@@ -1705,6 +1705,42 @@ Definition infinite_fold_left {A B} (f : A → B → A) (l : nat → list B) a :
 Definition infinite_prod {F : field} gen :=
   infinite_fold_left (λ a b, (a * b)%LS) gen ls_one.
 
+(* To be moved to Primes.v when done *)
+
+Fixpoint prime_after_aux cnt n :=
+  if is_prime n then n
+  else
+    match cnt with
+    | 0 => 0 (* should never happen, thanks to Tchebychev *)
+    | S c => prime_after_aux c (n + 1)
+    end.
+
+Definition prime_after n := prime_after_aux (n + 1) (n + 1).
+
+(* Bertrand's postulate proven by Tchebychev *)
+
+Theorem prime_after_never_answers_0 : ∀ n, prime_after n ≠ 0.
+Proof.
+...
+
+Theorem prime_after_is_prime : ∀ n p,
+  p = prime_after n → n < p ∧ is_prime p.
+Proof.
+...
+
+Compute (prime_after 2).
+
+Fixpoint nth_prime_aux cnt n :=
+  let p := prime_after n in
+  match cnt with
+  | 0 => p
+  | S c => nth_prime_aux c p
+  end.
+
+Definition nth_prime n := nth_prime_aux (n - 1) 0.
+
+Compute (nth_prime 3).
+
 ...
 
 Theorem list_of_1_sub_pow_primes_times_ζ {F : field} : ∀ l,
