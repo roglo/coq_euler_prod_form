@@ -1699,6 +1699,33 @@ apply list_of_pow_1_sub_pol_times_series; [ | easy | ]. {
 }
 Qed.
 
+Definition infinite_fold_left {A B} (f : A → B → A) (l : nat → list B) a :=
+  λ i, fold_left f (l i) a.
+
+Definition infinite_prod {F : field} gen :=
+  infinite_fold_left (λ a b, (a * b)%LS) gen ls_one.
+
+Fixpoint primes_list_loop n cnt :=
+  match cnt with
+  | 0 => []
+  | S c =>
+      if is_prime n then n :: primes_list_loop (n + 1) c
+      else primes_list_loop (n + 1) c
+  end.
+
+Definition primes_list_upto := primes_list_loop 1.
+
+Compute (primes_list_upto 100).
+
+(* how to define "nth_prime"? I must use the fact that there is
+   an infinity of them! *)
+
+...
+
+Theorem list_of_1_sub_pow_primes_times_ζ {F : field} : ∀ l,
+  (infinite_prod (λ i, (pol_pow 1 - pol_pow (nth_prime i))%LP) * ζ =
+   fold_right series_but_mul_of ζ l)%LS.
+Proof.
 ...
 
 Theorem ζ_Euler_product_eq : ...
