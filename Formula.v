@@ -1730,6 +1730,31 @@ Definition nth_prime n := nth_prime_aux (n - 1) 0.
 
 Compute (nth_prime 3).
 
+(* slow but simple *)
+
+Definition firstn_primes n := map nth_prime (seq 1 n).
+
+(* fast but complicated *)
+
+Fixpoint firstn_primes_loop n p :=
+  match n with
+  | 0 => []
+  | S n' =>
+      let p' := prime_after p in
+      p' :: firstn_primes_loop n' p'
+  end.
+
+Definition firstn_primes' n := firstn_primes_loop n 0.
+
+(*
+Time Compute (firstn_primes 100).
+Time Compute (firstn_primes' 100).
+
+Compute (let n := 60 in (firstn_primes n, firstn_primes' n)).
+*)
+
+...
+
 (* Bertrand's postulate proven by Chebychev *)
 
 Theorem prime_after_never_answers_0 : ∀ n, prime_after n ≠ 0.
