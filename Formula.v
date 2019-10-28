@@ -1715,24 +1715,18 @@ Fixpoint prime_after_aux cnt n :=
 
 Definition prime_after n := prime_after_aux (n + 1) (n + 1).
 
-Compute (prime_after 6).
+Compute (prime_after 2).
 
-...
-
-Fixpoint primes_list_loop n cnt :=
+Fixpoint nth_prime_aux cnt n :=
+  let p := prime_after n in
   match cnt with
-  | 0 => []
-  | S c =>
-      if is_prime n then n :: primes_list_loop (n + 1) c
-      else primes_list_loop (n + 1) c
+  | 0 => p
+  | S c => nth_prime_aux c p
   end.
 
-Definition primes_list_upto := primes_list_loop 1.
+Definition nth_prime n := nth_prime_aux (n - 1) 0.
 
-Compute (primes_list_upto 100).
-
-(* how to define "nth_prime"? I must use the fact that there is
-   an infinity of them! *)
+Compute (nth_prime 3).
 
 ...
 
