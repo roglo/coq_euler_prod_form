@@ -1,4 +1,4 @@
-(* playing with prime numbers, as a break *)
+(* Euler Product Formula *)
 
 Set Nested Proofs Allowed.
 Require Import Utf8 Arith Psatz Setoid Morphisms.
