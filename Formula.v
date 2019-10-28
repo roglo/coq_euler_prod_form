@@ -1705,6 +1705,20 @@ Definition infinite_fold_left {A B} (f : A → B → A) (l : nat → list B) a :
 Definition infinite_prod {F : field} gen :=
   infinite_fold_left (λ a b, (a * b)%LS) gen ls_one.
 
+Fixpoint prime_after_aux cnt n :=
+  if is_prime n then n
+  else
+    match cnt with
+    | 0 => 0
+    | S c => prime_after_aux c (n + 1)
+    end.
+
+Definition prime_after n := prime_after_aux (n + 1) (n + 1).
+
+Compute (prime_after 6).
+
+...
+
 Fixpoint primes_list_loop n cnt :=
   match cnt with
   | 0 => []

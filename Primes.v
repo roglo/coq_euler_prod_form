@@ -247,7 +247,9 @@ destruct a; [ easy | ].
 destruct a; [ easy | exfalso ].
 specialize (H1 (S (S k))) as H2.
 assert (H : 2 ≤ S (S k) < S (S p)). {
-  split; [ flia Hp2 | rewrite <- Hk; cbn; flia ].
+  split; [ flia Hp2 | ].
+  rewrite <- Hk; cbn.
+  remember (a * _); flia.
 }
 specialize (H2 H); clear H.
 apply H2; rewrite <- Hk.
