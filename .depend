@@ -1,6 +1,6 @@
+Formula.vio: Formula.v Misc.vio Primes.vio
+Formula.vo Formula.glob Formula.v.beautified: Formula.v Misc.vo Primes.vo
 Misc.vio: Misc.v
 Misc.vo Misc.glob Misc.v.beautified: Misc.v
 Primes.vio: Primes.v Misc.vio
 Primes.vo Primes.glob Primes.v.beautified: Primes.v Misc.vo
-prime.vio: prime.v Misc.vio Primes.vio
-prime.vo prime.glob prime.v.beautified: prime.v Misc.vo Primes.vo
