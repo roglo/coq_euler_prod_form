@@ -11,6 +11,16 @@ Notation "x ≤ y ≤ z" := (x <= y ∧ y <= z)%nat (at level 70, y at next leve
 Notation "x < y ≤ z" := (x < y ∧ y <= z)%nat (at level 70, y at next level).
 Notation "x ≤ y < z" := (x ≤ y ∧ y < z)%nat (at level 70, y at next level).
 
+Definition List_combine_all {A} (l1 l2 : list A) (d : A) :=
+  let '(l'1, l'2) :=
+    match List.length l1 ?= List.length l2 with
+    | Eq => (l1, l2)
+    | Lt => (l1 ++ List.repeat d (List.length l2 - List.length l1), l2)
+    | Gt => (l1, l2 ++ List.repeat d (List.length l1 - List.length l2))
+    end
+  in
+  List.combine l'1 l'2.
+
 Theorem Nat_sub_succ_1 : ∀ n, S n - 1 = n.
 Proof. now intros; rewrite Nat.sub_succ, Nat.sub_0_r. Qed.
 

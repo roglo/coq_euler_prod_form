@@ -1,4 +1,5 @@
 (* Euler Product Formula *)
+(* https://en.wikipedia.org/wiki/Proof_of_the_Euler_product_formula_for_the_Riemann_zeta_function *)
 
 Set Nested Proofs Allowed.
 Require Import Utf8 Arith Psatz Setoid Morphisms.
@@ -7,6 +8,13 @@ Import List List.ListNotations.
 Require Import Misc Primes.
 
 (* ζ(s) = Σ (n ∈ ℕ* ) 1/n^s = Π (p ∈ Primes) 1/(1-1/p^s) *)
+
+(* Here ζ is not applied to ℂ as usual, but to any field, whose
+   type is defined below; most of the theorems has a field f
+   as implicit first parameter.
+     And w have never to evaluate a value ζ(s) for a given s,
+   so the ζ function is just defined by the coefficients of
+   its terms. See type ln_series below. *)
 
 Class field :=
   { f_type : Set;
@@ -142,8 +150,6 @@ Qed.
 
 (* Euler product formula *)
 
-(* https://en.wikipedia.org/wiki/Proof_of_the_Euler_product_formula_for_the_Riemann_zeta_function *)
-
 (*
 Riemann zeta function is
    ζ(s) = 1 + 1/2^s + 1/3^s + 1/4^s + 1/5^s + ...
@@ -153,7 +159,7 @@ Euler product formula is the fact that
    ζ(s) = -----------------------------------------------
           (1-1/2^s) (1-1/3^s) (1-1/5^s) ... (1-1/p^s) ...
 
-where the product in the denominateur applies on all prime numbers
+where the product in the denominator applies on all prime numbers
 and only them.
 
 The proof is the following.
@@ -172,7 +178,7 @@ Then we continue by proving
 
 i.e. all terms but the multiples of 2 and 3
 
-Then we do it for the number (5) in the second term (1/5^s) of the series.
+Then we do it for the number 5 in the second term (1/5^s) of the series.
 
 This number in the second term is always the next prime number, like in the
 Sieve of Eratosthenes.
@@ -194,7 +200,7 @@ Implementation.
 ζ(s) and all the expressions above are actually of the form
     a₁ + a₂/2^s + a₃/3^s + a₄/4^s + ...
 
-We can represent them as the sequence
+We can represent them by the sequence
     (a_n) = (a₁, a₂, a₃, ...)
 
 For example, ζ is (1, 1, 1, 1, ...)
@@ -206,18 +212,25 @@ written
 
 with x = e^(-s). Easy to verify.
 
-Note that we do not consider the parameter s or x. The fact that
+Note that we do not consider the parameters s or x. The fact that
 they are supposed to be complex number is irrelevant in this proof.
 We just consider they belong to a field (type "field" defined
 above).
 *)
 
-(* Definition of the type of such a series *)
+(* Definition of the type of such a series; a value s of this
+   type is a function ls : nat → field representing the series
+       ls(1) + ls(2)/2^s + ls(3)/3^s + ls(4)/4^s + ...
+   or the equivalent form with x at a logarithm power
+       ls(1) + ls(2).x^ln(2) + ls(3).x^ln(3) + ls(4).x^ln(4)+...
+   where x = e^(-s)
+ *)
 
 Class ln_series {F : field} :=
   { ls : nat → f_type }.
 
-(* Definition of the type of a polynomial (a finite series) *) 
+(* Definition of the type of a polynomial: this is just
+   a finite series; it can be represented by a list *)
 
 Class ln_polyn {F : field} :=
   { lp : list f_type }.
@@ -245,6 +258,8 @@ Arguments lp {_}.
 Definition ls_eq {F : field} s1 s2 := ∀ n, n ≠ 0 → ls s1 n = ls s2 n.
 Arguments ls_eq _ s1%LS s2%LS.
 
+(* which is an equivalence relation *)
+
 Theorem ls_eq_refl {F : field} : reflexive _ ls_eq.
 Proof. easy. Qed.
 
@@ -266,21 +281,17 @@ Add Parametric Relation {F : field} : (ln_series) ls_eq
  transitivity proved by ls_eq_trans
  as ls_eq_rel.
 
+(* The unit series: 1 + 0/2^s + 0/3^s + 0/4^s + ... *)
+
 Definition ls_one {F : field} :=
   {| ls n := match n with 1 => f_one | _ => f_zero end |}.
 
-Definition List_combine_all {A} (l1 l2 : list A) (d : A) :=
-  let '(l'1, l'2) :=
-    match List.length l1 ?= List.length l2 with
-    | Eq => (l1, l2)
-    | Lt => (l1 ++ List.repeat d (List.length l2 - List.length l1), l2)
-    | Gt => (l1, l2 ++ List.repeat d (List.length l1 - List.length l2))
-    end
-  in
-  List.combine l'1 l'2.
+(* Notation for accessing a series coefficient at index i *)
 
 Notation "r ~{ i }" := (ls r i) (at level 1, format "r ~{ i }").
 Notation "x '∈' l" := (List.In x l) (at level 60).
+
+(* adding, opposing, subtracting polynomials *)
 
 Definition lp_add {F : field} p q :=
   {| lp :=
@@ -290,7 +301,16 @@ Definition lp_sub {F : field} p q := lp_add p (lp_opp q).
 
 Notation "x - y" := (lp_sub x y) : lp_scope.
 
+(* At last, the famous ζ function: all its coefficients are 1 *)
+
 Definition ζ {F : field} := {| ls _ := f_one |}.
+
+(* Series where the indices, which are multiple of some n, are 0
+      1 + ls(2)/2^s + ls(3)/3^s + ... + ls(n-1)/(n-1)^s + 0/n^s +
+      ... + ls(ni-1)/(ni-1)^s + 0/ni^s + ls(ni+1)/(ni+1)^s + ...
+   This special series allows to cumulate the multiplications of
+   terms of the form (1-1/p^s); when doing (1-1/p^s).ζ, the result
+   is ζ without all terms multiple of p *)
 
 Definition series_but_mul_of {F : field} n s :=
   {| ls i :=
@@ -299,10 +319,19 @@ Definition series_but_mul_of {F : field} n s :=
        | _ => ls s i
        end |}.
 
+(* list of divisors of a natural number *)
+
 Definition divisors_but_firstn_and_lastn d n :=
   List.filter (λ a, n mod a =? 0) (List.seq d (S n - d)).
 
 Definition divisors := divisors_but_firstn_and_lastn 1.
+
+(* product of series is like the convolution product but
+   limited to divisors; indeed the coefficient of the term
+   in x^ln(n), resulting of the multiplication of two series
+   u and v, is the sum:
+      u_1.v_n + ... u_d.v_{n/d} + ... u_n.v_1
+   where d covers all the divisors of n *)
 
 Definition log_prod_term {F : field} u v n i :=
   (u i * v (n / i))%F.
@@ -316,6 +345,8 @@ Definition log_prod {F : field} u v n :=
 (* Σ (i = 1, ∞) s1_i x^ln(i) * Σ (i = 1, ∞) s2_i x^ln(i) *)
 Definition ls_mul {F : field} s1 s2 :=
   {| ls := log_prod (ls s1) (ls s2) |}.
+
+(* polynomial seen as a series *)
 
 Definition ls_of_pol {F : field} p :=
   {| ls n :=
@@ -345,6 +376,24 @@ apply filter_In in Hd.
 destruct Hd as (Hd, Hnd).
 split; [ now apply Nat.eqb_eq | ].
 apply in_seq in Hd; flia Hd.
+Qed.
+
+Theorem in_divisors_iff : ∀ n,
+  n ≠ 0 → ∀ d, d ∈ divisors n ↔ n mod d = 0 ∧ d ≠ 0.
+Proof.
+intros * Hn *.
+unfold divisors, divisors_but_firstn_and_lastn.
+split; [ now apply in_divisors | ].
+intros (Hnd, Hd).
+apply filter_In.
+split; [ | now apply Nat.eqb_eq ].
+apply in_seq.
+split; [ flia Hd | ].
+apply Nat.mod_divides in Hnd; [ | easy ].
+destruct Hnd as (c, Hc).
+rewrite Nat.mul_comm in Hc; rewrite Hc.
+destruct c; [ easy | ].
+cbn; flia.
 Qed.
 
 (* allows to rewrite H1, H2 with
@@ -423,24 +472,6 @@ assert (H : ∀ s i f, 2 ≤ s → j ∈ filter f (seq s i) → 2 ≤ j). {
 }
 eapply (H 2 i); [ easy | ].
 apply Hj.
-Qed.
-
-Theorem in_divisors_iff : ∀ n,
-  n ≠ 0 → ∀ d, d ∈ divisors n ↔ n mod d = 0 ∧ d ≠ 0.
-Proof.
-intros * Hn *.
-unfold divisors, divisors_but_firstn_and_lastn.
-split; [ now apply in_divisors | ].
-intros (Hnd, Hd).
-apply filter_In.
-split; [ | now apply Nat.eqb_eq ].
-apply in_seq.
-split; [ flia Hd | ].
-apply Nat.mod_divides in Hnd; [ | easy ].
-destruct Hnd as (c, Hc).
-rewrite Nat.mul_comm in Hc; rewrite Hc.
-destruct c; [ easy | ].
-cbn; flia.
 Qed.
 
 Theorem eq_first_divisor_1 : ∀ n, n ≠ 0 → List.hd 0 (divisors n) = 1.
@@ -893,6 +924,8 @@ induction Hperm using Permutation_ind; [ easy | | | ]. {
 etransitivity; [ apply IHHperm1 | apply IHHperm2 ].
 Qed.
 
+(* The product of series is associative; first, lemmas *)
+
 Theorem fold_add_flat_prod_assoc {F : field} : ∀ n u v w,
   n ≠ 0
   → fold_left f_add
@@ -1251,12 +1284,16 @@ clear H.
 now apply fold_add_flat_prod_assoc.
 Qed.
 
+(* Associativity of product of series *)
+
 Theorem ls_mul_assoc {F : field} : ∀ x y z,
-  (x * (y * z) = x * y * z)%LS.
+  (x * (y * z) = (x * y) * z)%LS.
 Proof.
 intros * i Hi.
 now cbn; apply log_prod_assoc.
 Qed.
+
+(* Polynomial 1-1/n^s ≍ 1-x^ln(n) *)
 
 Definition pol_pow {F : field} n :=
   {| lp := List.repeat f_zero (n - 1) ++ [f_one] |}.
@@ -1269,18 +1306,19 @@ is equal to
    (only odd ones are remaining)
 
 But actually, our theorem is more general.
-We prove, for any n and r, that
-   (1 - 1/n^s) r(s)
+We prove, for any m and r, that
+   (1 - 1/m^s) r(s)
 
 where r is a series having the following property
    ∀ i, r(s)_{i} = r(s)_{n*i}
+(the i-th coefficient of the series is equal to its (n*i)-th coefficient,
+which is true for ζ since all its coefficients are 1)
 
-(the i-th coefficient of the series is equal to its (n*i)-th coefficient)
+is equal to a series r with all coefficients, whose rank is
+a multiple of m, are removed.
 
-which is true for ζ since all its coefficients are 1.
-
-The resulting series (1-1/n^s) ζ(s) has this property for all m
-such as gcd(n,m)=1, allowing us at the next theorems to restart
+The resulting series (1-1/m^s) ζ(s) has this property for all n
+such as gcd(m,n)=1, allowing us at the next theorems to restart
 with that series and another prime number. We can then iterate
 for all prime numbers.
 
@@ -1550,7 +1588,7 @@ But actually, our theorem is a little more general:
 
 1/ we do not do it for 2, 3, 5 ... p but for any list of natural numbers
    (n1, n2, n3, ... nm) such that gcd(ni,nj) = 1 for i≠j, what is true
-   for a list of prime numbers.
+   in particular for a list of prime numbers.
 
 2/ It is not the ζ function but any series r with logarithm powers such that
        ∀ i, r_{i} = r_{n*i}
