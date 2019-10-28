@@ -1,4 +1,4 @@
-(* Euler Product Formula *)
+(* Prime numbers *)
 
 Set Nested Proofs Allowed.
 Require Import Utf8 Arith.
@@ -164,6 +164,7 @@ rewrite Hc, Nat_fact_succ.
 now rewrite Nat.mul_assoc, Nat.mul_shuffle0.
 Qed.
 
+(* not useful for Euler Formula, but just for sport *)
 Theorem infinite_many_primes : ∀ n, ∃ m, m > n ∧ is_prime m = true.
 Proof.
 intros.
