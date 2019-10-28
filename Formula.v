@@ -12,7 +12,7 @@ Require Import Misc Primes.
 (* Here ζ is not applied to ℂ as usual, but to any field, whose
    type is defined below; most of the theorems has a field f
    as implicit first parameter.
-     And w have never to evaluate a value ζ(s) for a given s,
+     And we have never to evaluate a value ζ(s) for a given s,
    so the ζ function is just defined by the coefficients of
    its terms. See type ln_series below. *)
 
