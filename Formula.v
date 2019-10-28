@@ -1711,22 +1711,11 @@ Fixpoint prime_after_aux cnt n :=
   if is_prime n then n
   else
     match cnt with
-    | 0 => 0 (* should never happen, thanks to Tchebychev *)
+    | 0 => 0 (* should never happen, thanks to Chebychev *)
     | S c => prime_after_aux c (n + 1)
     end.
 
 Definition prime_after n := prime_after_aux (n + 1) (n + 1).
-
-(* Bertrand's postulate proven by Tchebychev *)
-
-Theorem prime_after_never_answers_0 : ∀ n, prime_after n ≠ 0.
-Proof.
-...
-
-Theorem prime_after_is_prime : ∀ n p,
-  p = prime_after n → n < p ∧ is_prime p.
-Proof.
-...
 
 Compute (prime_after 2).
 
@@ -1741,6 +1730,20 @@ Definition nth_prime n := nth_prime_aux (n - 1) 0.
 
 Compute (nth_prime 3).
 
+(* Bertrand's postulate proven by Chebychev *)
+
+Theorem prime_after_never_answers_0 : ∀ n, prime_after n ≠ 0.
+Proof.
+...
+
+Theorem prime_after_is_prime : ∀ n, is_prime (prime_after n).
+Proof.
+...
+
+Theorem no_primes_between_a_prime_and_the_following_one :
+  ∀ p, is_prime p
+  → ∀ q, p < q < prime_after p → is_prime q = false.
+Proof.
 ...
 
 Theorem list_of_1_sub_pow_primes_times_ζ {F : field} : ∀ l,
