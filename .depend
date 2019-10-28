@@ -1,0 +1,4 @@
+Misc.vio: Misc.v
+Misc.vo Misc.glob Misc.v.beautified: Misc.v
+prime.vio: prime.v Misc.vio
+prime.vo prime.glob prime.v.beautified: prime.v Misc.vo
