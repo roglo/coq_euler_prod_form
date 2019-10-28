@@ -165,7 +165,7 @@ now rewrite Nat.mul_assoc, Nat.mul_shuffle0.
 Qed.
 
 (* not useful for Euler Formula, but just for sport *)
-Theorem infinite_many_primes : ∀ n, ∃ m, m > n ∧ is_prime m = true.
+Theorem infinitely_many_primes : ∀ n, ∃ m, m > n ∧ is_prime m = true.
 Proof.
 intros.
 specialize (prime_divisor (fact n + 1)) as H1.
