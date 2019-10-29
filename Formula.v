@@ -148,6 +148,12 @@ rewrite f_add_opp_diag_l.
 apply f_mul_0_l.
 Qed.
 
+Theorem f_mul_opp_r {F : field} : ∀ x y, (x * - y = - (x * y))%F.
+Proof.
+intros.
+now rewrite f_mul_comm, f_mul_opp_l, f_mul_comm.
+Qed.
+
 Theorem f_mul_1_r {F : field} : ∀ x, (x * f_one)%F = x.
 Proof.
 intros.
@@ -1357,10 +1363,17 @@ assert (Htn : t n = s~{n}). {
   apply f_mul_1_r.
 }
 destruct p. {
-...
-  assert (Htn : t m = (- s~{n})%F). {
-    assert (H : t m = (- s~{n/m})%F). {
+  assert (Htm : t (n/m) = (- s~{n})%F). {
+    assert (H : t (n/m) = (- s~{n/m})%F). {
       rewrite Ht; unfold log_prod_term.
+      rewrite Nat_mod_0_div_div; [ | | easy ]. 2: {
+        split; [ flia Hm | ].
+        apply Nat.mod_divides in Hp; [ | flia Hm ].
+        destruct Hp as (p, Hp).
+        rewrite Hp.
+        destruct p; [ now rewrite Nat.mul_0_r in Hp | ].
+        rewrite Nat.mul_comm; cbn; flia.
+      }
       replace ((ls_of_pol _)~{m}) with (- f_one)%F. 2: {
         symmetry; cbn.
         destruct m; [ flia Hm | cbn ].
@@ -1369,16 +1382,18 @@ destruct p. {
         induction m; [ cbn; apply f_add_0_l | cbn ].
         destruct m; cbn in IHm; cbn; [ easy | apply IHm ].
       }
-      now rewrite f_mul_opp_l, f_mul_1_l.
+      now rewrite f_mul_opp_r, f_mul_1_r.
     }
     apply Nat.mod_divides in Hp; [ | flia Hm ].
     destruct Hp as (p, Hp).
-    rewrite Hp, Nat.mul_comm, Nat.div_mul in H; [ | flia Hm ].
+    rewrite Hp in H at 2.
+    rewrite Nat.mul_comm, Nat.div_mul in H; [ | flia Hm ].
     destruct (zerop p) as [Hpz| Hpz]; [ now rewrite Hpz, Nat.mul_0_r in Hp | ].
     apply Nat.neq_0_lt_0 in Hpz.
     rewrite Hs in H; [ | easy ].
     now rewrite <- Hp in H.
   }
+...
   assert (Hto : ∀ d, d ≠ 1 → d ≠ m → t d = f_zero). {
     intros d Hd1 Hdm.
     rewrite Ht; unfold log_prod_term.
