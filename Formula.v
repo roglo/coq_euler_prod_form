@@ -1363,17 +1363,16 @@ assert (Htn : t n = s~{n}). {
   apply f_mul_1_r.
 }
 destruct p. {
-  assert (Htm : t (n/m) = (- s~{n})%F). {
-    assert (H : t (n/m) = (- s~{n/m})%F). {
+  apply Nat.mod_divides in Hp; [ | flia Hm ].
+  destruct Hp as (p, Hp).
+  assert (Hpz : p ≠ 0). {
+    now intros H; rewrite H, Nat.mul_0_r in Hp.
+  }
+  move p before n; move Hpz before Hn.
+  assert (Htm : t p = (- s~{n})%F). {
+    assert (H : t p = (- s~{p})%F). {
       rewrite Ht; unfold log_prod_term.
-      rewrite Nat_mod_0_div_div; [ | | easy ]. 2: {
-        split; [ flia Hm | ].
-        apply Nat.mod_divides in Hp; [ | flia Hm ].
-        destruct Hp as (p, Hp).
-        rewrite Hp.
-        destruct p; [ now rewrite Nat.mul_0_r in Hp | ].
-        rewrite Nat.mul_comm; cbn; flia.
-      }
+      rewrite Hp, Nat.div_mul; [ | easy ].
       replace ((ls_of_pol _)~{m}) with (- f_one)%F. 2: {
         symmetry; cbn.
         destruct m; [ flia Hm | cbn ].
@@ -1384,31 +1383,26 @@ destruct p. {
       }
       now rewrite f_mul_opp_r, f_mul_1_r.
     }
-    apply Nat.mod_divides in Hp; [ | flia Hm ].
-    destruct Hp as (p, Hp).
-    rewrite Hp in H at 2.
-    rewrite Nat.mul_comm, Nat.div_mul in H; [ | flia Hm ].
-    destruct (zerop p) as [Hpz| Hpz]; [ now rewrite Hpz, Nat.mul_0_r in Hp | ].
-    apply Nat.neq_0_lt_0 in Hpz.
     rewrite Hs in H; [ | easy ].
     now rewrite <- Hp in H.
   }
-...
-  assert (Hto : ∀ d, d ≠ 1 → d ≠ m → t d = f_zero). {
+  assert (Hto : ∀ d, d ≠ n → d ≠ p → t d = f_zero). {
     intros d Hd1 Hdm.
     rewrite Ht; unfold log_prod_term.
-    replace ((ls_of_pol (pol_pow 1 - pol_pow m))~{d}) with f_zero. 2: {
+    replace ((ls_of_pol (pol_pow 1 - pol_pow m))~{n/d}) with f_zero. 2: {
       symmetry; cbn.
-      destruct d; [ easy | cbn ].
+      destruct d; [ easy | ].
       destruct m; intros. {
-        cbn; rewrite f_add_opp_diag_r.
-        destruct d; [ easy | now destruct d ].
+        cbn - [ "/" ]; rewrite f_add_opp_diag_r.
+        now destruct (n / S d).
       }
       rewrite Nat_sub_succ_1.
       destruct m; intros. {
-        cbn; rewrite f_add_opp_diag_r.
-        destruct d; [ easy | now destruct d ].
+        cbn - [ "/" ]; rewrite f_add_opp_diag_r.
+        destruct (n / S d) as [| nd]; [ easy | ].
+        destruct nd; [ easy | now destruct nd ].
       }
+...
       destruct m; intros. {
         cbn; rewrite f_opp_0, f_add_0_r, f_add_0_l.
         destruct d; [ easy | ].
