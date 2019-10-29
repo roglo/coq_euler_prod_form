@@ -3,7 +3,7 @@
 
 Set Nested Proofs Allowed.
 Require Import Utf8 Arith Psatz Setoid Morphisms.
-Require Import Sorting.Permutation.
+Require Import Sorting.Permutation SetoidList.
 Import List List.ListNotations.
 Require Import Misc Primes.
 
@@ -1704,20 +1704,19 @@ Definition infinite_fold_left {A B} (f : A → B → A) (l : nat → list B) a :
 
 Locate "Π".
 
-Notation "s *. p" := (ls_mul s (ls_of_pol p))
-   (at level 41, right associativity) : ls_scope.
+Notation "s *' p" := (ls_mul s (ls_of_pol p))
+   (at level 42, left associativity, p at level 1) : ls_scope.
 
 Check fold_left.
 
+Inspect 7.
+
+Definition infinite_lp_prod {F : field} (f : nat → nat) :=
+  fold_left (λ a b, (a *' (pol_pow 1 - pol_pow (f b)))%LS).
+
+Check infinite_lp_prod.
+
 ...
-
-Definition infinite_lp_prod {F : field} f (g : _ → list nat) :=
-  fold_left (λ a b, (a *. f b)%LS).
-
-...
-
-Definition infinite_lp_prod {F : field} f (g : _ → list nat) :=
-  infinite_fold_left (λ a b, (a .* f b)%LS) g ls_one.
 
 (* To be moved to Primes.v when done *)
 

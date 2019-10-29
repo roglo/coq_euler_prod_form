@@ -1,7 +1,7 @@
 (* Theorems of general usage, which could be (or not) in Coq library *)
 
 Set Nested Proofs Allowed.
-Require Import Utf8 Arith Psatz.
+Require Import Utf8 Arith Psatz Sorted.
 Import List.
 
 (* "fast" lia, to improve compilation speed *)
@@ -92,6 +92,12 @@ clear IHlen.
 induction len; [ apply Sorted.HdRel_nil | ].
 cbn. apply Sorted.HdRel_cons.
 apply Nat.lt_succ_diag_r.
+Qed.
+
+Theorem Forall_inv_tail {A} : ∀ P (a : A) l, Forall P (a :: l) → Forall P l.
+Proof.
+intros * HF.
+now inversion HF.
 Qed.
 
 Theorem Sorted_Sorted_lt_app_not_in_l : ∀ a l1 l2,
