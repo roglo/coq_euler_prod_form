@@ -165,7 +165,7 @@ and only them.
 The proof is the following.
 
 We first prove that
-   (1-1/2^s) ζ(s) = 1 + 1/3^s + 1/5^s + 1/7^s + ...
+   ζ(s) (1-1/2^s) = 1 + 1/3^s + 1/5^s + 1/7^s + ...
 
 i.e. all terms but the multiples of 2
 i.e. all odd numbers
@@ -173,7 +173,7 @@ i.e. all odd numbers
 (this is easy to verify on a paper)
 
 Then we continue by proving
-   (1-1/3^s) (1-1/2^s) ζ(s) =
+   ζ(s) (1-1/2^s) (1-1/3^s) =
        1 + 1/5^s + 1/7^s + 1/11^s + ... + 1/23^s + 1/25^s + ...
 
 i.e. all terms but the multiples of 2 and 3
@@ -184,7 +184,7 @@ This number in the second term is always the next prime number, like in the
 Sieve of Eratosthenes.
 
 Up to prime number p, we have, using commutativity
-  (1-1/2^s) (1-1/3^s) ... (1-1/p^s) ζ(s) = 1 + 1/q^s + ...
+  ζ(s) (1-1/2^s) (1-1/3^s) ... (1-1/p^s) = 1 + 1/q^s + ...
 
 where q is the prime number after p and the rest holds terms whose
 number is greater than q and not divisible by the primes between
@@ -354,16 +354,15 @@ Definition ls_of_pol {F : field} p :=
        | 0 => f_zero
        | S n' => List.nth n' (lp p) f_zero end |}.
 
-(* Σ (i = 1, k), p_(i-1) x^ln(i) * Σ (i = 1, ∞) s_(i-1) x^ln(i) *)
-Definition ls_pol_mul_l {F : field} p s :=
-  ls_mul (ls_of_pol p) s.
+Definition ls_pol_mul_r {F : field} s p :=
+  ls_mul s (ls_of_pol p).
 
 Arguments ls_of_pol _ p%LP.
-Arguments ls_pol_mul_l _ p%LP s%LS.
+Arguments ls_pol_mul_r _ s%LS p%LP.
 
 Notation "x = y" := (ls_eq x y) : ls_scope.
 Notation "x * y" := (ls_mul x y) : ls_scope.
-Notation "p .* s" := (ls_pol_mul_l p s) (at level 41, right associativity) :
+Notation "s *' p" := (ls_pol_mul_r s p) (at level 41, left associativity) :
    ls_scope.
 
 Theorem in_divisors : ∀ n,
@@ -1300,14 +1299,14 @@ Definition pol_pow {F : field} n :=
 
 (*
 Here, we prove that
-   (1 - 1/2^s) ζ(s)
+   ζ(s) (1 - 1/2^s)
 is equal to
    ζ(s) without terms whose rank is divisible by 2
    (only odd ones are remaining)
 
 But actually, our theorem is more general.
 We prove, for any m and r, that
-   (1 - 1/m^s) r(s)
+   r(s) (1 - 1/m^s)
 
 where r is a series having the following property
    ∀ i, r(s)_{i} = r(s)_{n*i}
@@ -1317,7 +1316,7 @@ which is true for ζ since all its coefficients are 1)
 is equal to a series r with all coefficients, whose rank is
 a multiple of m, are removed.
 
-The resulting series (1-1/m^s) ζ(s) has this property for all n
+The resulting series ζ(s) (1-1/m^s) has this property for all n
 such as gcd(m,n)=1, allowing us at the next theorems to restart
 with that series and another prime number. We can then iterate
 for all prime numbers.
@@ -1327,17 +1326,18 @@ and even not prime numbers if we want, providing their gcd two by
 two is 1.
 *)
 
-Theorem pol_1_sub_pow_times_series {F : field} : ∀ s m,
+Theorem series_times_pol_1_sub_pow {F : field} : ∀ s m,
   2 ≤ m
   → (∀ i, i ≠ 0 → ls s i = ls s (m * i))
-  → ((pol_pow 1 - pol_pow m) .* s = series_but_mul_of m s)%LS.
+  → (s *' (pol_pow 1 - pol_pow m) = series_but_mul_of m s)%LS.
 Proof.
 intros * Hm Hs n Hn.
 cbn - [ ls_of_pol log_prod ].
 remember (n mod m) as p eqn:Hp; symmetry in Hp.
 unfold log_prod, log_prod_list.
-remember (log_prod_term (ls (ls_of_pol (pol_pow 1 - pol_pow m))) (ls s) n)
+remember (log_prod_term (ls s) (ls (ls_of_pol (pol_pow 1 - pol_pow m))) n)
   as t eqn:Ht.
+(*
 assert (Ht1 : t 1 = s~{n}). {
   rewrite Ht; unfold log_prod_term.
   rewrite Nat.div_1_r.
@@ -1350,7 +1350,9 @@ assert (Ht1 : t 1 = s~{n}). {
   }
   apply f_mul_1_l.
 }
+*)
 destruct p. {
+...
   assert (Htn : t m = (- s~{n})%F). {
     assert (H : t m = (- s~{n/m})%F). {
       rewrite Ht; unfold log_prod_term.
