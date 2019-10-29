@@ -1386,8 +1386,8 @@ destruct p. {
     rewrite Hs in H; [ | easy ].
     now rewrite <- Hp in H.
   }
-  assert (Hto : ∀ d, d ≠ n → d ≠ p → t d = f_zero). {
-    intros d Hd1 Hdm.
+  assert (Hto : ∀ d, d ∈ divisors n → d ≠ n → d ≠ p → t d = f_zero). {
+    intros d Hdn Hd1 Hdm.
     rewrite Ht; unfold log_prod_term.
     replace ((ls_of_pol (pol_pow 1 - pol_pow m))~{n/d}) with f_zero. 2: {
       symmetry; cbn.
@@ -1402,13 +1402,25 @@ destruct p. {
         destruct (n / S d) as [| nd]; [ easy | ].
         destruct nd; [ easy | now destruct nd ].
       }
-...
+      remember (n / S d) as nd eqn:Hnd; symmetry in Hnd.
       destruct m; intros. {
-        cbn; rewrite f_opp_0, f_add_0_r, f_add_0_l.
-        destruct d; [ easy | ].
-        destruct d; [ easy | ].
-        now destruct d.
+        cbn - [ "/" ]; rewrite f_opp_0, f_add_0_r, f_add_0_l.
+        destruct nd; [ easy | ].
+        destruct nd. {
+          specialize (Nat.div_mod n (S d) (Nat.neq_succ_0 _)) as H1.
+          rewrite Hnd, Nat.mul_1_r in H1; symmetry in H1.
+          apply in_divisors in Hdn; [ | easy ].
+          now rewrite (proj1 Hdn), Nat.add_0_r in H1.
+        }
+        destruct nd; [ | now destruct nd ].
+        specialize (Nat.div_mod n (S d) (Nat.neq_succ_0 _)) as H1.
+        rewrite Hnd in H1.
+        apply in_divisors in Hdn; [ | easy ].
+        rewrite (proj1 Hdn), Nat.add_0_r, Nat.mul_comm in H1.
+        rewrite H1 in Hp.
+        now apply Nat.mul_cancel_l in Hp.
       }
+...
       cbn; rewrite f_opp_0, f_add_0_r, f_add_0_l.
       destruct d; [ easy | clear Hd1 ].
       destruct d; [ easy | ].
