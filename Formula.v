@@ -1702,10 +1702,44 @@ Qed.
 Definition infinite_fold_left {A B} (f : A → B → A) (l : nat → list B) a :=
   λ i, fold_left f (l i) a.
 
-Definition infinite_prod {F : field} gen :=
-  infinite_fold_left (λ a b, (a * b)%LS) gen ls_one.
+Locate "Π".
+
+Notation "s *. p" := (ls_mul s (ls_of_pol p))
+   (at level 41, right associativity) : ls_scope.
+
+Check fold_left.
+
+...
+
+Definition infinite_lp_prod {F : field} f (g : _ → list nat) :=
+  fold_left (λ a b, (a *. f b)%LS).
+
+...
+
+Definition infinite_lp_prod {F : field} f (g : _ → list nat) :=
+  infinite_fold_left (λ a b, (a .* f b)%LS) g ls_one.
 
 (* To be moved to Primes.v when done *)
+
+Fixpoint primes_upto_aux n cnt :=
+  match cnt with
+  | 0 => []
+  | S c =>
+      if is_prime n then n :: primes_upto_aux (n + 1) c
+      else primes_upto_aux (n + 1) c
+  end.
+
+Definition primes_upto := primes_upto_aux 1.
+
+Compute (primes_upto 17).
+
+Theorem list_of_1_sub_pow_primes_times_ζ {F : field} : ∀ l,
+  (infinite_lp_prod (λ p, (pol_pow 1 - pol_pow p)%LP) * ζ =
+   fold_right series_but_mul_of ζ l)%LS.
+Proof.
+...
+
+...
 
 Fixpoint prime_after_aux cnt n :=
   if is_prime n then n
@@ -1769,12 +1803,6 @@ Proof.
 Theorem no_primes_between_a_prime_and_the_following_one :
   ∀ p, is_prime p
   → ∀ q, p < q < prime_after p → is_prime q = false.
-Proof.
-...
-
-Theorem list_of_1_sub_pow_primes_times_ζ {F : field} : ∀ l,
-  (infinite_prod (λ i, (pol_pow 1 - pol_pow (nth_prime i))%LP) * ζ =
-   fold_right series_but_mul_of ζ l)%LS.
 Proof.
 ...
 
