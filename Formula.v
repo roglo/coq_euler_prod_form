@@ -1711,12 +1711,12 @@ Check fold_left.
 
 Inspect 7.
 
+(*
 Definition infinite_lp_prod {F : field} (f : nat → nat) :=
   fold_left (λ a b, (a *' (pol_pow 1 - pol_pow (f b)))%LS).
 
 Check infinite_lp_prod.
-
-...
+*)
 
 (* To be moved to Primes.v when done *)
 
@@ -1731,14 +1731,6 @@ Fixpoint primes_upto_aux n cnt :=
 Definition primes_upto := primes_upto_aux 1.
 
 Compute (primes_upto 17).
-
-Theorem list_of_1_sub_pow_primes_times_ζ {F : field} : ∀ l,
-  (infinite_lp_prod (λ p, (pol_pow 1 - pol_pow p)%LP) * ζ =
-   fold_right series_but_mul_of ζ l)%LS.
-Proof.
-...
-
-...
 
 Fixpoint prime_after_aux cnt n :=
   if is_prime n then n
