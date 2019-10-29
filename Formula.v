@@ -1746,11 +1746,12 @@ Fixpoint firstn_primes_loop n p :=
 
 Definition firstn_primes' n := firstn_primes_loop n 0.
 
+Time Compute (let n := 60 in firstn_primes n).
+Time Compute (let n := 60 in firstn_primes' n).
+
 (*
 Time Compute (firstn_primes 100).
 Time Compute (firstn_primes' 100).
-
-Compute (let n := 60 in (firstn_primes n, firstn_primes' n)).
 *)
 
 ...
