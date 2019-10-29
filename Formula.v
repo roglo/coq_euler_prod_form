@@ -148,6 +148,13 @@ rewrite f_add_opp_diag_l.
 apply f_mul_0_l.
 Qed.
 
+Theorem f_mul_1_r {F : field} : ∀ x, (x * f_one)%F = x.
+Proof.
+intros.
+rewrite f_mul_comm.
+apply f_mul_1_l.
+Qed.
+
 (* Euler product formula *)
 
 (*
@@ -1337,10 +1344,9 @@ remember (n mod m) as p eqn:Hp; symmetry in Hp.
 unfold log_prod, log_prod_list.
 remember (log_prod_term (ls s) (ls (ls_of_pol (pol_pow 1 - pol_pow m))) n)
   as t eqn:Ht.
-(*
-assert (Ht1 : t 1 = s~{n}). {
+assert (Htn : t n = s~{n}). {
   rewrite Ht; unfold log_prod_term.
-  rewrite Nat.div_1_r.
+  rewrite Nat.div_same; [ | easy ].
   replace ((ls_of_pol _)~{1}) with f_one. 2: {
     symmetry; cbn.
     destruct m; [ flia Hm | cbn ].
@@ -1348,9 +1354,8 @@ assert (Ht1 : t 1 = s~{n}). {
     destruct m; [ flia Hm | clear; cbn ].
     now destruct m; cbn; rewrite f_opp_0, f_add_0_r.
   }
-  apply f_mul_1_l.
+  apply f_mul_1_r.
 }
-*)
 destruct p. {
 ...
   assert (Htn : t m = (- s~{n})%F). {
