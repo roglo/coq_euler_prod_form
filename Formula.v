@@ -1699,6 +1699,8 @@ apply list_of_pow_1_sub_pol_times_series; [ | easy | ]. {
 }
 Qed.
 
+...
+
 Definition infinite_fold_left {A B} (f : A → B → A) (l : nat → list B) a :=
   λ i, fold_left f (l i) a.
 
