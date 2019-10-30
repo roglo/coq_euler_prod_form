@@ -125,7 +125,7 @@ Theorem f_mul_0_l {F : field} : ∀ x, (0 * x = 0)%F.
 Proof.
 intros.
 assert (H : (0 * x + x = x)%F). {
-  transitivity ((0 * x + f_one * x)%F).
+  transitivity ((0 * x + 1 * x)%F).
   -now rewrite f_mul_1_l.
   -rewrite <- f_mul_add_distr_r.
    now rewrite f_add_0_l, f_mul_1_l.
@@ -168,7 +168,7 @@ intros.
 now rewrite f_mul_comm, f_mul_opp_l, f_mul_comm.
 Qed.
 
-Theorem f_mul_1_r {F : field} : ∀ x, (x * f_one)%F = x.
+Theorem f_mul_1_r {F : field} : ∀ x, (x * 1)%F = x.
 Proof.
 intros.
 rewrite f_mul_comm.
@@ -321,7 +321,7 @@ Add Parametric Relation {F : field} : (ln_series) ls_eq
 (* The unit series: 1 + 0/2^s + 0/3^s + 0/4^s + ... *)
 
 Definition ls_one {F : field} :=
-  {| ls n := match n with 1 => f_one | _ => 0%F end |}.
+  {| ls n := match n with 1 => 1%F | _ => 0%F end |}.
 
 (* Notation for accessing a series coefficient at index i *)
 
@@ -340,7 +340,7 @@ Notation "x - y" := (lp_sub x y) : lp_scope.
 
 (* At last, the famous ζ function: all its coefficients are 1 *)
 
-Definition ζ {F : field} := {| ls _ := f_one |}.
+Definition ζ {F : field} := {| ls _ := 1%F |}.
 
 (* Series where the indices, which are multiple of some n, are 0
       1 + ls(2)/2^s + ls(3)/3^s + ... + ls(n-1)/(n-1)^s + 0/n^s +
@@ -488,7 +488,7 @@ intros * i Hi.
 destruct i; [ easy | clear Hi ].
 cbn - [ ls_one ].
 unfold log_prod_term at 2.
-replace ls_one~{1} with f_one by easy.
+replace ls_one~{1} with 1%F by easy.
 rewrite f_add_0_l, f_mul_1_l, Nat.div_1_r.
 cbn - [ ls_one ].
 apply fold_left_map_log_prod_term.
@@ -1362,7 +1362,7 @@ Qed.
 (* Polynomial 1-1/n^s ≍ 1-x^ln(n) *)
 
 Definition pol_pow {F : field} n :=
-  {| lp := List.repeat 0%F (n - 1) ++ [f_one] |}.
+  {| lp := List.repeat 0%F (n - 1) ++ [1%F] |}.
 
 (*
 Here, we prove that
@@ -1407,7 +1407,7 @@ remember (log_prod_term (ls s) (ls (ls_of_pol (pol_pow 1 - pol_pow m))) n)
 assert (Htn : t n = s~{n}). {
   rewrite Ht; unfold log_prod_term.
   rewrite Nat.div_same; [ | easy ].
-  replace ((ls_of_pol _)~{1}) with f_one. 2: {
+  replace ((ls_of_pol _)~{1}) with 1%F. 2: {
     symmetry; cbn.
     destruct m; [ flia Hm | cbn ].
     rewrite Nat.sub_0_r.
@@ -1427,7 +1427,7 @@ destruct p. {
     assert (H : t p = (- s~{p})%F). {
       rewrite Ht; unfold log_prod_term.
       rewrite Hp, Nat.div_mul; [ | easy ].
-      replace ((ls_of_pol _)~{m}) with (- f_one)%F. 2: {
+      replace ((ls_of_pol _)~{m}) with (- 1%F)%F. 2: {
         symmetry; cbn.
         destruct m; [ flia Hm | cbn ].
         rewrite Nat.sub_0_r.
