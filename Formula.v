@@ -1508,8 +1508,58 @@ destruct p. {
   rewrite eq_last_divisor in H1; [ | easy ].
   rewrite Hll in H1 at 2.
   rewrite H1, map_app, fold_left_app; cbn.
-  destruct l2 as [| a l2]. {
-    rewrite removelast_app; [ | easy ].
+  rewrite removelast_app; [ | easy ].
+  rewrite map_app.
+  rewrite fold_left_app.
+  assert (H2 : ∀ a, fold_left f_add (map t l1) a = a). {
+    assert (H2 : ∀ d, d ∈ l1 → t d = 0%F). {
+      intros d Hd.
+      assert (H2 : d ≠ n). {
+        intros H2; move H2 at top; subst d.
+        specialize (divisors_are_sorted n) as H2.
+        rewrite H1 in H2.
+        apply Sorted.Sorted_StronglySorted in H2. 2: {
+          apply Nat.lt_strorder.
+        }
+        clear - Hd H2.
+        induction l1 as [| a l1]; [ easy | ].
+        destruct Hd as [Hd| Hd]. {
+          subst a.
+          cbn in H2.
+...
+Search (StronglySorted _ (_ ++ _)).
+
+          apply StronglySorted_inv in H2.
+
+          subst a; cbn in H2.
+          apply StronglySorted_inv in H2.
+          destruct H2 as (_, H2).
+            clear IHl1.
+            induction l1 as [| a l1]. {
+              apply Forall_inv in H2; flia H2.
+            }
+            cbn in H2.
+            apply Forall_inv_tail in H2.
+            apply IHl1, H2.
+          }
+          cbn in H2.
+          apply StronglySorted_inv in H2.
+          now apply IHl1.
+        }
+        apply Hto; [ now rewrite H1; apply in_or_app; left | easy | easy ].
+      }
+      clear Hll Hl1 H1.
+      induction l1 as [| a1 l1]; intros a; [ easy | cbn ].
+      rewrite fold_f_add_assoc.
+      rewrite (H2 a1 (or_introl eq_refl)), f_add_0_r.
+      apply IHl1.
+      intros d Hd.
+      now apply H2; right.
+    }
+    apply H2.
+...
+(*
+  induction l2 as [| a l2]. {
     rewrite removelast_app in H1; [ | easy ].
     cbn; rewrite app_nil_r.
     rewrite app_nil_r in H1.
@@ -1520,6 +1570,7 @@ destruct p. {
     rewrite H, Htn in Htm; move Htm at bottom.
     apply f_eq_opp_eq_0 in Htm.
     rewrite Htn, Htm, f_add_0_r.
+*)
     assert (H2 : ∀ a, fold_left f_add (map t l1) a = a). {
       assert (H2 : ∀ d, d ∈ l1 → t d = 0%F). {
         intros d Hd; rewrite H in *.
@@ -1560,6 +1611,11 @@ destruct p. {
     }
     apply H2.
   }
+  remember (a :: l2) as l; cbn; subst l.
+  rewrite map_app, map_cons.
+...
+  rewrite removelast_app; [ | ].
+
 ...
   assert (Hmz : m ≠ 0) by now intros H; rewrite H in Hp.
   assert (Hmd : m ∈ divisors n). {
