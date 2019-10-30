@@ -1483,13 +1483,19 @@ destruct p. {
   specialize (app_removelast_last 0 Hdn) as H1.
   rewrite eq_last_divisor in H1; [ | easy ].
   rewrite Hll in H1 at 2.
-  clear Hll.
   rewrite H1, map_app, fold_left_app; cbn.
   destruct l2 as [| a l2]. {
-  rewrite removelast_app; [ | easy ].
-  rewrite removelast_app in H1; [ | easy ].
-  cbn; rewrite app_nil_r.
-  rewrite app_nil_r in H1.
+    rewrite removelast_app; [ | easy ].
+    rewrite removelast_app in H1; [ | easy ].
+    cbn; rewrite app_nil_r.
+    rewrite app_nil_r in H1.
+    assert (H : p = n). {
+      rewrite Hll in H1.
+      now apply app_inj_tail in H1.
+    }
+    rewrite H, Htn in Htm; move Htm at bottom.
+    apply f_add_move_0_r in Htm.
+Search (_ + _ = f_zero)%F.
 ...
   assert (Hmz : m ≠ 0) by now intros H; rewrite H in Hp.
   assert (Hmd : m ∈ divisors n). {
