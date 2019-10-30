@@ -1403,6 +1403,9 @@ destruct p. {
         destruct nd; [ easy | now destruct nd ].
       }
       remember (n / S d) as nd eqn:Hnd; symmetry in Hnd.
+(**)
+assert (Hndn : nd ∈ divisors n). {
+...
       destruct m; intros. {
         cbn - [ "/" ]; rewrite f_opp_0, f_add_0_r, f_add_0_l.
         destruct nd; [ easy | ].
@@ -1420,9 +1423,18 @@ destruct p. {
         rewrite H1 in Hp.
         now apply Nat.mul_cancel_l in Hp.
       }
-...
       cbn; rewrite f_opp_0, f_add_0_r, f_add_0_l.
-      destruct d; [ easy | clear Hd1 ].
+      destruct nd; [ easy | ].
+      destruct nd. {
+        specialize (Nat.div_mod n (S d) (Nat.neq_succ_0 _)) as H1.
+        rewrite Hnd, Nat.mul_1_r in H1.
+        apply in_divisors in Hdn; [ | easy ].
+        rewrite (proj1 Hdn), Nat.add_0_r in H1.
+        now symmetry in H1.
+      }
+      destruct nd; [ easy | ].
+...
+      destruct nd; [ easy | clear Hd1 ].
       destruct d; [ easy | ].
       assert (Hd : d ≠ m) by flia Hdm.
       clear - Hd.
