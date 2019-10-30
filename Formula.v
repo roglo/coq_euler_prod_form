@@ -1495,7 +1495,10 @@ destruct p. {
     }
     rewrite H, Htn in Htm; move Htm at bottom.
     apply f_add_move_0_r in Htm.
+...
 Search (_ + _ = f_zero)%F.
+Require Import ZArith.
+Search (_ = - _ ↔ _)%Z.
 ...
   assert (Hmz : m ≠ 0) by now intros H; rewrite H in Hp.
   assert (Hmd : m ∈ divisors n). {
