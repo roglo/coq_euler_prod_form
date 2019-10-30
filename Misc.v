@@ -2,7 +2,7 @@
 
 Set Nested Proofs Allowed.
 Require Import Utf8 Arith Psatz Sorted.
-Import List.
+Import List List.ListNotations.
 
 (* "fast" lia, to improve compilation speed *)
 Tactic Notation "flia" hyp_list(Hs) := clear - Hs; lia.
@@ -80,6 +80,41 @@ Proof.
 intros.
 induction l as [| a l]; [ easy | cbn ].
 now rewrite app_length, IHl.
+Qed.
+
+Theorem List_last_seq : ∀ i n, n ≠ 0 → last (seq i n) 0 = i + n - 1.
+Proof.
+intros * Hn.
+destruct n; [ easy | clear Hn ].
+revert i; induction n; intros. {
+  cbn; symmetry.
+  apply Nat.add_sub.
+}
+remember (S n) as sn; cbn; subst sn.
+remember (seq (S i) (S n)) as l eqn:Hl.
+destruct l; [ easy | ].
+rewrite Hl.
+replace (i + S (S n)) with (S i + S n) by flia.
+apply IHn.
+Qed.
+
+Theorem List_last_In {A} : ∀ (d : A) l, l ≠ [] → In (last l d) l.
+Proof.
+intros * Hl.
+destruct l as [| a l]; [ easy | clear Hl ].
+revert a.
+induction l as [| b l]; intros; [ now left | ].
+remember (b :: l) as l'; cbn; subst l'.
+right; apply IHl.
+Qed.
+
+Theorem List_last_app {A} : ∀ l (d a : A), List.last (l ++ [a]) d = a.
+Proof.
+intros.
+induction l; [ easy | ].
+cbn.
+remember (l ++ [a]) as l' eqn:Hl'.
+destruct l'; [ now destruct l | apply IHl ].
 Qed.
 
 Theorem Sorted_Sorted_seq : ∀ start len, Sorted.Sorted lt (seq start len).

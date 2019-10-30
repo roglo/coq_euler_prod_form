@@ -492,6 +492,36 @@ intros.
 now destruct n.
 Qed.
 
+Theorem eq_last_divisor : ∀ n, n ≠ 0 → List.last (divisors n) 0 = n.
+Proof.
+intros n Hn.
+remember (divisors n) as l eqn:Hl.
+symmetry in Hl.
+unfold divisors, divisors_but_firstn_and_lastn in Hl.
+rewrite Nat_sub_succ_1 in Hl.
+specialize (List_last_seq 1 n Hn) as H1.
+replace (1 + n - 1) with n in H1 by flia.
+specialize (proj2 (filter_In (λ a, n mod a =? 0) n (seq 1 n))) as H2.
+rewrite Hl in H2.
+rewrite Nat.mod_same in H2; [ | easy ].
+cbn in H2.
+assert (H3 : n ∈ seq 1 n). {
+  rewrite <- H1 at 1.
+  apply List_last_In.
+  now destruct n.
+}
+assert (H : n ∈ seq 1 n ∧ true = true) by easy.
+specialize (H2 H); clear H.
+assert (H : seq 1 n ≠ []); [ now intros H; rewrite H in H3 | ].
+specialize (app_removelast_last 0 H) as H4; clear H.
+rewrite H1 in H4.
+assert (H : seq 1 n ≠ []); [ now intros H; rewrite H in H3 | ].
+rewrite H4, filter_app in Hl; cbn in Hl.
+rewrite Nat.mod_same in Hl; [ | easy ].
+cbn in Hl; rewrite <- Hl.
+apply List_last_app.
+Qed.
+
 Theorem divisors_are_sorted : ∀ n, Sorted.Sorted lt (divisors n).
 Proof.
 intros.
@@ -1439,10 +1469,32 @@ destruct p. {
     }
     apply f_mul_0_r.
   }
+(**)
+  assert (Hpd : p ∈ divisors n). {
+    apply in_divisors_iff; [ easy | ].
+    now rewrite Hp, Nat.mod_mul.
+  }
+  specialize (In_nth _ _ 0 Hpd) as (k & Hkd & Hkn).
+  specialize (nth_split _ 0 Hkd) as (l1 & l2 & Hll & Hl1).
+  rewrite Hkn in Hll.
+  assert (Hdn : divisors n ≠ []). {
+    intros H; rewrite H in Hll; now destruct l1.
+  }
+  specialize (app_removelast_last 0 Hdn) as H1.
+  rewrite eq_last_divisor in H1; [ | easy ].
+  rewrite Hll in H1 at 2.
+  clear Hll.
+  rewrite H1, map_app, fold_left_app; cbn.
+  destruct l2 as [| a l2]. {
+  rewrite removelast_app; [ | easy ].
+  rewrite removelast_app in H1; [ | easy ].
+  cbn; rewrite app_nil_r.
+  rewrite app_nil_r in H1.
 ...
+  assert (Hmz : m ≠ 0) by now intros H; rewrite H in Hp.
   assert (Hmd : m ∈ divisors n). {
     apply in_divisors_iff; [ easy | ].
-    split; [ easy | flia Hm ].
+    now rewrite Hp, Nat.mul_comm, Nat.mod_mul.
   }
   specialize (In_nth _ _ 0 Hmd) as (k & Hkd & Hkn).
   specialize (nth_split _ 0 Hkd) as (l1 & l2 & Hll & Hl1).
