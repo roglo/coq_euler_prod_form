@@ -1403,8 +1403,7 @@ destruct p. {
         destruct nd; [ easy | now destruct nd ].
       }
       remember (n / S d) as nd eqn:Hnd; symmetry in Hnd.
-(**)
-assert (Hndn : nd ∈ divisors n). {
+      destruct nd; [ easy | ].
 ...
       destruct m; intros. {
         cbn - [ "/" ]; rewrite f_opp_0, f_add_0_r, f_add_0_l.
