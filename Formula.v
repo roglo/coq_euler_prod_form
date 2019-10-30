@@ -1388,66 +1388,58 @@ destruct p. {
   }
   assert (Hto : ∀ d, d ∈ divisors n → d ≠ n → d ≠ p → t d = f_zero). {
     intros d Hdn Hd1 Hdm.
-...
     rewrite Ht; unfold log_prod_term.
-    replace ((ls_of_pol (pol_pow 1 - pol_pow m))~{n/d}) with f_zero. 2: {
+    remember (n / d) as nd eqn:Hnd; symmetry in Hnd.
+    assert (Hd : d ≠ 0). {
+      intros H; rewrite H in Hdn.
+      now apply in_divisors in Hdn.
+    }
+    move d before p; move Hd before Hn.
+    assert (Hdnd : n = d * nd). {
+      rewrite <- Hnd.
+      apply Nat.div_exact; [ easy | ].
+      now apply in_divisors in Hdn.
+    }
+    clear Hnd.
+    assert (Hd1n : nd ≠ 1). {
+      now intros H; rewrite H, Nat.mul_1_r in Hdnd; symmetry in Hdnd.
+    }
+    replace ((ls_of_pol (pol_pow 1 - pol_pow m))~{nd}) with f_zero. 2: {
       symmetry; cbn.
-      destruct d; [ easy | ].
+      destruct nd; [ easy | ].
       destruct m; intros. {
         cbn - [ "/" ]; rewrite f_add_opp_diag_r.
-        now destruct (n / S d).
+        now destruct nd.
       }
       rewrite Nat_sub_succ_1.
-      destruct m; intros. {
-        cbn - [ "/" ]; rewrite f_add_opp_diag_r.
-        destruct (n / S d) as [| nd]; [ easy | ].
-        destruct nd; [ easy | now destruct nd ].
-      }
-      remember (n / S d) as nd eqn:Hnd; symmetry in Hnd.
-      destruct nd; [ easy | ].
-...
-      destruct m; intros. {
-        cbn - [ "/" ]; rewrite f_opp_0, f_add_0_r, f_add_0_l.
-        destruct nd; [ easy | ].
-        destruct nd. {
-          specialize (Nat.div_mod n (S d) (Nat.neq_succ_0 _)) as H1.
-          rewrite Hnd, Nat.mul_1_r in H1; symmetry in H1.
-          apply in_divisors in Hdn; [ | easy ].
-          now rewrite (proj1 Hdn), Nat.add_0_r in H1.
-        }
-        destruct nd; [ | now destruct nd ].
-        specialize (Nat.div_mod n (S d) (Nat.neq_succ_0 _)) as H1.
-        rewrite Hnd in H1.
-        apply in_divisors in Hdn; [ | easy ].
-        rewrite (proj1 Hdn), Nat.add_0_r, Nat.mul_comm in H1.
-        rewrite H1 in Hp.
+      assert (Hndm : nd ≠ m). {
+        intros H; rewrite Hdnd, H, Nat.mul_comm in Hp.
         now apply Nat.mul_cancel_l in Hp.
       }
-      cbn; rewrite f_opp_0, f_add_0_r, f_add_0_l.
-      destruct nd; [ easy | ].
-      destruct nd. {
-        specialize (Nat.div_mod n (S d) (Nat.neq_succ_0 _)) as H1.
-        rewrite Hnd, Nat.mul_1_r in H1.
-        apply in_divisors in Hdn; [ | easy ].
-        rewrite (proj1 Hdn), Nat.add_0_r in H1.
-        now symmetry in H1.
+      destruct m. {
+        destruct nd; [ easy | now destruct nd ].
       }
-      destruct nd; [ easy | ].
-...
-      destruct nd; [ easy | clear Hd1 ].
-      destruct d; [ easy | ].
-      assert (Hd : d ≠ m) by flia Hdm.
-      clear - Hd.
-      revert d Hd.
-      induction m; intros; cbn. {
-        destruct d; [ easy | now destruct d ].
+      destruct nd; [ easy | cbn ].
+      destruct m. {
+        destruct nd; [ | now destruct nd ].
+        rewrite Hdnd, Nat.mul_comm in Hp.
+        now apply Nat.mul_cancel_l in Hp.
       }
-      rewrite f_opp_0, f_add_0_l.
-      destruct d; [ easy | ].
-      apply IHm; flia Hd.
+      cbn; rewrite f_opp_0, f_add_0_l.
+      destruct nd; [ easy | ].
+      clear - Hndm.
+      revert nd Hndm.
+      induction m; intros. {
+        destruct nd; [ easy | now destruct nd ].
+      }
+      cbn; rewrite f_opp_0, f_add_0_l.
+      destruct nd; [ easy | ].
+      apply -> Nat.succ_inj_wd_neg in Hndm.
+      now apply IHm.
     }
-    apply f_mul_0_l.
+    apply f_mul_0_r.
   }
+...
   assert (Hmd : m ∈ divisors n). {
     apply in_divisors_iff; [ easy | ].
     split; [ easy | flia Hm ].
