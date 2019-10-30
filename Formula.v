@@ -45,6 +45,8 @@ Notation "- x" := (f_opp x) : field_scope.
 Notation "x + y" := (f_add x y) : field_scope.
 Notation "x - y" := (f_sub x y) : field_scope.
 Notation "x * y" := (f_mul x y) : field_scope.
+Notation "0" := (f_zero) : field_scope.
+Notation "1" := (f_one) : field_scope.
 
 Theorem f_add_0_r {F : field} : ∀ x, (x + f_zero)%F = x.
 Proof.
@@ -173,11 +175,11 @@ rewrite f_mul_comm.
 apply f_mul_1_l.
 Qed.
 
-Theorem f_eq_opp_eq_0 {F : field} : ∀ x, x = (- x)%F → x = f_zero.
+Theorem f_eq_opp_eq_0 {F : field} : ∀ x, x = (- x)%F → x = 0%F.
 Proof.
 intros * Hx.
 apply f_add_move_0_r in Hx.
-replace x with (x * f_one)%F in Hx by now rewrite f_mul_1_r.
+replace x with (x * 1)%F in Hx by now rewrite f_mul_1_r.
 rewrite <- f_mul_add_distr_l in Hx.
 apply f_eq_mul_0_l in Hx; [ easy | ].
 apply f_charact_ne_2.
