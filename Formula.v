@@ -48,20 +48,20 @@ Notation "x * y" := (f_mul x y) : field_scope.
 Notation "0" := (f_zero) : field_scope.
 Notation "1" := (f_one) : field_scope.
 
-Theorem f_add_0_r {F : field} : ∀ x, (x + f_zero)%F = x.
+Theorem f_add_0_r {F : field} : ∀ x, (x + 0)%F = x.
 Proof.
 intros.
 rewrite f_add_comm.
 apply f_add_0_l.
 Qed.
 
-Theorem f_opp_0 {F : field} : (- f_zero)%F = f_zero.
+Theorem f_opp_0 {F : field} : (- 0)%F = 0%F.
 Proof.
-rewrite <- (f_add_0_r (- f_zero)%F).
+rewrite <- (f_add_0_r (- 0)%F).
 apply f_add_opp_diag_l.
 Qed.
 
-Theorem f_add_opp_diag_r {F : field} : ∀ x, f_add x (f_opp x) = f_zero.
+Theorem f_add_opp_diag_r {F : field} : ∀ x, (x + - x = 0)%F.
 Proof.
 intros.
 rewrite f_add_comm.
@@ -92,7 +92,7 @@ split.
  now rewrite f_add_0_r.
 Qed.
 
-Theorem f_add_move_0_r {F : field} : ∀ x y, (x + y)%F = f_zero ↔ x = (- y)%F.
+Theorem f_add_move_0_r {F : field} : ∀ x y, (x + y = 0)%F ↔ x = (- y)%F.
 Proof.
 intros.
 split.
@@ -121,11 +121,11 @@ rewrite f_mul_comm, f_mul_add_distr_l.
 now do 2 rewrite (f_mul_comm z).
 Qed.
 
-Theorem f_mul_0_l {F : field} : ∀ x, (f_zero * x)%F = f_zero.
+Theorem f_mul_0_l {F : field} : ∀ x, (0 * x = 0)%F.
 Proof.
 intros.
-assert (H : (f_zero * x + x = x)%F). {
-  transitivity ((f_zero * x + f_one * x)%F).
+assert (H : (0 * x + x = x)%F). {
+  transitivity ((0 * x + f_one * x)%F).
   -now rewrite f_mul_1_l.
   -rewrite <- f_mul_add_distr_r.
    now rewrite f_add_0_l, f_mul_1_l.
@@ -135,7 +135,7 @@ unfold f_sub in H.
 now rewrite f_add_opp_diag_r in H.
 Qed.
 
-Theorem f_mul_0_r {F : field} : ∀ x, (x * f_zero)%F = f_zero.
+Theorem f_mul_0_r {F : field} : ∀ x, (x * 0 = 0)%F.
 Proof.
 intros.
 rewrite f_mul_comm.
@@ -143,7 +143,7 @@ apply f_mul_0_l.
 Qed.
 
 Theorem f_eq_mul_0_l {F : field} : ∀ x y,
-  (x * y)%F = f_zero → y ≠ f_zero → x = f_zero.
+  (x * y = 0)%F → y ≠ 0%F → x = 0%F.
 Proof.
 intros * Hxy Hy.
 rewrite f_mul_comm in Hxy.
@@ -321,7 +321,7 @@ Add Parametric Relation {F : field} : (ln_series) ls_eq
 (* The unit series: 1 + 0/2^s + 0/3^s + 0/4^s + ... *)
 
 Definition ls_one {F : field} :=
-  {| ls n := match n with 1 => f_one | _ => f_zero end |}.
+  {| ls n := match n with 1 => f_one | _ => 0%F end |}.
 
 (* Notation for accessing a series coefficient at index i *)
 
@@ -332,7 +332,7 @@ Notation "x '∈' l" := (List.In x l) (at level 60).
 
 Definition lp_add {F : field} p q :=
   {| lp :=
-       List.map (prod_curry f_add) (List_combine_all (lp p) (lp q) f_zero) |}.
+       List.map (prod_curry f_add) (List_combine_all (lp p) (lp q) 0%F) |}.
 Definition lp_opp {F : field} p := {| lp := List.map f_opp (lp p) |}.
 Definition lp_sub {F : field} p q := lp_add p (lp_opp q).
 
@@ -352,7 +352,7 @@ Definition ζ {F : field} := {| ls _ := f_one |}.
 Definition series_but_mul_of {F : field} n s :=
   {| ls i :=
        match i mod n with
-       | 0 => f_zero
+       | 0 => 0%F
        | _ => ls s i
        end |}.
 
@@ -377,7 +377,7 @@ Definition log_prod_list {F : field} u v n :=
   List.map (log_prod_term u v n) (divisors n).
 
 Definition log_prod {F : field} u v n :=
-  List.fold_left f_add (log_prod_list u v n) f_zero.
+  List.fold_left f_add (log_prod_list u v n) 0%F.
 
 (* Σ (i = 1, ∞) s1_i x^ln(i) * Σ (i = 1, ∞) s2_i x^ln(i) *)
 Definition ls_mul {F : field} s1 s2 :=
@@ -388,8 +388,8 @@ Definition ls_mul {F : field} s1 s2 :=
 Definition ls_of_pol {F : field} p :=
   {| ls n :=
        match n with
-       | 0 => f_zero
-       | S n' => List.nth n' (lp p) f_zero end |}.
+       | 0 => 0%F
+       | S n' => List.nth n' (lp p) 0%F end |}.
 
 Definition ls_pol_mul_r {F : field} s p :=
   ls_mul s (ls_of_pol p).
@@ -470,7 +470,7 @@ revert i.
 induction l as [| a l]; intros; [ easy | ].
 cbn - [ ls_one ].
 unfold log_prod_term at 2.
-replace ls_one~{a} with f_zero. 2: {
+replace ls_one~{a} with 0%F. 2: {
   cbn.
   destruct a; [ easy | ].
   destruct a; [ exfalso | now destruct a ].
@@ -997,11 +997,11 @@ Theorem fold_add_flat_prod_assoc {F : field} : ∀ n u v w,
   → fold_left f_add
        (flat_map (λ d, map (f_mul (u d)) (log_prod_list v w (n / d)))
           (divisors n))
-       f_zero =
+       0%F =
      fold_left f_add
        (flat_map (λ d, map (f_mul (w (n / d))) (log_prod_list u v d))
           (divisors n))
-       f_zero.
+       0%F.
 Proof.
 intros * Hn.
 do 2 rewrite flat_map_concat_map.
@@ -1318,8 +1318,8 @@ rewrite map_f_mul_fold_add_distr_r.
 rewrite fold_add_map_fold_add.
 assert
   (H : ∀ (u : nat → _) f l,
-   flat_map (λ i, (u i * f_zero)%F :: f i) l =
-   flat_map (λ i, f_zero :: f i) l). {
+   flat_map (λ i, (u i * 0)%F :: f i) l =
+   flat_map (λ i, 0%F :: f i) l). {
   clear; intros.
   induction l as [| a l]; [ easy | cbn ].
   now rewrite f_mul_0_r, IHl.
@@ -1327,8 +1327,8 @@ assert
 rewrite H; clear H.
 assert
   (H : ∀ (u : nat → _) f l,
-   flat_map (λ i, (f_zero * u i)%F :: f i) l =
-   flat_map (λ i, f_zero :: f i) l). {
+   flat_map (λ i, (0 * u i)%F :: f i) l =
+   flat_map (λ i, 0%F :: f i) l). {
   clear; intros.
   induction l as [| a l]; [ easy | cbn ].
   now rewrite f_mul_0_l, IHl.
@@ -1336,7 +1336,7 @@ assert
 rewrite H; clear H.
 assert
   (H : ∀ (f : nat → _) l l',
-   fold_left f_add (flat_map (λ i, f_zero :: f i) l) l' =
+   fold_left f_add (flat_map (λ i, 0%F :: f i) l) l' =
    fold_left f_add (flat_map f l) l'). {
   clear; intros.
   revert l'.
@@ -1362,7 +1362,7 @@ Qed.
 (* Polynomial 1-1/n^s ≍ 1-x^ln(n) *)
 
 Definition pol_pow {F : field} n :=
-  {| lp := List.repeat f_zero (n - 1) ++ [f_one] |}.
+  {| lp := List.repeat 0%F (n - 1) ++ [f_one] |}.
 
 (*
 Here, we prove that
@@ -1440,7 +1440,7 @@ destruct p. {
     rewrite Hs in H; [ | easy ].
     now rewrite <- Hp in H.
   }
-  assert (Hto : ∀ d, d ∈ divisors n → d ≠ n → d ≠ p → t d = f_zero). {
+  assert (Hto : ∀ d, d ∈ divisors n → d ≠ n → d ≠ p → t d = 0%F). {
     intros d Hdn Hd1 Hdm.
     rewrite Ht; unfold log_prod_term.
     remember (n / d) as nd eqn:Hnd; symmetry in Hnd.
@@ -1458,7 +1458,7 @@ destruct p. {
     assert (Hd1n : nd ≠ 1). {
       now intros H; rewrite H, Nat.mul_1_r in Hdnd; symmetry in Hdnd.
     }
-    replace ((ls_of_pol (pol_pow 1 - pol_pow m))~{nd}) with f_zero. 2: {
+    replace ((ls_of_pol (pol_pow 1 - pol_pow m))~{nd}) with 0%F. 2: {
       symmetry; cbn.
       destruct nd; [ easy | ].
       destruct m; intros. {
@@ -1543,7 +1543,7 @@ destruct p. {
   rewrite fold_left_app; cbn.
   rewrite fold_f_add_assoc.
   assert (H1 : ∀ a, fold_left f_add (map t l1) a = a). {
-    assert (Hdl : ∀ d, d ∈ l1 → t d = f_zero). {
+    assert (Hdl : ∀ d, d ∈ l1 → t d = 0). {
       intros d Hd.
       specialize (divisors_are_sorted n) as Hds.
       rewrite <- Heql, Hll in Hds; cbn in Hds.
@@ -1572,7 +1572,7 @@ destruct p. {
   }
   rewrite H1.
   assert (H2 : ∀ a, fold_left f_add (map t l2) a = a). {
-    assert (Hdl : ∀ d, d ∈ l2 → t d = f_zero). {
+    assert (Hdl : ∀ d, d ∈ l2 → t d = 0). {
       intros d Hd.
       clear Hs.
       specialize (divisors_are_sorted n) as Hs.
@@ -1604,10 +1604,10 @@ destruct p. {
   rewrite H2.
   apply f_add_opp_diag_r.
 }
-assert (Hto : ∀ d, d ∈ divisors n → d ≠ 1 → t d = f_zero). {
+assert (Hto : ∀ d, d ∈ divisors n → d ≠ 1 → t d = 0). {
   intros d Hd Hd1.
   rewrite Ht; unfold log_prod_term.
-  replace ((ls_of_pol (pol_pow 1 - pol_pow m))~{d}) with f_zero. 2: {
+  replace ((ls_of_pol (pol_pow 1 - pol_pow m))~{d}) with 0. 2: {
     symmetry.
     clear - Hn Hp Hd Hd1.
     assert (Hdm : d ≠ m). {
