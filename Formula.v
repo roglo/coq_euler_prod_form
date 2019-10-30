@@ -1526,27 +1526,70 @@ destruct p. {
         destruct Hd as [Hd| Hd]. {
           subst a.
           cbn in H2.
-...
-Search (StronglySorted _ (_ ++ _)).
-
-          apply StronglySorted_inv in H2.
-
-          subst a; cbn in H2.
-          apply StronglySorted_inv in H2.
-          destruct H2 as (_, H2).
-            clear IHl1.
-            induction l1 as [| a l1]. {
-              apply Forall_inv in H2; flia H2.
-            }
-            cbn in H2.
-            apply Forall_inv_tail in H2.
-            apply IHl1, H2.
-          }
+          remember (l1 ++ p :: l2) as l eqn:Hl; symmetry in Hl.
+          destruct l as [| a l]; [ now destruct l1 | ].
+          remember (removelast (a :: l)) as l3 eqn:Hl3.
+          clear - H2.
           cbn in H2.
           apply StronglySorted_inv in H2.
-          now apply IHl1.
+          destruct H2 as (_, H1).
+          induction l3 as [| a l]. {
+            cbn in H1.
+            apply Forall_inv in H1; flia H1.
+          }
+          cbn in H1.
+          apply Forall_inv_tail in H1.
+          now apply IHl.
         }
-        apply Hto; [ now rewrite H1; apply in_or_app; left | easy | easy ].
+        cbn in H2.
+        remember (l1 ++ p :: l2) as l eqn:Hl; symmetry in Hl.
+        destruct l as [| a1 l]; [ now destruct l1 | ].
+        remember (removelast (a1 :: l)) as l3 eqn:Hl3.
+        cbn in H2.
+        apply StronglySorted_inv in H2.
+        now apply IHl1.
+      }
+      apply Hto; [ | easy | ]. 2: {
+        intros H; move H at top; subst d.
+        specialize (divisors_are_sorted n) as H3.
+        rewrite Hll in H3.
+        clear - Hd H3.
+        apply Sorted.Sorted_StronglySorted in H3. 2: {
+          apply Nat.lt_strorder.
+        }
+        induction l1 as [| a l]; [ easy | ].
+        cbn in H3.
+        destruct Hd as [Hp| Hp]. {
+          subst a.
+          apply StronglySorted_inv in H3.
+          destruct H3 as (_, H3).
+          clear - H3.
+          induction l as [| a l]. {
+            cbn in H3; apply Forall_inv in H3; flia H3.
+          }
+          cbn in H3.
+          apply Forall_inv_tail in H3.
+          now apply IHl.
+        }
+        apply StronglySorted_inv in H3.
+        now apply IHl.
+      }
+      rewrite Hll.
+      now apply in_or_app; left.
+    }
+    intros a.
+    clear - H2.
+    induction l1 as [| b l]; [ easy | ].
+    cbn; rewrite fold_f_add_assoc.
+    rewrite H2; [ | now left ].
+    rewrite f_add_0_r.
+    apply IHl.
+    intros d Hd.
+    now apply H2; right.
+  }
+  rewrite H2.
+...
+      apply Hto; [ now rewrite H1; apply in_or_app; left | easy | ].
       }
       clear Hll Hl1 H1.
       induction l1 as [| a1 l1]; intros a; [ easy | cbn ].
