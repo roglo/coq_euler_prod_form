@@ -33,7 +33,8 @@ Class field :=
     f_mul_1_l : ∀ x, f_mul f_one x = x;
     f_mul_inv_diag_l : ∀ x, x ≠ f_zero → f_mul (f_inv x) x = f_one;
     f_mul_add_distr_l : ∀ x y z,
-      f_mul x (f_add y z) = f_add (f_mul x y) (f_mul x z) }.
+      f_mul x (f_add y z) = f_add (f_mul x y) (f_mul x z);
+    f_charact_ne_2 : f_add f_one f_one ≠ f_zero }.
 
 Declare Scope field_scope.
 Delimit Scope field_scope with F.
@@ -139,6 +140,17 @@ rewrite f_mul_comm.
 apply f_mul_0_l.
 Qed.
 
+Theorem f_eq_mul_0_l {F : field} : ∀ x y,
+  (x * y)%F = f_zero → y ≠ f_zero → x = f_zero.
+Proof.
+intros * Hxy Hy.
+rewrite f_mul_comm in Hxy.
+apply (f_equal (f_mul (f_inv y))) in Hxy.
+rewrite f_mul_0_r, f_mul_assoc in Hxy.
+rewrite f_mul_inv_diag_l in Hxy; [ | easy ].
+now rewrite f_mul_1_l in Hxy.
+Qed.
+
 Theorem f_mul_opp_l {F : field} : ∀ x y, (- x * y = - (x * y))%F.
 Proof.
 intros.
@@ -159,6 +171,16 @@ Proof.
 intros.
 rewrite f_mul_comm.
 apply f_mul_1_l.
+Qed.
+
+Theorem f_eq_opp_eq_0 {F : field} : ∀ x, x = (- x)%F → x = f_zero.
+Proof.
+intros * Hx.
+apply f_add_move_0_r in Hx.
+replace x with (x * f_one)%F in Hx by now rewrite f_mul_1_r.
+rewrite <- f_mul_add_distr_l in Hx.
+apply f_eq_mul_0_l in Hx; [ easy | ].
+apply f_charact_ne_2.
 Qed.
 
 (* Euler product formula *)
@@ -1494,11 +1516,8 @@ destruct p. {
       now apply app_inj_tail in H1.
     }
     rewrite H, Htn in Htm; move Htm at bottom.
-...
-    apply f_add_move_0_r in Htm.
-...
-Search (_ + _ = f_zero)%F.
-Search (_ = - _ ↔ _)%Z.
+    apply f_eq_opp_eq_0 in Htm.
+    rewrite Htn, Htm, f_add_0_r.
 ...
   assert (Hmz : m ≠ 0) by now intros H; rewrite H in Hp.
   assert (Hmd : m ∈ divisors n). {
