@@ -113,6 +113,14 @@ do 2 rewrite <- f_add_assoc.
 apply f_equal, f_add_comm.
 Qed.
 
+Theorem f_opp_involutive {F : field} : ∀ x, (- - x)%F = x.
+Proof.
+intros.
+symmetry.
+apply f_add_move_0_r.
+apply f_add_opp_diag_r.
+Qed.
+
 Theorem f_mul_add_distr_r {F : field} : ∀ x y z,
   ((x + y) * z)%F = (x * z + y * z)%F.
 Proof.
@@ -1587,7 +1595,25 @@ destruct p. {
     intros d Hd.
     now apply H2; right.
   }
-  rewrite H2.
+  rewrite <- fold_f_add_assoc.
+  rewrite (f_add_comm _ (t n)), H2.
+  rewrite f_add_0_r.
+  destruct l2 as [| a l2]. {
+    rewrite Hll in H1; cbn in H1.
+    rewrite removelast_app in H1; [ | easy ].
+    cbn in H1; cbn.
+    rewrite app_nil_r in H1.
+    apply app_inj_tail in H1.
+    destruct H1 as (_, H1); move H1 at top; subst p.
+    apply f_eq_opp_eq_0.
+    rewrite Htn at 1; rewrite Htm.
+    now rewrite f_opp_involutive.
+  }
+  remember (a :: l2) as l; cbn; subst l.
+  rewrite map_cons.
+  cbn - [ removelast ].
+  rewrite Htn, Htm.
+  rewrite f_add_opp_diag_r.
 ...
       apply Hto; [ now rewrite H1; apply in_or_app; left | easy | ].
       }
