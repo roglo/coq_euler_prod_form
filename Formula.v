@@ -1452,6 +1452,8 @@ Definition pol_pow {F : field} n :=
 
 (* *)
 
+Notation "1" := (pol_pow 1) : lp_scope.
+
 Theorem fold_ls_mul_assoc {F : field} {A} : ∀ l b c (f : A → _),
   (fold_left (λ c a, c * f a) l (b * c) =
    fold_left (λ c a, c * f a) l b * c)%LS.
@@ -1880,7 +1882,7 @@ But actually, our theorem is a little more general:
 *)
 
 Notation "'Π' ( a ∈ l ) , p" :=
-  (List.fold_left (λ c a, (c * ls_of_pol p)%LS) l ls_one)
+  (List.fold_left (λ c a, (c * ls_of_pol p%LP)%LS) l ls_one)
   (at level 36, a at level 0, l at level 60, p at level 36) : ls_scope.
 
 Theorem list_of_pow_1_sub_pol_times_series {F : field} : ∀ l r,
@@ -2061,7 +2063,7 @@ Qed.
 (* formula for all primes up to a given value *)
 
 Theorem list_of_1_sub_pow_primes_upto_times_ζ {F : field} : ∀ k,
-  (ζ * Π (p ∈ primes_upto k), (pol_pow 1 - pol_pow p) =
+  (ζ * Π (p ∈ primes_upto k), (1 - pol_pow p) =
    fold_right series_but_mul_of ζ (primes_upto k))%LS.
 Proof.
 intros.
