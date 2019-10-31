@@ -1652,11 +1652,11 @@ destruct p. {
      apply NoDup_cons_iff in H2.
      now apply IHl.
     -intros H; move H at top; subst d.
-...
-     rewrite Hll in Hpd.
+     move Hpd at bottom.
+     specialize (NoDup_divisors n) as Hnd.
+     rewrite Hll in Hpd, Hnd.
      remember (a :: l2) as l3 eqn:Hl3.
-     clear - Hpd Hd.
-     (* lemma to do *)
+     clear - Hpd Hd Hnd.
      assert (Hp : p ∈ l3). {
        clear - Hd.
        destruct l3 as [| a l]; [ easy | ].
@@ -1667,169 +1667,22 @@ destruct p. {
        now right; apply IHl.
      }
      clear Hd.
-...
-     assert (Hnr : p ∈ removelast (l1 ++ p :: a :: l2)). {
-       rewrite removelast_app; [ | easy ].
-       apply in_or_app; right.
-       now left.
-     }
-     remember (removelast (l1 ++ p :: a :: l2)) as l eqn:Hl.
-     clear - H1 Hnr.
-...
-      apply Hto; [ now rewrite H1; apply in_or_app; left | easy | ].
-      }
-      clear Hll Hl1 H1.
-      induction l1 as [| a1 l1]; intros a; [ easy | cbn ].
-      rewrite fold_f_add_assoc.
-      rewrite (H2 a1 (or_introl eq_refl)), f_add_0_r.
-      apply IHl1.
-      intros d Hd.
-      now apply H2; right.
-    }
-    apply H2.
-...
-(*
-  induction l2 as [| a l2]. {
-    rewrite removelast_app in H1; [ | easy ].
-    cbn; rewrite app_nil_r.
-    rewrite app_nil_r in H1.
-    assert (H : p = n). {
-      rewrite Hll in H1.
-      now apply app_inj_tail in H1.
-    }
-    rewrite H, Htn in Htm; move Htm at bottom.
-    apply f_eq_opp_eq_0 in Htm.
-    rewrite Htn, Htm, f_add_0_r.
-*)
-    assert (H2 : ∀ a, fold_left f_add (map t l1) a = a). {
-      assert (H2 : ∀ d, d ∈ l1 → t d = 0%F). {
-        intros d Hd; rewrite H in *.
-        assert (H2 : d ≠ n). {
-          intros H2; move H2 at top; subst d.
-          specialize (divisors_are_sorted n) as H2.
-          rewrite H1 in H2.
-          apply Sorted.Sorted_StronglySorted in H2. 2: {
-            apply Nat.lt_strorder.
-          }
-          clear - Hd H2.
-          induction l1 as [| a l1]; [ easy | ].
-          destruct Hd as [Hd| Hd]. {
-            subst a; cbn in H2.
-            apply StronglySorted_inv in H2.
-            destruct H2 as (_, H2).
-            clear IHl1.
-            induction l1 as [| a l1]. {
-              apply Forall_inv in H2; flia H2.
-            }
-            cbn in H2.
-            apply Forall_inv_tail in H2.
-            apply IHl1, H2.
-          }
-          cbn in H2.
-          apply StronglySorted_inv in H2.
-          now apply IHl1.
-        }
-        apply Hto; [ now rewrite H1; apply in_or_app; left | easy | easy ].
-      }
-      clear Hll Hl1 H1.
-      induction l1 as [| a1 l1]; intros a; [ easy | cbn ].
-      rewrite fold_f_add_assoc.
-      rewrite (H2 a1 (or_introl eq_refl)), f_add_0_r.
-      apply IHl1.
-      intros d Hd.
-      now apply H2; right.
-    }
-    apply H2.
+     apply NoDup_remove_2 in Hnd; apply Hnd; clear Hnd.
+     now apply in_or_app; right.
   }
-  remember (a :: l2) as l; cbn; subst l.
-  rewrite map_app, map_cons.
-...
-  rewrite removelast_app; [ | ].
-
-...
-  assert (Hmz : m ≠ 0) by now intros H; rewrite H in Hp.
-  assert (Hmd : m ∈ divisors n). {
-    apply in_divisors_iff; [ easy | ].
-    now rewrite Hp, Nat.mul_comm, Nat.mod_mul.
+  remember (removelast (a :: l2)) as l eqn:Hl.
+  clear - H3.
+  assert (Ha : ∀ a, fold_left f_add (map t l) a = a). {
+    induction l as [| b l]; intros; [ easy | cbn ].
+    rewrite fold_f_add_assoc.
+    rewrite H3; [ | now left ].
+    rewrite f_add_0_r; apply IHl.
+    now intros d Hd; apply H3; right.
   }
-  specialize (In_nth _ _ 0 Hmd) as (k & Hkd & Hkn).
-  specialize (nth_split _ 0 Hkd) as (l1 & l2 & Hll & Hl1).
-  rewrite Hkn in Hll.
-  rewrite Hll, map_app; cbn.
-  specialize (eq_first_divisor_1 n Hn) as H1.
-  remember (divisors n) as l.
-  destruct l1 as [| a l1]. {
-    cbn in Hl1; subst k.
-    destruct l as [| a l]; [ easy | ].
-    cbn in Hkn, H1.
-    rewrite <- Hkn, H1 in Hm; flia Hm.
-  }
-  rewrite Hll in H1; cbn in H1; subst a.
-  cbn; rewrite f_add_0_l, Ht1, Htn.
-  rewrite fold_left_app; cbn.
-  rewrite fold_f_add_assoc.
-  assert (H1 : ∀ a, fold_left f_add (map t l1) a = a). {
-    assert (Hdl : ∀ d, d ∈ l1 → t d = 0). {
-      intros d Hd.
-      specialize (divisors_are_sorted n) as Hds.
-      rewrite <- Heql, Hll in Hds; cbn in Hds.
-      apply Hto. {
-        intros H; subst d.
-        assert (H : 1 ∈ (l1 ++ m :: l2)). {
-          now apply in_or_app; left.
-        }
-        replace (1 :: l1 ++ m :: l2) with ([] ++ 1 :: l1 ++ m :: l2)
-          in Hds by easy.
-        now apply Sorted_Sorted_lt_app_not_in_r in Hds.
-      }
-      intros H; subst d.
-      assert (H : m ∈ (1 :: l1)) by now right.
-      rewrite app_comm_cons in Hds.
-      revert H.
-      now apply Sorted_Sorted_lt_app_not_in_l in Hds.
-    }
-    intros a; clear - Hdl.
-    revert a.
-    induction l1 as [| b l]; intros; [ easy | ].
-    cbn; rewrite Hdl; [ | now left ].
-    rewrite f_add_0_r.
-    apply IHl; intros c Hc.
-    now apply Hdl; right.
-  }
-  rewrite H1.
-  assert (H2 : ∀ a, fold_left f_add (map t l2) a = a). {
-    assert (Hdl : ∀ d, d ∈ l2 → t d = 0). {
-      intros d Hd.
-      clear Hs.
-      specialize (divisors_are_sorted n) as Hs.
-      rewrite <- Heql, Hll in Hs; cbn in Hs.
-      apply Hto. {
-        intros H; subst d.
-        apply Sorted.Sorted_StronglySorted in Hs; [ | apply Nat.lt_strorder ].
-        apply Sorted.StronglySorted_inv in Hs.
-        destruct Hs as (Hds, Hall).
-        specialize (proj1 (Forall_forall _ _) Hall 1) as H2.
-        assert (H : 1 ∈ (l1 ++ m :: l2)). {
-          now apply in_or_app; right; right.
-        }
-        specialize (H2 H); flia H2.
-      }
-      intros H; subst d.
-      apply Sorted.Sorted_inv in Hs.
-      destruct Hs as (Hs, Hr).
-      now apply Sorted_Sorted_lt_app_not_in_r in Hs.
-    }
-    intros a; clear - Hdl.
-    revert a.
-    induction l2 as [| b l]; intros; [ easy | ].
-    cbn; rewrite Hdl; [ | now left ].
-    rewrite f_add_0_r.
-    apply IHl; intros c Hc.
-    now apply Hdl; right.
-  }
-  rewrite H2.
-  apply f_add_opp_diag_r.
+  apply Ha.
 }
+assert (Hto : ∀ d, d ∈ divisors n → d ≠ n → t d = 0%F). {
+...
 assert (Hto : ∀ d, d ∈ divisors n → d ≠ 1 → t d = 0). {
   intros d Hd Hd1.
   rewrite Ht; unfold log_prod_term.
