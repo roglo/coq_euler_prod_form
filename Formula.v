@@ -2022,6 +2022,23 @@ cbn in Hp.
 now apply (primes_upto_aux_are_primes 2 k).
 Qed.
 
+Theorem primes_upto_aux_ge : ∀ d k p,
+  p ∈ primes_upto_aux d k
+  → d ≤ p.
+Proof.
+intros * Hp.
+revert d Hp.
+induction k; intros; [ easy | ].
+cbn in Hp.
+destruct (is_prime d). {
+  destruct Hp as [Hp| Hp]; [ now subst d | ].
+  transitivity (d + 1); [ flia | ].
+  now apply IHk.
+}
+transitivity (d + 1); [ flia | ].
+now apply IHk.
+Qed.
+
 Theorem NoDup_primes_upto_aux : ∀ d k, NoDup (primes_upto_aux d k).
 Proof.
 intros.
@@ -2031,14 +2048,17 @@ remember (is_prime d) as b eqn:Hb; symmetry in Hb.
 destruct b; [ | apply IHk ].
 constructor; [ | apply IHk ].
 intros Hd.
-...
+apply primes_upto_aux_ge in Hd.
+flia Hd.
+Qed.
 
 Theorem NoDup_primes_upto : ∀ k, NoDup (primes_upto k).
 Proof.
 intros.
-induction k; [ constructor | ].
-cbn; unfold primes_upto in IHk.
-...
+apply NoDup_primes_upto_aux.
+Qed.
+
+(* formula for all primes up to a given value *)
 
 Theorem list_of_1_sub_pow_primes_upto_times_ζ {F : field} : ∀ k,
   (ζ * Π (p ∈ primes_upto k), (pol_pow 1 - pol_pow p) =
@@ -2048,47 +2068,10 @@ intros.
 apply list_of_1_sub_pow_primes_times_ζ.
 -intros p Hp.
  now apply (primes_upto_are_primes k).
--idtac.
+-apply NoDup_primes_upto.
+Qed.
 
 ...
-
-ζ * fold_left (λ c a, ls_mul c (ls_of_pol (pol_pow 1 - pol_pow a))) l l_one.
-ζ * Π (p ∈ l), (pol_pow 1 - pol_pow p) = 1
-
-...
-
-Definition infinite_fold_left {A B} (f : A → B → A) (l : nat → list B) a :=
-  λ i, fold_left f (l i) a.
-
-Locate "Π".
-
-Notation "s *' p" := (ls_mul s (ls_of_pol p))
-   (at level 42, left associativity, p at level 1) : ls_scope.
-
-Check fold_left.
-
-Inspect 7.
-
-(*
-Definition infinite_lp_prod {F : field} (f : nat → nat) :=
-  fold_left (λ a b, (a *' (pol_pow 1 - pol_pow (f b)))%LS).
-
-Check infinite_lp_prod.
-*)
-
-(* To be moved to Primes.v when done *)
-
-Fixpoint primes_upto_aux n cnt :=
-  match cnt with
-  | 0 => []
-  | S c =>
-      if is_prime n then n :: primes_upto_aux (n + 1) c
-      else primes_upto_aux (n + 1) c
-  end.
-
-Definition primes_upto := primes_upto_aux 1.
-
-Compute (primes_upto 17).
 
 Fixpoint prime_after_aux cnt n :=
   if is_prime n then n
