@@ -1504,7 +1504,6 @@ destruct p. {
     }
     apply f_mul_0_r.
   }
-(**)
   assert (Hpd : p ∈ divisors n). {
     apply in_divisors_iff; [ easy | ].
     now rewrite Hp, Nat.mod_mul.
@@ -1682,6 +1681,10 @@ destruct p. {
   apply Ha.
 }
 assert (Hto : ∀ d, d ∈ divisors n → d ≠ n → t d = 0%F). {
+  intros d Hd Hd1.
+  rewrite Ht; unfold log_prod_term.
+  replace ((ls_of_pol (pol_pow 1 - pol_pow m))~{n / d}) with 0%F. 2: {
+    symmetry.
 ...
 assert (Hto : ∀ d, d ∈ divisors n → d ≠ 1 → t d = 0). {
   intros d Hd Hd1.
