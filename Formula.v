@@ -1982,6 +1982,42 @@ apply list_of_pow_1_sub_pol_times_series; [ | easy | ]. {
 }
 Qed.
 
+(* *)
+
+Fixpoint primes_upto_aux n cnt :=
+  match cnt with
+  | 0 => []
+  | S c =>
+      if is_prime n then n :: primes_upto_aux (n + 1) c
+      else primes_upto_aux (n + 1) c
+  end.
+
+Definition primes_upto := primes_upto_aux 1.
+
+Compute (primes_upto 17).
+
+Theorem primes_upto_are_primes : ∀ k p,
+  p ∈ primes_upto k
+  → is_prime p = true.
+Proof.
+intros * Hp.
+induction k; [ easy | ].
+cbn in Hp.
+...
+
+Theorem list_of_1_sub_pow_primes_upto_times_ζ {F : field} : ∀ k,
+  (ζ * Π (p ∈ primes_upto k), (pol_pow 1 - pol_pow p) =
+   fold_right series_but_mul_of ζ (primes_upto k))%LS.
+Proof.
+intros.
+apply list_of_1_sub_pow_primes_times_ζ.
+-intros p Hp.
+
+...
+
+ζ * fold_left (λ c a, ls_mul c (ls_of_pol (pol_pow 1 - pol_pow a))) l l_one.
+ζ * Π (p ∈ l), (pol_pow 1 - pol_pow p) = 1
+
 ...
 
 Definition infinite_fold_left {A B} (f : A → B → A) (l : nat → list B) a :=
