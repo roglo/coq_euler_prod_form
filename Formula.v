@@ -1682,9 +1682,33 @@ destruct p. {
 }
 assert (Hto : ∀ d, d ∈ divisors n → d ≠ n → t d = 0%F). {
   intros d Hd Hd1.
+...
   rewrite Ht; unfold log_prod_term.
   replace ((ls_of_pol (pol_pow 1 - pol_pow m))~{n / d}) with 0%F. 2: {
     symmetry.
+    clear - Hn Hp Hd Hd1.
+    assert (Hdm : n / d ≠ m). {
+      intros H; subst m.
+      specialize (divisor_inv n d Hd) as Hnd.
+      apply in_divisors in Hnd; [ | easy ].
+      now rewrite Hp in Hnd.
+    }
+    clear - Hd1 Hdm; cbn.
+    remember (n / d) as k eqn:Hk; symmetry in Hk.
+    destruct k; [ easy | ].
+    destruct m. {
+      cbn - [ "/" ]; rewrite f_add_opp_diag_r.
+      destruct k; [ easy | now destruct k ].
+    }
+    apply -> Nat.succ_inj_wd_neg in Hdm.
+    rewrite Nat_sub_succ_1.
+    revert d k Hd1 Hdm Hk.
+    induction m; intros. {
+      cbn; rewrite f_add_opp_diag_r.
+      destruct k; [ easy | now destruct k ].
+    }
+    cbn.
+    destruct k. {
 ...
 assert (Hto : ∀ d, d ∈ divisors n → d ≠ 1 → t d = 0). {
   intros d Hd Hd1.
@@ -1700,8 +1724,7 @@ assert (Hto : ∀ d, d ∈ divisors n → d ≠ 1 → t d = 0). {
     clear - Hd1 Hdm; cbn.
     destruct d; [ easy | ].
     destruct m. {
-      cbn.
-      cbn; rewrite f_add_opp_diag_r.
+      cbn - [ "/" ]; rewrite f_add_opp_diag_r.
       destruct d; [ easy | now destruct d ].
     }
     apply -> Nat.succ_inj_wd_neg in Hd1.
