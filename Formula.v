@@ -1996,6 +1996,22 @@ Definition primes_upto := primes_upto_aux 1.
 
 Compute (primes_upto 17).
 
+Theorem primes_upto_aux_are_primes : ∀ d k p,
+  p ∈ primes_upto_aux d k
+  → is_prime p = true.
+Proof.
+intros * Hp.
+revert d Hp.
+induction k; intros; [ easy | ].
+cbn in Hp.
+remember (is_prime d) as b eqn:Hb; symmetry in Hb.
+destruct b. {
+  destruct Hp as [Hp| Hp]; [ now subst d | ].
+  now apply (IHk (d + 1)).
+}
+now apply (IHk (d + 1)).
+Qed.
+
 Theorem primes_upto_are_primes : ∀ k p,
   p ∈ primes_upto k
   → is_prime p = true.
@@ -2003,6 +2019,25 @@ Proof.
 intros * Hp.
 induction k; [ easy | ].
 cbn in Hp.
+now apply (primes_upto_aux_are_primes 2 k).
+Qed.
+
+Theorem NoDup_primes_upto_aux : ∀ d k, NoDup (primes_upto_aux d k).
+Proof.
+intros.
+revert d.
+induction k; intros; [ constructor | cbn ].
+remember (is_prime d) as b eqn:Hb; symmetry in Hb.
+destruct b; [ | apply IHk ].
+constructor; [ | apply IHk ].
+intros Hd.
+...
+
+Theorem NoDup_primes_upto : ∀ k, NoDup (primes_upto k).
+Proof.
+intros.
+induction k; [ constructor | ].
+cbn; unfold primes_upto in IHk.
 ...
 
 Theorem list_of_1_sub_pow_primes_upto_times_ζ {F : field} : ∀ k,
@@ -2012,6 +2047,8 @@ Proof.
 intros.
 apply list_of_1_sub_pow_primes_times_ζ.
 -intros p Hp.
+ now apply (primes_upto_are_primes k).
+-idtac.
 
 ...
 
