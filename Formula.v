@@ -1729,44 +1729,53 @@ assert (Hto : ∀ d, d ∈ divisors n → d ≠ n → t d = 0%F). {
   }
   apply f_mul_0_r.
 }
-...
-remember (divisors n) as l eqn:Hl; symmetry in Hl.
-destruct l as [| a l]; [ now destruct n | ].
-specialize (eq_first_divisor_1 n Hn) as H1.
-rewrite Hl in H1; cbn in H1; subst a.
-cbn; rewrite f_add_0_l, <- Ht1.
-assert (H1 : ∀ a, fold_left f_add (map t l) a = a). {
-  intros a.
-  specialize (divisors_are_sorted n) as Hds.
-  rewrite Hl in Hds; clear Hl.
-  apply Sorted.Sorted_StronglySorted in Hds; [ | apply Nat.lt_strorder ].
-  apply Sorted.StronglySorted_inv in Hds.
-  destruct Hds as (Hds, Hall).
-  revert a.
-  induction l as [| b l]; intros; cbn; [ easy | ].
-  rewrite f_add_comm, fold_f_add_assoc.
-  rewrite IHl; cycle 1. {
-    intros d Hd Hd1.
-    apply Hto; [ | easy ].
-    destruct Hd as [Hd| Hd]; [ now subst d | ].
-    now right; right.
-  } {
-    now apply Sorted.StronglySorted_inv in Hds.
-  } {
-    now apply Forall_inv_tail in Hall.
-  }
-  rewrite Hto; cycle 1; [ now right; left | | ]. {
-    intros H; subst b.
-    apply Forall_inv in Hall; flia Hall.
-  }
-  apply f_add_0_l.
+assert (Hnd : n ∈ divisors n). {
+  apply in_divisors_iff; [ easy | ].
+  now rewrite Nat.mod_same.
 }
-apply H1.
+specialize (NoDup_divisors n) as Hndd.
+remember (divisors n) as l eqn:Hl; symmetry in Hl.
+clear - Hnd Hto Htn Hndd.
+induction l as [| a l]; [ easy | cbn ].
+rewrite fold_f_add_assoc.
+destruct Hnd as [Hnd| Hnd]. {
+  subst a.
+  replace (fold_left _ _ _) with 0%F. 2: {
+    symmetry.
+    clear - Hto Hndd.
+    induction l as [| a l]; [ easy | cbn ].
+    rewrite fold_f_add_assoc.
+    apply NoDup_cons_iff in Hndd.
+    rewrite Hto; [ | now right; left | ]. 2: {
+      intros H; apply (proj1 Hndd); rewrite H.
+      now left.
+    }
+    rewrite f_add_0_r.
+    apply IHl. {
+      intros d Hd Hdn.
+      apply Hto; [ | easy ].
+      destruct Hd as [Hd| Hd]; [ now left | now right; right ].
+    }
+    destruct Hndd as (Hna, Hndd).
+    apply NoDup_cons_iff in Hndd.
+    apply NoDup_cons_iff.
+    split; [ | easy ].
+    intros H; apply Hna.
+    now right.
+  }
+  now rewrite Htn, f_add_0_l.
+}
+apply NoDup_cons_iff in Hndd.
+rewrite Hto; [ | now left | now intros H; subst a ].
+rewrite f_add_0_r.
+apply IHl; [ | easy | easy ].
+intros d Hd Hdn.
+apply Hto; [ now right | easy ].
 Qed.
 
 (*
 Here, we try to prove that
-   (1 - 1/2^s) (1 - 1/3^s) (1 - 1/5^s) ... (1 - 1/p^s) ζ(s)
+   ζ(s) (1 - 1/2^s) (1 - 1/3^s) (1 - 1/5^s) ... (1 - 1/p^s)
 is equal to
    ζ(s) without terms whose rank is divisible by 2, 3, 5, ... or p
 i.e.
@@ -1783,6 +1792,8 @@ But actually, our theorem is a little more general:
    for any n in (n1, n2, n3 ... nm)
    what is true for ζ function since ∀ i ζ_{i}=1.
 *)
+
+...
 
 Notation "'Π' ( a ∈ l ) , e" := (List.fold_right (λ a c, (e .* c)%LS) ls_one l)
   (at level 36, a at level 0, l at level 60, e at level 36) : ls_scope.
