@@ -1375,6 +1375,47 @@ Qed.
 Definition pol_pow {F : field} n :=
   {| lp := List.repeat 0%F (n - 1) ++ [1%F] |}.
 
+(* *)
+
+Theorem eq_pol_1_sub_pow_0 {F : field} : ∀ m n d,
+  d ∈ divisors n
+  → d ≠ 1
+  → d ≠ m
+  → (ls_of_pol (pol_pow 1 - pol_pow m))~{d} = 0%F.
+Proof.
+intros * Hd Hd1 Hdm.
+destruct (Nat.eq_dec n 0) as [Hn| Hn]; [ now subst n | ].
+apply in_divisors in Hd; [ | easy ].
+destruct Hd as (Hnd, Hd).
+cbn.
+destruct d; [ easy | ].
+destruct m. {
+  cbn; rewrite f_add_opp_diag_r.
+  destruct d; [ easy | now destruct d ].
+}
+rewrite Nat_sub_succ_1.
+apply -> Nat.succ_inj_wd_neg in Hdm.
+destruct m. {
+  destruct d; [ easy | now destruct d ].
+}
+destruct d; [ easy | cbn ].
+destruct m. {
+  destruct d; [ easy | now destruct d ].
+}
+cbn; rewrite f_opp_0, f_add_0_l.
+destruct d; [ easy | ].
+clear - Hdm.
+do 2 apply -> Nat.succ_inj_wd_neg in Hdm.
+revert d Hdm.
+induction m; intros. {
+  destruct d; [ easy | now destruct d ].
+}
+cbn; rewrite f_opp_0, f_add_0_l.
+destruct d; [ easy | ].
+apply -> Nat.succ_inj_wd_neg in Hdm.
+now apply IHm.
+Qed.
+
 (*
 Here, we prove that
    ζ(s) (1 - 1/2^s)
@@ -1470,37 +1511,19 @@ destruct p. {
       now intros H; rewrite H, Nat.mul_1_r in Hdnd; symmetry in Hdnd.
     }
     replace ((ls_of_pol (pol_pow 1 - pol_pow m))~{nd}) with 0%F. 2: {
-      symmetry; cbn.
-      destruct nd; [ easy | ].
-      destruct m; intros. {
-        cbn - [ "/" ]; rewrite f_add_opp_diag_r.
-        now destruct nd.
-      }
-      rewrite Nat_sub_succ_1.
+      symmetry.
       assert (Hndm : nd ≠ m). {
         intros H; rewrite Hdnd, H, Nat.mul_comm in Hp.
-        now apply Nat.mul_cancel_l in Hp.
+        apply Nat.mul_cancel_l in Hp; [ easy | ].
+        now intros H1; rewrite H, H1, Nat.mul_0_r in Hdnd.
       }
-      destruct m. {
-        destruct nd; [ easy | now destruct nd ].
+      assert (Hndd : nd ∈ divisors n). {
+        specialize (divisor_inv n _ Hdn) as H1.
+        rewrite Hdnd in H1 at 1.
+        rewrite Nat.mul_comm, Nat.div_mul in H1; [ easy | ].
+        now intros H; rewrite H in Hdnd.
       }
-      destruct nd; [ easy | cbn ].
-      destruct m. {
-        destruct nd; [ | now destruct nd ].
-        rewrite Hdnd, Nat.mul_comm in Hp.
-        now apply Nat.mul_cancel_l in Hp.
-      }
-      cbn; rewrite f_opp_0, f_add_0_l.
-      destruct nd; [ easy | ].
-      clear - Hndm.
-      revert nd Hndm.
-      induction m; intros. {
-        destruct nd; [ easy | now destruct nd ].
-      }
-      cbn; rewrite f_opp_0, f_add_0_l.
-      destruct nd; [ easy | ].
-      apply -> Nat.succ_inj_wd_neg in Hndm.
-      now apply IHm.
+      now apply (eq_pol_1_sub_pow_0 _ n).
     }
     apply f_mul_0_r.
   }
@@ -1682,85 +1705,31 @@ destruct p. {
 }
 assert (Hto : ∀ d, d ∈ divisors n → d ≠ n → t d = 0%F). {
   intros d Hd Hd1.
-...
   rewrite Ht; unfold log_prod_term.
   replace ((ls_of_pol (pol_pow 1 - pol_pow m))~{n / d}) with 0%F. 2: {
     symmetry.
-    clear - Hn Hp Hd Hd1.
+    assert (Hn1 : n / d ≠ 1). {
+      intros H.
+      apply in_divisors in Hd; [ | easy ].
+      destruct Hd as (Hnd, Hd).
+      apply Nat.mod_divides in Hnd; [ | easy ].
+      destruct Hnd as (c, Hc).
+      rewrite Hc, Nat.mul_comm, Nat.div_mul in H; [ | easy ].
+      rewrite H, Nat.mul_1_r in Hc.
+      now symmetry in Hc.
+    }
     assert (Hdm : n / d ≠ m). {
       intros H; subst m.
       specialize (divisor_inv n d Hd) as Hnd.
       apply in_divisors in Hnd; [ | easy ].
       now rewrite Hp in Hnd.
     }
-    clear - Hd1 Hdm; cbn.
-    remember (n / d) as k eqn:Hk; symmetry in Hk.
-    destruct k; [ easy | ].
-    destruct m. {
-      cbn - [ "/" ]; rewrite f_add_opp_diag_r.
-      destruct k; [ easy | now destruct k ].
-    }
-    apply -> Nat.succ_inj_wd_neg in Hdm.
-    rewrite Nat_sub_succ_1.
-    revert d k Hd1 Hdm Hk.
-    induction m; intros. {
-      cbn; rewrite f_add_opp_diag_r.
-      destruct k; [ easy | now destruct k ].
-    }
-    cbn.
-    destruct k. {
-...
-assert (Hto : ∀ d, d ∈ divisors n → d ≠ 1 → t d = 0). {
-  intros d Hd Hd1.
-  rewrite Ht; unfold log_prod_term.
-  replace ((ls_of_pol (pol_pow 1 - pol_pow m))~{d}) with 0. 2: {
-    symmetry.
-    clear - Hn Hp Hd Hd1.
-    assert (Hdm : d ≠ m). {
-      intros H; subst d.
-      apply in_divisors in Hd; [ | easy ].
-      now rewrite Hp in Hd.
-    }
-    clear - Hd1 Hdm; cbn.
-    destruct d; [ easy | ].
-    destruct m. {
-      cbn - [ "/" ]; rewrite f_add_opp_diag_r.
-      destruct d; [ easy | now destruct d ].
-    }
-    apply -> Nat.succ_inj_wd_neg in Hd1.
-    apply -> Nat.succ_inj_wd_neg in Hdm.
-    rewrite Nat_sub_succ_1.
-    revert d Hd1 Hdm.
-    induction m; intros. {
-      cbn; rewrite f_add_opp_diag_r.
-      destruct d; [ easy | now destruct d ].
-    }
-    cbn.
-    destruct d; [ easy | clear Hd1 ].
-    apply -> Nat.succ_inj_wd_neg in Hdm.
-    destruct d. {
-      destruct m; [ easy | ].
-      now cbn; rewrite f_add_opp_diag_r.
-    }
-    specialize (IHm (S d) (Nat.neq_succ_0 _) Hdm) as H1.
-    destruct m. {
-      cbn.
-      destruct d; [ easy | now destruct d ].
-    }
-    cbn in H1; cbn.
-    destruct m. {
-      cbn.
-      destruct d; [ easy | ].
-      destruct d; [ easy | now destruct d ].
-    }
-    cbn in H1.
-    destruct d. {
-      now cbn; rewrite f_add_opp_diag_r.
-    }
-    cbn; apply H1.
+    apply divisor_inv in Hd.
+    now apply (eq_pol_1_sub_pow_0 _ n).
   }
-  apply f_mul_0_l.
+  apply f_mul_0_r.
 }
+...
 remember (divisors n) as l eqn:Hl; symmetry in Hl.
 destruct l as [| a l]; [ now destruct n | ].
 specialize (eq_first_divisor_1 n Hn) as H1.
