@@ -708,6 +708,7 @@ Theorem ls_mul_comm {F : field} : ∀ x y,
   (x * y = y * x)%LS.
 Proof.
 intros * i Hi.
+cbn - [ log_prod ].
 apply fold_log_prod_comm.
 Qed.
 
@@ -1323,7 +1324,18 @@ Theorem ls_mul_assoc {F : field} : ∀ x y z,
   (x * (y * z) = (x * y) * z)%LS.
 Proof.
 intros * i Hi.
-now cbn; apply log_prod_assoc.
+now apply log_prod_assoc.
+Qed.
+
+Theorem ls_mul_mul_swap {F : field} : ∀ x y z,
+  (x * y * z = x * z * y)%LS.
+Proof.
+intros.
+rewrite ls_mul_comm.
+rewrite (ls_mul_comm _ y).
+rewrite ls_mul_assoc.
+rewrite (ls_mul_comm _ x).
+apply ls_mul_assoc.
 Qed.
 
 (* *)
@@ -1439,6 +1451,17 @@ Definition pol_pow {F : field} n :=
   {| lp := List.repeat 0%F (n - 1) ++ [1%F] |}.
 
 (* *)
+
+Theorem fold_ls_mul_assoc {F : field} {A} : ∀ l b c (f : A → _),
+  (fold_left (λ c a, c * f a) l (b * c) =
+   fold_left (λ c a, c * f a) l b * c)%LS.
+Proof.
+intros.
+revert b c.
+induction l as [| d l]; intros; [ easy | cbn ].
+do 3 rewrite IHl.
+apply ls_mul_mul_swap.
+Qed.
 
 Theorem eq_pol_1_sub_pow_0 {F : field} : ∀ m n d,
   d ∈ divisors n
@@ -1874,20 +1897,8 @@ induction l as [| a1 l]. {
   now rewrite ls_mul_1_r.
 }
 cbn.
-Theorem fold_ls_mul_assoc {F : field} : ∀ l b c (p : nat → _),
-  (fold_left (λ c a, c * p a) l (b * c) =
-   fold_left (λ c a, c * p a) l b * c)%LS.
-Proof.
-...
 rewrite fold_ls_mul_assoc.
 rewrite ls_mul_assoc.
-rewrite IHl.
-...
-unfold "*'" at 2.
-rewrite ls_mul_1_l.
-remember (Π (a ∈ l), (pol_pow 1 - pol_pow a))%LS as p eqn:Hp.
-unfold ".*".
-rewrite <- ls_mul_assoc.
 rewrite IHl; cycle 1. {
   now intros a Ha; apply Hge2; right.
 } {
@@ -1897,7 +1908,7 @@ rewrite IHl; cycle 1. {
   apply (Hgcd (S na) (S nb)).
   now intros H; apply Hnn; apply Nat.succ_inj in H.
 }
-apply pol_1_sub_pow_times_series; [ now apply Hge2; left | ].
+apply series_times_pol_1_sub_pow; [ now apply Hge2; left | ].
 intros i Hi.
 specialize (Hai a1 (or_introl eq_refl)) as Ha1i.
 clear - Hi Ha1i Hgcd.
@@ -1936,7 +1947,7 @@ Qed.
 Corollary list_of_1_sub_pow_primes_times_ζ {F : field} : ∀ l,
   (∀ p, p ∈ l → is_prime p = true)
   → NoDup l
-  → (Π (p ∈ l), (pol_pow 1 - pol_pow p) * ζ =
+  → (ζ * Π (p ∈ l), (pol_pow 1 - pol_pow p) =
      fold_right series_but_mul_of ζ l)%LS.
 Proof.
 intros * Hp Hnd.
