@@ -33,8 +33,7 @@ Class field :=
     f_mul_1_l : ∀ x, f_mul f_one x = x;
     f_mul_inv_diag_l : ∀ x, x ≠ f_zero → f_mul (f_inv x) x = f_one;
     f_mul_add_distr_l : ∀ x y z,
-      f_mul x (f_add y z) = f_add (f_mul x y) (f_mul x z);
-    f_charact_ne_2 : f_add f_one f_one ≠ f_zero }.
+      f_mul x (f_add y z) = f_add (f_mul x y) (f_mul x z) }.
 
 Declare Scope field_scope.
 Delimit Scope field_scope with F.
@@ -181,16 +180,6 @@ Proof.
 intros.
 rewrite f_mul_comm.
 apply f_mul_1_l.
-Qed.
-
-Theorem f_eq_opp_eq_0 {F : field} : ∀ x, x = (- x)%F → x = 0%F.
-Proof.
-intros * Hx.
-apply f_add_move_0_r in Hx.
-replace x with (x * 1)%F in Hx by now rewrite f_mul_1_r.
-rewrite <- f_mul_add_distr_l in Hx.
-apply f_eq_mul_0_l in Hx; [ easy | ].
-apply f_charact_ne_2.
 Qed.
 
 (* Euler product formula *)
@@ -1619,9 +1608,9 @@ destruct p. {
     rewrite app_nil_r in H1.
     apply app_inj_tail in H1.
     destruct H1 as (_, H1); move H1 at top; subst p.
-    apply f_eq_opp_eq_0.
-    rewrite Htn at 1; rewrite Htm.
-    now rewrite f_opp_involutive.
+    destruct m; [ flia Hm | ].
+    destruct m; [ flia Hm | ].
+    cbn in Hp; flia Hn Hp.
   }
   remember (a :: l2) as l; cbn; subst l.
   rewrite map_cons.
