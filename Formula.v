@@ -565,6 +565,20 @@ specialize (H2 (λ a, n mod a =? 0) (seq 1 n)).
 now specialize (H2 (Sorted_Sorted_seq _ _)).
 Qed.
 
+Theorem NoDup_divisors : ∀ n, NoDup (divisors n).
+Proof.
+intros.
+specialize (divisors_are_sorted n) as Hs.
+apply Sorted.Sorted_StronglySorted in Hs; [ | apply Nat.lt_strorder ].
+remember (divisors n) as l eqn:Hl; clear Hl.
+induction Hs; [ constructor | ].
+constructor; [ | easy ].
+intros Ha.
+clear - H Ha.
+specialize (proj1 (Forall_forall (lt a) l) H a Ha) as H1.
+flia H1.
+Qed.
+
 Theorem fold_f_add_assoc {F : field} : ∀ a b l,
   fold_left f_add l (a + b)%F = (fold_left f_add l a + b)%F.
 Proof.
@@ -1628,6 +1642,50 @@ destruct p. {
      destruct Hd as [Hd| Hd]; [ now subst d; left | ].
      now right; apply IHl.
     -intros H; move H at top; subst d.
+     assert (Hnr : n ∈ removelast (l1 ++ p :: a :: l2)). {
+       rewrite removelast_app; [ | easy ].
+       apply in_or_app; right.
+       remember (a :: l2) as l; cbn; subst l.
+       now right.
+     }
+     remember (removelast (l1 ++ p :: a :: l2)) as l eqn:Hl.
+     clear - H1 Hnr.
+     specialize (NoDup_divisors n) as H2.
+     rewrite H1 in H2; clear H1.
+     induction l as [| a l]; [ easy | ].
+     destruct Hnr as [Hnr| Hrn]. {
+       subst a; cbn in H2.
+       apply NoDup_cons_iff in H2.
+       destruct H2 as (H, _); apply H.
+       now apply in_or_app; right; left.
+     }
+     cbn in H2.
+     apply NoDup_cons_iff in H2.
+     now apply IHl.
+    -intros H; move H at top; subst d.
+...
+     rewrite Hll in Hpd.
+     remember (a :: l2) as l3 eqn:Hl3.
+     clear - Hpd Hd.
+     (* lemma to do *)
+     assert (Hp : p ∈ l3). {
+       clear - Hd.
+       destruct l3 as [| a l]; [ easy | ].
+       revert a Hd.
+       induction l as [| b l]; intros; [ easy | ].
+       remember (b :: l) as l1; cbn in Hd; subst l1.
+       destruct Hd as [Hd| Hd]; [ now subst a; left | ].
+       now right; apply IHl.
+     }
+     clear Hd.
+...
+     assert (Hnr : p ∈ removelast (l1 ++ p :: a :: l2)). {
+       rewrite removelast_app; [ | easy ].
+       apply in_or_app; right.
+       now left.
+     }
+     remember (removelast (l1 ++ p :: a :: l2)) as l eqn:Hl.
+     clear - H1 Hnr.
 ...
       apply Hto; [ now rewrite H1; apply in_or_app; left | easy | ].
       }
