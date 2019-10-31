@@ -334,7 +334,7 @@ Definition ls_one {F : field} :=
 (* Notation for accessing a series coefficient at index i *)
 
 Notation "r ~{ i }" := (ls r i) (at level 1, format "r ~{ i }").
-Notation "x '∈' l" := (List.In x l) (at level 60).
+Notation "x '∈' l" := (List.In x l) (at level 70).
 
 (* adding, opposing, subtracting polynomials *)
 
@@ -1614,6 +1614,20 @@ destruct p. {
   cbn - [ removelast ].
   rewrite Htn, Htm.
   rewrite f_add_opp_diag_r.
+  assert (H3 : ∀ d, d ∈ removelast (a :: l2) → t d = 0%F). {
+    intros d Hd.
+    apply Hto.
+    -rewrite Hll.
+     apply in_or_app; right; right.
+     remember (a :: l2) as l.
+     clear - Hd.
+     (* lemma to do *)
+     destruct l as [| a l]; [ easy | ].
+     revert a Hd.
+     induction l as [| b l]; intros; [ easy | ].
+     destruct Hd as [Hd| Hd]; [ now subst d; left | ].
+     now right; apply IHl.
+    -intros H; move H at top; subst d.
 ...
       apply Hto; [ now rewrite H1; apply in_or_app; left | easy | ].
       }
