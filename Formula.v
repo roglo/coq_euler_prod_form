@@ -2037,6 +2037,7 @@ destruct b. {
   induction l as [| p l]; intros; [ easy | cbn ].
   remember (i mod p) as b1 eqn:Hb1; symmetry in Hb1.
   destruct b1; [ easy | ].
+...
   apply IHl with (n := n + 1).
   (* oui, non, ça marche pas *)
 ...
