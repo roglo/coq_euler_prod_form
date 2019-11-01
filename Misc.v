@@ -257,3 +257,18 @@ rewrite app_assoc.
 apply NoDup_app_comm.
 now apply IHll.
 Qed.
+
+Theorem NoDup_filter {A} : ∀ (f : A → _) l, NoDup l → NoDup (filter f l).
+Proof.
+intros * Hnd.
+induction l as [| a l]; [ easy | cbn ].
+remember (f a) as b eqn:Hb; symmetry in Hb.
+apply NoDup_cons_iff in Hnd.
+destruct Hnd as (Hal, Hl).
+destruct b. {
+  constructor; [ | now apply IHl ].
+  intros H; apply Hal.
+  now apply filter_In in H.
+}
+now apply IHl.
+Qed.

@@ -1986,78 +1986,24 @@ Qed.
 
 (* *)
 
-Fixpoint primes_upto_aux n cnt :=
-  match cnt with
-  | 0 => []
-  | S c =>
-      if is_prime n then n :: primes_upto_aux (n + 1) c
-      else primes_upto_aux (n + 1) c
-  end.
-
-Definition primes_upto := primes_upto_aux 1.
+Definition primes_upto n := filter is_prime (seq 1 n).
 
 Compute (primes_upto 17).
-
-Theorem primes_upto_aux_are_primes : ∀ d k p,
-  p ∈ primes_upto_aux d k
-  → is_prime p = true.
-Proof.
-intros * Hp.
-revert d Hp.
-induction k; intros; [ easy | ].
-cbn in Hp.
-remember (is_prime d) as b eqn:Hb; symmetry in Hb.
-destruct b. {
-  destruct Hp as [Hp| Hp]; [ now subst d | ].
-  now apply (IHk (d + 1)).
-}
-now apply (IHk (d + 1)).
-Qed.
 
 Theorem primes_upto_are_primes : ∀ k p,
   p ∈ primes_upto k
   → is_prime p = true.
 Proof.
 intros * Hp.
-induction k; [ easy | ].
-cbn in Hp.
-now apply (primes_upto_aux_are_primes 2 k).
-Qed.
-
-Theorem primes_upto_aux_ge : ∀ d k p,
-  p ∈ primes_upto_aux d k
-  → d ≤ p.
-Proof.
-intros * Hp.
-revert d Hp.
-induction k; intros; [ easy | ].
-cbn in Hp.
-destruct (is_prime d). {
-  destruct Hp as [Hp| Hp]; [ now subst d | ].
-  transitivity (d + 1); [ flia | ].
-  now apply IHk.
-}
-transitivity (d + 1); [ flia | ].
-now apply IHk.
-Qed.
-
-Theorem NoDup_primes_upto_aux : ∀ d k, NoDup (primes_upto_aux d k).
-Proof.
-intros.
-revert d.
-induction k; intros; [ constructor | cbn ].
-remember (is_prime d) as b eqn:Hb; symmetry in Hb.
-destruct b; [ | apply IHk ].
-constructor; [ | apply IHk ].
-intros Hd.
-apply primes_upto_aux_ge in Hd.
-flia Hd.
+now apply filter_In in Hp.
 Qed.
 
 Theorem NoDup_primes_upto : ∀ k, NoDup (primes_upto k).
 Proof.
 intros.
-apply NoDup_primes_upto_aux.
+unfold primes_upto.
+apply NoDup_filter.
+apply seq_NoDup.
 Qed.
 
 (* formula for all primes up to a given value *)
@@ -2073,6 +2019,20 @@ apply list_of_1_sub_pow_primes_times_ζ.
 -apply NoDup_primes_upto.
 Qed.
 
+Theorem ζ_times_product_on_primes_close_to_1 {F : field} : ∀ n i, 1 < i < n →
+  (ζ * Π (p ∈ primes_upto n), (1 - pol_pow p))%LS~{i} = 0%F.
+Proof.
+intros * (H1i, Hin).
+rewrite list_of_1_sub_pow_primes_upto_times_ζ; [ | flia H1i ].
+remember (primes_upto n) as l eqn:Hl; symmetry in Hl.
+revert n Hin Hl.
+induction l as [| p l]; intros. {
+  destruct n; [ flia Hin | ].
+  destruct n; [ flia Hin H1i | easy ].
+}
+cbn.
+remember (i mod p) as b eqn:Hb; symmetry in Hb.
+destruct b; [ easy | ].
 ...
 
 Fixpoint prime_after_aux cnt n :=
