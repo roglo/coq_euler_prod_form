@@ -2037,9 +2037,14 @@ destruct b. {
   induction l as [| p l]; intros; [ easy | cbn ].
   remember (i mod p) as b1 eqn:Hb1; symmetry in Hb1.
   destruct b1; [ easy | ].
+  destruct Hii as [Hii| Hii]. {
+    subst p.
+    admit. (* à voir *)
+  }
+  specialize (infinitely_many_primes n) as (p1 & Hp1n & Hp1).
 ...
-  apply IHl with (n := n + 1).
-  (* oui, non, ça marche pas *)
+  apply IHl with (n := p1); [ easy | flia Hin Hp1n | ].
+  (* à vérifier *)
 ...
 Search is_prime.
 (* i>1 must be divisible by at least one prime number p less than n (PNT)
