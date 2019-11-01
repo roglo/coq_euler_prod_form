@@ -260,12 +260,8 @@ above).
    where x = e^(-s)
  *)
 
-Inductive ln_prod {F : field} :=
-  | lr : (nat → f_type) → ln_prod
-  | lv : f_type → ln_prod.
-
 Class ln_series {F : field} :=
-  { ls : nat → ln_prod }.
+  { ls : nat → f_type }.
 
 (* Definition of the type of a polynomial: this is just
    a finite series; it can be represented by a list *)
@@ -322,7 +318,7 @@ Add Parametric Relation {F : field} : (ln_series) ls_eq
 (* The unit series: 1 + 0/2^s + 0/3^s + 0/4^s + ... *)
 
 Definition ls_one {F : field} :=
-  {| ls n := match n with 1 => lv 1%F | _ => lv 0%F end |}.
+  {| ls n := match n with 1 => 1%F | _ => 0%F end |}.
 
 (* Notation for accessing a series coefficient at index i *)
 
@@ -342,7 +338,7 @@ Notation "1" := (ls_one) : ls_scope.
 
 (* At last, the famous ζ function: all its coefficients are 1 *)
 
-Definition ζ {F : field} := {| ls _ := lv 1%F |}.
+Definition ζ {F : field} := {| ls _ := 1%F |}.
 
 (* Series where the indices, which are multiple of some n, are 0
       1 + ls(2)/2^s + ls(3)/3^s + ... + ls(n-1)/(n-1)^s + 0/n^s +
@@ -354,7 +350,7 @@ Definition ζ {F : field} := {| ls _ := lv 1%F |}.
 Definition series_but_mul_of {F : field} n s :=
   {| ls i :=
        match i mod n with
-       | 0 => lv 0%F
+       | 0 => 0%F
        | _ => ls s i
        end |}.
 
@@ -372,32 +368,8 @@ Definition divisors := divisors_but_firstn_and_lastn 1.
       u_1.v_n + ... u_d.v_{n/d} + ... u_n.v_1
    where d covers all the divisors of n *)
 
-Fixpoint convol_prod_aux {F : field} f g i j :=
-  (f i * g j +
-   match j with
-   | 0 => 0%F
-   | S j' => convol_prod_aux f g (S i) j'
-   end)%F.
-
-Definition convol_prod {F : field} f g n :=
-  convol_prod_aux f g 0 n.
-
-Definition lp_prod {F : field} x y :=
-  match x with
-  | lv x =>
-       match y with
-       | lv y => lv (x * y)%F
-       | lr g => lr (λ i, (x * g i)%F)
-       end
-  | lr f =>
-       match y with
-       | lv y => lr (λ i, (f i * y)%F)
-       | lr g => lr (convol_prod f g)
-       end
-  end.
-
 Definition log_prod_term {F : field} u v n i :=
-  lp_prod (u i) (v (n / i)).
+  (u i * v (n / i))%F.
 
 Definition log_prod_list {F : field} u v n :=
   List.map (log_prod_term u v n) (divisors n).
