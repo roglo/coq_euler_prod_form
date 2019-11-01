@@ -2019,11 +2019,66 @@ apply list_of_1_sub_pow_primes_times_ζ.
 -apply NoDup_primes_upto.
 Qed.
 
+Definition ζ_but_mul_of {F : field} n :=
+  {| ls i := match i mod n with 0 => 0%F | S _ => 1%F end |}.
+
+(*
+Theorem glop {F : field} : ∀ i l, 1 < i < length l →
+  (∀ na nb, na ≠ nb → Nat.gcd (List.nth na l 1) (List.nth nb l 1) = 1)
+  → (fold_right series_but_mul_of ζ l)~{i} = 0%F.
+Proof.
+intros * (H1i, Hin) Hnn.
+(*
+l = [2; 3; 5; 7; 11; 13]
+ζ(s) = 1 + x^ln(2) + x^ln(3) + x^ln(4) + x^ln(5) + ...
+sbm 2 ζ(s) = 1 + x^ln(3) + x^ln(5) + x^ln(7) + ...
+sbm 3 (sbm 2 ζ(s)) = 1 + x^ln(5) + x^ln(7) + x^ln(11) + ...
+...
+intros * (H1i, Hin) Hnn.
+*)
+(*
+destruct i; [ flia H1i | ].
+destruct i; [ flia H1i | clear H1i ].
+*)
+induction l as [| p l]; intros; cbn in Hin; [ flia Hin | ].
+cbn.
+remember (i mod p) as b eqn:Hb; symmetry in Hb.
+destruct b; [ easy | ].
+destruct (Nat.eq_dec i (length l)) as [Hil| Hil]. {
+...
+x∈l
+gcd(p,x)=1
+...
+l = [2; 3; 5; 7; 11; 13]
+ζ(s) = 1 + x^ln(2) + x^ln(3) + x^ln(4) + x^ln(5) + ...
+sbm 2 ζ(s) = 1 + x^ln(3) + x^ln(5) + x^ln(7) + ...
+sbm 3 (sbm 2 ζ(s)) = 1 + x^ln(5) + x^ln(7) + x^ln(11) + ...
+...
+*)
+
+Theorem series_but_mul_primes_upto {F : field} : ∀ n i, 1 < i < n →
+  (fold_right series_but_mul_of ζ (primes_upto n))~{i} = 0%F.
+Proof.
+intros * (H1i, Hin).
+(* i>1 must be divisible by at least one prime number p less than n (PNT)
+   therefore is cancelled by series_but_mul_of p *)
+...
+remember (primes_upto n) as l eqn:Hl; symmetry in Hl.
+induction l as [| p l]; intros. {
+  destruct n; [ flia Hin | ].
+  destruct n; [ flia Hin H1i | easy ].
+}
+cbn.
+remember (i mod p) as b eqn:Hb; symmetry in Hb.
+destruct b; [ easy | ].
+...
+
 Theorem ζ_times_product_on_primes_close_to_1 {F : field} : ∀ n i, 1 < i < n →
   (ζ * Π (p ∈ primes_upto n), (1 - pol_pow p))%LS~{i} = 0%F.
 Proof.
 intros * (H1i, Hin).
 rewrite list_of_1_sub_pow_primes_upto_times_ζ; [ | flia H1i ].
+...
 remember (primes_upto n) as l eqn:Hl; symmetry in Hl.
 revert n Hin Hl.
 induction l as [| p l]; intros. {
