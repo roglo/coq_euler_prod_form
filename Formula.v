@@ -2032,6 +2032,13 @@ destruct b. {
     split; [ | easy ].
     apply in_seq; flia H1i Hin.
   }
+  remember (primes_upto n) as l eqn:Hl; symmetry in Hl.
+  revert n Hin Hl.
+  induction l as [| p l]; intros; [ easy | cbn ].
+  remember (i mod p) as b1 eqn:Hb1; symmetry in Hb1.
+  destruct b1; [ easy | ].
+  apply IHl with (n := n + 1).
+  (* oui, non, ça marche pas *)
 ...
 Search is_prime.
 (* i>1 must be divisible by at least one prime number p less than n (PNT)
