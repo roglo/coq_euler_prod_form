@@ -2006,6 +2006,37 @@ apply NoDup_filter.
 apply seq_NoDup.
 Qed.
 
+Theorem gcd_primes_upto : ∀ k na nb,
+  na ≠ nb
+  → Nat.gcd (nth na (primes_upto k) 1) (nth nb (primes_upto k) 1) = 1.
+Proof.
+intros * Hnab.
+remember (nth na (primes_upto k) 1) as pa eqn:Hpa.
+remember (nth nb (primes_upto k) 1) as pb eqn:Hpb.
+move pb before pa.
+destruct (le_dec (length (primes_upto k)) na) as [Hka| Hka]. {
+  rewrite Hpa, nth_overflow; [ | easy ].
+  apply Nat.gcd_1_l.
+}
+destruct (le_dec (length (primes_upto k)) nb) as [Hkb| Hkb]. {
+  rewrite Hpb, nth_overflow; [ | easy ].
+  apply Nat.gcd_1_r.
+}
+apply Nat.nle_gt in Hka.
+apply Nat.nle_gt in Hkb.
+apply eq_primes_gcd_1. {
+  apply (primes_upto_are_primes k).
+  now rewrite Hpa; apply nth_In.
+} {
+  apply (primes_upto_are_primes k).
+  now rewrite Hpb; apply nth_In.
+}
+intros H; apply Hnab; clear Hnab.
+subst pa pb.
+apply (proj1 (NoDup_nth (primes_upto k) 1)); [ | easy | easy | easy ].
+apply NoDup_primes_upto.
+Qed.
+
 (* formula for all primes up to a given value *)
 
 Theorem list_of_1_sub_pow_primes_upto_times {F : field} : ∀ r k,
@@ -2021,30 +2052,7 @@ apply list_of_pow_1_sub_pol_times_series; [ | easy | ]. {
   destruct p; [ easy | flia ].
 } {
   intros * Hnab.
-  remember (nth na (primes_upto k) 1) as pa eqn:Hpa.
-  remember (nth nb (primes_upto k) 1) as pb eqn:Hpb.
-  move pb before pa.
-  destruct (le_dec (length (primes_upto k)) na) as [Hka| Hka]. {
-    rewrite Hpa, nth_overflow; [ | easy ].
-    apply Nat.gcd_1_l.
-  }
-  destruct (le_dec (length (primes_upto k)) nb) as [Hkb| Hkb]. {
-    rewrite Hpb, nth_overflow; [ | easy ].
-    apply Nat.gcd_1_r.
-  }
-  apply Nat.nle_gt in Hka.
-  apply Nat.nle_gt in Hkb.
-  apply eq_primes_gcd_1. {
-    apply (primes_upto_are_primes k).
-    now rewrite Hpa; apply nth_In.
-  } {
-    apply (primes_upto_are_primes k).
-    now rewrite Hpb; apply nth_In.
-  }
-  intros H; apply Hnab; clear Hnab.
-  subst pa pb.
-  apply (proj1 (NoDup_nth (primes_upto k) 1)); [ | easy | easy | easy ].
-  apply NoDup_primes_upto.
+  now apply gcd_primes_upto.
 }
 Qed.
 
@@ -2102,7 +2110,28 @@ cbn.
 rewrite f_add_0_l.
 unfold log_prod_term.
 rewrite Nat.div_1_r.
-unfold "*"%LS.
+specialize (gcd_primes_upto n) as Hgcd.
+remember (primes_upto n) as l eqn:Hl; symmetry in Hl.
+replace ((Π (p ∈ l), (1 - pol_pow p))~{1})%F with 1%F. 2: {
+  symmetry.
+  clear Hl.
+  induction l as [| p l]; [ easy | cbn ].
+  rewrite fold_ls_mul_assoc; [ | easy ].
+  cbn - [ ls_of_pol ].
+  rewrite f_add_0_l.
+  unfold log_prod_term.
+  rewrite Nat.div_1_r.
+  rewrite IHl; cycle 1. {
+    intros a Ha i Hi.
+    apply Hrp; [ now right | easy ].
+  } {
+    intros * Hnab.
+...
+
+  rewrite f_mul_1_l; cbn.
+  destruct p; cbn.
+...
+apply f_add_opp_diag_r.
 ...
 Qed.
 
