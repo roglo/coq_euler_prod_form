@@ -2166,6 +2166,41 @@ Qed.
 
 Check @ζ_times_product_on_primes_close_to_1.
 
+Fixpoint prime_decomp_aux cnt n d dpow :=
+  match cnt with
+  | 0 =>
+      match dpow with
+      | 0 => []
+      | _ => [(d, dpow)]
+      end
+  | S c =>
+      match n mod d with
+      | 0 => prime_decomp_aux c (n / d) d (S dpow)
+      | _ =>
+          match dpow with
+          | 0 => prime_decomp_aux c n (S d) 0
+          | _ => (d, dpow) :: prime_decomp_aux c n (S d) 0
+          end
+      end
+  end.
+
+Definition prime_decomp n :=
+  match n with
+  | 0 | 1 => []
+  | _ => prime_decomp_aux n n 2 0
+  end.
+
+Check fold_left.
+
+Definition Nat_power n p := fold_left Nat.mul (List.repeat n p) 1.
+
+Theorem prime_decomp_decomp : ∀ n, 2 ≤ n →
+  fold_left (λ c ddp, let '(d, dpow) := ddp in c * Nat_power d dpow)
+    (prime_decomp n) 1 = n.
+Proof.
+intros * Hn.
+...
+
 (* https://en.wikipedia.org/wiki/Factorial#Number_theory *)
 Theorem glop : ∀ n, 5 < n → is_prime n = false ↔ fact (n - 1) mod n = 0.
 Proof.
