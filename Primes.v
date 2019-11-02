@@ -24,7 +24,7 @@ Theorem prime_test_false_exists_div_iff : ∀ n k,
   2 ≤ k
   → (∀ d, 2 ≤ d < k → n mod d ≠ 0)
   → prime_test (n - k) n k = false
-  ↔ ∃ a b : nat, a < n ∧ b < n ∧ n = a * b.
+  ↔ ∃ a b : nat, 2 ≤ a ∧ 2 ≤ b ∧ n = a * b.
 Proof.
 intros * Hk Hd.
 split.
@@ -66,7 +66,14 @@ split.
        destruct a; [ flia Hnab Han | ].
        destruct a; [ flia Hnab Han Hbn | flia ].
      }
-     flia Han Hcnt.
+     rewrite Hnab in Hcnt.
+     apply Nat.sub_0_le in Hcnt.
+     apply (Nat.lt_le_trans _ (a * b)); [ | easy ].
+     destruct a; [ flia Han | ].
+     destruct b; [ flia Hbn | ].
+     destruct b; [ flia Hbn | ].
+     rewrite Nat.mul_comm; cbn.
+     remember (b * S a); flia.
    }
    specialize (H1 H).
    exfalso; apply H1; rewrite Hnab, Nat.mul_comm.
@@ -86,7 +93,7 @@ Qed.
 
 Theorem not_prime_decomp : ∀ n, 2 ≤ n →
   is_prime n = false
-  → ∃ a b, a < n ∧ b < n ∧ n = a * b.
+  → ∃ a b, 2 ≤ a ∧ 2 ≤ b ∧ n = a * b.
 Proof.
 intros n Hn Hp.
 unfold is_prime in Hp.
@@ -105,9 +112,12 @@ intros n Hn Hp.
 specialize (not_prime_decomp n Hn Hp) as (a & b & Ha & Hb & Hab).
 exists a.
 split; [ | now rewrite Hab; apply Nat.divide_mul_l ].
-split; [ | easy ].
-destruct a; [ flia Hab Hb | ].
-destruct a; [ flia Hab Hb | flia ].
+split; [ easy | ].
+rewrite Hab, Nat.mul_comm.
+destruct a; [ flia Ha | ].
+destruct b; [ flia Hb | ].
+destruct b; [ flia Hb | ].
+cbn; remember (b * S a); flia.
 Qed.
 
 Theorem prime_divisor : ∀ n, 2 ≤ n →
