@@ -2087,6 +2087,27 @@ destruct ((d * c) mod a); [ easy | ].
 now apply IHl.
 Qed.
 
+Theorem times_product_on_primes_close_to_1 {F : field} : ∀ r s n,
+  (∀ a, a ∈ primes_upto n → ∀ i, i ≠ 0 → r~{i} = r~{a*i})
+  → s = (r * Π (p ∈ primes_upto n), (1 - pol_pow p))%LS
+  → s~{1} = r~{1} ∧ ∀ i, 1 < i < n → s~{i} = 0%F.
+Proof.
+intros * Hrp Hs; subst s.
+split. 2: {
+  intros * (H1i, Hin).
+  rewrite list_of_1_sub_pow_primes_upto_times; [ | easy | flia H1i ].
+  now apply series_but_mul_primes_upto.
+}
+cbn.
+rewrite f_add_0_l.
+unfold log_prod_term.
+rewrite Nat.div_1_r.
+unfold "*"%LS.
+...
+Qed.
+
+...
+
 Theorem times_product_on_primes_close_to_1 {F : field} : ∀ r n i,
   1 < i < n
   → (∀ a, a ∈ primes_upto n → ∀ i, i ≠ 0 → r~{i} = r~{a*i})
