@@ -2008,19 +2008,48 @@ Qed.
 
 (* formula for all primes up to a given value *)
 
-Theorem list_of_1_sub_pow_primes_upto_times_ζ {F : field} : ∀ k,
-  (ζ * Π (p ∈ primes_upto k), (1 - pol_pow p) =
-   fold_right series_but_mul_of ζ (primes_upto k))%LS.
+Theorem list_of_1_sub_pow_primes_upto_times {F : field} : ∀ r k,
+  (∀ a, a ∈ primes_upto k → ∀ i, i ≠ 0 → r~{i} = r~{a*i})
+  → (r * Π (p ∈ primes_upto k), (1 - pol_pow p) =
+     fold_right series_but_mul_of r (primes_upto k))%LS.
 Proof.
-intros.
-apply list_of_1_sub_pow_primes_times_ζ.
--intros p Hp.
- now apply (primes_upto_are_primes k).
--apply NoDup_primes_upto.
+intros * Hri.
+apply list_of_pow_1_sub_pol_times_series; [ | easy | ]. {
+  intros p Hpl.
+  apply primes_upto_are_primes in Hpl.
+  destruct p; [ easy | ].
+  destruct p; [ easy | flia ].
+} {
+  intros * Hnab.
+  remember (nth na (primes_upto k) 1) as pa eqn:Hpa.
+  remember (nth nb (primes_upto k) 1) as pb eqn:Hpb.
+  move pb before pa.
+  destruct (le_dec (length (primes_upto k)) na) as [Hka| Hka]. {
+    rewrite Hpa, nth_overflow; [ | easy ].
+    apply Nat.gcd_1_l.
+  }
+  destruct (le_dec (length (primes_upto k)) nb) as [Hkb| Hkb]. {
+    rewrite Hpb, nth_overflow; [ | easy ].
+    apply Nat.gcd_1_r.
+  }
+  apply Nat.nle_gt in Hka.
+  apply Nat.nle_gt in Hkb.
+  apply eq_primes_gcd_1. {
+    apply (primes_upto_are_primes k).
+    now rewrite Hpa; apply nth_In.
+  } {
+    apply (primes_upto_are_primes k).
+    now rewrite Hpb; apply nth_In.
+  }
+  intros H; apply Hnab; clear Hnab.
+  subst pa pb.
+  apply (proj1 (NoDup_nth (primes_upto k) 1)); [ | easy | easy | easy ].
+  apply NoDup_primes_upto.
+}
 Qed.
 
-Theorem series_but_mul_primes_upto {F : field} : ∀ n i, 1 < i < n →
-  (fold_right series_but_mul_of ζ (primes_upto n))~{i} = 0%F.
+Theorem series_but_mul_primes_upto {F : field} : ∀ n i r, 1 < i < n →
+  (fold_right series_but_mul_of r (primes_upto n))~{i} = 0%F.
 Proof.
 intros * (H1i, Hin).
 specialize (prime_divisor i H1i) as H1.
@@ -2053,59 +2082,21 @@ destruct Hdn as [Hdn| Hdn]. {
   subst a; cbn.
   now rewrite Nat.mul_comm, Nat.mod_mul.
 }
-...
-remember (is_prime i) as b eqn:Hb; symmetry in Hb.
-destruct b. {
-  assert (Hii : i ∈ primes_upto n). {
-    (* lemma to do *)
-    apply filter_In.
-    unfold primes_upto.
-    split; [ | easy ].
-    apply in_seq; flia H1i Hin.
-  }
-...
-  remember (primes_upto n) as l eqn:Hl; symmetry in Hl.
-  revert n Hin Hl.
-  induction l as [| p l]; intros; [ easy | cbn ].
-  remember (i mod p) as b1 eqn:Hb1; symmetry in Hb1.
-  destruct b1; [ easy | ].
-  destruct Hii as [Hii| Hii]. {
-    subst p.
-...
-  }
-  specialize (infinitely_many_primes n) as (p1 & Hp1n & Hp1).
-...
-  apply IHl with (n := p1); [ easy | flia Hin Hp1n | ].
-...
-Search is_prime.
-(* i>1 must be divisible by at least one prime number p less than n (PNT)
-   therefore is cancelled by series_but_mul_of p *)
-...
-remember (primes_upto n) as l eqn:Hl; symmetry in Hl.
-induction l as [| p l]; intros. {
-  destruct n; [ flia Hin | ].
-  destruct n; [ flia Hin H1i | easy ].
-}
 cbn.
-remember (i mod p) as b eqn:Hb; symmetry in Hb.
-destruct b; [ easy | ].
-...
+destruct ((d * c) mod a); [ easy | ].
+now apply IHl.
+Qed.
 
-Theorem ζ_times_product_on_primes_close_to_1 {F : field} : ∀ n i, 1 < i < n →
-  (ζ * Π (p ∈ primes_upto n), (1 - pol_pow p))%LS~{i} = 0%F.
+Theorem times_product_on_primes_close_to_1 {F : field} : ∀ r n i,
+  1 < i < n
+  → (∀ a, a ∈ primes_upto n → ∀ i, i ≠ 0 → r~{i} = r~{a*i})
+  → (r * Π (p ∈ primes_upto n), (1 - pol_pow p))%LS~{i} = 0%F.
 Proof.
-intros * (H1i, Hin).
-rewrite list_of_1_sub_pow_primes_upto_times_ζ; [ | flia H1i ].
-...
-remember (primes_upto n) as l eqn:Hl; symmetry in Hl.
-revert n Hin Hl.
-induction l as [| p l]; intros. {
-  destruct n; [ flia Hin | ].
-  destruct n; [ flia Hin H1i | easy ].
-}
-cbn.
-remember (i mod p) as b eqn:Hb; symmetry in Hb.
-destruct b; [ easy | ].
+intros * (H1i, Hin) Hrp.
+rewrite list_of_1_sub_pow_primes_upto_times; [ | easy | flia H1i ].
+now apply series_but_mul_primes_upto.
+Qed.
+
 ...
 
 Fixpoint prime_after_aux cnt n :=
