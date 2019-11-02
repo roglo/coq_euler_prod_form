@@ -2172,6 +2172,28 @@ Proof.
 intros * H5n.
 split. {
   intros Hn.
+  specialize (not_prime_decomp n) as H1.
+  assert (H : 2 ≤ n) by flia H5n.
+  specialize (H1 H Hn) as (a & b & Ha & Hb & Hab); clear H.
+  rewrite Hab, Nat.mod_mul_r; [ | flia Ha | flia Hb ].
+  apply Nat.eq_add_0; split. {
+    apply Nat.mod_divide; [ flia Ha | ].
+    apply (Nat.divide_trans _ (fact a)). 2: {
+      apply Nat_le_divides_fact.
+      destruct b; [ flia Hb | ].
+      destruct b; [ flia Hb | ].
+      destruct a; [ flia Ha | ].
+      rewrite Nat.mul_comm; cbn.
+      remember (b * S a); flia.
+    }
+    apply Nat.mod_divide; [ flia Ha | ].
+    (* lemma to do *)
+    induction a; [ easy | ].
+    rewrite Nat_fact_succ, Nat.mul_comm.
+    now rewrite Nat.mod_mul.
+  }
+  apply Nat.eq_mul_0; right.
+  apply Nat.mod_divides; [ flia Hb | ].
 ...
 
 Fixpoint prime_after_aux cnt n :=
