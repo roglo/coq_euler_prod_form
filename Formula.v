@@ -2097,6 +2097,14 @@ rewrite list_of_1_sub_pow_primes_upto_times; [ | easy | flia H1i ].
 now apply series_but_mul_primes_upto.
 Qed.
 
+Corollary ζ_times_product_on_primes_close_to_1 {F : field} : ∀ n i,
+  1 < i < n
+  → (ζ * Π (p ∈ primes_upto n), (1 - pol_pow p))%LS~{i} = 0%F.
+Proof.
+intros * (H1i, Hin).
+now apply times_product_on_primes_close_to_1.
+Qed.
+
 ...
 
 Fixpoint prime_after_aux cnt n :=
