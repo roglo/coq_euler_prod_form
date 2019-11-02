@@ -1988,7 +1988,9 @@ Qed.
 
 Definition primes_upto n := filter is_prime (seq 1 n).
 
+(*
 Compute (primes_upto 17).
+*)
 
 Theorem primes_upto_are_primes : ∀ k p,
   p ∈ primes_upto k
@@ -2161,6 +2163,8 @@ intros * Hs.
 replace 1%F with ζ~{1} by easy.
 now apply times_product_on_primes_close_to.
 Qed.
+
+Check @ζ_times_product_on_primes_close_to_1.
 
 ...
 
