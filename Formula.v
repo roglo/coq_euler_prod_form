@@ -2213,6 +2213,9 @@ induction l as [| a l]; intros. {
   cbn; destruct n; [ flia Hn | ].
   destruct n; [ easy | exfalso ].
   remember (S n) as sn; cbn - [ "/" "mod" ] in Hl; subst sn.
+Search is_prime.
+Check not_prime_exists_div.
+Check not_prime_decomp.
 ...
   cbn - [ "/" "mod" ] in Hl.
   replace (S (S n)) with (n + 1 * 2) in Hl by flia.
