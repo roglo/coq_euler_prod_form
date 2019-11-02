@@ -2041,6 +2041,18 @@ assert (Hdn : d ∈ primes_upto n). {
   destruct c; [ rewrite Hc, Nat.mul_0_r in H1i; flia H1i | ].
   rewrite Nat.mul_succ_r; flia.
 }
+assert (Hdz : d ≠ 0); [ now intros H; rewrite H in Hd | ].
+apply Nat.mod_divide in Hdi; [ | easy ].
+apply Nat.mod_divides in Hdi; [ | easy ].
+destruct Hdi as (c, Hc).
+subst i.
+remember (primes_upto n) as l.
+clear n Hin Heql.
+induction l as [| a l]; [ easy | ].
+destruct Hdn as [Hdn| Hdn]. {
+  subst a; cbn.
+  now rewrite Nat.mul_comm, Nat.mod_mul.
+}
 ...
 remember (is_prime i) as b eqn:Hb; symmetry in Hb.
 destruct b. {
