@@ -2190,15 +2190,38 @@ Definition prime_decomp n :=
   | _ => prime_decomp_aux n n 2 0
   end.
 
-Check fold_left.
-
 Definition Nat_power n p := fold_left Nat.mul (List.repeat n p) 1.
+
+Theorem prime_decomp_aux_succ_pow_not_nil : ∀ cnt n d dpow,
+  prime_decomp_aux cnt n d (S dpow) ≠ [].
+Proof.
+intros * Hcon.
+revert n d dpow Hcon.
+induction cnt; intros; [ easy | ].
+cbn in Hcon.
+destruct (n mod d); [ eapply IHcnt; apply Hcon | easy ].
+Qed.
 
 Theorem prime_decomp_decomp : ∀ n, 2 ≤ n →
   fold_left (λ c ddp, let '(d, dpow) := ddp in c * Nat_power d dpow)
     (prime_decomp n) 1 = n.
 Proof.
 intros * Hn.
+remember (prime_decomp n) as l eqn:Hl; symmetry in Hl.
+revert n Hn Hl.
+induction l as [| a l]; intros. {
+  cbn; destruct n; [ flia Hn | ].
+  destruct n; [ easy | exfalso ].
+  cbn - [ "/" "mod" ] in Hl.
+  replace (S (S n)) with (n + 1 * 2) in Hl by flia.
+  rewrite Nat.mod_add in Hl; [ | easy ].
+  rewrite Nat.div_add in Hl; [ | easy ].
+  remember (n mod 2) as b eqn:Hb; symmetry in Hb.
+  destruct b. {
+    remember ((n / 2 + 1) mod 2) as b1 eqn:Hb1; symmetry in Hb1.
+    destruct b1; [ | easy ].
+    now apply prime_decomp_aux_succ_pow_not_nil in Hl.
+  }
 ...
 
 (* https://en.wikipedia.org/wiki/Factorial#Number_theory *)
