@@ -2023,6 +2023,8 @@ Theorem series_but_mul_primes_upto {F : field} : ∀ n i, 1 < i < n →
   (fold_right series_but_mul_of ζ (primes_upto n))~{i} = 0%F.
 Proof.
 intros * (H1i, Hin).
+(* search for the first prime number dividing i *)
+...
 remember (is_prime i) as b eqn:Hb; symmetry in Hb.
 destruct b. {
   assert (Hii : i ∈ primes_upto n). {
@@ -2032,6 +2034,7 @@ destruct b. {
     split; [ | easy ].
     apply in_seq; flia H1i Hin.
   }
+...
   remember (primes_upto n) as l eqn:Hl; symmetry in Hl.
   revert n Hin Hl.
   induction l as [| p l]; intros; [ easy | cbn ].
@@ -2039,12 +2042,11 @@ destruct b. {
   destruct b1; [ easy | ].
   destruct Hii as [Hii| Hii]. {
     subst p.
-    admit. (* à voir *)
+...
   }
   specialize (infinitely_many_primes n) as (p1 & Hp1n & Hp1).
 ...
   apply IHl with (n := p1); [ easy | flia Hin Hp1n | ].
-  (* à vérifier *)
 ...
 Search is_prime.
 (* i>1 must be divisible by at least one prime number p less than n (PNT)
