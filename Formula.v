@@ -2095,7 +2095,7 @@ destruct ((d * c) mod a); [ easy | ].
 now apply IHl.
 Qed.
 
-Theorem times_product_on_primes_close_to_1 {F : field} : ∀ r s n,
+Theorem times_product_on_primes_close_to {F : field} : ∀ r s n,
   (∀ a, a ∈ primes_upto n → ∀ i, i ≠ 0 → r~{i} = r~{a*i})
   → s = (r * Π (p ∈ primes_upto n), (1 - pol_pow p))%LS
   → s~{1} = r~{1} ∧ ∀ i, 1 < i < n → s~{i} = 0%F.
@@ -2153,14 +2153,13 @@ replace ((Π (p ∈ l), (1 - pol_pow p))~{1})%F with 1%F. 2: {
 apply f_mul_1_r.
 Qed.
 
-...
-
-Corollary ζ_times_product_on_primes_close_to_1 {F : field} : ∀ n i,
-  1 < i < n
-  → (ζ * Π (p ∈ primes_upto n), (1 - pol_pow p))%LS~{i} = 0%F.
+Corollary ζ_times_product_on_primes_close_to_1 {F : field} : ∀ s n,
+  s = (ζ * Π (p ∈ primes_upto n), (1 - pol_pow p))%LS
+  → s~{1} = 1%F ∧ (∀ i, 1 < i < n → s~{i} = 0%F).
 Proof.
-intros * (H1i, Hin).
-now apply times_product_on_primes_close_to_1.
+intros * Hs.
+replace 1%F with ζ~{1} by easy.
+now apply times_product_on_primes_close_to.
 Qed.
 
 ...
