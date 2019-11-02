@@ -2111,6 +2111,12 @@ rewrite f_add_0_l.
 unfold log_prod_term.
 rewrite Nat.div_1_r.
 specialize (gcd_primes_upto n) as Hgcd.
+assert (Hil : ∀ a, a ∈ primes_upto n → 2 ≤ a). {
+  intros * Ha.
+  apply filter_In in Ha.
+  destruct a; [ easy | ].
+  destruct a; [ easy | flia ].
+}
 remember (primes_upto n) as l eqn:Hl; symmetry in Hl.
 replace ((Π (p ∈ l), (1 - pol_pow p))~{1})%F with 1%F. 2: {
   symmetry.
@@ -2126,26 +2132,28 @@ replace ((Π (p ∈ l), (1 - pol_pow p))~{1})%F with 1%F. 2: {
     apply Hrp; [ now right | easy ].
   } {
     intros * Hnab.
-...
-
-  rewrite f_mul_1_l; cbn.
-  destruct p; cbn.
-...
-apply f_add_opp_diag_r.
-...
+    apply (Hgcd (S na) (S nb) (proj2 (Nat.succ_inj_wd_neg na nb) Hnab)).
+  } {
+    intros a Ha.
+    now apply Hil; right.
+  }
+  rewrite f_mul_1_l.
+  destruct p; cbn. {
+    specialize (Hil 0 (or_introl eq_refl)).
+    flia Hil.
+  }
+  rewrite Nat.sub_0_r.
+  destruct p. {
+    specialize (Hil 1 (or_introl eq_refl)).
+    flia Hil.
+  }
+  cbn; clear.
+  now destruct p; cbn; rewrite f_opp_0, f_add_0_r.
+}
+apply f_mul_1_r.
 Qed.
 
 ...
-
-Theorem times_product_on_primes_close_to_1 {F : field} : ∀ r n i,
-  1 < i < n
-  → (∀ a, a ∈ primes_upto n → ∀ i, i ≠ 0 → r~{i} = r~{a*i})
-  → (r * Π (p ∈ primes_upto n), (1 - pol_pow p))%LS~{i} = 0%F.
-Proof.
-intros * (H1i, Hin) Hrp.
-rewrite list_of_1_sub_pow_primes_upto_times; [ | easy | flia H1i ].
-now apply series_but_mul_primes_upto.
-Qed.
 
 Corollary ζ_times_product_on_primes_close_to_1 {F : field} : ∀ n i,
   1 < i < n
