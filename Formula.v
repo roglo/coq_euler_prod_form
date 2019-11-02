@@ -2212,6 +2212,8 @@ revert n Hn Hl.
 induction l as [| a l]; intros. {
   cbn; destruct n; [ flia Hn | ].
   destruct n; [ easy | exfalso ].
+  remember (S n) as sn; cbn - [ "/" "mod" ] in Hl; subst sn.
+...
   cbn - [ "/" "mod" ] in Hl.
   replace (S (S n)) with (n + 1 * 2) in Hl by flia.
   rewrite Nat.mod_add in Hl; [ | easy ].
