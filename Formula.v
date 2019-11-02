@@ -2170,6 +2170,7 @@ Check @ζ_times_product_on_primes_close_to_1.
 Theorem glop : ∀ n, 5 < n → is_prime n = false ↔ fact (n - 1) mod n = 0.
 Proof.
 intros * H5n.
+...
 split. {
   intros Hn.
   specialize (not_prime_decomp n) as H1.
