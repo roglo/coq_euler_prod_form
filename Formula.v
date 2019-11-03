@@ -2212,21 +2212,49 @@ revert n Hn Hl.
 induction l as [| a l]; intros. {
   cbn; destruct n; [ flia Hn | ].
   destruct n; [ easy | exfalso ].
+  clear Hn.
   remember (S n) as sn; cbn - [ "/" "mod" ] in Hl; subst sn.
-Search is_prime.
-Check not_prime_exists_div.
-Check not_prime_decomp.
-...
-  cbn - [ "/" "mod" ] in Hl.
-  replace (S (S n)) with (n + 1 * 2) in Hl by flia.
-  rewrite Nat.mod_add in Hl; [ | easy ].
-  rewrite Nat.div_add in Hl; [ | easy ].
-  remember (n mod 2) as b eqn:Hb; symmetry in Hb.
+  remember (S (S n) mod 2) as b eqn:Hb; symmetry in Hb.
   destruct b. {
-    remember ((n / 2 + 1) mod 2) as b1 eqn:Hb1; symmetry in Hb1.
-    destruct b1; [ | easy ].
     now apply prime_decomp_aux_succ_pow_not_nil in Hl.
   }
+  cbn - [ "/" "mod" ] in Hl.
+  remember (S (S n) mod 3) as b3 eqn:Hb3; symmetry in Hb3; move b3 before b.
+  destruct b3. {
+    now apply prime_decomp_aux_succ_pow_not_nil in Hl.
+  }
+  destruct n; [ easy | ].
+  cbn - [ "/" "mod" ] in Hl.
+  remember (S (S (S n)) mod 4) as b4 eqn:Hb4; symmetry in Hb4; move b4 before b3.
+  destruct b4. {
+    now apply prime_decomp_aux_succ_pow_not_nil in Hl.
+  }
+  destruct n; [ easy | ].
+  cbn - [ "/" "mod" ] in Hl.
+  remember (S (S (S (S n))) mod 5) as b5 eqn:Hb5; symmetry in Hb5; move b5 before b4.
+  destruct b5. {
+    now apply prime_decomp_aux_succ_pow_not_nil in Hl.
+  }
+Theorem glop : ∀ cnt n d, 2 ≤ n → d + cnt = n + 2 → prime_decomp_aux cnt n d 0 ≠ [].
+Proof.
+intros * Hn Hdc.
+revert n d Hdc Hn.
+induction cnt; intros.
+cbn.
+...
+  Hl : prime_decomp_aux (S n) (S (S n)) 3 0 = []
+  Hl : prime_decomp_aux n (S (S n)) 4 0 = []
+prime_decomp_aux cnt n d 0
+d = n - cnt + 2
+d + cnt = n + 2
+
+  cbn - [ "/" "mod" ] in Hl.
+...
+cbn.
+Print prime_decomp_aux.
+n = cnt + 2
+d = n - cnt + 2
+Print prime_decomp_aux.
 ...
 
 (* https://en.wikipedia.org/wiki/Factorial#Number_theory *)
