@@ -2372,53 +2372,46 @@ destruct (S (S n) mod 2) as [Hb| Hb]. {
 apply Sorted_prime_decomp_aux.
 Qed.
 
-...
+Theorem in_prime_decomp_aux_le : ∀ cnt n d d',
+  d' ∈ prime_decomp_aux cnt n d
+  → d ≤ d'.
+Proof.
+intros * Hd'.
+revert n d d' Hd'.
+induction cnt; intros; [ easy | ].
+cbn in Hd'.
+destruct (n mod d) as [Hb| Hb]. {
+  destruct Hd' as [Hd'| Hd']; [ now subst d' | ].
+  now apply (IHcnt (n / d)).
+}
+transitivity (S d); [ apply Nat.le_succ_diag_r | now apply (IHcnt n) ].
+Qed.
 
-Theorem pouet : ∀ n d,
+Theorem in_prime_decomp_ge_2 : ∀ n d,
   d ∈ prime_decomp n
   → 2 ≤ d.
 Proof.
 intros * Hd.
-assert (Hn : 2 ≤ n). {
-  destruct n; [ easy | ].
-  destruct n; [ easy | ].
-  auto with arith.
-}
-unfold prime_decomp in Hd.
-replace n with (S (S (n - 2))) in Hd by flia Hn.
-replace (S (S (n - 2))) with n in Hd by flia Hn.
 destruct n; [ easy | ].
-cbn - [ "/" "mod" ] in Hd.
-remember (S n mod 2) as b2 eqn:Hb2; symmetry in Hb2.
-destruct b2. {
-  destruct Hd as [Hd| Hd]; [ now rewrite Hd | ].
-  apply Nat.mod_divides in Hb2; [ | easy ].
-  destruct Hb2 as (b2, Hb2).
-  rewrite Hb2, Nat.mul_comm, Nat.div_mul in Hd; [ | easy ].
-  destruct n; [ easy | clear Hn ].
-  cbn - [ "/" "mod" ] in Hd.
-  remember (b2 mod 2) as b3 eqn:Hb3; symmetry in Hb3.
-  destruct b3. {
-    destruct Hd as [Hd| Hd]; [ now rewrite Hd | ].
-    apply Nat.mod_divides in Hb3; [ | easy ].
-    destruct Hb3 as (b3, Hb3).
-    rewrite Hb3, Nat.mul_comm, Nat.div_mul in Hd; [ | easy ].
-    destruct n; [ easy | ].
-    cbn - [ "/" "mod" ] in Hd.
-...
+destruct n; [ easy | ].
+unfold prime_decomp in Hd.
+eapply in_prime_decomp_aux_le.
+apply Hd.
+Qed.
 
-Theorem glop : ∀ n d, d ∈ prime_decomp n → is_prime d = true.
+Theorem in_prime_decomp_prime : ∀ n d,
+  d ∈ prime_decomp n → is_prime d = true.
 Proof.
 intros * Hp.
-assert (Hn : 2 ≤ n). {
+assert (H2n : 2 ≤ n). {
   destruct n; [ easy | ].
   destruct n; [ easy | ].
   auto with arith.
 }
+specialize (in_prime_decomp_ge_2 n d Hp) as H2d.
 apply Bool.not_false_is_true.
 intros Hd.
-Search (is_prime _ = false).
-specialize (not_prime_exists_div d). as (a & Ha & Han).
+specialize (not_prime_exists_div d H2d Hd) as (a & Ha & Han).
 ...
 unfold prime_decomp in Hp.
 replace n with (S (S (n - 2))) in Hp by flia Hn.
