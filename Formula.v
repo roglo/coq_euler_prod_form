@@ -2265,10 +2265,7 @@ induction l as [| a l]; intros. {
   replace (S (S n) - 2) with n in Hb by flia.
   destruct n; [ easy | ].
   remember (S (S n)) as sn.
-clear Hb.
-(*
   cbn - [ "/" "mod" ] in Hb.
-*)
   cbn - [ "/" "mod" ] in Hl.
   remember (S sn mod 2) as b1 eqn:Hb1; symmetry in Hb1.
   destruct b1; [ now apply prime_decomp_aux_succ_pow_not_nil in Hl | ].
@@ -2276,10 +2273,8 @@ clear Hb.
   Hl : prime_decomp_aux sn (S sn) 3 0 = []
 *)
   subst sn.
-  remember (S n) as sn.
-(*
   cbn - [ "/" "mod" ] in Hb.
-*)
+  remember (S n) as sn.
   cbn - [ "/" "mod" ] in Hl.
   remember (S (S sn) mod 3) as b2 eqn:Hb2; symmetry in Hb2.
   destruct b2; [ now apply prime_decomp_aux_succ_pow_not_nil in Hl | ].
@@ -2287,6 +2282,7 @@ clear Hb.
   Hl : prime_decomp_aux sn (S (S sn)) 4 0 = []
 *)
   subst sn.
+  cbn - [ "/" "mod" ] in Hb.
   cbn - [ "/" "mod" ] in Hl.
   remember (S (S (S n)) mod 4) as b3 eqn:Hb3; symmetry in Hb3.
   move b3 before b2.
