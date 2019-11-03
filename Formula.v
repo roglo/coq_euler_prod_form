@@ -2210,6 +2210,29 @@ Proof.
 intros * Hn Hpn.
 destruct n; [ easy | ].
 destruct n; [ easy | clear Hn ].
+destruct n; [ easy | ].
+cbn - [ "/" "mod" ] in Hpn.
+remember (S (S n)) as ssn.
+cbn - [ "/" "mod" ].
+subst ssn.
+remember (S (S (S n)) mod 2) as b eqn:Hb; symmetry in Hb.
+destruct b; [ easy | ].
+destruct n; [ easy | ].
+cbn - [ "/" "mod" ] in Hpn.
+remember (S (S n)) as ssn.
+cbn - [ "/" "mod" ].
+subst ssn.
+remember (S (S (S (S n))) mod 3) as b3 eqn:Hb3; symmetry in Hb3.
+destruct b3; [ easy | ].
+destruct n; [ easy | ].
+cbn - [ "/" "mod" ] in Hpn.
+remember (S (S n)) as ssn.
+cbn - [ "/" "mod" ].
+subst ssn.
+...
+intros * Hn Hpn.
+destruct n; [ easy | ].
+destruct n; [ easy | clear Hn ].
 cbn - [ "/" "mod" ].
 remember (S (S n) mod 2) as b eqn:Hb; symmetry in Hb.
 destruct b. {
