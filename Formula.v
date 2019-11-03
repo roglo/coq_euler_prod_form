@@ -2276,6 +2276,33 @@ destruct b. {
 ...
 *)
 
+Theorem tagada : ∀ cnt n d p,
+  2 ≤ d
+  → n ≤ cnt
+  → p ∈ prime_decomp_aux cnt n d
+  → 2 ≤ p.
+Proof.
+intros * Hd Hcnt Hp.
+revert n d p Hd Hcnt Hp.
+induction cnt; intros; [ easy | ].
+cbn in Hp.
+...
+
+Theorem pouet : ∀ n d,
+  d ∈ prime_decomp n
+  → 2 ≤ d.
+Proof.
+intros * Hd.
+assert (Hn : 2 ≤ n). {
+  destruct n; [ easy | ].
+  destruct n; [ easy | ].
+  auto with arith.
+}
+unfold prime_decomp in Hd.
+replace n with (S (S (n - 2))) in Hd by flia Hn.
+replace (S (S (n - 2))) with n in Hd by flia Hn.
+...
+
 Theorem glop : ∀ n d, d ∈ prime_decomp n → is_prime d = true.
 Proof.
 intros * Hp.
@@ -2284,9 +2311,17 @@ assert (Hn : 2 ≤ n). {
   destruct n; [ easy | ].
   auto with arith.
 }
+...
 unfold prime_decomp in Hp.
 replace n with (S (S (n - 2))) in Hp by flia Hn.
 replace (S (S (n - 2))) with n in Hp by flia Hn.
+unfold is_prime.
+...
+
+replace n with (S (S (n - 2))) in Hp by flia Hn.
+replace (S (S (n - 2))) with n in Hp by flia Hn.
+
+Print prime_decomp_aux.
 ...
 
 Theorem prime_divisor_in_decomp : ∀ d n,
