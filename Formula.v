@@ -2409,9 +2409,17 @@ assert (H2n : 2 ≤ n). {
   auto with arith.
 }
 specialize (in_prime_decomp_ge_2 n d Hp) as H2d.
-apply Bool.not_false_is_true.
-intros Hd.
+specialize (prime_divisor d H2d) as (d' & Hd' & k & Hk).
+destruct k; [ subst d; flia H2d | ].
+destruct k; [ now rewrite Nat.mul_1_l in Hk; subst d' | exfalso ].
+remember (S (S k)) as k' eqn:Hk'.
+assert (H2k : 2 ≤ k') by flia Hk'.
+clear k Hk'; rename k' into k.
+move k before d; move H2k before H2d; move d' before d.
+move Hp before Hd'.
+...
 specialize (not_prime_exists_div d H2d Hd) as (a & Ha & Han).
+Search (is_prime _ = true).
 ...
 unfold prime_decomp in Hp.
 replace n with (S (S (n - 2))) in Hp by flia Hn.
