@@ -2292,6 +2292,7 @@ destruct b. {
   apply Nat.mod_divides in Hb; [ | flia Hd ].
   destruct Hb as (c, Hc).
   rewrite Hc, Nat.mul_comm, Nat.div_mul in Hp; [ | flia Hd ].
+Abort. (*
 ...
   destruct (lt_dec cnt c) as [Hcc| Hcc]. {
     subst n.
@@ -2331,6 +2332,19 @@ destruct b. {
   cbn.
   destruct d.
 ...
+*)
+
+Theorem tagada : ∀ n, Sorted le (prime_decomp n).
+Proof.
+intros.
+induction n; [ constructor | ].
+cbn - [ "/" "mod" ].
+destruct n; [ easy | ].
+remember (S (S n) mod 2) as b2 eqn:Hb2; symmetry in Hb2.
+destruct b2. {
+  constructor.
+  unfold prime_decomp in IHn.
+...
 
 Theorem pouet : ∀ n d,
   d ∈ prime_decomp n
@@ -2345,6 +2359,24 @@ assert (Hn : 2 ≤ n). {
 unfold prime_decomp in Hd.
 replace n with (S (S (n - 2))) in Hd by flia Hn.
 replace (S (S (n - 2))) with n in Hd by flia Hn.
+destruct n; [ easy | ].
+cbn - [ "/" "mod" ] in Hd.
+remember (S n mod 2) as b2 eqn:Hb2; symmetry in Hb2.
+destruct b2. {
+  destruct Hd as [Hd| Hd]; [ now rewrite Hd | ].
+  apply Nat.mod_divides in Hb2; [ | easy ].
+  destruct Hb2 as (b2, Hb2).
+  rewrite Hb2, Nat.mul_comm, Nat.div_mul in Hd; [ | easy ].
+  destruct n; [ easy | clear Hn ].
+  cbn - [ "/" "mod" ] in Hd.
+  remember (b2 mod 2) as b3 eqn:Hb3; symmetry in Hb3.
+  destruct b3. {
+    destruct Hd as [Hd| Hd]; [ now rewrite Hd | ].
+    apply Nat.mod_divides in Hb3; [ | easy ].
+    destruct Hb3 as (b3, Hb3).
+    rewrite Hb3, Nat.mul_comm, Nat.div_mul in Hd; [ | easy ].
+    destruct n; [ easy | ].
+    cbn - [ "/" "mod" ] in Hd.
 ...
 
 Theorem glop : ∀ n d, d ∈ prime_decomp n → is_prime d = true.
