@@ -2334,7 +2334,19 @@ Abort. (*
 ...
 *)
 
-Theorem tagada : ∀ cnt n d, Sorted le (prime_decomp_aux cnt n d).
+Theorem prime_decomp_aux_le : ∀ cnt n d d',
+  d ≤ d' → HdRel le d (prime_decomp_aux cnt n d').
+Proof.
+intros * Hdd.
+revert n d d' Hdd.
+induction cnt; intros; [ constructor | cbn ].
+destruct (n mod d') as [Hnd| Hnd]; [ now constructor | ].
+apply IHcnt, (le_trans _ d'); [ easy | ].
+apply Nat.le_succ_diag_r.
+Qed.
+
+Theorem Sorted_prime_decomp_aux : ∀ cnt n d,
+  Sorted le (prime_decomp_aux cnt n d).
 Proof.
 intros.
 revert n d.
@@ -2342,21 +2354,24 @@ induction cnt; intros; [ constructor | cbn ].
 remember (n mod d) as b eqn:Hb; symmetry in Hb.
 destruct b as [Hnd| Hnd]. {
   constructor; [ apply IHcnt | ].
-  remember (prime_decomp_aux cnt (n / d) d) as l eqn:Hl; symmetry in Hl.
-  destruct l as [| a l]; [ constructor | ].
-  constructor.
-...
+  now apply prime_decomp_aux_le.
+}
+apply IHcnt.
+Qed.
 
-Theorem tagada : ∀ n, Sorted le (prime_decomp n).
+Theorem Sorted_prime_decomp : ∀ n, Sorted le (prime_decomp n).
 Proof.
 intros.
-induction n; [ constructor | ].
+destruct n; [ constructor | ].
 cbn - [ "/" "mod" ].
-destruct n; [ easy | ].
-remember (S (S n) mod 2) as b2 eqn:Hb2; symmetry in Hb2.
-destruct b2. {
-  constructor.
-  unfold prime_decomp in IHn.
+destruct n; [ constructor | ].
+destruct (S (S n) mod 2) as [Hb| Hb]. {
+  constructor; [ apply Sorted_prime_decomp_aux | ].
+  now apply prime_decomp_aux_le.
+}
+apply Sorted_prime_decomp_aux.
+Qed.
+
 ...
 
 Theorem pouet : ∀ n d,
