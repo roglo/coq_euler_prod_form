@@ -2256,53 +2256,6 @@ induction l as [| a l]; intros. {
   remember (is_prime n) as b eqn:Hb; symmetry in Hb.
   destruct b; [ now rewrite prime_decomp_of_prime in Hl | ].
 ...
-  cbn; destruct n; [ flia Hn | ].
-  destruct n; [ easy | exfalso ].
-  clear Hn.
-  unfold prime_decomp in Hl.
-  remember (S n) as sn; cbn - [ "/" "mod" ] in Hl; subst sn.
-  remember (S (S n) mod 2) as b eqn:Hb; symmetry in Hb.
-  destruct b. {
-    now apply prime_decomp_aux_succ_pow_not_nil in Hl.
-  }
-  cbn - [ "/" "mod" ] in Hl.
-  remember (S (S n) mod 3) as b3 eqn:Hb3; symmetry in Hb3; move b3 before b.
-  destruct b3. {
-    now apply prime_decomp_aux_succ_pow_not_nil in Hl.
-  }
-  destruct n; [ easy | ].
-  cbn - [ "/" "mod" ] in Hl.
-  remember (S (S (S n)) mod 4) as b4 eqn:Hb4; symmetry in Hb4; move b4 before b3.
-  destruct b4. {
-    now apply prime_decomp_aux_succ_pow_not_nil in Hl.
-  }
-  destruct n; [ easy | ].
-  cbn - [ "/" "mod" ] in Hl.
-  remember (S (S (S (S n))) mod 5) as b5 eqn:Hb5; symmetry in Hb5; move b5 before b4.
-  destruct b5. {
-    now apply prime_decomp_aux_succ_pow_not_nil in Hl.
-  }
-Theorem glop : ∀ cnt n d, 2 ≤ n → d + cnt = n + 2 → prime_decomp_aux cnt n d 0 ≠ [].
-Proof.
-intros * Hn Hdc.
-revert n d Hdc Hn.
-induction cnt; intros.
-cbn.
-...
-  Hl : prime_decomp_aux (S n) (S (S n)) 3 0 = []
-  Hl : prime_decomp_aux n (S (S n)) 4 0 = []
-prime_decomp_aux cnt n d 0
-d = n - cnt + 2
-d + cnt = n + 2
-
-  cbn - [ "/" "mod" ] in Hl.
-...
-cbn.
-Print prime_decomp_aux.
-n = cnt + 2
-d = n - cnt + 2
-Print prime_decomp_aux.
-...
 
 (* https://en.wikipedia.org/wiki/Factorial#Number_theory *)
 Theorem glop : ∀ n, 5 < n → is_prime n = false ↔ fact (n - 1) mod n = 0.
