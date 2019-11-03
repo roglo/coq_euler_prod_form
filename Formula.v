@@ -2203,28 +2203,24 @@ destruct (n mod d); [ eapply IHcnt; apply Hcon | easy ].
 Qed.
 
 Theorem prime_decomp_aux_of_prime_test : ∀ n k,
-  prime_test (n + 1) (n + k + 4) (k + 3) = true
-  → prime_decomp_aux (n + 3) (n + k + 4) (k + 3) 0 = [(n + k + 4, 1)].
+  prime_test n (n + k + 2) (k + 2) = true
+  → prime_decomp_aux (n + 2) (n + k + 2) (k + 2) 0 = [(n + k + 2, 1)].
 Proof.
 intros * Hpn.
 revert k Hpn.
 induction n; intros. {
-  cbn in Hpn.
   cbn - [ "/" "mod" ].
-  remember ((k + 4) mod (k + 3)) as b eqn:Hb; symmetry in Hb.
-  destruct b; [ easy | ].
-  replace (S (k + 3)) with (k + 4) by flia.
   rewrite Nat.mod_same; [ | flia ].
   rewrite Nat.div_same; [ | flia ].
   rewrite Nat.mod_1_l; [ easy | flia ].
 }
 cbn - [ "/" "mod" ].
 cbn - [ "/" "mod" ] in Hpn.
-remember (S (n + k + 4) mod (k + 3)) as b eqn:Hb; symmetry in Hb.
+remember (S (n + k + 2) mod (k + 2)) as b eqn:Hb; symmetry in Hb.
 destruct b; [ easy | ].
-replace (S (n + k + 4)) with (n + (k + 1) + 4) in Hpn |-* by flia.
-replace (S (k + 3)) with (k + 1 + 3) by flia.
-replace (k + 3 + 1) with (k + 1 + 3) in Hpn by flia.
+replace (S (n + k + 2)) with (n + (k + 1) + 2) in Hpn |-* by flia.
+replace (S (k + 2)) with (k + 1 + 2) by flia.
+replace (k + 2 + 1) with (k + 1 + 2) in Hpn by flia.
 now apply IHn.
 Qed.
 
@@ -2236,20 +2232,13 @@ Proof.
 intros * Hn Hpn.
 destruct n; [ easy | ].
 destruct n; [ easy | clear Hn ].
-destruct n; [ easy | ].
-cbn - [ "/" "mod" ] in Hpn.
-remember (S (S n)) as ssn.
-cbn - [ "/" "mod" ].
-subst ssn.
-remember (S (S (S n)) mod 2) as b eqn:Hb; symmetry in Hb.
-destruct b; [ easy | ].
-destruct n; [ easy | ].
-replace 3 with (0 + 3) in Hpn |-* by flia.
-replace (S (S (S (S n)))) with (n + 0 + 4) in Hpn by flia.
-replace (S (S (S (S n)))) with (n + 0 + 4) by flia.
-replace (S (S (S n))) with (n + 3) by flia.
-replace (S n) with (n + 1) in Hpn by flia.
-now apply prime_decomp_aux_of_prime_test.
+unfold is_prime in Hpn.
+unfold prime_decomp.
+replace 2 with (0 + 2) in Hpn by flia.
+replace (S (S n)) with (n + 0 + 2) in Hpn by flia.
+apply prime_decomp_aux_of_prime_test in Hpn.
+rewrite Nat.add_0_r, Nat.add_0_l in Hpn.
+now replace (n + 2) with (S (S n)) in Hpn by flia.
 Qed.
 
 ...
