@@ -2334,6 +2334,19 @@ Abort. (*
 ...
 *)
 
+Theorem tagada : ∀ cnt n d, Sorted le (prime_decomp_aux cnt n d).
+Proof.
+intros.
+revert n d.
+induction cnt; intros; [ constructor | cbn ].
+remember (n mod d) as b eqn:Hb; symmetry in Hb.
+destruct b as [Hnd| Hnd]. {
+  constructor; [ apply IHcnt | ].
+  remember (prime_decomp_aux cnt (n / d) d) as l eqn:Hl; symmetry in Hl.
+  destruct l as [| a l]; [ constructor | ].
+  constructor.
+...
+
 Theorem tagada : ∀ n, Sorted le (prime_decomp n).
 Proof.
 intros.
