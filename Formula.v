@@ -2236,6 +2236,44 @@ replace 2 with (0 + 2) in Hpn at 2 by flia.
 now apply prime_decomp_aux_of_prime_test in Hpn; [ | easy ].
 Qed.
 
+(*
+Theorem prime_in_prime_decomp_aux : ∀ cnt d k,
+  k ≠ 0
+  → k * d ≤ cnt
+  → is_prime d = true
+  → d ∈ prime_decomp_aux cnt (k * d) 2.
+Proof.
+intros * Hk Hcnt Hd.
+revert k d Hk Hcnt Hd.
+induction cnt; intros. {
+  apply Nat.le_0_r in Hcnt.
+  apply Nat.mul_eq_0_r in Hcnt; [ | easy ].
+  now subst d.
+}
+cbn - [ "/" "mod" ].
+remember ((k * d) mod 2) as b eqn:Hb; symmetry in Hb.
+destruct b. {
+  apply Nat.mod_divides in Hb; [ | easy ].
+  destruct Hb as (c, Hc).
+  rewrite Hc, Nat.mul_comm, Nat.div_mul; [ | easy ].
+...
+*)
+
+Theorem prime_divisor_in_decomp : ∀ d n,
+  2 ≤ n → is_prime d = true → Nat.divide d n → d ∈ prime_decomp n.
+Proof.
+intros * Hn Hd Hdn.
+...
+destruct Hdn as (k, Hk).
+Print prime_decomp.
+unfold prime_decomp.
+replace n with (S (S (n - 2))) by flia Hn.
+replace (S (S (n - 2))) with n by flia Hn.
+...
+rewrite Hk.
+now apply prime_in_prime_decomp_aux.
+...
+
 Theorem prime_decomp_decomp : ∀ n, 2 ≤ n →
   fold_left Nat.mul (prime_decomp n) 1 = n.
 Proof.
@@ -2246,7 +2284,12 @@ induction l as [| a l]; intros. {
   exfalso.
   remember (is_prime n) as b eqn:Hb; symmetry in Hb.
   destruct b; [ now rewrite prime_decomp_of_prime in Hl | ].
-(**)
+  specialize (prime_divisor n Hn) as (d & Hd & Hdn).
+...
+apply prime_divisor_in_decomp in Hdn; [ | easy | easy ].
+now rewrite Hl in Hdn.
+}
+..
   unfold is_prime in Hb.
   unfold prime_decomp in Hl.
   replace n with (S (S (n - 2))) in Hb at 1 by flia Hn.
