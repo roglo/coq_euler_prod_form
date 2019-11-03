@@ -2202,6 +2202,26 @@ cbn in Hcon.
 destruct (n mod d); [ eapply IHcnt; apply Hcon | easy ].
 Qed.
 
+Theorem prime_decomp_of_prime : ∀ n,
+  2 ≤ n
+  → is_prime n = true
+  → prime_decomp n = [(n, 1)].
+Proof.
+intros * Hn Hpn.
+destruct n; [ easy | ].
+destruct n; [ easy | clear Hn ].
+cbn - [ "/" "mod" ].
+remember (S (S n) mod 2) as b eqn:Hb; symmetry in Hb.
+destruct b. {
+  destruct n; [ easy | ].
+  apply Nat.mod_divides in Hb; [ | easy ].
+  destruct Hb as (c, Hc).
+  rewrite Hc in Hpn.
+  destruct c; [ now rewrite Nat.mul_0_r in Hc | ].
+  destruct c; [ easy | ].
+  clear Hc; exfalso.
+...
+
 Theorem prime_decomp_decomp : ∀ n, 2 ≤ n →
   fold_left (λ c ddp, let '(d, dpow) := ddp in c * Nat_power d dpow)
     (prime_decomp n) 1 = n.
@@ -2210,6 +2230,11 @@ intros * Hn.
 remember (prime_decomp n) as l eqn:Hl; symmetry in Hl.
 revert n Hn Hl.
 induction l as [| a l]; intros. {
+  exfalso.
+  remember (is_prime n) as b eqn:Hb; symmetry in Hb.
+  destruct b. {
+
+Search (is_prime _ = true).
 ...
   cbn; destruct n; [ flia Hn | ].
   destruct n; [ easy | exfalso ].
