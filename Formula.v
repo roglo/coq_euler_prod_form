@@ -2259,6 +2259,36 @@ destruct b. {
 ...
 *)
 
+(*
+Theorem glip : ∀ cnt n d p,
+  2 ≤ n ≤ cnt
+  → p ∈ prime_decomp_aux cnt n d
+  → is_prime p = true.
+Proof.
+intros * (Hn, Hcnt) Hp.
+revert n p d Hn Hcnt Hp.
+induction cnt; intros; [ easy | ].
+cbn - [ "/" "mod" ] in Hp.
+remember (n mod d) as b eqn:Hb; symmetry in Hb.
+destruct b. {
+  destruct Hp as [Hp| Hp]. {
+    subst d.
+...
+*)
+
+Theorem glop : ∀ n d, d ∈ prime_decomp n → is_prime d = true.
+Proof.
+intros * Hp.
+assert (Hn : 2 ≤ n). {
+  destruct n; [ easy | ].
+  destruct n; [ easy | ].
+  auto with arith.
+}
+unfold prime_decomp in Hp.
+replace n with (S (S (n - 2))) in Hp by flia Hn.
+replace (S (S (n - 2))) with n in Hp by flia Hn.
+...
+
 Theorem prime_divisor_in_decomp : ∀ d n,
   2 ≤ n → is_prime d = true → Nat.divide d n → d ∈ prime_decomp n.
 Proof.
