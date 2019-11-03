@@ -2166,32 +2166,23 @@ Qed.
 
 Check @ζ_times_product_on_primes_close_to_1.
 
-Fixpoint prime_decomp_aux cnt n d dpow :=
+Fixpoint prime_decomp_aux cnt n d :=
   match cnt with
-  | 0 =>
-      match dpow with
-      | 0 => []
-      | _ => [(d, dpow)]
-      end
+  | 0 => []
   | S c =>
       match n mod d with
-      | 0 => prime_decomp_aux c (n / d) d (S dpow)
-      | _ =>
-          match dpow with
-          | 0 => prime_decomp_aux c n (S d) 0
-          | _ => (d, dpow) :: prime_decomp_aux c n (S d) 0
-          end
+      | 0 => d :: prime_decomp_aux c (n / d) d
+      | _ => prime_decomp_aux c n (S d)
       end
   end.
 
 Definition prime_decomp n :=
   match n with
   | 0 | 1 => []
-  | _ => prime_decomp_aux n n 2 0
+  | _ => prime_decomp_aux n n 2
   end.
 
-Definition Nat_power n p := fold_left Nat.mul (List.repeat n p) 1.
-
+(*
 Theorem prime_decomp_aux_succ_pow_not_nil : ∀ cnt n d dpow,
   prime_decomp_aux cnt n d (S dpow) ≠ [].
 Proof.
@@ -2201,11 +2192,12 @@ induction cnt; intros; [ easy | ].
 cbn in Hcon.
 destruct (n mod d); [ eapply IHcnt; apply Hcon | easy ].
 Qed.
+*)
 
 Theorem prime_decomp_aux_of_prime_test : ∀ n k,
   2 ≤ n
   → prime_test (n - 2) (k + n) (k + 2) = true
-  → prime_decomp_aux n (k + n) (k + 2) 0 = [(k + n, 1)].
+  → prime_decomp_aux n (k + n) (k + 2) = [k + n].
 Proof.
 intros * Hn Hpn.
 destruct n; [ easy | ].
@@ -2232,7 +2224,7 @@ Qed.
 Theorem prime_decomp_of_prime : ∀ n,
   2 ≤ n
   → is_prime n = true
-  → prime_decomp n = [(n, 1)].
+  → prime_decomp n = [n].
 Proof.
 intros * Hn Hpn.
 unfold is_prime in Hpn.
@@ -2245,8 +2237,7 @@ now apply prime_decomp_aux_of_prime_test in Hpn; [ | easy ].
 Qed.
 
 Theorem prime_decomp_decomp : ∀ n, 2 ≤ n →
-  fold_left (λ c ddp, let '(d, dpow) := ddp in c * Nat_power d dpow)
-    (prime_decomp n) 1 = n.
+  fold_left Nat.mul (prime_decomp n) 1 = n.
 Proof.
 intros * Hn.
 remember (prime_decomp n) as l eqn:Hl; symmetry in Hl.
@@ -2260,6 +2251,7 @@ induction l as [| a l]; intros. {
   unfold prime_decomp in Hl.
   replace n with (S (S (n - 2))) in Hb at 1 by flia Hn.
   replace n with (S (S (n - 2))) in Hl at 1 by flia Hn.
+...
   destruct n; [ easy | ].
   destruct n; [ easy | clear Hn ].
   replace (S (S n) - 2) with n in Hb by flia.
@@ -2302,14 +2294,15 @@ Theorem glop : ∀ cnt n d, prime_decomp_aux (cnt + 3) (n + 6) (d + 5) 0 ≠ [].
 Proof.
 intros.
 ...
+*)
 
 (* https://en.wikipedia.org/wiki/Factorial#Number_theory *)
 Theorem glop : ∀ n, 5 < n → is_prime n = false ↔ fact (n - 1) mod n = 0.
 Proof.
 intros * H5n.
-...
 split. {
   intros Hn.
+...
   specialize (not_prime_decomp n) as H1.
   assert (H : 2 ≤ n) by flia H5n.
   specialize (H1 H Hn) as (a & b & Ha & Hb & Hab); clear H.
