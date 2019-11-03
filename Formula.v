@@ -2203,8 +2203,8 @@ destruct (n mod d); [ eapply IHcnt; apply Hcon | easy ].
 Qed.
 
 Theorem prime_decomp_aux_of_prime_test : ∀ n k,
-  prime_test n (n + k + 2) (k + 2) = true
-  → prime_decomp_aux (n + 2) (n + k + 2) (k + 2) 0 = [(n + k + 2, 1)].
+  prime_test n (k + S (S n)) (k + 2) = true
+  → prime_decomp_aux (S (S n)) (k + S (S n)) (k + 2) 0 = [(k + S (S n), 1)].
 Proof.
 intros * Hpn.
 revert k Hpn.
@@ -2214,13 +2214,14 @@ induction n; intros. {
   rewrite Nat.div_same; [ | flia ].
   rewrite Nat.mod_1_l; [ easy | flia ].
 }
+remember (S (S n)) as sn.
 cbn - [ "/" "mod" ].
 cbn - [ "/" "mod" ] in Hpn.
-remember (S (n + k + 2) mod (k + 2)) as b eqn:Hb; symmetry in Hb.
+remember ((k + S sn) mod (k + 2)) as b eqn:Hb; symmetry in Hb.
 destruct b; [ easy | ].
-replace (S (n + k + 2)) with (n + (k + 1) + 2) in Hpn |-* by flia.
-replace (S (k + 2)) with (k + 1 + 2) by flia.
-replace (k + 2 + 1) with (k + 1 + 2) in Hpn by flia.
+replace (k + S sn) with (S k + sn) in Hpn |-* by flia.
+replace (S (k + 2)) with (S k + 2) by flia.
+replace (k + 2 + 1) with (S k + 2) in Hpn by flia.
 now apply IHn.
 Qed.
 
@@ -2230,15 +2231,13 @@ Theorem prime_decomp_of_prime : ∀ n,
   → prime_decomp n = [(n, 1)].
 Proof.
 intros * Hn Hpn.
-destruct n; [ easy | ].
-destruct n; [ easy | clear Hn ].
 unfold is_prime in Hpn.
 unfold prime_decomp.
+destruct n; [ easy | ].
+destruct n; [ easy | clear Hn ].
 replace 2 with (0 + 2) in Hpn by flia.
-replace (S (S n)) with (n + 0 + 2) in Hpn by flia.
-apply prime_decomp_aux_of_prime_test in Hpn.
-rewrite Nat.add_0_r, Nat.add_0_l in Hpn.
-now replace (n + 2) with (S (S n)) in Hpn by flia.
+replace (S (S n)) with (0 + S (S n)) in Hpn by flia.
+now apply prime_decomp_aux_of_prime_test in Hpn.
 Qed.
 
 ...
