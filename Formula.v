@@ -2220,6 +2220,15 @@ destruct b. {
   destruct c; [ now rewrite Nat.mul_0_r in Hc | ].
   destruct c; [ easy | ].
   clear Hc; exfalso.
+(**)
+  assert (H2 : is_prime 2 = true) by easy.
+  specialize (eq_primes_gcd_1 _ _ Hpn H2) as H1.
+  assert (H : 2 * S (S c) ≠ 2) by flia.
+  specialize (H1 H); clear H.
+  replace 2 with (2 * 1) in H1 at 2 by easy.
+  rewrite Nat.gcd_mul_mono_l in H1.
+  flia H1.
+}
 ...
 
 Theorem prime_decomp_decomp : ∀ n, 2 ≤ n →
