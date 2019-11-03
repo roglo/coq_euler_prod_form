@@ -2290,6 +2290,36 @@ induction l as [| a l]; intros. {
 (*
   Hl : prime_decomp_aux n (S (S (S n))) 5 0 = []
 *)
+destruct n; [ easy | ].
+destruct n; [ easy | ].
+destruct n; [ easy | ].
+clear - Hl.
+replace (S (S (S (S (S (S n)))))) with (n + 6) in Hl by flia.
+replace (S (S (S n))) with (n + 3) in Hl by flia.
+destruct n; [ easy | ].
+destruct n; [ easy | ].
+Theorem glop : ∀ cnt n d, prime_decomp_aux (cnt + 3) (n + 6) (d + 5) 0 ≠ [].
+Proof.
+intros.
+revert n d.
+induction cnt; intros. {
+  cbn - [ "/" "mod" ].
+  remember ((n + 6) mod (d + 5)) as b eqn:Hb; symmetry in Hb.
+  destruct b. {
+    apply Nat.mod_divides in Hb; [ | flia ].
+    destruct Hb as (b, Hb).
+    rewrite Hb, Nat.mul_comm, Nat.div_mul; [ | flia ].
+    destruct (b mod (d + 5)); [ | easy ].
+    now destruct (b / (d + 5) mod (d + 5)).
+  }
+  remember ((n + 6) mod S (d + 5)) as b1 eqn:Hb1; symmetry in Hb1.
+  move b1 before b.
+  destruct b1. {
+    now destruct (((n + 6) / S (d + 5)) mod S (d + 5)).
+  }
+  remember ((n + 6) mod (S (S (d + 5)))) as b2 eqn:Hb2; symmetry in Hb2.
+  move b2 before b1.
+  destruct b2; [ easy | exfalso ].
 ...
 
 (* https://en.wikipedia.org/wiki/Factorial#Number_theory *)
