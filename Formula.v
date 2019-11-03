@@ -2203,10 +2203,14 @@ destruct (n mod d); [ eapply IHcnt; apply Hcon | easy ].
 Qed.
 
 Theorem prime_decomp_aux_of_prime_test : ∀ n k,
-  prime_test n (k + S (S n)) (k + 2) = true
-  → prime_decomp_aux (S (S n)) (k + S (S n)) (k + 2) 0 = [(k + S (S n), 1)].
+  2 ≤ n
+  → prime_test (n - 2) (k + n) (k + 2) = true
+  → prime_decomp_aux n (k + n) (k + 2) 0 = [(k + n, 1)].
 Proof.
-intros * Hpn.
+intros * Hn Hpn.
+destruct n; [ easy | ].
+destruct n; [ flia Hn | clear Hn ].
+replace (S (S n) - 2) with n in Hpn by flia.
 revert k Hpn.
 induction n; intros. {
   cbn - [ "/" "mod" ].
@@ -2233,14 +2237,12 @@ Proof.
 intros * Hn Hpn.
 unfold is_prime in Hpn.
 unfold prime_decomp.
-destruct n; [ easy | ].
-destruct n; [ easy | clear Hn ].
-replace 2 with (0 + 2) in Hpn by flia.
-replace (S (S n)) with (0 + S (S n)) in Hpn by flia.
-now apply prime_decomp_aux_of_prime_test in Hpn.
+replace n with (S (S (n - 2))) in Hpn at 1 by flia Hn.
+replace n with (S (S (n - 2))) at 1 by flia Hn.
+replace n with (0 + n) in Hpn at 2 by flia.
+replace 2 with (0 + 2) in Hpn at 2 by flia.
+now apply prime_decomp_aux_of_prime_test in Hpn; [ | easy ].
 Qed.
-
-...
 
 Theorem prime_decomp_decomp : ∀ n, 2 ≤ n →
   fold_left (λ c ddp, let '(d, dpow) := ddp in c * Nat_power d dpow)
@@ -2252,9 +2254,7 @@ revert n Hn Hl.
 induction l as [| a l]; intros. {
   exfalso.
   remember (is_prime n) as b eqn:Hb; symmetry in Hb.
-  destruct b. {
-
-Search (is_prime _ = true).
+  destruct b; [ now rewrite prime_decomp_of_prime in Hl | ].
 ...
   cbn; destruct n; [ flia Hn | ].
   destruct n; [ easy | exfalso ].
