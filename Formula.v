@@ -2286,6 +2286,50 @@ intros * Hd Hcnt Hp.
 revert n d p Hd Hcnt Hp.
 induction cnt; intros; [ easy | ].
 cbn in Hp.
+remember (n mod d) as b eqn:Hb; symmetry in Hb.
+destruct b. {
+  destruct Hp as [Hp| Hp]; [ now subst d |].
+  apply Nat.mod_divides in Hb; [ | flia Hd ].
+  destruct Hb as (c, Hc).
+  rewrite Hc, Nat.mul_comm, Nat.div_mul in Hp; [ | flia Hd ].
+...
+  destruct (lt_dec cnt c) as [Hcc| Hcc]. {
+    subst n.
+    exfalso; clear - Hd Hcnt Hcc.
+    destruct d; [ easy | ].
+    destruct d; [ flia Hd | clear Hd ].
+    destruct d. {
+      apply Nat.nle_gt in Hcc; apply Hcc; clear Hcc.
+      revert c Hcnt.
+      induction cnt; intros. {
+        apply Nat.le_1_r in Hcnt.
+        destruct Hcnt as [Hcnt| Hcnt]. {
+          apply Nat.mul_eq_0_r in Hcnt; [ | easy ].
+          now subst c.
+        }
+        now apply Nat.eq_mul_1 in Hcnt.
+      }
+      destruct c; [ auto with arith | ].
+      apply -> Nat.succ_le_mono.
+      apply IHcnt.
+      destruct (Nat.eq_dec (2 * S c) (S (S cnt))) as [H1| H1]. {
+...
+  }
+  apply Nat.nlt_ge in Hcc.
+  eapply IHcnt; [ apply Hd | apply Hcc | apply Hp ].
+...
+  rewrite Hc, Nat.mul_comm, Nat.div_mul; [ | flia Hd ].
+  subst n.
+  destruct d; [ flia Hd | ].
+  destruct d; [ flia Hd | ].
+  cbn in Hcnt.
+...
+  transitivity (n - 1); [ | flia Hcnt ].
+  rewrite Hc.
+  destruct d; [ flia Hd | ].
+  destruct d; [ flia Hd | ].
+  cbn.
+  destruct d.
 ...
 
 Theorem pouet : ∀ n d,
@@ -2311,6 +2355,10 @@ assert (Hn : 2 ≤ n). {
   destruct n; [ easy | ].
   auto with arith.
 }
+apply Bool.not_false_is_true.
+intros Hd.
+Search (is_prime _ = false).
+specialize (not_prime_exists_div d). as (a & Ha & Han).
 ...
 unfold prime_decomp in Hp.
 replace n with (S (S (n - 2))) in Hp by flia Hn.
