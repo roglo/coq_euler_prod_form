@@ -2255,6 +2255,14 @@ induction l as [| a l]; intros. {
   exfalso.
   remember (is_prime n) as b eqn:Hb; symmetry in Hb.
   destruct b; [ now rewrite prime_decomp_of_prime in Hl | ].
+  specialize (prime_divisor n Hn) as Hp.
+  destruct Hp as (p & Hp & Hpn).
+  move p before n.
+  unfold prime_decomp in Hl.
+  replace n with (S (S (n - 2))) in Hl at 1 by flia Hn.
+  replace n with (S (n - 1)) in Hl at 1 by flia Hn.
+  cbn - [ "/" "mod" ] in Hl.
+...
 (**)
   unfold is_prime in Hb.
   unfold prime_decomp in Hl.
