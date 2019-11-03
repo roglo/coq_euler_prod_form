@@ -2202,6 +2202,32 @@ cbn in Hcon.
 destruct (n mod d); [ eapply IHcnt; apply Hcon | easy ].
 Qed.
 
+Theorem prime_decomp_aux_of_prime_test : ∀ n k,
+  prime_test (n + 1) (n + k + 4) (k + 3) = true
+  → prime_decomp_aux (n + 3) (n + k + 4) (k + 3) 0 = [(n + k + 4, 1)].
+Proof.
+intros * Hpn.
+revert k Hpn.
+induction n; intros. {
+  cbn in Hpn.
+  cbn - [ "/" "mod" ].
+  remember ((k + 4) mod (k + 3)) as b eqn:Hb; symmetry in Hb.
+  destruct b; [ easy | ].
+  replace (S (k + 3)) with (k + 4) by flia.
+  rewrite Nat.mod_same; [ | flia ].
+  rewrite Nat.div_same; [ | flia ].
+  rewrite Nat.mod_1_l; [ easy | flia ].
+}
+cbn - [ "/" "mod" ].
+cbn - [ "/" "mod" ] in Hpn.
+remember (S (n + k + 4) mod (k + 3)) as b eqn:Hb; symmetry in Hb.
+destruct b; [ easy | ].
+replace (S (n + k + 4)) with (n + (k + 1) + 4) in Hpn |-* by flia.
+replace (S (k + 3)) with (k + 1 + 3) by flia.
+replace (k + 3 + 1) with (k + 1 + 3) in Hpn by flia.
+now apply IHn.
+Qed.
+
 Theorem prime_decomp_of_prime : ∀ n,
   2 ≤ n
   → is_prime n = true
@@ -2218,40 +2244,14 @@ subst ssn.
 remember (S (S (S n)) mod 2) as b eqn:Hb; symmetry in Hb.
 destruct b; [ easy | ].
 destruct n; [ easy | ].
-cbn - [ "/" "mod" ] in Hpn.
-remember (S (S n)) as ssn.
-cbn - [ "/" "mod" ].
-subst ssn.
-remember (S (S (S (S n))) mod 3) as b3 eqn:Hb3; symmetry in Hb3.
-destruct b3; [ easy | ].
-destruct n; [ easy | ].
-cbn - [ "/" "mod" ] in Hpn.
-remember (S (S n)) as ssn.
-cbn - [ "/" "mod" ].
-subst ssn.
-...
-intros * Hn Hpn.
-destruct n; [ easy | ].
-destruct n; [ easy | clear Hn ].
-cbn - [ "/" "mod" ].
-remember (S (S n) mod 2) as b eqn:Hb; symmetry in Hb.
-destruct b. {
-  destruct n; [ easy | ].
-  apply Nat.mod_divides in Hb; [ | easy ].
-  destruct Hb as (c, Hc).
-  rewrite Hc in Hpn.
-  destruct c; [ now rewrite Nat.mul_0_r in Hc | ].
-  destruct c; [ easy | ].
-  clear Hc; exfalso.
-(**)
-  assert (H2 : is_prime 2 = true) by easy.
-  specialize (eq_primes_gcd_1 _ _ Hpn H2) as H1.
-  assert (H : 2 * S (S c) ≠ 2) by flia.
-  specialize (H1 H); clear H.
-  replace 2 with (2 * 1) in H1 at 2 by easy.
-  rewrite Nat.gcd_mul_mono_l in H1.
-  flia H1.
-}
+replace 3 with (0 + 3) in Hpn |-* by flia.
+replace (S (S (S (S n)))) with (n + 0 + 4) in Hpn by flia.
+replace (S (S (S (S n)))) with (n + 0 + 4) by flia.
+replace (S (S (S n))) with (n + 3) by flia.
+replace (S n) with (n + 1) in Hpn by flia.
+now apply prime_decomp_aux_of_prime_test.
+Qed.
+
 ...
 
 Theorem prime_decomp_decomp : ∀ n, 2 ≤ n →
