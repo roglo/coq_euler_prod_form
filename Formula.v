@@ -2210,9 +2210,11 @@ intros * Hn.
 remember (prime_decomp n) as l eqn:Hl; symmetry in Hl.
 revert n Hn Hl.
 induction l as [| a l]; intros. {
+...
   cbn; destruct n; [ flia Hn | ].
   destruct n; [ easy | exfalso ].
   clear Hn.
+  unfold prime_decomp in Hl.
   remember (S n) as sn; cbn - [ "/" "mod" ] in Hl; subst sn.
   remember (S (S n) mod 2) as b eqn:Hb; symmetry in Hb.
   destruct b. {
