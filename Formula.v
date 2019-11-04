@@ -2402,6 +2402,15 @@ eapply in_prime_decomp_aux_le.
 apply Hd.
 Qed.
 
+Theorem prime_decomp_param_ge_2 : ∀ n d,
+  d ∈ prime_decomp n
+  → 2 ≤ n.
+Proof.
+intros * Hd.
+destruct n; [ easy | ].
+destruct n; [ easy | flia ].
+Qed.
+
 Theorem glop : ∀ k d,
   k ≠ 0
   → is_prime d = true
@@ -2688,7 +2697,16 @@ replace (S (S (n - 2))) with n in Habn by flia Hn.
 Theorem in_prime_decomp_is_prime : ∀ n d,
   d ∈ prime_decomp n → is_prime d = true.
 Proof.
-intros * Hd.
+intros * Hdn.
+specialize (prime_decomp_param_ge_2 n d Hdn) as H2n.
+specialize (in_prime_decomp_ge_2 n d Hdn) as H2d.
+move Hdn at bottom.
+unfold prime_decomp in Hdn.
+replace n with (S (S (n - 2))) in Hdn by flia H2n.
+replace (S (S (n - 2))) with n in Hdn by flia H2n.
+unfold is_prime.
+replace d with (S (S (d - 2))) by flia H2d.
+replace (S (S (d - 2))) with d by flia H2d.
 ...
 intros * Hd.
 specialize (in_prime_decomp_ge_2 n d Hd) as H2d.
