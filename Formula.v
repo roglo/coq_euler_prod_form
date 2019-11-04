@@ -2546,7 +2546,21 @@ Theorem product_by_prime_not_in_prime_decomp : ∀ n p a,
   → is_prime p = true
   → p * a ∉ prime_decomp n.
 Proof.
-intros * Hpa Hp Hapn.
+intros * Ha Hp Hapn.
+assert (Hn : 2 ≤ n). {
+  destruct n; [ easy | ].
+  destruct n; [ easy | flia ].
+}
+move Hn after Ha.
+destruct (lt_dec p a) as [Hpa| Hpa]. {
+  specialize (in_prime_decomp_divide n (p * a) Hapn) as (k, Hk).
+  move k before a.
+  unfold prime_decomp in Hapn.
+  replace n with (S (S (n - 2))) in Hapn by flia Hn.
+  replace (S (S (n - 2))) with n in Hapn by flia Hn.
+...
+  specialize (prime_decomp_of_prime p Hp) as H1.
+  assert (p ∈ prime_decomp_aux (n + 2 - p) n p). {
 ...
 
 Theorem product_not_in_prime_decomp : ∀ n a b,
