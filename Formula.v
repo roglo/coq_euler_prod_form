@@ -2399,24 +2399,56 @@ eapply in_prime_decomp_aux_le.
 apply Hd.
 Qed.
 
+Theorem glop : ∀ a b d,
+  d ∈ prime_decomp a
+  → d ∈ prime_decomp (a * b).
+Proof.
+intros * Hd.
+...
+
+Theorem in_prime_decomp_iff : ∀ n d,
+  Nat.divide d n ∧ is_prime d = true
+  ↔ d ∈ prime_decomp n.
+Proof.
+intros; split.
+-intros ((k, Hk), Hd).
+ subst n.
+Search (prime_decomp (_ * _)).
+...
+apply glop.
+right.
+rewrite prime_decomp_of_prime; [ now left | | easy ].
+destruct d; [ easy | ].
+destruct d; [ easy | flia ].
+...
+
 Theorem in_prime_decomp_prime : ∀ n d,
   d ∈ prime_decomp n → is_prime d = true.
 Proof.
-intros * Hp.
+intros * Hd.
 assert (H2n : 2 ≤ n). {
   destruct n; [ easy | ].
   destruct n; [ easy | ].
   auto with arith.
 }
-specialize (in_prime_decomp_ge_2 n d Hp) as H2d.
-specialize (prime_divisor d H2d) as (d' & Hd' & k & Hk).
+specialize (in_prime_decomp_ge_2 n d Hd) as H2d.
+specialize (prime_divisor d H2d) as (d' & Hd'p & k & Hk).
 destruct k; [ subst d; flia H2d | ].
 destruct k; [ now rewrite Nat.mul_1_l in Hk; subst d' | exfalso ].
 remember (S (S k)) as k' eqn:Hk'.
 assert (H2k : 2 ≤ k') by flia Hk'.
 clear k Hk'; rename k' into k.
 move k before d; move H2k before H2d; move d' before d.
-move Hp before Hd'.
+move Hd before Hd'p.
+assert (Hd' : d' ∈ prime_decomp n). {
+  apply in_prime_decomp_iff.
+  split; [ | easy ].
+...
+  apply in_prime_decomp_iff in Hd.
+  apply (Nat.divide_trans _ d); [ | easy ].
+  rewrite Hk.
+  apply Nat.divide_factor_r.
+}
 ...
 specialize (not_prime_exists_div d H2d Hd) as (a & Ha & Han).
 Search (is_prime _ = true).
