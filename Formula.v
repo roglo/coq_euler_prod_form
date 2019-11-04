@@ -2737,6 +2737,8 @@ destruct b. {
   apply (IHcnt (S d)); [ easy | flia H2d ].
 }
 apply (IHcnt n); [ easy | easy | easy | easy | ].
+destruct cnt; [ easy | cbn ].
+rewrite Hb.
 ...
 
 Lemma in_prime_decomp_aux_prime_test : ∀ n p,
