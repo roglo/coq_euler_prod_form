@@ -2190,7 +2190,7 @@ destruct (n mod d); [ eapply IHcnt; apply Hcon | easy ].
 Qed.
 *)
 
-Theorem prime_decomp_aux_of_prime_test : ∀ n k,
+Lemma prime_decomp_aux_of_prime_test : ∀ n k,
   2 ≤ n
   → prime_test (n - 2) (k + n) (k + 2) = true
   → prime_decomp_aux n (k + n) (k + 2) = [k + n].
@@ -2536,6 +2536,25 @@ replace (S (S (n - 2))) with n in Hd by flia H2n.
 now apply in_prime_decomp_aux_divide in Hd.
 Qed.
 
+Check prime_decomp_aux_of_prime_test.
+
+Theorem glop : ∀ n p j k d,
+  2 ≤ n
+  → 2 ≤ d ≤ p
+  → n = j * p
+  → prime_test (p - 2) (k + p) (k + 2) = true
+  → p ∈ prime_decomp_aux n (k + n) (k + 2).
+Proof.
+intros * H2n H2dp Hnj Hpt.
+revert j p k d H2n H2dp Hnj Hpt.
+induction n; intros; [ flia H2n | ].
+cbn.
+remember ((k + S n) mod (k + 2)) as b eqn:Hb; symmetry in Hb.
+destruct b. {
+  destruct (Nat.eq_dec p (k + 2)) as [Hpk| Hpk]; [ now left | right ].
+(* mouais, en fait, j'y crois pas trop *)
+...
+
 Theorem glop : ∀ p n,
   2 ≤ n
   → Nat.divide p n
@@ -2551,6 +2570,35 @@ replace (S (S (n - 2))) with n by flia H2n.
 unfold is_prime in Hp.
 replace p with (S (S (p - 2))) in Hp by flia H2p.
 replace (S (S (p - 2))) with p in Hp by flia H2p.
+Print prime_test.
+Print prime_decomp_aux.
+...
+prime_decomp_aux =
+fix prime_decomp_aux (cnt n d : nat) {struct cnt} : list nat :=
+  match cnt with
+  | 0 => []
+  | S c => match n mod d with
+           | 0 => d :: prime_decomp_aux c (n / d) d
+           | S _ => prime_decomp_aux c n (S d)
+           end
+  end
+...
+prime_test =
+fix prime_test (cnt n d : nat) {struct cnt} : bool :=
+  match cnt with
+  | 0 => true
+  | S c => match n mod d with
+           | 0 => false
+           | S _ => prime_test c n (d + 1)
+           end
+...
+  H2n : 2 ≤ n
+  H2p : 2 ≤ p
+  k : nat
+  Hk : n = k * p
+  Hp : prime_test (p - 2) p 2 = true
+  ============================
+  p ∈ prime_decomp_aux n n 2
 ...
 destruct n; [ easy | ].
 destruct n; [ flia H2n | clear H2n ].
