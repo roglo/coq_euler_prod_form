@@ -2221,15 +2221,19 @@ replace (k + 2 + 1) with (S k + 2) in Hpn by flia.
 now apply IHn.
 Qed.
 
+Theorem prime_ge_2 : ∀ n, is_prime n = true → 2 ≤ n.
+Proof.
+intros * Hp.
+destruct n; [ easy | ].
+destruct n; [ easy | flia ].
+Qed.
+
 Theorem prime_decomp_of_prime : ∀ n,
   is_prime n = true
   → prime_decomp n = [n].
 Proof.
 intros * Hpn.
-assert (Hn : 2 ≤ n). {
-  destruct n; [ easy | ].
-  destruct n; [ easy | flia ].
-}
+specialize (prime_ge_2 _ Hpn) as Hn.
 unfold is_prime in Hpn.
 unfold prime_decomp.
 replace n with (S (S (n - 2))) in Hpn at 1 by flia Hn.
@@ -2416,7 +2420,7 @@ destruct k. {
 assert (Hk : 2 ≤ S (S k)) by flia.
 remember (S (S k)) as k'; clear k Heqk'.
 rename k' into k; move k before d; move Hk after Hd.
-...
+Abort.
 
 Theorem in_prime_decomp_iff : ∀ n d,
   2 ≤ n
@@ -2426,7 +2430,7 @@ Proof.
 intros * Hn; split.
 -intros ((k, Hk), Hd).
  subst n.
-Search (prime_decomp (_ * _)).
+Abort. (*
 ...
 apply glop.
 right.
@@ -2436,15 +2440,53 @@ destruct d; [ easy | flia ].
 ...
 *)
 
-Theorem in_prime_decomp_prime : ∀ n d,
-  d ∈ prime_decomp n → is_prime d = true.
+Lemma in_prime_decomp_aux_divide : ∀ cnt n d p,
+  d ≠ 0
+  → p ∈ prime_decomp_aux cnt n d
+  → Nat.divide p n.
+Proof.
+intros * Hdz Hp.
+specialize (in_prime_decomp_aux_le cnt n d _ Hp) as Hdp.
+assert (Hpz : p ≠ 0) by flia Hdz Hdp.
+move Hpz before Hdz.
+revert n d p Hdz Hp Hpz Hdp.
+induction cnt; intros; [ easy | ].
+cbn in Hp.
+remember (n mod d) as b eqn:Hb; symmetry in Hb.
+destruct b. {
+  destruct Hp as [Hp| Hp]; [ now subst d; apply Nat.mod_divide | ].
+  apply (Nat.divide_trans _ (n / d)). 2: {
+    apply Nat.mod_divides in Hb; [ | easy ].
+    destruct Hb as (c, Hc).
+    rewrite Hc, Nat.mul_comm, Nat.div_mul; [ | easy ].
+    apply Nat.divide_factor_l.
+  }
+  now apply (IHcnt _ d).
+}
+specialize (in_prime_decomp_aux_le _ _ _ _ Hp) as H1.
+now apply (IHcnt _ (S d)).
+Qed.
+
+Theorem in_prime_decomp_divide : ∀ n d,
+  d ∈ prime_decomp n → Nat.divide d n.
 Proof.
 intros * Hd.
 assert (H2n : 2 ≤ n). {
   destruct n; [ easy | ].
-  destruct n; [ easy | ].
-  auto with arith.
+  destruct n; [ easy | flia ].
 }
+specialize (in_prime_decomp_ge_2 n d Hd) as H2d.
+move Hd at bottom.
+unfold prime_decomp in Hd.
+replace n with (S (S (n - 2))) in Hd by flia H2n.
+replace (S (S (n - 2))) with n in Hd by flia H2n.
+now apply in_prime_decomp_aux_divide in Hd.
+Qed.
+
+Theorem in_prime_decomp_prime : ∀ n d,
+  d ∈ prime_decomp n → is_prime d = true.
+Proof.
+intros * Hd.
 specialize (in_prime_decomp_ge_2 n d Hd) as H2d.
 specialize (prime_divisor d H2d) as (d' & Hd'p & k & Hk).
 destruct k; [ subst d; flia H2d | ].
@@ -2454,7 +2496,10 @@ assert (H2k : 2 ≤ k') by flia Hk'.
 clear k Hk'; rename k' into k.
 move k before d; move H2k before H2d; move d' before d.
 move Hd before Hd'p.
+specialize (in_prime_decomp_divide _ _ Hd) as Hdn.
+...
 assert (Hd' : d' ∈ prime_decomp n). {
+...
   apply in_prime_decomp_iff.
   split; [ | easy ].
 ...
