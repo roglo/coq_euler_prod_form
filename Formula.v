@@ -2541,6 +2541,14 @@ replace (S (S (n - 2))) with n in Hd by flia H2n.
 now apply in_prime_decomp_aux_divide in Hd.
 Qed.
 
+Theorem glop : ∀ p n,
+  Nat.divide p n
+  → is_prime p = true
+  → p ∈ prime_decomp n.
+Proof.
+intros * Hpn Hp.
+...
+
 Theorem product_by_prime_not_in_prime_decomp : ∀ n p a,
   2 ≤ a
   → is_prime p = true
@@ -2552,6 +2560,11 @@ assert (Hn : 2 ≤ n). {
   destruct n; [ easy | flia ].
 }
 move Hn after Ha.
+specialize (in_prime_decomp_divide n (p * a) Hapn) as (k, Hk).
+assert (p ∈ prime_decomp n). {
+Search (_ ∈ prime_decomp _).
+...
+
 destruct (lt_dec p a) as [Hpa| Hpa]. {
   specialize (in_prime_decomp_divide n (p * a) Hapn) as (k, Hk).
   move k before a.
