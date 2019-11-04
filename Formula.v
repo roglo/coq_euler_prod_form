@@ -2737,9 +2737,7 @@ destruct b. {
   apply (IHcnt (S d)); [ easy | flia H2d ].
 }
 apply (IHcnt n); [ easy | easy | easy | easy | ].
-...
 destruct cnt; [ easy | ].
-cbn - [ "/" "mod" ] in Hpd.
 cbn - [ "/" "mod" ].
 rewrite Hb.
 ...
