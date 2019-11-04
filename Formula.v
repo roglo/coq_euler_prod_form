@@ -2699,11 +2699,12 @@ Lemma in_prime_decomp_aux_prime_test : ∀ cnt n p d,
   → 2 ≤ p
   → 2 ≤ d
   → (∀ e, 2 ≤ e < d → n mod e ≠ 0)
+   → n + d ≤ cnt + 2
   → p ∈ prime_decomp_aux cnt n d
   → prime_test (p - d) p d = true.
 Proof.
-intros * H2n H2p H2d Hed Hpd.
-revert n p d H2n H2p H2d Hed Hpd.
+intros * H2n H2p H2d Hed Hndc Hpd.
+revert n p d H2n H2p H2d Hed Hpd Hndc.
 induction cnt; intros; [ easy | ].
 cbn in Hpd.
 remember (n mod d) as b eqn:Hb; symmetry in Hb.
@@ -2716,7 +2717,17 @@ destruct b. {
   destruct Hb as (b, Hb); rewrite Nat.mul_comm in Hb.
   rewrite Hb, Nat.div_mul in Hpd; [ | flia H2d ].
   destruct (le_dec 2 b) as [H2b| H2b]. {
-    apply (IHcnt b); [ easy | easy | easy | | easy ].
+    apply (IHcnt b); [ easy | easy | easy | | easy | ]. 2: {
+      transitivity (n + d - 1); [ | flia Hndc ].
+      rewrite Hb.
+      destruct d; [ flia H2d | ].
+      rewrite <- Nat.add_sub_assoc; [ | flia ].
+      rewrite Nat_sub_succ_1.
+      rewrite Nat.mul_comm; cbn.
+      destruct b; [ flia H2b | ].
+      destruct d; [ flia H2d | ].
+      cbn; remember (d * S b); flia.
+    }
     intros e He.
     specialize (Hed _ He) as H1.
     rewrite Hb in H1.
@@ -2736,7 +2747,13 @@ destruct b. {
   rewrite Nat.mod_1_l in Hpd; [ | easy ].
   apply (IHcnt (S d)); [ easy | flia H2d ].
 }
-apply (IHcnt n); [ easy | easy | easy | easy | ].
+apply (IHcnt n); [ easy | easy | easy | easy | | ]. 2: {
+...
+  destruct (Nat.eq_dec (n + d) (S cnt + 2)) as [Hnds| Hnds]. {
+    exfalso; clear Hndc.
+    destruct cnt; [ easy | ].
+    cbn - [ "/" "mod" ] in Hpd.
+...
 destruct cnt; [ easy | ].
 cbn - [ "/" "mod" ].
 rewrite Hb.
