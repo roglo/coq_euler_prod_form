@@ -2694,6 +2694,63 @@ replace (S (S (n - 2))) with n in Habn by flia Hn.
 ...
 *)
 
+Lemma in_prime_decomp_aux_prime_test : ∀ n p d,
+  2 ≤ n
+  → 2 ≤ p
+  → 2 ≤ d
+  → (∀ e, 2 ≤ e < d → n mod e ≠ 0)
+  → p ∈ prime_decomp_aux n n d
+  → prime_test (p - d) p d = true.
+Proof.
+intros * H2n H2p H2d He Hpd.
+destruct n; [ easy | ].
+cbn - [ "/" "mod" ] in Hpd.
+remember (S n mod d) as b eqn:Hb; symmetry in Hb.
+destruct b. {
+  destruct Hpd as [Hpd| Hpd]; [ now subst d; rewrite Nat.sub_diag | ].
+  apply Nat.mod_divides in Hb; [ | flia H2d  ].
+  destruct Hb as (b, Hb); rewrite Nat.mul_comm in Hb.
+  rewrite Hb, Nat.div_mul in Hpd; [ | flia H2d ].
+...
+  destruct Hpd as [Hpd| Hpd]; [ now subst p | ].
+  apply Nat.mod_divides in Hb; [ | easy ].
+  destruct Hb as (b, Hb); rewrite Nat.mul_comm in Hb.
+  rewrite Hb, Nat.div_mul in Hpd; [ | easy ].
+(**)
+  destruct n; [ easy | clear H2n ].
+  move b before p.
+  cbn - [ "/" "mod" ] in Hpd.
+  remember (b mod 2) as b2 eqn:Hb2; symmetry in Hb2.
+  destruct b2. {
+    apply Nat.mod_divides in Hb2; [ | easy ].
+    destruct Hb2 as (b2, Hb2); rewrite Nat.mul_comm in Hb2.
+    move b2 before b.
+    rewrite Hb2, Nat.div_mul in Hpd; [ | easy ].
+    destruct Hpd as [Hpd| Hpd]; [ now subst p | ].
+    destruct n; [ easy | ].
+    cbn - [ "/" "mod" ] in Hpd.
+    remember (b2 mod 2) as b3 eqn:Hb3; symmetry in Hb3.
+    destruct b3. {
+      apply Nat.mod_divides in Hb3; [ | easy ].
+      destruct Hb3 as (b3, Hb3); rewrite Nat.mul_comm in Hb3.
+      move b3 before b2.
+      rewrite Hb3, Nat.div_mul in Hpd; [ | easy ].
+      destruct Hpd as [Hpd| Hpd]; [ now subst p | ].
+      destruct n; [ easy | ].
+      cbn - [ "/" "mod" ] in Hpd.
+      remember (b3 mod 2) as b4 eqn:Hb4; symmetry in Hb4.
+      destruct b4. {
+        apply Nat.mod_divides in Hb4; [ | easy ].
+        destruct Hb4 as (b4, Hb4); rewrite Nat.mul_comm in Hb4.
+        move b4 before b3.
+        rewrite Hb4, Nat.div_mul in Hpd; [ | easy ].
+        destruct Hpd as [Hpd| Hpd]; [ now subst p | ].
+        destruct n; [ easy | ].
+        cbn - [ "/" "mod" ] in Hpd.
+        remember (b4 mod 2) as b5 eqn:Hb5; symmetry in Hb5.
+        destruct b5. {
+...
+
 Lemma in_prime_decomp_aux_prime_test : ∀ n p,
   2 ≤ n
   → 2 ≤ p
