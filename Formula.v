@@ -2556,6 +2556,7 @@ replace (S (S (n - 2))) with n by flia H2n.
 unfold is_prime in Hp.
 replace p with (S (S (p - 2))) in Hp by flia H2p.
 replace (S (S (p - 2))) with p in Hp by flia H2p.
+Search divisors_but_firstn_and_lastn.
 ...
 destruct n; [ easy | ].
 destruct n; [ flia H2n | clear H2n ].
