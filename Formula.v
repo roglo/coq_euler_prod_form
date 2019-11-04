@@ -2546,7 +2546,7 @@ Theorem glop : ∀ p n,
   → is_prime p = true
   → p ∈ prime_decomp n.
 Proof.
-intros * Hpn Hp.
+intros * (k, Hk) Hp.
 ...
 
 Theorem product_by_prime_not_in_prime_decomp : ∀ n p a,
