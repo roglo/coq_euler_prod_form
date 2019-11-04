@@ -2708,7 +2708,10 @@ induction cnt; intros; [ easy | ].
 cbn in Hpd.
 remember (n mod d) as b eqn:Hb; symmetry in Hb.
 destruct b. {
-  destruct Hpd as [Hpd| Hpd]; [ now subst d; rewrite Nat.sub_diag | ].
+  destruct Hpd as [Hpd| Hpd]. {
+    subst d.
+    rewrite (proj2 (Nat.sub_0_le p p)); [ easy | flia ].
+  }
   apply Nat.mod_divides in Hb; [ | flia H2d  ].
   destruct Hb as (b, Hb); rewrite Nat.mul_comm in Hb.
   rewrite Hb, Nat.div_mul in Hpd; [ | flia H2d ].
@@ -2733,8 +2736,12 @@ destruct b. {
   rewrite Nat.mod_1_l in Hpd; [ | easy ].
   apply (IHcnt (S d)); [ easy | flia H2d ].
 }
+apply (IHcnt n); [ easy | easy | easy | easy | ].
 ...
-apply (IHcnt n).
+destruct cnt; [ easy | ].
+cbn - [ "/" "mod" ] in Hpd.
+cbn - [ "/" "mod" ].
+rewrite Hb.
 ...
 
 Lemma in_prime_decomp_aux_prime_test : ∀ n p,
