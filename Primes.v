@@ -208,7 +208,7 @@ apply Nat.eq_mul_1 in Hz.
 now destruct Hz as (Hz, H); subst d.
 Qed.
 
-Theorem prime_test_mod_ne_0 : ∀ n k,
+Lemma prime_test_mod_ne_0 : ∀ n k,
   2 ≤ n
   → prime_test (n - k) n k = true
   → ∀ d, k ≤ d < n → n mod d ≠ 0.

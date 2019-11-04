@@ -2541,6 +2541,14 @@ replace (S (S (n - 2))) with n in Hd by flia H2n.
 now apply in_prime_decomp_aux_divide in Hd.
 Qed.
 
+Theorem product_by_prime_not_in_prime_decomp : ∀ n p a,
+  2 ≤ a
+  → is_prime p = true
+  → p * a ∉ prime_decomp n.
+Proof.
+intros * Hpa Hp Hapn.
+...
+
 Theorem product_not_in_prime_decomp : ∀ n a b,
   2 ≤ a ≤ b
   → a * b ∉ prime_decomp n.
@@ -2551,6 +2559,29 @@ assert (Hn : 2 ≤ n). {
   destruct n; [ easy | flia ].
 }
 move Hn after Hab.
+specialize (prime_divisor a (proj1 Hab)) as (p & Hp & Hpa).
+specialize (in_prime_decomp_divide n (a * b) Habn) as (k, Hk).
+move k before b.
+destruct Hpa as (k' & Hk').
+subst a.
+replace (k' * p * b) with (p * (k' * b)) in Habn by flia.
+replace (k' * p * b) with (p * (k' * b)) in Hk by flia.
+remember (k' * b) as b'.
+revert Habn.
+...
+apply product_by_prime_not_in_prime_decomp; [ | easy ].
+destruct b'; [ lia | ].
+destruct b'. {
+  symmetry in Heqb'.
+  apply Nat.eq_mul_1 in Heqb'.
+  flia Heqb' Hab.
+}
+flia.
+...
+
+remember (is_prime a) as ap eqn:Hap; symmetry in Hap.
+destru
+
 unfold prime_decomp in Habn.
 replace n with (S (S (n - 2))) in Habn by flia Hn.
 replace (S (S (n - 2))) with n in Habn by flia Hn.
