@@ -2337,7 +2337,7 @@ Abort. (*
 ...
 *)
 
-Theorem prime_decomp_aux_le : ∀ cnt n d d',
+Lemma prime_decomp_aux_le : ∀ cnt n d d',
   d ≤ d' → HdRel le d (prime_decomp_aux cnt n d').
 Proof.
 intros * Hdd.
@@ -2348,7 +2348,7 @@ apply IHcnt, (le_trans _ d'); [ easy | ].
 apply Nat.le_succ_diag_r.
 Qed.
 
-Theorem Sorted_prime_decomp_aux : ∀ cnt n d,
+Lemma Sorted_prime_decomp_aux : ∀ cnt n d,
   Sorted le (prime_decomp_aux cnt n d).
 Proof.
 intros.
@@ -2375,7 +2375,7 @@ destruct (S (S n) mod 2) as [Hb| Hb]. {
 apply Sorted_prime_decomp_aux.
 Qed.
 
-Theorem in_prime_decomp_aux_le : ∀ cnt n d d',
+Lemma in_prime_decomp_aux_le : ∀ cnt n d d',
   d' ∈ prime_decomp_aux cnt n d
   → d ≤ d'.
 Proof.
