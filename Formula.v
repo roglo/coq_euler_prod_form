@@ -324,6 +324,7 @@ Definition ls_one {F : field} :=
 
 Notation "r ~{ i }" := (ls r i) (at level 1, format "r ~{ i }").
 Notation "x '∈' l" := (List.In x l) (at level 70).
+Notation "x '∉' l" := (¬ List.In x l) (at level 70).
 
 (* adding, opposing, subtracting polynomials *)
 
@@ -2464,7 +2465,26 @@ destruct b. {
       remember (d * S b); flia Hnc.
     }
   }
-...
+  apply Nat.mod_divides in Hb; [ | flia Hdp ].
+  destruct Hb as (b, Hb).
+  rewrite Hb, Nat.mul_comm, Nat.div_mul; [ | flia Hdp ].
+  rewrite Hb, Nat.mul_comm, Nat.div_mul in Hb1; [ | flia Hdp ].
+exfalso.
+Check Nat.gauss.
+specialize (Nat.gauss p n b) as H1.
+assert (H : Nat.divide p (n * b)). {
+  rewrite Hnkp, Nat.mul_shuffle0.
+  apply Nat.divide_factor_r.
+}
+specialize (H1 H); clear H.
+rewrite Hnkp in Hb.
+specialize (Nat.div_mod b p) as H2.
+rewrite Hb1 in H2.
+assert (H : p ≠ 0) by flia Hdp.
+specialize (H2 H); clear H.
+rewrite H2 in Hb.
+Check Nat.gauss.
+Abort. (* pas sûr que le th soit bon *)
 
 Theorem prime_divisor_in_decomp : ∀ n p,
   2 ≤ n
@@ -2476,7 +2496,7 @@ unfold prime_decomp.
 replace n with (S (S (n - 2))) by flia H2n.
 replace (S (S (n - 2))) with n by flia H2n.
 Search (_ ∈ prime_decomp_aux _ _ _).
-...
+Abort. (* je n'arrive pas à faire le lemme *)
 
 Lemma in_prime_decomp_aux_divide : ∀ cnt n d p,
   d ≠ 0
@@ -2521,6 +2541,21 @@ replace (S (S (n - 2))) with n in Hd by flia H2n.
 now apply in_prime_decomp_aux_divide in Hd.
 Qed.
 
+Theorem product_not_in_prime_decomp : ∀ n a b,
+  2 ≤ a ≤ b
+  → a * b ∉ prime_decomp n.
+Proof.
+intros * Hab Habn.
+assert (Hn : 2 ≤ n). {
+  destruct n; [ easy | ].
+  destruct n; [ easy | flia ].
+}
+move Hn after Hab.
+unfold prime_decomp in Habn.
+replace n with (S (S (n - 2))) in Habn by flia Hn.
+replace (S (S (n - 2))) with n in Habn by flia Hn.
+...
+
 Theorem in_prime_decomp_is_prime : ∀ n d,
   d ∈ prime_decomp n → is_prime d = true.
 Proof.
@@ -2536,6 +2571,10 @@ move k before d; move H2k before H2d; move d' before d.
 move Hd before Hd'p.
 specialize (in_prime_decomp_divide _ _ Hd) as Hdn.
 subst d; rename d' into p.
+...
+apply product_not_in_prime_decomp in Hd; [ easy | easy | ].
+destruct p; [ easy | ].
+destruct p; [ easy | flia ].
 ...
 destruct Hdn as (k', Hk').
 rewrite Hk in Hk'.
