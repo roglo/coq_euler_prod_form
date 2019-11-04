@@ -2553,7 +2553,8 @@ remember ((k + S n) mod (k + 2)) as b eqn:Hb; symmetry in Hb.
 destruct b. {
   destruct (Nat.eq_dec p (k + 2)) as [Hpk| Hpk]; [ now left | right ].
 (* mouais, en fait, j'y crois pas trop *)
-...
+Print prime_decomp_aux.
+Abort.
 
 Theorem glop : ∀ p n,
   2 ≤ n
@@ -2572,6 +2573,7 @@ replace p with (S (S (p - 2))) in Hp by flia H2p.
 replace (S (S (p - 2))) with p in Hp by flia H2p.
 Print prime_test.
 Print prime_decomp_aux.
+Abort. (*
 ...
 prime_decomp_aux =
 fix prime_decomp_aux (cnt n d : nat) {struct cnt} : list nat :=
@@ -2613,6 +2615,7 @@ destruct b2. {
   destruct Hb2 as (b2, Hb2).
   rewrite Hb2, Nat.mul_comm, Nat.div_mul; [ | easy ].
 ...
+*)
 
 Theorem product_by_prime_not_in_prime_decomp : ∀ n p a,
   2 ≤ a
@@ -2628,7 +2631,7 @@ move Hn after Ha.
 specialize (in_prime_decomp_divide n (p * a) Hapn) as (k, Hk).
 assert (p ∈ prime_decomp n). {
 Search (_ ∈ prime_decomp _).
-...
+Abort. (*
 
 destruct (lt_dec p a) as [Hpa| Hpa]. {
   specialize (in_prime_decomp_divide n (p * a) Hapn) as (k, Hk).
@@ -2640,6 +2643,7 @@ destruct (lt_dec p a) as [Hpa| Hpa]. {
   specialize (prime_decomp_of_prime p Hp) as H1.
   assert (p ∈ prime_decomp_aux (n + 2 - p) n p). {
 ...
+*)
 
 Theorem product_not_in_prime_decomp : ∀ n a b,
   2 ≤ a ≤ b
@@ -2660,6 +2664,7 @@ replace (k' * p * b) with (p * (k' * b)) in Habn by flia.
 replace (k' * p * b) with (p * (k' * b)) in Hk by flia.
 remember (k' * b) as b'.
 revert Habn.
+Abort. (*
 ...
 apply product_by_prime_not_in_prime_decomp; [ | easy ].
 destruct b'; [ lia | ].
@@ -2678,10 +2683,13 @@ unfold prime_decomp in Habn.
 replace n with (S (S (n - 2))) in Habn by flia Hn.
 replace (S (S (n - 2))) with n in Habn by flia Hn.
 ...
+*)
 
 Theorem in_prime_decomp_is_prime : ∀ n d,
   d ∈ prime_decomp n → is_prime d = true.
 Proof.
+intros * Hd.
+...
 intros * Hd.
 specialize (in_prime_decomp_ge_2 n d Hd) as H2d.
 specialize (prime_divisor d H2d) as (d' & Hd'p & k & Hk).
