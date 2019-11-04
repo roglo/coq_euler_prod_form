@@ -2222,11 +2222,14 @@ now apply IHn.
 Qed.
 
 Theorem prime_decomp_of_prime : ∀ n,
-  2 ≤ n
-  → is_prime n = true
+  is_prime n = true
   → prime_decomp n = [n].
 Proof.
-intros * Hn Hpn.
+intros * Hpn.
+assert (Hn : 2 ≤ n). {
+  destruct n; [ easy | ].
+  destruct n; [ easy | flia ].
+}
 unfold is_prime in Hpn.
 unfold prime_decomp.
 replace n with (S (S (n - 2))) in Hpn at 1 by flia Hn.
@@ -2399,18 +2402,28 @@ eapply in_prime_decomp_aux_le.
 apply Hd.
 Qed.
 
-Theorem glop : ∀ a b d,
-  d ∈ prime_decomp a
-  → d ∈ prime_decomp (a * b).
+Theorem glop : ∀ k d,
+  k ≠ 0
+  → is_prime d = true
+  → d ∈ prime_decomp (k * d).
 Proof.
-intros * Hd.
+intros * Hk Hd.
+destruct k; [ easy | clear Hk ].
+destruct k. {
+  rewrite Nat.mul_1_l.
+  rewrite prime_decomp_of_prime; [ now left | easy ].
+}
+assert (Hk : 2 ≤ S (S k)) by flia.
+remember (S (S k)) as k'; clear k Heqk'.
+rename k' into k; move k before d; move Hk after Hd.
 ...
 
 Theorem in_prime_decomp_iff : ∀ n d,
-  Nat.divide d n ∧ is_prime d = true
+  2 ≤ n
+  → Nat.divide d n ∧ is_prime d = true
   ↔ d ∈ prime_decomp n.
 Proof.
-intros; split.
+intros * Hn; split.
 -intros ((k, Hk), Hd).
  subst n.
 Search (prime_decomp (_ * _)).
@@ -2421,6 +2434,7 @@ rewrite prime_decomp_of_prime; [ now left | | easy ].
 destruct d; [ easy | ].
 destruct d; [ easy | flia ].
 ...
+*)
 
 Theorem in_prime_decomp_prime : ∀ n d,
   d ∈ prime_decomp n → is_prime d = true.
@@ -2464,6 +2478,7 @@ replace (S (S (n - 2))) with n in Hp by flia Hn.
 
 Print prime_decomp_aux.
 ...
+*)
 
 Theorem prime_divisor_in_decomp : ∀ d n,
   2 ≤ n → is_prime d = true → Nat.divide d n → d ∈ prime_decomp n.
@@ -2479,6 +2494,7 @@ replace (S (S (n - 2))) with n by flia Hn.
 rewrite Hk.
 now apply prime_in_prime_decomp_aux.
 ...
+*)
 
 Theorem prime_decomp_decomp : ∀ n, 2 ≤ n →
   fold_left Nat.mul (prime_decomp n) 1 = n.
@@ -2564,6 +2580,7 @@ split. {
   apply Nat.eq_mul_0; right.
   apply Nat.mod_divides; [ flia Hb | ].
 ...
+*)
 
 Fixpoint prime_after_aux cnt n :=
   if is_prime n then n
