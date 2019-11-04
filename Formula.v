@@ -2497,6 +2497,7 @@ clear k Hk'; rename k' into k.
 move k before d; move H2k before H2d; move d' before d.
 move Hd before Hd'p.
 specialize (in_prime_decomp_divide _ _ Hd) as Hdn.
+subst d; rename d' into p.
 ...
 destruct Hdn as (k', Hk').
 rewrite Hk in Hk'.
