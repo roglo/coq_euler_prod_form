@@ -2422,23 +2422,61 @@ remember (S (S k)) as k'; clear k Heqk'.
 rename k' into k; move k before d; move Hk after Hd.
 Abort.
 
-Theorem in_prime_decomp_iff : ∀ n d,
+Lemma glop : ∀ cnt n d p k,
   2 ≤ n
-  → Nat.divide d n ∧ is_prime d = true
-  ↔ d ∈ prime_decomp n.
+  → 2 ≤ d ≤ p
+  → n ≤ cnt
+  → n = k * p
+  → is_prime p = true
+  → p ∈ prime_decomp_aux cnt n d.
 Proof.
-intros * Hn; split.
--intros ((k, Hk), Hd).
- subst n.
-Abort. (*
+intros * H2n Hdp Hnc Hnkp Hp.
+revert n k d Hdp H2n Hnc Hnkp.
+induction cnt; intros; [ flia H2n Hnc | cbn ].
+remember (n mod d) as b eqn:Hb; symmetry in Hb.
+destruct b. {
+  destruct (Nat.eq_dec p d) as [Hpd| Hpd]; [ now left | right ].
+  remember (n / d mod p) as b1 eqn:Hb1; symmetry in Hb1.
+  destruct b1. {
+    apply Nat.mod_divides in Hb1; [ | flia Hdp ].
+    destruct Hb1 as (b1, Hb1).
+    rewrite Nat.mul_comm in Hb1.
+    apply (IHcnt _ b1); [ easy | | | easy ]. {
+      apply Nat.mod_divides in Hb; [ | flia Hdp ].
+      destruct Hb as (b, Hb).
+      rewrite Hb, Nat.mul_comm, Nat.div_mul; [ | flia Hdp ].
+      destruct b; [ flia H2n Hb | ].
+      destruct b; [ exfalso | flia ].
+      rewrite Nat.mul_1_r in Hb; subst d.
+      destruct k; [ flia H2n Hnkp | ].
+      destruct k; [ now rewrite Nat.mul_1_l in Hnkp; subst p | ].
+      rewrite Hnkp in Hdp.
+      cbn in Hdp; flia Hdp.
+    } {
+      apply Nat.mod_divides in Hb; [ | flia Hdp ].
+      destruct Hb as (b, Hb).
+      rewrite Hb, Nat.mul_comm, Nat.div_mul; [ | flia Hdp ].
+      rewrite Hb in Hnc; move Hnc at bottom.
+      destruct d; [ flia Hdp | ].
+      destruct d; [ flia Hdp | ].
+      cbn in Hnc.
+      destruct b; [ flia | ].
+      remember (d * S b); flia Hnc.
+    }
+  }
 ...
-apply glop.
-right.
-rewrite prime_decomp_of_prime; [ now left | | easy ].
-destruct d; [ easy | ].
-destruct d; [ easy | flia ].
+
+Theorem prime_divisor_in_decomp : ∀ n p,
+  2 ≤ n
+  → Nat.divide p n ∧ is_prime p = true
+  → p ∈ prime_decomp n.
+Proof.
+intros * H2n ((k, Hk), Hp).
+unfold prime_decomp.
+replace n with (S (S (n - 2))) by flia H2n.
+replace (S (S (n - 2))) with n by flia H2n.
+Search (_ ∈ prime_decomp_aux _ _ _).
 ...
-*)
 
 Lemma in_prime_decomp_aux_divide : ∀ cnt n d p,
   d ≠ 0
