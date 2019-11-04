@@ -357,10 +357,7 @@ Definition series_but_mul_of {F : field} n s :=
 
 (* list of divisors of a natural number *)
 
-Definition divisors_but_firstn_and_lastn d n :=
-  List.filter (λ a, n mod a =? 0) (List.seq d (S n - d)).
-
-Definition divisors := divisors_but_firstn_and_lastn 1.
+Definition divisors n := List.filter (λ a, n mod a =? 0) (List.seq 1 n).
 
 (* product of series is like the convolution product but
    limited to divisors; indeed the coefficient of the term
@@ -405,7 +402,7 @@ Theorem in_divisors : ∀ n,
   n ≠ 0 → ∀ d, d ∈ divisors n → n mod d = 0 ∧ d ≠ 0.
 Proof.
 intros * Hn *.
-unfold divisors, divisors_but_firstn_and_lastn.
+unfold divisors.
 intros Hd.
 apply filter_In in Hd.
 destruct Hd as (Hd, Hnd).
@@ -417,7 +414,7 @@ Theorem in_divisors_iff : ∀ n,
   n ≠ 0 → ∀ d, d ∈ divisors n ↔ n mod d = 0 ∧ d ≠ 0.
 Proof.
 intros * Hn *.
-unfold divisors, divisors_but_firstn_and_lastn.
+unfold divisors.
 split; [ now apply in_divisors | ].
 intros (Hnd, Hd).
 apply filter_In.
@@ -485,8 +482,7 @@ Qed.
 Theorem divisors_are_sorted : ∀ n, Sorted.Sorted lt (divisors n).
 Proof.
 intros.
-unfold divisors, divisors_but_firstn_and_lastn.
-rewrite Nat_sub_succ_1.
+unfold divisors.
 specialize (SetoidList.filter_sort eq_equivalence Nat.lt_strorder) as H2.
 specialize (H2 Nat.lt_wd).
 specialize (H2 (λ a, n mod a =? 0) (seq 1 n)).
@@ -1407,8 +1403,7 @@ Proof.
 intros n Hn.
 remember (divisors n) as l eqn:Hl.
 symmetry in Hl.
-unfold divisors, divisors_but_firstn_and_lastn in Hl.
-rewrite Nat_sub_succ_1 in Hl.
+unfold divisors in Hl.
 specialize (List_last_seq 1 n Hn) as H1.
 replace (1 + n - 1) with n in H1 by flia.
 specialize (proj2 (filter_In (λ a, n mod a =? 0) n (seq 1 n))) as H2.
@@ -2556,7 +2551,6 @@ replace (S (S (n - 2))) with n by flia H2n.
 unfold is_prime in Hp.
 replace p with (S (S (p - 2))) in Hp by flia H2p.
 replace (S (S (p - 2))) with p in Hp by flia H2p.
-Search divisors_but_firstn_and_lastn.
 ...
 destruct n; [ easy | ].
 destruct n; [ flia H2n | clear H2n ].
