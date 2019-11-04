@@ -2542,11 +2542,33 @@ now apply in_prime_decomp_aux_divide in Hd.
 Qed.
 
 Theorem glop : ∀ p n,
-  Nat.divide p n
+  2 ≤ n
+  → Nat.divide p n
   → is_prime p = true
   → p ∈ prime_decomp n.
 Proof.
-intros * (k, Hk) Hp.
+intros * H2n (k, Hk) Hp.
+specialize (prime_ge_2 _ Hp) as H2p.
+move H2p before H2n.
+unfold prime_decomp.
+replace n with (S (S (n - 2))) by flia H2n.
+replace (S (S (n - 2))) with n by flia H2n.
+unfold is_prime in Hp.
+replace p with (S (S (p - 2))) in Hp by flia H2p.
+replace (S (S (p - 2))) with p in Hp by flia H2p.
+...
+destruct n; [ easy | ].
+destruct n; [ flia H2n | clear H2n ].
+cbn - [ "/" "mod" ].
+replace (S (S n)) with (n + 1 * 2) by flia.
+rewrite Nat.mod_add; [ | easy ].
+rewrite Nat.div_add; [ | easy ].
+replace (n + 1 * 2) with (n + 2) by flia.
+remember (n mod 2) as b2 eqn:Hb2; symmetry in Hb2.
+destruct b2. {
+  apply Nat.mod_divides in Hb2; [ | easy ].
+  destruct Hb2 as (b2, Hb2).
+  rewrite Hb2, Nat.mul_comm, Nat.div_mul; [ | easy ].
 ...
 
 Theorem product_by_prime_not_in_prime_decomp : ∀ n p a,
