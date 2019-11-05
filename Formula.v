@@ -2540,7 +2540,7 @@ destruct b1. {
     rewrite Nat.mod_mul in H1; [ easy | now intros H; subst k ].
   }
   replace (j + 1 + 1 * k) with (j + k + 1) by flia.
-...
+Abort. (* ça marche pas *)
 
 Lemma glop : ∀ n b k,
   2 ≤ n
@@ -2556,24 +2556,6 @@ destruct b1. {
   cbn in Hb; subst b.
   now rewrite Nat.sub_diag.
 }
-...
-(*
-Lemma glop : ∀ n b k j,
-  2 ≤ b
-  → (∀ d, d < j + 1 → (n + j + 1) mod (d + k) ≠ 0)
-  → hd 2 (prime_decomp_aux n (n + j + 1) (k + j + 1)) = b
-  → prime_test (b - k) b k = true.
-...
-  n, b, k : nat
-  H2n : 2 ≤ S n
-  H2b : 2 ≤ b
-  b1 : nat
-  Hb1 : S n mod k = S b1
-  Hb : hd 2 (prime_decomp_aux n (S n) (S k)) = b
-  ============================
-  prime_test (b - k) b k = true
-...
-*)
 destruct n; [ flia H2n | clear H2n ].
 cbn - [ "/" "mod" ] in Hb.
 remember (S (S n) mod S k) as b2 eqn:Hb2; symmetry in Hb2.
@@ -2587,20 +2569,6 @@ destruct b2. {
   rewrite Nat.mod_1_l; [ easy | flia ].
 }
 move b1 before b; move b2 before b1.
-...
-Lemma glop : ∀ n b k j,
-  2 ≤ b
-  → (∀ d, d < j + 1 → (n + j + 1) mod (d + k) ≠ 0)
-  → hd 2 (prime_decomp_aux n (n + j + 1) (k + j + 1)) = b
-  → prime_test (b - k) b k = true.
-...
-  H2b : 2 ≤ b
-  Hb1 : S (S n) mod k = S b1
-  Hb2 : S (S n) mod S k = S b2
-  Hb : hd 2 (prime_decomp_aux n (S (S n)) (S (S k))) = b
-  ============================
-  prime_test (b - k) b k = true
-...
 destruct n. {
   cbn in Hb; subst b.
   destruct k; [ easy | ].
@@ -2639,15 +2607,6 @@ destruct b3. {
   rewrite Nat.mod_1_l; [ easy | flia ].
 }
 move b3 before b2.
-...
-  H2b : 2 ≤ b
-  Hb1 : S (S (S n)) mod k = S b1
-  Hb2 : S (S (S n)) mod S k = S b2
-  Hb3 : S (S (S n)) mod S (S k) = S b3
-  Hb : hd 2 (prime_decomp_aux n (S (S (S n))) (S (S (S k)))) = b
-  ============================
-  prime_test (b - k) b k = true
-...
 destruct n. {
   cbn in Hb; subst b.
   destruct k; [ easy | ].
@@ -2696,6 +2655,13 @@ destruct b4. {
   subst x; flia.
 }
 move b4 before b3.
+...
+Lemma glop : ∀ n b k j,
+  2 ≤ b
+  → (∀ d, d < j + 1 → (n + j + 1) mod (d + k) ≠ 0)
+  → hd 2 (prime_decomp_aux n (n + j + 1) (k + j + 1)) = b
+  → prime_test (b - k) b k = true.
+Proof.
 ...
   Hb1 : S (S (S (S n))) mod k = S b1
   Hb2 : S (S (S (S n))) mod S k = S b2
