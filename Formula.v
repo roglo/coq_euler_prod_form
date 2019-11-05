@@ -2454,6 +2454,45 @@ replace (S (S (n - 2))) with n in Hd by flia H2n.
 now apply in_prime_decomp_aux_divide in Hd.
 Qed.
 
+Lemma glop : ∀ n k,
+  prime_test n
+    (List.hd 2 (prime_decomp_aux (n - k) n (k + 2))) (k + 2) = true.
+Proof.
+intros.
+remember (n - k) as cnt eqn:Hcnt; symmetry in Hcnt.
+revert n k Hcnt.
+induction cnt; intros. {
+  cbn.
+  destruct k. {
+    now cbn; rewrite Nat.sub_0_r in Hcnt; subst n.
+  }
+  replace (S k + 2) with (k + 3) by flia.
+  revert k Hcnt.
+  induction n; intros; [ easy | cbn ].
+  rewrite Nat.sub_succ in Hcnt.
+  rewrite Nat.mod_small; [ | flia ].
+  replace (k + 3 + 1) with (S k + 3) by flia.
+  apply IHn; flia Hcnt.
+}
+...
+
+Theorem glop : ∀ n, is_prime (List.hd 2 (prime_decomp n)) = true.
+Proof.
+intros.
+destruct n; [ easy | ].
+cbn - [ "/" "mod" ].
+destruct n; [ easy | ].
+remember (S (S n) mod 2) as b eqn:Hb; symmetry in Hb.
+destruct b; [ easy | ].
+cbn - [ "/" "mod" ].
+remember (S (S n) mod 3) as b3 eqn:Hb3; symmetry in Hb3.
+destruct b3; [ easy | ].
+
+
+  is_prime (hd 2 (prime_decomp_aux n (S (S n)) 4)) = true
+  is_prime (hd 2 (prime_decomp_aux (S n) (S (S n)) 3)) = true
+...
+
 (* https://en.wikipedia.org/wiki/Factorial#Number_theory *)
 Theorem glop : ∀ n, 5 < n → is_prime n = false ↔ fact (n - 1) mod n = 0.
 Proof.
