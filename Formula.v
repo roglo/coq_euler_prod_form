@@ -2491,6 +2491,68 @@ apply IHcnt; [ easy | | ]. {
 ...
 *)
 
+Lemma glop : ∀ n b k j,
+  2 ≤ b
+  → (∀ d, d < j + 1 → (n + j + 1) mod (d + k) ≠ 0)
+  → hd 2 (prime_decomp_aux n (n + j + 1) (k + j + 1)) = b
+  → prime_test (b - k) b k = true.
+Proof.
+intros * H2b Hnk Hb.
+revert b k j H2b Hnk Hb.
+induction n; intros. {
+  cbn in Hb; subst b.
+  destruct k. {
+    assert (H : 0 < j + 1) by flia.
+    now specialize (Hnk 0 H) as H1; clear H.
+  }
+  rewrite Nat.sub_succ.
+  destruct k. {
+    assert (H : 0 < j + 1) by flia.
+    now specialize (Hnk 0 H) as H1; clear H.
+  }
+  now rewrite Nat.sub_succ.
+}
+cbn in Hb.
+replace (S (n + j + 1)) with (n + j + 2) in Hb by flia.
+remember ((n + j + 2) mod (k + j + 1)) as b1 eqn:Hb1; symmetry in Hb1.
+destruct b1. {
+  cbn in Hb; subst b.
+  specialize (Hnk 0) as H1.
+  assert (H : 0 < j + 1) by flia.
+  specialize (H1 H); clear H.
+  replace (S n + j + 1) with (n + j + 2) in H1 by flia.
+  apply Nat.mod_divides in Hb1; [ | flia ].
+  destruct Hb1 as (b1, Hb1).
+  replace (k + j + 1 - k) with (S j) by flia; cbn.
+  cbn in H1.
+  replace (k + j + 1) with (j + 1 + 1 * k) by flia.
+  rewrite Nat.mod_add; [ | now intros H; subst k ].
+  rewrite Hb1 in H1.
+  rewrite <- Nat.add_assoc in H1.
+  rewrite Nat.mul_add_distr_r in H1.
+  rewrite Nat.mul_comm, Nat.add_comm in H1.
+  rewrite Nat.mod_add in H1; [ | now intros H; subst k ].
+  remember ((j + 1) mod k) as b2 eqn:Hb2; symmetry in Hb2.
+  destruct b2. {
+    apply Nat.mod_divides in Hb2; [ | now intros H2; subst k ].
+    destruct Hb2 as (b2, Hb2).
+    rewrite Hb2, <- Nat.mul_assoc, Nat.mul_comm in H1.
+    rewrite Nat.mod_mul in H1; [ easy | now intros H; subst k ].
+  }
+  replace (j + 1 + 1 * k) with (j + k + 1) by flia.
+  destruct j; [ easy | cbn ].
+  replace (S (j + k + 1)) with (j + 1 + 1 * (k + 1)) at 1 by flia.
+  rewrite Nat.mod_add; [ | flia ].
+}
+...
+  specialize (Hnk j) as H2.
+  assert (H : j < j + 1) by flia.
+  specialize (H2 H); clear H.
+  replace (S n + j + 1) with (n + j + 2) in H2 by flia.
+....
+apply (IHn _ _ j); [ easy | | ].
+...
+
 Lemma glop : ∀ n b k,
   2 ≤ n
   → 2 ≤ b
@@ -2505,6 +2567,24 @@ destruct b1. {
   cbn in Hb; subst b.
   now rewrite Nat.sub_diag.
 }
+...
+(*
+Lemma glop : ∀ n b k j,
+  2 ≤ b
+  → (∀ d, d < j + 1 → (n + j + 1) mod (d + k) ≠ 0)
+  → hd 2 (prime_decomp_aux n (n + j + 1) (k + j + 1)) = b
+  → prime_test (b - k) b k = true.
+...
+  n, b, k : nat
+  H2n : 2 ≤ S n
+  H2b : 2 ≤ b
+  b1 : nat
+  Hb1 : S n mod k = S b1
+  Hb : hd 2 (prime_decomp_aux n (S n) (S k)) = b
+  ============================
+  prime_test (b - k) b k = true
+...
+*)
 destruct n; [ flia H2n | clear H2n ].
 cbn - [ "/" "mod" ] in Hb.
 remember (S (S n) mod S k) as b2 eqn:Hb2; symmetry in Hb2.
@@ -2518,6 +2598,20 @@ destruct b2. {
   rewrite Nat.mod_1_l; [ easy | flia ].
 }
 move b1 before b; move b2 before b1.
+...
+Lemma glop : ∀ n b k j,
+  2 ≤ b
+  → (∀ d, d < j + 1 → (n + j + 1) mod (d + k) ≠ 0)
+  → hd 2 (prime_decomp_aux n (n + j + 1) (k + j + 1)) = b
+  → prime_test (b - k) b k = true.
+...
+  H2b : 2 ≤ b
+  Hb1 : S (S n) mod k = S b1
+  Hb2 : S (S n) mod S k = S b2
+  Hb : hd 2 (prime_decomp_aux n (S (S n)) (S (S k))) = b
+  ============================
+  prime_test (b - k) b k = true
+...
 destruct n. {
   cbn in Hb; subst b.
   destruct k; [ easy | ].
@@ -2556,6 +2650,15 @@ destruct b3. {
   rewrite Nat.mod_1_l; [ easy | flia ].
 }
 move b3 before b2.
+...
+  H2b : 2 ≤ b
+  Hb1 : S (S (S n)) mod k = S b1
+  Hb2 : S (S (S n)) mod S k = S b2
+  Hb3 : S (S (S n)) mod S (S k) = S b3
+  Hb : hd 2 (prime_decomp_aux n (S (S (S n))) (S (S (S k)))) = b
+  ============================
+  prime_test (b - k) b k = true
+...
 destruct n. {
   cbn in Hb; subst b.
   destruct k; [ easy | ].
@@ -2604,6 +2707,14 @@ destruct b4. {
   subst x; flia.
 }
 move b4 before b3.
+...
+  Hb1 : S (S (S (S n))) mod k = S b1
+  Hb2 : S (S (S (S n))) mod S k = S b2
+  Hb3 : S (S (S (S n))) mod S (S k) = S b3
+  Hb4 : S (S (S (S n))) mod S (S (S k)) = S b4
+  Hb : hd 2 (prime_decomp_aux n (S (S (S (S n)))) (S (S (S (S k))))) = b
+  ============================
+  prime_test (b - k) b k = true
 ...
 
 Theorem glop : ∀ n, is_prime (List.hd 2 (prime_decomp n)) = true.
