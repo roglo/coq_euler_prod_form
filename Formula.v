@@ -2694,6 +2694,7 @@ replace (S (S (n - 2))) with n in Habn by flia Hn.
 ...
 *)
 
+(* march pa
 Lemma in_prime_decomp_aux_prime_test : ∀ cnt n p d,
   2 ≤ n
   → 2 ≤ p
@@ -2708,8 +2709,7 @@ intros * H2n H2p H2d Hcnt Hne Hpe Hpd.
 (*
 Compute (let p := 14 in let d := 3 in prime_test (p - d) p d).
 *)
-clear Hcnt.
-revert n p d H2n H2p H2d (*Hcnt*) Hne Hpe Hpd.
+revert n p d H2n H2p H2d Hcnt Hne Hpe Hpd.
 induction cnt; intros; [ easy | ].
 cbn in Hpd.
 remember (n mod d) as b eqn:Hb; symmetry in Hb.
@@ -2722,7 +2722,7 @@ destruct b. {
   destruct Hb as (b, Hb); rewrite Nat.mul_comm in Hb.
   rewrite Hb, Nat.div_mul in Hpd; [ | flia H2d ].
   destruct (le_dec 2 b) as [H2b| H2b]. {
-    apply (IHcnt b); [ easy | easy | easy | | easy | easy ].(* {
+    apply (IHcnt b); [ easy | easy | easy | | easy | easy ]. (* {
       transitivity (n - 1); [ | flia Hcnt ].
       rewrite Hb.
       destruct d; [ flia H2d | ].
@@ -2761,6 +2761,7 @@ destruct cnt. {
   destruct b1; [ | easy ].
   destruct Hpd as [Hpd| Hpd]; [ | easy ].
 ...
+*)
 
 Lemma in_prime_decomp_aux_prime_test : ∀ n p,
   2 ≤ n
@@ -2769,6 +2770,7 @@ Lemma in_prime_decomp_aux_prime_test : ∀ n p,
   → prime_test (p - 2) p 2 = true.
 Proof.
 intros * H2n H2p Hpd.
+...
 destruct n; [ easy | ].
 cbn - [ "/" "mod" ] in Hpd.
 remember (S n mod 2) as b eqn:Hb; symmetry in Hb.
