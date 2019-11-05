@@ -2540,18 +2540,6 @@ destruct b1. {
     rewrite Nat.mod_mul in H1; [ easy | now intros H; subst k ].
   }
   replace (j + 1 + 1 * k) with (j + k + 1) by flia.
-  destruct j; [ easy | cbn ].
-  replace (S (j + k + 1)) with (j + 1 + 1 * (k + 1)) at 1 by flia.
-  rewrite Nat.mod_add; [ | flia ].
-...
-}
-...
-  specialize (Hnk j) as H2.
-  assert (H : j < j + 1) by flia.
-  specialize (H2 H); clear H.
-  replace (S n + j + 1) with (n + j + 2) in H2 by flia.
-....
-apply (IHn _ _ j); [ easy | | ].
 ...
 
 Lemma glop : ∀ n b k,
