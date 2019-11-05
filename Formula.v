@@ -2491,6 +2491,38 @@ apply IHcnt; [ easy | | ]. {
 ...
 *)
 
+Theorem glop : ∀ n, is_prime (List.hd 2 (prime_decomp n)) = true.
+Proof.
+intros.
+destruct n; [ easy | ].
+destruct n; [ easy | ].
+assert (H2n : 2 ≤ S (S n)) by flia.
+remember (S (S n)) as n'.
+clear n Heqn'; rename n' into n.
+unfold prime_decomp.
+replace n with (S (S (n - 2))) by flia H2n.
+replace (S (S (n - 2))) with n by flia H2n.
+unfold is_prime.
+remember (hd 2 (prime_decomp_aux n n 2)) as b eqn:Hb; symmetry in Hb.
+assert (H2b : 2 ≤ b). {
+  remember (prime_decomp_aux n n 2) as l eqn:Hl; symmetry in Hl.
+  destruct l as [| a l]; [ now cbn in Hb; subst b | ].
+  cbn in Hb.
+  subst a.
+...
+destruct l as [| b l]; [ easy | cbn ].
+specialize (in_prime_decomp_aux_le n n 2 b) as H1.
+assert (H : b ∈ prime_decomp_aux n n 2) by now rewrite Hl; left.
+specialize (H1 H).
+Theorem glop : ∀ cnt n d p, p ∈ prime_decomp_aux cnt n d → d ≤ p.
+Proof.
+Search prime_decomp_aux.
+destruct b. {
+  exfalso.
+  destruct n; [ easy | ].
+  cbn - [ "/" "mod" ] in Hb.
+  remember (S
+replace b with (S (S (b - 2))).
 ...
 
 Lemma glop : ∀ cnt cnt2 n d, 2 ≤ n → cnt ≤ → n ≤ cnt2 → prime_test (cnt - d) n d = prime_test (cnt2 - d) n d.
