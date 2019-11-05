@@ -2503,6 +2503,19 @@ apply IHcnt; [ easy | | ]. {
 ...
 *)
 
+Lemma glop : ∀ cnt n d, 2 ≤ n ≤ cnt → prime_test n n d = prime_test cnt n d.
+Proof.
+intros * (Hn, Hcnt).
+revert n d Hn Hcnt.
+induction cnt; intros. {
+  now apply Nat.le_0_r in Hcnt; subst n.
+}
+destruct n; [ flia Hn | ].
+cbn.
+remember (S n mod d) as b eqn:Hb; symmetry in Hb.
+destruct b; [ easy | ].
+...
+
 Lemma glop : ∀ cnt n d, (∀ e, d ≤ e < n → n mod e ≠ 0) → prime_test cnt n d = true.
 Proof.
 intros * Hdn.
@@ -2521,7 +2534,6 @@ destruct (lt_dec d n) as [Hnd| Hnd]. {
 apply Nat.nlt_ge in Hnd.
 destruct (
 rewrite Nat.mod_small.
-...
 ...
 
 Lemma glop : ∀ cnt n d, 2 ≤ d → (∀ e, d ≤ e ≤ cnt → n mod e ≠ 0) → prime_test cnt n d = true.
