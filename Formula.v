@@ -2178,18 +2178,6 @@ Definition prime_decomp n :=
   | _ => prime_decomp_aux n n 2
   end.
 
-(*
-Theorem prime_decomp_aux_succ_pow_not_nil : ∀ cnt n d dpow,
-  prime_decomp_aux cnt n d (S dpow) ≠ [].
-Proof.
-intros * Hcon.
-revert n d dpow Hcon.
-induction cnt; intros; [ easy | ].
-cbn in Hcon.
-destruct (n mod d); [ eapply IHcnt; apply Hcon | easy ].
-Qed.
-*)
-
 Lemma prime_decomp_aux_of_prime_test : ∀ n k,
   2 ≤ n
   → prime_test (n - 2) (k + n) (k + 2) = true
@@ -2503,17 +2491,28 @@ apply IHcnt; [ easy | | ]. {
 ...
 *)
 
-Lemma glop : ∀ cnt n d, 2 ≤ n ≤ cnt → prime_test n n d = prime_test cnt n d.
+...
+
+Lemma glop : ∀ cnt cnt2 n d, 2 ≤ n → cnt ≤ → n ≤ cnt2 → prime_test (cnt - d) n d = prime_test (cnt2 - d) n d.
 Proof.
-intros * (Hn, Hcnt).
-revert n d Hn Hcnt.
+intros * Hn Hcnt Hcnt2.
+revert n d cnt2 Hn Hcnt Hcnt2.
 induction cnt; intros. {
   now apply Nat.le_0_r in Hcnt; subst n.
 }
-destruct n; [ flia Hn | ].
+destruct cnt2. {
+  apply Nat.le_0_r in Hcnt2; subst n; flia Hn.
+}
 cbn.
-remember (S n mod d) as b eqn:Hb; symmetry in Hb.
+destruct d; [ easy | ].
+Search prime_test.
+
+remember (n mod d) as b eqn:Hb; symmetry in Hb.
 destruct b; [ easy | ].
+Search prime_test.
+...
+
+apply IHcnt; [ easy | | ]. {
 ...
 
 Lemma glop : ∀ cnt n d, (∀ e, d ≤ e < n → n mod e ≠ 0) → prime_test cnt n d = true.
