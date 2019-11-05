@@ -2512,7 +2512,10 @@ induction cnt; intros. {
 Compute (is_prime 2).
 Compute (prime_test 0 2 2).
 Compute (prime_test 1 2 2).
+Print is_prime.
 Print prime_test.
+Print prime_decomp_aux.
+...
 Compute (prime_test 2 2 2).
 Compute (prime_test 3 2 2).
 Compute (prime_test 1 3 2).
