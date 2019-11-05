@@ -2474,6 +2474,17 @@ induction cnt; intros. {
   replace (k + 3 + 1) with (S k + 3) by flia.
   apply IHn; flia Hcnt.
 }
+cbn.
+remember (n mod (k + 2)) as b eqn:Hb; symmetry in Hb.
+destruct b. {
+  cbn.
+  apply Nat.mod_divides in Hb; [ | flia ].
+  destruct Hb as (b, Hb).
+  destruct n; [ easy | ].
+  cbn.
+  rewrite Nat.mod_same; [ | flia ].
+  rewrite Hb in Hcnt.
+(* crotte de bique *)
 ...
 
 Theorem glop : ∀ n, is_prime (List.hd 2 (prime_decomp n)) = true.
