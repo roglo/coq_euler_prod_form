@@ -2556,6 +2556,54 @@ destruct b3. {
   rewrite Nat.mod_1_l; [ easy | flia ].
 }
 move b3 before b2.
+destruct n. {
+  cbn in Hb; subst b.
+  destruct k; [ easy | ].
+  now destruct k.
+}
+cbn - [ "/" "mod" ] in Hb.
+remember (S (S (S (S n))) mod S (S (S k))) as b4 eqn:Hb4; symmetry in Hb4.
+destruct b4. {
+  cbn in Hb; subst b.
+  clear H2b.
+  replace (S (S (S k)) - k) with 3 by flia; cbn.
+  replace (S (S (S k))) with (3 + 1 * k) by flia.
+  rewrite Nat.mod_add; [ | now intros H; subst k ].
+  remember (3 mod k) as b5 eqn:Hb5; symmetry in Hb5.
+  destruct b5. {
+    destruct k; [ easy | ].
+    apply Nat.mod_divides in Hb5; [ | easy ].
+    destruct Hb5 as (b5, Hb5); rewrite Nat.mul_comm in Hb5.
+    destruct b5; [ easy | ].
+    destruct b5. {
+      replace k with 2 in * by flia Hb5.
+      apply Nat.mod_divides in Hb4; [ | easy ].
+      destruct Hb4 as (b4, Hb4); rewrite Nat.mul_comm in Hb4.
+      rewrite Hb4 in Hb1.
+      replace (b4 * 6) with (0 + b4 * 2 * 3) in Hb1 by flia.
+      now rewrite Nat.mod_add in Hb1.
+    }
+    destruct b5. {
+      now replace k with 0 in * by flia Hb5.
+    }
+    rewrite Nat.mul_comm in Hb5.
+    cbn in Hb5.
+    destruct k; [ easy | ].
+    rewrite Nat.mul_comm in Hb5; cbn in Hb5.
+    remember (b5 * S k); cbn in Hb5; flia Hb5.
+  }
+  replace (3 + 1 * k) with (2 + 1 * (k + 1)) by flia.
+  rewrite Nat.mod_add; [ | flia ].
+  destruct k; [ easy | ].
+  destruct k; [ easy | ].
+  rewrite Nat.mod_small; [ | flia ].
+  remember (S (S k) + 1) as x.
+  replace (2 + 1 * x) with (1 + 1 * (x + 1)) by flia.
+  rewrite Nat.mod_add; [ | flia ].
+  rewrite Nat.mod_1_l; [ easy | ].
+  subst x; flia.
+}
+move b4 before b3.
 ...
 
 Theorem glop : ∀ n, is_prime (List.hd 2 (prime_decomp n)) = true.
