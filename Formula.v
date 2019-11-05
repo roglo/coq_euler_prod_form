@@ -2705,7 +2705,11 @@ Lemma in_prime_decomp_aux_prime_test : ∀ cnt n p d,
   → prime_test (p - d) p d = true.
 Proof.
 intros * H2n H2p H2d Hcnt Hne Hpe Hpd.
-revert n p d H2n H2p H2d Hcnt Hne Hpe Hpd.
+(*
+Compute (let p := 14 in let d := 3 in prime_test (p - d) p d).
+*)
+clear Hcnt.
+revert n p d H2n H2p H2d (*Hcnt*) Hne Hpe Hpd.
 induction cnt; intros; [ easy | ].
 cbn in Hpd.
 remember (n mod d) as b eqn:Hb; symmetry in Hb.
@@ -2718,7 +2722,7 @@ destruct b. {
   destruct Hb as (b, Hb); rewrite Nat.mul_comm in Hb.
   rewrite Hb, Nat.div_mul in Hpd; [ | flia H2d ].
   destruct (le_dec 2 b) as [H2b| H2b]. {
-    apply (IHcnt b); [ easy | easy | easy | | | easy | easy ]. {
+    apply (IHcnt b); [ easy | easy | easy | | easy | easy ].(* {
       transitivity (n - 1); [ | flia Hcnt ].
       rewrite Hb.
       destruct d; [ flia H2d | ].
@@ -2727,7 +2731,7 @@ destruct b. {
       destruct d; [ flia H2d | ].
       destruct b; [ flia H2b | ].
       cbn; remember (d * S b); flia.
-    }
+    }*)
     intros e He.
     specialize (Hne _ He) as H1.
     rewrite Hb in H1.
@@ -2747,11 +2751,15 @@ destruct b. {
   rewrite Nat.mod_1_l in Hpd; [ | easy ].
   apply (IHcnt (S d)); [ easy | flia H2d ].
 }
-apply (IHcnt n); [ easy | easy | easy | | easy | easy | ]. {
-  destruct (Nat.eq_dec n (S cnt)) as [Hnc| Hnc]. {
-    exfalso.
-    destruct cnt; [ easy | ].
-    cbn - [ "/" "mod" ] in Hpd.
+apply (IHcnt n); [ easy | easy | easy | easy | easy | ].
+destruct cnt; [ easy | ].
+cbn - [ "/" "mod" ].
+rewrite Hb.
+destruct cnt. {
+  cbn; cbn - [ "/" "mod" ] in Hpd.
+  remember (n mod S d) as b1 eqn:Hb1; symmetry in Hb1.
+  destruct b1; [ | easy ].
+  destruct Hpd as [Hpd| Hpd]; [ | easy ].
 ...
 
 Lemma in_prime_decomp_aux_prime_test : ∀ n p,
