@@ -2454,7 +2454,7 @@ replace (S d - d) with 1 by flia.
 apply IHcnt.
 Qed.
 
-Lemma prime_decomp_aux_more_iter : ∀ cnt n d k,
+Lemma prime_decomp_aux_more_iter : ∀ k cnt n d,
   2 ≤ n
   → 2 ≤ d
   → n + 2 ≤ cnt + d
@@ -2497,8 +2497,6 @@ apply IHcnt; [ easy | | flia Hnc ].
 flia H2d Hnc.
 Qed.
 
-...
-
 Theorem glop : ∀ n, is_prime (List.hd 2 (prime_decomp n)) = true.
 Proof.
 intros.
@@ -2522,6 +2520,18 @@ assert (H2b : 2 ≤ b). {
 move b before n; move H2b before H2n.
 replace b with (S (S (b - 2))) by flia H2b.
 replace (S (S (b - 2))) with b by flia H2b.
+(**)
+revert b H2b Hb .
+induction n; intros; [ flia H2n | ].
+cbn - [ "/" "mod" ] in Hb.
+remember (S n mod 2) as b1 eqn:Hb1; symmetry in Hb1.
+destruct b1; [ now cbn in Hb; subst b | ].
+destruct (Nat.eq_dec n 1) as [Hn1| Hn1]; [ now subst n | ].
+apply IHn; [ flia H2n Hn1 | easy | ].
+Inspect 1.
+...
+rewrite (prime_decomp_aux_more_iter 1) in Hb; [ | easy | flia | flia ].
+rewrite Nat.add_1_r in Hb; cbn - [ "/" "mod" ] in Hb.
 ...
 
 Lemma glop : ∀ cnt cnt2 n d, 2 ≤ n → cnt ≤ → n ≤ cnt2 → prime_test (cnt - d) n d = prime_test (cnt2 - d) n d.
