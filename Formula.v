@@ -2543,6 +2543,7 @@ destruct b1. {
   destruct j; [ easy | cbn ].
   replace (S (j + k + 1)) with (j + 1 + 1 * (k + 1)) at 1 by flia.
   rewrite Nat.mod_add; [ | flia ].
+...
 }
 ...
   specialize (Hnk j) as H2.
