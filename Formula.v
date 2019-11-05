@@ -2491,6 +2491,73 @@ apply IHcnt; [ easy | | ]. {
 ...
 *)
 
+Lemma glop : ∀ n b k,
+  2 ≤ n
+  → 2 ≤ b
+  → hd 2 (prime_decomp_aux n n k) = b
+  → prime_test (b - k) b k = true.
+Proof.
+intros * H2n H2b Hb.
+destruct n; [ flia H2n | ].
+cbn in Hb.
+remember (S n mod k) as b1 eqn:Hb1; symmetry in Hb1.
+destruct b1. {
+  cbn in Hb; subst b.
+  now rewrite Nat.sub_diag.
+}
+destruct n; [ flia H2n | clear H2n ].
+cbn - [ "/" "mod" ] in Hb.
+remember (S (S n) mod S k) as b2 eqn:Hb2; symmetry in Hb2.
+destruct b2. {
+  cbn in Hb; subst b.
+  replace (S k - k) with 1 by flia; cbn.
+  replace (S k) with (1 + 1 * k) by flia.
+  rewrite Nat.mod_add; [ | flia H2b ].
+  destruct k; [ flia H2b | clear H2b ].
+  destruct k; [ now rewrite Nat.mod_1_r in Hb1 | ].
+  rewrite Nat.mod_1_l; [ easy | flia ].
+}
+move b1 before b; move b2 before b1.
+destruct n. {
+  cbn in Hb; subst b.
+  destruct k; [ easy | ].
+  now destruct k.
+}
+cbn - [ "/" "mod" ] in Hb.
+remember (S (S (S n)) mod S (S k)) as b3 eqn:Hb3; symmetry in Hb3.
+destruct b3. {
+  cbn in Hb; subst b.
+  clear H2b.
+  replace (S (S k) - k) with 2 by flia; cbn.
+  replace (S (S k)) with (2 + 1 * k) by flia.
+  rewrite Nat.mod_add; [ | now intros H; subst k ].
+  remember (2 mod k) as b4 eqn:Hb4; symmetry in Hb4.
+  destruct b4. {
+    destruct k; [ easy | ].
+    apply Nat.mod_divides in Hb4; [ | easy ].
+    destruct Hb4 as (b4, Hb4); rewrite Nat.mul_comm in Hb4.
+    destruct b4; [ easy | ].
+    destruct b4. {
+      replace k with 1 in * by flia Hb4.
+      apply Nat.mod_divides in Hb3; [ | easy ].
+      destruct Hb3 as (b3, Hb3); rewrite Nat.mul_comm in Hb3.
+      rewrite Hb3 in Hb1.
+      replace (b3 * 4) with (0 + b3 * 2 * 2) in Hb1 by flia.
+      now rewrite Nat.mod_add in Hb1.
+    }
+    destruct b4. {
+      now replace k with 0 in * by flia Hb4.
+    }
+    now rewrite Nat.mul_comm in Hb4.
+  }
+  replace (2 + 1 * k) with (1 + 1 * (k + 1)) by flia.
+  rewrite Nat.mod_add; [ | flia ].
+  destruct k; [ easy | ].
+  rewrite Nat.mod_1_l; [ easy | flia ].
+}
+move b3 before b2.
+...
+
 Theorem glop : ∀ n, is_prime (List.hd 2 (prime_decomp n)) = true.
 Proof.
 intros.
@@ -2506,23 +2573,14 @@ unfold is_prime.
 remember (hd 2 (prime_decomp_aux n n 2)) as b eqn:Hb; symmetry in Hb.
 assert (H2b : 2 ≤ b). {
   remember (prime_decomp_aux n n 2) as l eqn:Hl; symmetry in Hl.
-  destruct l as [| a l]; [ now cbn in Hb; subst b | ].
-  cbn in Hb.
-  subst a.
-...
-destruct l as [| b l]; [ easy | cbn ].
-specialize (in_prime_decomp_aux_le n n 2 b) as H1.
-assert (H : b ∈ prime_decomp_aux n n 2) by now rewrite Hl; left.
-specialize (H1 H).
-Theorem glop : ∀ cnt n d p, p ∈ prime_decomp_aux cnt n d → d ≤ p.
-Proof.
-Search prime_decomp_aux.
-destruct b. {
-  exfalso.
-  destruct n; [ easy | ].
-  cbn - [ "/" "mod" ] in Hb.
-  remember (S
-replace b with (S (S (b - 2))).
+  destruct l as [| a l]; [ now subst b | ].
+  cbn in Hb; subst a.
+  apply (in_prime_decomp_aux_le n n).
+  now rewrite Hl; left.
+}
+move b before n; move H2b before H2n.
+replace b with (S (S (b - 2))) by flia H2b.
+replace (S (S (b - 2))) with b by flia H2b.
 ...
 
 Lemma glop : ∀ cnt cnt2 n d, 2 ≤ n → cnt ≤ → n ≤ cnt2 → prime_test (cnt - d) n d = prime_test (cnt2 - d) n d.
