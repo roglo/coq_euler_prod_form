@@ -2297,15 +2297,18 @@ destruct (Nat.eq_dec e d) as [Hed| Hed]. {
 apply Hnd; flia He Hed.
 Qed.
 
-Theorem prime_decomp_nil : ∀ n, prime_decomp n = [] → n = 0 ∨ n = 1.
+Theorem prime_decomp_nil_iff : ∀ n, prime_decomp n = [] ↔ n = 0 ∨ n = 1.
 Proof.
-intros * Hn.
-unfold prime_decomp in Hn.
-destruct n; [ now left | ].
-destruct n; [ now right | exfalso ].
-revert Hn.
-apply prime_decomp_aux_not_nil; [ flia | easy | easy | ].
-intros e He; flia He.
+intros.
+split.
+-intros Hn.
+ unfold prime_decomp in Hn.
+ destruct n; [ now left | ].
+ destruct n; [ now right | exfalso ].
+ revert Hn.
+ apply prime_decomp_aux_not_nil; [ flia | easy | easy | ].
+ intros e He; flia He.
+-now intros [Hn| Hn]; subst n.
 Qed.
 
 Theorem prime_decomp_inj : ∀ a b,
@@ -2316,12 +2319,24 @@ remember (prime_decomp b) as l eqn:Hb; symmetry in Hb.
 rename Hab into Ha; move Ha after Hb.
 revert a b Ha0 Hb0 Ha Hb.
 induction l as [| d]; intros. {
-  apply prime_decomp_nil in Ha.
-  apply prime_decomp_nil in Hb.
+  apply prime_decomp_nil_iff in Ha.
+  apply prime_decomp_nil_iff in Hb.
   destruct Ha as [Ha| Ha]; [ easy | ].
   destruct Hb as [Hb| Hb]; [ easy | ].
   now subst a b.
 }
+specialize (in_prime_decomp_divide a d) as Hda.
+rewrite Ha in Hda; cbn in Hda.
+specialize (Hda (or_introl (eq_refl _))) as (da, Hda).
+specialize (in_prime_decomp_divide b d) as Hdb.
+rewrite Hb in Hdb; cbn in Hdb.
+specialize (Hdb (or_introl (eq_refl _))) as (db, Hdb).
+move db before da.
+rewrite Hda, Hdb; f_equal.
+apply IHl.
+-now intros H; rewrite H in Hda.
+-now intros H; rewrite H in Hdb.
+-idtac.
 ...
 
 Theorem tl_prime_decomp : ∀ n,
@@ -2335,6 +2350,9 @@ induction l as [| b l]; intros. {
   specialize (first_in_decomp_is_prime n) as H1.
   rewrite Hl in H1; cbn in H1.
   rewrite <- prime_decomp_of_prime in Hl; [ | easy ].
+  symmetry.
+  apply prime_decomp_nil_iff.
+Search (prime_decomp _ = []).
 ...
 
 Theorem decomp_hold_primes : ∀ n d, d ∈ prime_decomp n → is_prime d = true.
