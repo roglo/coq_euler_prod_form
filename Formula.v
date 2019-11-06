@@ -2210,13 +2210,12 @@ Qed.
 Lemma hd_prime_decomp_aux_prime_test_true : ∀ cnt n b d,
   2 ≤ n
   → 2 ≤ d
-  → 2 ≤ b
   → n + 2 ≤ cnt + d
   → (∀ e : nat, 2 ≤ e < d → n mod e ≠ 0)
   → b = hd 2 (prime_decomp_aux cnt n d)
   → prime_test (b - 2) b 2 = true.
 Proof.
-intros * H2n H2d H2b Hcnt Hnd Hb.
+intros * H2n H2d Hcnt Hnd Hb.
 revert d H2d Hcnt Hnd Hb.
 induction cnt; intros; [ now subst b | ].
 cbn - [ "/" "mod" ] in Hb.
@@ -2252,9 +2251,8 @@ replace (S cnt + d) with (cnt + S d) in Hcnt by flia.
 apply (IHcnt (S d)); [ flia H2d | easy | easy | easy ].
 Qed.
 
-...
-
-Theorem glop : ∀ n, is_prime (List.hd 2 (prime_decomp n)) = true.
+Theorem first_in_decomp_is_prime : ∀ n,
+  is_prime (List.hd 2 (prime_decomp n)) = true.
 Proof.
 intros.
 unfold is_prime, prime_decomp.
@@ -2268,130 +2266,11 @@ remember (hd 2 (prime_decomp_aux n n 2)) as b eqn:Hb.
 move b before n; move H2b before H2n.
 replace b with (S (S (b - 2))) by flia H2b.
 replace (S (S (b - 2))) with b by flia H2b.
-rewrite (prime_decomp_aux_more_iter 1) in Hb; [ | easy | flia | flia ].
-rewrite Nat.add_1_r in Hb.
-cbn - [ "/" "mod" ] in Hb.
-remember (n mod 2) as b1 eqn:Hb1; symmetry in Hb1.
-destruct b1; [ now subst b | ].
-rewrite (prime_decomp_aux_more_iter 1) in Hb; [ | easy | flia | flia ].
-rewrite Nat.add_1_r in Hb.
-cbn - [ "/" "mod" ] in Hb.
-remember (n mod 3) as b2 eqn:Hb2; symmetry in Hb2.
-destruct b2; [ now subst b | ].
-rewrite (prime_decomp_aux_more_iter 1) in Hb; [ | easy | flia | flia ].
-rewrite Nat.add_1_r in Hb.
-cbn - [ "/" "mod" ] in Hb.
-remember (n mod 4) as b3 eqn:Hb3; symmetry in Hb3.
-destruct b3. {
-  exfalso; cbn in Hb; subst b.
-  apply Nat.mod_divides in Hb3; [ | easy ].
-  destruct Hb3 as (b3, Hb3); rewrite Nat.mul_comm in Hb3.
-  rewrite Hb3 in Hb1.
-  replace (b3 * 4) with (0 + b3 * 2 * 2) in Hb1 by flia.
-  now rewrite Nat.mod_add in Hb1.
-}
-rewrite (prime_decomp_aux_more_iter 1) in Hb; [ | easy | flia | flia ].
-rewrite Nat.add_1_r in Hb.
-cbn - [ "/" "mod" ] in Hb.
-remember (n mod 5) as b4 eqn:Hb4; symmetry in Hb4.
-destruct b4; [ now subst b | ].
-rewrite (prime_decomp_aux_more_iter 1) in Hb; [ | easy | flia | flia ].
-rewrite Nat.add_1_r in Hb.
-cbn - [ "/" "mod" ] in Hb.
-remember (n mod 6) as b5 eqn:Hb5; symmetry in Hb5.
-destruct b5. {
-  exfalso; cbn in Hb; subst b.
-  apply Nat.mod_divides in Hb5; [ | easy ].
-  destruct Hb5 as (b5, Hb5); rewrite Nat.mul_comm in Hb5.
-  rewrite Hb5 in Hb1.
-  replace (b5 * 6) with (0 + b5 * 3 * 2) in Hb1 by flia.
-  now rewrite Nat.mod_add in Hb1.
-}
-(**)
-Lemma glop : ∀ n b d,
-  2 ≤ n
-  → 2 ≤ d
-  → 2 ≤ b
-  → (∀ e, 2 ≤ e < d → n mod e ≠ 0)
-  → b = hd 2 (prime_decomp_aux n n d)
-  → prime_test (b - 2) b 2 = true.
-Proof.
-intros * H2n H2d H2b Hnd Hb.
-rewrite (prime_decomp_aux_more_iter 1) in Hb; [ | easy | easy | flia H2d ].
-rewrite Nat.add_1_r in Hb.
-cbn - [ "/" "mod" ] in Hb.
-remember (n mod d) as b1 eqn:Hb1; symmetry in Hb1.
-destruct b1. {
-  cbn in Hb; subst b.
-  apply Nat.mod_divides in Hb1; [ | flia H2d ].
-  destruct Hb1 as (b1, Hb1).
-  destruct b1; [ flia H2n Hb1 | ].
-  destruct b1. {
-    rewrite Nat.mul_1_r in Hb1; subst d.
-    clear H2b H2d.
-    apply prev_not_div_prime_test_true; [ easy | easy | flia H2n | easy ].
-  }
-  apply prev_not_div_prime_test_true; [ easy | easy | flia H2n | ].
-  intros e He.
-  specialize (Hnd e He) as H1.
-  intros H2; apply H1; clear H1.
-  apply Nat.mod_divides in H2; [ | flia He ].
-  destruct H2 as (b2, Hb2); rewrite Nat.mul_comm in Hb2.
-  rewrite Hb1, Hb2, Nat.mul_shuffle0.
-  apply Nat.mod_mul; flia He.
-}
-assert (H : ∀ e, 2 ≤ e < S d → n mod e ≠ 0). {
-  intros e He.
-  destruct (Nat.eq_dec e d) as [Hed| Hed]. {
-    now subst e; intros H; rewrite H in Hb1.
-  }
-  apply Hnd; flia He Hed.
-}
-move H before Hnd; clear Hnd; rename H into Hnd.
-clear b1 Hb1.
-rewrite (prime_decomp_aux_more_iter 1) in Hb;
-  [ | easy | flia H2d | flia H2d ].
-rewrite Nat.add_1_r in Hb.
-cbn - [ "/" "mod" ] in Hb.
-remember (n mod S d) as b1 eqn:Hb1; symmetry in Hb1.
-destruct b1. {
-  cbn in Hb; subst b.
-  apply Nat.mod_divides in Hb1; [ | flia H2d ].
-  destruct Hb1 as (b1, Hb1).
-  destruct b1; [ flia H2n Hb1 | ].
-  destruct b1. {
-    rewrite Nat.mul_1_r in Hb1; subst n.
-    apply prev_not_div_prime_test_true; [ easy | easy | flia H2d | easy ].
-  }
-  apply prev_not_div_prime_test_true; [ easy | easy | flia H2n | ].
-  intros e He.
-  specialize (Hnd e He) as H1.
-  intros H2; apply H1; clear H1.
-  apply Nat.mod_divides in H2; [ | flia He ].
-  destruct H2 as (b2, Hb2); rewrite Nat.mul_comm in Hb2.
-  rewrite Hb1, Hb2, Nat.mul_shuffle0.
-  apply Nat.mod_mul; flia He.
-}
-assert (H : ∀ e, 2 ≤ e < S (S d) → n mod e ≠ 0). {
-  intros e He.
-  destruct (Nat.eq_dec e (S d)) as [Hed| Hed]. {
-    now subst e; intros H; rewrite H in Hb1.
-  }
-  apply Hnd; flia He Hed.
-}
-move H before Hnd; clear Hnd; rename H into Hnd.
-clear b1 Hb1.
-...
-now apply (hd_prime_decomp_aux_prime_test_true n b d 2).
-...
-  n, b, d : nat
-  H2n : 2 ≤ n
-  H2d : 2 ≤ d
-  H2b : 2 ≤ b
-  Hnd : ∀ e : nat, 2 ≤ e < S (S d) → n mod e ≠ 0
-  Hb : b = hd 2 (prime_decomp_aux n n (S (S d)))
-  ============================
-  prime_test (b - 2) b 2 = true
+apply (hd_prime_decomp_aux_prime_test_true n n b 2);
+  [ easy | easy | easy | | easy ].
+intros e He; flia He.
+Qed.
+
 ...
 
 (* https://en.wikipedia.org/wiki/Factorial#Number_theory *)
