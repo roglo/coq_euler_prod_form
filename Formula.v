@@ -2217,7 +2217,7 @@ Lemma hd_prime_decomp_aux_prime_test_true : ∀ cnt n b d,
   → prime_test (b - 2) b 2 = true.
 Proof.
 intros * H2n H2d H2b Hcnt Hnd Hb.
-revert n d H2n H2d Hcnt Hnd Hb.
+revert d H2d Hcnt Hnd Hb.
 induction cnt; intros; [ now subst b | ].
 cbn - [ "/" "mod" ] in Hb.
 remember (n mod d) as b1 eqn:Hb1; symmetry in Hb1.
@@ -2249,7 +2249,7 @@ assert (H : ∀ e, 2 ≤ e < 1 + d → n mod e ≠ 0). {
 move H before Hnd; clear Hnd; rename H into Hnd.
 clear b1 Hb1.
 replace (S cnt + d) with (cnt + S d) in Hcnt by flia.
-apply (IHcnt n (S d)); [ easy | flia H2d | easy | easy | easy ].
+apply (IHcnt (S d)); [ flia H2d | easy | easy | easy ].
 Qed.
 
 ...
