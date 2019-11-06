@@ -64,6 +64,9 @@ rewrite <- Nat.divide_div_mul_exact; [ | easy | easy ].
 now rewrite Nat.mul_comm, Nat.div_mul.
 Qed.
 
+Theorem List_hd_nth_0 {A} : ∀ l (d : A), hd d l = nth 0 l d.
+Proof. intros; now destruct l. Qed.
+
 Theorem List_map_map_map {A B C D} : ∀ (f : A → B → C) (g : A → D → B) h l,
   map (λ d, map (f d) (map (g d) (h d))) l =
   map (λ d, map (λ x, (f d (g d x))) (h d)) l.

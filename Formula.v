@@ -2271,6 +2271,92 @@ apply (hd_prime_decomp_aux_prime_test_true n n b 2);
 intros e He; flia He.
 Qed.
 
+Lemma prime_decomp_aux_not_nil : ∀ cnt n d,
+  2 ≤ n
+  → 2 ≤ d
+  → n + 2 ≤ cnt + d
+  → (∀ e : nat, 2 ≤ e < d → n mod e ≠ 0)
+  → prime_decomp_aux cnt n d ≠ [].
+Proof.
+intros * H2n H2d Hcnt Hnd.
+revert d H2d Hcnt Hnd.
+induction cnt; intros. {
+  assert (H : 2 ≤ n < d) by flia H2n Hcnt.
+  specialize (Hnd n H); clear H.
+  rewrite Nat.mod_same in Hnd; [ easy | flia H2n ].
+}
+cbn - [ "/" "mod" ].
+remember (n mod d) as b eqn:Hb; symmetry in Hb.
+destruct b; [ easy | ].
+rewrite Nat.add_succ_comm in Hcnt.
+apply IHcnt; [ flia H2d | easy | ].
+intros e He.
+destruct (Nat.eq_dec e d) as [Hed| Hed]. {
+  now subst e; intros H; rewrite H in Hb.
+}
+apply Hnd; flia He Hed.
+Qed.
+
+Theorem prime_decomp_nil : ∀ n, prime_decomp n = [] → n = 0 ∨ n = 1.
+Proof.
+intros * Hn.
+unfold prime_decomp in Hn.
+destruct n; [ now left | ].
+destruct n; [ now right | exfalso ].
+revert Hn.
+apply prime_decomp_aux_not_nil; [ flia | easy | easy | ].
+intros e He; flia He.
+Qed.
+
+Theorem prime_decomp_inj : ∀ a b,
+  a ≠ 0 → b ≠ 0 → prime_decomp a = prime_decomp b → a = b.
+Proof.
+intros * Ha0 Hb0 Hab.
+remember (prime_decomp b) as l eqn:Hb; symmetry in Hb.
+rename Hab into Ha; move Ha after Hb.
+revert a b Ha0 Hb0 Ha Hb.
+induction l as [| d]; intros. {
+  apply prime_decomp_nil in Ha.
+  apply prime_decomp_nil in Hb.
+  destruct Ha as [Ha| Ha]; [ easy | ].
+  destruct Hb as [Hb| Hb]; [ easy | ].
+  now subst a b.
+}
+...
+
+Theorem tl_prime_decomp : ∀ n,
+  tl (prime_decomp n) = prime_decomp (n / hd 0 (prime_decomp n)).
+Proof.
+intros.
+remember (prime_decomp n) as l eqn:Hl; symmetry in Hl.
+destruct l as [| a l]; [ easy | cbn ].
+revert n a Hl.
+induction l as [| b l]; intros. {
+  specialize (first_in_decomp_is_prime n) as H1.
+  rewrite Hl in H1; cbn in H1.
+  rewrite <- prime_decomp_of_prime in Hl; [ | easy ].
+...
+
+Theorem decomp_hold_primes : ∀ n d, d ∈ prime_decomp n → is_prime d = true.
+Proof.
+intros * Hdn.
+specialize (In_nth (prime_decomp n) d 2 Hdn) as (i & Hilen & Hid).
+clear Hdn; subst d.
+revert n Hilen.
+induction i; intros. {
+  rewrite <- List_hd_nth_0.
+  apply first_in_decomp_is_prime.
+}
+remember (prime_decomp n) as l eqn:Hl; symmetry in Hl.
+destruct l as [| a l]; [ easy | ].
+cbn in Hilen; cbn.
+apply Nat.succ_lt_mono in Hilen.
+...
+specialize (tl_prime_decomp n) as H1.
+rewrite Hl in H1; cbn in H1; rewrite H1.
+apply IHi.
+rewrite H1 in Hilen.
+easy.
 ...
 
 (* https://en.wikipedia.org/wiki/Factorial#Number_theory *)
