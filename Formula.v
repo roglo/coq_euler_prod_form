@@ -2272,6 +2272,7 @@ destruct b5. {
   replace (b5 * 6) with (0 + b5 * 3 * 2) in Hb1 by flia.
   now rewrite Nat.mod_add in Hb1.
 }
+(**)
 Lemma glop : ∀ n b d,
   2 ≤ n
   → 2 ≤ d
@@ -2301,14 +2302,17 @@ destruct b1. {
     apply Nat.leb_le.
     destruct b2; [ flia H2d Hb2 | ].
     destruct b2; [ flia Hb2 | exfalso ].
-(* blocked *)
-...
-destruct b1; [ now subst b | ].
-rewrite (prime_decomp_aux_more_iter 1) in Hb; [ | easy | flia | flia ].
-rewrite Nat.add_1_r in Hb.
-cbn - [ "/" "mod" ] in Hb.
-remember (n mod 6) as b5 eqn:Hb5; symmetry in Hb5.
-
+    destruct b1; [ flia H2n Hb1 | ].
+    specialize (Hnd (S ( S b2))) as H1.
+    assert (H : 2 ≤ S (S b2) < d). {
+      split; [ flia | flia Hb2 ].
+    }
+    specialize (H1 H); clear H.
+    apply H1.
+    rewrite Hb1, Hb2.
+    rewrite Nat.mul_shuffle0.
+    now apply Nat.mod_mul.
+  }
 ...
   H2n : 2 ≤ n
   H2b : 2 ≤ b
