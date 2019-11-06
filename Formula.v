@@ -2207,8 +2207,6 @@ destruct b1. {
 apply IHcnt; [ easy | flia H2d | flia Hcnt | easy ].
 Qed.
 
-...
-
 Theorem glop : ∀ n, is_prime (List.hd 2 (prime_decomp n)) = true.
 Proof.
 intros.
@@ -2280,11 +2278,25 @@ destruct b1. {
   cbn in Hb; subst b.
   apply Nat.mod_divides in Hb1; [ | flia H2d ].
   destruct Hb1 as (b1, Hb1).
-(**)
-destruct b1; [ flia H2n Hb1 | ].
-destruct b1. {
-  rewrite Nat.mul_1_r in Hb1; subst d.
-  clear H2b H2d.
+  destruct b1; [ flia H2n Hb1 | ].
+  destruct b1. {
+    rewrite Nat.mul_1_r in Hb1; subst d.
+    clear H2b H2d.
+    apply prev_not_div_prime_test_true; [ easy | easy | flia H2n | easy ].
+  }
+  apply prev_not_div_prime_test_true; [ easy | easy | flia H2n | ].
+  intros e He.
+  specialize (Hnd e He) as H1.
+  intros H2; apply H1; clear H1.
+  apply Nat.mod_divides in H2; [ | flia He ].
+  destruct H2 as (b2, Hb2); rewrite Nat.mul_comm in Hb2.
+  rewrite Hb1, Hb2, Nat.mul_shuffle0.
+  apply Nat.mod_mul; flia He.
+}
+apply prev_not_div_prime_test_true; [ easy | easy | flia H2b | ].
+intros e He H1.
+apply Nat.mod_divides in H1; [ | flia He ].
+destruct H1 as (b2, Hb2).
 ...
 destruct (lt_dec b1 d) as [Hbd| Hbd]. {
   specialize (Hnd b1) as H1.
