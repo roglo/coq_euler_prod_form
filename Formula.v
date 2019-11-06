@@ -2487,7 +2487,15 @@ induction l as [| b l]; intros. {
 symmetry.
 destruct n; [ easy | ].
 destruct n; [ easy | ].
-assert (HH : a ≤ S (S n)) by admit.
+assert (HH : a ≤ S (S n)). {
+  specialize (in_prime_decomp_divide (S (S n)) a) as H1.
+  rewrite Hl in H1.
+  specialize (H1 (or_introl eq_refl)).
+  destruct H1 as (c, Hc).
+  rewrite Hc.
+  destruct c; [ easy | ].
+  cbn; flia.
+}
 remember (S (S n) / a) as b1 eqn:Hb1; symmetry in Hb1.
 destruct b1. {
   exfalso.
@@ -2499,6 +2507,23 @@ destruct b1. {
 }
 destruct b1. {
   exfalso.
+  remember (S n) as n'.
+  cbn - [ "/" "mod" ] in Hl; subst n'.
+  remember (S (S n) mod 2) as b2 eqn:Hb2; symmetry in Hb2.
+  destruct b2. {
+    remember (prime_decomp_aux _ _ _) as x.
+    injection Hl; clear Hl; intros Hl Ha2; subst a x.
+    rewrite Hb1 in Hl.
+    now rewrite prime_decomp_aux_at_1 in Hl.
+  }
+  cbn - [ "/" "mod" ] in Hl.
+  remember (S (S n) mod 3) as b3 eqn:Hb3; symmetry in Hb3.
+  destruct b3. {
+    remember (prime_decomp_aux _ _ _) as x.
+    injection Hl; clear Hl; intros Hl Ha3; subst a x.
+    rewrite Hb1 in Hl.
+    rewrite prime_decomp_aux_at_1 in Hl; [ easy | flia ].
+  }
 ...
   apply Nat.div_small_iff in Hb1; [ flia HH Hb1 | ].
   intros H1; subst a.
