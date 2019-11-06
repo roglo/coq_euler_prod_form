@@ -2238,7 +2238,6 @@ rewrite Nat.add_1_r in Hb.
 cbn - [ "/" "mod" ] in Hb.
 remember (n mod 2) as b1 eqn:Hb1; symmetry in Hb1.
 destruct b1; [ now subst b | ].
-cbn in Hb.
 rewrite (prime_decomp_aux_more_iter 1) in Hb; [ | easy | flia | flia ].
 rewrite Nat.add_1_r in Hb.
 cbn - [ "/" "mod" ] in Hb.
@@ -2273,6 +2272,59 @@ destruct b5. {
   replace (b5 * 6) with (0 + b5 * 3 * 2) in Hb1 by flia.
   now rewrite Nat.mod_add in Hb1.
 }
+Lemma glop : ∀ n b d,
+  2 ≤ n
+  → 2 ≤ d
+  → 2 ≤ b
+  → (∀ e, 2 ≤ e < d → n mod e ≠ 0)
+  → b = hd 2 (prime_decomp_aux n n d)
+  → prime_test (b - 2) b 2 = true.
+Proof.
+intros * H2n H2d H2b Hnd Hb.
+rewrite (prime_decomp_aux_more_iter 1) in Hb; [ | easy | easy | flia H2d ].
+rewrite Nat.add_1_r in Hb.
+cbn - [ "/" "mod" ] in Hb.
+remember (n mod d) as b1 eqn:Hb1; symmetry in Hb1.
+destruct b1. {
+  cbn in Hb; subst b.
+  apply Nat.mod_divides in Hb1; [ | flia H2d ].
+  destruct Hb1 as (b1, Hb1).
+  rewrite (prime_test_more_iter 1); [ | easy | flia H2d ].
+  rewrite (prime_test_more_iter 1); [ | easy | flia H2d ].
+  rewrite (prime_test_more_iter 1); [ | easy | flia H2d ].
+  replace (d - 2 + 1 + 1 + 1) with (S d) by flia H2d.
+  cbn - [ "/" "mod" ].
+  remember (d mod 2) as b2 eqn:Hb2; symmetry in Hb2.
+  destruct b2. {
+    apply Nat.mod_divides in Hb2; [ | easy ].
+    destruct Hb2 as (b2, Hb2).
+    apply Nat.leb_le.
+    destruct b2; [ flia H2d Hb2 | ].
+    destruct b2; [ flia Hb2 | exfalso ].
+(* blocked *)
+...
+destruct b1; [ now subst b | ].
+rewrite (prime_decomp_aux_more_iter 1) in Hb; [ | easy | flia | flia ].
+rewrite Nat.add_1_r in Hb.
+cbn - [ "/" "mod" ] in Hb.
+remember (n mod 6) as b5 eqn:Hb5; symmetry in Hb5.
+
+...
+  H2n : 2 ≤ n
+  H2b : 2 ≤ b
+  b1 : nat
+  Hb1 : n mod 2 = S b1
+  b2 : nat
+  Hb2 : n mod 3 = S b2
+  b3 : nat
+  Hb3 : n mod 4 = S b3
+  b4 : nat
+  Hb4 : n mod 5 = S b4
+  b5 : nat
+  Hb5 : n mod 6 = S b5
+  Hb : b = hd 2 (prime_decomp_aux n n 7)
+  ============================
+  prime_test (b - 2) b 2 = true
 ...
 
 (* https://en.wikipedia.org/wiki/Factorial#Number_theory *)
