@@ -533,33 +533,6 @@ induction cnt; intros. {
   cbn in Hnc; cbn.
   revert d H2d Hnc.
   induction k; intros; [ easy | cbn ].
-Compute (is_prime 2).
-Compute (prime_test 0 2 2).
-Compute (prime_test 1 2 2).
-Print is_prime.
-Print prime_test.
-Print prime_decomp_aux.
-Abort. (*
-...
-Compute (prime_test 2 2 2).
-Compute (prime_test 3 2 2).
-Compute (prime_test 1 3 2).
-Compute (prime_test 2 3 2).
-Compute (prime_test 3 3 2).
-...
-Compute (prime_test 3 5 2).
-Compute (prime_test 4 5 2).
-Compute (prime_test 5 5 2).
-Print is_prime.
-Print prime_test.
-...
-cnt = 0
-n = 2
-d = 2
-
-n + 2 = 4
-cnt + d = 2
-...
   rewrite Nat.mod_small; [ | flia Hnc ].
   destruct n; [ flia H2n | ].
   apply IHk; flia Hnc.
@@ -569,4 +542,3 @@ remember (n mod d) as b eqn:Hb; symmetry in Hb.
 destruct b; [ easy | ].
 apply IHcnt; [ easy | flia H2d | flia Hnc ].
 Qed.
-*)
