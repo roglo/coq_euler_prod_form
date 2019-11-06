@@ -2338,27 +2338,6 @@ destruct (Nat.eq_dec e d) as [Hed| Hed]. {
 apply Hdn; flia He Hed.
 Qed.
 
-(*
-Lemma prime_decomp_aux_cons : ∀ n b l d,
-  2 ≤ n
-  → 2 ≤ d
-  → n * d = b
-  → prime_decomp_aux b b 2 = d :: l
-  → prime_decomp_aux n n 2 = l.
-Proof.
-intros * H2n H2d Hnd Hbd.
-assert (H2b : 2 ≤ b). {
-  subst b.
-  destruct n; [ easy | ].
-  destruct n; [ flia H2n | ].
-  destruct d; [ easy | ].
-  destruct d; [ flia H2d | ].
-  cbn; remember (n * (S (S d))); flia.
-}
-subst b.
-...
-*)
-
 Lemma prime_decomp_aux_cons : ∀ p b l n d cb cn,
   2 ≤ n
   → 2 ≤ b
@@ -2371,7 +2350,7 @@ Lemma prime_decomp_aux_cons : ∀ p b l n d cb cn,
   → prime_decomp_aux cn n d = l.
 Proof.
 intros * H2n H2b H2d H2p Hcb Hcn Hb Hbp.
-revert n d p b cn H2n H2b H2d H2p Hcb Hcn Hb Hbp.
+revert p b n d cn H2n H2b H2d H2p Hcb Hcn Hb Hbp.
 induction cb; intros; [ easy | ].
 cbn in Hbp.
 remember (b mod d) as b1 eqn:Hb1; symmetry in Hb1.
@@ -2393,20 +2372,19 @@ destruct b1. {
   rewrite Nat.add_comm in Hl.
   now rewrite (prime_decomp_aux_more_iter cb).
 }
-rewrite Nat.add_succ_comm in Hcb.
-apply IHcb with (n := n) (cn := cn - 1) in Hbp; try easy.
-2: flia H2d.
-2: flia Hcn.
-destruct cn; [ easy | ].
-rewrite Nat.sub_succ, Nat.sub_0_r in Hbp.
-cbn.
+rewrite (prime_decomp_aux_more_iter 1); try easy.
+rewrite Nat.add_1_r; cbn.
 remember (n mod d) as b2 eqn:Hb2; symmetry in Hb2.
-destruct b2; [ | easy ].
-apply Nat.mod_divides in Hb2; [ | now intros H1; subst d ].
-destruct Hb2 as (b2, Hb2); rewrite Nat.mul_comm in Hb2.
-rewrite Hb2, Nat.div_mul; [ | now intros H1; subst d ].
-rewrite Hb2 in Hbp.
-...
+destruct b2. {
+  apply Nat.mod_divides in Hb2; [ | flia H2d ].
+  destruct Hb2 as (b2, Hb2).
+  rewrite <- Hb, Hb2 in Hb1.
+  rewrite <- Nat.mul_assoc, Nat.mul_comm in Hb1.
+  rewrite Nat.mod_mul in Hb1; [ easy | flia H2d ].
+}
+rewrite Nat.add_succ_comm in Hcb.
+apply (IHcb p b); try easy; [ flia H2d | flia Hcn ].
+Qed.
 
 Theorem prime_decomp_mul : ∀ n d l,
   2 ≤ d
@@ -2445,9 +2423,8 @@ destruct b; [ easy | ].
 assert (H2b : 2 ≤ S (S b)) by flia.
 remember (S (S b)) as b'; clear b Heqb'; rename b' into b.
 move H2n after Hb; move H2b after Hb.
-...
-now apply (prime_decomp_aux_cons d b).
-...
+now apply (prime_decomp_aux_cons) with (n := n) (cn := n) in Hnd.
+Qed.
 
 Theorem prime_decomp_inj : ∀ a b,
   a ≠ 0 → b ≠ 0 → prime_decomp a = prime_decomp b → a = b.
@@ -2475,9 +2452,18 @@ apply IHl.
 -now intros H; rewrite H in Hda.
 -now intros H; rewrite H in Hdb.
 -rewrite Hda in Ha.
-...
- now apply (prime_decomp_mul _ d).
-...
+ apply (prime_decomp_mul _ d); [ | easy ].
+ destruct d; [ flia Ha0 Hda | ].
+ destruct d; [ | flia ].
+ apply (in_prime_decomp_ge_2 b 1).
+ now rewrite Hb; left.
+-rewrite Hdb in Hb.
+ apply (prime_decomp_mul _ d); [ | easy ].
+ destruct d; [ flia Ha0 Hda | ].
+ destruct d; [ | flia ].
+ apply (in_prime_decomp_ge_2 a 1).
+ now rewrite Ha; left.
+Qed.
 
 Theorem tl_prime_decomp : ∀ n,
   tl (prime_decomp n) = prime_decomp (n / hd 0 (prime_decomp n)).
@@ -2492,7 +2478,12 @@ induction l as [| b l]; intros. {
   rewrite <- prime_decomp_of_prime in Hl; [ | easy ].
   symmetry.
   apply prime_decomp_nil_iff.
-Search (prime_decomp _ = []).
+  assert (H2a : 2 ≤ a) by now apply prime_ge_2.
+  apply prime_decomp_inj in Hl; [ | | flia H2a ].
+  -subst n; right; apply Nat.div_same; flia H2a.
+  -intros H; subst n; cbn in Hl.
+   now rewrite prime_decomp_of_prime in Hl.
+}
 ...
 
 Theorem decomp_hold_primes : ∀ n d, d ∈ prime_decomp n → is_prime d = true.
