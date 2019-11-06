@@ -2311,6 +2311,33 @@ split.
 -now intros [Hn| Hn]; subst n.
 Qed.
 
+Lemma prime_decomp_aux_cons_nil : ∀ cnt n d l,
+  2 ≤ n
+  → 2 ≤ d
+  → n + 2 ≤ cnt + d
+  → (∀ e, 2 ≤ e < d → n mod e ≠ 0)
+  → prime_decomp_aux cnt n d = n :: l
+  → l = [].
+Proof.
+intros * H2n H2d Hcnt Hdn Hnd.
+revert d l H2d Hcnt Hdn Hnd.
+induction cnt; intros; [ easy | ].
+cbn in Hnd.
+remember (n mod d) as b eqn:Hb; symmetry in Hb.
+destruct b. {
+  injection Hnd; clear Hnd; intros Hl Hd; subst d.
+  rewrite Nat.div_same in Hl; [ | flia H2n ].
+  now rewrite prime_decomp_aux_at_1 in Hl.
+}
+rewrite Nat.add_succ_comm in Hcnt.
+apply (IHcnt (S d)); [ flia H2d | easy | | easy ].
+intros e He.
+destruct (Nat.eq_dec e d) as [Hed| Hed]. {
+  now subst e; intros H; rewrite H in Hb.
+}
+apply Hdn; flia He Hed.
+Qed.
+
 Theorem prime_decomp_mul : ∀ n d l,
   prime_decomp (n * d) = d :: l
   → prime_decomp n = l.
@@ -2334,25 +2361,12 @@ destruct n. {
     injection Hnd; clear Hnd; intros Hl Hd; subst x.
     now subst d.
   }
-  replace (d - 1) with (S (d - 2)) in Hnd by flia H2d.
-  cbn - [ "/" "mod" ] in Hnd.
-  remember (d mod 3) as b1 eqn:Hb1; symmetry in Hb1.
-  move b1 before b.
-  destruct b1. {
-    remember (prime_decomp_aux _ _ _) as x.
-    injection Hnd; clear Hnd; intros Hl Hd; subst x.
-    now subst d.
-  }
-  rewrite (prime_decomp_aux_more_iter 1) in Hnd; [ | easy | flia | flia ].
-  rewrite Nat.add_1_r in Hnd.
-  cbn - [ "/" "mod" ] in Hnd.
-  remember (d mod 4) as b2 eqn:Hb2; symmetry in Hb2.
-  move b2 before b1.
-  destruct b2. {
-    remember (prime_decomp_aux _ _ _) as x.
-    injection Hnd; clear Hnd; intros Hl Hd; subst x.
-    now subst d.
-  }
+  symmetry.
+  apply prime_decomp_aux_cons_nil in Hnd; [ easy | easy | flia | flia | ].
+  intros e He H.
+  replace e with 2 in H by flia He.
+  now rewrite H in Hb.
+}
 ...
 
 Theorem prime_decomp_inj : ∀ a b,
