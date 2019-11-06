@@ -2527,7 +2527,32 @@ destruct b1. {
   rewrite Hl in H1; cbn in H1.
   now rewrite prime_decomp_of_prime in Hl.
 }
-Search (prime_decomp _ = _ :: _).
+remember (S n) as sn.
+cbn - [ "/" "mod" ] in Hl; subst sn.
+remember (S (S n) mod 2) as b2 eqn:Hb2; symmetry in Hb2.
+destruct b2. {
+  remember (prime_decomp_aux _ _ _) as x.
+  injection Hl; clear Hl; intros Hl Ha2; subst a x.
+  rewrite Hb1 in Hl.
+  unfold prime_decomp.
+  rewrite (prime_decomp_aux_more_iter (S (S b1))) in Hl; cycle 1. {
+    flia.
+  } {
+    easy.
+  } {
+    apply Nat.add_le_mono_r.
+    rewrite <- Hb1.
+    replace (S (S n)) with (n + 1 * 2) by flia.
+    rewrite Nat.div_add; [ | easy ].
+    rewrite <- (Nat.add_1_r n).
+    apply Nat.add_le_mono_r.
+    clear.
+    rewrite <- Nat.div_1_r.
+    apply Nat.div_le_compat_l; flia.
+  }
+  rewrite Nat.add_comm in Hl.
+  rewrite (prime_decomp_aux_more_iter (S n)); [ easy | flia | easy | easy ].
+}
 ...
 
 Theorem decomp_hold_primes : ∀ n d, d ∈ prime_decomp n → is_prime d = true.
