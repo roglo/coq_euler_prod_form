@@ -2484,6 +2484,20 @@ induction l as [| b l]; intros. {
   -intros H; subst n; cbn in Hl.
    now rewrite prime_decomp_of_prime in Hl.
 }
+symmetry.
+unfold prime_decomp in Hl |-*.
+destruct n; [ easy | ].
+destruct n; [ easy | ].
+(* from Hl, I can make a lemma saying that S (S n) must be greater
+   than a *)
+...
+remember (S n / a) as b1 eqn:Hb1; symmetry in Hb1.
+destruct b1. {
+  exfalso.
+
+}
+destruct b1. {
+  exfalso.
 ...
 
 Theorem decomp_hold_primes : ∀ n d, d ∈ prime_decomp n → is_prime d = true.
