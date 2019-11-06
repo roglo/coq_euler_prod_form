@@ -2174,6 +2174,51 @@ destruct b; [ easy | ].
 apply IHcnt; flia H2d.
 Qed.
 
+(*
+Lemma glop : ∀ cnt c n d p,
+  2 ≤ n
+  → 2 ≤ p
+  → n + 2 ≤ cnt + d
+  → p ≤ c + d
+  → hd 2 (prime_decomp_aux cnt n d) = p
+  → prime_test c p d = true.
+Proof.
+intros * H2n H2p Hcnt Hc Hp.
+revert c n d p H2n H2p Hcnt Hc Hp.
+induction cnt; intros. {
+  cbn in Hp; subst p; cbn in Hcnt.
+  revert d H2n Hcnt Hc.
+  induction c; intros; [ easy | cbn ].
+  remember (2 mod d) as b eqn:Hb; symmetry in Hb.
+  destruct b. {
+    destruct d; [ flia Hcnt | ].
+    destruct d; [ flia Hcnt | easy ].
+  }
+  apply IHc; [ easy | flia Hcnt | flia Hc ].
+}
+cbn in Hp.
+remember (n mod d) as b eqn:Hb; symmetry in Hb.
+destruct b. {
+  cbn in Hp; subst p.
+  destruct c; [ easy | cbn ].
+  rewrite Nat.mod_same; [ | flia H2p ].
+  now apply Nat.leb_le.
+}
+destruct c; [ easy | cbn ].
+remember (p mod d) as b1 eqn:Hb1; symmetry in Hb1.
+destruct b1. {
+  apply Nat.leb_le.
+  destruct (Nat.eq_dec d 0) as [H0d| H0d]; [ now subst d | ].
+  apply Nat.mod_divides in Hb1; [ | easy ].
+  destruct Hb1 as (b1, Hb1).
+  destruct cnt. {
+    cbn in Hp.
+    subst p; flia H2n Hcnt.
+  }
+  cbn - [ "/" "mod" ] in Hp.
+...
+*)
+
 Theorem glop : ∀ n, is_prime (List.hd 2 (prime_decomp n)) = true.
 Proof.
 intros.
@@ -2188,6 +2233,31 @@ remember (hd 2 (prime_decomp_aux n n 2)) as b eqn:Hb; symmetry in Hb.
 move b before n; move H2b before H2n.
 replace b with (S (S (b - 2))) by flia H2b.
 replace (S (S (b - 2))) with b by flia H2b.
+destruct n; [ easy | ].
+cbn - [ "/" "mod" ] in Hb.
+remember (S n mod 2) as b1 eqn:Hb1; symmetry in Hb1.
+destruct b1; [ now subst b | ].
+cbn in Hb.
+rewrite (prime_decomp_aux_more_iter 1) in Hb; [ | easy | flia | flia ].
+rewrite Nat.add_1_r in Hb.
+cbn - [ "/" "mod" ] in Hb.
+remember (S n mod 3) as b2 eqn:Hb2; symmetry in Hb2.
+destruct b2; [ now subst b | ].
+rewrite (prime_decomp_aux_more_iter 1) in Hb; [ | easy | flia | flia ].
+rewrite Nat.add_1_r in Hb.
+cbn - [ "/" "mod" ] in Hb.
+remember (S n mod 4) as b3 eqn:Hb3; symmetry in Hb3.
+destruct b3. {
+  exfalso; cbn in Hb; subst b.
+  apply Nat.mod_divides in Hb3; [ | easy ].
+  destruct Hb3 as (b3, Hb3); rewrite Nat.mul_comm in Hb3.
+  rewrite Hb3 in Hb1.
+  replace (b3 * 4) with (0 + b3 * 2 * 2) in Hb1 by flia.
+  now rewrite Nat.mod_add in Hb1.
+}
+rewrite (prime_decomp_aux_more_iter 1) in Hb; [ | easy | flia | flia ].
+rewrite Nat.add_1_r in Hb.
+cbn - [ "/" "mod" ] in Hb.
 ...
 
 (* https://en.wikipedia.org/wiki/Factorial#Number_theory *)
