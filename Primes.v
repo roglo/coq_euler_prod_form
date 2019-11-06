@@ -523,22 +523,22 @@ Qed.
 
 Lemma prime_test_more_iter : ∀ k cnt n d,
   2 ≤ n
-  → 2 ≤ d
-  → n + 2 ≤ cnt + d
+  → n ≤ cnt + d
   → prime_test cnt n d = prime_test (cnt + k) n d.
 Proof.
-intros * H2n H2d Hnc.
-revert n k d H2n H2d Hnc.
+intros * H2n Hnc.
+revert n k d H2n Hnc.
 induction cnt; intros. {
   cbn in Hnc; cbn.
-  revert d H2d Hnc.
+  revert d Hnc.
   induction k; intros; [ easy | cbn ].
-  rewrite Nat.mod_small; [ | flia Hnc ].
+  remember (n mod d) as b eqn:Hb; symmetry in Hb.
+  destruct b; [ now symmetry; apply Nat.leb_le | ].
   destruct n; [ flia H2n | ].
   apply IHk; flia Hnc.
 }
 cbn - [ "/" "mod" ].
 remember (n mod d) as b eqn:Hb; symmetry in Hb.
 destruct b; [ easy | ].
-apply IHcnt; [ easy | flia H2d | flia Hnc ].
+apply IHcnt; [ easy | flia Hnc ].
 Qed.
