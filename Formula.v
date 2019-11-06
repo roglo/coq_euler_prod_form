@@ -2207,18 +2207,18 @@ destruct b1. {
 apply IHcnt; [ easy | flia H2d | flia Hcnt | easy ].
 Qed.
 
-Lemma hd_prime_decomp_aux_prime_test_true : ∀ n b d k,
+Lemma hd_prime_decomp_aux_prime_test_true : ∀ cnt n b d k,
   2 ≤ n
   → 2 ≤ d
   → 2 ≤ b
+  → n + 2 ≤ cnt + k + d
   → (∀ e : nat, 2 ≤ e < k + d → n mod e ≠ 0)
-  → b = hd 2 (prime_decomp_aux n n (k + d))
+  → b = hd 2 (prime_decomp_aux cnt n (k + d))
   → prime_test (b - 2) b 2 = true.
 Proof.
-intros * H2n H2d H2b Hnd Hb.
-rewrite (prime_decomp_aux_more_iter 1) in Hb;
-  [ | easy | flia H2d | flia H2d ].
-rewrite Nat.add_1_r in Hb.
+intros * H2n H2d H2b Hcnt Hnd Hb.
+revert n k d H2n H2d Hcnt Hnd Hb.
+induction cnt; intros; [ now subst b | ].
 cbn - [ "/" "mod" ] in Hb.
 remember (n mod (k + d)) as b1 eqn:Hb1; symmetry in Hb1.
 destruct b1. {
@@ -2248,6 +2248,11 @@ assert (H : ∀ e, 2 ≤ e < k + 1 + d → n mod e ≠ 0). {
 }
 move H before Hnd; clear Hnd; rename H into Hnd.
 clear b1 Hb1.
+rewrite Nat.add_1_r in Hnd.
+replace (S cnt + k) with (cnt + S k) in Hcnt by flia.
+now apply (IHcnt n (S k) d).
+Qed.
+
 ...
 
 Theorem glop : ∀ n, is_prime (List.hd 2 (prime_decomp n)) = true.
