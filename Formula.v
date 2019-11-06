@@ -2174,50 +2174,40 @@ destruct b; [ easy | ].
 apply IHcnt; flia H2d.
 Qed.
 
-(*
-Lemma glop : ∀ cnt c n d p,
+Lemma prev_not_div_prime_test_true : ∀ cnt n d,
   2 ≤ n
-  → 2 ≤ p
-  → n + 2 ≤ cnt + d
-  → p ≤ c + d
-  → hd 2 (prime_decomp_aux cnt n d) = p
-  → prime_test c p d = true.
+  → 2 ≤ d
+  → n ≤ cnt + d
+  → (∀ e, 2 ≤ e < n → n mod e ≠ 0)
+  → prime_test cnt n d = true.
 Proof.
-intros * H2n H2p Hcnt Hc Hp.
-revert c n d p H2n H2p Hcnt Hc Hp.
-induction cnt; intros. {
-  cbn in Hp; subst p; cbn in Hcnt.
-  revert d H2n Hcnt Hc.
-  induction c; intros; [ easy | cbn ].
-  remember (2 mod d) as b eqn:Hb; symmetry in Hb.
-  destruct b. {
-    destruct d; [ flia Hcnt | ].
-    destruct d; [ flia Hcnt | easy ].
-  }
-  apply IHc; [ easy | flia Hcnt | flia Hc ].
-}
-cbn in Hp.
-remember (n mod d) as b eqn:Hb; symmetry in Hb.
-destruct b. {
-  cbn in Hp; subst p.
-  destruct c; [ easy | cbn ].
-  rewrite Nat.mod_same; [ | flia H2p ].
-  now apply Nat.leb_le.
-}
-destruct c; [ easy | cbn ].
-remember (p mod d) as b1 eqn:Hb1; symmetry in Hb1.
+intros * H2n H2d Hcnt Hn.
+revert n d H2n H2d Hcnt Hn.
+induction cnt; intros; [ easy | cbn ].
+remember (n mod d) as b1 eqn:Hb1; symmetry in Hb1.
 destruct b1. {
   apply Nat.leb_le.
-  destruct (Nat.eq_dec d 0) as [H0d| H0d]; [ now subst d | ].
-  apply Nat.mod_divides in Hb1; [ | easy ].
+  apply Nat.mod_divides in Hb1; [ | flia H2d ].
   destruct Hb1 as (b1, Hb1).
-  destruct cnt. {
-    cbn in Hp.
-    subst p; flia H2n Hcnt.
+  destruct b1; [ flia H2d Hb1 | ].
+  destruct b1; [ flia Hb1 | ].
+  specialize (Hn (S (S b1))) as H1.
+  assert (H : 2 ≤ S (S b1) < n). {
+    split; [ flia | ].
+    rewrite Hb1; remember (S (S b1)) as b.
+    destruct d; [ flia H2d | cbn ].
+    destruct d; [ flia H2d | cbn ].
+    remember (d * b); flia Heqb.
   }
-  cbn - [ "/" "mod" ] in Hp.
+  specialize (H1 H).
+  exfalso; apply H1; clear H1.
+  rewrite Hb1.
+  now apply Nat.mod_mul.
+}
+apply IHcnt; [ easy | flia H2d | flia Hcnt | easy ].
+Qed.
+
 ...
-*)
 
 Theorem glop : ∀ n, is_prime (List.hd 2 (prime_decomp n)) = true.
 Proof.
@@ -2290,6 +2280,16 @@ destruct b1. {
   cbn in Hb; subst b.
   apply Nat.mod_divides in Hb1; [ | flia H2d ].
   destruct Hb1 as (b1, Hb1).
+(**)
+destruct b1; [ flia H2n Hb1 | ].
+destruct b1. {
+  rewrite Nat.mul_1_r in Hb1; subst d.
+  clear H2b H2d.
+...
+destruct (lt_dec b1 d) as [Hbd| Hbd]. {
+  specialize (Hnd b1) as H1.
+  assert (H1 : 2 ≤ b1
+...
   rewrite (prime_test_more_iter 1); [ | easy | flia H2d ].
   rewrite (prime_test_more_iter 1); [ | easy | flia H2d ].
   rewrite (prime_test_more_iter 1); [ | easy | flia H2d ].
@@ -2313,22 +2313,8 @@ destruct b1. {
     rewrite Nat.mul_shuffle0.
     now apply Nat.mod_mul.
   }
-...
-  H2n : 2 ≤ n
-  H2b : 2 ≤ b
-  b1 : nat
-  Hb1 : n mod 2 = S b1
-  b2 : nat
-  Hb2 : n mod 3 = S b2
-  b3 : nat
-  Hb3 : n mod 4 = S b3
-  b4 : nat
-  Hb4 : n mod 5 = S b4
-  b5 : nat
-  Hb5 : n mod 6 = S b5
-  Hb : b = hd 2 (prime_decomp_aux n n 7)
-  ============================
-  prime_test (b - 2) b 2 = true
+  rewrite (prime_test_more_iter 1); [ | easy | flia H2d ].
+  rewrite Nat.add_1_r; cbn - [ "/" "mod" ].
 ...
 
 (* https://en.wikipedia.org/wiki/Factorial#Number_theory *)
