@@ -2293,40 +2293,42 @@ destruct b1. {
   rewrite Hb1, Hb2, Nat.mul_shuffle0.
   apply Nat.mod_mul; flia He.
 }
-apply prev_not_div_prime_test_true; [ easy | easy | flia H2b | ].
-intros e He H1.
-apply Nat.mod_divides in H1; [ | flia He ].
-destruct H1 as (b2, Hb2).
-...
-destruct (lt_dec b1 d) as [Hbd| Hbd]. {
-  specialize (Hnd b1) as H1.
-  assert (H1 : 2 ≤ b1
-...
-  rewrite (prime_test_more_iter 1); [ | easy | flia H2d ].
-  rewrite (prime_test_more_iter 1); [ | easy | flia H2d ].
-  rewrite (prime_test_more_iter 1); [ | easy | flia H2d ].
-  replace (d - 2 + 1 + 1 + 1) with (S d) by flia H2d.
-  cbn - [ "/" "mod" ].
-  remember (d mod 2) as b2 eqn:Hb2; symmetry in Hb2.
+rewrite (prime_decomp_aux_more_iter 1) in Hb;
+  [ | easy | flia H2d | flia H2d ].
+rewrite Nat.add_1_r in Hb.
+cbn - [ "/" "mod" ] in Hb.
+remember (n mod S d) as b2 eqn:Hb2; symmetry in Hb2.
+destruct b2. {
+  cbn in Hb; subst b.
+  apply Nat.mod_divides in Hb2; [ | flia H2d ].
+  destruct Hb2 as (b2, Hb2).
+  destruct b2; [ flia H2n Hb2 | ].
   destruct b2. {
-    apply Nat.mod_divides in Hb2; [ | easy ].
-    destruct Hb2 as (b2, Hb2).
-    apply Nat.leb_le.
-    destruct b2; [ flia H2d Hb2 | ].
-    destruct b2; [ flia Hb2 | exfalso ].
-    destruct b1; [ flia H2n Hb1 | ].
-    specialize (Hnd (S ( S b2))) as H1.
-    assert (H : 2 ≤ S (S b2) < d). {
-      split; [ flia | flia Hb2 ].
+    rewrite Nat.mul_1_r in Hb2; subst n.
+    apply prev_not_div_prime_test_true; [ easy | easy | flia H2d | ].
+    intros e He.
+    destruct (Nat.eq_dec e d) as [Hed| Hed]. {
+      now subst e; intros H; rewrite H in Hb1.
     }
-    specialize (H1 H); clear H.
-    apply H1.
-    rewrite Hb1, Hb2.
-    rewrite Nat.mul_shuffle0.
-    now apply Nat.mod_mul.
+    apply Hnd; flia He Hed.
   }
-  rewrite (prime_test_more_iter 1); [ | easy | flia H2d ].
-  rewrite Nat.add_1_r; cbn - [ "/" "mod" ].
+  apply prev_not_div_prime_test_true; [ easy | easy | flia H2n | ].
+  intros e He.
+  destruct (Nat.eq_dec e d) as [Hed| Hed]. {
+    subst e; intros H.
+    replace (S d) with (1 + 1 * d) in H by flia.
+    rewrite Nat.mod_add in H; [ | flia H2d ].
+    rewrite Nat.mod_1_l in H; [ easy | flia H2d ].
+  }
+  specialize (Hnd e) as H1.
+  assert (H : 2 ≤ e < d) by flia He Hed.
+  specialize (H1 H); clear H.
+  intros H2; apply H1; clear H1.
+  apply Nat.mod_divides in H2; [ | flia He ].
+  destruct H2 as (b3, Hb3); rewrite Nat.mul_comm in Hb3.
+  rewrite Hb2, Hb3, Nat.mul_shuffle0.
+  apply Nat.mod_mul; flia He.
+}
 ...
 
 (* https://en.wikipedia.org/wiki/Factorial#Number_theory *)
