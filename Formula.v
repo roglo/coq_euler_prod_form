@@ -2207,6 +2207,49 @@ destruct b1. {
 apply IHcnt; [ easy | flia H2d | flia Hcnt | easy ].
 Qed.
 
+Lemma hd_prime_decomp_aux_prime_test_true : ∀ n b d k,
+  2 ≤ n
+  → 2 ≤ d
+  → 2 ≤ b
+  → (∀ e : nat, 2 ≤ e < k + d → n mod e ≠ 0)
+  → b = hd 2 (prime_decomp_aux n n (k + d))
+  → prime_test (b - 2) b 2 = true.
+Proof.
+intros * H2n H2d H2b Hnd Hb.
+rewrite (prime_decomp_aux_more_iter 1) in Hb;
+  [ | easy | flia H2d | flia H2d ].
+rewrite Nat.add_1_r in Hb.
+cbn - [ "/" "mod" ] in Hb.
+remember (n mod (k + d)) as b1 eqn:Hb1; symmetry in Hb1.
+destruct b1. {
+  cbn in Hb; subst b.
+  apply Nat.mod_divides in Hb1; [ | flia H2d ].
+  destruct Hb1 as (b1, Hb1).
+  destruct b1; [ flia H2n Hb1 | ].
+  destruct b1. {
+    rewrite Nat.mul_1_r in Hb1; subst n.
+    apply prev_not_div_prime_test_true; [ easy | easy | flia H2d | easy ].
+  }
+  apply prev_not_div_prime_test_true; [ easy | easy | flia H2n | ].
+  intros e He.
+  specialize (Hnd e He) as H1.
+  intros H2; apply H1; clear H1.
+  apply Nat.mod_divides in H2; [ | flia He ].
+  destruct H2 as (b2, Hb2); rewrite Nat.mul_comm in Hb2.
+  rewrite Hb1, Hb2, Nat.mul_shuffle0.
+  apply Nat.mod_mul; flia He.
+}
+assert (H : ∀ e, 2 ≤ e < k + 1 + d → n mod e ≠ 0). {
+  intros e He.
+  destruct (Nat.eq_dec e (k + d)) as [Hed| Hed]. {
+    now subst e; intros H; rewrite H in Hb1.
+  }
+  apply Hnd; flia He Hed.
+}
+move H before Hnd; clear Hnd; rename H into Hnd.
+clear b1 Hb1.
+...
+
 Theorem glop : ∀ n, is_prime (List.hd 2 (prime_decomp n)) = true.
 Proof.
 intros.
@@ -2325,7 +2368,26 @@ destruct b1. {
   rewrite Hb1, Hb2, Nat.mul_shuffle0.
   apply Nat.mod_mul; flia He.
 }
-(* possible recursion *)
+assert (H : ∀ e, 2 ≤ e < S (S d) → n mod e ≠ 0). {
+  intros e He.
+  destruct (Nat.eq_dec e (S d)) as [Hed| Hed]. {
+    now subst e; intros H; rewrite H in Hb1.
+  }
+  apply Hnd; flia He Hed.
+}
+move H before Hnd; clear Hnd; rename H into Hnd.
+clear b1 Hb1.
+...
+now apply (hd_prime_decomp_aux_prime_test_true n b d 2).
+...
+  n, b, d : nat
+  H2n : 2 ≤ n
+  H2d : 2 ≤ d
+  H2b : 2 ≤ b
+  Hnd : ∀ e : nat, 2 ≤ e < S (S d) → n mod e ≠ 0
+  Hb : b = hd 2 (prime_decomp_aux n n (S (S d)))
+  ============================
+  prime_test (b - 2) b 2 = true
 ...
 
 (* https://en.wikipedia.org/wiki/Factorial#Number_theory *)
