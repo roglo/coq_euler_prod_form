@@ -2160,8 +2160,9 @@ Qed.
 
 Check @ζ_times_product_on_primes_close_to_1.
 
-...
+(* to be moved to Primes.v when working *)
 
+(*
 Lemma hd_prime_decomp_aux_prime_test : ∀ j k n b,
   2 ≤ n
   → 2 ≤ b
@@ -2301,9 +2302,44 @@ apply Nat.mod_divides in H; [ | flia He' ].
 destruct H as (c, Hc).
 apply Nat.mod_divides; [ flia He' | ].
 ...
+*)
+
+Lemma neq_hd_prime_decomp_aux_0 : ∀ cnt n d,
+  d ≠ 0
+  → hd 2 (prime_decomp_aux cnt n d) ≠ 0.
+Proof.
+intros * H0d.
+revert d H0d.
+induction cnt; intros; [ easy | cbn ].
+remember (n mod d) as b eqn:Hb; symmetry in Hb.
+destruct b; [ easy | ].
+now apply IHcnt.
+Qed.
 
 Theorem glop : ∀ n, is_prime (List.hd 2 (prime_decomp n)) = true.
 Proof.
+intros.
+unfold is_prime, prime_decomp.
+destruct n; [ easy | ].
+destruct n; [ easy | ].
+assert (H2n : 2 ≤ S (S n)) by flia.
+remember (S (S n)) as n'.
+clear n Heqn'; rename n' into n.
+remember (hd 2 (prime_decomp_aux n n 2)) as b eqn:Hb; symmetry in Hb.
+destruct b; [ now apply neq_hd_prime_decomp_aux_0 in Hb | ].
+...
+  cbn - [ "/" "mod" ] in Hb.
+  remember (S n mod 2) as b1 eqn:Hb1; symmetry in Hb1.
+  destruct b1; [ easy | ].
+  rewrite (prime_decomp_aux_more_iter 1) in Hb; [ | easy | flia | flia ].
+  rewrite Nat.add_1_r in Hb.
+  cbn - [ "/" "mod" ] in Hb.
+  remember (S n mod 3) as b2 eqn:Hb2; symmetry in Hb2.
+  destruct b2; [ easy | ].
+  rewrite (prime_decomp_aux_more_iter 1) in Hb; [ | easy | flia | flia ].
+  rewrite Nat.add_1_r in Hb.
+  cbn - [ "/" "mod" ] in Hb.
+...
 intros.
 destruct n; [ easy | ].
 cbn - [ "/" "mod" ].
@@ -2316,6 +2352,7 @@ replace (S n) with (n' - 1) by flia Heqn'.
 clear n Heqn'.
 rename n' into n.
 move H2n before n.
+unfold is_prime.
 ...
 intros.
 destruct n; [ easy | ].
