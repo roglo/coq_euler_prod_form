@@ -2207,20 +2207,20 @@ destruct b1. {
 apply IHcnt; [ easy | flia H2d | flia Hcnt | easy ].
 Qed.
 
-Lemma hd_prime_decomp_aux_prime_test_true : ∀ cnt n b d k,
+Lemma hd_prime_decomp_aux_prime_test_true : ∀ cnt n b d,
   2 ≤ n
   → 2 ≤ d
   → 2 ≤ b
-  → n + 2 ≤ cnt + k + d
-  → (∀ e : nat, 2 ≤ e < k + d → n mod e ≠ 0)
-  → b = hd 2 (prime_decomp_aux cnt n (k + d))
+  → n + 2 ≤ cnt + d
+  → (∀ e : nat, 2 ≤ e < d → n mod e ≠ 0)
+  → b = hd 2 (prime_decomp_aux cnt n d)
   → prime_test (b - 2) b 2 = true.
 Proof.
 intros * H2n H2d H2b Hcnt Hnd Hb.
-revert n k d H2n H2d Hcnt Hnd Hb.
+revert n d H2n H2d Hcnt Hnd Hb.
 induction cnt; intros; [ now subst b | ].
 cbn - [ "/" "mod" ] in Hb.
-remember (n mod (k + d)) as b1 eqn:Hb1; symmetry in Hb1.
+remember (n mod d) as b1 eqn:Hb1; symmetry in Hb1.
 destruct b1. {
   cbn in Hb; subst b.
   apply Nat.mod_divides in Hb1; [ | flia H2d ].
@@ -2239,18 +2239,17 @@ destruct b1. {
   rewrite Hb1, Hb2, Nat.mul_shuffle0.
   apply Nat.mod_mul; flia He.
 }
-assert (H : ∀ e, 2 ≤ e < k + 1 + d → n mod e ≠ 0). {
+assert (H : ∀ e, 2 ≤ e < 1 + d → n mod e ≠ 0). {
   intros e He.
-  destruct (Nat.eq_dec e (k + d)) as [Hed| Hed]. {
+  destruct (Nat.eq_dec e d) as [Hed| Hed]. {
     now subst e; intros H; rewrite H in Hb1.
   }
   apply Hnd; flia He Hed.
 }
 move H before Hnd; clear Hnd; rename H into Hnd.
 clear b1 Hb1.
-rewrite Nat.add_1_r in Hnd.
-replace (S cnt + k) with (cnt + S k) in Hcnt by flia.
-now apply (IHcnt n (S k) d).
+replace (S cnt + d) with (cnt + S d) in Hcnt by flia.
+apply (IHcnt n (S d)); [ easy | flia H2d | easy | easy | easy ].
 Qed.
 
 ...
