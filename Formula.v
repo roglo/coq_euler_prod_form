@@ -2293,42 +2293,39 @@ destruct b1. {
   rewrite Hb1, Hb2, Nat.mul_shuffle0.
   apply Nat.mod_mul; flia He.
 }
+assert (H : ∀ e, 2 ≤ e < S d → n mod e ≠ 0). {
+  intros e He.
+  destruct (Nat.eq_dec e d) as [Hed| Hed]. {
+    now subst e; intros H; rewrite H in Hb1.
+  }
+  apply Hnd; flia He Hed.
+}
+move H before Hnd; clear Hnd; rename H into Hnd.
+clear b1 Hb1.
 rewrite (prime_decomp_aux_more_iter 1) in Hb;
   [ | easy | flia H2d | flia H2d ].
 rewrite Nat.add_1_r in Hb.
 cbn - [ "/" "mod" ] in Hb.
-remember (n mod S d) as b2 eqn:Hb2; symmetry in Hb2.
-destruct b2. {
+remember (n mod S d) as b1 eqn:Hb1; symmetry in Hb1.
+destruct b1. {
   cbn in Hb; subst b.
-  apply Nat.mod_divides in Hb2; [ | flia H2d ].
-  destruct Hb2 as (b2, Hb2).
-  destruct b2; [ flia H2n Hb2 | ].
-  destruct b2. {
-    rewrite Nat.mul_1_r in Hb2; subst n.
-    apply prev_not_div_prime_test_true; [ easy | easy | flia H2d | ].
-    intros e He.
-    destruct (Nat.eq_dec e d) as [Hed| Hed]. {
-      now subst e; intros H; rewrite H in Hb1.
-    }
-    apply Hnd; flia He Hed.
+  apply Nat.mod_divides in Hb1; [ | flia H2d ].
+  destruct Hb1 as (b1, Hb1).
+  destruct b1; [ flia H2n Hb1 | ].
+  destruct b1. {
+    rewrite Nat.mul_1_r in Hb1; subst n.
+    apply prev_not_div_prime_test_true; [ easy | easy | flia H2d | easy ].
   }
   apply prev_not_div_prime_test_true; [ easy | easy | flia H2n | ].
   intros e He.
-  destruct (Nat.eq_dec e d) as [Hed| Hed]. {
-    subst e; intros H.
-    replace (S d) with (1 + 1 * d) in H by flia.
-    rewrite Nat.mod_add in H; [ | flia H2d ].
-    rewrite Nat.mod_1_l in H; [ easy | flia H2d ].
-  }
-  specialize (Hnd e) as H1.
-  assert (H : 2 ≤ e < d) by flia He Hed.
-  specialize (H1 H); clear H.
+  specialize (Hnd e He) as H1.
   intros H2; apply H1; clear H1.
   apply Nat.mod_divides in H2; [ | flia He ].
-  destruct H2 as (b3, Hb3); rewrite Nat.mul_comm in Hb3.
-  rewrite Hb2, Hb3, Nat.mul_shuffle0.
+  destruct H2 as (b2, Hb2); rewrite Nat.mul_comm in Hb2.
+  rewrite Hb1, Hb2, Nat.mul_shuffle0.
   apply Nat.mod_mul; flia He.
 }
+(* possible recursion *)
 ...
 
 (* https://en.wikipedia.org/wiki/Factorial#Number_theory *)
