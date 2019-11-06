@@ -2485,19 +2485,27 @@ induction l as [| b l]; intros. {
    now rewrite prime_decomp_of_prime in Hl.
 }
 symmetry.
-unfold prime_decomp in Hl |-*.
 destruct n; [ easy | ].
 destruct n; [ easy | ].
-(* from Hl, I can make a lemma saying that S (S n) must be greater
-   than a *)
-...
-remember (S n / a) as b1 eqn:Hb1; symmetry in Hb1.
+assert (HH : a ≤ S (S n)) by admit.
+remember (S (S n) / a) as b1 eqn:Hb1; symmetry in Hb1.
 destruct b1. {
   exfalso.
-
+  apply Nat.div_small_iff in Hb1; [ flia HH Hb1 | ].
+  intros H1; subst a.
+  specialize (in_prime_decomp_ge_2 (S (S n)) 0) as H1.
+  rewrite Hl in H1.
+  specialize (H1 (or_introl (eq_refl _))); flia H1.
 }
 destruct b1. {
   exfalso.
+...
+  apply Nat.div_small_iff in Hb1; [ flia HH Hb1 | ].
+  intros H1; subst a.
+  specialize (in_prime_decomp_ge_2 (S (S n)) 0) as H1.
+  rewrite Hl in H1.
+  specialize (H1 (or_introl (eq_refl _))); flia H1.
+}
 ...
 
 Theorem decomp_hold_primes : ∀ n d, d ∈ prime_decomp n → is_prime d = true.
