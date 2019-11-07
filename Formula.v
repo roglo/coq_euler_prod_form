@@ -2162,14 +2162,25 @@ Check @ζ_times_product_on_primes_close_to_1.
 
 (* below to be moved to Primes.v when working *)
 
-...
-
 (* https://en.wikipedia.org/wiki/Factorial#Number_theory *)
 Theorem glop : ∀ n, 5 < n → is_prime n = false ↔ fact (n - 1) mod n = 0.
 Proof.
 intros * H5n.
 split. {
   intros Hn.
+  (* "n! is necessarily divisible by all prime numbers up to and
+     including n" *)
+  assert (Hpn : ∀ p, p ≤ n → is_prime p = true → Nat.divide p (fact n)). {
+    intros * Hpn Hpp.
+    rewrite (Nat_fact_divides_small _ p). 2: {
+      split; [ | easy ].
+      transitivity 2; [ flia | now apply prime_ge_2 ].
+    }
+    apply Nat.divide_factor_r.
+  }
+  (* "As a consequence, n > 5 is a composite number if and only if
+        (n - 1)! ≡ 0 (mod n)" *)
+  (* my comment: it is what they say, I don't know how to prove that *)
 ...
   specialize (not_prime_decomp n) as H1.
   assert (H : 2 ≤ n) by flia H5n.
