@@ -2166,80 +2166,107 @@ Check @ζ_times_product_on_primes_close_to_1.
 Theorem glop : ∀ n, 5 < n → is_prime n = false ↔ fact (n - 1) mod n = 0.
 Proof.
 intros * H5n.
-split. {
-  intros Hn.
-  (* "n! is necessarily divisible by all prime numbers up to and
+split.
+-intros Hn.
+ (* "n! is necessarily divisible by all prime numbers up to and
      including n" *)
-  assert (Hpn : ∀ p, p ≤ n → is_prime p = true → Nat.divide p (fact n)). {
-    intros * Hpn Hpp.
-    rewrite (Nat_fact_divides_small _ p). 2: {
-      split; [ | easy ].
-      transitivity 2; [ flia | now apply prime_ge_2 ].
-    }
-    apply Nat.divide_factor_r.
-  }
-  (* "As a consequence, n > 5 is a composite number if and only if
+ assert (Hpn : ∀ p, p ≤ n → is_prime p = true → Nat.divide p (fact n)). {
+   intros * Hpn Hpp.
+   rewrite (Nat_fact_divides_small _ p). 2: {
+     split; [ | easy ].
+     transitivity 2; [ flia | now apply prime_ge_2 ].
+   }
+   apply Nat.divide_factor_r.
+ }
+ (* "As a consequence, n > 5 is a composite number if and only if
         (n - 1)! ≡ 0 (mod n)" *)
-  specialize (not_prime_decomp n) as H1.
-  assert (H : 2 ≤ n) by flia H5n.
-  specialize (H1 H Hn) as (a & b & Ha & Hb & Hab); clear H.
-  apply Nat.mod_divide; [ flia H5n | ].
-  destruct (Nat.eq_dec a b) as [Haeb| Haeb]. {
-    subst b; clear Hb.
-    rewrite Hab at 1.
-    remember (a * (a - 1)) as b eqn:Hb.
-    apply (Nat.divide_trans _ (a * b)). {
-      subst b.
-      rewrite Nat.mul_assoc.
-      apply Nat.divide_factor_l.
-    }
-    assert (Haa : a ≠ b). {
-      intros H.
-      rewrite <- (Nat.mul_1_r a) in H; subst b.
-      apply Nat.mul_cancel_l in H; [ | flia Ha ].
-      replace a with 2 in Hab by flia H.
-      flia H5n Hab.
-    }
-    assert (Han : a ≤ n - 1). {
-      rewrite Hab.
-      destruct a; [ easy | ].
-      destruct a; [ flia Ha | ].
-      cbn; remember (a * S (S a)); flia.
-    }
-    assert (Hbn : b ≤ n - 1). {
-      rewrite Hb, Hab.
-      rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
-      apply Nat.sub_le_mono_l; flia Ha.
-    }
-    clear - Haa Han Hbn.
-    remember (n - 1) as m; clear n Heqm.
-    rename m into n; move n at top.
-    (* lemma to do *)
-Search (Nat.divide (_ * _)).
-Search (Nat.divide _ (fact _)).
-Search (fact _ mod _ = 0).
+ specialize (not_prime_decomp n) as H1.
+ assert (H : 2 ≤ n) by flia H5n.
+ specialize (H1 H Hn) as (a & b & Ha & Hb & Hab); clear H.
+ apply Nat.mod_divide; [ flia H5n | ].
+ assert (Han : 0 < a ≤ n - 1). {
+   rewrite Hab.
+   destruct a; [ easy | ].
+   split; [ flia | ].
+   destruct b; [ easy | ].
+   destruct a; [ flia Ha | ].
+   destruct b; [ flia Hb | ].
+   rewrite Nat.mul_comm; cbn.
+   remember (b * S (S a)); flia.
+ }
+ destruct (Nat.eq_dec a b) as [Haeb| Haeb]. {
+   subst b; clear Hb.
+   rewrite Hab at 1.
+   remember (a * (a - 1)) as b eqn:Hb.
+   apply (Nat.divide_trans _ (a * b)). {
+     subst b.
+     rewrite Nat.mul_assoc.
+     apply Nat.divide_factor_l.
+   }
+   assert (Haa : a ≠ b). {
+     intros H.
+     rewrite <- (Nat.mul_1_r a) in H; subst b.
+     apply Nat.mul_cancel_l in H; [ | flia Ha ].
+     replace a with 2 in Hab by flia H.
+     flia H5n Hab.
+   }
+   assert (Hbn : 0 < b ≤ n - 1). {
+     rewrite Hb, Hab.
+     split. {
+       destruct a; [ easy | ].
+       rewrite Nat.sub_succ, Nat.sub_0_r.
+       destruct a; [ flia Ha | ].
+       cbn; remember (a * S a); flia.
+     }
+     rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
+     apply Nat.sub_le_mono_l; flia Ha.
+   }
+   clear - Haa Han Hbn.
+   remember (n - 1) as m; clear n Heqm.
+   rename m into n; move n at top.
+   destruct (lt_dec a b) as [Hab| Hab].
+   -now apply Nat_divide_mul_fact.
+   -assert (H : b < a) by flia Haa Hab.
+    rewrite Nat.mul_comm.
+    now apply Nat_divide_mul_fact.
+ }
+ rewrite Hab at 1.
+ assert (Hbn : 0 < b ≤ n - 1). {
+   rewrite Hab.
+   destruct b; [ easy | ].
+   split; [ flia | ].
+   destruct a; [ easy | ].
+   destruct b; [ flia Hb | ].
+   destruct a; [ flia Ha | ].
+   cbn; remember (a * S (S b)); flia.
+ }
+ destruct (lt_dec a b) as [Halb| Halb].
+ +now apply Nat_divide_mul_fact.
+ +assert (H : b < a) by flia Halb Haeb.
+  rewrite Nat.mul_comm.
+  now apply Nat_divide_mul_fact.
+-intros Hn.
+ apply Bool.not_true_iff_false; intros Hp.
+ apply Nat.mod_divide in Hn; [ | flia H5n ].
+ revert Hn.
+ apply not_equiv_imp_False.
+(* lemma to do *)
+Search (¬ Nat.divide _ _).
 ...
-  rewrite Hab, Nat.mod_mul_r; [ | flia Ha | flia Hb ].
-  apply Nat.eq_add_0; split. {
-    apply Nat.mod_divide; [ flia Ha | ].
-    apply (Nat.divide_trans _ (fact a)). 2: {
-      apply Nat_le_divides_fact.
-      destruct b; [ flia Hb | ].
-      destruct b; [ flia Hb | ].
-      destruct a; [ flia Ha | ].
-      rewrite Nat.mul_comm; cbn.
-      remember (b * S a); flia.
-    }
-    apply Nat.mod_divide; [ flia Ha | ].
-    (* lemma to do *)
-    induction a; [ easy | ].
-    rewrite Nat_fact_succ, Nat.mul_comm.
-    now rewrite Nat.mod_mul.
-  }
-  apply Nat.eq_mul_0; right.
-  apply Nat.mod_divides; [ flia Hb | ].
+ apply Nat.mod_divides in Hn; [ | flia H5n ].
+ destruct Hn as (c, Hc).
+ move Hc at bottom.
+Search (is_prime _ = true).
 ...
-*)
+ specialize (prime_decomp_of_prime n Hp) as H1.
+Search prime_decomp.
+Search (is_prime _ = true → _).
+ specialize (prime_divisors n) as H1.
+...
+Search (is_prime _ = true → _).
+ specialize (prime_divisors _ Hp) as H1.
+ specialize (H1 (fact (n - 1) / c)).
+...
 
 Fixpoint prime_after_aux cnt n :=
   if is_prime n then n

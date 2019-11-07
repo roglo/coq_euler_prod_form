@@ -64,6 +64,60 @@ rewrite <- Nat.divide_div_mul_exact; [ | easy | easy ].
 now rewrite Nat.mul_comm, Nat.div_mul.
 Qed.
 
+Theorem Nat_fact_succ : ∀ n, fact (S n) = S n * fact n.
+Proof. easy. Qed.
+
+Theorem Nat_divide_fact_fact : ∀ n d, Nat.divide (fact (n - d)) (fact n).
+Proof.
+intros *.
+revert n.
+induction d; intros; [ rewrite Nat.sub_0_r; apply Nat.divide_refl | ].
+destruct n; [ apply Nat.divide_refl | ].
+rewrite Nat.sub_succ.
+apply (Nat.divide_trans _ (fact n)); [ apply IHd | ].
+rewrite Nat_fact_succ.
+now exists (S n).
+Qed.
+
+Theorem Nat_divide_mul_fact : ∀ n a b,
+  0 < a ≤ n
+  → 0 < b ≤ n
+  → a < b
+  → Nat.divide (a * b) (fact n).
+Proof.
+intros * Han Hbn Hab.
+exists (fact (a - 1) * (fact (b - 1) / fact a) * (fact n / fact b)).
+rewrite Nat.mul_comm.
+rewrite (Nat.mul_shuffle0 _ b).
+do 2 rewrite Nat.mul_assoc.
+replace (a * fact (a - 1)) with (fact a). 2: {
+  destruct a; [ flia Han | ].
+  rewrite Nat_fact_succ.
+  now rewrite Nat.sub_succ, Nat.sub_0_r.
+}
+replace (fact a * (fact (b - 1) / fact a)) with (fact (b - 1)). 2: {
+  specialize (Nat_divide_fact_fact (b - 1) (b - 1 - a)) as H1.
+  replace (b - 1 - (b - 1 - a)) with a in H1 by flia Hab.
+  destruct H1 as (c, Hc).
+  rewrite Hc, Nat.div_mul; [ | apply fact_neq_0 ].
+  apply Nat.mul_comm.
+}
+rewrite Nat.mul_comm, Nat.mul_assoc.
+replace (b * fact (b - 1)) with (fact b). 2: {
+  destruct b; [ flia Hbn | ].
+  rewrite Nat_fact_succ.
+  now rewrite Nat.sub_succ, Nat.sub_0_r.
+}
+replace (fact b * (fact n / fact b)) with (fact n). 2: {
+  specialize (Nat_divide_fact_fact n (n - b)) as H1.
+  replace (n - (n - b)) with b in H1 by flia Hbn.
+  destruct H1 as (c, Hc).
+  rewrite Hc, Nat.div_mul; [ | apply fact_neq_0 ].
+  apply Nat.mul_comm.
+}
+easy.
+Qed.
+
 Theorem List_hd_nth_0 {A} : ∀ l (d : A), hd d l = nth 0 l d.
 Proof. intros; now destruct l. Qed.
 
@@ -119,6 +173,9 @@ cbn.
 remember (l ++ [a]) as l' eqn:Hl'.
 destruct l'; [ now destruct l | apply IHl ].
 Qed.
+
+Theorem not_equiv_imp_False : ∀ P : Prop, (P → False) ↔ ¬ P.
+Proof. easy. Qed.
 
 Theorem Sorted_Sorted_seq : ∀ start len, Sorted.Sorted lt (seq start len).
 Proof.

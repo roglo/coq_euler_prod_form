@@ -139,21 +139,6 @@ split; [ easy | ].
 now transitivity a.
 Qed.
 
-Theorem Nat_fact_succ : ∀ n, fact (S n) = S n * fact n.
-Proof. easy. Qed.
-
-Theorem Nat_divide_fact_fact : ∀ n d, Nat.divide (fact (n - d)) (fact n).
-Proof.
-intros *.
-revert n.
-induction d; intros; [ rewrite Nat.sub_0_r; apply Nat.divide_refl | ].
-destruct n; [ apply Nat.divide_refl | ].
-rewrite Nat.sub_succ.
-apply (Nat.divide_trans _ (fact n)); [ apply IHd | ].
-rewrite Nat_fact_succ.
-now exists (S n).
-Qed.
-
 Theorem Nat_le_divides_fact : ∀ n d, d ≤ n → Nat.divide (fact d) (fact n).
 Proof.
 intros * Hdn.
