@@ -2502,7 +2502,10 @@ destruct b1. {
   rewrite Hl in H1.
   specialize (H1 (or_introl (eq_refl _))); flia H1.
 }
+(*
 clear - Hl Hb1.
+*)
+move Hl at bottom.
 assert (Haz : a ≠ 0) by now intros H; rewrite H in Hb1; cbn in Hb1.
 destruct b1. {
   exfalso.
@@ -2525,7 +2528,10 @@ destruct b1. {
   rewrite Hl in H1; cbn in H1.
   now rewrite prime_decomp_of_prime in Hl.
 }
+(*
 clear - Hl Hb1.
+*)
+move Hl at bottom.
 remember (S n) as sn.
 cbn - [ "/" "mod" ] in Hl; subst sn.
 remember (S (S n) mod 2) as b2 eqn:Hb2; symmetry in Hb2.
@@ -2552,6 +2558,63 @@ destruct b2. {
   rewrite Nat.add_comm in Hl.
   rewrite (prime_decomp_aux_more_iter (S n)); [ easy | flia | easy | easy ].
 }
+move b1 after b2; move Hb1 after Hb2.
+unfold prime_decomp.
+...
+cbn - [ "/" "mod" ] in Hl.
+remember (S (S n) mod 3) as b3 eqn:Hb3; symmetry in Hb3.
+destruct b3. {
+  remember (prime_decomp_aux _ _ _) as x.
+  injection Hl; clear Hl; intros Hl Ha2; subst a x.
+  rewrite Hb1 in Hl.
+  unfold prime_decomp.
+...
+remember (S b1) as sb.
+cbn - [ "/" "mod" ]; subst sb.
+remember (S (S b1) mod 2) as b4 eqn:Hb4; symmetry in Hb4.
+destruct b4. {
+apply Nat.mod_divides in Hb4; [ | easy ].
+destruct Hb4 as (b4, Hb4).
+rewrite Hb4 in Hl.
+Search (prime_decomp_aux _ (_ * _)).
+Search (prime_decomp (_ * _)).
+specialize (prime_decomp_mul 2 b4) as H1.
+...
+  rewrite (prime_decomp_aux_more_iter (S (S b1))) in Hl; cycle 1. {
+    flia.
+  } {
+    easy.
+  } {
+    apply Nat.add_le_mono_r.
+    rewrite <- Hb1.
+    replace (S (S n)) with (n + 1 * 2) by flia.
+    rewrite Nat.div_add; [ | easy ].
+    rewrite <- (Nat.add_1_r n).
+    apply Nat.add_le_mono_r.
+    clear.
+    rewrite <- Nat.div_1_r.
+    apply Nat.div_le_compat_l; flia.
+  }
+  rewrite Nat.add_comm in Hl.
+  rewrite (prime_decomp_aux_more_iter (S n)); [ easy | flia | easy | easy ].
+}
+move b1 after b2; move Hb1 after Hb2.
+...
+  Hb1 : S (S n) / a = S b1
+  Hl : prime_decomp (S (S n)) = a :: b :: l
+  ============================
+  prime_decomp (S b1) = b :: l
+...
+  Hb1 : S (S n) / a = S (S b1)
+  Hl : prime_decomp (S (S n)) = a :: b :: l
+  ============================
+  prime_decomp (S (S b1)) = b :: l
+...
+  Hb1 : S (S n) / a = S (S b1)
+  Hb2 : S (S n) mod 2 = S b2
+  Hl : prime_decomp_aux (S n) (S (S n)) 3 = a :: b :: l
+  ============================
+  prime_decomp (S (S b1)) = b :: l
 ...
 
 Theorem decomp_hold_primes : ∀ n d, d ∈ prime_decomp n → is_prime d = true.
