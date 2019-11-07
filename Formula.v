@@ -2233,6 +2233,7 @@ now rewrite Hv in H1.
 apply (IHcnt (c * n) n); [ | easy | | easy ]. {
   intros H; apply Nat.eq_mul_0 in H; flia Hcz Hnz H.
 }
+Check infinitely_many_primes.
 destruct cnt. {
   cbn in Hn.
 ...
