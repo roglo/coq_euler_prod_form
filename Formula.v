@@ -2465,18 +2465,16 @@ apply IHl.
  now rewrite Ha; left.
 Qed.
 
-Theorem tl_prime_decomp : ∀ n,
-  tl (prime_decomp n) = prime_decomp (n / hd 0 (prime_decomp n)).
+Theorem tl_prime_decomp : ∀ n a l,
+  prime_decomp n = a :: l
+  → prime_decomp (n / a) = l.
 Proof.
-intros.
-remember (prime_decomp n) as l eqn:Hl; symmetry in Hl.
-destruct l as [| a l]; [ easy | cbn ].
+intros * Hl.
 revert n a Hl.
 induction l as [| b l]; intros. {
   specialize (first_in_decomp_is_prime n) as H1.
   rewrite Hl in H1; cbn in H1.
   rewrite <- prime_decomp_of_prime in Hl; [ | easy ].
-  symmetry.
   apply prime_decomp_nil_iff.
   assert (H2a : 2 ≤ a) by now apply prime_ge_2.
   apply prime_decomp_inj in Hl; [ | | flia H2a ].
@@ -2484,7 +2482,6 @@ induction l as [| b l]; intros. {
   -intros H; subst n; cbn in Hl.
    now rewrite prime_decomp_of_prime in Hl.
 }
-symmetry.
 destruct n; [ easy | ].
 destruct n; [ easy | ].
 assert (HH : a ≤ S (S n)). {
@@ -2505,6 +2502,7 @@ destruct b1. {
   rewrite Hl in H1.
   specialize (H1 (or_introl (eq_refl _))); flia H1.
 }
+clear - Hl Hb1.
 assert (Haz : a ≠ 0) by now intros H; rewrite H in Hb1; cbn in Hb1.
 destruct b1. {
   exfalso.
@@ -2527,6 +2525,7 @@ destruct b1. {
   rewrite Hl in H1; cbn in H1.
   now rewrite prime_decomp_of_prime in Hl.
 }
+clear - Hl Hb1.
 remember (S n) as sn.
 cbn - [ "/" "mod" ] in Hl; subst sn.
 remember (S (S n) mod 2) as b2 eqn:Hb2; symmetry in Hb2.
