@@ -2162,6 +2162,11 @@ Check @ζ_times_product_on_primes_close_to_1.
 
 (* below to be moved to Primes.v when working *)
 
+Theorem Wilson : ∀ n, is_prime n = true ↔ fact (n - 1) mod n = n - 1.
+Proof.
+intros.
+split.
+-intros Hn.
 ...
 
 Fixpoint prime_after_aux cnt n :=
