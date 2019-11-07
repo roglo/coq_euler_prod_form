@@ -221,6 +221,15 @@ destruct Hin as [Hin| Hin]; [ now left | right ].
 now apply IHl1.
 Qed.
 
+Theorem List_fold_left_mul_assoc : ∀ a b c l,
+  fold_left Nat.mul l (a * b) * c = fold_left Nat.mul l a * b * c.
+Proof.
+intros.
+revert a.
+induction l as [| d l]; intros; [ easy | ].
+cbn; rewrite Nat.mul_shuffle0; apply IHl.
+Qed.
+
 Theorem NoDup_app_app_swap {A} : ∀ l1 l2 l3 : list A,
   NoDup (l1 ++ l2 ++ l3) → NoDup (l1 ++ l3 ++ l2).
 Proof.
