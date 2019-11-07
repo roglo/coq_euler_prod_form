@@ -2162,6 +2162,79 @@ Check @ζ_times_product_on_primes_close_to_1.
 
 (* below to be moved to Primes.v when working *)
 
+Fixpoint prime_after_aux_aux cnt n :=
+  if is_prime n then Some n
+  else
+    match cnt with
+    | 0 => None
+    | S c => prime_after_aux_aux c (n + 1)
+    end.
+
+Fixpoint prime_after_aux cnt c n :=
+  match cnt with
+  | 0 => 0
+  | S cnt' =>
+      match prime_after_aux_aux (c * n) n with
+      | None => prime_after_aux cnt' (c * n) n
+      | Some p => p
+      end
+  end.
+
+Definition prime_after n := prime_after_aux n 1 n.
+
+Compute (prime_after 345).
+
+Lemma glop : ∀ cnt c n,
+  c ≠ 0
+  → n ≠ 0
+  → n ≤ c * cnt
+  → prime_after_aux cnt c n ≠ 0.
+Proof.
+intros * Hcz Hnz Hcnt Hn.
+revert c n Hcz Hnz Hcnt Hn.
+induction cnt; intros. {
+  rewrite Nat.mul_0_r in Hcnt.
+  now apply Nat.le_0_r in Hcnt.
+}
+cbn in Hn.
+remember (prime_after_aux_aux (c * n) n) as v eqn:Hv.
+symmetry in Hv.
+destruct v as [v | ]. {
+  subst v.
+Theorem glop : ∀ cnt n,
+  match prime_after_aux_aux cnt n with
+  | Some p => is_prime p = true
+  | None => True
+  end.
+Proof.
+intros.
+revert n.
+induction cnt; intros. {
+  cbn.
+  remember (is_prime n) as b eqn:Hb; symmetry in Hb.
+  now destruct b.
+}
+cbn.
+remember (is_prime n) as b eqn:Hb; symmetry in Hb.
+destruct b; [ easy | ].
+apply IHcnt.
+Qed.
+specialize (glop (c * n) n) as H1.
+now rewrite Hv in H1.
+}
+apply (IHcnt (c * n) n); [ | easy | | easy ]. {
+  intros H; apply Nat.eq_mul_0 in H; flia Hcz Hnz H.
+}
+destruct cnt. {
+  cbn in Hn.
+...
+
+Theorem glop : ∀ n, prime_after n ≠ 0.
+Proof.
+intros *.
+unfold prime_after.
+...
+
 Theorem Wilson : ∀ n, is_prime n = true ↔ fact (n - 1) mod n = n - 1.
 Proof.
 intros.
