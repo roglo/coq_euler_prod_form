@@ -2180,11 +2180,45 @@ split. {
   }
   (* "As a consequence, n > 5 is a composite number if and only if
         (n - 1)! ≡ 0 (mod n)" *)
-  (* my comment: it is what they say, I don't know how to prove that *)
-...
   specialize (not_prime_decomp n) as H1.
   assert (H : 2 ≤ n) by flia H5n.
   specialize (H1 H Hn) as (a & b & Ha & Hb & Hab); clear H.
+  apply Nat.mod_divide; [ flia H5n | ].
+  destruct (Nat.eq_dec a b) as [Haeb| Haeb]. {
+    subst b; clear Hb.
+    rewrite Hab at 1.
+    remember (a * (a - 1)) as b eqn:Hb.
+    apply (Nat.divide_trans _ (a * b)). {
+      subst b.
+      rewrite Nat.mul_assoc.
+      apply Nat.divide_factor_l.
+    }
+    assert (Haa : a ≠ b). {
+      intros H.
+      rewrite <- (Nat.mul_1_r a) in H; subst b.
+      apply Nat.mul_cancel_l in H; [ | flia Ha ].
+      replace a with 2 in Hab by flia H.
+      flia H5n Hab.
+    }
+    assert (Han : a ≤ n - 1). {
+      rewrite Hab.
+      destruct a; [ easy | ].
+      destruct a; [ flia Ha | ].
+      cbn; remember (a * S (S a)); flia.
+    }
+    assert (Hbn : b ≤ n - 1). {
+      rewrite Hb, Hab.
+      rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
+      apply Nat.sub_le_mono_l; flia Ha.
+    }
+    clear - Haa Han Hbn.
+    remember (n - 1) as m; clear n Heqm.
+    rename m into n; move n at top.
+    (* lemma to do *)
+Search (Nat.divide (_ * _)).
+Search (Nat.divide _ (fact _)).
+Search (fact _ mod _ = 0).
+...
   rewrite Hab, Nat.mod_mul_r; [ | flia Ha | flia Hb ].
   apply Nat.eq_add_0; split. {
     apply Nat.mod_divide; [ flia Ha | ].
