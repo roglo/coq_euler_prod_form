@@ -902,3 +902,135 @@ apply (Nat.mul_cancel_r _ _ a) in Hl; [ | flia H2a ].
 rewrite Hk, <- Hl.
 symmetry; apply List_fold_left_mul_assoc.
 Qed.
+
+Theorem prime_divides_fact_ge : ∀ n m,
+  is_prime n = true
+  → Nat.divide n (fact m)
+  → n ≤ m.
+Proof.
+intros * Hn Hnm.
+induction m; intros. {
+  destruct Hnm as (c, Hc).
+  symmetry in Hc.
+  apply Nat.eq_mul_1 in Hc.
+  now rewrite (proj2 Hc) in Hn.
+}
+rewrite Nat_fact_succ in Hnm.
+specialize (Nat.gauss _ _ _ Hnm) as H1.
+apply Nat.nlt_ge; intros Hnsm.
+assert (H : Nat.gcd n (S m) = 1). {
+  clear - Hn Hnsm.
+  (* lemma to do *)
+  remember (Nat.gcd n (S m)) as g eqn:Hg; symmetry in Hg.
+  destruct g; [ now apply Nat.gcd_eq_0 in Hg; rewrite (proj1 Hg) in Hn | ].
+  destruct g; [ easy | exfalso ].
+  specialize (Nat.gcd_divide_l n (S m)) as H1.
+  rewrite Hg in H1.
+  destruct H1 as (d, Hd).
+  specialize (prime_divisors n Hn (S (S g))) as H1.
+  assert (H : Nat.divide (S (S g)) n). {
+    rewrite Hd; apply Nat.divide_factor_r.
+  }
+  specialize (H1 H); clear H.
+  destruct H1 as [H1| H1]; [ easy | ].
+  destruct d; [ now rewrite Hd in Hn | ].
+  rewrite Hd in H1.
+  destruct d. {
+    rewrite Nat.mul_1_l in Hd.
+    rewrite <- Hd in Hg.
+    specialize (Nat.gcd_divide_r n (S m)) as H2.
+    rewrite Hg in H2.
+    destruct H2 as (d2, Hd2).
+    destruct d2; [ easy | ].
+    rewrite Hd2 in Hnsm; cbn in Hnsm.
+    remember (d2 * n); flia Hnsm.
+  }
+  replace (S (S d)) with (1 + S d) in H1 by flia.
+  rewrite Nat.mul_add_distr_r, Nat.mul_1_l in H1.
+  rewrite <- (Nat.add_0_r (S (S g))) in H1 at 1.
+  now apply Nat.add_cancel_l in H1.
+}
+specialize (H1 H); clear H.
+apply Nat.nle_gt in Hnsm; apply Hnsm.
+transitivity m; [ | flia ].
+apply IHm, H1.
+Qed.
+
+(* https://en.wikipedia.org/wiki/Factorial#Number_theory *)
+Theorem Wilson_on_composite :
+  ∀ n, 5 < n → is_prime n = false ↔ fact (n - 1) mod n = 0.
+Proof.
+intros * H5n.
+split.
+-intros Hn.
+ specialize (not_prime_decomp n) as H1.
+ assert (H : 2 ≤ n) by flia H5n.
+ specialize (H1 H Hn) as (a & b & Ha & Hb & Hab); clear H.
+ apply Nat.mod_divide; [ flia H5n | ].
+ assert (Han : 0 < a ≤ n - 1). {
+   rewrite Hab.
+   destruct a; [ easy | ].
+   split; [ flia | ].
+   destruct b; [ easy | ].
+   destruct a; [ flia Ha | ].
+   destruct b; [ flia Hb | ].
+   rewrite Nat.mul_comm; cbn.
+   remember (b * S (S a)); flia.
+ }
+ destruct (Nat.eq_dec a b) as [Haeb| Haeb]. {
+   subst b; clear Hb.
+   rewrite Hab at 1.
+   remember (a * (a - 1)) as b eqn:Hb.
+   apply (Nat.divide_trans _ (a * b)). {
+     subst b.
+     rewrite Nat.mul_assoc.
+     apply Nat.divide_factor_l.
+   }
+   assert (Haa : a ≠ b). {
+     intros H.
+     rewrite <- (Nat.mul_1_r a) in H; subst b.
+     apply Nat.mul_cancel_l in H; [ | flia Ha ].
+     replace a with 2 in Hab by flia H.
+     flia H5n Hab.
+   }
+   assert (Hbn : 0 < b ≤ n - 1). {
+     rewrite Hb, Hab.
+     split. {
+       destruct a; [ easy | ].
+       rewrite Nat.sub_succ, Nat.sub_0_r.
+       destruct a; [ flia Ha | ].
+       cbn; remember (a * S a); flia.
+     }
+     rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
+     apply Nat.sub_le_mono_l; flia Ha.
+   }
+   clear - Haa Han Hbn.
+   remember (n - 1) as m; clear n Heqm.
+   rename m into n; move n at top.
+   destruct (lt_dec a b) as [Hab| Hab].
+   -now apply Nat_divide_mul_fact.
+   -assert (H : b < a) by flia Haa Hab.
+    rewrite Nat.mul_comm.
+    now apply Nat_divide_mul_fact.
+ }
+ rewrite Hab at 1.
+ assert (Hbn : 0 < b ≤ n - 1). {
+   rewrite Hab.
+   destruct b; [ easy | ].
+   split; [ flia | ].
+   destruct a; [ easy | ].
+   destruct b; [ flia Hb | ].
+   destruct a; [ flia Ha | ].
+   cbn; remember (a * S (S b)); flia.
+ }
+ destruct (lt_dec a b) as [Halb| Halb].
+ +now apply Nat_divide_mul_fact.
+ +assert (H : b < a) by flia Halb Haeb.
+  rewrite Nat.mul_comm.
+  now apply Nat_divide_mul_fact.
+-intros Hn.
+ apply Bool.not_true_iff_false; intros Hp.
+ apply Nat.mod_divide in Hn; [ | flia H5n ].
+ specialize (prime_divides_fact_ge _ _ Hp Hn) as H1.
+ flia H5n H1.
+Qed.
