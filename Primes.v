@@ -466,6 +466,13 @@ replace (S (S (n - 2))) with n in Hd by flia H2n.
 now apply in_prime_decomp_aux_divide in Hd.
 Qed.
 
+Theorem in_prime_decomp_le : ∀ n d : nat, d ∈ prime_decomp n → d ≤ n.
+Proof.
+intros * Hd.
+apply Nat.divide_pos_le; [ | now apply in_prime_decomp_divide ].
+destruct n; [ easy | flia ].
+Qed.
+
 Lemma prime_decomp_aux_at_1 : ∀ cnt d, 2 ≤ d → prime_decomp_aux cnt 1 d = [].
 Proof.
 intros * H2d.

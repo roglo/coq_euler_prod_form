@@ -2465,10 +2465,76 @@ apply IHl.
  now rewrite Ha; left.
 Qed.
 
-Theorem tl_prime_decomp : ∀ n a l,
+Lemma prime_decomp_cons_aux : ∀ n a l,
+  2 ≤ n
+  → 2 ≤ a
+  → 2 ≤ n / a
+  → is_prime a = true
+  → prime_decomp n = a :: l
+  → prime_decomp (n / a) = l.
+Proof.
+intros * H2n H2a H2na Hpa Hl.
+unfold prime_decomp in Hl.
+replace n with (S (S (n - 2))) in Hl by flia H2n.
+replace (S (S (n - 2))) with n in Hl by flia H2n.
+unfold prime_decomp.
+replace (n / a) with (S (S (n / a - 2))) by flia H2na.
+replace (S (S (n / a - 2))) with (n / a) by flia H2na.
+...
+
+Theorem prime_decomp_cons : ∀ n a l,
   prime_decomp n = a :: l
   → prime_decomp (n / a) = l.
 Proof.
+intros * Hl.
+assert (H2n : 2 ≤ n). {
+  destruct n; [ easy | ].
+  destruct n; [ easy | flia ].
+}
+move Hl at bottom.
+assert (Hap : is_prime a = true). {
+  specialize (first_in_decomp_is_prime n) as H1.
+  now rewrite Hl in H1.
+}
+assert (H2a : 2 ≤ a) by now apply prime_ge_2.
+move H2a before H2n.
+move Hap after Hl.
+remember (n / a) as b eqn:Hb; symmetry in Hb.
+destruct b. {
+  apply Nat.div_small_iff in Hb; [ | flia H2a ].
+  exfalso; apply Nat.nle_gt in Hb; apply Hb.
+  apply in_prime_decomp_le.
+  now rewrite Hl; left.
+}
+destruct b. {
+  cbn; symmetry.
+  assert (Ha : a ≠ 0) by flia H2a.
+  assert (Hn2a : n < 2 * a). {
+    specialize (Nat.div_mod n a) as H1.
+    specialize (H1 Ha).
+    rewrite Hb, Nat.mul_1_r in H1.
+    replace (2 * a) with (a + a) by flia.
+    rewrite H1.
+    apply Nat.add_lt_mono_l.
+    now apply Nat.mod_upper_bound.
+  }
+  specialize (in_prime_decomp_divide n a) as H1.
+  rewrite Hl in H1; cbn in H1.
+  specialize (H1 (or_introl eq_refl)).
+  destruct H1 as (c, Hc).
+  rewrite Hc, Nat.div_mul in Hb; [ | easy ].
+  subst c; rewrite Nat.mul_1_l in Hc.
+  rewrite Hc in Hl.
+  specialize (first_in_decomp_is_prime a) as H1.
+  rewrite prime_decomp_of_prime in Hl; [ | easy ].
+  now injection Hl; intros.
+}
+rewrite <- Hb.
+assert (H2na : 2 ≤ S (S b)) by flia.
+rewrite <- Hb in H2na.
+clear b Hb.
+move H2na before H2a.
+...
 intros * Hl.
 revert n a Hl.
 induction l as [| b l]; intros. {
