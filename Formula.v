@@ -2184,6 +2184,14 @@ Definition prime_after n := prime_after_aux n 1 n.
 
 Compute (prime_after 345).
 
+(*
+c  cnt
+1  n
+n  n-1
+n² n-2
+n³ n-3
+*)
+
 Lemma glop : ∀ cnt c n,
   c ≠ 0
   → n ≠ 0
