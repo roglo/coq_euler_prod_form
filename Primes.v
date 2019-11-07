@@ -903,6 +903,42 @@ rewrite Hk, <- Hl.
 symmetry; apply List_fold_left_mul_assoc.
 Qed.
 
+Theorem prime_relatively_prime : ∀ p n,
+  is_prime p = true
+  → 0 < n < p
+  → Nat.gcd p n = 1.
+Proof.
+intros * Hp Hnp.
+remember (Nat.gcd p n) as g eqn:Hg; symmetry in Hg.
+destruct g; [ now apply Nat.gcd_eq_0 in Hg; rewrite (proj1 Hg) in Hp | ].
+destruct g; [ easy | exfalso ].
+specialize (Nat.gcd_divide_l p n) as H1.
+rewrite Hg in H1.
+destruct H1 as (d, Hd).
+specialize (prime_divisors p Hp (S (S g))) as H1.
+assert (H : Nat.divide (S (S g)) p). {
+  rewrite Hd; apply Nat.divide_factor_r.
+}
+specialize (H1 H); clear H.
+destruct H1 as [H1| H1]; [ easy | ].
+destruct d; [ now rewrite Hd in Hp | ].
+rewrite Hd in H1.
+destruct d. {
+  rewrite Nat.mul_1_l in Hd.
+  rewrite <- Hd in Hg.
+  specialize (Nat.gcd_divide_r p n) as H2.
+  rewrite Hg in H2.
+  destruct H2 as (d2, Hd2).
+  destruct d2; [ rewrite Hd2 in Hnp; flia Hnp | ].
+  rewrite Hd2 in Hnp; cbn in Hnp.
+  remember (d2 * p); flia Hnp.
+}
+replace (S (S d)) with (1 + S d) in H1 by flia.
+rewrite Nat.mul_add_distr_r, Nat.mul_1_l in H1.
+rewrite <- (Nat.add_0_r (S (S g))) in H1 at 1.
+now apply Nat.add_cancel_l in H1.
+Qed.
+
 Theorem prime_divides_fact_ge : ∀ n m,
   is_prime n = true
   → Nat.divide n (fact m)
@@ -919,36 +955,8 @@ rewrite Nat_fact_succ in Hnm.
 specialize (Nat.gauss _ _ _ Hnm) as H1.
 apply Nat.nlt_ge; intros Hnsm.
 assert (H : Nat.gcd n (S m) = 1). {
-  clear - Hn Hnsm.
-  (* lemma to do *)
-  remember (Nat.gcd n (S m)) as g eqn:Hg; symmetry in Hg.
-  destruct g; [ now apply Nat.gcd_eq_0 in Hg; rewrite (proj1 Hg) in Hn | ].
-  destruct g; [ easy | exfalso ].
-  specialize (Nat.gcd_divide_l n (S m)) as H1.
-  rewrite Hg in H1.
-  destruct H1 as (d, Hd).
-  specialize (prime_divisors n Hn (S (S g))) as H1.
-  assert (H : Nat.divide (S (S g)) n). {
-    rewrite Hd; apply Nat.divide_factor_r.
-  }
-  specialize (H1 H); clear H.
-  destruct H1 as [H1| H1]; [ easy | ].
-  destruct d; [ now rewrite Hd in Hn | ].
-  rewrite Hd in H1.
-  destruct d. {
-    rewrite Nat.mul_1_l in Hd.
-    rewrite <- Hd in Hg.
-    specialize (Nat.gcd_divide_r n (S m)) as H2.
-    rewrite Hg in H2.
-    destruct H2 as (d2, Hd2).
-    destruct d2; [ easy | ].
-    rewrite Hd2 in Hnsm; cbn in Hnsm.
-    remember (d2 * n); flia Hnsm.
-  }
-  replace (S (S d)) with (1 + S d) in H1 by flia.
-  rewrite Nat.mul_add_distr_r, Nat.mul_1_l in H1.
-  rewrite <- (Nat.add_0_r (S (S g))) in H1 at 1.
-  now apply Nat.add_cancel_l in H1.
+  apply prime_relatively_prime; [ easy | ].
+  split; [ flia | easy ].
 }
 specialize (H1 H); clear H.
 apply Nat.nle_gt in Hnsm; apply Hnsm.
