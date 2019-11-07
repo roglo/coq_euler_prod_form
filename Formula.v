@@ -2246,26 +2246,41 @@ split.
   rewrite Nat.mul_comm.
   now apply Nat_divide_mul_fact.
 -intros Hn.
+ (* lemma to do *)
  apply Bool.not_true_iff_false; intros Hp.
  apply Nat.mod_divide in Hn; [ | flia H5n ].
- revert Hn.
- apply not_equiv_imp_False.
-(* lemma to do *)
-Search (¬ Nat.divide _ _).
-...
- apply Nat.mod_divides in Hn; [ | flia H5n ].
- destruct Hn as (c, Hc).
- move Hc at bottom.
-Search (is_prime _ = true).
-...
- specialize (prime_decomp_of_prime n Hp) as H1.
-Search prime_decomp.
-Search (is_prime _ = true → _).
- specialize (prime_divisors n) as H1.
-...
-Search (is_prime _ = true → _).
- specialize (prime_divisors _ Hp) as H1.
- specialize (H1 (fact (n - 1) / c)).
+ move Hn at bottom.
+Lemma toto : ∀ n m,
+  is_prime n = true
+  → Nat.divide n (fact m)
+  → n ≤ m.
+Proof.
+intros * Hn Hnm.
+induction m; intros. {
+  destruct Hnm as (c, Hc).
+  symmetry in Hc.
+  apply Nat.eq_mul_1 in Hc.
+  now rewrite (proj2 Hc) in Hn.
+}
+rewrite Nat_fact_succ in Hnm.
+specialize (Nat.gauss _ _ _ Hnm) as H1.
+apply Nat.nlt_ge; intros Hnsm.
+assert (H : Nat.gcd n (S m) = 1). {
+  clear - Hn Hnsm.
+  destruct m; [ apply Nat.gcd_1_r | ].
+  assert (Hm : 1 < S (S m) < n). {
+    split; [ flia | easy ].
+  }
+  clear Hnsm.
+  remember (S (S m)) as m'; clear m Heqm'.
+  rename m' into m; move m before n; move Hm after Hn.
+  (* lemma to do *)
+... suite ok
+}
+specialize (H1 H); clear H.
+apply Nat.nle_gt in Hnsm; apply Hnsm.
+transitivity m; [ | flia ].
+apply IHm, H1.
 ...
 
 Fixpoint prime_after_aux cnt n :=
