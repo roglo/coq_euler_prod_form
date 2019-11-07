@@ -2484,7 +2484,8 @@ apply IHl.
  now rewrite Ha; left.
 Qed.
 
-Theorem decomp_hold_primes : ∀ n d, d ∈ prime_decomp n → is_prime d = true.
+Theorem in_prime_decomp_is_prime : ∀ n d,
+  d ∈ prime_decomp n → is_prime d = true.
 Proof.
 intros * Hdn.
 specialize (In_nth (prime_decomp n) d 2 Hdn) as (i & Hilen & Hid).
@@ -2498,12 +2499,18 @@ remember (prime_decomp n) as l eqn:Hl; symmetry in Hl.
 destruct l as [| a l]; [ easy | ].
 cbn in Hilen; cbn.
 apply Nat.succ_lt_mono in Hilen.
-...
-specialize (tl_prime_decomp n) as H1.
-rewrite Hl in H1; cbn in H1; rewrite H1.
+specialize (prime_decomp_cons n a l Hl) as H1.
+rewrite <- H1.
 apply IHi.
-rewrite H1 in Hilen.
-easy.
+now rewrite H1.
+Qed.
+
+(* (above to be moved to Prime.v) *)
+
+Theorem glop : ∀ n, fold_left Nat.mul (prime_decomp n) 1 = n.
+Proof.
+intros.
+Search prime_decomp.
 ...
 
 (* https://en.wikipedia.org/wiki/Factorial#Number_theory *)
