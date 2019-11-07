@@ -2426,6 +2426,25 @@ move H2n after Hb; move H2b after Hb.
 now apply (prime_decomp_aux_cons) with (n := n) (cn := n) in Hnd.
 Qed.
 
+Theorem prime_decomp_cons : ∀ n a l,
+  prime_decomp n = a :: l
+  → prime_decomp (n / a) = l.
+Proof.
+intros * Hl.
+assert (Hap : is_prime a = true). {
+  specialize (first_in_decomp_is_prime n) as H1.
+  now rewrite Hl in H1.
+}
+assert (H2a : 2 ≤ a) by now apply prime_ge_2.
+apply (prime_decomp_mul (n / a) a); [ easy | ].
+specialize (in_prime_decomp_divide n a) as H1.
+rewrite Hl in H1.
+specialize (H1 (or_introl eq_refl)).
+destruct H1 as (b, Hb).
+rewrite Hb, Nat.div_mul; [ | flia H2a ].
+now rewrite <- Hb.
+Qed.
+
 Theorem prime_decomp_inj : ∀ a b,
   a ≠ 0 → b ≠ 0 → prime_decomp a = prime_decomp b → a = b.
 Proof.
@@ -2464,224 +2483,6 @@ apply IHl.
  apply (in_prime_decomp_ge_2 a 1).
  now rewrite Ha; left.
 Qed.
-
-Lemma prime_decomp_cons_aux : ∀ n a l,
-  2 ≤ n
-  → 2 ≤ a
-  → 2 ≤ n / a
-  → is_prime a = true
-  → prime_decomp n = a :: l
-  → prime_decomp (n / a) = l.
-Proof.
-intros * H2n H2a H2na Hpa Hl.
-unfold prime_decomp in Hl.
-replace n with (S (S (n - 2))) in Hl by flia H2n.
-replace (S (S (n - 2))) with n in Hl by flia H2n.
-unfold prime_decomp.
-replace (n / a) with (S (S (n / a - 2))) by flia H2na.
-replace (S (S (n / a - 2))) with (n / a) by flia H2na.
-...
-
-Theorem prime_decomp_cons : ∀ n a l,
-  prime_decomp n = a :: l
-  → prime_decomp (n / a) = l.
-Proof.
-intros * Hl.
-assert (H2n : 2 ≤ n). {
-  destruct n; [ easy | ].
-  destruct n; [ easy | flia ].
-}
-move Hl at bottom.
-assert (Hap : is_prime a = true). {
-  specialize (first_in_decomp_is_prime n) as H1.
-  now rewrite Hl in H1.
-}
-assert (H2a : 2 ≤ a) by now apply prime_ge_2.
-move H2a before H2n.
-move Hap after Hl.
-remember (n / a) as b eqn:Hb; symmetry in Hb.
-destruct b. {
-  apply Nat.div_small_iff in Hb; [ | flia H2a ].
-  exfalso; apply Nat.nle_gt in Hb; apply Hb.
-  apply in_prime_decomp_le.
-  now rewrite Hl; left.
-}
-destruct b. {
-  cbn; symmetry.
-  assert (Ha : a ≠ 0) by flia H2a.
-  assert (Hn2a : n < 2 * a). {
-    specialize (Nat.div_mod n a) as H1.
-    specialize (H1 Ha).
-    rewrite Hb, Nat.mul_1_r in H1.
-    replace (2 * a) with (a + a) by flia.
-    rewrite H1.
-    apply Nat.add_lt_mono_l.
-    now apply Nat.mod_upper_bound.
-  }
-  specialize (in_prime_decomp_divide n a) as H1.
-  rewrite Hl in H1; cbn in H1.
-  specialize (H1 (or_introl eq_refl)).
-  destruct H1 as (c, Hc).
-  rewrite Hc, Nat.div_mul in Hb; [ | easy ].
-  subst c; rewrite Nat.mul_1_l in Hc.
-  rewrite Hc in Hl.
-  specialize (first_in_decomp_is_prime a) as H1.
-  rewrite prime_decomp_of_prime in Hl; [ | easy ].
-  now injection Hl; intros.
-}
-rewrite <- Hb.
-assert (H2na : 2 ≤ S (S b)) by flia.
-rewrite <- Hb in H2na.
-clear b Hb.
-move H2na before H2a.
-...
-intros * Hl.
-revert n a Hl.
-induction l as [| b l]; intros. {
-  specialize (first_in_decomp_is_prime n) as H1.
-  rewrite Hl in H1; cbn in H1.
-  rewrite <- prime_decomp_of_prime in Hl; [ | easy ].
-  apply prime_decomp_nil_iff.
-  assert (H2a : 2 ≤ a) by now apply prime_ge_2.
-  apply prime_decomp_inj in Hl; [ | | flia H2a ].
-  -subst n; right; apply Nat.div_same; flia H2a.
-  -intros H; subst n; cbn in Hl.
-   now rewrite prime_decomp_of_prime in Hl.
-}
-destruct n; [ easy | ].
-destruct n; [ easy | ].
-assert (HH : a ≤ S (S n)). {
-  specialize (in_prime_decomp_divide (S (S n)) a) as H1.
-  rewrite Hl in H1.
-  specialize (H1 (or_introl eq_refl)).
-  destruct H1 as (c, Hc).
-  rewrite Hc.
-  destruct c; [ easy | ].
-  cbn; flia.
-}
-remember (S (S n) / a) as b1 eqn:Hb1; symmetry in Hb1.
-destruct b1. {
-  exfalso.
-  apply Nat.div_small_iff in Hb1; [ flia HH Hb1 | ].
-  intros H1; subst a.
-  specialize (in_prime_decomp_ge_2 (S (S n)) 0) as H1.
-  rewrite Hl in H1.
-  specialize (H1 (or_introl (eq_refl _))); flia H1.
-}
-(*
-clear - Hl Hb1.
-*)
-move Hl at bottom.
-assert (Haz : a ≠ 0) by now intros H; rewrite H in Hb1; cbn in Hb1.
-destruct b1. {
-  exfalso.
-  assert (H2a : S (S n) < 2 * a). {
-    specialize (Nat.div_mod (S (S n)) a Haz) as H1.
-    rewrite Hb1, Nat.mul_1_r in H1.
-    replace (2 * a) with (a + a) by flia.
-    rewrite H1.
-    apply Nat.add_lt_mono_l.
-    now apply Nat.mod_upper_bound.
-  }
-  specialize (in_prime_decomp_divide (S (S n)) a) as H1.
-  rewrite Hl in H1; cbn in H1.
-  specialize (H1 (or_introl eq_refl)).
-  destruct H1 as (c, Hc).
-  rewrite Hc, Nat.div_mul in Hb1; [ | easy ].
-  subst c; rewrite Nat.mul_1_l in Hc.
-  rewrite Hc in Hl.
-  specialize (first_in_decomp_is_prime a) as H1.
-  rewrite Hl in H1; cbn in H1.
-  now rewrite prime_decomp_of_prime in Hl.
-}
-(*
-clear - Hl Hb1.
-*)
-move Hl at bottom.
-remember (S n) as sn.
-cbn - [ "/" "mod" ] in Hl; subst sn.
-remember (S (S n) mod 2) as b2 eqn:Hb2; symmetry in Hb2.
-destruct b2. {
-  remember (prime_decomp_aux _ _ _) as x.
-  injection Hl; clear Hl; intros Hl Ha2; subst a x.
-  rewrite Hb1 in Hl.
-  unfold prime_decomp.
-  rewrite (prime_decomp_aux_more_iter (S (S b1))) in Hl; cycle 1. {
-    flia.
-  } {
-    easy.
-  } {
-    apply Nat.add_le_mono_r.
-    rewrite <- Hb1.
-    replace (S (S n)) with (n + 1 * 2) by flia.
-    rewrite Nat.div_add; [ | easy ].
-    rewrite <- (Nat.add_1_r n).
-    apply Nat.add_le_mono_r.
-    clear.
-    rewrite <- Nat.div_1_r.
-    apply Nat.div_le_compat_l; flia.
-  }
-  rewrite Nat.add_comm in Hl.
-  rewrite (prime_decomp_aux_more_iter (S n)); [ easy | flia | easy | easy ].
-}
-move b1 after b2; move Hb1 after Hb2.
-unfold prime_decomp.
-...
-cbn - [ "/" "mod" ] in Hl.
-remember (S (S n) mod 3) as b3 eqn:Hb3; symmetry in Hb3.
-destruct b3. {
-  remember (prime_decomp_aux _ _ _) as x.
-  injection Hl; clear Hl; intros Hl Ha2; subst a x.
-  rewrite Hb1 in Hl.
-  unfold prime_decomp.
-...
-remember (S b1) as sb.
-cbn - [ "/" "mod" ]; subst sb.
-remember (S (S b1) mod 2) as b4 eqn:Hb4; symmetry in Hb4.
-destruct b4. {
-apply Nat.mod_divides in Hb4; [ | easy ].
-destruct Hb4 as (b4, Hb4).
-rewrite Hb4 in Hl.
-Search (prime_decomp_aux _ (_ * _)).
-Search (prime_decomp (_ * _)).
-specialize (prime_decomp_mul 2 b4) as H1.
-...
-  rewrite (prime_decomp_aux_more_iter (S (S b1))) in Hl; cycle 1. {
-    flia.
-  } {
-    easy.
-  } {
-    apply Nat.add_le_mono_r.
-    rewrite <- Hb1.
-    replace (S (S n)) with (n + 1 * 2) by flia.
-    rewrite Nat.div_add; [ | easy ].
-    rewrite <- (Nat.add_1_r n).
-    apply Nat.add_le_mono_r.
-    clear.
-    rewrite <- Nat.div_1_r.
-    apply Nat.div_le_compat_l; flia.
-  }
-  rewrite Nat.add_comm in Hl.
-  rewrite (prime_decomp_aux_more_iter (S n)); [ easy | flia | easy | easy ].
-}
-move b1 after b2; move Hb1 after Hb2.
-...
-  Hb1 : S (S n) / a = S b1
-  Hl : prime_decomp (S (S n)) = a :: b :: l
-  ============================
-  prime_decomp (S b1) = b :: l
-...
-  Hb1 : S (S n) / a = S (S b1)
-  Hl : prime_decomp (S (S n)) = a :: b :: l
-  ============================
-  prime_decomp (S (S b1)) = b :: l
-...
-  Hb1 : S (S n) / a = S (S b1)
-  Hb2 : S (S n) mod 2 = S b2
-  Hl : prime_decomp_aux (S n) (S (S n)) 3 = a :: b :: l
-  ============================
-  prime_decomp (S (S b1)) = b :: l
-...
 
 Theorem decomp_hold_primes : ∀ n d, d ∈ prime_decomp n → is_prime d = true.
 Proof.
