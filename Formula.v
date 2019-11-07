@@ -2162,36 +2162,6 @@ Check @ζ_times_product_on_primes_close_to_1.
 
 (* below to be moved to Primes.v when working *)
 
-Theorem prime_decomp_prod : ∀ n, n ≠ 0 →
-  fold_left Nat.mul (prime_decomp n) 1 = n.
-Proof.
-intros * Hnz.
-remember (prime_decomp n) as l eqn:Hl; symmetry in Hl.
-revert n Hnz Hl.
-induction l as [| a l]; intros. {
-  now apply prime_decomp_nil_iff in Hl; destruct Hl.
-}
-remember 1 as one; cbn; subst one.
-specialize (in_prime_decomp_divide n a) as H1.
-rewrite Hl in H1; specialize (H1 (or_introl eq_refl)).
-destruct H1 as (k, Hk).
-rewrite Hk in Hl.
-assert (H2a : 2 ≤ a). {
-  apply (in_prime_decomp_ge_2 (k * a)).
-  now rewrite Hl; left.
-}
-apply prime_decomp_mul in Hl; [ | easy ].
-apply IHl in Hl; [ | now intros H; subst k ].
-apply (Nat.mul_cancel_r _ _ a) in Hl; [ | flia H2a ].
-rewrite Hk, <- Hl, Nat.mul_1_l; clear.
-revert a.
-induction l as [| b l]; intros; [ now rewrite Nat.mul_1_l | ].
-remember 1 as one; cbn; subst one.
-rewrite IHl.
-rewrite List_fold_left_mul_assoc.
-now rewrite Nat.mul_assoc, Nat.mul_shuffle0.
-Qed.
-
 ...
 
 (* https://en.wikipedia.org/wiki/Factorial#Number_theory *)

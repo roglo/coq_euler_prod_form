@@ -892,3 +892,28 @@ rewrite <- H1.
 apply IHi.
 now rewrite H1.
 Qed.
+
+Theorem prime_decomp_prod : ∀ n, n ≠ 0 →
+  fold_left Nat.mul (prime_decomp n) 1 = n.
+Proof.
+intros * Hnz.
+remember (prime_decomp n) as l eqn:Hl; symmetry in Hl.
+revert n Hnz Hl.
+induction l as [| a l]; intros. {
+  now apply prime_decomp_nil_iff in Hl; destruct Hl.
+}
+remember 1 as one; cbn; subst one.
+specialize (in_prime_decomp_divide n a) as H1.
+rewrite Hl in H1; specialize (H1 (or_introl eq_refl)).
+destruct H1 as (k, Hk).
+rewrite Hk in Hl.
+assert (H2a : 2 ≤ a). {
+  apply (in_prime_decomp_ge_2 (k * a)).
+  now rewrite Hl; left.
+}
+apply prime_decomp_mul in Hl; [ | easy ].
+apply IHl in Hl; [ | now intros H; subst k ].
+apply (Nat.mul_cancel_r _ _ a) in Hl; [ | flia H2a ].
+rewrite Hk, <- Hl.
+symmetry; apply List_fold_left_mul_assoc.
+Qed.
