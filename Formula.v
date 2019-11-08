@@ -2454,6 +2454,7 @@ induction niter; intros. {
   specialize (bounded_phony_prime_after_is_after n m) as H1.
   specialize (H1 (Nat.lt_le_incl _ _ (proj1 Hm)) Hmp).
   etransitivity; [ apply H1 | ].
+  clear Hb H1.
 ... rest ok
 }
 cbn.
