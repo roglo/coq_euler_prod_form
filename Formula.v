@@ -2187,7 +2187,7 @@ Fixpoint phony_prime_after niter n :=
   if is_prime n then n
   else
     match niter with
-    | 0 => 0 (* should never happen *)
+    | 0 => 0
     | S niter' => phony_prime_after niter' (n + 1)
     end.
 
@@ -2196,9 +2196,13 @@ Fixpoint prime_after_aux niter n :=
   else
     match niter with
     | 0 =>
-        (* should never be called because of Bertrand's Postulate *)
-        (* actually called when n = 0, and then fact n + 1 = 2, fastly
-           computed *)
+        (* point never reached and phony_prime_after never called
+           thanks to Bertrand's Postulate *)
+        (* except, actually when n = 0, and then fact n + 1 = 2,
+           not a big deal, fastly computed *)
+        (* this code serves to prove that prime_after always
+           answers a prime number, i.e. phony_prime_after never
+           answers 0 *)
         phony_prime_after (fact n + 1) n
     | S niter' =>
         prime_after_aux niter' (n + 1)
@@ -2206,7 +2210,43 @@ Fixpoint prime_after_aux niter n :=
 
 Definition prime_after n := prime_after_aux n n.
 
-Compute (prime_after 25).
+Fixpoint nth_prime_aux cnt n :=
+  let p := prime_after n in
+  match cnt with
+  | 0 => p
+  | S c => nth_prime_aux c (p + 1)
+  end.
+
+Definition nth_prime n := nth_prime_aux (n - 1) 0.
+
+Compute (nth_prime 3).
+
+(* slow but simple *)
+
+Definition firstn_primes n := map nth_prime (seq 1 n).
+
+(* fast but complicated *)
+
+Fixpoint firstn_primes_loop n p :=
+  match n with
+  | 0 => []
+  | S n' =>
+      let p' := prime_after p in
+      p' :: firstn_primes_loop n' (p' + 1)
+  end.
+
+Definition firstn_primes' n := firstn_primes_loop n 0.
+
+Time Compute (let n := 50 in firstn_primes n).
+Time Compute (let n := 50 in firstn_primes' n).
+Time Compute (let n := 100 in firstn_primes' n).
+
+(*
+Time Compute (firstn_primes 100).
+Time Compute (firstn_primes' 100).
+*)
+
+Compute (prime_after 510).
 
 Lemma bounded_prime_after : ∀ n p,
   n < p
@@ -2286,71 +2326,6 @@ Proof.
 intros.
 split.
 -intros Hn.
-...
-
-Fixpoint prime_after_aux cnt n :=
-  if is_prime n then n
-  else
-    match cnt with
-    | 0 => 0 (* should never happen, thanks to Chebychev *)
-    | S c => prime_after_aux c (n + 1)
-    end.
-
-Definition prime_after n := prime_after_aux (n + 1) (n + 1).
-
-Compute (prime_after 2).
-
-Fixpoint nth_prime_aux cnt n :=
-  let p := prime_after n in
-  match cnt with
-  | 0 => p
-  | S c => nth_prime_aux c p
-  end.
-
-Definition nth_prime n := nth_prime_aux (n - 1) 0.
-
-Compute (nth_prime 3).
-
-(* slow but simple *)
-
-Definition firstn_primes n := map nth_prime (seq 1 n).
-
-(* fast but complicated *)
-
-Fixpoint firstn_primes_loop n p :=
-  match n with
-  | 0 => []
-  | S n' =>
-      let p' := prime_after p in
-      p' :: firstn_primes_loop n' p'
-  end.
-
-Definition firstn_primes' n := firstn_primes_loop n 0.
-
-Time Compute (let n := 60 in firstn_primes n).
-Time Compute (let n := 60 in firstn_primes' n).
-
-(*
-Time Compute (firstn_primes 100).
-Time Compute (firstn_primes' 100).
-*)
-
-...
-
-(* Bertrand's postulate proven by Chebychev *)
-
-Theorem prime_after_never_answers_0 : ∀ n, prime_after n ≠ 0.
-Proof.
-...
-
-Theorem prime_after_is_prime : ∀ n, is_prime (prime_after n).
-Proof.
-...
-
-Theorem no_primes_between_a_prime_and_the_following_one :
-  ∀ p, is_prime p
-  → ∀ q, p < q < prime_after p → is_prime q = false.
-Proof.
 ...
 
 Theorem ζ_Euler_product_eq : ...
