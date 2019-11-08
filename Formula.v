@@ -2446,8 +2446,7 @@ Lemma prime_after_aux_is_after : ∀ niter n, n ≤ prime_after_aux niter n.
 Proof.
 intros.
 revert n.
-induction niter; intros. {
-  cbn.
+induction niter; intros; cbn. {
   remember (is_prime n) as b eqn:Hb; symmetry in Hb.
   destruct b; [ easy | ].
   specialize (next_prime_bounded n) as (m & Hm & Hmp).
@@ -2457,7 +2456,6 @@ induction niter; intros. {
   clear Hb H1.
 ... rest ok
 }
-cbn.
 remember (is_prime n) as b eqn:Hb; symmetry in Hb.
 destruct b; [ easy | ].
 transitivity (n + 1); [ flia | apply IHniter ].
