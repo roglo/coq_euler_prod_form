@@ -2187,9 +2187,7 @@ Definition prime_after n := prime_after_aux n n.
 
 Compute (prime_after 25).
 
-Check prime_test_more_iter.
-
-Lemma pouet : ∀ n p,
+Lemma bounded_prime_after : ∀ n p,
   n < p
   → is_prime p = true
   → phony_prime_after (p - n) n ≠ 0.
@@ -2210,23 +2208,34 @@ apply IHniter.
 now replace (S niter + n) with (niter + (n + 1)) in Hm by flia.
 Qed.
 
-Lemma glip : ∀ n, phony_prime_after (fact n + 1) n ≠ 0.
+Lemma phony_prime_after_neq_0 : ∀ n, phony_prime_after (fact n + 1) n ≠ 0.
 Proof.
 intros.
 specialize (next_prime_bounded n) as (m & Hm & Hmp).
-specialize (pouet n m (proj1 Hm) Hmp) as H1.
+specialize (bounded_prime_after n m (proj1 Hm) Hmp) as H1.
 intros Hp; apply H1; clear H1.
 remember (fact n + 1) as niter1.
 remember (m - n) as niter2.
 assert (Hni : niter2 ≤ niter1). {
   subst niter1 niter2; flia Hm.
 }
-clear Hm Heqniter1 Heqniter2.
+clear Hm Heqniter1 Heqniter2 Hmp.
 move niter2 before niter1.
 move Hni after Hp.
-...
+revert n Hp niter2 Hni.
+induction niter1; intros. {
+  now apply Nat.le_0_r in Hni; subst niter2.
+}
+cbn in Hp.
+remember (is_prime n) as b eqn:Hb; symmetry in Hb.
+destruct b; [ now subst n | ].
+destruct niter2; [ now cbn; rewrite Hb | ].
+cbn; rewrite Hb.
+apply Nat.succ_le_mono in Hni.
+now apply IHniter1.
+Qed.
 
-Lemma glop : ∀ niter n, prime_after_aux niter n ≠ 0.
+Lemma prime_after_aux_neq_0 : ∀ niter n, prime_after_aux niter n ≠ 0.
 Proof.
 intros.
 revert n.
@@ -2234,72 +2243,21 @@ induction niter; intros. {
   cbn.
   remember (is_prime n) as b eqn:Hb; symmetry in Hb.
   destruct b; [ now intros H; subst n | ].
-... suite ok
+  apply phony_prime_after_neq_0.
 }
 cbn.
 remember (is_prime n) as b eqn:Hb; symmetry in Hb.
 destruct b; [ now intros H; subst n | ].
 apply IHniter.
-...
 Qed.
 
+Lemma prime_after_neq_0 : ∀ n, prime_after n ≠ 0.
+Proof. intros; apply prime_after_aux_neq_0. Qed.
+
+Theorem arghh : ∀ n, is_prime (prime_after n) = true.
 ...
 
-Lemma glop : ∀ niter n p,
-  niter + p = fact n + 1
-  → phony_prime_after niter p ≠ 0.
-Proof.
-intros * Hniter.
-revert n p Hniter.
-induction niter; intros.
-rewrite Nat.add_1_r in Hniter; cbn.
-remember (is_prime p) as b eqn:Hb; symmetry in Hb.
-destruct b; [ now intros H; rewrite H in Hniter | exfalso ].
-...
-intros * Hcz Hnz Hcnt Hn.
-revert c n Hcz Hnz Hcnt Hn.
-induction cnt; intros. {
-  rewrite Nat.mul_0_r in Hcnt.
-  now apply Nat.le_0_r in Hcnt.
-}
-cbn in Hn.
-remember (prime_after_aux_aux (c * n) n) as v eqn:Hv.
-symmetry in Hv.
-destruct v as [v | ]. {
-  subst v.
-Theorem glop : ∀ cnt n,
-  match prime_after_aux_aux cnt n with
-  | Some p => is_prime p = true
-  | None => True
-  end.
-Proof.
-intros.
-revert n.
-induction cnt; intros. {
-  cbn.
-  remember (is_prime n) as b eqn:Hb; symmetry in Hb.
-  now destruct b.
-}
-cbn.
-remember (is_prime n) as b eqn:Hb; symmetry in Hb.
-destruct b; [ easy | ].
-apply IHcnt.
-Qed.
-specialize (glop (c * n) n) as H1.
-now rewrite Hv in H1.
-}
-apply (IHcnt (c * n) n); [ | easy | | easy ]. {
-  intros H; apply Nat.eq_mul_0 in H; flia Hcz Hnz H.
-}
-Check infinitely_many_primes.
-destruct cnt. {
-  cbn in Hn.
-...
-
-Theorem glop : ∀ n, prime_after n ≠ 0.
-Proof.
-intros *.
-unfold prime_after.
+Theorem glap : ∀ n, n ≤ prime_after n.
 ...
 
 Theorem Wilson : ∀ n, is_prime n = true ↔ fact (n - 1) mod n = n - 1.
