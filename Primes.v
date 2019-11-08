@@ -163,7 +163,7 @@ rewrite Hc, Nat_fact_succ.
 now rewrite Nat.mul_assoc, Nat.mul_shuffle0.
 Qed.
 
-Theorem infinitely_many_primes : ∀ n, ∃ m, m > n ∧ is_prime m = true.
+Lemma next_prime_bounded : ∀ n, ∃ m, n < m ≤ fact n + 1 ∧ is_prime m = true.
 Proof.
 intros.
 specialize (prime_divisor (fact n + 1)) as H1.
@@ -179,21 +179,30 @@ specialize (H1 H); clear H.
 destruct H1 as (d & Hd & Hdn).
 exists d.
 split; [ | easy ].
-destruct (lt_dec n d) as [Hnd| Hnd]; [ easy | ].
-apply Nat.nlt_ge in Hnd; exfalso.
-assert (Ht : Nat.divide d (fact n)). {
-  exists (fact n / d).
-  apply Nat_fact_divides_small.
-  split; [ | easy ].
-  destruct d; [ easy | flia ].
-}
-destruct Hdn as (z, Hz).
-destruct Ht as (t, Ht).
-rewrite Ht in Hz.
-apply Nat.add_sub_eq_l in Hz.
-rewrite <- Nat.mul_sub_distr_r in Hz.
-apply Nat.eq_mul_1 in Hz.
-now destruct Hz as (Hz, H); subst d.
+split.
+-destruct (lt_dec n d) as [Hnd| Hnd]; [ easy | ].
+ apply Nat.nlt_ge in Hnd; exfalso.
+ assert (Ht : Nat.divide d (fact n)). {
+   exists (fact n / d).
+   apply Nat_fact_divides_small.
+   split; [ | easy ].
+   destruct d; [ easy | flia ].
+ }
+ destruct Hdn as (z, Hz).
+ destruct Ht as (t, Ht).
+ rewrite Ht in Hz.
+ apply Nat.add_sub_eq_l in Hz.
+ rewrite <- Nat.mul_sub_distr_r in Hz.
+ apply Nat.eq_mul_1 in Hz.
+ now destruct Hz as (Hz, H); subst d.
+-apply Nat.divide_pos_le; [ flia | easy ].
+Qed.
+
+Theorem infinitely_many_primes : ∀ n, ∃ m, m > n ∧ is_prime m = true.
+Proof.
+intros.
+specialize (next_prime_bounded n) as (m & (Hnm & _) & Hp).
+now exists m.
 Qed.
 
 Lemma prime_test_mod_ne_0 : ∀ n k,
