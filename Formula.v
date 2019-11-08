@@ -2273,7 +2273,7 @@ apply IHniter.
 now replace (S niter + n) with (niter + (n + 1)) in Hm by flia.
 Qed.
 
-Lemma phony_prime_after_neq_0 : ∀ n, phony_prime_after (fact (n / 2) + 1) n ≠ 0.
+Lemma phony_prime_after_neq_0 : ∀ n, phony_prime_after (fact n + 1) n ≠ 0.
 Proof.
 intros.
 specialize (next_prime_bounded n) as (m & Hm & Hmp).
@@ -2308,7 +2308,6 @@ induction niter; intros. {
   cbn - [ "/" ].
   remember (is_prime n) as b eqn:Hb; symmetry in Hb.
   destruct b; [ now intros H; subst n | ].
-...
   apply phony_prime_after_neq_0.
 }
 cbn.
