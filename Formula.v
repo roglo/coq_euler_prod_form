@@ -2189,24 +2189,41 @@ Compute (prime_after 25).
 
 Check prime_test_more_iter.
 
+Lemma pouet : ∀ n p,
+  n < p
+  → is_prime p = true
+  → phony_prime_after (p - n) n ≠ 0.
+Proof.
+intros * Hnm Hm.
+remember (p - n) as niter eqn:Hniter.
+replace p with (niter + n) in * by flia Hniter Hnm.
+clear p Hnm Hniter.
+revert n Hm.
+induction niter; intros. {
+  cbn in Hm; cbn.
+  now rewrite Hm; intros H; subst n.
+}
+cbn.
+remember (is_prime n) as b eqn:Hb; symmetry in Hb.
+destruct b; [ now intros H; subst n | ].
+apply IHniter.
+now replace (S niter + n) with (niter + (n + 1)) in Hm by flia.
+Qed.
+
 Lemma glip : ∀ n, phony_prime_after (fact n + 1) n ≠ 0.
 Proof.
 intros.
 specialize (next_prime_bounded n) as (m & Hm & Hmp).
-...
-remember (fact n + 1) as niter; clear Heqniter.
-revert n m Hm Hmp.
-induction niter; intros. {
-  cbn.
-  destruct Hm as (Hn, Hm).
-  now apply Nat.le_0_r in Hm; subst m.
+specialize (pouet n m (proj1 Hm) Hmp) as H1.
+intros Hp; apply H1; clear H1.
+remember (fact n + 1) as niter1.
+remember (m - n) as niter2.
+assert (Hni : niter2 ≤ niter1). {
+  subst niter1 niter2; flia Hm.
 }
-cbn.
-remember (is_prime n) as b eqn:Hb; symmetry in Hb.
-destruct b; [ now intros H; rewrite H in Hb | ].
-destruct m; [ easy | ].
-destruct m; [ easy | ].
-apply (IHniter _ (S (S m))); [ | easy ].
+clear Hm Heqniter1 Heqniter2.
+move niter2 before niter1.
+move Hni after Hp.
 ...
 
 Lemma glop : ∀ niter n, prime_after_aux niter n ≠ 0.
