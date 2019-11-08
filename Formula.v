@@ -2252,10 +2252,10 @@ Time Compute (firstn_primes' 100).
 
 Compute (prime_after 510).
 
-Lemma bounded_prime_after : ∀ n p,
+Lemma bounded_phony_prime_after : ∀ n p,
   n < p
   → is_prime p = true
-  → phony_prime_after (p - n) n ≠ 0.
+  → is_prime (phony_prime_after (p - n) n) = true.
 Proof.
 intros * Hnm Hm.
 remember (p - n) as niter eqn:Hniter.
@@ -2264,21 +2264,21 @@ clear p Hnm Hniter.
 revert n Hm.
 induction niter; intros. {
   cbn in Hm; cbn.
-  now rewrite Hm; intros H; subst n.
+  now rewrite Hm.
 }
 cbn.
 remember (is_prime n) as b eqn:Hb; symmetry in Hb.
-destruct b; [ now intros H; subst n | ].
+destruct b; [ easy | ].
 apply IHniter.
 now replace (S niter + n) with (niter + (n + 1)) in Hm by flia.
 Qed.
 
-Lemma phony_prime_after_neq_0 : ∀ n, phony_prime_after (fact n + 1) n ≠ 0.
+Lemma phony_prime_after_is_prime : ∀ n,
+  is_prime (phony_prime_after (fact n + 1) n) = true.
 Proof.
 intros.
 specialize (next_prime_bounded n) as (m & Hm & Hmp).
-specialize (bounded_prime_after n m (proj1 Hm) Hmp) as H1.
-intros Hp; apply H1; clear H1.
+specialize (bounded_phony_prime_after n m (proj1 Hm) Hmp) as H1.
 remember (fact n + 1) as niter1.
 remember (m - n) as niter2.
 assert (Hni : niter2 ≤ niter1). {
@@ -2286,43 +2286,140 @@ assert (Hni : niter2 ≤ niter1). {
 }
 clear Hm Heqniter1 Heqniter2 Hmp.
 move niter2 before niter1.
-move Hni after Hp.
-revert n Hp niter2 Hni.
+revert n niter2 H1 Hni.
 induction niter1; intros. {
   now apply Nat.le_0_r in Hni; subst niter2.
 }
-cbn in Hp.
+cbn.
 remember (is_prime n) as b eqn:Hb; symmetry in Hb.
-destruct b; [ now subst n | ].
-destruct niter2; [ now cbn; rewrite Hb | ].
-cbn; rewrite Hb.
+destruct b; [ easy | ].
+destruct niter2; [ now cbn in H1; rewrite Hb in H1 | ].
+cbn in H1; rewrite Hb in H1.
 apply Nat.succ_le_mono in Hni.
-now apply IHniter1.
+now apply IHniter1 in H1.
 Qed.
 
-Lemma prime_after_aux_neq_0 : ∀ niter n, prime_after_aux niter n ≠ 0.
+Lemma prime_after_aux_is_prime : ∀ niter n,
+  is_prime (prime_after_aux niter n) = true.
 Proof.
 intros.
 revert n.
 induction niter; intros. {
   cbn - [ "/" ].
   remember (is_prime n) as b eqn:Hb; symmetry in Hb.
-  destruct b; [ now intros H; subst n | ].
-  apply phony_prime_after_neq_0.
+  destruct b; [ easy | ].
+  apply phony_prime_after_is_prime.
 }
 cbn.
 remember (is_prime n) as b eqn:Hb; symmetry in Hb.
-destruct b; [ now intros H; subst n | ].
+destruct b; [ easy | ].
 apply IHniter.
 Qed.
 
-Lemma prime_after_neq_0 : ∀ n, prime_after n ≠ 0.
-Proof. intros; apply prime_after_aux_neq_0. Qed.
+Theorem prime_after_is_prime : ∀ n, is_prime (prime_after n) = true.
+Proof.
+intros.
+apply prime_after_aux_is_prime.
+Qed.
 
-Theorem arghh : ∀ n, is_prime (prime_after n) = true.
+Lemma bounded_phony_prime_after_is_after : ∀ n p,
+  n < p
+  → is_prime p = true
+  → n ≤ phony_prime_after (p - n) n.
+Proof.
+intros * Hnm Hm.
+remember (p - n) as niter eqn:Hniter.
+replace p with (niter + n) in * by flia Hniter Hnm.
+clear p Hnm Hniter.
+revert n Hm.
+induction niter; intros. {
+  cbn in Hm; cbn.
+  now rewrite Hm.
+}
+cbn.
+remember (is_prime n) as b eqn:Hb; symmetry in Hb.
+destruct b; [ easy | ].
+transitivity (n + 1); [ flia | ].
+apply IHniter.
+now replace (S niter + n) with (niter + (n + 1)) in Hm by flia.
+Qed.
+
+Lemma phony_prime_after_is_after : ∀ n, n ≤ phony_prime_after (fact n + 1) n.
+Proof.
+intros.
+specialize (next_prime_bounded n) as (m & Hm & Hmp).
+specialize (bounded_phony_prime_after_is_after n m (proj1 Hm) Hmp) as H1.
+...
+remember (fact n + 1) as niter1.
+remember (m - n) as niter2.
+assert (Hni : niter2 ≤ niter1). {
+  subst niter1 niter2; flia Hm.
+}
+clear m Hm Hmp Heqniter2 Heqniter1.
+revert n niter1 H1 Hni.
+induction niter2; intros. {
+  cbn in H1.
+  remember (is_prime n) as b eqn:Hb; symmetry in Hb.
+  destruct b. {
+    destruct niter1; [ now cbn; rewrite Hb | ].
+    now cbn; rewrite Hb.
+  }
+  apply Nat.le_0_r in H1; subst n; flia.
+}
+cbn in H1.
+remember (is_prime n) as b eqn:Hb; symmetry in Hb.
+destruct b; [ now destruct niter1; cbn; rewrite Hb | ].
+destruct niter1; [ flia Hni | cbn; rewrite Hb ].
+apply Nat.succ_le_mono in Hni.
+...
+Lemma glop : ∀ niter n,
+  is_prime n = false
+  → phony_prime_after niter (n + 1) = phony_prime_after niter n.
+Proof.
+intros * Hn.
+revert n Hn.
+induction niter; intros. {
+  cbn; rewrite Hn.
 ...
 
-Theorem glap : ∀ n, n ≤ prime_after n.
+destruct niter2. {
+  cbn in H1; rewrite Hb in H1.
+  apply Nat.le_0_r in H1; subst n.
+  apply Nat.le_0_l.
+}
+cbn in H1; rewrite Hb in H1.
+apply Nat.succ_le_mono in Hni.
+destruct n; [ apply Nat.le_0_l | ].
+transitivity (S n + 1); [ flia | ].
+apply (IHniter1 _ niter2); [ | easy ].
+clear - H1 Hb.
+replace (S n + 1) with (n + 2) in H1 |-* by flia.
+replace (S n) with (n + 1) in * by flia.
+revert n H1 Hb.
+induction niter2; intros. {
+  cbn in H1; cbn.
+  remember (is_prime (n + 2)) as b1 eqn:Hb1; symmetry in Hb1.
+  destruct b1; [ easy | flia H1 ].
+}
+cbn in H1; cbn.
+remember (is_prime (n + 2)) as b1 eqn:Hb1; symmetry in Hb1.
+destruct b1; [ easy | ].
+...
+
+Lemma prime_after_aux_is_after : ∀ niter n, n ≤ prime_after_aux niter n.
+Proof.
+intros.
+revert n.
+induction niter; intros. {
+  cbn.
+  remember (is_prime n) as b eqn:Hb; symmetry in Hb.
+  destruct b; [ easy | ].
+...
+
+Theorem prime_after_is_after : ∀ n, n ≤ prime_after n.
+Proof.
+intros.
+unfold prime_after.
 ...
 
 Theorem Wilson : ∀ n, is_prime n = true ↔ fact (n - 1) mod n = n - 1.
