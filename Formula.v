@@ -2162,42 +2162,83 @@ Check @ζ_times_product_on_primes_close_to_1.
 
 (* below to be moved to Primes.v when working *)
 
-Fixpoint prime_after_aux_aux cnt n :=
-  if is_prime n then Some n
+Fixpoint phony_prime_after niter n :=
+  if is_prime n then n
   else
-    match cnt with
-    | 0 => None
-    | S c => prime_after_aux_aux c (n + 1)
+    match niter with
+    | 0 => 0 (* should never happen *)
+    | S niter' => phony_prime_after niter' (n + 1)
     end.
 
-Fixpoint prime_after_aux cnt c n :=
-  match cnt with
-  | 0 => 0
-  | S cnt' =>
-      match prime_after_aux_aux (c * n) n with
-      | None => prime_after_aux cnt' (c * n) n
-      | Some p => p
-      end
-  end.
+Fixpoint prime_after_aux niter n :=
+  if is_prime n then n
+  else
+    match niter with
+    | 0 =>
+        (* should never be called because of Bertrand's Postulate *)
+        (* actually called when n = 0, and then fact n + 1 = 2, fastly
+           computed *)
+        phony_prime_after (fact n + 1) n
+    | S niter' =>
+        prime_after_aux niter' (n + 1)
+    end.
 
-Definition prime_after n := prime_after_aux n 1 n.
+Definition prime_after n := prime_after_aux n n.
 
-Compute (prime_after 345).
+Compute (prime_after 25).
 
-(*
-c  cnt
-1  n
-n  n-1
-n² n-2
-n³ n-3
-*)
+Check prime_test_more_iter.
 
-Lemma glop : ∀ cnt c n,
-  c ≠ 0
-  → n ≠ 0
-  → n ≤ c * cnt
-  → prime_after_aux cnt c n ≠ 0.
+Lemma glip : ∀ n, phony_prime_after (fact n + 1) n ≠ 0.
 Proof.
+intros.
+specialize (next_prime_bounded n) as (m & Hm & Hmp).
+...
+remember (fact n + 1) as niter; clear Heqniter.
+revert n m Hm Hmp.
+induction niter; intros. {
+  cbn.
+  destruct Hm as (Hn, Hm).
+  now apply Nat.le_0_r in Hm; subst m.
+}
+cbn.
+remember (is_prime n) as b eqn:Hb; symmetry in Hb.
+destruct b; [ now intros H; rewrite H in Hb | ].
+destruct m; [ easy | ].
+destruct m; [ easy | ].
+apply (IHniter _ (S (S m))); [ | easy ].
+...
+
+Lemma glop : ∀ niter n, prime_after_aux niter n ≠ 0.
+Proof.
+intros.
+revert n.
+induction niter; intros. {
+  cbn.
+  remember (is_prime n) as b eqn:Hb; symmetry in Hb.
+  destruct b; [ now intros H; subst n | ].
+... suite ok
+}
+cbn.
+remember (is_prime n) as b eqn:Hb; symmetry in Hb.
+destruct b; [ now intros H; subst n | ].
+apply IHniter.
+...
+Qed.
+
+...
+
+Lemma glop : ∀ niter n p,
+  niter + p = fact n + 1
+  → phony_prime_after niter p ≠ 0.
+Proof.
+intros * Hniter.
+revert n p Hniter.
+induction niter; intros.
+rewrite Nat.add_1_r in Hniter; cbn.
+remember (is_prime p) as b eqn:Hb; symmetry in Hb.
+destruct b; [ now intros H; rewrite H in Hniter | exfalso ].
+...
 intros * Hcz Hnz Hcnt Hn.
 revert c n Hcz Hnz Hcnt Hn.
 induction cnt; intros. {
