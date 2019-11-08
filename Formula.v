@@ -2203,6 +2203,10 @@ Fixpoint prime_after_aux niter n :=
         (* this code serves to prove that prime_after always
            answers a prime number, i.e. phony_prime_after never
            answers 0 *)
+        (* something: after the iterations of the present function,
+           the value of n is twice the value of the initial n,
+           so we are actually searching the next prime number
+           after 2n; no important, this code is just for proofs. *)
         phony_prime_after (fact n + 1) n
     | S niter' =>
         prime_after_aux niter' (n + 1)
@@ -2269,7 +2273,7 @@ apply IHniter.
 now replace (S niter + n) with (niter + (n + 1)) in Hm by flia.
 Qed.
 
-Lemma phony_prime_after_neq_0 : ∀ n, phony_prime_after (fact n + 1) n ≠ 0.
+Lemma phony_prime_after_neq_0 : ∀ n, phony_prime_after (fact (n / 2) + 1) n ≠ 0.
 Proof.
 intros.
 specialize (next_prime_bounded n) as (m & Hm & Hmp).
@@ -2301,9 +2305,10 @@ Proof.
 intros.
 revert n.
 induction niter; intros. {
-  cbn.
+  cbn - [ "/" ].
   remember (is_prime n) as b eqn:Hb; symmetry in Hb.
   destruct b; [ now intros H; subst n | ].
+...
   apply phony_prime_after_neq_0.
 }
 cbn.
