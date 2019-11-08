@@ -2355,55 +2355,31 @@ remember (m - n) as niter2.
 assert (Hni : niter2 ≤ niter1). {
   subst niter1 niter2; flia Hm.
 }
+assert (Hn2 : niter2 ≠ 0) by flia Heqniter2 Hm.
 clear m Hm Hmp Heqniter2 Heqniter1.
+...
 revert n niter1 H1 Hni.
-induction niter2; intros. {
-  cbn in H1.
-  remember (is_prime n) as b eqn:Hb; symmetry in Hb.
-  destruct b. {
-    destruct niter1; [ now cbn; rewrite Hb | ].
-    now cbn; rewrite Hb.
-  }
-  apply Nat.le_0_r in H1; subst n; flia.
-}
+induction niter2; intros; [ easy | clear Hn2 ].
 cbn in H1.
 remember (is_prime n) as b eqn:Hb; symmetry in Hb.
 destruct b; [ now destruct niter1; cbn; rewrite Hb | ].
 destruct niter1; [ flia Hni | cbn; rewrite Hb ].
 apply Nat.succ_le_mono in Hni.
-...
-Lemma glop : ∀ niter n,
-  is_prime n = false
-  → phony_prime_after niter (n + 1) = phony_prime_after niter n.
-Proof.
-intros * Hn.
-revert n Hn.
-induction niter; intros. {
-  cbn; rewrite Hn.
-...
-
 destruct niter2. {
-  cbn in H1; rewrite Hb in H1.
-  apply Nat.le_0_r in H1; subst n.
-  apply Nat.le_0_l.
+  cbn in H1.
+  remember (is_prime (n + 1)) as b1 eqn:Hb1; symmetry in Hb1.
+  destruct b1. {
+    destruct niter1; cbn; rewrite Hb1; flia.
+  }
+  apply Nat.le_0_r in H1; subst n; apply Nat.le_0_l.
 }
-cbn in H1; rewrite Hb in H1.
-apply Nat.succ_le_mono in Hni.
-destruct n; [ apply Nat.le_0_l | ].
-transitivity (S n + 1); [ flia | ].
-apply (IHniter1 _ niter2); [ | easy ].
-clear - H1 Hb.
-replace (S n + 1) with (n + 2) in H1 |-* by flia.
-replace (S n) with (n + 1) in * by flia.
-revert n H1 Hb.
-induction niter2; intros. {
-  cbn in H1; cbn.
-  remember (is_prime (n + 2)) as b1 eqn:Hb1; symmetry in Hb1.
-  destruct b1; [ easy | flia H1 ].
-}
-cbn in H1; cbn.
-remember (is_prime (n + 2)) as b1 eqn:Hb1; symmetry in Hb1.
+transitivity (n + 1); [ flia | ].
+apply IHniter2; [ easy | | easy ].
+cbn.
+remember (is_prime (n + 1)) as b1 eqn:Hb1; symmetry in Hb1.
 destruct b1; [ easy | ].
+cbn in H1.
+rewrite Hb1 in H1.
 ...
 
 Lemma prime_after_aux_is_after : ∀ niter n, n ≤ prime_after_aux niter n.
