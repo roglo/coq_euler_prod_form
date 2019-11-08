@@ -2445,17 +2445,71 @@ replace (n + 6 + 1) with (n + 7) in H1 |-* by flia.
 Lemma prime_after_aux_is_after : ∀ niter n, n ≤ prime_after_aux niter n.
 Proof.
 intros.
+specialize (next_prime_bounded n) as (m & Hm & Hmp).
+Abort. (*
+specialize (bounded_phony_prime_after_is_after n m (Nat.lt_le_incl _ _ (proj1 Hm)) Hmp) as H1.
+  cbn.
 revert n.
 induction niter; intros. {
-  cbn.
   remember (is_prime n) as b eqn:Hb; symmetry in Hb.
   destruct b; [ easy | ].
-...
+  destruct n; [ apply Nat.le_0_l | ].
+  rewrite Nat.add_1_r; cbn - [ fact ].
+  cbn in Hb.
+  destruct n; [ cbn; flia | ].
+  rewrite Hb.
+  remember (S (S n)) as ssn eqn:Hssn.
+  replace (S (S n + 1)) with (ssn + 1) by flia Hssn.
+  rewrite (prime_test_more_iter 2) in Hb; [ | flia Hssn | flia Hssn ].
+  replace (n + 2) with ssn in Hb by flia Hssn.
+  clear n Hssn; rename ssn into n.
+*)
 
 Theorem prime_after_is_after : ∀ n, n ≤ prime_after n.
 Proof.
 intros.
 unfold prime_after.
+destruct n; [ apply Nat.le_0_l | ].
+destruct n; [ cbn; flia | ].
+remember (S n) as sn; cbn; subst sn.
+remember (prime_test n (S (S n)) 2) as b eqn:Hb; symmetry in Hb.
+destruct b; [ easy | ].
+replace (S (S n)) with (n + 2) in Hb |-* by flia.
+replace (S (S n + 1)) with (n + 3) by flia; cbn.
+remember (is_prime (n + 3)) as b1 eqn:Hb1; symmetry in Hb1.
+destruct b1; [ flia | ].
+replace (n + 3 + 1) with (n + 4) by flia.
+(**)
+destruct n; [ cbn; flia | ].
+replace (S n + 4) with (n + 5) by flia.
+replace (S n + 3) with (n + 4) in Hb1 by flia.
+replace (S n + 2) with (n + 3) in Hb |-* by flia.
+replace (S n) with (n + 1) in Hb by flia; cbn.
+remember (is_prime (n + 5)) as b eqn:Hb2; symmetry in Hb2.
+destruct b; [ flia | ].
+replace (n + 5 + 1) with (n + 6) by flia.
+(**)
+destruct n; [ cbn; flia | ].
+replace (S n + 6) with (n + 7) by flia.
+replace (S n + 5) with (n + 6) in Hb2 by flia.
+replace (S n + 4) with (n + 5) in Hb1 by flia.
+replace (S n + 3) with (n + 4) in Hb |-* by flia.
+replace (S n + 1) with (n + 2) in Hb by flia; cbn.
+remember (is_prime (n + 7)) as b eqn:Hb3; symmetry in Hb3.
+destruct b; [ flia | ].
+replace (n + 7 + 1) with (n + 8) by flia.
+(**)
+destruct n; [ cbn; flia | ].
+replace (S n + 8) with (n + 9) by flia.
+replace (S n + 7) with (n + 8) in Hb3 by flia.
+replace (S n + 6) with (n + 7) in Hb2 by flia.
+replace (S n + 5) with (n + 6) in Hb1 by flia.
+replace (S n + 4) with (n + 5) in Hb |-* by flia.
+replace (S n + 2) with (n + 3) in Hb by flia; cbn.
+remember (is_prime (n + 9)) as b eqn:Hb4; symmetry in Hb4.
+destruct b; [ flia | ].
+replace (n + 9 + 1) with (n + 10) by flia.
+(**)
 ...
 
 Theorem Wilson : ∀ n, is_prime n = true ↔ fact (n - 1) mod n = n - 1.
