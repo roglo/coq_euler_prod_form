@@ -2445,6 +2445,23 @@ replace (n + 6 + 1) with (n + 7) in H1 |-* by flia.
 Lemma prime_after_aux_is_after : ∀ niter n, n ≤ prime_after_aux niter n.
 Proof.
 intros.
+revert n.
+induction niter; intros. {
+  cbn.
+  remember (is_prime n) as b eqn:Hb; symmetry in Hb.
+  destruct b; [ easy | ].
+  specialize (next_prime_bounded n) as (m & Hm & Hmp).
+  specialize (bounded_phony_prime_after_is_after n m) as H1.
+  specialize (H1 (Nat.lt_le_incl _ _ (proj1 Hm)) Hmp).
+  etransitivity; [ apply H1 | ].
+... rest ok
+}
+cbn.
+remember (is_prime n) as b eqn:Hb; symmetry in Hb.
+destruct b; [ easy | ].
+transitivity (n + 1); [ flia | apply IHniter ].
+...
+
 specialize (next_prime_bounded n) as (m & Hm & Hmp).
 Abort. (*
 specialize (bounded_phony_prime_after_is_after n m (Nat.lt_le_incl _ _ (proj1 Hm)) Hmp) as H1.
