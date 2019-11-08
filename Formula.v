@@ -2344,6 +2344,7 @@ apply IHniter.
 now replace (S niter + n) with (niter + (n + 1)) in Hm by flia.
 Qed.
 
+(*
 Lemma phony_prime_after_is_after : ∀ n, is_prime n = false → n ≤ phony_prime_after (fact n + 1) n.
 Proof.
 intros * Hn.
@@ -2351,9 +2352,46 @@ specialize (next_prime_bounded n) as (m & Hm & Hmp).
 specialize (bounded_phony_prime_after_is_after n m (Nat.lt_le_incl _ _ (proj1 Hm)) Hmp) as H1.
 remember (fact n + 1) as it1 eqn:Hit1.
 remember (m - n) as it2 eqn:Hit2.
-replace m with (n + it2) in Hmp by flia Hit2 Hm.
-assert (Hni : it2 ≤ it1) by (subst it1 it2; flia Hm).
-clear m Hm Hit2 Hit1.
+replace m with (n + it2) in Hmp, Hm by flia Hit2 Hm.
+destruct Hm as (_, Hm).
+clear m Hit2 Hit1 Hn.
+revert n it2 Hm Hmp H1.
+induction it1; intros. {
+  apply Nat.le_0_r, Nat.eq_add_0 in Hm.
+  rewrite (proj1 Hm); apply Nat.le_0_l.
+}
+cbn.
+destruct it2; [ now rewrite Nat.add_0_r in Hmp; rewrite Hmp | ].
+cbn in H1.
+remember (is_prime n) as b eqn:Hb; symmetry in Hb.
+destruct b; [ easy | ].
+...
+destruct it1. {
+  cbn; apply Nat.le_0_r in Hni; subst it2.
+  now rewrite Nat.add_0_r in Hmp; rewrite Hmp.
+}
+cbn; rewrite Hn.
+revert n it2 Hmp Hni Hn H1.
+induction it1; intros. {
+  cbn.
+  remember (is_prime (n + 1)) as b eqn:Hb; symmetry in Hb.
+  destruct b; [ flia | ].
+  destruct it2; cbn in H1; rewrite Hn in H1; [ easy | ].
+  destruct it2; [ now rewrite Hmp in Hb | flia Hni ].
+}
+cbn.
+remember (is_prime (n + 1)) as b eqn:Hb; symmetry in Hb.
+destruct b; [ flia | ].
+destruct (Nat.eq_dec it2 (S (S it1))) as [H2| H2]. {
+  rewrite H2 in H1; cbn in H1.
+  now rewrite Hn, Hb in H1.
+}
+specialize (IHit1 n it2 Hmp) as H3.
+assert (Hii : it2 ≤ S it1) by flia Hni H2.
+specialize (H3 Hii Hn H1).
+etransitivity; [ apply H3 | ].
+clear - Hmp Hii.
+...
 destruct it2; [ now rewrite Nat.add_0_r, Hn in Hmp | ].
 cbn in H1; rewrite Hn in H1.
 destruct it1; [ flia Hni | ].
@@ -2402,6 +2440,7 @@ remember (is_prime (n + 6)) as b eqn:Hb5; symmetry in Hb5.
 destruct b; [ flia | ].
 replace (n + 6 + 1) with (n + 7) in H1 |-* by flia.
 ...
+*)
 
 Lemma prime_after_aux_is_after : ∀ niter n, n ≤ prime_after_aux niter n.
 Proof.
