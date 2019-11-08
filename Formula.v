@@ -2252,6 +2252,8 @@ Time Compute (firstn_primes' 100).
 
 Compute (prime_after 510).
 
+(* "prime_after n" is indeed a prime *)
+
 Lemma bounded_phony_prime_after : ∀ n p,
   n < p
   → is_prime p = true
@@ -2322,6 +2324,8 @@ intros.
 apply prime_after_aux_is_prime.
 Qed.
 
+(* "prime_after n" is indeed after (greater or equal to) n *)
+
 Lemma bounded_phony_prime_after_is_after : ∀ n p,
   n ≤ p
   → is_prime p = true
@@ -2344,104 +2348,6 @@ apply IHniter.
 now replace (S niter + n) with (niter + (n + 1)) in Hm by flia.
 Qed.
 
-(*
-Lemma phony_prime_after_is_after : ∀ n, is_prime n = false → n ≤ phony_prime_after (fact n + 1) n.
-Proof.
-intros * Hn.
-specialize (next_prime_bounded n) as (m & Hm & Hmp).
-specialize (bounded_phony_prime_after_is_after n m (Nat.lt_le_incl _ _ (proj1 Hm)) Hmp) as H1.
-remember (fact n + 1) as it1 eqn:Hit1.
-remember (m - n) as it2 eqn:Hit2.
-replace m with (n + it2) in Hmp, Hm by flia Hit2 Hm.
-destruct Hm as (_, Hm).
-clear m Hit2 Hit1 Hn.
-revert n it2 Hm Hmp H1.
-induction it1; intros. {
-  apply Nat.le_0_r, Nat.eq_add_0 in Hm.
-  rewrite (proj1 Hm); apply Nat.le_0_l.
-}
-cbn.
-destruct it2; [ now rewrite Nat.add_0_r in Hmp; rewrite Hmp | ].
-cbn in H1.
-remember (is_prime n) as b eqn:Hb; symmetry in Hb.
-destruct b; [ easy | ].
-...
-destruct it1. {
-  cbn; apply Nat.le_0_r in Hni; subst it2.
-  now rewrite Nat.add_0_r in Hmp; rewrite Hmp.
-}
-cbn; rewrite Hn.
-revert n it2 Hmp Hni Hn H1.
-induction it1; intros. {
-  cbn.
-  remember (is_prime (n + 1)) as b eqn:Hb; symmetry in Hb.
-  destruct b; [ flia | ].
-  destruct it2; cbn in H1; rewrite Hn in H1; [ easy | ].
-  destruct it2; [ now rewrite Hmp in Hb | flia Hni ].
-}
-cbn.
-remember (is_prime (n + 1)) as b eqn:Hb; symmetry in Hb.
-destruct b; [ flia | ].
-destruct (Nat.eq_dec it2 (S (S it1))) as [H2| H2]. {
-  rewrite H2 in H1; cbn in H1.
-  now rewrite Hn, Hb in H1.
-}
-specialize (IHit1 n it2 Hmp) as H3.
-assert (Hii : it2 ≤ S it1) by flia Hni H2.
-specialize (H3 Hii Hn H1).
-etransitivity; [ apply H3 | ].
-clear - Hmp Hii.
-...
-destruct it2; [ now rewrite Nat.add_0_r, Hn in Hmp | ].
-cbn in H1; rewrite Hn in H1.
-destruct it1; [ flia Hni | ].
-apply Nat.succ_le_mono in Hni.
-cbn; rewrite Hn.
-destruct it2; [ destruct it1; cbn; rewrite Hmp; flia | ].
-cbn in H1.
-destruct it1; [ flia Hni | cbn ].
-apply Nat.succ_le_mono in Hni.
-remember (is_prime (n + 1)) as b eqn:Hb; symmetry in Hb.
-destruct b; [ flia | ].
-replace (n + 1 + 1) with (n + 2) in H1 |-* by flia.
-destruct it2; [ destruct it1; cbn; rewrite Hmp; flia | ].
-cbn in H1.
-destruct it1; [ flia Hni | cbn ].
-apply Nat.succ_le_mono in Hni.
-remember (is_prime (n + 2)) as b eqn:Hb1; symmetry in Hb1.
-destruct b; [ flia | ].
-replace (n + 2 + 1) with (n + 3) in H1 |-* by flia.
-destruct it2; [ destruct it1; cbn; rewrite Hmp; flia | ].
-cbn in H1.
-destruct it1; [ flia Hni | cbn ].
-apply Nat.succ_le_mono in Hni.
-remember (is_prime (n + 3)) as b eqn:Hb2; symmetry in Hb2.
-destruct b; [ flia | ].
-replace (n + 3 + 1) with (n + 4) in H1 |-* by flia.
-destruct it2; [ destruct it1; cbn; rewrite Hmp; flia | ].
-cbn in H1.
-destruct it1; [ flia Hni | cbn ].
-apply Nat.succ_le_mono in Hni.
-remember (is_prime (n + 4)) as b eqn:Hb3; symmetry in Hb3.
-destruct b; [ flia | ].
-replace (n + 4 + 1) with (n + 5) in H1 |-* by flia.
-destruct it2; [ destruct it1; cbn; rewrite Hmp; flia | ].
-cbn in H1.
-destruct it1; [ flia Hni | cbn ].
-apply Nat.succ_le_mono in Hni.
-remember (is_prime (n + 5)) as b eqn:Hb4; symmetry in Hb4.
-destruct b; [ flia | ].
-replace (n + 5 + 1) with (n + 6) in H1 |-* by flia.
-destruct it2; [ destruct it1; cbn; rewrite Hmp; flia | ].
-cbn in H1.
-destruct it1; [ flia Hni | cbn ].
-apply Nat.succ_le_mono in Hni.
-remember (is_prime (n + 6)) as b eqn:Hb5; symmetry in Hb5.
-destruct b; [ flia | ].
-replace (n + 6 + 1) with (n + 7) in H1 |-* by flia.
-...
-*)
-
 Lemma prime_after_aux_is_after : ∀ niter n, n ≤ prime_after_aux niter n.
 Proof.
 intros.
@@ -2454,78 +2360,32 @@ induction niter; intros; cbn. {
   specialize (H1 (Nat.lt_le_incl _ _ (proj1 Hm)) Hmp).
   etransitivity; [ apply H1 | ].
   clear Hb H1.
-... rest ok
+  remember (m - n) as k eqn:Hk.
+  replace m with (n + k) in Hmp by flia Hk Hm.
+  replace (fact n + 1) with (k + (fact n + 1 - k)) by flia Hm Hk.
+  remember (fact n + 1 - k) as l eqn:Hl.
+  clear m Hm Hk Hl; move l before k.
+  revert n l Hmp.
+  induction k; intros; cbn. {
+    rewrite Nat.add_0_r in Hmp; rewrite Hmp.
+    now destruct l; cbn; rewrite Hmp.
+  }
+  remember (is_prime n) as b eqn:Hb; symmetry in Hb.
+  destruct b; [ easy |].
+  replace (n + S k) with (n + 1 + k) in Hmp by flia.
+  now apply IHk.
 }
 remember (is_prime n) as b eqn:Hb; symmetry in Hb.
 destruct b; [ easy | ].
 transitivity (n + 1); [ flia | apply IHniter ].
-...
-
-specialize (next_prime_bounded n) as (m & Hm & Hmp).
-Abort. (*
-specialize (bounded_phony_prime_after_is_after n m (Nat.lt_le_incl _ _ (proj1 Hm)) Hmp) as H1.
-  cbn.
-revert n.
-induction niter; intros. {
-  remember (is_prime n) as b eqn:Hb; symmetry in Hb.
-  destruct b; [ easy | ].
-  destruct n; [ apply Nat.le_0_l | ].
-  rewrite Nat.add_1_r; cbn - [ fact ].
-  cbn in Hb.
-  destruct n; [ cbn; flia | ].
-  rewrite Hb.
-  remember (S (S n)) as ssn eqn:Hssn.
-  replace (S (S n + 1)) with (ssn + 1) by flia Hssn.
-  rewrite (prime_test_more_iter 2) in Hb; [ | flia Hssn | flia Hssn ].
-  replace (n + 2) with ssn in Hb by flia Hssn.
-  clear n Hssn; rename ssn into n.
-*)
+Qed.
 
 Theorem prime_after_is_after : ∀ n, n ≤ prime_after n.
 Proof.
 intros.
-unfold prime_after.
-destruct n; [ apply Nat.le_0_l | ].
-destruct n; [ cbn; flia | ].
-remember (S n) as sn; cbn; subst sn.
-remember (prime_test n (S (S n)) 2) as b eqn:Hb; symmetry in Hb.
-destruct b; [ easy | ].
-replace (S (S n)) with (n + 2) in Hb |-* by flia.
-replace (S (S n + 1)) with (n + 3) by flia; cbn.
-remember (is_prime (n + 3)) as b1 eqn:Hb1; symmetry in Hb1.
-destruct b1; [ flia | ].
-replace (n + 3 + 1) with (n + 4) by flia.
-(**)
-destruct n; [ cbn; flia | ].
-replace (S n + 4) with (n + 5) by flia.
-replace (S n + 3) with (n + 4) in Hb1 by flia.
-replace (S n + 2) with (n + 3) in Hb |-* by flia.
-replace (S n) with (n + 1) in Hb by flia; cbn.
-remember (is_prime (n + 5)) as b eqn:Hb2; symmetry in Hb2.
-destruct b; [ flia | ].
-replace (n + 5 + 1) with (n + 6) by flia.
-(**)
-destruct n; [ cbn; flia | ].
-replace (S n + 6) with (n + 7) by flia.
-replace (S n + 5) with (n + 6) in Hb2 by flia.
-replace (S n + 4) with (n + 5) in Hb1 by flia.
-replace (S n + 3) with (n + 4) in Hb |-* by flia.
-replace (S n + 1) with (n + 2) in Hb by flia; cbn.
-remember (is_prime (n + 7)) as b eqn:Hb3; symmetry in Hb3.
-destruct b; [ flia | ].
-replace (n + 7 + 1) with (n + 8) by flia.
-(**)
-destruct n; [ cbn; flia | ].
-replace (S n + 8) with (n + 9) by flia.
-replace (S n + 7) with (n + 8) in Hb3 by flia.
-replace (S n + 6) with (n + 7) in Hb2 by flia.
-replace (S n + 5) with (n + 6) in Hb1 by flia.
-replace (S n + 4) with (n + 5) in Hb |-* by flia.
-replace (S n + 2) with (n + 3) in Hb by flia; cbn.
-remember (is_prime (n + 9)) as b eqn:Hb4; symmetry in Hb4.
-destruct b; [ flia | ].
-replace (n + 9 + 1) with (n + 10) by flia.
-(**)
+apply prime_after_aux_is_after.
+Qed.
+
 ...
 
 Theorem Wilson : ∀ n, is_prime n = true ↔ fact (n - 1) mod n = n - 1.
