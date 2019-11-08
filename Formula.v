@@ -2323,7 +2323,7 @@ apply prime_after_aux_is_prime.
 Qed.
 
 Lemma bounded_phony_prime_after_is_after : ∀ n p,
-  n < p
+  n ≤ p
   → is_prime p = true
   → n ≤ phony_prime_after (p - n) n.
 Proof.
@@ -2344,42 +2344,45 @@ apply IHniter.
 now replace (S niter + n) with (niter + (n + 1)) in Hm by flia.
 Qed.
 
-Lemma phony_prime_after_is_after : ∀ n, n ≤ phony_prime_after (fact n + 1) n.
+Lemma phony_prime_after_is_after : ∀ n, is_prime n = false → n ≤ phony_prime_after (fact n + 1) n.
 Proof.
-intros.
+intros * Hn.
 specialize (next_prime_bounded n) as (m & Hm & Hmp).
+...
 specialize (bounded_phony_prime_after_is_after n m (proj1 Hm) Hmp) as H1.
-...
-remember (fact n + 1) as niter1.
-remember (m - n) as niter2.
-assert (Hni : niter2 ≤ niter1). {
-  subst niter1 niter2; flia Hm.
+remember (fact n + 1) as it1 eqn:Hit1.
+remember (m - n) as it2 eqn:Hit2.
+replace m with (n + it2) in Hmp by flia Hit2 Hm.
+assert (Hni : it2 ≤ it1) by (subst it1 it2; flia Hm).
+clear m Hm Hit2 Hit1.
+revert n Hn it1 Hni Hmp H1.
+induction it2; intros. {
+  rewrite Nat.add_0_r in Hmp; cbn in H1.
+  rewrite Hmp in H1.
+  now destruct it1; cbn; rewrite Hmp.
 }
-assert (Hn2 : niter2 ≠ 0) by flia Heqniter2 Hm.
-clear m Hm Hmp Heqniter2 Heqniter1.
-...
-revert n niter1 H1 Hni.
-induction niter2; intros; [ easy | clear Hn2 ].
-cbn in H1.
-remember (is_prime n) as b eqn:Hb; symmetry in Hb.
-destruct b; [ now destruct niter1; cbn; rewrite Hb | ].
-destruct niter1; [ flia Hni | cbn; rewrite Hb ].
+destruct it1; [ flia Hni | ].
+cbn in H1; cbn.
+rewrite Hn in H1 |-*.
+rewrite <- Nat.add_succ_comm in Hmp.
 apply Nat.succ_le_mono in Hni.
-destruct niter2. {
-  cbn in H1.
-  remember (is_prime (n + 1)) as b1 eqn:Hb1; symmetry in Hb1.
-  destruct b1. {
-    destruct niter1; cbn; rewrite Hb1; flia.
-  }
-  apply Nat.le_0_r in H1; subst n; apply Nat.le_0_l.
-}
-transitivity (n + 1); [ flia | ].
-apply IHniter2; [ easy | | easy ].
-cbn.
 remember (is_prime (n + 1)) as b1 eqn:Hb1; symmetry in Hb1.
-destruct b1; [ easy | ].
+destruct b1. {
+  destruct it1; cbn; rewrite Hb1; flia.
+}
+rewrite <- Nat.add_1_r in Hmp.
+specialize (IHit2 (n + 1) Hb1 it1 Hni Hmp) as H2.
+transitivity (n + 1); [ flia | ].
+apply H2.
+clear - Hmp H1.
+revert n Hmp H1.
+induction it2; intros; cbn. {
+  now rewrite Nat.add_0_r in Hmp; rewrite Hmp.
+}
+remember (is_prime (n + 1)) as b eqn:Hb; symmetry in Hb.
+destruct b; [ easy | ].
 cbn in H1.
-rewrite Hb1 in H1.
+rewrite Hb in H1.
 ...
 
 Lemma prime_after_aux_is_after : ∀ niter n, n ≤ prime_after_aux niter n.

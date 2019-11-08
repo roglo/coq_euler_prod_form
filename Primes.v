@@ -163,7 +163,7 @@ rewrite Hc, Nat_fact_succ.
 now rewrite Nat.mul_assoc, Nat.mul_shuffle0.
 Qed.
 
-Lemma next_prime_bounded : ∀ n, ∃ m, n < m ≤ fact n + 1 ∧ is_prime m = true.
+Lemma next_prime_bounded : ∀ n, ∃ m, n ≤ m ≤ fact n + 1 ∧ is_prime m = true.
 Proof.
 intros.
 specialize (prime_divisor (fact n + 1)) as H1.
@@ -180,12 +180,12 @@ destruct H1 as (d & Hd & Hdn).
 exists d.
 split; [ | easy ].
 split.
--destruct (lt_dec n d) as [Hnd| Hnd]; [ easy | ].
- apply Nat.nlt_ge in Hnd; exfalso.
+-destruct (le_dec n d) as [Hnd| Hnd]; [ easy | ].
+ apply Nat.nle_gt in Hnd; exfalso.
  assert (Ht : Nat.divide d (fact n)). {
    exists (fact n / d).
    apply Nat_fact_divides_small.
-   split; [ | easy ].
+   split; [ | flia Hnd ].
    destruct d; [ easy | flia ].
  }
  destruct Hdn as (z, Hz).
@@ -198,7 +198,7 @@ split.
 -apply Nat.divide_pos_le; [ flia | easy ].
 Qed.
 
-Theorem infinitely_many_primes : ∀ n, ∃ m, m > n ∧ is_prime m = true.
+Theorem infinitely_many_primes : ∀ n, ∃ m, m ≥ n ∧ is_prime m = true.
 Proof.
 intros.
 specialize (next_prime_bounded n) as (m & (Hnm & _) & Hp).
