@@ -2162,6 +2162,27 @@ Check @ζ_times_product_on_primes_close_to_1.
 
 (* below to be moved to Primes.v when working *)
 
+(* Questions
+   - How to compute the prime number after a given n ?
+   - How to be able to test "Compute (next_prime n)" without having to
+     give (and compute) a too big upper bound, like this famous n! + 1 ?
+   - How to give an proved correct upper bound that is not too
+     complicated ?
+   Solution
+     The function "next_prime" below.
+   How does it work ?
+     It first makes n iterations. Bertrand's Postulate claims that,
+     inside these n iterations (up to 2n), a prime number is found.
+     So we can do "Compute (next_prime n)" fast enough.
+       If n iterations are reached, the function calls a function
+     named "phony_prime_after", giving it n! + 1 as maximum number
+     of iterations. It is proven that it is a sufficient upper
+     bound. But, in practice, when testing "Compute (next_prime n)",
+     this function is never called.
+       So this computation remains fast and proven that it returns
+     a prime number.
+ *)
+
 Fixpoint phony_prime_after niter n :=
   if is_prime n then n
   else
