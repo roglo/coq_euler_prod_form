@@ -2214,44 +2214,6 @@ Fixpoint prime_after_aux niter n :=
 
 Definition prime_after n := prime_after_aux n n.
 
-Fixpoint nth_prime_aux cnt n :=
-  let p := prime_after n in
-  match cnt with
-  | 0 => p
-  | S c => nth_prime_aux c (p + 1)
-  end.
-
-Definition nth_prime n := nth_prime_aux (n - 1) 0.
-
-Compute (nth_prime 3).
-
-(* slow but simple *)
-
-Definition firstn_primes n := map nth_prime (seq 1 n).
-
-(* fast but complicated *)
-
-Fixpoint firstn_primes_loop n p :=
-  match n with
-  | 0 => []
-  | S n' =>
-      let p' := prime_after p in
-      p' :: firstn_primes_loop n' (p' + 1)
-  end.
-
-Definition firstn_primes' n := firstn_primes_loop n 0.
-
-Time Compute (let n := 50 in firstn_primes n).
-Time Compute (let n := 50 in firstn_primes' n).
-Time Compute (let n := 100 in firstn_primes' n).
-
-(*
-Time Compute (firstn_primes 100).
-Time Compute (firstn_primes' 100).
-*)
-
-Compute (prime_after 510).
-
 (* "prime_after n" is indeed a prime *)
 
 Lemma bounded_phony_prime_after : ∀ n p,
@@ -2385,6 +2347,53 @@ Proof.
 intros.
 apply prime_after_aux_is_after.
 Qed.
+
+(* thanks to the code, 510!+1 is not computed in this example;
+   otherwise this would not answer *)
+
+Compute (prime_after 510).
+
+(* should proof here that there is no prime between n and "next_prime n" *)
+
+(* ... *)
+
+(* nth prime *)
+
+Fixpoint nth_prime_aux cnt n :=
+  let p := prime_after n in
+  match cnt with
+  | 0 => p
+  | S c => nth_prime_aux c (p + 1)
+  end.
+
+Definition nth_prime n := nth_prime_aux (n - 1) 0.
+
+Compute (nth_prime 3).
+
+(* slow but simple *)
+
+Definition firstn_primes n := map nth_prime (seq 1 n).
+
+(* fast but complicated *)
+
+Fixpoint firstn_primes_loop n p :=
+  match n with
+  | 0 => []
+  | S n' =>
+      let p' := prime_after p in
+      p' :: firstn_primes_loop n' (p' + 1)
+  end.
+
+Definition firstn_primes' n := firstn_primes_loop n 0.
+
+Time Compute (let n := 50 in firstn_primes n).
+Time Compute (let n := 50 in firstn_primes' n).
+Time Compute (let n := 100 in firstn_primes' n).
+
+(*
+Time Compute (firstn_primes 100).
+Time Compute (firstn_primes' 100).
+*)
 
 ...
 
