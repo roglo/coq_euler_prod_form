@@ -2304,8 +2304,8 @@ Lemma no_prime_before_phony_prime_after : ∀ n i,
   → is_prime i = false.
 Proof.
 intros * Hb Hni.
-specialize (next_prime_bounded n) as (m & Hm & Hmp).
-move m before i.
+specialize (next_prime_bounded n) as (p & Hp & Hpp).
+move p before i.
 ...
 remember (fact n + 1) as it eqn:Hit; clear Hit.
 destruct Hm as (_, Hm).
