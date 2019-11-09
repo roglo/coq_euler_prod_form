@@ -2399,6 +2399,30 @@ destruct b. {
 eapply IHj; [ easy | apply Hnj | apply Hq | easy ].
 Qed.
 
+Theorem phony_prime_after_more_iter : ∀ k n,
+  phony_prime_after (fact n + 1) n = phony_prime_after (fact n + 1 + k) n.
+Proof.
+intros.
+Check next_prime_bounded.
+Check bounded_phony_prime_after.
+...
+revert n.
+induction k; intros; [ now rewrite Nat.add_0_r | ].
+rewrite (Nat.add_comm _ (S k)).
+cbn.
+rewrite (Nat.add_comm k).
+remember (is_prime n) as b eqn:Hb; symmetry in Hb.
+destruct b. {
+  rewrite Nat.add_comm; cbn.
+  now rewrite Hb.
+}
+...
+specialize (phony_prime_after_is_prime n) as H1.
+remember (phony_prime_after (fact n + 1) n) as p eqn:Hp.
+...
+specialize (bounded_phony_prime_after n p) as H2.
+...
+
 Lemma no_prime_before_after_aux : ∀ niter n i,
   n ≤ i < prime_after_aux niter n → is_prime i = false.
 Proof.
@@ -2451,6 +2475,13 @@ destruct niter; cbn; rewrite Hb. {
     now destruct it; cbn; rewrite Hb1.
   }
   apply Nat.eq_le_incl.
+...
+rewrite (phony_prime_after_more_iter ((fact (n + 1) - fact n)) n).
+Search phony_prime_after.
+clear - Hb.
+...
+  rewrite (Nat.add_1_r (fact n)); cbn.
+  rewrite Hb.
 ...
 }
 cbn in Hni.
