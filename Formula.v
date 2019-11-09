@@ -2445,6 +2445,10 @@ destruct niter; cbn; rewrite Hb. {
   remember (is_prime (n + 1)) as b eqn:Hb1; symmetry in Hb1.
   destruct b. {
     replace i with n by flia Hni; clear i Hni.
+    etransitivity; [ apply phony_prime_after_is_after | ].
+    remember (fact (n + 1) + 1) as it1 eqn:Hit1.
+    replace (fact n + 1) with (S (fact n)) by flia; cbn.
+    rewrite Hb; subst it1.
 ...
   }
 ...
