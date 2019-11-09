@@ -2305,18 +2305,32 @@ Lemma no_prime_before_phony_prime_after : ∀ n i,
 Proof.
 intros * Hb Hni.
 specialize (next_prime_bounded n) as (p & Hp & Hpp).
+specialize (phony_prime_after_is_prime n) as Hpq.
+remember (phony_prime_after (fact n + 1) n) as q eqn:Hq.
+clear p Hp Hpp.
+remember (fact n + 1) as it eqn:Hit; clear Hit.
 remember (i - n) as j eqn:Hj.
 replace i with (n + j) in * by flia Hj Hni.
 clear i Hj.
 destruct Hni as (_, Hnj).
-remember (fact n + 1) as it eqn:Hit; clear Hit.
-revert n p it Hb Hnj Hp Hpp.
+revert n q it Hb Hnj Hq Hpq.
 induction j; intros; [ now rewrite Nat.add_0_r | ].
-destruct it; cbn in Hnj; rewrite Hb in Hnj; [ flia Hnj | ].
 rewrite <- Nat.add_succ_comm in Hnj |-*.
-rewrite Nat.add_1_r in Hnj.
-eapply IHj; [ | apply Hnj | | apply Hpp ].
-...
+destruct it; cbn in Hq; rewrite Hb in Hq; [ now subst q | ].
+rewrite Nat.add_1_r in Hq.
+remember (is_prime (S n)) as b eqn:Hb1; symmetry in Hb1.
+destruct b. {
+  destruct it. {
+    remember (S n) as sn; cbn in Hq; subst sn.
+    rewrite Hb1 in Hq.
+    subst q; flia Hnj.
+  }
+  remember (S n) as sn; cbn in Hq; subst sn.
+  rewrite Hb1 in Hq.
+  flia Hq Hnj.
+}
+eapply IHj; [ easy | apply Hnj | apply Hq | easy ].
+Qed.
 
 Lemma no_prime_before_after_aux : ∀ niter n i,
   n ≤ i < prime_after_aux niter n → is_prime i = false.
@@ -2327,7 +2341,6 @@ induction niter; intros. {
   cbn - [ "/" ] in Hni.
   remember (is_prime n) as b eqn:Hb; symmetry in Hb.
   destruct b; [ flia Hni | ].
-...
   now apply (no_prime_before_phony_prime_after n).
 }
 cbn in Hni.
@@ -2336,6 +2349,7 @@ destruct b; [ flia Hni | ].
 apply (IHniter n).
 split; [ easy | ].
 eapply lt_le_trans; [ apply Hni | ].
+...
 destruct niter; cbn; rewrite Hb. {
   cbn in Hni.
   remember (is_prime (n + 1)) as b eqn:Hb1; symmetry in Hb1.
