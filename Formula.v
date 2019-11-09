@@ -2307,6 +2307,28 @@ intros * Hb Hni.
 specialize (next_prime_bounded n) as (m & Hm & Hmp).
 move m before i.
 ...
+remember (fact n + 1) as it eqn:Hit; clear Hit.
+destruct Hm as (_, Hm).
+revert n i m Hb Hni Hm Hmp.
+induction it; intros; [ now apply Nat.le_0_r in Hm; subst m | ].
+cbn in Hni.
+rewrite Hb in Hni.
+destruct m; [ easy | ].
+specialize (IHit (n + 1) i m) as H1.
+...
+remember (m - n) as k eqn:Hk.
+replace m with (n + k) in Hmp by flia Hk Hm.
+replace (fact n + 1) with (k + (fact n + 1 - k)) in Hni, Hm by flia Hm Hk.
+remember (fact n + 1 - k) as l eqn:Hl.
+...
+clear m Hm Hk Hl; move l before k.
+revert n l Hmp.
+induction k; intros; cbn. {
+  rewrite Nat.add_0_r in Hmp; rewrite Hmp.
+  now destruct l; cbn; rewrite Hmp.
+
+Print phony_prime_after.
+...
 specialize (bounded_no_prime_before_phony_prime_after n m i) as H1.
 specialize (H1 (Nat.lt_le_incl _ _ (proj1 Hm)) Hmp).
 specialize (H1
