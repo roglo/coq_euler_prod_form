@@ -2306,15 +2306,33 @@ Proof.
 intros * Hb Hni.
 specialize (next_prime_bounded n) as (p & Hp & Hpp).
 move p before i.
-...
 remember (fact n + 1) as it eqn:Hit; clear Hit.
-destruct Hm as (_, Hm).
-revert n i m Hb Hni Hm Hmp.
-induction it; intros; [ now apply Nat.le_0_r in Hm; subst m | ].
-cbn in Hni.
-rewrite Hb in Hni.
-destruct m; [ easy | ].
-specialize (IHit (n + 1) i m) as H1.
+destruct Hp as (_, Hp).
+...
+revert n i p Hb Hni Hp Hpp.
+induction it; intros; [ now apply Nat.le_0_r in Hp; subst p | ].
+cbn in Hni; rewrite Hb in Hni.
+destruct p; [ easy | ].
+apply Nat.succ_le_mono in Hp.
+remember (is_prime (n + 1)) as b eqn:Hb1; symmetry in Hb1.
+destruct b. {
+  destruct it; cbn in Hni; rewrite Hb1 in Hni. {
+    now apply Nat.le_0_r in Hp; subst p.
+  }
+  now replace i with n by flia Hni.
+}
+destruct (Nat.eq_dec i n) as [Hin| Hin]; [ now subst i | ].
+destruct (Nat.eq_dec p it) as [Hpi| Hpi]. {
+  subst p.
+  destruct it; [ easy | cbn in Hni, IHit ].
+  rewrite Hb1 in Hni.
+  specialize (IHit (n + 1) i (S (S it)) Hb1) as H1.
+  rewrite Hb in IHit.
+...
+
+specialize (IHit (n + 1) i Hb1) as H1.
+assert (H : n + 1 ≤ i < phony_prime_after it (n + 1)) by flia Hni Hin.
+specialize (H1 H); clear H.
 ...
 remember (m - n) as k eqn:Hk.
 replace m with (n + k) in Hmp by flia Hk Hm.
