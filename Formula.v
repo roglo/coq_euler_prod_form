@@ -2286,6 +2286,89 @@ intros.
 apply prime_after_aux_is_prime.
 Qed.
 
+(* there is no prime between "n" and "next_prime n" *)
+
+(*
+Lemma bounded_no_prime_before_phony_prime_after : ∀ n p i,
+  n ≤ p
+  → is_prime p = true
+  → n < i ≤ phony_prime_after (p - n) n
+  → is_prime i = false.
+Proof.
+intros * Hnm Hp Hni.
+*)
+
+Lemma no_prime_before_phony_prime_after : ∀ n i,
+  is_prime n = false
+  → n ≤ i < phony_prime_after (fact n + 1) n
+  → is_prime i = false.
+Proof.
+intros * Hb Hni.
+specialize (next_prime_bounded n) as (m & Hm & Hmp).
+move m before i.
+...
+specialize (bounded_no_prime_before_phony_prime_after n m i) as H1.
+specialize (H1 (Nat.lt_le_incl _ _ (proj1 Hm)) Hmp).
+specialize (H1
+etransitivity; [ apply H1 | ].
+phony_prime_after_is_after n m) as H1.
+...
+specialize (H1 (Nat.lt_le_incl _ _ (proj1 Hm)) Hmp).
+etransitivity; [ apply H1 | ].
+clear H1.
+remember (m - n) as k eqn:Hk.
+replace m with (n + k) in Hmp by flia Hk Hm.
+replace (fact n + 1) with (k + (fact n + 1 - k)) by flia Hm Hk.
+remember (fact n + 1 - k) as l eqn:Hl.
+clear m Hm Hk Hl; move l before k.
+revert n l Hmp.
+induction k; intros; cbn. {
+  rewrite Nat.add_0_r in Hmp; rewrite Hmp.
+  now destruct l; cbn; rewrite Hmp.
+}
+remember (is_prime n) as b eqn:Hb; symmetry in Hb.
+destruct b; [ easy |].
+replace (n + S k) with (n + 1 + k) in Hmp by flia.
+now apply IHk.
+Qed.
+...
+
+Lemma no_prime_before_after_aux : ∀ niter n i,
+  n ≤ i < prime_after_aux niter n → is_prime i = false.
+Proof.
+intros * Hni.
+revert n i Hni.
+induction niter; intros. {
+  cbn - [ "/" ] in Hni.
+  remember (is_prime n) as b eqn:Hb; symmetry in Hb.
+  destruct b; [ flia Hni | ].
+...
+  now apply (no_prime_before_phony_prime_after n).
+}
+cbn in Hni.
+remember (is_prime n) as b eqn:Hb; symmetry in Hb.
+destruct b; [ flia Hni | ].
+apply (IHniter n).
+split; [ easy | ].
+eapply lt_le_trans; [ apply Hni | ].
+destruct niter; cbn; rewrite Hb. {
+  cbn in Hni.
+  remember (is_prime (n + 1)) as b eqn:Hb1; symmetry in Hb1.
+  destruct b. {
+    replace i with n by flia Hni; clear i Hni.
+...
+  }
+...
+Qed.
+
+Theorem no_prime_before_after : ∀ n i,
+  n ≤ i < prime_after n → is_prime i = false.
+Proof.
+intros * Hni.
+...
+now apply (no_prime_before_after_aux n n i).
+...
+
 (* "prime_after n" is indeed after (greater or equal to) n *)
 
 Lemma bounded_phony_prime_after_is_after : ∀ n p,
@@ -2310,35 +2393,40 @@ apply IHniter.
 now replace (S niter + n) with (niter + (n + 1)) in Hm by flia.
 Qed.
 
+Lemma phony_prime_after_aux_is_after : ∀ n,
+  n ≤ phony_prime_after (fact n + 1) n.
+Proof.
+intros.
+specialize (next_prime_bounded n) as (m & Hm & Hmp).
+specialize (bounded_phony_prime_after_is_after n m) as H1.
+specialize (H1 (Nat.lt_le_incl _ _ (proj1 Hm)) Hmp).
+etransitivity; [ apply H1 | ].
+clear H1.
+remember (m - n) as k eqn:Hk.
+replace m with (n + k) in Hmp by flia Hk Hm.
+replace (fact n + 1) with (k + (fact n + 1 - k)) by flia Hm Hk.
+remember (fact n + 1 - k) as l eqn:Hl.
+clear m Hm Hk Hl; move l before k.
+revert n l Hmp.
+induction k; intros; cbn. {
+  rewrite Nat.add_0_r in Hmp; rewrite Hmp.
+  now destruct l; cbn; rewrite Hmp.
+}
+remember (is_prime n) as b eqn:Hb; symmetry in Hb.
+destruct b; [ easy |].
+replace (n + S k) with (n + 1 + k) in Hmp by flia.
+now apply IHk.
+Qed.
+
 Lemma prime_after_aux_is_after : ∀ niter n, n ≤ prime_after_aux niter n.
 Proof.
 intros.
 revert n.
 induction niter; intros; cbn. {
-  remember (is_prime n) as b eqn:Hb; symmetry in Hb.
-  destruct b; [ easy | ].
-  specialize (next_prime_bounded n) as (m & Hm & Hmp).
-  specialize (bounded_phony_prime_after_is_after n m) as H1.
-  specialize (H1 (Nat.lt_le_incl _ _ (proj1 Hm)) Hmp).
-  etransitivity; [ apply H1 | ].
-  clear Hb H1.
-  remember (m - n) as k eqn:Hk.
-  replace m with (n + k) in Hmp by flia Hk Hm.
-  replace (fact n + 1) with (k + (fact n + 1 - k)) by flia Hm Hk.
-  remember (fact n + 1 - k) as l eqn:Hl.
-  clear m Hm Hk Hl; move l before k.
-  revert n l Hmp.
-  induction k; intros; cbn. {
-    rewrite Nat.add_0_r in Hmp; rewrite Hmp.
-    now destruct l; cbn; rewrite Hmp.
-  }
-  remember (is_prime n) as b eqn:Hb; symmetry in Hb.
-  destruct b; [ easy |].
-  replace (n + S k) with (n + 1 + k) in Hmp by flia.
-  now apply IHk.
+  destruct (is_prime n); [ easy | ].
+  apply phony_prime_after_aux_is_after.
 }
-remember (is_prime n) as b eqn:Hb; symmetry in Hb.
-destruct b; [ easy | ].
+destruct (is_prime n); [ easy | ].
 transitivity (n + 1); [ flia | apply IHniter ].
 Qed.
 
@@ -2352,10 +2440,6 @@ Qed.
    otherwise this would not answer *)
 
 Compute (prime_after 510).
-
-(* should proof here that there is no prime between n and "next_prime n" *)
-
-(* ... *)
 
 (* nth prime *)
 
