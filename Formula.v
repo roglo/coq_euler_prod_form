@@ -2399,11 +2399,26 @@ destruct b. {
 eapply IHj; [ easy | apply Hnj | apply Hq | easy ].
 Qed.
 
-Theorem phony_prime_after_more_iter : ∀ k n p niter,
-  n ≤ p
-  → is_prime p = true
+Theorem phony_prime_after_more_iter : ∀ k n niter,
+  fact n + 1 ≤ niter
+  → phony_prime_after niter n ≤ phony_prime_after (niter + k) n.
+Proof.
+intros * Hni.
+specialize (next_prime_bounded n) as (p & Hnp & Hpp).
+revert n niter Hni Hnp.
+induction k; intros; [ now rewrite Nat.add_0_r | ].
+rewrite <- Nat.add_succ_comm; cbn.
+remember (is_prime n) as b eqn:Hb; symmetry in Hb.
+destruct b; [ now destruct niter; cbn; rewrite Hb | ].
+etransitivity; [ now apply IHk | ].
+...
+
+Theorem phony_prime_after_more_iter : ∀ k n niter,
+  fact n + 1 ≤ niter
   → phony_prime_after niter n = phony_prime_after (niter + k) n.
 Proof.
+intros * Hni.
+...
 intros * Hnp Hpp.
 revert n p Hpp Hnp.
 induction niter; intros; cbn. {
