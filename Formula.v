@@ -338,9 +338,17 @@ Notation "r ~{ i }" := (ls r i) (at level 1, format "r ~{ i }").
 (* adding, opposing, subtracting polynomials *)
 
 Definition t_add {F : field} u v :=
-  match (u, v) with
-  | (LnT ut, LnT vt) => LnT (ut + vt)
-  | _ => 0%T (* not yet implemented *)
+  match u with
+  | LnT ut =>
+      match v with
+      | LnT vt => LnT (ut + vt)
+      | LnP vt => LnP (λ i, (ut + vt i)%F)
+      end
+  | LnP ut =>
+      match v with
+      | LnT vt => LnP (λ i, (ut i + vt)%F)
+      | LnP vt => LnP (λ i, (ut i + vt i)%F)
+      end
   end.
 
 Definition t_opp {F : field} u :=
@@ -715,15 +723,11 @@ destruct ua as [ut| ]. {
       rewrite Hc, Nat.mul_comm; cbn; flia.
     }
     rewrite Hua.
+    rewrite (f_mul_comm vt).
     rewrite <- IHl. 2: {
       intros d Hdl.
       now apply Hd; right.
     }
-    remember (fold_left t_add (map (log_prod_term u v n) l) 0%T) as x eqn:Hx.
-    symmetry in Hx.
-    destruct x as [ut1| ]. {
-      rewrite LnT_add, <- Hx.
-      rewrite (f_mul_comm vt).
 Theorem fold_t_add_assoc {F : field} : ∀ a b l,
   fold_left t_add l (a + b)%T = t_add (fold_left t_add l a) b.
 Proof.
@@ -737,7 +741,18 @@ destruct a as [ua| ]. {
       rewrite LnT_add.
       now rewrite IHl.
     }
+    remember (fold_left t_add l 0%T) as x eqn:Hx; symmetry in Hx.
+    destruct x as [x| ]. {
 ...
+rewrite <- fold_t_add_assoc.
+now rewrite <- LnT_add, f_add_0_l.
+...
+    remember (fold_left t_add (map (log_prod_term u v n) l) 0%T) as x eqn:Hx.
+    symmetry in Hx.
+    destruct x as [ut1| ]. {
+Check LnT_add.
+...
+      rewrite LnT_add, <- Hx.
 rewrite <- IHl; f_equal.
 apply f_add_add_swap.
 Qed.
