@@ -2414,29 +2414,20 @@ Theorem phony_prime_after_more_iter : ∀ k n niter,
 Proof.
 intros * Hnit.
 specialize (next_prime_bounded n) as (p & Hnp & Hpp).
-...
-assert (Hpi : p + n ≤ niter) by flia Hnit Hnp.
-clear Hnit Hnp.
-revert k n p Hpp Hpi.
+remember (p - n) as i eqn:Hi.
+replace p with (n + i) in * by flia Hi Hnp.
+clear Hi; destruct Hnp as (_, Hnp).
+assert (Hni : n + i ≤ niter) by flia Hnit Hnp.
+clear p Hnit Hnp.
+revert k n Hpp Hni.
 induction niter; intros. {
-  cbn.
-  now apply Nat.le_0_r in Hpi; rewrite Hpi in Hpp.
+  apply Nat.le_0_r in Hni.
+  apply Nat.eq_add_0 in Hni.
+  now rewrite (proj1 Hni), (proj2 Hni) in Hpp.
 }
 cbn.
 remember (is_prime n) as b eqn:Hb; symmetry in Hb.
 destruct b; [ easy | ].
-destruct p; [ easy | ].
-apply (IHniter _ _ p); [ | flia Hpi ].
-...
-destruct niter. {
-  cbn.
-  destruct k; [ easy | cbn ].
-  remember (is_prime n) as b eqn:Hb; symmetry in Hb.
-  destruct b; [ easy | ].
-  destruct k. {
-    cbn.
-    remember (is_prime (n + 1)) as b eqn:Hb1; symmetry in Hb1.
-    destruct b; [ | easy ].
 ...
 
 Theorem phony_prime_after_more_iter : ∀ k n niter,
