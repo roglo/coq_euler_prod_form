@@ -2164,11 +2164,6 @@ Check @ζ_times_product_on_primes_close_to_1.
 
 ...
 
-(* thanks to the code, 510! + 1 is not computed in this example;
-   otherwise this would not answer *)
-
-Compute (prime_after 510).
-
 (* nth prime *)
 
 Fixpoint nth_prime_aux cnt n :=

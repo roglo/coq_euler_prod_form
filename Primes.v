@@ -1352,3 +1352,10 @@ Proof.
 intros * Hni.
 now apply (no_prime_before_after_aux n n i).
 Qed.
+
+(* thanks to the code, 510! + 1 is not computed in this example;
+   otherwise this would not answer *)
+
+(*
+Compute (prime_after 510).
+*)
