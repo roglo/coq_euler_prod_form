@@ -2389,15 +2389,6 @@ destruct b. {
 eapply IHj; [ easy | apply Hnj | apply Hq | easy ].
 Qed.
 
-Theorem Nat_fact_le_diag : ∀ n, n ≤ fact n.
-Proof.
-destruct n; [ flia | ].
-rewrite Nat_fact_succ.
-rewrite <- (Nat.mul_1_r (S n)) at 1.
-apply Nat.mul_le_mono_l.
-apply lt_O_fact.
-Qed.
-
 Theorem phony_prime_after_more_iter : ∀ k n niter,
   fact n + 1 ≤ niter
   → phony_prime_after niter n = phony_prime_after (niter + k) n.
