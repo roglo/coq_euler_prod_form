@@ -260,14 +260,18 @@ above).
    where x = e^(-s)
  *)
 
+Inductive ln_term {F : field} :=
+  | LnT : f_type → ln_term            (* a coefficient *)
+  | LnP : (nat → f_type) → ln_term.  (* an infinite product *)
+
 Class ln_series {F : field} :=
-  { ls : nat → f_type }.
+  { ls : nat → ln_term }.
 
 (* Definition of the type of a polynomial: this is just
    a finite series; it can be represented by a list *)
 
 Class ln_polyn {F : field} :=
-  { lp : list f_type }.
+  { lp : list ln_term }.
 
 (* Syntactic scopes, allowing to use operations on series and
    polynomials with usual mathematical forms. For example we can
@@ -283,8 +287,15 @@ Delimit Scope ls_scope with LS.
 Declare Scope lp_scope.
 Delimit Scope lp_scope with LP.
 
+Declare Scope lt_scope.
+Delimit Scope lt_scope with T.
+
 Arguments ls {_} _%LS _%nat.
 Arguments lp {_}.
+Arguments LnT _ _%F.
+
+Notation "0" := (LnT 0) : lt_scope.
+Notation "1" := (LnT 1) : lt_scope.
 
 (* Equality between series; since these series start with 1, the
    comparison is only on natural indices different from 0 *)
@@ -318,7 +329,7 @@ Add Parametric Relation {F : field} : (ln_series) ls_eq
 (* The unit series: 1 + 0/2^s + 0/3^s + 0/4^s + ... *)
 
 Definition ls_one {F : field} :=
-  {| ls n := match n with 1 => 1%F | _ => 0%F end |}.
+  {| ls n := match n with 1 => 1%T | _ => 0%T end |}.
 
 (* Notation for accessing a series coefficient at index i *)
 
@@ -326,10 +337,22 @@ Notation "r ~{ i }" := (ls r i) (at level 1, format "r ~{ i }").
 
 (* adding, opposing, subtracting polynomials *)
 
+Definition t_add {F : field} u v :=
+  match (u, v) with
+  | (LnT ut, LnT vt) => LnT (ut + vt)
+  | _ => 0%T (* not yet implemented *)
+  end.
+
+Definition t_opp {F : field} u :=
+  match u with
+  | LnT ut => LnT (- ut)
+  | _ => 0%T (* not yet implemented *)
+  end.
+
 Definition lp_add {F : field} p q :=
   {| lp :=
-       List.map (prod_curry f_add) (List_combine_all (lp p) (lp q) 0%F) |}.
-Definition lp_opp {F : field} p := {| lp := List.map f_opp (lp p) |}.
+       List.map (prod_curry t_add) (List_combine_all (lp p) (lp q) 0%T) |}.
+Definition lp_opp {F : field} p := {| lp := List.map t_opp (lp p) |}.
 Definition lp_sub {F : field} p q := lp_add p (lp_opp q).
 
 Notation "x - y" := (lp_sub x y) : lp_scope.
@@ -337,7 +360,7 @@ Notation "1" := (ls_one) : ls_scope.
 
 (* At last, the famous ζ function: all its coefficients are 1 *)
 
-Definition ζ {F : field} := {| ls _ := 1%F |}.
+Definition ζ {F : field} := {| ls _ := 1%T |}.
 
 (* Series where the indices, which are multiple of some n, are 0
       1 + ls(2)/2^s + ls(3)/3^s + ... + ls(n-1)/(n-1)^s + 0/n^s +
@@ -349,7 +372,7 @@ Definition ζ {F : field} := {| ls _ := 1%F |}.
 Definition series_but_mul_of {F : field} n s :=
   {| ls i :=
        match i mod n with
-       | 0 => 0%F
+       | 0 => 0%T
        | _ => ls s i
        end |}.
 
@@ -365,13 +388,16 @@ Definition divisors n := List.filter (λ a, n mod a =? 0) (List.seq 1 n).
    where d covers all the divisors of n *)
 
 Definition log_prod_term {F : field} u v n i :=
-  (u i * v (n / i))%F.
+  match (u i, v (n / i)) with
+  | (LnT ut, LnT vt) => LnT (ut * vt)
+  | _ => 0%T (* not yet implemented *)
+  end.
 
 Definition log_prod_list {F : field} u v n :=
   List.map (log_prod_term u v n) (divisors n).
 
 Definition log_prod {F : field} u v n :=
-  List.fold_left f_add (log_prod_list u v n) 0%F.
+  List.fold_left t_add (log_prod_list u v n) 0%T.
 
 (* Σ (i = 1, ∞) s1_i x^ln(i) * Σ (i = 1, ∞) s2_i x^ln(i) *)
 Definition ls_mul {F : field} s1 s2 :=
@@ -382,8 +408,8 @@ Definition ls_mul {F : field} s1 s2 :=
 Definition ls_of_pol {F : field} p :=
   {| ls n :=
        match n with
-       | 0 => 0%F
-       | S n' => List.nth n' (lp p) 0%F end |}.
+       | 0 => 0%T
+       | S n' => List.nth n' (lp p) 0%T end |}.
 
 Definition ls_pol_mul_r {F : field} s p :=
   ls_mul s (ls_of_pol p).
@@ -659,19 +685,40 @@ Qed.
 Theorem fold_log_prod_add_on_rev {F : field} : ∀ u v n l,
   n ≠ 0
   → (∀ d, d ∈ l → n mod d = 0 ∧ d ≠ 0)
-  → fold_left f_add (map (log_prod_term u v n) l) f_zero =
-     fold_left f_add (map (log_prod_term v u n) (rev (map (λ i, n / i) l)))
-       f_zero.
+  → fold_left t_add (map (log_prod_term u v n) l) 0%T =
+     fold_left t_add (map (log_prod_term v u n) (rev (map (λ i, n / i) l)))
+       0%T.
 Proof.
 intros * Hn Hd.
 induction l as [| a l]; intros; [ easy | cbn ].
-rewrite f_add_0_l.
-rewrite List.map_app.
-rewrite List.fold_left_app; cbn.
-specialize (Hd a (or_introl eq_refl)) as H1.
-destruct H1 as (H1, H2).
-rewrite <- IHl.
--unfold log_prod_term at 2 4.
+remember (u a) as ua eqn:Hua; symmetry in Hua.
+remember (v (n / a)) as va eqn:Hva; symmetry in Hva.
+destruct ua as [ut| ]. {
+  destruct va as [vt| ]. {
+(**)
+    rewrite f_add_0_l.
+    rewrite List.map_app.
+    rewrite List.fold_left_app; cbn.
+    rewrite Hva.
+    specialize (Hd a (or_introl eq_refl)) as H1.
+    destruct H1 as (H1, H2).
+    rewrite Nat_mod_0_div_div; [ | | easy ]; cycle 1. {
+      split; [ flia H2 | ].
+      apply Nat.mod_divides in H1; [ | easy ].
+      destruct H1 as (c, Hc).
+      destruct c; [ now rewrite Nat.mul_comm in Hc | ].
+      rewrite Hc, Nat.mul_comm; cbn; flia.
+    }
+    rewrite Hua.
+    rewrite <- IHl. 2: {
+      intros d Hdl.
+      now apply Hd; right.
+    }
+    remember (fold_left t_add (map (log_prod_term u v n) l) 0%T) as x eqn:Hx.
+    symmetry in Hx.
+    destruct x as [ut1| ]. {
+...
+-unfold log_prod_term at 2 (*4*).
  rewrite Nat_mod_0_div_div; [ | | easy ]; cycle 1. {
    split; [ flia H2 | ].
    apply Nat.mod_divides in H1; [ | easy ].
@@ -679,6 +726,7 @@ rewrite <- IHl.
    destruct c; [ now rewrite Nat.mul_comm in Hc | ].
    rewrite Hc, Nat.mul_comm; cbn; flia.
  }
+ rewrite Hua.
  rewrite (f_mul_comm (v (n / a))).
  now rewrite <- fold_f_add_assoc, f_add_0_l.
 -intros d Hdl.
