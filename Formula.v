@@ -732,6 +732,29 @@ Theorem fold_t_add_assoc {F : field} : ∀ a b l,
   fold_left t_add l (a + b)%T = t_add (fold_left t_add l a) b.
 Proof.
 intros.
+revert a b.
+induction l as [| c l]; intros; [ easy | cbn ].
+Theorem t_add_assoc {F : field} : ∀ a b c, ((a + b) + c)%T = (a + (b + c))%T.
+Proof.
+intros.
+destruct a as [a| a]. {
+  destruct b as [b| b]. {
+    rewrite <- LnT_add.
+    destruct c as [c| c]. {
+      do 3 rewrite <- LnT_add.
+      now rewrite f_add_assoc.
+    }
+    cbn.
+Theorem LnP_add_assoc {F : field} : ∀ a b c,
+  LnP (λ i : nat, (a + b + c i)%F) = LnP (λ i : nat, (a + (b + c i))%F).
+Proof.
+intros.
+(* we need a specific equality, where, if it is LnP, is extensional *)
+...
+rewrite t_add_assoc.
+rewrite IHl.
+...
+intros.
 destruct a as [ua| ]. {
   destruct b as [ub| ]. {
     revert ua ub.
@@ -741,8 +764,6 @@ destruct a as [ua| ]. {
       rewrite LnT_add.
       now rewrite IHl.
     }
-    remember (fold_left t_add l 0%T) as x eqn:Hx; symmetry in Hx.
-    destruct x as [x| ]. {
 ...
 rewrite <- fold_t_add_assoc.
 now rewrite <- LnT_add, f_add_0_l.
