@@ -300,7 +300,14 @@ Notation "1" := (LnT 1) : lt_scope.
 (* Equality between series; since these series start with 1, the
    comparison is only on natural indices different from 0 *)
 
-Definition ls_eq {F : field} s1 s2 := ∀ n, n ≠ 0 → ls s1 n = ls s2 n.
+Definition ls_eq {F : field} s1 s2 := ∀ n, n ≠ 0 →
+  match ls s1 n with
+  | LnT c1 =>
+      match ls s2 n with
+      | LnT c2 => c1 = c2
+      | LnP p2 => ...
+...
+  ls s1 n = ls s2 n.
 Arguments ls_eq _ s1%LS s2%LS.
 
 (* which is an equivalence relation *)
