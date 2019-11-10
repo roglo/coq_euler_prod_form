@@ -195,55 +195,6 @@ intros * HF.
 now inversion HF.
 Qed.
 
-Theorem Sorted_Sorted_lt_app_not_in_l : ∀ a l1 l2,
-  Sorted.Sorted lt (l1 ++ a :: l2)
-  → not (List.In a l1).
-Proof.
-intros * Hs Ha.
-apply Sorted.Sorted_StronglySorted in Hs; [ | apply Nat.lt_strorder ].
-induction l1 as [| b l]; [ easy | cbn ].
-destruct Ha as [Ha| Ha]. {
-  subst b.
-  clear IHl.
-  cbn in Hs.
-  induction l as [| b l]; intros. {
-    cbn in Hs.
-    apply Sorted.StronglySorted_inv in Hs.
-    destruct Hs as (_, Hr).
-    apply Forall_inv in Hr; flia Hr.
-  }
-  apply IHl.
-  apply Sorted.StronglySorted_inv in Hs.
-  destruct Hs as (Hs, Hr).
-  cbn in Hs, Hr.
-  constructor. {
-    now apply Sorted.StronglySorted_inv in Hs.
-  }
-  now apply Forall_inv_tail in Hr.
-}
-apply IHl; [ | easy ].
-cbn in Hs.
-now apply Sorted.StronglySorted_inv in Hs.
-Qed.
-
-Theorem Sorted_Sorted_lt_app_not_in_r : ∀ a l1 l2,
-  Sorted.Sorted lt (l1 ++ a :: l2)
-  → not (List.In a l2).
-Proof.
-intros * Hs Ha.
-apply Sorted.Sorted_StronglySorted in Hs; [ | apply Nat.lt_strorder ].
-induction l1 as [| b l]. {
-  cbn in Hs.
-  apply Sorted.StronglySorted_inv in Hs.
-  destruct Hs as (Hs, Hr).
-  specialize (proj1 (Forall_forall _ _) Hr) as H1.
-  specialize (H1 _ Ha); flia H1.
-}
-cbn in Hs.
-apply Sorted.StronglySorted_inv in Hs.
-now apply IHl.
-Qed.
-
 Theorem NoDup_app_comm {A} : ∀ l l' : list A,
   NoDup (l ++ l') → NoDup (l' ++ l).
 Proof.
