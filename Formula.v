@@ -2399,16 +2399,24 @@ destruct b. {
 eapply IHj; [ easy | apply Hnj | apply Hq | easy ].
 Qed.
 
-Theorem phony_prime_after_more_iter : ∀ k n niter,
-  fact n + 1 ≤ niter
+Theorem phony_prime_after_more_iter : ∀ k n p niter,
+  n ≤ p
+  → is_prime p = true
   → phony_prime_after niter n = phony_prime_after (niter + k) n.
 Proof.
-intros * Hnk.
-revert k n Hnk.
-induction niter; intros; cbn; [ flia Hnk | ].
-remember (is_prime n) as b eqn:Hb; symmetry in Hb.
-destruct b; [ easy | ].
-apply IHniter.
+intros * Hnp Hpp.
+revert n p Hpp Hnp.
+induction niter; intros; cbn. {
+  remember (is_prime n) as b eqn:Hb; symmetry in Hb.
+  destruct b; [ now destruct k; cbn; rewrite Hb | ].
+  revert n Hnp Hb.
+  induction k; intros; cbn; rewrite Hb; [ easy | ].
+  rewrite Nat.add_comm; cbn.
+  destruct (Nat.eq_dec n p) as [Hnp1| Hnp1]. {
+    rewrite <- Nat.add_1_r.
+    now rewrite Hnp1, Hpp in Hb.
+  }
+  apply IHk; [ flia Hnp Hnp1 | ].
 ...
 
 Lemma no_prime_before_after_aux : ∀ niter n i,
