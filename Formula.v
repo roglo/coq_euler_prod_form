@@ -728,11 +728,15 @@ Theorem fold_t_add_assoc {F : field} : ∀ a b l,
   fold_left t_add l (a + b)%T = t_add (fold_left t_add l a) b.
 Proof.
 intros.
-revert a.
-induction l as [| c l]; intros; [ easy | cbn ].
 destruct a as [ua| ]. {
   destruct b as [ub| ]. {
+    revert ua ub.
+    induction l as [| c l]; intros; [ easy | cbn ].
     destruct c as [uc| ]. {
+      rewrite f_add_add_swap.
+      rewrite LnT_add.
+      now rewrite IHl.
+    }
 ...
 rewrite <- IHl; f_equal.
 apply f_add_add_swap.
