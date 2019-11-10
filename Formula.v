@@ -2162,8 +2162,6 @@ Check @ζ_times_product_on_primes_close_to_1.
 
 (* below to be moved to Primes.v when working *)
 
-...
-
 (* nth prime *)
 
 Fixpoint nth_prime_aux cnt n :=
@@ -2175,7 +2173,7 @@ Fixpoint nth_prime_aux cnt n :=
 
 Definition nth_prime n := nth_prime_aux (n - 1) 0.
 
-Compute (nth_prime 3).
+Compute (nth_prime 30).
 
 (* slow but simple *)
 
@@ -2198,8 +2196,8 @@ Time Compute (let n := 50 in firstn_primes' n).
 Time Compute (let n := 100 in firstn_primes' n).
 
 (*
-Time Compute (firstn_primes 100).
-Time Compute (firstn_primes' 100).
+Time Compute (firstn_primes 100).   (* slow *)
+Time Compute (firstn_primes' 100).  (* fast *)
 *)
 
 ...
