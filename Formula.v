@@ -2399,18 +2399,29 @@ destruct b. {
 eapply IHj; [ easy | apply Hnj | apply Hq | easy ].
 Qed.
 
+Theorem Nat_fact_le_diag : ∀ n, n ≤ fact n.
+Proof.
+destruct n; [ flia | ].
+rewrite Nat_fact_succ.
+rewrite <- (Nat.mul_1_r (S n)) at 1.
+apply Nat.mul_le_mono_l.
+apply lt_O_fact.
+Qed.
+
 Theorem phony_prime_after_more_iter : ∀ k n niter,
-  fact n + 1 ≤ niter
+  niter + n = fact (n - niter) + 1
   → phony_prime_after niter n ≤ phony_prime_after (niter + k) n.
 Proof.
 intros * Hni.
-specialize (next_prime_bounded n) as (p & Hnp & Hpp).
-revert n niter Hni Hnp.
-induction k; intros; [ now rewrite Nat.add_0_r | ].
-rewrite <- Nat.add_succ_comm; cbn.
+revert n k Hni.
+induction niter; intros; cbn. {
+  rewrite Nat.add_0_l, Nat.sub_0_r in Hni.
+  specialize (Nat_fact_le_diag n) as H1.
+  flia Hni H1.
+}
 remember (is_prime n) as b eqn:Hb; symmetry in Hb.
-destruct b; [ now destruct niter; cbn; rewrite Hb | ].
-etransitivity; [ now apply IHk | ].
+destruct b; [ easy | ].
+apply IHniter.
 ...
 
 Theorem phony_prime_after_more_iter : ∀ k n niter,
