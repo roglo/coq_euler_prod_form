@@ -262,7 +262,9 @@ above).
 
 Inductive ln_term {F : field} :=
   | LnT : f_type → ln_term            (* a coefficient *)
-  | LnP : (nat → f_type) → ln_term.  (* an infinite product *)
+  | LnP : (nat → nat → f_type) → ln_term.
+     (* an infinite product: LnP f where each f i is a series
+        all (f i) j are multiplied together *)
 
 Class ln_series {F : field} :=
   { ls : nat → ln_term }.
@@ -300,14 +302,7 @@ Notation "1" := (LnT 1) : lt_scope.
 (* Equality between series; since these series start with 1, the
    comparison is only on natural indices different from 0 *)
 
-Definition ls_eq {F : field} s1 s2 := ∀ n, n ≠ 0 →
-  match ls s1 n with
-  | LnT c1 =>
-      match ls s2 n with
-      | LnT c2 => c1 = c2
-      | LnP p2 => ...
-...
-  ls s1 n = ls s2 n.
+Definition ls_eq {F : field} s1 s2 := ∀ n, n ≠ 0 → ls s1 n = ls s2 n.
 Arguments ls_eq _ s1%LS s2%LS.
 
 (* which is an equivalence relation *)
@@ -345,17 +340,9 @@ Notation "r ~{ i }" := (ls r i) (at level 1, format "r ~{ i }").
 (* adding, opposing, subtracting polynomials *)
 
 Definition t_add {F : field} u v :=
-  match u with
-  | LnT ut =>
-      match v with
-      | LnT vt => LnT (ut + vt)
-      | LnP vt => LnP (λ i, (ut + vt i)%F)
-      end
-  | LnP ut =>
-      match v with
-      | LnT vt => LnP (λ i, (ut i + vt)%F)
-      | LnP vt => LnP (λ i, (ut i + vt i)%F)
-      end
+  match (u, v) with
+  | (LnT ut, LnT vt) => LnT (ut + vt)
+  | _ => 0%T (* no possible addition *)
   end.
 
 Definition t_opp {F : field} u :=
@@ -752,6 +739,7 @@ destruct a as [a| a]. {
       now rewrite f_add_assoc.
     }
     cbn.
+...
 Theorem LnP_add_assoc {F : field} : ∀ a b c,
   LnP (λ i : nat, (a + b + c i)%F) = LnP (λ i : nat, (a + (b + c i))%F).
 Proof.
