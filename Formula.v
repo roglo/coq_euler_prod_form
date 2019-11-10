@@ -358,6 +358,11 @@ Definition lp_sub {F : field} p q := lp_add p (lp_opp q).
 Notation "x - y" := (lp_sub x y) : lp_scope.
 Notation "1" := (ls_one) : ls_scope.
 
+Notation "a + b" := (t_add a b) : lt_scope.
+
+Theorem LnT_add {F : field} : ∀ u v, LnT (u + v) = t_add (LnT u) (LnT v).
+Proof. easy. Qed.
+
 (* At last, the famous ζ function: all its coefficients are 1 *)
 
 Definition ζ {F : field} := {| ls _ := 1%T |}.
@@ -670,7 +675,7 @@ split; intros Ha.
  now apply divisor_inv.
 Qed.
 
-(* Commutativity of product of series *)
+(* Commutativity of sum of series *)
 
 Theorem fold_f_add_assoc {F : field} : ∀ a b l,
   fold_left f_add l (a + b)%F = (fold_left f_add l a + b)%F.
@@ -717,6 +722,23 @@ destruct ua as [ut| ]. {
     remember (fold_left t_add (map (log_prod_term u v n) l) 0%T) as x eqn:Hx.
     symmetry in Hx.
     destruct x as [ut1| ]. {
+      rewrite LnT_add, <- Hx.
+      rewrite (f_mul_comm vt).
+Theorem fold_t_add_assoc {F : field} : ∀ a b l,
+  fold_left t_add l (a + b)%T = t_add (fold_left t_add l a) b.
+Proof.
+intros.
+revert a.
+induction l as [| c l]; intros; [ easy | cbn ].
+destruct a as [ua| ]. {
+  destruct b as [ub| ]. {
+    destruct c as [uc| ]. {
+...
+rewrite <- IHl; f_equal.
+apply f_add_add_swap.
+Qed.
+...
+ now rewrite <- fold_f_add_assoc, f_add_0_l.
 ...
 -unfold log_prod_term at 2 (*4*).
  rewrite Nat_mod_0_div_div; [ | | easy ]; cycle 1. {
