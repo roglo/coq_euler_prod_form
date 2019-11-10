@@ -2409,19 +2409,59 @@ apply lt_O_fact.
 Qed.
 
 Theorem phony_prime_after_more_iter : ∀ k n niter,
-  niter + n = fact (n - niter) + 1
+  fact n + 1 ≤ niter
+  → phony_prime_after niter n = phony_prime_after (niter + k) n.
+Proof.
+intros * Hnit.
+specialize (next_prime_bounded n) as (p & Hnp & Hpp).
+...
+assert (Hpi : p + n ≤ niter) by flia Hnit Hnp.
+clear Hnit Hnp.
+revert k n p Hpp Hpi.
+induction niter; intros. {
+  cbn.
+  now apply Nat.le_0_r in Hpi; rewrite Hpi in Hpp.
+}
+cbn.
+remember (is_prime n) as b eqn:Hb; symmetry in Hb.
+destruct b; [ easy | ].
+destruct p; [ easy | ].
+apply (IHniter _ _ p); [ | flia Hpi ].
+...
+destruct niter. {
+  cbn.
+  destruct k; [ easy | cbn ].
+  remember (is_prime n) as b eqn:Hb; symmetry in Hb.
+  destruct b; [ easy | ].
+  destruct k. {
+    cbn.
+    remember (is_prime (n + 1)) as b eqn:Hb1; symmetry in Hb1.
+    destruct b; [ | easy ].
+...
+
+Theorem phony_prime_after_more_iter : ∀ k n niter,
+  fact n + 1 ≤ niter
   → phony_prime_after niter n ≤ phony_prime_after (niter + k) n.
 Proof.
 intros * Hni.
 revert n k Hni.
-induction niter; intros; cbn. {
-  rewrite Nat.add_0_l, Nat.sub_0_r in Hni.
-  specialize (Nat_fact_le_diag n) as H1.
-  flia Hni H1.
-}
+induction niter; intros; cbn; [ flia Hni | ].
 remember (is_prime n) as b eqn:Hb; symmetry in Hb.
 destruct b; [ easy | ].
-apply IHniter.
+destruct (le_dec (fact (n + 1) + 1) niter) as [H1| H1]. {
+  now apply IHniter.
+}
+apply Nat.nle_gt in H1.
+rewrite (Nat.add_1_r n) in H1; cbn in H1.
+rewrite Nat.add_1_r in Hni.
+apply Nat.succ_le_mono in Hni.
+destruct niter. {
+  apply Nat.le_0_r in Hni.
+  now apply fact_neq_0 in Hni.
+}
+cbn.
+remember (is_prime (n + 1)) as b eqn:Hb1; symmetry in Hb1.
+destruct b; [ easy | ].
 ...
 
 Theorem phony_prime_after_more_iter : ∀ k n niter,
