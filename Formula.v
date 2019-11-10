@@ -2355,16 +2355,6 @@ Qed.
 
 (* there is no prime between "n" and "next_prime n" *)
 
-(*
-Lemma bounded_no_prime_before_phony_prime_after : ∀ n p i,
-  n ≤ p
-  → is_prime p = true
-  → n < i ≤ phony_prime_after (p - n) n
-  → is_prime i = false.
-Proof.
-intros * Hnm Hp Hni.
-*)
-
 Lemma no_prime_before_phony_prime_after : ∀ n i,
   is_prime n = false
   → n ≤ i < phony_prime_after (fact n + 1) n
@@ -2417,71 +2407,29 @@ specialize (next_prime_bounded n) as (p & Hnp & Hpp).
 remember (p - n) as i eqn:Hi.
 replace p with (n + i) in * by flia Hi Hnp.
 clear Hi; destruct Hnp as (_, Hnp).
-assert (Hni : n + i ≤ niter) by flia Hnit Hnp.
+assert (Hni : i ≤ niter) by flia Hnit Hnp.
 clear p Hnit Hnp.
-revert k n Hpp Hni.
+revert i k n Hpp Hni.
 induction niter; intros. {
   apply Nat.le_0_r in Hni.
-  apply Nat.eq_add_0 in Hni.
-  now rewrite (proj1 Hni), (proj2 Hni) in Hpp.
+  rewrite Hni, Nat.add_0_r in Hpp.
+  cbn; rewrite Hpp.
+  now destruct k; cbn; rewrite Hpp.
 }
 cbn.
 remember (is_prime n) as b eqn:Hb; symmetry in Hb.
 destruct b; [ easy | ].
-...
-
-Theorem phony_prime_after_more_iter : ∀ k n niter,
-  fact n + 1 ≤ niter
-  → phony_prime_after niter n ≤ phony_prime_after (niter + k) n.
-Proof.
-intros * Hni.
-revert n k Hni.
-induction niter; intros; cbn; [ flia Hni | ].
-remember (is_prime n) as b eqn:Hb; symmetry in Hb.
-destruct b; [ easy | ].
-destruct (le_dec (fact (n + 1) + 1) niter) as [H1| H1]. {
-  now apply IHniter.
-}
-apply Nat.nle_gt in H1.
-rewrite (Nat.add_1_r n) in H1; cbn in H1.
-rewrite Nat.add_1_r in Hni.
+destruct i; [ now rewrite Nat.add_0_r, Hb in Hpp | ].
 apply Nat.succ_le_mono in Hni.
-destruct niter. {
-  apply Nat.le_0_r in Hni.
-  now apply fact_neq_0 in Hni.
-}
-cbn.
-remember (is_prime (n + 1)) as b eqn:Hb1; symmetry in Hb1.
-destruct b; [ easy | ].
-...
-
-Theorem phony_prime_after_more_iter : ∀ k n niter,
-  fact n + 1 ≤ niter
-  → phony_prime_after niter n = phony_prime_after (niter + k) n.
-Proof.
-intros * Hni.
-...
-intros * Hnp Hpp.
-revert n p Hpp Hnp.
-induction niter; intros; cbn. {
-  remember (is_prime n) as b eqn:Hb; symmetry in Hb.
-  destruct b; [ now destruct k; cbn; rewrite Hb | ].
-  revert n Hnp Hb.
-  induction k; intros; cbn; rewrite Hb; [ easy | ].
-  rewrite Nat.add_comm; cbn.
-  destruct (Nat.eq_dec n p) as [Hnp1| Hnp1]. {
-    rewrite <- Nat.add_1_r.
-    now rewrite Hnp1, Hpp in Hb.
-  }
-  apply IHk; [ flia Hnp Hnp1 | ].
-...
+replace (n + S i) with (n + 1 + i) in Hpp by flia.
+now apply (IHniter i).
+Qed.
 
 Lemma no_prime_before_after_aux : ∀ niter n i,
   n ≤ i < prime_after_aux niter n → is_prime i = false.
 Proof.
 intros * Hni.
-revert n i Hni.
-induction niter; intros. {
+destruct niter. {
   cbn - [ "/" ] in Hni.
   remember (is_prime n) as b eqn:Hb; symmetry in Hb.
   destruct b; [ flia Hni | ].
@@ -2490,68 +2438,41 @@ induction niter; intros. {
 cbn in Hni.
 remember (is_prime n) as b eqn:Hb; symmetry in Hb.
 destruct b; [ flia Hni | ].
-apply (IHniter n).
-split; [ easy | ].
-(*
-...
-destruct niter. {
-  cbn in Hni; cbn.
-  rewrite Hb.
-  remember (is_prime (n + 1)) as b eqn:Hb1; symmetry in Hb1.
-  destruct b. {
-    replace i with n by flia Hni.
-    clear i Hni.
-    specialize (phony_prime_after_is_after n) as H1.
-    remember (phony_prime_after (fact n + 1) n) as p eqn:Hp.
-    destruct (Nat.eq_dec n p) as [Hnp| Hnp]; [ | flia H1 Hnp ].
-    subst n; rewrite Hp in Hb.
-    apply Bool.not_true_iff_false in Hb.
-    exfalso; apply Hb.
-    apply phony_prime_after_is_prime.
-  }
-  remember (fact n) as it1 eqn:Hit1; clear Hit1.
-  rewrite Nat.add_1_r; cbn.
-  rewrite Hb.
-  remember (fact (n + 1) + 1) as it2 eqn:Hit2; clear Hit2.
-  destruct it2; cbn in Hni; rewrite Hb1 in Hni; [ flia Hni | ].
-...
-*)
-eapply lt_le_trans; [ apply Hni | ].
-destruct niter; cbn; rewrite Hb. {
+revert n i Hb Hni.
+induction niter; intros. {
   cbn in Hni.
   remember (is_prime (n + 1)) as b eqn:Hb1; symmetry in Hb1.
-  destruct b. {
-    replace i with n by flia Hni; clear i Hni.
-    rewrite (Nat.add_1_r (fact n)); cbn.
-    rewrite Hb.
-    remember (fact n) as it eqn:Hit; symmetry in Hit.
-    now destruct it; cbn; rewrite Hb1.
+  destruct b; [ now replace i with n by flia Hni | ].
+  apply (no_prime_before_phony_prime_after n); [ easy | ].
+  split; [ easy | ].
+  eapply lt_le_trans; [ apply Hni | ].
+  rewrite (phony_prime_after_more_iter (fact (n + 1) - fact n + 1) n);
+    [ | easy ].
+  replace (fact n + 1 + (fact (n + 1) - fact n + 1)) with
+      (S (fact (n + 1) + 1)). 2: {
+    rewrite (Nat.add_1_r n).
+    cbn; flia.
   }
-  apply Nat.eq_le_incl.
-...
-rewrite (phony_prime_after_more_iter ((fact (n + 1) - fact n)) n).
-Search phony_prime_after.
-clear - Hb.
-...
-  rewrite (Nat.add_1_r (fact n)); cbn.
-  rewrite Hb.
-...
+  now cbn; rewrite Hb.
 }
 cbn in Hni.
+
 remember (is_prime (n + 1)) as b eqn:Hb1; symmetry in Hb1.
-destruct b; [ apply prime_after_aux_is_after | ].
-...
+destruct b; [ now replace i with n by flia Hni | ].
+destruct (Nat.eq_dec n i) as [Hni1| Hni1]; [ now subst i | ].
+apply (IHniter (n + 1)); [ easy | ].
+split; [ | easy ].
+flia Hni Hni1.
 Qed.
 
 Theorem no_prime_before_after : ∀ n i,
   n ≤ i < prime_after n → is_prime i = false.
 Proof.
 intros * Hni.
-...
 now apply (no_prime_before_after_aux n n i).
-...
+Qed.
 
-(* thanks to the code, 510!+1 is not computed in this example;
+(* thanks to the code, 510! + 1 is not computed in this example;
    otherwise this would not answer *)
 
 Compute (prime_after 510).
