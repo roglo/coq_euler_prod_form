@@ -2342,10 +2342,13 @@ apply fold_left_add_from_0.
 Qed.
 
 Theorem summation_split_last : ∀ b e f,
-  b ≤ S e
-  → Σ (i = b, S e), f i = Σ (i = b, e), f i + f (S e).
+  b ≤ e
+  → 1 ≤ e
+  → Σ (i = b, e), f i = Σ (i = b, e - 1), f i + f e.
 Proof.
-intros * Hbe.
+intros * Hbe He.
+destruct e; [ flia He | clear He ].
+rewrite Nat.sub_succ, Nat.sub_0_r.
 replace (S (S e) - b) with (S (S e - b)) by flia Hbe.
 remember (S e - b) as n eqn:Hn.
 revert b Hbe Hn.
@@ -2419,6 +2422,15 @@ Qed.
 Theorem binomial_0_r : ∀ n, binomial n 0 = 1.
 Proof. now intros; destruct n. Qed.
 
+Theorem binomial_diag : ∀ n, binomial n n = 1.
+Proof.
+intros.
+induction n; [ easy | cbn ].
+now rewrite IHn, binomial_succ_diag_r, Nat.add_0_r.
+Qed.
+
+(* *)
+
 Theorem newton_binomial : ∀ n a b,
   (a + b) ^ n = Σ (k = 0, n), binomial n k * a ^ (n - k) * b ^ k.
 Proof.
@@ -2446,23 +2458,33 @@ do 2 rewrite <- mul_assoc_in_summation.
 rewrite Nat.add_shuffle0.
 f_equal.
 rewrite <- (summation_shift 0 n (λ i, binomial n i * a ^ (S n - i) * b ^ i)).
-rewrite summation_split_last; [ | flia ].
+rewrite summation_split_last; [ | flia | flia ].
+replace (S n - 1) with n by flia.
 rewrite binomial_succ_diag_r, Nat.mul_0_l, Nat.add_0_r.
 symmetry.
 rewrite summation_split_first; [ | flia ].
 now rewrite binomial_0_r, Nat.mul_1_l, Nat.sub_0_r, Nat.pow_0_r, Nat.mul_1_r.
 Qed.
 
-Theorem glop : ∀ p, is_prime p = true →
+Theorem sum_power_prime_mod : ∀ p, is_prime p = true →
   ∀ a b, (a + b) ^ p mod p = (a ^ p + b ^ p) mod p.
 Proof.
 intros * Hp *.
 rewrite newton_binomial.
 rewrite summation_split_first; [ | flia ].
 rewrite binomial_0_r, Nat.mul_1_l, Nat.sub_0_r, Nat.pow_0_r, Nat.mul_1_r.
-...
-rewrite summation_split_last.
-
+specialize (prime_ge_2 p Hp) as H2p.
+rewrite summation_split_last; [ | flia H2p | flia H2p ].
+rewrite binomial_diag.
+rewrite Nat.sub_diag, Nat.pow_0_r, Nat.mul_1_r, Nat.mul_1_l.
+rewrite Nat.add_assoc, Nat.add_shuffle0.
+symmetry.
+remember (a ^ p + b ^ p) as x.
+replace x with (x + 0) at 1 by flia.
+rewrite <- Nat.add_mod_idemp_r; [ symmetry | flia H2p ].
+rewrite <- Nat.add_mod_idemp_r; [ symmetry | flia H2p ].
+f_equal; f_equal; clear x Heqx; symmetry.
+rewrite Nat.mod_0_l; [ | flia H2p ].
 ...
 
 Theorem fermat_little : ∀ p, is_prime p = true →
@@ -2475,7 +2497,7 @@ induction a. {
 }
 rewrite <- Nat.add_1_r.
 ...
-rewrite glop; [ | easy ].
+rewrite sum_power_prime_mod; [ | easy ].
 rewrite Nat.pow_1_l.
 rewrite <- Nat.add_mod_idemp_l; [ | now intros H; rewrite H in Hp ].
 rewrite IHa.
