@@ -2231,6 +2231,27 @@ intros.
 now destruct n.
 Qed.
 
+Theorem binomial_lt : ∀ n k, n < k → binomial n k = 0.
+Proof.
+intros * Hnk.
+revert k Hnk.
+induction n; intros; [ now destruct k | cbn ].
+destruct k; [ flia Hnk | ].
+apply Nat.succ_lt_mono in Hnk.
+rewrite IHn; [ | easy ].
+rewrite Nat.add_0_l.
+apply IHn; flia Hnk.
+Qed.
+
+Theorem binomial_succ_diag_r : ∀ n, binomial n (S n) = 0.
+Proof.
+intros.
+apply binomial_lt; flia.
+Qed.
+
+Theorem binomial_0_r : ∀ n, binomial n 0 = 1.
+Proof. now intros; destruct n. Qed.
+
 Theorem fold_left_add_from_0 {A} : ∀ a l (f : A → nat),
   fold_left (λ c i, c + f i) l a =
   a + fold_left (λ c i, c + f i) l 0.
@@ -2267,7 +2288,9 @@ cbn - [ "-" binomial ].
 rewrite IHn.
 rewrite mul_summation_distr_l.
 Check binomial_succ_succ.
-
+Check binomial_succ_r.
+Check binomial_succ_diag_r.
+Check binomial_0_r.
 ...
   Σ (i = 0, n), (a + b) * (binomial n i * a ^ (n - i) * b ^ i) =?
   Σ (k = 0, S n), binomial (S n) k * a ^ (S n - k) * b ^ k
@@ -2297,14 +2320,20 @@ a ^ S n +
 Σ (k = 0, n), binomial n (S k) * a ^ (n - k) * b ^ S k +
 Σ (k = 0, n), binomial n k * a ^ (n - k) * b ^ S k =      (1)
 
-... à réfléchir ...
 a ^ S n +
-Σ (k = 1, n), binomial n (S k) * a ^ (n - k) * b ^ S k +
+Σ (k = 1, S n), binomial n k * a ^ (S n - k) * b ^ k +
 Σ (k = 0, n), binomial n k * a ^ (n - k) * b ^ S k =
 
 a ^ S n +
-Σ (k = 0, n - 1), binomial n k * a ^ (S n - k) * b ^ k +
-Σ (k = 0, n), binomial n k * a ^ (n - k) * b ^ S k
+Σ (k = 1, n), binomial n k * a ^ (S n - k) * b ^ k +
+Σ (k = 0, n), binomial n k * a ^ (n - k) * b ^ S k =
+
+binomial n 0 * a ^ (S n - 0) * b ^ 0 +
+Σ (k = 1, n), binomial n k * a ^ (S n - k) * b ^ k +
+Σ (k = 0, n), binomial n k * a ^ (n - k) * b ^ S k =
+
+Σ (k = 0, n), binomial n k * a ^ (S n - k) * b ^ k +
+Σ (k = 0, n), binomial n k * a ^ (n - k) * b ^ S k =
 
 ...
 
