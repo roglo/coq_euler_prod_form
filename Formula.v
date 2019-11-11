@@ -234,8 +234,6 @@ Implementation.
 ζ(s) and all the expressions above are actually of the form
     a₁ + a₂/2^s + a₃/3^s + a₄/4^s + ...
 
-They are Dirichlet series.
-
 We can represent them by the sequence
     (a_n) = (a₁, a₂, a₃, ...)
 
