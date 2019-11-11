@@ -2228,8 +2228,7 @@ Theorem mul_summation_distr_l : ∀ a b e f,
   a * (Σ (i = b, e), f i) = Σ (i = b, e), a * f i.
 Proof.
 Admitted.
-rewrite Nat.mul_add_distr_r.
-do 2 rewrite mul_summation_distr_l.
+rewrite mul_summation_distr_l.
 ...
 
 Theorem glop : ∀ p, is_prime p = true →
