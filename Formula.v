@@ -2236,6 +2236,7 @@ Qed.
 Ltac rewrite_in_summation th :=
   let b := fresh "b" in
   let e := fresh "e" in
+  let a := fresh "a" in
   intros b e;
   remember (S e - b) as n eqn:Hn;
   remember 0 as a eqn:Ha; clear Ha;
@@ -2259,6 +2260,34 @@ intros.
 assert (H : ∀ a b c d, a * b * c * d = a * (b * c * d)) by flia.
 revert b e.
 rewrite_in_summation H.
+Qed.
+
+Theorem power_shuffle1_in_summation : ∀ b e a f g,
+  Σ (i = b, e), a * f i * a ^ (e - i) * g i =
+  Σ (i = b, e), f i * a ^ (S e - i) * g i.
+Proof.
+intros.
+(* failed to be able to use "rewrite_in_summation" here *)
+assert
+  (H : ∀ i e,
+   a * f i * a ^ (e - i) * g i = f i * a ^ (S (e - i)) * g i). {
+  clear e; intros; f_equal.
+  rewrite <- Nat.mul_assoc, Nat.mul_comm, <- Nat.mul_assoc.
+  f_equal.
+  rewrite Nat.mul_comm.
+  replace a with (a ^ 1) at 1 by apply Nat.pow_1_r.
+  now rewrite <- Nat.pow_add_r.
+}
+remember (S e - b) as n eqn:Hn.
+remember 0 as z eqn:Hz; clear Hz.
+revert e z b Hn.
+induction n as [| n IHn]; intros; [ easy | ].
+cbn - [ "-" ].
+rewrite IHn; [ | flia Hn ].
+f_equal; f_equal.
+rewrite H.
+f_equal; f_equal; f_equal.
+flia Hn.
 Qed.
 
 Theorem summation_add : ∀ b e f g,
@@ -2335,6 +2364,7 @@ rewrite mul_summation_distr_l.
 rewrite mul_add_distr_r_in_summation.
 rewrite summation_add.
 do 2 rewrite <- double_mul_assoc_in_summation.
+rewrite power_shuffle1_in_summation.
 ...
 Σ (i = 0, n), (a + b) * (binomial n i * a ^ (n - i) * b ^ i) =
 
