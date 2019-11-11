@@ -2262,6 +2262,15 @@ revert b e.
 rewrite_in_summation H.
 Qed.
 
+Theorem mul_assoc_in_summation : ∀ b e f g h,
+  Σ (i = b, e), f i * g i * h i = Σ (i = b, e), f i * (g i * h i).
+Proof.
+intros.
+assert (H : ∀ a b c, a * b * c = a * (b * c)) by flia.
+revert b e.
+rewrite_in_summation H.
+Qed.
+
 Theorem power_shuffle1_in_summation : ∀ b e a f g,
   Σ (i = b, e), a * f i * a ^ (e - i) * g i =
   Σ (i = b, e), f i * a ^ (S e - i) * g i.
@@ -2332,6 +2341,36 @@ cbn.
 apply fold_left_add_from_0.
 Qed.
 
+Theorem summation_split_last : ∀ b e f,
+  b ≤ S e
+  → Σ (i = b, S e), f i = Σ (i = b, e), f i + f (S e).
+Proof.
+intros * Hbe.
+replace (S (S e) - b) with (S (S e - b)) by flia Hbe.
+remember (S e - b) as n eqn:Hn.
+revert b Hbe Hn.
+induction n; intros. {
+  now replace (S e) with b by flia Hbe Hn.
+}
+remember (S n) as sn; cbn; subst sn.
+rewrite fold_left_add_from_0.
+rewrite IHn; [ | flia Hn | flia Hn ].
+rewrite Nat.add_assoc; f_equal; cbn.
+now rewrite (fold_left_add_from_0 (f b)).
+Qed.
+
+Theorem summation_shift : ∀ b e f,
+  Σ (i = S b, S e), f i = Σ (i = b, e), f (S i).
+Proof.
+intros.
+rewrite Nat.sub_succ.
+remember (S e - b) as n eqn:Hn.
+revert b Hn.
+induction n; intros; [ easy | cbn ].
+setoid_rewrite fold_left_add_from_0.
+rewrite IHn; [ easy | flia Hn ].
+Qed.
+
 (* binomial *)
 
 Fixpoint binomial n k :=
@@ -2397,43 +2436,33 @@ symmetry.
 rewrite summation_split_first; [ | flia ].
 unfold binomial at 1.
 rewrite Nat.mul_1_l, Nat.sub_0_r, Nat.pow_0_r, Nat.mul_1_r at 1.
-...
-Σ (i = 0, n), binomial n i * a ^ (S n - i) * b ^ i +
-Σ (i = 0, n), binomial n i * a ^ (n - i) * b ^ S i       (1)
-...
-a ^ S n + Σ (i = 1, S n), binomial (S n) i * a ^ (S n - i) * b ^ i =
-
-a ^ S n + Σ (k = 0, n), binomial (S n) (S k) * a ^ (n - k) * b ^ S k =
-
-a ^ S n +
-Σ (k = 0, n), binomial n k * a ^ (n - k) * b ^ S k +
-Σ (k = 0, n), binomial n (S k) * a ^ (n - k) * b ^ S k =
-
-a ^ S n +
-Σ (k = 0, n), binomial n (S k) * a ^ (n - k) * b ^ S k +
-Σ (k = 0, n), binomial n k * a ^ (n - k) * b ^ S k =      (1)
-
-a ^ S n +
-Σ (k = 1, S n), binomial n k * a ^ (S n - k) * b ^ k +
-Σ (k = 0, n), binomial n k * a ^ (n - k) * b ^ S k =
-
-a ^ S n +
-Σ (k = 1, n), binomial n k * a ^ (S n - k) * b ^ k +
-Σ (k = 0, n), binomial n k * a ^ (n - k) * b ^ S k =
-
-binomial n 0 * a ^ (S n - 0) * b ^ 0 +
-Σ (k = 1, n), binomial n k * a ^ (S n - k) * b ^ k +
-Σ (k = 0, n), binomial n k * a ^ (n - k) * b ^ S k =
-
-Σ (k = 0, n), binomial n k * a ^ (S n - k) * b ^ k +
-Σ (k = 0, n), binomial n k * a ^ (n - k) * b ^ S k =
-
-...
+rewrite summation_shift.
+cbn - [ "-" "^" ].
+rewrite mul_assoc_in_summation.
+rewrite mul_add_distr_r_in_summation.
+rewrite summation_add.
+rewrite Nat.add_assoc.
+do 2 rewrite <- mul_assoc_in_summation.
+rewrite Nat.add_shuffle0.
+f_equal.
+rewrite <- (summation_shift 0 n (λ i, binomial n i * a ^ (S n - i) * b ^ i)).
+rewrite summation_split_last; [ | flia ].
+rewrite binomial_succ_diag_r, Nat.mul_0_l, Nat.add_0_r.
+symmetry.
+rewrite summation_split_first; [ | flia ].
+now rewrite binomial_0_r, Nat.mul_1_l, Nat.sub_0_r, Nat.pow_0_r, Nat.mul_1_r.
+Qed.
 
 Theorem glop : ∀ p, is_prime p = true →
   ∀ a b, (a + b) ^ p mod p = (a ^ p + b ^ p) mod p.
 Proof.
 intros * Hp *.
+rewrite newton_binomial.
+rewrite summation_split_first; [ | flia ].
+rewrite binomial_0_r, Nat.mul_1_l, Nat.sub_0_r, Nat.pow_0_r, Nat.mul_1_r.
+...
+rewrite summation_split_last.
+
 ...
 
 Theorem fermat_little : ∀ p, is_prime p = true →
