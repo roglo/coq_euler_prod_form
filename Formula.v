@@ -2216,6 +2216,32 @@ Fixpoint binomial n k :=
      end
   end.
 
+Theorem fold_left_add_from_0 {A} : ∀ a l (f : A → nat),
+  fold_left (λ c i, c + f i) l a =
+  a + fold_left (λ c i, c + f i) l 0.
+Proof.
+intros.
+revert a.
+induction l as [| x l]; intros; [ symmetry; apply Nat.add_0_r | cbn ].
+rewrite IHl; symmetry; rewrite IHl.
+apply Nat.add_assoc.
+Qed.
+
+Theorem mul_summation_distr_l : ∀ a b e f,
+  a * (Σ (i = b, e), f i) = Σ (i = b, e), a * f i.
+Proof.
+intros.
+remember (S e - b) as n eqn:Hn.
+revert e a b Hn.
+induction n; intros; [ apply Nat.mul_0_r | ].
+cbn.
+rewrite fold_left_add_from_0.
+rewrite Nat.mul_add_distr_l.
+rewrite (IHn e); [ | flia Hn ].
+symmetry.
+apply fold_left_add_from_0.
+Qed.
+
 Theorem newton_binomial : ∀ n a b,
   (a + b) ^ n =
   Σ (k = 0, n), binomial n k * a ^ (n - k) * b ^ k.
@@ -2224,10 +2250,6 @@ intros.
 induction n; [ easy | ].
 cbn - [ "-" binomial ].
 rewrite IHn.
-Theorem mul_summation_distr_l : ∀ a b e f,
-  a * (Σ (i = b, e), f i) = Σ (i = b, e), a * f i.
-Proof.
-Admitted.
 rewrite mul_summation_distr_l.
 ...
 
