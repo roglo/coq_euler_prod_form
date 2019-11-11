@@ -2284,10 +2284,27 @@ revert e z b Hn.
 induction n as [| n IHn]; intros; [ easy | ].
 cbn - [ "-" ].
 rewrite IHn; [ | flia Hn ].
+f_equal; f_equal; rewrite H.
+f_equal; f_equal; f_equal; flia Hn.
+Qed.
+
+Theorem power_shuffle2_in_summation : ∀ b e a c f,
+  Σ (i = b, e), c * f i * a ^ (e - i) * c ^ i =
+  Σ (i = b, e), f i * a ^ (e - i) * c ^ S i.
+Proof.
+intros.
+remember (S e - b) as n eqn:Hn.
+remember 0 as z eqn:Hz; clear Hz.
+revert e z b Hn.
+induction n as [| n IHn]; intros; [ easy | ].
+cbn.
+rewrite IHn; [ | flia Hn ].
 f_equal; f_equal.
-rewrite H.
-f_equal; f_equal; f_equal.
-flia Hn.
+do 2 rewrite <- Nat.mul_assoc.
+rewrite Nat.mul_comm.
+do 3 rewrite <- Nat.mul_assoc.
+f_equal; f_equal.
+apply Nat.mul_comm.
 Qed.
 
 Theorem summation_add : ∀ b e f g,
@@ -2365,15 +2382,10 @@ rewrite mul_add_distr_r_in_summation.
 rewrite summation_add.
 do 2 rewrite <- double_mul_assoc_in_summation.
 rewrite power_shuffle1_in_summation.
+rewrite power_shuffle2_in_summation.
 ...
-Σ (i = 0, n), (a + b) * (binomial n i * a ^ (n - i) * b ^ i) =
-
-Σ (i = 0, n), a * binomial n i * a ^ (n - i) * b ^ i +
-Σ (i = 0, n), b * binomial n i * a ^ (n - i) * b ^ i =
-
-Σ (k = 0, n), binomial n k * a ^ (S n - k) * b ^ k +
-Σ (k = 0, n), binomial n k * a ^ (n - k) * b ^ S k       (1)
-
+Σ (i = 0, n), binomial n i * a ^ (S n - i) * b ^ i +
+Σ (i = 0, n), binomial n i * a ^ (n - i) * b ^ S i       (1)
 ...
 
 Σ (k = 0, S n), binomial (S n) k * a ^ (S n - k) * b ^ k =
