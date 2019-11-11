@@ -2266,7 +2266,7 @@ induction n; [ easy | ].
 cbn - [ "-" binomial ].
 rewrite IHn.
 rewrite mul_summation_distr_l.
-Check binomial_succ_r.
+Check binomial_succ_succ.
 
 ...
   Σ (i = 0, n), (a + b) * (binomial n i * a ^ (n - i) * b ^ i) =?
@@ -2279,7 +2279,7 @@ Check binomial_succ_r.
 Σ (i = 0, n), b * binomial n i * a ^ (n - i) * b ^ i =
 
 Σ (k = 0, n), binomial n k * a ^ (S n - k) * b ^ k +
-Σ (k = 0, n), binomial n k * a ^ (n - k) * b ^ S k
+Σ (k = 0, n), binomial n k * a ^ (n - k) * b ^ S k       (1)
 
 ...
 
@@ -2295,8 +2295,9 @@ a ^ S n +
 
 a ^ S n +
 Σ (k = 0, n), binomial n (S k) * a ^ (n - k) * b ^ S k +
-Σ (k = 0, n), binomial n k * a ^ (n - k) * b ^ S k =
+Σ (k = 0, n), binomial n k * a ^ (n - k) * b ^ S k =      (1)
 
+... à réfléchir ...
 a ^ S n +
 Σ (k = 1, n), binomial n (S k) * a ^ (n - k) * b ^ S k +
 Σ (k = 0, n), binomial n k * a ^ (n - k) * b ^ S k =
