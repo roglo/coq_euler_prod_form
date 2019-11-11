@@ -2476,6 +2476,12 @@ destruct n; [ flia Hkn | ].
 rewrite binomial_succ_succ.
 rewrite Nat.sub_succ.
 do 2 rewrite Nat_fact_succ.
+rewrite <- Nat.mul_assoc.
+rewrite (Nat.mul_comm (S k)).
+rewrite <- Nat.div_div; [ | | easy ]. 2: {
+  apply Nat.neq_mul_0.
+  split; apply fact_neq_0.
+}
 ...
 
 Theorem binomial_prime : ∀ p k,
