@@ -2216,6 +2216,10 @@ Fixpoint binomial n k :=
      end
   end.
 
+Theorem binomial_succ_succ : ∀ n k,
+  binomial (S n) (S k) = binomial n k + binomial n (S k).
+Proof. easy. Qed.
+
 Theorem fold_left_add_from_0 {A} : ∀ a l (f : A → nat),
   fold_left (λ c i, c + f i) l a =
   a + fold_left (λ c i, c + f i) l 0.
