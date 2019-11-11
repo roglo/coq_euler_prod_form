@@ -2462,10 +2462,25 @@ induction n; [ easy | cbn ].
 now rewrite IHn, binomial_succ_diag_r, Nat.add_0_r.
 Qed.
 
-Theorem divide_fact_fact : ∀ k n,
+Theorem divide_fact_mul_fact_fact : ∀ k n,
   k ≤ n
   → Nat.divide (fact k * fact (n - k)) (fact n).
 Proof.
+intros * Hkn.
+revert n Hkn.
+induction k; intros. {
+  exists 1; rewrite Nat.mul_1_l.
+  now cbn; rewrite Nat.sub_0_r, Nat.add_0_r.
+}
+destruct n; [ flia Hkn | ].
+apply Nat.succ_le_mono in Hkn.
+rewrite Nat.sub_succ.
+do 2 rewrite Nat_fact_succ.
+specialize (IHk _ Hkn) as (c, Hc).
+rewrite Hc.
+do 2 rewrite Nat.mul_assoc.
+do 2 rewrite <- Nat.mul_assoc.
+apply Nat.mul_divide_mono_r.
 ...
 
 Theorem binomial_by_factorials : ∀ n k,
