@@ -2219,6 +2219,22 @@ rewrite IHl; symmetry; rewrite IHl.
 apply Nat.add_assoc.
 Qed.
 
+Theorem all_0_summation_0 : ∀ b e f,
+  (∀ i, b ≤ i ≤ e → f i = 0)
+  → Σ (i = b, e), f i = 0.
+Proof.
+intros * Hz.
+remember (S e - b) as n eqn:Hn.
+revert b Hz Hn.
+induction n; intros; [ easy | cbn ].
+rewrite fold_left_add_from_0.
+rewrite IHn; [ | | flia Hn ]. {
+  rewrite Hz; [ easy | flia Hn ].
+}
+intros i Hi.
+apply Hz; flia Hi.
+Qed.
+
 Theorem mul_summation_distr_l : ∀ a b e f,
   a * (Σ (i = b, e), f i) = Σ (i = b, e), a * f i.
 Proof.
@@ -2374,6 +2390,23 @@ setoid_rewrite fold_left_add_from_0.
 rewrite IHn; [ easy | flia Hn ].
 Qed.
 
+Theorem summation_mod_idemp : ∀ b e f n,
+  (Σ (i = b, e), f i) mod n = (Σ (i = b, e), f i mod n) mod n.
+Proof.
+intros.
+destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
+remember (S e - b) as m eqn:Hm.
+revert b Hm.
+induction m; intros; [ easy | cbn ].
+rewrite (fold_left_add_from_0 (f b)).
+rewrite (fold_left_add_from_0 (f b mod n)).
+rewrite Nat.add_mod_idemp_l; [ | easy ].
+rewrite <- Nat.add_mod_idemp_r; [ symmetry | easy ].
+rewrite <- Nat.add_mod_idemp_r; [ symmetry | easy ].
+f_equal; f_equal.
+apply IHm; flia Hm.
+Qed.
+
 (* binomial *)
 
 Fixpoint binomial n k :=
@@ -2428,6 +2461,14 @@ intros.
 induction n; [ easy | cbn ].
 now rewrite IHn, binomial_succ_diag_r, Nat.add_0_r.
 Qed.
+
+Theorem binomial_prime : ∀ p k,
+  is_prime p = true
+  → 1 ≤ k ≤ p - 1
+  → Nat.divide p (binomial p k).
+Proof.
+intros * Hp Hkp.
+...
 
 (* *)
 
@@ -2485,6 +2526,13 @@ rewrite <- Nat.add_mod_idemp_r; [ symmetry | flia H2p ].
 rewrite <- Nat.add_mod_idemp_r; [ symmetry | flia H2p ].
 f_equal; f_equal; clear x Heqx; symmetry.
 rewrite Nat.mod_0_l; [ | flia H2p ].
+rewrite summation_mod_idemp.
+rewrite all_0_summation_0. {
+  rewrite Nat.mod_0_l; [ easy | flia H2p ].
+}
+intros i Hi.
+...
+specialize (binomial_prime _ _ Hp Hi) as (c, Hc).
 ...
 
 Theorem fermat_little : ∀ p, is_prime p = true →
