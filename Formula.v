@@ -2321,6 +2321,17 @@ rewrite (fold_left_add_from_0 (g b)).
 flia.
 Qed.
 
+Theorem summation_split_first : ∀ b e f,
+  b ≤ e
+  → Σ (i = b, e), f i = f b + Σ (i = S b, e), f i.
+Proof.
+intros * Hbe.
+rewrite Nat.sub_succ.
+replace (S e - b) with (S (e - b)) by flia Hbe.
+cbn.
+apply fold_left_add_from_0.
+Qed.
+
 (* binomial *)
 
 Fixpoint binomial n k :=
@@ -2370,8 +2381,7 @@ Theorem binomial_0_r : ∀ n, binomial n 0 = 1.
 Proof. now intros; destruct n. Qed.
 
 Theorem newton_binomial : ∀ n a b,
-  (a + b) ^ n =
-  Σ (k = 0, n), binomial n k * a ^ (n - k) * b ^ k.
+  (a + b) ^ n = Σ (k = 0, n), binomial n k * a ^ (n - k) * b ^ k.
 Proof.
 intros.
 induction n; [ easy | ].
@@ -2383,14 +2393,15 @@ rewrite summation_add.
 do 2 rewrite <- double_mul_assoc_in_summation.
 rewrite power_shuffle1_in_summation.
 rewrite power_shuffle2_in_summation.
+symmetry.
+rewrite summation_split_first; [ | flia ].
+unfold binomial at 1.
+rewrite Nat.mul_1_l, Nat.sub_0_r, Nat.pow_0_r, Nat.mul_1_r at 1.
 ...
 Σ (i = 0, n), binomial n i * a ^ (S n - i) * b ^ i +
 Σ (i = 0, n), binomial n i * a ^ (n - i) * b ^ S i       (1)
 ...
-
-Σ (k = 0, S n), binomial (S n) k * a ^ (S n - k) * b ^ k =
-
-a ^ S n + Σ (k = 1, S n), binomial (S n) k * a ^ (S n - k) * b ^ k =
+a ^ S n + Σ (i = 1, S n), binomial (S n) i * a ^ (S n - i) * b ^ i =
 
 a ^ S n + Σ (k = 0, n), binomial (S n) (S k) * a ^ (n - k) * b ^ S k =
 
