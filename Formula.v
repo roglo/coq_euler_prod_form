@@ -2220,6 +2220,17 @@ Theorem binomial_succ_succ : ∀ n k,
   binomial (S n) (S k) = binomial n k + binomial n (S k).
 Proof. easy. Qed.
 
+Theorem binomial_succ_r : ∀ n k,
+  binomial n (S k) =
+    match n with
+    | 0 => 0
+    | S n' => binomial n' k + binomial n' (S k)
+    end.
+Proof.
+intros.
+now destruct n.
+Qed.
+
 Theorem fold_left_add_from_0 {A} : ∀ a l (f : A → nat),
   fold_left (λ c i, c + f i) l a =
   a + fold_left (λ c i, c + f i) l 0.
@@ -2255,6 +2266,31 @@ induction n; [ easy | ].
 cbn - [ "-" binomial ].
 rewrite IHn.
 rewrite mul_summation_distr_l.
+Check binomial_succ_r.
+
+...
+  Σ (i = 0, n), (a + b) * (binomial n i * a ^ (n - i) * b ^ i) =?
+  Σ (k = 0, S n), binomial (S n) k * a ^ (S n - k) * b ^ k
+...
+
+Σ (i = 0, n), (a + b) * (binomial n i * a ^ (n - i) * b ^ i) =
+
+Σ (i = 0, n), a * binomial n i * a ^ (n - i) * b ^ i +
+Σ (i = 0, n), b * binomial n i * a ^ (n - i) * b ^ i =
+
+Σ (k = 0, n), binomial n k * a ^ (S n - k) * b ^ k +
+Σ (k = 0, n), binomial n k * a ^ (n - k) * b ^ (S k)
+
+...
+
+Σ (k = 0, S n), binomial (S n) k * a ^ (S n - k) * b ^ k =
+a ^ S n + Σ (k = 1, S n), binomial (S n) k * a ^ (S n - k) * b ^ k =
+a ^ S n + Σ (k = 0, n), binomial (S n) (S k) * a ^ (n - k) * b ^ S k =
+
+a ^ S n +
+Σ (k = 0, n), binomial n k * a ^ (n - k) * b ^ S k +
+Σ (k = 0, n), binomial n (S k) * a ^ (n - k) * b ^ S k
+
 ...
 
 Theorem glop : ∀ p, is_prime p = true →
