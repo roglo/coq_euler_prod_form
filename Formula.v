@@ -2200,6 +2200,67 @@ Time Compute (firstn_primes 100).   (* slow *)
 Time Compute (firstn_primes' 100).  (* fast *)
 *)
 
+Notation "a ^ b" := (Nat.pow a b) : nat_scope.
+
+Check fold_left.
+
+Fixpoint binomial n m :=
+  match m with
+  | 0 => 1
+  | S m' =>
+      match n with
+      | 0 => 0
+      | S n' => binomial n' m' + binomial n' m
+     end
+  end.
+
+Theorem newton_binomial : ∀ n a b,
+  (a + b) ^ n =
+  fold_left (λ c m, c + binomial n m * a ^ m * b ^ (n - m)) (seq 0 (n + 1)) 0.
+Proof.
+intros.
+induction n; [ easy | ].
+cbn - [ "-" binomial ].
+rewrite IHn.
+unfold binomial at 3.
+rewrite Nat.mul_1_l, Nat.sub_0_r.
+...
+
+Theorem glop : ∀ p, is_prime p = true →
+  ∀ a b, (a + b) ^ p mod p = (a ^ p + b ^ p) mod p.
+Proof.
+intros * Hp *.
+...
+
+Theorem fermat_little : ∀ p, is_prime p = true →
+  ∀ a, a ^ p mod p = a mod p.
+Proof.
+intros * Hp *.
+induction a. {
+  rewrite Nat.pow_0_l; [ easy | ].
+  now intros H; rewrite H in Hp.
+}
+rewrite <- Nat.add_1_r.
+...
+rewrite glop; [ | easy ].
+rewrite Nat.pow_1_l.
+rewrite <- Nat.add_mod_idemp_l; [ | now intros H; rewrite H in Hp ].
+rewrite IHa.
+rewrite Nat.add_mod_idemp_l; [ easy | now intros H; rewrite H in Hp ].
+...
+
+Theorem glop : ∀ p, is_prime p = true →
+  ∀ a, (a + 1) ^ p mod p = (a ^ p + 1) mod p.
+Proof.
+intros * Hp *.
+induction a. {
+  cbn.
+  rewrite Nat.pow_1_l.
+  rewrite Nat.pow_0_l; [ easy | ].
+  now intros H; rewrite H in Hp.
+}
+...
+
 Theorem Wilson : ∀ n, is_prime n = true ↔ fact (n - 1) mod n = n - 1.
 Proof.
 intros.
