@@ -2462,12 +2462,29 @@ induction n; [ easy | cbn ].
 now rewrite IHn, binomial_succ_diag_r, Nat.add_0_r.
 Qed.
 
+Theorem binomial_by_factorials : ∀ n k,
+  k ≤ n
+  → binomial n k = fact n / (fact k * fact (n - k)).
+Proof.
+intros * Hkn.
+revert n Hkn.
+induction k; intros. {
+  cbn; rewrite binomial_0_r, Nat.sub_0_r, Nat.add_0_r.
+  rewrite Nat.div_same; [ easy | apply fact_neq_0 ].
+}
+destruct n; [ flia Hkn | ].
+rewrite binomial_succ_succ.
+rewrite Nat.sub_succ.
+do 2 rewrite Nat_fact_succ.
+...
+
 Theorem binomial_prime : ∀ p k,
   is_prime p = true
   → 1 ≤ k ≤ p - 1
   → Nat.divide p (binomial p k).
 Proof.
 intros * Hp Hkp.
+Check Nat.gauss.
 ...
 
 (* *)
