@@ -2202,9 +2202,80 @@ Time Compute (firstn_primes' 100).  (* fast *)
 
 Notation "a ^ b" := (Nat.pow a b) : nat_scope.
 
+(* summation *)
+
 Notation "'Σ' ( i = b , e ) , g" :=
   (fold_left (λ c i, c + g) (seq b (S e - b)) 0)
   (at level 45, i at level 0, b at level 60, e at level 60).
+
+Theorem fold_left_add_from_0 {A} : ∀ a l (f : A → nat),
+  fold_left (λ c i, c + f i) l a =
+  a + fold_left (λ c i, c + f i) l 0.
+Proof.
+intros.
+revert a.
+induction l as [| x l]; intros; [ symmetry; apply Nat.add_0_r | cbn ].
+rewrite IHl; symmetry; rewrite IHl.
+apply Nat.add_assoc.
+Qed.
+
+Theorem mul_summation_distr_l : ∀ a b e f,
+  a * (Σ (i = b, e), f i) = Σ (i = b, e), a * f i.
+Proof.
+intros.
+remember (S e - b) as n eqn:Hn.
+revert e a b Hn.
+induction n; intros; [ apply Nat.mul_0_r | cbn ].
+rewrite fold_left_add_from_0.
+rewrite Nat.mul_add_distr_l.
+rewrite (IHn e); [ | flia Hn ].
+symmetry.
+apply fold_left_add_from_0.
+Qed.
+
+Ltac rewrite_in_summation th :=
+  let b := fresh "b" in
+  let e := fresh "e" in
+  intros b e;
+  remember (S e - b) as n eqn:Hn;
+  remember 0 as a eqn:Ha; clear Ha;
+  revert e a b Hn;
+  induction n as [| n IHn]; intros; [ easy | cbn ];
+  rewrite th;
+  apply (IHn e); flia Hn.
+
+Theorem mul_add_distr_r_in_summation : ∀ b e f g h,
+  Σ (i = b, e), (f i + g i) * h i =
+  Σ (i = b, e), (f i * h i + g i * h i).
+Proof.
+intros; revert b e.
+rewrite_in_summation Nat.mul_add_distr_r.
+Qed.
+
+Theorem double_mul_assoc_in_summation : ∀ b e f g h k,
+  Σ (i = b, e), f i * g i * h i * k i = Σ (i = b, e), f i * (g i * h i * k i).
+Proof.
+intros.
+assert (H : ∀ a b c d, a * b * c * d = a * (b * c * d)) by flia.
+revert b e.
+rewrite_in_summation H.
+Qed.
+
+Theorem summation_add : ∀ b e f g,
+  Σ (i = b, e), (f i + g i) = Σ (i = b, e), f i + Σ (i = b, e), g i.
+Proof.
+intros.
+remember (S e - b) as n eqn:Hn.
+revert b Hn.
+induction n; intros; [ easy | cbn ].
+rewrite fold_left_add_from_0.
+rewrite IHn; [ | flia Hn ].
+rewrite (fold_left_add_from_0 (f b)).
+rewrite (fold_left_add_from_0 (g b)).
+flia.
+Qed.
+
+(* binomial *)
 
 Fixpoint binomial n k :=
   match k with
@@ -2252,32 +2323,6 @@ Qed.
 Theorem binomial_0_r : ∀ n, binomial n 0 = 1.
 Proof. now intros; destruct n. Qed.
 
-Theorem fold_left_add_from_0 {A} : ∀ a l (f : A → nat),
-  fold_left (λ c i, c + f i) l a =
-  a + fold_left (λ c i, c + f i) l 0.
-Proof.
-intros.
-revert a.
-induction l as [| x l]; intros; [ symmetry; apply Nat.add_0_r | cbn ].
-rewrite IHl; symmetry; rewrite IHl.
-apply Nat.add_assoc.
-Qed.
-
-Theorem mul_summation_distr_l : ∀ a b e f,
-  a * (Σ (i = b, e), f i) = Σ (i = b, e), a * f i.
-Proof.
-intros.
-remember (S e - b) as n eqn:Hn.
-revert e a b Hn.
-induction n; intros; [ apply Nat.mul_0_r | ].
-cbn.
-rewrite fold_left_add_from_0.
-rewrite Nat.mul_add_distr_l.
-rewrite (IHn e); [ | flia Hn ].
-symmetry.
-apply fold_left_add_from_0.
-Qed.
-
 Theorem newton_binomial : ∀ n a b,
   (a + b) ^ n =
   Σ (k = 0, n), binomial n k * a ^ (n - k) * b ^ k.
@@ -2287,15 +2332,10 @@ induction n; [ easy | ].
 cbn - [ "-" binomial ].
 rewrite IHn.
 rewrite mul_summation_distr_l.
-Check binomial_succ_succ.
-Check binomial_succ_r.
-Check binomial_succ_diag_r.
-Check binomial_0_r.
+rewrite mul_add_distr_r_in_summation.
+rewrite summation_add.
+do 2 rewrite <- double_mul_assoc_in_summation.
 ...
-  Σ (i = 0, n), (a + b) * (binomial n i * a ^ (n - i) * b ^ i) =?
-  Σ (k = 0, S n), binomial (S n) k * a ^ (S n - k) * b ^ k
-...
-
 Σ (i = 0, n), (a + b) * (binomial n i * a ^ (n - i) * b ^ i) =
 
 Σ (i = 0, n), a * binomial n i * a ^ (n - i) * b ^ i +
