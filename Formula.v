@@ -234,6 +234,8 @@ Implementation.
 ζ(s) and all the expressions above are actually of the form
     a₁ + a₂/2^s + a₃/3^s + a₄/4^s + ...
 
+They are Dirichlet series.
+
 We can represent them by the sequence
     (a_n) = (a₁, a₂, a₃, ...)
 
@@ -2199,8 +2201,6 @@ Time Compute (let n := 100 in firstn_primes' n).
 Time Compute (firstn_primes 100).   (* slow *)
 Time Compute (firstn_primes' 100).  (* fast *)
 *)
-
-...
 
 Theorem Wilson : ∀ n, is_prime n = true ↔ fact (n - 1) mod n = n - 1.
 Proof.
