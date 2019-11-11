@@ -2202,28 +2202,29 @@ Time Compute (firstn_primes' 100).  (* fast *)
 
 Notation "a ^ b" := (Nat.pow a b) : nat_scope.
 
-Check fold_left.
+Notation "'Σ' ( i = b , e ) , g" :=
+  (fold_left (λ c i, c + g) (seq b (e - b)) 0)
+  (at level 45, i at level 0, b at level 60, e at level 60).
 
-Fixpoint binomial n m :=
-  match m with
+Fixpoint binomial n k :=
+  match k with
   | 0 => 1
-  | S m' =>
+  | S k' =>
       match n with
       | 0 => 0
-      | S n' => binomial n' m' + binomial n' m
+      | S n' => binomial n' k' + binomial n' k
      end
   end.
 
 Theorem newton_binomial : ∀ n a b,
   (a + b) ^ n =
-  fold_left (λ c m, c + binomial n m * a ^ m * b ^ (n - m)) (seq 0 (n + 1)) 0.
+  Σ (k = 0, n + 1), binomial n k * a ^ (n - k) * b ^ k.
 Proof.
 intros.
 induction n; [ easy | ].
 cbn - [ "-" binomial ].
 rewrite IHn.
-unfold binomial at 3.
-rewrite Nat.mul_1_l, Nat.sub_0_r.
+replace (S (n + 1)) with (n + 2) by flia.
 ...
 
 Theorem glop : ∀ p, is_prime p = true →
