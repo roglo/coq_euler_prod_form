@@ -2471,13 +2471,12 @@ https://proofwiki.org/wiki/Binomial_Coefficient_is_Integer
 (* P(m,k) = m...(m+k-1) *)
 Definition P m k := fact (m + k - 1) / fact (m - 1).
 
-Lemma glop : ∀ m k,
+Lemma P_form : ∀ m k,
   2 ≤ m
   → 2 ≤ k
   → P m k = k * P m (k - 1) + P (m - 1) k.
 Proof.
 intros * H2m H2k.
-(* P(m,k) = m...(m+k-1) =  m...(m+k-2)[ k + (m-1) ] *)
 replace (P m k) with (P m (k - 1) * (k + (m - 1))). 2: {
   unfold P.
   replace (m + (k - 1) - 1) with (m + k - 2) by flia H2k.
@@ -2491,42 +2490,23 @@ replace (P m k) with (P m (k - 1) * (k + (m - 1))). 2: {
 }
 rewrite Nat.mul_comm, Nat.mul_add_distr_r; f_equal.
 unfold P.
-replace (m + (k - 1) - 1) with (m - 1 + k - 1) by flia H2m H2k.
-replace (fact (m - 1)) with (fact (m - 2) * (m - 1)). 2: {
-  replace (m - 1) with (S (m - 2)) by flia H2m.
-  rewrite Nat_fact_succ.
-  apply Nat.mul_comm.
-}
-replace (m - 1 + k - 1) with (m + k - 2) by flia H2m.
 replace (m - 1 - 1) with (m - 2) by flia H2m.
-rewrite <- Nat.div_div; [ | apply fact_neq_0 | flia H2m ].
-rewrite <- Nat.divide_div_mul_exact; [ | flia H2m | ]. 2: {
-  replace (m - 1 + k - 1) with (m + k - 2) by flia H2m.
-  specialize (Nat_le_divides_fact (m + k - 2) (m - 2)) as H1.
-  assert (H : m - 2 ≤ m + k - 2) by flia H2m.
-  specialize (H1 H); clear H.
-  destruct H1 as (c, Hc).
-  rewrite Hc, Nat.div_mul; [ | apply fact_neq_0 ].
-... suite ok
-}
-rewrite Nat.mul_comm.
-rewrite Nat.div_mul; [ easy | flia H2m ].
-
-...
-rewrite <- Nat.divide_div_mul_exact; [ | apply fact_neq_0 | ]. 2: {
-  apply Nat_le_divides_fact; flia H2k.
-}
-rewrite Nat.mul_comm.
-...
-rewrite Nat.divide_div_mul_exact; [ | apply fact_neq_0 | ]. 2: {
-  apply Nat_le_divides_fact; flia H2k.
-}
-...
+replace (m + (k - 1) - 1) with (m + k - 2) by flia H2k.
+replace (m - 1 + k - 1) with (m + k - 2) by flia H2m.
+specialize (Nat_le_divides_fact (m + k - 2) (m - 1)) as H1.
+assert (H :  m - 1 ≤ m + k - 2) by flia H2k.
+specialize (H1 H) as (c, Hc); clear H.
+rewrite Hc, Nat.div_mul; [ | apply fact_neq_0 ].
+replace (m - 1) with (S (m - 2)) by flia H2m.
+rewrite Nat_fact_succ, Nat.mul_assoc.
+rewrite Nat.div_mul; [ | apply fact_neq_0 ].
+apply Nat.mul_comm.
+Qed.
 
 Theorem glop : ∀ k n m,
   1 ≤ m
   → m + k ≤ n
-  → Nat.divide (fact k) (fact (m + k - 1) / fact (m - 1)).
+  → Nat.divide (fact k) (P m k).
 Proof.
 intros * Hm Hkn.
 revert m k Hm Hkn.
@@ -2536,6 +2516,20 @@ induction n; intros. {
   apply Nat.divide_refl.
 }
 destruct m; [ flia Hm | ].
+destruct m. {
+  unfold P; cbn - [ "/" ].
+  rewrite Nat.sub_0_r, Nat.div_1_r.
+  apply Nat.divide_refl.
+}
+cbn in Hkn.
+apply Nat.succ_le_mono in Hkn.
+...
+specialize (IHn (S m) k) as H1.
+assert (H : 1 ≤ S m) by flia.
+specialize (H1 H Hkn); clear H.
+destruct H1 as (c, Hc).
+rewrite P_form.
+...
 rewrite Nat.sub_succ, Nat.sub_0_r.
 replace (S m + k - 1) with (m + k) by flia.
 destruct m. {
