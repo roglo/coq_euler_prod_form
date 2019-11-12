@@ -2507,16 +2507,45 @@ Qed.
 Theorem divide_prod_consec : ∀ k n, k ≠ 0 → Nat.divide k (prod_consec k n).
 Proof.
 intros * Hkz.
-...
-unfold prod_consec.
-destruct k; [ easy | clear Hkz ].
-cbn - [ "mod" ]; rewrite Nat.add_0_r.
-rewrite fold_left_mul_from_1.
-revert n.
-induction k; intros; [ apply Nat.divide_1_l | ].
-specialize (IHk n) as H1.
-destruct H1 as (c, H1).
-rewrite fold_left_mul_from_1.
+remember (n mod k) as nk eqn:Hnk; symmetry in Hnk.
+destruct nk. {
+  apply Nat.mod_divides in Hnk; [ | easy ].
+  destruct Hnk as (c, Hc).
+  unfold Nat.divide.
+  exists (prod_consec (k - 1) (n + 1) * c).
+  rewrite Nat.mul_shuffle0, <- Nat.mul_assoc, <- Hc, Nat.mul_comm.
+... suite ok
+}
+specialize (Nat.div_mod n k Hkz) as H1.
+remember (k - (n - 1) mod k - 1) as i eqn:Hi.
+rewrite Hnk in H1.
+assert (Nat.divide k (n + i)). {
+  unfold Nat.divide.
+  rewrite H1, Hi.
+  assert ((n - 1) mod k = nk). {
+    rewrite H1.
+    replace (k * _ + S _ - 1) with (k * (n / k) + nk) by flia.
+    rewrite Nat.mul_comm, Nat.add_comm.
+    rewrite Nat.mod_add; [ | easy ].
+    apply Nat.mod_small.
+    apply (Nat.add_lt_mono_l _ _ 1).
+    rewrite Nat.add_1_l, <- Hnk.
+    specialize (Nat.mod_upper_bound n k Hkz) as H2.
+    flia H2.
+  }
+  rewrite H.
+  rewrite <- Nat.sub_add_distr.
+  rewrite Nat.add_1_r.
+  rewrite Nat.add_sub_assoc. 2: {
+    rewrite <- Hnk.
+    apply Nat.lt_le_incl.
+    now apply Nat.mod_upper_bound.
+  }
+  rewrite Nat.add_shuffle0.
+  rewrite Nat.add_sub.
+  exists (n / k + 1).
+  flia.
+}
 ...
 
 Theorem divide_fact_div_prod_of_consec_num : ∀ n k,
