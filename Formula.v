@@ -2504,16 +2504,29 @@ replace (S (n - 1)) with n by flia Hnz.
 rewrite Nat.div_mul_cancel_l; [ easy | apply fact_neq_0 | easy ].
 Qed.
 
-Theorem prod_consec_but_fst : ∀ k n,
+Theorem prod_consec_split : ∀ i k n,
   k ≠ 0
-  → prod_consec k n = n * prod_consec (k - 1) (n + 1).
+  → i < k
+  → prod_consec k n =
+     prod_consec i n * (n + i) * prod_consec (k - i - 1) (n + i + 1).
 Proof.
-intros * Hkz.
+intros * Hkz Hik.
 destruct k; [ easy | clear Hkz ].
 unfold prod_consec.
-cbn; rewrite Nat.add_0_r, Nat.sub_0_r.
-rewrite Nat.add_1_r.
-apply fold_left_mul_from_1.
+replace (S k) with (i + (S k - i)) by flia Hik.
+rewrite seq_app.
+rewrite fold_left_app.
+rewrite fold_left_mul_from_1.
+rewrite <- Nat.mul_assoc; f_equal.
+replace (S k - i) with (1 + (k - i)) by flia Hik.
+rewrite seq_app.
+rewrite fold_left_app.
+rewrite fold_left_mul_from_1.
+replace (seq (n + i) 1) with [n+i] by easy.
+remember (fold_left _ [n + i] 1) as y eqn:Hy.
+cbn in Hy; rewrite Nat.add_0_r in Hy; subst y.
+f_equal; f_equal; f_equal.
+flia Hik.
 Qed.
 
 Theorem divide_prod_consec : ∀ k n, k ≠ 0 → Nat.divide k (prod_consec k n).
@@ -2539,19 +2552,11 @@ assert (Hkni : Nat.divide k (n + i)). {
   apply Nat.mul_comm.
 }
 assert (Hik : i < k) by flia Hi Hkz.
-...
-
-Theorem divide_fact_div_prod_of_consec_num : ∀ n k,
-  Nat.divide (fact k) (prod_consec k n).
-Proof.
-intros.
-destruct k; [ apply Nat.divide_1_l | ].
-destruct k; [ apply Nat.divide_1_l | ].
-assert (Hnk : ∀ k, n ≤ n + k) by flia.
-destruct k. {
-  specialize (Nat_le_divides_fact (n + 2) n (Hnk _)) as (c, Hc).
-  cbn; rewrite Nat.add_0_r.
-...
+rewrite (prod_consec_split i); [ | easy | easy ].
+rewrite Nat.mul_shuffle0.
+apply (Nat.divide_trans _ (n + i)); [ easy | ].
+apply Nat.divide_factor_r.
+Qed.
 
 Theorem divide_fact_div_prod_of_consec_num : ∀ n k,
   Nat.divide (fact k) (fact (n + k) / fact n).
