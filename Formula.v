@@ -2520,6 +2520,9 @@ Theorem divide_prod_consec : ∀ k n, k ≠ 0 → Nat.divide k (prod_consec k n)
 Proof.
 intros * Hkz.
 remember (n mod k) as nk eqn:Hnk; symmetry in Hnk.
+(* perhaps there is a way to do this without considering the
+   two cases nk = 0 and nk ≠ 0, with something looking like
+   (n + 1) mod k - 1 *)
 destruct nk. {
   apply Nat.mod_divides in Hnk; [ | easy ].
   destruct Hnk as (c, Hc).
