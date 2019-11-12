@@ -2462,6 +2462,12 @@ induction n; [ easy | cbn ].
 now rewrite IHn, binomial_succ_diag_r, Nat.add_0_r.
 Qed.
 
+(* look at
+https://proofwiki.org/wiki/Binomial_Coefficient_is_Integer
+*)
+
+...
+
 Theorem divide_fact_mul_fact_fact : ∀ k n,
   k ≤ n
   → Nat.divide (fact k * fact (n - k)) (fact n).
