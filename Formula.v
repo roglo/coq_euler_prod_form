@@ -2509,11 +2509,12 @@ Proof.
 intros * Hkz.
 unfold prod_consec.
 destruct k; [ easy | clear Hkz ].
-cbn; rewrite Nat.add_0_r.
+cbn - [ "mod" ]; rewrite Nat.add_0_r.
 rewrite fold_left_mul_from_1.
 revert n.
-induction k; intros; [ cbn; apply Nat.divide_1_l | ].
-cbn; rewrite Nat.add_0_r.
+induction k; intros; [ apply Nat.divide_1_l | ].
+specialize (IHk n) as H1.
+destruct H1 as (c, H1).
 rewrite fold_left_mul_from_1.
 ...
 
