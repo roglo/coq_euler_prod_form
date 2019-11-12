@@ -2507,6 +2507,7 @@ Qed.
 Theorem divide_prod_consec : ∀ k n, k ≠ 0 → Nat.divide k (prod_consec k n).
 Proof.
 intros * Hkz.
+...
 unfold prod_consec.
 destruct k; [ easy | clear Hkz ].
 cbn - [ "mod" ]; rewrite Nat.add_0_r.
