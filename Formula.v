@@ -2487,6 +2487,29 @@ apply Nat.mul_divide_mono_r.
 ...
 *)
 
+Definition binomial' n k := fact n / (fact k * fact (n - k)).
+
+Theorem glop : ∀ n k,
+  k < n → binomial' (S n) (S k) = binomial' n k + binomial' n (S k).
+Proof.
+intros * Hkn.
+unfold binomial'.
+rewrite Nat.sub_succ.
+revert k Hkn.
+induction n; intros; [ easy | ].
+destruct k. {
+  replace (fact 0) with 1 by easy.
+  replace (fact 1) with 1 by easy.
+  rewrite Nat.mul_1_l, Nat.sub_0_r, Nat.mul_1_l.
+  rewrite Nat.sub_succ, Nat.sub_0_r.
+  rewrite (Nat_fact_succ (S n)).
+  rewrite Nat.div_mul; [ | apply fact_neq_0 ].
+  rewrite Nat.div_same; [ | apply fact_neq_0 ].
+  rewrite Nat_fact_succ, Nat.div_mul; [ easy | apply fact_neq_0 ].
+}
+do 2 rewrite Nat.sub_succ.
+...
+
 Theorem binomial_by_factorials_aux : ∀ n k,
   k ≤ n
   → binomial n k * fact k * fact (n - k) = fact n.
