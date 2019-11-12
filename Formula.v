@@ -2466,6 +2466,29 @@ Qed.
 https://proofwiki.org/wiki/Binomial_Coefficient_is_Integer
 *)
 
+Theorem divide_fact_div_fact_fact : ∀ k n,
+  k ≤ n
+  → Nat.divide (fact k) (fact n / fact (n - k)).
+Proof.
+intros * Hkn.
+revert n Hkn.
+induction k; intros. {
+  cbn; rewrite Nat.sub_0_r.
+  rewrite Nat.div_same; [ | apply fact_neq_0 ].
+  apply Nat.divide_refl.
+}
+destruct n; [ flia Hkn | ].
+apply Nat.succ_le_mono in Hkn.
+rewrite Nat.sub_succ.
+specialize (IHk _ Hkn) as H1.
+destruct H1 as (c, Hc).
+do 2 rewrite Nat_fact_succ.
+specialize (Nat_divide_fact_fact n k) as (d, Hd).
+rewrite Hd, Nat.mul_assoc, Nat.div_mul; [ | apply fact_neq_0 ].
+rewrite Hd, Nat.div_mul in Hc; [ | apply fact_neq_0 ].
+rewrite Hc, Nat.mul_assoc.
+apply Nat.mul_divide_mono_r.
+rewrite Hc in Hd.
 ...
 
 Theorem divide_fact_mul_fact_fact : ∀ k n,
