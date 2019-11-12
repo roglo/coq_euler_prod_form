@@ -2522,7 +2522,7 @@ intros * Hkz.
 (* a value i < k such that (n + i) divides k *)
 remember (k - 1 - (n + k - 1) mod k) as i eqn:Hi.
 ...
-specialize (Nat.div_mod (n + k - 1) k Hkz) as H1.
+specialize (Nat.div_mod n k Hkz) as H1.
 unfold Nat.divide.
 rewrite prod_consec_but_fst; [ | easy ].
 ...
