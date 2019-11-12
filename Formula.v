@@ -2468,6 +2468,12 @@ https://proofwiki.org/wiki/Binomial_Coefficient_is_Integer
 
 (* https://math.stackexchange.com/questions/12065/the-product-of-n-consecutive-integers-is-divisible-by-n-factorial/12073#12073 *)
 
+Lemma P_form : ∀ m k,
+  fact (m + k + 1) / fact (k + 2) =
+  k * (fact (m + k) / fact k) + fact (m + k) / fact (k + 1).
+Proof.
+...
+
 (* P(m,k) = m...(m+k-1) *)
 Definition P m k := fact (m + k - 1) / fact (m - 1).
 
