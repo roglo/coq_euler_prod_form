@@ -2566,9 +2566,20 @@ destruct k; [ apply Nat.divide_1_l | ].
 destruct k; [ apply Nat.divide_1_l | ].
 assert (Hnk : ∀ k, n ≤ n + k) by flia.
 destruct k. {
-  specialize (Nat_le_divides_fact (n + 2) n (Hnk _)) as (c, Hc).
-  rewrite Hc, Nat.div_mul; [ | apply fact_neq_0 ].
-Check Nat_le_divides_fact.
+  cbn.
+  specialize (prod_consec_fact_fact 2 (n + 1)) as H1.
+  rewrite Nat.add_sub in H1.
+  rewrite Nat.add_shuffle0, Nat.add_sub in H1.
+  rewrite <- H1; [ | flia ].
+  now apply divide_prod_consec.
+}
+destruct k. {
+  cbn.
+  specialize (prod_consec_fact_fact 3 (n + 1)) as H1.
+  rewrite Nat.add_sub in H1.
+  rewrite Nat.add_shuffle0, Nat.add_sub in H1.
+  rewrite <- H1; [ | flia ].
+Check divide_prod_consec.
 ...
 
 Theorem divide_fact_div_fact_fact_sub : ∀ k n,
