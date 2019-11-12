@@ -2519,55 +2519,24 @@ Qed.
 Theorem divide_prod_consec : ∀ k n, k ≠ 0 → Nat.divide k (prod_consec k n).
 Proof.
 intros * Hkz.
-(* a value i < k such that (n + i) divides k *)
+(* a value i < k such that k divides (n + i) *)
 remember (k - 1 - (n + k - 1) mod k) as i eqn:Hi.
-...
-specialize (Nat.div_mod n k Hkz) as H1.
-unfold Nat.divide.
-rewrite prod_consec_but_fst; [ | easy ].
-...
-intros * Hkz.
-remember (n mod k) as nk eqn:Hnk; symmetry in Hnk.
-(* perhaps there is a way to do this without considering the
-   two cases nk = 0 and nk ≠ 0, with something looking like
-   (n + 1) mod k - 1 *)
-destruct nk. {
-  apply Nat.mod_divides in Hnk; [ | easy ].
-  destruct Hnk as (c, Hc).
-  unfold Nat.divide.
-  exists (prod_consec (k - 1) (n + 1) * c).
-  rewrite Nat.mul_shuffle0, <- Nat.mul_assoc, <- Hc, Nat.mul_comm.
-  now apply prod_consec_but_fst.
-}
-specialize (Nat.div_mod n k Hkz) as H1.
-remember (k - (n - 1) mod k - 1) as i eqn:Hi.
-rewrite Hnk in H1.
+specialize (Nat.div_mod (n + k - 1) k Hkz) as H1.
 assert (Hkni : Nat.divide k (n + i)). {
   unfold Nat.divide.
-  rewrite H1, Hi.
-  assert ((n - 1) mod k = nk). {
-    rewrite H1.
-    replace (k * _ + S _ - 1) with (k * (n / k) + nk) by flia.
-    rewrite Nat.mul_comm, Nat.add_comm.
-    rewrite Nat.mod_add; [ | easy ].
-    apply Nat.mod_small.
-    apply (Nat.add_lt_mono_l _ _ 1).
-    rewrite Nat.add_1_l, <- Hnk.
-    specialize (Nat.mod_upper_bound n k Hkz) as H2.
-    flia H2.
-  }
-  rewrite H.
-  rewrite <- Nat.sub_add_distr.
-  rewrite Nat.add_1_r.
+  rewrite Hi.
   rewrite Nat.add_sub_assoc. 2: {
-    rewrite <- Hnk.
-    apply Nat.lt_le_incl.
+    apply (Nat.add_le_mono_r _ _ 1).
+    rewrite Nat.sub_add; [ | flia Hkz ].
+    rewrite Nat.add_1_r.
     now apply Nat.mod_upper_bound.
   }
-  rewrite Nat.add_shuffle0.
+  rewrite Nat.add_sub_assoc; [ | flia Hkz ].
+  remember ((n + k - 1) mod k) as x.
+  rewrite H1; subst x.
   rewrite Nat.add_sub.
-  exists (n / k + 1).
-  flia.
+  exists ((n + k - 1) / k).
+  apply Nat.mul_comm.
 }
 assert (Hik : i < k) by flia Hi Hkz.
 ...
