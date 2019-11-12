@@ -2519,6 +2519,14 @@ Qed.
 Theorem divide_prod_consec : ∀ k n, k ≠ 0 → Nat.divide k (prod_consec k n).
 Proof.
 intros * Hkz.
+(* a value i < k such that (n + i) divides k *)
+remember (k - 1 - (n + k - 1) mod k) as i eqn:Hi.
+...
+specialize (Nat.div_mod (n + k - 1) k Hkz) as H1.
+unfold Nat.divide.
+rewrite prod_consec_but_fst; [ | easy ].
+...
+intros * Hkz.
 remember (n mod k) as nk eqn:Hnk; symmetry in Hnk.
 (* perhaps there is a way to do this without considering the
    two cases nk = 0 and nk ≠ 0, with something looking like
