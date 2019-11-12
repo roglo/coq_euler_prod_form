@@ -2504,6 +2504,18 @@ replace (S (n - 1)) with n by flia Hnz.
 rewrite Nat.div_mul_cancel_l; [ easy | apply fact_neq_0 | easy ].
 Qed.
 
+Theorem prod_consec_but_fst : ∀ k n,
+  k ≠ 0
+  → prod_consec k n = n * prod_consec (k - 1) (n + 1).
+Proof.
+intros * Hkz.
+destruct k; [ easy | clear Hkz ].
+unfold prod_consec.
+cbn; rewrite Nat.add_0_r, Nat.sub_0_r.
+rewrite Nat.add_1_r.
+apply fold_left_mul_from_1.
+Qed.
+
 Theorem divide_prod_consec : ∀ k n, k ≠ 0 → Nat.divide k (prod_consec k n).
 Proof.
 intros * Hkz.
@@ -2514,12 +2526,12 @@ destruct nk. {
   unfold Nat.divide.
   exists (prod_consec (k - 1) (n + 1) * c).
   rewrite Nat.mul_shuffle0, <- Nat.mul_assoc, <- Hc, Nat.mul_comm.
-... suite ok
+  now apply prod_consec_but_fst.
 }
 specialize (Nat.div_mod n k Hkz) as H1.
 remember (k - (n - 1) mod k - 1) as i eqn:Hi.
 rewrite Hnk in H1.
-assert (Nat.divide k (n + i)). {
+assert (Hkni : Nat.divide k (n + i)). {
   unfold Nat.divide.
   rewrite H1, Hi.
   assert ((n - 1) mod k = nk). {
@@ -2546,6 +2558,7 @@ assert (Nat.divide k (n + i)). {
   exists (n / k + 1).
   flia.
 }
+assert (Hik : i < k) by flia Hi Hkz.
 ...
 
 Theorem divide_fact_div_prod_of_consec_num : ∀ n k,
