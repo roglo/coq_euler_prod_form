@@ -2580,6 +2580,8 @@ destruct k. {
   rewrite Nat.add_shuffle0, Nat.add_sub in H1.
   rewrite <- H1; [ | flia ].
 Check divide_prod_consec.
+Search (Nat.divide (_ * _)).
+Search (Nat.divide (fact _)).
 ...
 
 Theorem divide_fact_div_fact_fact_sub : ∀ k n,
