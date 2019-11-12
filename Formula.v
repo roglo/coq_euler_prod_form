@@ -2496,7 +2496,19 @@ Theorem divide_fact_mul_fact_fact : ∀ k n,
   → Nat.divide (fact k * fact (n - k)) (fact n).
 Proof.
 intros * Hkn.
-Abort. (*
+specialize (Nat_le_divides_fact n k Hkn) as (c, Hc).
+specialize (Nat_divide_fact_fact n k) as (d, Hd).
+move d before c.
+revert n c d Hkn Hc Hd.
+induction k; intros. {
+  cbn; rewrite Nat.sub_0_r, Nat.add_0_r.
+  apply Nat.divide_refl.
+}
+destruct n; [ flia Hkn | ].
+apply Nat.succ_le_mono in Hkn.
+rewrite Nat.sub_succ in Hd |-*.
+rewrite Hd.
+apply Nat.mul_divide_mono_r.
 ...
 intros * Hkn.
 revert n Hkn.
