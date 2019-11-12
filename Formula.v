@@ -2467,6 +2467,9 @@ Theorem divide_fact_mul_fact_fact : ∀ k n,
   → Nat.divide (fact k * fact (n - k)) (fact n).
 Proof.
 intros * Hkn.
+Abort. (*
+...
+intros * Hkn.
 revert n Hkn.
 induction k; intros. {
   exists 1; rewrite Nat.mul_1_l.
@@ -2481,6 +2484,40 @@ rewrite Hc.
 do 2 rewrite Nat.mul_assoc.
 do 2 rewrite <- Nat.mul_assoc.
 apply Nat.mul_divide_mono_r.
+...
+*)
+
+Theorem binomial_by_factorials_aux : ∀ n k,
+  k ≤ n
+  → binomial n k * fact k * fact (n - k) = fact n.
+Proof.
+intros * Hkn.
+revert k Hkn.
+induction n; intros; [ now apply Nat.le_0_r in Hkn; subst k; cbn | ].
+destruct k; [ cbn; flia | ].
+apply Nat.succ_le_mono in Hkn.
+rewrite binomial_succ_succ.
+rewrite Nat.sub_succ.
+do 2 rewrite Nat_fact_succ.
+do 2 rewrite <- Nat.mul_assoc.
+rewrite (Nat.mul_comm (S k)).
+rewrite Nat.mul_add_distr_r.
+do 2 rewrite Nat.mul_assoc.
+rewrite IHn; [ | easy ].
+...
+intros * Hkn.
+revert n Hkn.
+induction k; intros; [ now rewrite binomial_0_r, Nat.mul_1_l, Nat.sub_0_r | ].
+destruct n; [ flia Hkn | ].
+apply Nat.succ_le_mono in Hkn.
+rewrite binomial_succ_succ.
+rewrite Nat.sub_succ.
+do 2 rewrite Nat_fact_succ.
+do 2 rewrite <- Nat.mul_assoc.
+rewrite (Nat.mul_comm (S k)).
+rewrite Nat.mul_add_distr_r.
+do 2 rewrite Nat.mul_assoc.
+rewrite IHk; [ | easy ].
 ...
 
 Theorem binomial_by_factorials : ∀ n k,
@@ -2504,6 +2541,7 @@ rewrite <- Nat.div_div; [ | | easy ]. 2: {
   apply Nat.neq_mul_0.
   split; apply fact_neq_0.
 }
+...
 rewrite Nat.divide_div_mul_exact; cycle 1. {
   apply Nat.neq_mul_0.
   split; apply fact_neq_0.
