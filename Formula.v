@@ -2582,6 +2582,12 @@ destruct k. {
 Check divide_prod_consec.
 Search (Nat.divide (_ * _)).
 Search (Nat.divide (fact _)).
+Compute (prime_decomp (fact 1)).
+Compute (prime_decomp (fact 2)).
+Compute (prime_decomp (fact 3)).
+Compute (prime_decomp (fact 4)).
+Compute (prime_decomp (fact 5)).
+Compute (prime_decomp (fact 6)).
 ...
 
 Theorem divide_fact_div_fact_fact_sub : ∀ k n,
