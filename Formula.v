@@ -2219,6 +2219,18 @@ rewrite IHl; symmetry; rewrite IHl.
 apply Nat.add_assoc.
 Qed.
 
+Theorem fold_left_mul_from_1 {A} : ∀ a l (f : A → nat),
+  fold_left (λ c i, c * f i) l a =
+  a * fold_left (λ c i, c * f i) l 1.
+Proof.
+intros.
+revert a.
+induction l as [| x l]; intros; [ symmetry; apply Nat.mul_1_r | cbn ].
+rewrite IHl; symmetry; rewrite IHl.
+rewrite Nat.add_0_r.
+apply Nat.mul_assoc.
+Qed.
+
 Theorem all_0_summation_0 : ∀ b e f,
   (∀ i, b ≤ i ≤ e → f i = 0)
   → Σ (i = b, e), f i = 0.
@@ -2461,6 +2473,101 @@ intros.
 induction n; [ easy | cbn ].
 now rewrite IHn, binomial_succ_diag_r, Nat.add_0_r.
 Qed.
+
+(* product of k consecutive numbers from n to n+k-1 *)
+Definition prod_consec k n := fold_left Nat.mul (seq n k) 1.
+
+Theorem prod_consec_fact_fact : ∀ k n,
+  n ≠ 0
+  → prod_consec k n = fact (n + k - 1) / fact (n - 1).
+Proof.
+intros * Hnz.
+unfold prod_consec.
+revert n Hnz.
+induction k; intros. {
+  cbn; rewrite Nat.add_0_r.
+  rewrite Nat.div_same; [ easy | apply fact_neq_0 ].
+}
+replace (n + S k - 1) with (n + k) by flia.
+cbn; rewrite Nat.add_0_r.
+rewrite fold_left_mul_from_1.
+rewrite IHk; [ | easy ].
+rewrite Nat.sub_succ, Nat.sub_0_r.
+replace (S n + k - 1) with (n + k) by flia.
+rewrite <- Nat.divide_div_mul_exact; [ | apply fact_neq_0 | ]. 2: {
+  apply Nat_le_divides_fact; flia.
+}
+remember (fact n) as x eqn:Hx.
+replace n with (S (n - 1)) in Hx by flia Hnz; subst x.
+rewrite Nat_fact_succ.
+replace (S (n - 1)) with n by flia Hnz.
+rewrite Nat.div_mul_cancel_l; [ easy | apply fact_neq_0 | easy ].
+Qed.
+
+Theorem divide_prod_consec : ∀ k n, k ≠ 0 → Nat.divide k (prod_consec k n).
+Proof.
+intros * Hkz.
+unfold prod_consec.
+destruct k; [ easy | clear Hkz ].
+cbn; rewrite Nat.add_0_r.
+rewrite fold_left_mul_from_1.
+revert n.
+induction k; intros; [ cbn; apply Nat.divide_1_l | ].
+cbn; rewrite Nat.add_0_r.
+rewrite fold_left_mul_from_1.
+...
+
+Theorem divide_fact_div_prod_of_consec_num : ∀ n k,
+  Nat.divide (fact k) (prod_consec k n).
+Proof.
+intros.
+destruct k; [ apply Nat.divide_1_l | ].
+destruct k; [ apply Nat.divide_1_l | ].
+assert (Hnk : ∀ k, n ≤ n + k) by flia.
+destruct k. {
+  specialize (Nat_le_divides_fact (n + 2) n (Hnk _)) as (c, Hc).
+  cbn; rewrite Nat.add_0_r.
+...
+
+Theorem divide_fact_div_prod_of_consec_num : ∀ n k,
+  Nat.divide (fact k) (fact (n + k) / fact n).
+Proof.
+intros.
+destruct k; [ apply Nat.divide_1_l | ].
+destruct k; [ apply Nat.divide_1_l | ].
+assert (Hnk : ∀ k, n ≤ n + k) by flia.
+destruct k. {
+  specialize (Nat_le_divides_fact (n + 2) n (Hnk _)) as (c, Hc).
+  rewrite Hc, Nat.div_mul; [ | apply fact_neq_0 ].
+Check Nat_le_divides_fact.
+...
+
+Theorem divide_fact_div_fact_fact_sub : ∀ k n,
+  k ≤ n
+  → Nat.divide (fact k) (fact n / fact (n - k)).
+Proof.
+intros * Hkn.
+...
+revert n Hkn.
+induction k; intros. {
+  cbn; rewrite Nat.sub_0_r.
+  rewrite Nat.div_same; [ | apply fact_neq_0 ].
+  apply Nat.divide_refl.
+}
+destruct n; [ flia Hkn | ].
+apply Nat.succ_le_mono in Hkn.
+rewrite Nat.sub_succ.
+specialize (IHk _ Hkn) as H1.
+destruct H1 as (c, Hc).
+do 2 rewrite Nat_fact_succ.
+specialize (Nat_divide_fact_fact n k) as (d, Hd).
+rewrite Hd, Nat.mul_assoc, Nat.div_mul; [ | apply fact_neq_0 ].
+rewrite Hd, Nat.div_mul in Hc; [ | apply fact_neq_0 ].
+rewrite Hc, Nat.mul_assoc.
+apply Nat.mul_divide_mono_r.
+rewrite Hc in Hd.
+clear d Hc.
+...
 
 (* look at
 https://proofwiki.org/wiki/Binomial_Coefficient_is_Integer
