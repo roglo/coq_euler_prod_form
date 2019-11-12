@@ -2503,18 +2503,37 @@ rewrite Nat.div_mul; [ | apply fact_neq_0 ].
 apply Nat.mul_comm.
 Qed.
 
-Theorem glop : ∀ k n m,
-  1 ≤ m
-  → m + k ≤ n
-  → Nat.divide (fact k) (P m k).
+Theorem glop : ∀ k m, Nat.divide (fact k) (P m k).
 Proof.
-intros * Hm Hkn.
-revert m k Hm Hkn.
+intros.
+remember (m + k) as n eqn:Hn.
+assert (H : m + k ≤ n) by flia Hn.
+clear Hn; rename H into Hn.
+revert k m Hn.
 induction n; intros. {
-  apply Nat.le_0_r, Nat.eq_add_0 in Hkn.
-  rewrite (proj1 Hkn), (proj2 Hkn).
+  apply Nat.le_0_r, Nat.eq_add_0 in Hn.
+  rewrite (proj1 Hn), (proj2 Hn).
   apply Nat.divide_refl.
 }
+destruct n. {
+  apply Nat.le_1_r in Hn.
+  destruct Hn as [Hn| Hn]. {
+    apply Nat.eq_add_0 in Hn.
+    rewrite (proj1 Hn), (proj2 Hn).
+    apply Nat.divide_refl.
+  }
+  apply Nat.eq_add_1 in Hn.
+  destruct Hn as [Hn| Hn]. {
+    rewrite (proj1 Hn), (proj2 Hn).
+    apply Nat.divide_refl.
+  }
+  rewrite (proj1 Hn), (proj2 Hn).
+  apply Nat.divide_refl.
+}
+destruct m. {
+  unfold P.
+  rewrite Nat.add_0_l, Nat.sub_0_l, Nat.div_1_r.
+...
 destruct m; [ flia Hm | ].
 destruct m. {
   unfold P; cbn - [ "/" ].
