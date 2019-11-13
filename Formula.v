@@ -2569,15 +2569,26 @@ Fixpoint all_incr_such_that_primes_divides_from it i p k :=
   match it with
   | 0 => []
   | S it' =>
-      if lt_dec (i + p) k then
-        i + p :: all_incr_such_that_primes_divides_from it' (i + p) p k
+      if lt_dec i k then
+        i :: all_incr_such_that_primes_divides_from it' (i + p) p k
       else
         []
   end.
 Definition all_incr_such_that_primes_divides n p k :=
   let i := p - 1 - (n + p - 1) mod p in
-  i :: all_incr_such_that_primes_divides_from i p k.
+  all_incr_such_that_primes_divides_from k i p k.
 
+Compute (number_of_times_divides_fact 15 146).
+Compute
+  (all_incr_such_that_primes_divides 0 5 146 ++
+   all_incr_such_that_primes_divides 0 25 146 ++
+   all_incr_such_that_primes_divides 0 125 146).
+Compute (length (all_incr_such_that_primes_divides 1 5 146)).
+Compute (length (all_incr_such_that_primes_divides 1 25 146)).
+Compute (length (all_incr_such_that_primes_divides 1 125 146)).
+Compute (length (all_incr_such_that_primes_divides 1 625 146)).
+Compute (length (all_incr_such_that_primes_divides 1 3125 146)).
+...
 remember (all_incr_such_that_primes_divides n p) as il eqn:Hil.
 ...
 (* the first value i < k such that p divides (n + i) *)
