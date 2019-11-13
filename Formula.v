@@ -2816,6 +2816,16 @@ destruct (Nat.eq_dec m 1) as [Hm1| Hm1]. {
   rewrite Nat.div_1_r.
   apply Nat.divide_refl.
 }
+destruct (Nat.eq_dec k 1) as [Hk1| Hk1]. {
+  subst k; apply Nat.divide_1_l.
+}
+Inspect 1.
+assert (H2m : 2 ≤ m) by flia H1m Hm1.
+assert (H2k : 2 ≤ k) by flia H1k Hk1.
+specialize (P_form m k H2m H2k) as H1.
+assert (Hmn : m + (k - 1) < n) by flia Hn H2k.
+assert (H1k1 : 1 ≤ k - 1) by flia H2k.
+specialize (IHn (m + (k - 1)) Hmn (k - 1) m (le_refl _) H1m H1k1) as H2.
 ...
 
 Theorem divide_fact_div_fact_fact : ∀ k n,
