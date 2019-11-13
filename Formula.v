@@ -2474,6 +2474,11 @@ induction n; [ easy | cbn ].
 now rewrite IHn, binomial_succ_diag_r, Nat.add_0_r.
 Qed.
 
+(* try to implement https://math.stackexchange.com/questions/12065/the-product-of-n-consecutive-integers-is-divisible-by-n-factorial/12073#12073 *)
+(* lemma already done, probably in git log *)
+
+...
+
 (* product of k consecutive numbers from n to n+k-1 *)
 Definition prod_consec k n := fold_left Nat.mul (seq n k) 1.
 
