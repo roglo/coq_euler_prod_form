@@ -10,6 +10,7 @@ Tactic Notation "flia" hyp_list(Hs) := clear - Hs; lia.
 Notation "x ≤ y ≤ z" := (x <= y ∧ y <= z)%nat (at level 70, y at next level).
 Notation "x < y ≤ z" := (x < y ∧ y <= z)%nat (at level 70, y at next level).
 Notation "x ≤ y < z" := (x ≤ y ∧ y < z)%nat (at level 70, y at next level).
+Notation "x < y < z" := (x < y ∧ y < z)%nat (at level 70, y at next level).
 
 Definition List_combine_all {A} (l1 l2 : list A) (d : A) :=
   let '(l'1, l'2) :=
