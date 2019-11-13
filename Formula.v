@@ -2474,305 +2474,21 @@ induction n; [ easy | cbn ].
 now rewrite IHn, binomial_succ_diag_r, Nat.add_0_r.
 Qed.
 
-(*
-(* product of k consecutive numbers from n to n+k-1 *)
-Definition prod_consec k n := fold_left Nat.mul (seq n k) 1.
-
-Theorem prod_consec_fact_fact : ∀ k n,
-  n ≠ 0
-  → prod_consec k n = fact (n + k - 1) / fact (n - 1).
-Proof.
-intros * Hnz.
-unfold prod_consec.
-revert n Hnz.
-induction k; intros. {
-  cbn; rewrite Nat.add_0_r.
-  rewrite Nat.div_same; [ easy | apply fact_neq_0 ].
-}
-replace (n + S k - 1) with (n + k) by flia.
-cbn; rewrite Nat.add_0_r.
-rewrite fold_left_mul_from_1.
-rewrite IHk; [ | easy ].
-rewrite Nat.sub_succ, Nat.sub_0_r.
-replace (S n + k - 1) with (n + k) by flia.
-rewrite <- Nat.divide_div_mul_exact; [ | apply fact_neq_0 | ]. 2: {
-  apply Nat_le_divides_fact; flia.
-}
-remember (fact n) as x eqn:Hx.
-replace n with (S (n - 1)) in Hx by flia Hnz; subst x.
-rewrite Nat_fact_succ.
-replace (S (n - 1)) with n by flia Hnz.
-rewrite Nat.div_mul_cancel_l; [ easy | apply fact_neq_0 | easy ].
-Qed.
-
-Theorem prod_consec_split : ∀ i k n,
-  k ≠ 0
-  → i < k
-  → prod_consec k n =
-     prod_consec i n * (n + i) * prod_consec (k - i - 1) (n + i + 1).
-Proof.
-intros * Hkz Hik.
-destruct k; [ easy | clear Hkz ].
-unfold prod_consec.
-replace (S k) with (i + (S k - i)) by flia Hik.
-rewrite seq_app.
-rewrite fold_left_app.
-rewrite fold_left_mul_from_1.
-rewrite <- Nat.mul_assoc; f_equal.
-replace (S k - i) with (1 + (k - i)) by flia Hik.
-rewrite seq_app.
-rewrite fold_left_app.
-rewrite fold_left_mul_from_1.
-replace (seq (n + i) 1) with [n+i] by easy.
-remember (fold_left _ [n + i] 1) as y eqn:Hy.
-cbn in Hy; rewrite Nat.add_0_r in Hy; subst y.
-f_equal; f_equal; f_equal.
-flia Hik.
-Qed.
-
-Definition greatest_prime_divisor p := last (prime_decomp p) 0.
-
-Fixpoint notdf_loop it d kdr :=
-  match it with
-  | 0 => 0
-  | S it' =>
-      match kdr / d with
-      | 0 => 0
-      | kdr' => kdr' + notdf_loop it' d kdr'
-      end
-  end.
-
-(* Legendre's Formula *)
-
-Definition number_of_times_prime_divides_fact p k :=
-  notdf_loop k p k.
-
-Definition number_of_times_divides_fact d k :=
-  number_of_times_prime_divides_fact (greatest_prime_divisor d) k.
-
-Compute (number_of_times_divides_fact 5 280).
-Compute (number_of_times_divides_fact 15 146).
-Compute (number_of_times_divides_fact 5 1000).
-Compute (number_of_times_divides_fact 1 42).
-
-Theorem prime_divide_prod_consec : ∀ k n p r,
-  is_prime p = true
-  → r = number_of_times_prime_divides_fact p k
-  → Nat.divide (p ^ r) (prod_consec k n).
-Proof.
-intros * Hpp Hr.
-destruct (Nat.eq_dec k 0) as [Hkz| Hkz]. {
-  subst k; cbn in Hr; subst r; cbn.
-  apply Nat.divide_refl.
-}
-(**)
-Fixpoint all_incr_such_that_primes_divides_from it i p k :=
-  match it with
-  | 0 => []
-  | S it' =>
-      if lt_dec i k then
-        i :: all_incr_such_that_primes_divides_from it' (i + p) p k
-      else
-        []
-  end.
-Definition all_incr_such_that_primes_divides n p k :=
-  let i := p - 1 - (n + p - 1) mod p in
-  all_incr_such_that_primes_divides_from k i p k.
-
-Compute (number_of_times_divides_fact 15 146).
-Compute
-(let n := 1 in length
-  (all_incr_such_that_primes_divides n 5 146 ++ [999] ++
-   all_incr_such_that_primes_divides n 25 146 ++ [999] ++
-   all_incr_such_that_primes_divides n 125 146)).
-Compute (length (all_incr_such_that_primes_divides 1 5 146)).
-Compute (length (all_incr_such_that_primes_divides 1 25 146)).
-Compute (length (all_incr_such_that_primes_divides 1 125 146)).
-Compute (length (all_incr_such_that_primes_divides 1 625 146)).
-Compute (length (all_incr_such_that_primes_divides 1 3125 146)).
-...
-remember (all_incr_such_that_primes_divides n p) as il eqn:Hil.
-...
-(* the first value i < k such that p divides (n + i) *)
-remember (p - 1 - (n + p - 1) mod p) as i eqn:Hi.
-
----------------------------------------------
-   ^   ^     ^  ^      ^         ^         ^
-   |p  |n    |p |n+p-1 |p        |p        |p
-                      -
-                      p-1-(n+p-1)mod p
-
-assert (Hpz : p ≠ 0) by now intros H; rewrite H in Hpp.
-specialize (Nat.div_mod (n + p - 1) p Hpz) as H1.
-assert (Hkni : Nat.divide p (n + i)). {
-  unfold Nat.divide.
-  rewrite Hi.
-  rewrite Nat.add_sub_assoc. 2: {
-    apply (Nat.add_le_mono_r _ _ 1).
-    rewrite Nat.sub_add; [ | flia Hpz ].
-    rewrite Nat.add_1_r.
-    now apply Nat.mod_upper_bound.
-  }
-  rewrite Nat.add_sub_assoc; [ | flia Hpz ].
-  remember ((n + p - 1) mod p) as x.
-  rewrite H1; subst x.
-  rewrite Nat.add_sub.
-  exists ((n + p - 1) / p).
-  apply Nat.mul_comm.
-}
-...
-assert (Hik : i < k) by flia Hi Hpk.
-rewrite (prod_consec_split i); [ | easy | easy ].
-rewrite Nat.mul_shuffle0.
-apply (Nat.divide_trans _ (n + i)); [ easy | ].
-apply Nat.divide_factor_r.
-Qed.
-
-Theorem divide_prod_consec : ∀ k n d,
-  0 < d ≤ k
-  → Nat.divide d (prod_consec k n).
-Proof.
-intros * Hdk.
-(* a value i < k such that d divides (n + i) *)
-remember (d - 1 - (n + d - 1) mod d) as i eqn:Hi.
-assert (Hkz : k ≠ 0) by flia Hdk.
-assert (Hdz : d ≠ 0) by flia Hdk.
-specialize (Nat.div_mod (n + d - 1) d Hdz) as H1.
-assert (Hkni : Nat.divide d (n + i)). {
-  unfold Nat.divide.
-  rewrite Hi.
-  rewrite Nat.add_sub_assoc. 2: {
-    apply (Nat.add_le_mono_r _ _ 1).
-    rewrite Nat.sub_add; [ | easy ].
-    rewrite Nat.add_1_r.
-    now apply Nat.mod_upper_bound.
-  }
-  rewrite Nat.add_sub_assoc; [ | easy ].
-  remember ((n + d - 1) mod d) as x.
-  rewrite H1; subst x.
-  rewrite Nat.add_sub.
-  exists ((n + d - 1) / d).
-  apply Nat.mul_comm.
-}
-assert (Hik : i < k) by flia Hi Hdk.
-rewrite (prod_consec_split i); [ | easy | easy ].
-rewrite Nat.mul_shuffle0.
-apply (Nat.divide_trans _ (n + i)); [ easy | ].
-apply Nat.divide_factor_r.
-Qed.
-
-Theorem prime_divides_prod_consec : ∀ k n p r,
-  is_prime p = true
-  → Nat.divide (p ^ r) (fact k)
-  → Nat.divide (p ^ r) (prod_consec k n).
-Proof.
-intros * Hpp Hpk.
-specialize (prime_divide_prod_consec k n p Hpp) as H1.
-...
-apply divide_prod_consec.
-...
-destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now rewrite Hpz in Hpp | ].
-split. {
-  clear - Hpz.
-  apply Nat.neq_0_lt_0.
-  induction r; [ easy | cbn ].
-  now apply Nat.neq_mul_0.
-}
-Check prime_divides_fact_ge.
-...
-apply prime_divides_fact_ge; [ | easy ].
-...
-
-Theorem prime_divides_prod_consec : ∀ k n p,
-  is_prime p = true
-  → Nat.divide p (fact k)
-  → Nat.divide p (prod_consec k n).
-Proof.
-intros * Hpp Hpk.
-apply divide_prod_consec.
-destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now rewrite Hpz in Hpp | ].
-split; [ flia Hpz | ].
-now apply prime_divides_fact_ge.
-Qed.
-
-Theorem divide_fact_div_prod_of_consec_num : ∀ n k,
-  Nat.divide (fact k) (fact (n + k) / fact n).
-Proof.
-intros.
-destruct k; [ apply Nat.divide_1_l | ].
-destruct k; [ apply Nat.divide_1_l | ].
-assert (Hnk : ∀ k, n ≤ n + k) by flia.
-destruct k. {
-  cbn.
-  specialize (prod_consec_fact_fact 2 (n + 1)) as H1.
-  rewrite Nat.add_sub in H1.
-  rewrite Nat.add_shuffle0, Nat.add_sub in H1.
-  rewrite <- H1; [ | flia ].
-  apply divide_prod_consec.
-  split; [ apply Nat.lt_0_succ | easy ].
-}
-destruct k. {
-  cbn.
-  specialize (prod_consec_fact_fact 3 (n + 1)) as H1.
-  rewrite Nat.add_sub in H1.
-  rewrite Nat.add_shuffle0, Nat.add_sub in H1.
-  rewrite <- H1; [ | flia ].
-Check divide_prod_consec.
-Search (Nat.divide (_ * _)).
-Search (Nat.divide (fact _)).
-Compute (prime_decomp (fact 1)).
-Compute (prime_decomp (fact 2)).
-Compute (prime_decomp (fact 3)).
-Compute (prime_decomp (fact 4)).
-Compute (prime_decomp (fact 5)).
-Compute (prime_decomp (fact 6)).
-...
-
-Theorem divide_fact_div_fact_fact_sub : ∀ k n,
-  k ≤ n
-  → Nat.divide (fact k) (fact n / fact (n - k)).
-Proof.
-intros * Hkn.
-...
-revert n Hkn.
-induction k; intros. {
-  cbn; rewrite Nat.sub_0_r.
-  rewrite Nat.div_same; [ | apply fact_neq_0 ].
-  apply Nat.divide_refl.
-}
-destruct n; [ flia Hkn | ].
-apply Nat.succ_le_mono in Hkn.
-rewrite Nat.sub_succ.
-specialize (IHk _ Hkn) as H1.
-destruct H1 as (c, Hc).
-do 2 rewrite Nat_fact_succ.
-specialize (Nat_divide_fact_fact n k) as (d, Hd).
-rewrite Hd, Nat.mul_assoc, Nat.div_mul; [ | apply fact_neq_0 ].
-rewrite Hd, Nat.div_mul in Hc; [ | apply fact_neq_0 ].
-rewrite Hc, Nat.mul_assoc.
-apply Nat.mul_divide_mono_r.
-rewrite Hc in Hd.
-clear d Hc.
-...
-
-(* look at
-https://proofwiki.org/wiki/Binomial_Coefficient_is_Integer
-*)
-*)
-
 (* https://math.stackexchange.com/questions/12065/the-product-of-n-consecutive-integers-is-divisible-by-n-factorial/12073#12073 *)
+(* by Ralph D. Jeffords *)
 
-(* P(m,k) = m...(m+k-1) *)
-Definition P m k := fact (m + k - 1) / fact (m - 1).
+(* product of k consecutive numbers from n to n+k-1 *)
+(* prod_consec (m,k) = m...(m+k-1) *)
+Definition prod_consec n k := fact (n + k - 1) / fact (n - 1).
 
-Lemma P_form : ∀ m k,
+Lemma prod_consec_rec_formula : ∀ m k,
   2 ≤ m
   → 2 ≤ k
-  → P m k = k * P m (k - 1) + P (m - 1) k.
+  → prod_consec m k = k * prod_consec m (k - 1) + prod_consec (m - 1) k.
 Proof.
 intros * H2m H2k.
-replace (P m k) with (P m (k - 1) * (k + (m - 1))). 2: {
-  unfold P.
+replace (prod_consec m k) with (prod_consec m (k - 1) * (k + (m - 1))). 2: {
+  unfold prod_consec.
   replace (m + (k - 1) - 1) with (m + k - 2) by flia H2k.
   replace (m + k - 1) with (S (m + k - 2)) by flia H2m.
   rewrite Nat_fact_succ.
@@ -2783,7 +2499,7 @@ replace (P m k) with (P m (k - 1) * (k + (m - 1))). 2: {
   rewrite Nat.mul_comm; f_equal; flia H2m.
 }
 rewrite Nat.mul_comm, Nat.mul_add_distr_r; f_equal.
-unfold P.
+unfold prod_consec.
 replace (m - 1 - 1) with (m - 2) by flia H2m.
 replace (m + (k - 1) - 1) with (m + k - 2) by flia H2k.
 replace (m - 1 + k - 1) with (m + k - 2) by flia H2m.
@@ -2797,7 +2513,10 @@ rewrite Nat.div_mul; [ | apply fact_neq_0 ].
 apply Nat.mul_comm.
 Qed.
 
-Theorem glop : ∀ k m, 1 ≤ m → 1 ≤ k → Nat.divide (fact k) (P m k).
+Theorem divide_fact_prod_consec : ∀ k m,
+  1 ≤ m
+  → 1 ≤ k
+  → Nat.divide (fact k) (prod_consec m k).
 Proof.
 intros * H1m H1k.
 remember (m + k) as n eqn:Hn.
@@ -2811,7 +2530,7 @@ destruct (Nat.eq_dec n 2) as [Hn2| Hn2]. {
   apply Nat.divide_refl.
 }
 destruct (Nat.eq_dec m 1) as [Hm1| Hm1]. {
-  subst m; unfold P.
+  subst m; unfold prod_consec.
   rewrite Nat.add_comm, Nat.add_sub, Nat.sub_diag.
   rewrite Nat.div_1_r.
   apply Nat.divide_refl.
@@ -2822,10 +2541,21 @@ destruct (Nat.eq_dec k 1) as [Hk1| Hk1]. {
 Inspect 1.
 assert (H2m : 2 ≤ m) by flia H1m Hm1.
 assert (H2k : 2 ≤ k) by flia H1k Hk1.
-specialize (P_form m k H2m H2k) as H1.
+specialize (prod_consec_rec_formula m k H2m H2k) as H1.
 assert (Hmn : m + (k - 1) < n) by flia Hn H2k.
 assert (H1k1 : 1 ≤ k - 1) by flia H2k.
 specialize (IHn (m + (k - 1)) Hmn (k - 1) m (le_refl _) H1m H1k1) as H2.
+apply (Nat.mul_divide_mono_l _ _ k) in H2.
+replace k with (S (k - 1)) in H2 at 1 by flia H1k.
+rewrite <- Nat_fact_succ in H2.
+replace (S (k - 1)) with k in H2 by flia H1k.
+rewrite H1.
+apply Nat.divide_add_r; [ easy | ].
+apply (IHn (m - 1 + k)); [ flia Hn H2m | easy | flia H2m | easy ].
+Qed.
+
+Inspect 1.
+
 ...
 
 Theorem divide_fact_div_fact_fact : ∀ k n,
