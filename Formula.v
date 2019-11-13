@@ -2606,6 +2606,12 @@ Theorem prime_divides_fact_ge' : ∀ p m r,
   → Nat.divide (p ^ r) (fact m)
   → p ^ r ≤ m.
 Proof.
+(* wrong:
+    Nat.divide (3 ^ 2) (fact 7)
+    3 ^ 2 ≤ 7 is false
+ *)
+Abort. (*
+...
 intros * Hp Hrz Hpm.
 induction m; intros. {
   destruct Hpm as (c, Hc).
@@ -2633,6 +2639,7 @@ apply Nat.nle_gt in Hnsm; apply Hnsm.
 transitivity m; [ | flia ].
 apply IHm, H1.
 Qed.
+*)
 
 Theorem prime_divides_prod_consec : ∀ k n p r,
   is_prime p = true
@@ -2641,6 +2648,7 @@ Theorem prime_divides_prod_consec : ∀ k n p r,
 Proof.
 intros * Hpp Hpk.
 apply divide_prod_consec.
+...
 destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now rewrite Hpz in Hpp | ].
 split. {
   clear - Hpz.
