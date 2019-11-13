@@ -2543,15 +2543,53 @@ Fixpoint notdf_loop it d kdr :=
 
 (* Legendre's Formula *)
 
+Definition number_of_times_prime_divides_fact p k :=
+  notdf_loop k p k.
+
 Definition number_of_times_divides_fact d k :=
-  notdf_loop k (greatest_prime_divisor d) k.
+  number_of_times_prime_divides_fact (greatest_prime_divisor d) k.
 
 Compute (number_of_times_divides_fact 5 280).
 Compute (number_of_times_divides_fact 15 146).
 Compute (number_of_times_divides_fact 5 1000).
-Compute (number_of_times_divides_fact 2 9).
+Compute (number_of_times_divides_fact 1 42).
 
+Theorem prime_divide_prod_consec : ∀ k n p,
+  is_prime p = true
+  → Nat.divide (p ^ number_of_times_prime_divides_fact p k)
+       (prod_consec k n).
+Proof.
+intros * Hdk.
+remember (number_of_times_prime_divides_fact p k) as r eqn:Hr.
 ...
+(* a value i < k such that d divides (n + i) *)
+remember (d - 1 - (n + d - 1) mod d) as i eqn:Hi.
+assert (Hkz : k ≠ 0) by flia Hdk.
+assert (Hdz : d ≠ 0) by flia Hdk.
+specialize (Nat.div_mod (n + d - 1) d Hdz) as H1.
+assert (Hkni : Nat.divide d (n + i)). {
+  unfold Nat.divide.
+  rewrite Hi.
+  rewrite Nat.add_sub_assoc. 2: {
+    apply (Nat.add_le_mono_r _ _ 1).
+    rewrite Nat.sub_add; [ | easy ].
+    rewrite Nat.add_1_r.
+    now apply Nat.mod_upper_bound.
+  }
+  rewrite Nat.add_sub_assoc; [ | easy ].
+  remember ((n + d - 1) mod d) as x.
+  rewrite H1; subst x.
+  rewrite Nat.add_sub.
+  exists ((n + d - 1) / d).
+  apply Nat.mul_comm.
+}
+assert (Hik : i < k) by flia Hi Hdk.
+rewrite (prod_consec_split i); [ | easy | easy ].
+rewrite Nat.mul_shuffle0.
+apply (Nat.divide_trans _ (n + i)); [ easy | ].
+apply Nat.divide_factor_r.
+Qed.
+*)
 
 Theorem divide_prod_consec : ∀ k n d,
   0 < d ≤ k
@@ -2586,54 +2624,15 @@ apply (Nat.divide_trans _ (n + i)); [ easy | ].
 apply Nat.divide_factor_r.
 Qed.
 
-(*
-Theorem prime_relatively_prime' : ∀ p n r,
-  is_prime p = true
-  → 0 < n < p
-  → Nat.gcd p (n ^ r) = 1.
-Proof.
-intros * Hp Hnp.
-remember (Nat.gcd p n) as g eqn:Hg; symmetry in Hg.
-destruct g; [ now apply Nat.gcd_eq_0 in Hg; rewrite (proj1 Hg) in Hp | ].
-destruct g; [ easy | exfalso ].
-specialize (Nat.gcd_divide_l p n) as H1.
-rewrite Hg in H1.
-destruct H1 as (d, Hd).
-specialize (prime_divisors p Hp (S (S g))) as H1.
-assert (H : Nat.divide (S (S g)) p). {
-  rewrite Hd; apply Nat.divide_factor_r.
-}
-specialize (H1 H); clear H.
-destruct H1 as [H1| H1]; [ easy | ].
-destruct d; [ now rewrite Hd in Hp | ].
-rewrite Hd in H1.
-destruct d. {
-  rewrite Nat.mul_1_l in Hd.
-  rewrite <- Hd in Hg.
-  specialize (Nat.gcd_divide_r p n) as H2.
-  rewrite Hg in H2.
-  destruct H2 as (d2, Hd2).
-  destruct d2; [ rewrite Hd2 in Hnp; flia Hnp | ].
-  rewrite Hd2 in Hnp; cbn in Hnp.
-  remember (d2 * p); flia Hnp.
-}
-replace (S (S d)) with (1 + S d) in H1 by flia.
-rewrite Nat.mul_add_distr_r, Nat.mul_1_l in H1.
-rewrite <- (Nat.add_0_r (S (S g))) in H1 at 1.
-now apply Nat.add_cancel_l in H1.
-Qed.
-*)
-
 Theorem prime_divides_prod_consec : ∀ k n p r,
   is_prime p = true
   → Nat.divide (p ^ r) (fact k)
   → Nat.divide (p ^ r) (prod_consec k n).
 Proof.
 intros * Hpp Hpk.
-apply divide_prod_consec.
+specialize (prime_divide_prod_consec k n p Hpp) as H1.
 ...
-3^2 divides 7!
-but 3^2 is not ≤ 7
+apply divide_prod_consec.
 ...
 destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now rewrite Hpz in Hpp | ].
 split. {
