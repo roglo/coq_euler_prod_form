@@ -2531,22 +2531,25 @@ Qed.
 
 Definition greatest_prime_divisor p := last (prime_decomp p) 0.
 
-Fixpoint notpcd_loop it d kdr :=
+Fixpoint notdf_loop it d kdr :=
   match it with
   | 0 => 0
   | S it' =>
       match kdr / d with
       | 0 => 0
-      | kdr' => kdr' + notpcd_loop it' d kdr'
+      | kdr' => kdr' + notdf_loop it' d kdr'
       end
   end.
 
+(* Legendre's Formula *)
+
 Definition number_of_times_divides_fact d k :=
-  let p := greatest_prime_divisor d in
-  notpcd_loop k p k.
+  notdf_loop k (greatest_prime_divisor d) k.
 
 Compute (number_of_times_divides_fact 5 280).
 Compute (number_of_times_divides_fact 15 146).
+Compute (number_of_times_divides_fact 5 1000).
+Compute (number_of_times_divides_fact 2 9).
 
 ...
 
