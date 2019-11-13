@@ -2554,42 +2554,66 @@ Compute (number_of_times_divides_fact 15 146).
 Compute (number_of_times_divides_fact 5 1000).
 Compute (number_of_times_divides_fact 1 42).
 
-Theorem prime_divide_prod_consec : ∀ k n p,
+Theorem prime_divide_prod_consec : ∀ k n p r,
   is_prime p = true
-  → Nat.divide (p ^ number_of_times_prime_divides_fact p k)
-       (prod_consec k n).
+  → r = number_of_times_prime_divides_fact p k
+  → Nat.divide (p ^ r) (prod_consec k n).
 Proof.
-intros * Hdk.
-remember (number_of_times_prime_divides_fact p k) as r eqn:Hr.
+intros * Hpp Hr.
+destruct (Nat.eq_dec k 0) as [Hkz| Hkz]. {
+  subst k; cbn in Hr; subst r; cbn.
+  apply Nat.divide_refl.
+}
+(**)
+Fixpoint all_incr_such_that_primes_divides_from it i p k :=
+  match it with
+  | 0 => []
+  | S it' =>
+      if lt_dec (i + p) k then
+        i + p :: all_incr_such_that_primes_divides_from it' (i + p) p k
+      else
+        []
+  end.
+Definition all_incr_such_that_primes_divides n p k :=
+  let i := p - 1 - (n + p - 1) mod p in
+  i :: all_incr_such_that_primes_divides_from i p k.
+
+remember (all_incr_such_that_primes_divides n p) as il eqn:Hil.
 ...
-(* a value i < k such that d divides (n + i) *)
-remember (d - 1 - (n + d - 1) mod d) as i eqn:Hi.
-assert (Hkz : k ≠ 0) by flia Hdk.
-assert (Hdz : d ≠ 0) by flia Hdk.
-specialize (Nat.div_mod (n + d - 1) d Hdz) as H1.
-assert (Hkni : Nat.divide d (n + i)). {
+(* the first value i < k such that p divides (n + i) *)
+remember (p - 1 - (n + p - 1) mod p) as i eqn:Hi.
+
+---------------------------------------------
+   ^   ^     ^  ^      ^         ^         ^
+   |p  |n    |p |n+p-1 |p        |p        |p
+                      -
+                      p-1-(n+p-1)mod p
+
+assert (Hpz : p ≠ 0) by now intros H; rewrite H in Hpp.
+specialize (Nat.div_mod (n + p - 1) p Hpz) as H1.
+assert (Hkni : Nat.divide p (n + i)). {
   unfold Nat.divide.
   rewrite Hi.
   rewrite Nat.add_sub_assoc. 2: {
     apply (Nat.add_le_mono_r _ _ 1).
-    rewrite Nat.sub_add; [ | easy ].
+    rewrite Nat.sub_add; [ | flia Hpz ].
     rewrite Nat.add_1_r.
     now apply Nat.mod_upper_bound.
   }
-  rewrite Nat.add_sub_assoc; [ | easy ].
-  remember ((n + d - 1) mod d) as x.
+  rewrite Nat.add_sub_assoc; [ | flia Hpz ].
+  remember ((n + p - 1) mod p) as x.
   rewrite H1; subst x.
   rewrite Nat.add_sub.
-  exists ((n + d - 1) / d).
+  exists ((n + p - 1) / p).
   apply Nat.mul_comm.
 }
-assert (Hik : i < k) by flia Hi Hdk.
+...
+assert (Hik : i < k) by flia Hi Hpk.
 rewrite (prod_consec_split i); [ | easy | easy ].
 rewrite Nat.mul_shuffle0.
 apply (Nat.divide_trans _ (n + i)); [ easy | ].
 apply Nat.divide_factor_r.
 Qed.
-*)
 
 Theorem divide_prod_consec : ∀ k n d,
   0 < d ≤ k
