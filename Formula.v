@@ -2529,6 +2529,27 @@ f_equal; f_equal; f_equal.
 flia Hik.
 Qed.
 
+Definition greatest_prime_divisor p := last (prime_decomp p) 0.
+
+Fixpoint notpcd_loop it d kdr :=
+  match it with
+  | 0 => 0
+  | S it' =>
+      match kdr / d with
+      | 0 => 0
+      | kdr' => kdr' + notpcd_loop it' d kdr'
+      end
+  end.
+
+Definition number_of_times_divides_fact d k :=
+  let p := greatest_prime_divisor d in
+  notpcd_loop k p k.
+
+Compute (number_of_times_divides_fact 5 280).
+Compute (number_of_times_divides_fact 15 146).
+
+...
+
 Theorem divide_prod_consec : ∀ k n d,
   0 < d ≤ k
   → Nat.divide d (prod_consec k n).
