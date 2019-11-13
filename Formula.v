@@ -2800,54 +2800,19 @@ Qed.
 Theorem glop : ∀ k m, 1 ≤ m → 1 ≤ k → Nat.divide (fact k) (P m k).
 Proof.
 intros * H1m H1k.
-...
 remember (m + k) as n eqn:Hn.
 assert (H : m + k ≤ n) by flia Hn.
 clear Hn; rename H into Hn.
-revert k m Hn.
-induction n; intros. {
-  apply Nat.le_0_r, Nat.eq_add_0 in Hn.
-  rewrite (proj1 Hn), (proj2 Hn).
+revert k m Hn H1m H1k.
+induction n as (n, IHn) using lt_wf_rec; intros.
+destruct (Nat.eq_dec n 2) as [Hn2| Hn2]. {
+  replace m with 1 by flia Hn H1m H1k Hn2.
+  replace k with 1 by flia Hn H1m H1k Hn2.
   apply Nat.divide_refl.
 }
-destruct n. {
-  apply Nat.le_1_r in Hn.
-  destruct Hn as [Hn| Hn]. {
-    apply Nat.eq_add_0 in Hn.
-    rewrite (proj1 Hn), (proj2 Hn).
-    apply Nat.divide_refl.
-  }
-  apply Nat.eq_add_1 in Hn.
-  destruct Hn as [Hn| Hn]. {
-    rewrite (proj1 Hn), (proj2 Hn).
-    apply Nat.divide_refl.
-  }
-  rewrite (proj1 Hn), (proj2 Hn).
-  apply Nat.divide_refl.
-}
-destruct m. {
-  unfold P.
-  rewrite Nat.add_0_l, Nat.sub_0_l, Nat.div_1_r.
-...
-destruct m; [ flia Hm | ].
-destruct m. {
-  unfold P; cbn - [ "/" ].
-  rewrite Nat.sub_0_r, Nat.div_1_r.
-  apply Nat.divide_refl.
-}
-cbn in Hkn.
-apply Nat.succ_le_mono in Hkn.
-...
-specialize (IHn (S m) k) as H1.
-assert (H : 1 ≤ S m) by flia.
-specialize (H1 H Hkn); clear H.
-destruct H1 as (c, Hc).
-rewrite P_form.
-...
-rewrite Nat.sub_succ, Nat.sub_0_r.
-replace (S m + k - 1) with (m + k) by flia.
-destruct m. {
-  cbn - [ "/" ].
+destruct (Nat.eq_dec m 1) as [Hm1| Hm1]. {
+  subst m; unfold P.
+  rewrite Nat.add_comm, Nat.add_sub, Nat.sub_diag.
   rewrite Nat.div_1_r.
   apply Nat.divide_refl.
 }
