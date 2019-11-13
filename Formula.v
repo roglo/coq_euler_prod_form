@@ -2600,47 +2600,6 @@ now apply Nat.add_cancel_l in H1.
 Qed.
 *)
 
-Theorem prime_divides_fact_ge' : ∀ p m r,
-  is_prime p = true
-  → r ≠ 0
-  → Nat.divide (p ^ r) (fact m)
-  → p ^ r ≤ m.
-Proof.
-(* wrong:
-    Nat.divide (3 ^ 2) (fact 7)
-    3 ^ 2 ≤ 7 is false
- *)
-Abort. (*
-...
-intros * Hp Hrz Hpm.
-induction m; intros. {
-  destruct Hpm as (c, Hc).
-  symmetry in Hc.
-  apply Nat.eq_mul_1 in Hc.
-  destruct Hc as (Hc, Hnr).
-  destruct r; [ easy | ].
-  cbn in Hnr.
-  apply Nat.eq_mul_1 in Hnr.
-  now rewrite (proj1 Hnr) in Hp.
-}
-rewrite Nat_fact_succ in Hpm.
-specialize (Nat.gauss _ _ _ Hpm) as H1.
-apply Nat.nlt_ge; intros Hnsm.
-assert (H : Nat.gcd (p ^ r) (S m) = 1). {
-Check prime_relatively_prime.
-(* oui, non, c'est pas bon ; n < p ^ r mais n = p ^ (r - 1), par exemple *)
-...
-  apply prime_relatively_prime; [ | ].
-  apply prime_relatively_prime; [ easy | ].
-  split; [ flia | easy ].
-}
-specialize (H1 H); clear H.
-apply Nat.nle_gt in Hnsm; apply Hnsm.
-transitivity m; [ | flia ].
-apply IHm, H1.
-Qed.
-*)
-
 Theorem prime_divides_prod_consec : ∀ k n p r,
   is_prime p = true
   → Nat.divide (p ^ r) (fact k)
@@ -2648,6 +2607,9 @@ Theorem prime_divides_prod_consec : ∀ k n p r,
 Proof.
 intros * Hpp Hpk.
 apply divide_prod_consec.
+...
+3^2 divides 7!
+but 3^2 is not ≤ 7
 ...
 destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now rewrite Hpz in Hpp | ].
 split. {
