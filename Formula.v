@@ -2558,6 +2558,12 @@ apply (Nat.divide_trans _ (n + i)); [ easy | ].
 apply Nat.divide_factor_r.
 Qed.
 
+Theorem a_voir : ∀ k n d,
+  Nat.divide d (fact k) → Nat.divide d (prod_consec k n).
+Proof.
+intros.
+...
+
 Theorem divide_fact_div_prod_of_consec_num : ∀ n k,
   Nat.divide (fact k) (fact (n + k) / fact n).
 Proof.
