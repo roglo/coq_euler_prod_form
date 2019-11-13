@@ -2580,9 +2580,10 @@ Definition all_incr_such_that_primes_divides n p k :=
 
 Compute (number_of_times_divides_fact 15 146).
 Compute
-  (all_incr_such_that_primes_divides 0 5 146 ++
-   all_incr_such_that_primes_divides 0 25 146 ++
-   all_incr_such_that_primes_divides 0 125 146).
+(let n := 1 in length
+  (all_incr_such_that_primes_divides n 5 146 ++ [999] ++
+   all_incr_such_that_primes_divides n 25 146 ++ [999] ++
+   all_incr_such_that_primes_divides n 125 146)).
 Compute (length (all_incr_such_that_primes_divides 1 5 146)).
 Compute (length (all_incr_such_that_primes_divides 1 25 146)).
 Compute (length (all_incr_such_that_primes_divides 1 125 146)).
