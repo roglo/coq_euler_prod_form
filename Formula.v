@@ -2474,8 +2474,7 @@ induction n; [ easy | cbn ].
 now rewrite IHn, binomial_succ_diag_r, Nat.add_0_r.
 Qed.
 
-(* https://math.stackexchange.com/questions/12065/the-product-of-n-consecutive-integers-is-divisible-by-n-factorial/12073#12073 *)
-(* by Ralph D. Jeffords *)
+(* Code by Ralph D. Jeffords at math.stackexchange.com *)
 
 (* product of k consecutive numbers from n to n+k-1 *)
 (* prod_consec (m,k) = m...(m+k-1) *)
@@ -2588,7 +2587,7 @@ rewrite <- (proj2 (Nat.div_exact _ _ (fact_neq_0 _))). 2: {
 apply Nat.divide_refl.
 Qed.
 
-Theorem binomial_by_factorials : ∀ n k,
+Theorem binomial_fact : ∀ n k,
   k ≤ n
   → binomial n k = fact n / (fact k * fact (n - k)).
 Proof.
@@ -2673,16 +2672,6 @@ f_equal.
 flia Hkn.
 Qed.
 
-Theorem binomial_prime : ∀ p k,
-  is_prime p = true
-  → 1 ≤ k ≤ p - 1
-  → Nat.divide p (binomial p k).
-Proof.
-intros * Hp Hkp.
-...
-
-(* *)
-
 Theorem newton_binomial : ∀ n a b,
   (a + b) ^ n = Σ (k = 0, n), binomial n k * a ^ (n - k) * b ^ k.
 Proof.
@@ -2717,6 +2706,26 @@ symmetry.
 rewrite summation_split_first; [ | flia ].
 now rewrite binomial_0_r, Nat.mul_1_l, Nat.sub_0_r, Nat.pow_0_r, Nat.mul_1_r.
 Qed.
+
+Theorem binomial_prime : ∀ p k,
+  is_prime p = true
+  → 1 ≤ k ≤ p - 1
+  → Nat.divide p (binomial p k).
+Proof.
+intros * Hp Hkp.
+rewrite binomial_fact; [ | flia Hkp ].
+assert (Hffz : fact k * fact (p - k) ≠ 0). {
+  apply Nat.neq_mul_0; split; apply fact_neq_0.
+}
+apply (Nat.gauss _ (fact k * fact (p - k))). {
+  rewrite <- (proj2 (Nat.div_exact _ _ Hffz)). 2: {
+    apply Nat.mod_divide; [ easy | ].
+    apply fact_fact_divides_fact; flia Hkp.
+  }
+  apply Nat_divide_small_fact; flia Hkp.
+}
+Search (Nat.gcd _ _ = 1).
+...
 
 Theorem sum_power_prime_mod : ∀ p, is_prime p = true →
   ∀ a b, (a + b) ^ p mod p = (a ^ p + b ^ p) mod p.
