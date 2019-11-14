@@ -2570,6 +2570,15 @@ rewrite Nat.sub_add in H1; [ | easy ].
 apply H1; [ flia Hkn | flia Hkz ].
 Qed.
 
+(*
+Theorem binomial_succ_succ_2 : ∀ k n,
+  k ≤ n
+  → binomial (S n) (S k) = S n * binomial n k / S k.
+Proof.
+intros * Hkn.
+...
+*)
+
 Theorem binomial_by_factorials : ∀ n k,
   k ≤ n
   → binomial n k = fact n / (fact k * fact (n - k)).
@@ -2603,7 +2612,7 @@ rewrite Nat.divide_div_mul_exact; cycle 1. {
   apply Nat.mod_divide; [ apply fact_neq_0 | ].
   apply Nat_divide_fact_fact.
 }
-rewrite <- IHk; [ | easy ].
+...
 clear - Hkn.
 (* lemma to do *)
 ...
