@@ -92,12 +92,20 @@ rewrite Nat_fact_succ.
 now exists (S n).
 Qed.
 
-Theorem Nat_divide_fact_r : ∀ n, n ≠ 0 → Nat.divide n (fact n).
+Theorem Nat_divide_small_fact : ∀ n k, 0 < k ≤ n → Nat.divide k (fact n).
 Proof.
-intros * Hnz.
-replace n with (S (n - 1)) by flia Hnz.
+intros * Hkn.
+revert k Hkn.
+induction n; intros; [ flia Hkn | ].
 rewrite Nat_fact_succ.
-apply Nat.divide_factor_l.
+destruct (Nat.eq_dec k (S n)) as [Hksn| Hksn]. {
+  rewrite Hksn.
+  apply Nat.divide_factor_l.
+}
+apply (Nat.divide_trans _ (fact n)). {
+  apply IHn; flia Hkn Hksn.
+}
+apply Nat.divide_factor_r.
 Qed.
 
 Theorem Nat_divide_mul_fact : ∀ n a b,

@@ -2618,38 +2618,19 @@ rewrite Nat_add_div_same. 2: {
     flia Hkn.
   }
   rewrite <- Nat.divide_div_mul_exact; [ | flia Hkn | ]. 2: {
-    apply Nat_divide_fact_r; flia Hkn.
+    apply Nat_divide_small_fact; flia Hkn.
   }
   apply (Nat.mul_divide_cancel_l _ _ (n - k)); [ flia Hkn | ].
   rewrite <- Nat.divide_div_mul_exact; [ | flia Hkn | ]. 2: {
     apply (Nat.divide_trans _ (fact (n - k))). {
-      apply Nat_divide_fact_r; flia Hkn.
+      apply Nat_divide_small_fact; flia Hkn.
     }
-...
-  replace (n - k) with (fact (n - k) / fact (n - S k)). 2: {
-    replace (n - k) with (S (n - S k)) by flia Hkn Hken.
-    rewrite Nat_fact_succ.
-    rewrite Nat.div_mul; [ easy | apply fact_neq_0 ].
+    apply Nat.divide_factor_r.
   }
-...
-Theorem Nat_div_over_div : ∀ a b c,
-  b ≠ 0
-  → c ≠ 0
-  → c ≤ b
-  → Nat.divide b (a * c)
-  → a / (b / c) = a * c / b.
-Proof.
-intros * Hbz Hcz Hcb Hbac.
-assert (Hbc : b / c ≠ 0). {
-  intros H.
-  apply Nat.div_small_iff in H; [ | easy ].
-  now apply Nat.nle_gt in H.
-}
-apply (Nat.mul_cancel_r _ _ (b / c)); [ easy | ].
-rewrite Nat.mul_comm.
-rewrite <- (proj2 (Nat.div_exact _ _ Hbc)). 2: {
-  destruct Hbac as (d, Hd).
-(* c'est vraiment trop chiant à prouver, ça *)
+  rewrite Nat.mul_comm, Nat.div_mul; [ | flia Hkn ].
+  rewrite <- Nat.divide_div_mul_exact; [ | flia Hkn | ]. 2: {
+    apply Nat_divide_small_fact; flia Hkn.
+  }
 ...
 intros * Hbz Hbac.
 apply (Nat.mul_cancel_r _ _ b); [ easy | ].
