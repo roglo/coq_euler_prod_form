@@ -2724,7 +2724,42 @@ apply (Nat.gauss _ (fact k * fact (p - k))). {
   }
   apply Nat_divide_small_fact; flia Hkp.
 }
+assert (Hjp : p - k ≤ p - 1) by flia Hkp.
+remember (p - k) as j; move j before p.
+clear Hffz Heqj; destruct Hkp as (_, Hkp).
+move Hjp before Hkp; rewrite Nat.mul_comm.
+(* lemma, perhaps? *)
+revert j Hjp.
+induction k; intros. {
+  rewrite Nat.mul_1_r.
+  clear Hkp.
+  induction j; [ apply Nat.gcd_1_r | ].
+  rewrite Nat_fact_succ.
 Search (Nat.gcd _ _ = 1).
+...
+Theorem Nat_gcd_prime_prod : ∀ p a b,
+  is_prime p = true
+  → Nat.gcd p a = 1
+  → Nat.gcd p b = 1
+  → Nat.gcd p (a * b) = 1.
+Proof.
+intros * Hpp Hpa Hpb.
+...
+apply Nat.bezout_1_gcd.
+destruct (Nat.gcd_bezout p a) as [H1 | H1]; rewrite Hpa in H1.
+-idtac.
+ unfold Nat.Bezout in H1.
+ destruct H1 as (a' & b' & Hab').
+ unfold Nat.Bezout.
+ exists a'.
+(* complicated *)
+...
+apply Nat_gcd_prime_prod; [ easy | | ].
+...
+clear Hffz.
+destruct k; [ flia Hkp | ].
+destruct Hkp as (_, Hkp).
+rewrite Nat.fact)
 ...
 
 Theorem sum_power_prime_mod : ∀ p, is_prime p = true →
