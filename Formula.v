@@ -2584,56 +2584,40 @@ Theorem binomial_by_factorials : ∀ n k,
   → binomial n k = fact n / (fact k * fact (n - k)).
 Proof.
 intros * Hkn.
-revert n Hkn.
-induction k; intros. {
-  cbn; rewrite binomial_0_r, Nat.sub_0_r, Nat.add_0_r.
-  rewrite Nat.div_same; [ easy | apply fact_neq_0 ].
-}
-destruct n; [ flia Hkn | ].
-apply Nat.succ_le_mono in Hkn.
-rewrite Nat.sub_succ.
-do 2 rewrite Nat_fact_succ.
-rewrite <- Nat.mul_assoc.
-rewrite (Nat.mul_comm (S k)).
-rewrite <- Nat.div_div; [ | | easy ]. 2: {
-  apply Nat.neq_mul_0.
-  split; apply fact_neq_0.
-}
-rewrite Nat.divide_div_mul_exact; cycle 1. {
-  apply Nat.neq_mul_0.
-  split; apply fact_neq_0.
-} {
-  specialize (fact_divides_fact_over_fact _ _ Hkn) as H1.
-  apply (Nat.mul_divide_cancel_r _ _ (fact (n - k))) in H1. 2: {
-    apply fact_neq_0.
-  }
-  rewrite (Nat.mul_comm (_ / _)) in H1.
-  rewrite <- (proj2 (Nat.div_exact _ _ (fact_neq_0 _))) in H1; [ easy | ].
-  apply Nat.mod_divide; [ apply fact_neq_0 | ].
-  apply Nat_divide_fact_fact.
-}
-...
-clear - Hkn.
-(* lemma to do *)
-...
 revert k Hkn.
 induction n; intros; [ now apply Nat.le_0_r in Hkn; subst k | ].
 destruct k. {
-  cbn - [ "/" ].
-  rewrite Nat.mul_1_r, Nat.div_1_r.
-  rewrite binomial_0_r; cbn; f_equal; f_equal.
-  (* lemma to do *)
-  clear.
-  induction n; [ easy | cbn ].
-  now rewrite binomial_0_r, IHn.
+  cbn; rewrite Nat.add_0_r.
+  symmetry; apply Nat.div_same.
+  intros H; apply Nat.eq_add_0 in H.
+  destruct H as (H, _).
+  now apply fact_neq_0 in H.
 }
 apply Nat.succ_le_mono in Hkn.
-specialize (IHn _ Hkn) as H1.
-rewrite binomial_succ_succ.
-rewrite H1 at 2.
-(*
-rewrite binomial_succ_succ.
-*)
+rewrite Nat.sub_succ.
+rewrite binomial_succ_r.
+rewrite IHn; [ | easy ].
+destruct (Nat.eq_dec k n) as [Hken| Hken]. {
+  rewrite Hken.
+  rewrite Nat.sub_diag.
+  rewrite Nat.mul_1_r, Nat.div_same; [ | apply fact_neq_0 ].
+  rewrite Nat.mul_1_r, Nat.div_same; [ | apply fact_neq_0 ].
+  now rewrite binomial_succ_diag_r, Nat.add_0_r.
+}
+rewrite IHn; [ | flia Hkn Hken ].
+...
+replace (n - k) with (S (n - S k)) by flia Hkn Hken.
+do 3 rewrite Nat_fact_succ.
+replace (S (n - S k)) with (n - k) by flia Hkn Hken.
+rewrite (Nat.mul_comm (fact k)).
+rewrite Nat.mul_shuffle0.
+do 2 rewrite <- Nat.mul_assoc.
+rewrite <- Nat.div_div; [ | flia Hkn Hken | ]. 2: {
+  apply Nat.neq_mul_0; split; apply fact_neq_0.
+}
+rewrite <- (Nat.div_div _ (S k)); [ | easy | ]. 2: {
+  apply Nat.neq_mul_0; split; apply fact_neq_0.
+}
 ...
 
 Theorem binomial_prime : ∀ p k,
