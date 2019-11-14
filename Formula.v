@@ -2616,6 +2616,7 @@ destruct (Nat.eq_dec k n) as [Hken| Hken]. {
 assert (H : k < n) by flia Hkn Hken.
 clear Hkn Hken; rename H into Hkn.
 rewrite IHn; [ | flia Hkn ].
+(* lemma to do, perhaps? *)
 replace (n - k) with (S (n - S k)) by flia Hkn.
 do 3 rewrite Nat_fact_succ.
 replace (S (n - S k)) with (n - k) by flia Hkn.
@@ -2652,14 +2653,25 @@ rewrite Nat_add_div_same. 2: {
   rewrite (Nat.mul_comm (n - k)), Nat.div_mul; [ | flia Hkn ].
   now apply fact_fact_divides_fact, Nat.lt_le_incl.
 }
-...
-intros * Hbz Hbac.
-apply (Nat.mul_cancel_r _ _ b); [ easy | ].
-rewrite (Nat.mul_comm (a * c / b)).
-rewrite <- Nat.divide_div_mul_exact; [ | easy | easy ].
-rewrite (Nat.mul_comm b), Nat.div_mul; [ | easy ].
-rewrite Nat.mul_comm.
-...
+rewrite Nat.mul_shuffle1.
+rewrite <- (Nat.div_div (S n * _)); cycle 1. {
+  apply Nat.neq_mul_0; split; [ easy | flia Hkn ].
+} {
+  apply Nat.neq_mul_0; split; apply fact_neq_0.
+}
+f_equal.
+(* lemma to do, perhaps? *)
+rewrite <- (Nat.div_mul_cancel_l _ _ (S k)); [ | flia Hkn | easy ].
+rewrite <- (Nat.div_mul_cancel_r (fact n) _ (n - k)); [ | easy | flia Hkn ].
+rewrite Nat_add_div_same. 2: {
+  apply Nat.mul_divide_cancel_l; [ easy | ].
+  apply Nat_divide_small_fact; flia Hkn.
+}
+f_equal.
+rewrite (Nat.mul_comm (fact n)), <- Nat.mul_add_distr_r.
+f_equal.
+flia Hkn.
+Qed.
 
 Theorem binomial_prime : ∀ p k,
   is_prime p = true
@@ -2667,7 +2679,6 @@ Theorem binomial_prime : ∀ p k,
   → Nat.divide p (binomial p k).
 Proof.
 intros * Hp Hkp.
-Check Nat.gauss.
 ...
 
 (* *)
