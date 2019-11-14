@@ -22,6 +22,18 @@ Definition List_combine_all {A} (l1 l2 : list A) (d : A) :=
   in
   List.combine l'1 l'2.
 
+Theorem Nat_add_div_same : ∀ a b c,
+  Nat.divide c a
+  → a / c + b / c = (a + b) / c.
+Proof.
+intros * Hca.
+destruct (Nat.eq_dec c 0) as [Hcz| Hcz]; [ now subst c | ].
+destruct Hca as (d, Hd).
+rewrite Hd, Nat.div_mul; [ | easy ].
+rewrite Nat.add_comm, (Nat.add_comm _ b).
+now rewrite Nat.div_add.
+Qed.
+
 Theorem Nat_sub_succ_1 : ∀ n, S n - 1 = n.
 Proof. now intros; rewrite Nat.sub_succ, Nat.sub_0_r. Qed.
 
@@ -78,6 +90,14 @@ rewrite Nat.sub_succ.
 apply (Nat.divide_trans _ (fact n)); [ apply IHd | ].
 rewrite Nat_fact_succ.
 now exists (S n).
+Qed.
+
+Theorem Nat_divide_fact_r : ∀ n, n ≠ 0 → Nat.divide n (fact n).
+Proof.
+intros * Hnz.
+replace n with (S (n - 1)) by flia Hnz.
+rewrite Nat_fact_succ.
+apply Nat.divide_factor_l.
 Qed.
 
 Theorem Nat_divide_mul_fact : ∀ n a b,

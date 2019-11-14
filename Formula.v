@@ -2570,15 +2570,6 @@ rewrite Nat.sub_add in H1; [ | easy ].
 apply H1; [ flia Hkn | flia Hkz ].
 Qed.
 
-(*
-Theorem binomial_succ_succ_2 : ∀ k n,
-  k ≤ n
-  → binomial (S n) (S k) = S n * binomial n k / S k.
-Proof.
-intros * Hkn.
-...
-*)
-
 Theorem binomial_by_factorials : ∀ n k,
   k ≤ n
   → binomial n k = fact n / (fact k * fact (n - k)).
@@ -2604,20 +2595,68 @@ destruct (Nat.eq_dec k n) as [Hken| Hken]. {
   rewrite Nat.mul_1_r, Nat.div_same; [ | apply fact_neq_0 ].
   now rewrite binomial_succ_diag_r, Nat.add_0_r.
 }
-rewrite IHn; [ | flia Hkn Hken ].
-...
-replace (n - k) with (S (n - S k)) by flia Hkn Hken.
+assert (H : k < n) by flia Hkn Hken.
+clear Hkn Hken; rename H into Hkn.
+rewrite IHn; [ | flia Hkn ].
+replace (n - k) with (S (n - S k)) by flia Hkn.
 do 3 rewrite Nat_fact_succ.
-replace (S (n - S k)) with (n - k) by flia Hkn Hken.
+replace (S (n - S k)) with (n - k) by flia Hkn.
 rewrite (Nat.mul_comm (fact k)).
 rewrite Nat.mul_shuffle0.
 do 2 rewrite <- Nat.mul_assoc.
-rewrite <- Nat.div_div; [ | flia Hkn Hken | ]. 2: {
+rewrite <- Nat.div_div; [ | flia Hkn | ]. 2: {
   apply Nat.neq_mul_0; split; apply fact_neq_0.
 }
 rewrite <- (Nat.div_div _ (S k)); [ | easy | ]. 2: {
   apply Nat.neq_mul_0; split; apply fact_neq_0.
 }
+rewrite Nat_add_div_same. 2: {
+  replace (fact (n - S k)) with (fact (n - k) / (n - k)). 2: {
+    replace (n - k) with (S (n - S k)) by flia Hkn.
+    rewrite Nat_fact_succ.
+    rewrite Nat.mul_comm, Nat.div_mul; [ easy | ].
+    flia Hkn.
+  }
+  rewrite <- Nat.divide_div_mul_exact; [ | flia Hkn | ]. 2: {
+    apply Nat_divide_fact_r; flia Hkn.
+  }
+  apply (Nat.mul_divide_cancel_l _ _ (n - k)); [ flia Hkn | ].
+  rewrite <- Nat.divide_div_mul_exact; [ | flia Hkn | ]. 2: {
+    apply (Nat.divide_trans _ (fact (n - k))). {
+      apply Nat_divide_fact_r; flia Hkn.
+    }
+...
+  replace (n - k) with (fact (n - k) / fact (n - S k)). 2: {
+    replace (n - k) with (S (n - S k)) by flia Hkn Hken.
+    rewrite Nat_fact_succ.
+    rewrite Nat.div_mul; [ easy | apply fact_neq_0 ].
+  }
+...
+Theorem Nat_div_over_div : ∀ a b c,
+  b ≠ 0
+  → c ≠ 0
+  → c ≤ b
+  → Nat.divide b (a * c)
+  → a / (b / c) = a * c / b.
+Proof.
+intros * Hbz Hcz Hcb Hbac.
+assert (Hbc : b / c ≠ 0). {
+  intros H.
+  apply Nat.div_small_iff in H; [ | easy ].
+  now apply Nat.nle_gt in H.
+}
+apply (Nat.mul_cancel_r _ _ (b / c)); [ easy | ].
+rewrite Nat.mul_comm.
+rewrite <- (proj2 (Nat.div_exact _ _ Hbc)). 2: {
+  destruct Hbac as (d, Hd).
+(* c'est vraiment trop chiant à prouver, ça *)
+...
+intros * Hbz Hbac.
+apply (Nat.mul_cancel_r _ _ b); [ easy | ].
+rewrite (Nat.mul_comm (a * c / b)).
+rewrite <- Nat.divide_div_mul_exact; [ | easy | easy ].
+rewrite (Nat.mul_comm b), Nat.div_mul; [ | easy ].
+rewrite Nat.mul_comm.
 ...
 
 Theorem binomial_prime : ∀ p k,
