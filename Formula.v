@@ -2603,6 +2603,25 @@ rewrite Nat.divide_div_mul_exact; cycle 1. {
   apply Nat.mod_divide; [ apply fact_neq_0 | ].
   apply Nat_divide_fact_fact.
 }
+rewrite <- IHk; [ | easy ].
+clear - Hkn.
+(* lemma to do *)
+...
+revert k Hkn.
+induction n; intros; [ now apply Nat.le_0_r in Hkn; subst k | ].
+destruct k. {
+  cbn - [ "/" ].
+  rewrite Nat.mul_1_r, Nat.div_1_r.
+  rewrite binomial_0_r; cbn; f_equal; f_equal.
+  (* lemma to do *)
+  clear.
+  induction n; [ easy | cbn ].
+  now rewrite binomial_0_r, IHn.
+}
+apply Nat.succ_le_mono in Hkn.
+specialize (IHn _ Hkn) as H1.
+rewrite binomial_succ_succ.
+rewrite H1 at 2.
 (*
 rewrite binomial_succ_succ.
 *)
