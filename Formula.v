@@ -2795,6 +2795,14 @@ rewrite IHa.
 rewrite Nat.add_mod_idemp_l; [ easy | now intros H; rewrite H in Hp ].
 Qed.
 
+Theorem glop : ∀ p,
+  is_prime p = true
+  → ∀ a, 1 < a → a mod p ≠ 0
+  → ∀ i j, i < j < p → a ^ i mod p ≠ a ^ j mod p.
+Proof.
+intros * Hp * Hap * Hij.
+...
+
 Theorem fermat_little : ∀ p,
   is_prime p = true → ∀ a, a mod p ≠ 0 → a ^ (p - 1) mod p = 1.
 Proof.
@@ -2803,6 +2811,9 @@ assert (Hpz : p ≠ 0) by now intros H; rewrite H in Hp.
 specialize (fermat_little_1 p Hp a) as H1.
 replace p with (S (p - 1)) in H1 at 1 by flia Hpz.
 rewrite Nat.pow_succ_r in H1; [ | flia Hpz ].
+...
+specialize (glop p Hp a Hap) as H2.
+...
 rewrite <- Nat.mul_mod_idemp_r in H1; [ | easy ].
 remember (a ^ (p - 1) mod p) as n eqn:Hn; symmetry in Hn.
 destruct n. {
@@ -2815,6 +2826,8 @@ replace (S (S n)) with (n + 2) in H1, Hn by flia.
 rewrite <- Nat.mul_mod_idemp_l in H1; [ | easy ].
 remember (a mod p) as r eqn:Hr; symmetry in Hr.
 destruct r; [ easy | clear Hap ].
+specialize (Nat.div_mod (S r * (n + 2)) p Hpz) as H2.
+rewrite H1 in H2.
 ...
 
 Theorem Wilson : ∀ n, is_prime n = true ↔ fact (n - 1) mod n = n - 1.
