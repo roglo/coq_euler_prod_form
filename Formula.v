@@ -2779,10 +2779,8 @@ rewrite Nat.mul_comm.
 apply Nat.mod_mul; flia H2p.
 Qed.
 
-...
-
-Theorem fermat_little : ∀ p, is_prime p = true →
-  ∀ a, a ^ p mod p = a mod p.
+Theorem fermat_little : ∀ p,
+  is_prime p = true → ∀ a, a ^ p mod p = a mod p.
 Proof.
 intros * Hp *.
 induction a. {
@@ -2790,24 +2788,13 @@ induction a. {
   now intros H; rewrite H in Hp.
 }
 rewrite <- Nat.add_1_r.
-...
 rewrite sum_power_prime_mod; [ | easy ].
 rewrite Nat.pow_1_l.
 rewrite <- Nat.add_mod_idemp_l; [ | now intros H; rewrite H in Hp ].
 rewrite IHa.
 rewrite Nat.add_mod_idemp_l; [ easy | now intros H; rewrite H in Hp ].
-...
+Qed.
 
-Theorem glop : ∀ p, is_prime p = true →
-  ∀ a, (a + 1) ^ p mod p = (a ^ p + 1) mod p.
-Proof.
-intros * Hp *.
-induction a. {
-  cbn.
-  rewrite Nat.pow_1_l.
-  rewrite Nat.pow_0_l; [ easy | ].
-  now intros H; rewrite H in Hp.
-}
 ...
 
 Theorem Wilson : ∀ n, is_prime n = true ↔ fact (n - 1) mod n = n - 1.
