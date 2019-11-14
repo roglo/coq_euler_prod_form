@@ -2735,140 +2735,18 @@ induction k; intros. {
   clear Hkp.
   induction j; [ apply Nat.gcd_1_r | ].
   rewrite Nat_fact_succ.
-...
-apply Nat_gcd_1_mul_r.
-...
-
-  destruct Bab as [Bab| Bab]; [ easy | ].
-  destruct Bab as (u & v & Huv).
-
-  apply Nat_bezout_comm.
-...
-  apply Nat.bezout_1_gcd.
-  apply Nat_bezout_comm; [ flia Hjp | ].
-  apply Nat_bezout_mul. {
-    replace 1 with (Nat.gcd (S j) p). 2: {
-      rewrite Nat.gcd_comm.
-      apply prime_relatively_prime; [ easy | flia Hjp ].
-    }
-    apply Nat.gcd_bezout_pos; flia.
+  apply Nat_gcd_1_mul_r. {
+    apply prime_relatively_prime; [ easy | flia Hjp ].
   }
-  apply Nat_bezout_comm; [ apply fact_neq_0 | ].
-  replace 1 with (Nat.gcd p (fact j)); [ | apply IHj; flia Hjp ].
-  apply Nat.gcd_bezout_pos; flia Hjp.
+  apply IHj; flia Hjp.
 }
 rewrite Nat_fact_succ, Nat.mul_comm, <- Nat.mul_assoc.
-Search (Nat.gcd _ (_ * _)).
-
-...
-intros * (u & v & Huv).
-remember (max (u / b) (v / a)) as k eqn:Hk.
-exists (k * a - v), (k * b - u).
-do 2 rewrite Nat.mul_sub_distr_r.
-rewrite Huv.
-rewrite (Nat.add_comm _ (v * b)).
-rewrite Nat.sub_add_distr.
-rewrite Nat.add_sub_assoc. 2: {
-  apply (Nat.add_le_mono_r _ _ (v * b)).
-  rewrite <- Huv.
-  rewrite Nat.sub_add. 2: {
-    rewrite Hk.
-...
-  rewrite Nat.add_comm, <- Huv.
-  apply Nat.mul_le_mono_r.
-  rewrite Hk.
-  rewrite <- Nat.mul_max_distr_r.
-...
-
-Theorem glop : ∀ a b c,
-  Nat.gcd a b = 1
-  → Nat.gcd a c = 1
-  → Nat.gcd a (b * c) = 1.
-Proof.
-intros * Hab Hac.
-specialize (Nat.gcd_bezout b a) as Bab.
-specialize (Nat.gcd_bezout c a) as Bac.
-rewrite Nat.gcd_comm, Hab in Bab.
-rewrite Nat.gcd_comm, Hac in Bac.
-rewrite Nat.gcd_comm.
-apply Nat.bezout_1_gcd.
-apply Nat_bezout_mul. {
-  destruct Bab as [Bab| Bab]; [ easy | ].
-  destruct Bab as (u & v & Huv).
-  unfold Nat.Bezout.
-...
-
-  apply Nat_bezout_mul; [ easy | ].
-  destruct Bac as [Bac| Bac]; [ easy | ].
-  destruct Bac as (
-...
-
-    now apply Nat_bezout_mul.
-  } {
-    apply Nat.bezout_1_gcd.
-
-...
-    rewrite Hab in Bab.
-    apply Nat.bezout_1_gcd.
-
-
-
-    destruct Bab as (ub & ua & Hu).
-    destruct Bac as (vc & va & Hv).
-    exists (ub * vc).
-    replace (ub * vc * (b * c)) with ((ub * b) * (vc * c)) by flia.
-    rewrite Hu, Hv.
-    exists (ua * va * a + ua + va).
-    ring.
-  }
-
-...
-    exists (ub * vc).
-
-
-
-
-
-    destruct Babc as [Babc| Babc]. {
-      destruct Babc as (wa & wbc & Hw).
-      move Hu at bottom.
-      move Hv at bottom.
-      move Hw at bottom.
-      apply (Nat.mul_cancel_r _ _ ua) in Hw.
-      rewrite Nat.mul_shuffle0, <- Nat.mul_assoc, Hu in Hw.
-...
-
-Theorem Nat_gcd_prime_mul_l_lt : ∀ p n m,
-  is_prime p = true
-  → n < p
-  → Nat.gcd p (n * m) = 1.
-...
-Search (Nat.gcd _ _ = 1).
-...
-Theorem Nat_gcd_prime_prod : ∀ p a b,
-  is_prime p = true
-  → Nat.gcd p a = 1
-  → Nat.gcd p b = 1
-  → Nat.gcd p (a * b) = 1.
-Proof.
-intros * Hpp Hpa Hpb.
-...
-apply Nat.bezout_1_gcd.
-destruct (Nat.gcd_bezout p a) as [H1 | H1]; rewrite Hpa in H1.
--idtac.
- unfold Nat.Bezout in H1.
- destruct H1 as (a' & b' & Hab').
- unfold Nat.Bezout.
- exists a'.
-(* complicated *)
-...
-apply Nat_gcd_prime_prod; [ easy | | ].
-...
-clear Hffz.
-destruct k; [ flia Hkp | ].
-destruct Hkp as (_, Hkp).
-rewrite Nat.fact)
-...
+apply Nat_gcd_1_mul_r. {
+  apply prime_relatively_prime; [ easy | flia Hkp ].
+}
+rewrite Nat.mul_comm.
+apply IHk; [ flia Hkp | easy ].
+Qed.
 
 Theorem sum_power_prime_mod : ∀ p, is_prime p = true →
   ∀ a b, (a + b) ^ p mod p = (a ^ p + b ^ p) mod p.
@@ -2894,8 +2772,13 @@ rewrite all_0_summation_0. {
   rewrite Nat.mod_0_l; [ easy | flia H2p ].
 }
 intros i Hi.
-...
 specialize (binomial_prime _ _ Hp Hi) as (c, Hc).
+rewrite Hc, (Nat.mul_comm c).
+do 2 rewrite <- Nat.mul_assoc.
+rewrite Nat.mul_comm.
+apply Nat.mod_mul; flia H2p.
+Qed.
+
 ...
 
 Theorem fermat_little : ∀ p, is_prime p = true →
