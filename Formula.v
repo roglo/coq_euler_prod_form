@@ -2571,9 +2571,22 @@ apply H1; [ flia Hkn | flia Hkz ].
 Qed.
 
 Theorem fact_fact_divides_fact : ∀ k n,
-  Nat.divide (fact k * fact (n - k)) (fact n).
+  k ≤ n
+  → Nat.divide (fact k * fact (n - k)) (fact n).
 Proof.
-...
+intros * Hkn.
+specialize (fact_divides_fact_over_fact k n Hkn) as H1.
+apply (Nat.mul_divide_cancel_r _ _ (fact (n - k))) in H1. 2: {
+  apply fact_neq_0.
+}
+eapply Nat.divide_trans; [ apply H1 | ].
+rewrite Nat.mul_comm.
+rewrite <- (proj2 (Nat.div_exact _ _ (fact_neq_0 _))). 2: {
+  apply Nat.mod_divide; [ apply fact_neq_0 | ].
+  apply Nat_divide_fact_fact.
+}
+apply Nat.divide_refl.
+Qed.
 
 Theorem binomial_by_factorials : ∀ n k,
   k ≤ n
@@ -2637,7 +2650,8 @@ rewrite Nat_add_div_same. 2: {
     apply Nat_divide_small_fact; flia Hkn.
   }
   rewrite (Nat.mul_comm (n - k)), Nat.div_mul; [ | flia Hkn ].
-
+  now apply fact_fact_divides_fact, Nat.lt_le_incl.
+}
 ...
 intros * Hbz Hbac.
 apply (Nat.mul_cancel_r _ _ b); [ easy | ].
