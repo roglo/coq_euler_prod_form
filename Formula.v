@@ -2811,7 +2811,10 @@ destruct n. {
   now symmetry in H1.
 }
 destruct n; [ easy | exfalso ].
-specialize (Nat.div_mod a p) as H2.
+replace (S (S n)) with (n + 2) in H1, Hn by flia.
+rewrite <- Nat.mul_mod_idemp_l in H1; [ | easy ].
+remember (a mod p) as r eqn:Hr; symmetry in Hr.
+destruct r; [ easy | clear Hap ].
 ...
 
 Theorem Wilson : ∀ n, is_prime n = true ↔ fact (n - 1) mod n = n - 1.
