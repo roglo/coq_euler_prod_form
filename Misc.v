@@ -147,6 +147,94 @@ replace (fact b * (fact n / fact b)) with (fact n). 2: {
 easy.
 Qed.
 
+Theorem Nat_bezout_comm : ∀ a b g,
+  b ≠ 0
+  → Nat.Bezout a b g → Nat.Bezout b a g.
+Proof.
+intros * Hbz (u & v & Huv).
+destruct (Nat.eq_dec a 0) as [Haz| Haz]. {
+  subst a.
+  rewrite Nat.mul_0_r in Huv; symmetry in Huv.
+  apply Nat.eq_add_0 in Huv.
+  rewrite (proj1 Huv).
+  now exists 0, 0.
+}
+remember (max (u / b + 1) (v / a + 1)) as k eqn:Hk.
+exists (k * a - v), (k * b - u).
+do 2 rewrite Nat.mul_sub_distr_r.
+rewrite Huv.
+rewrite (Nat.add_comm _ (v * b)).
+rewrite Nat.sub_add_distr.
+rewrite Nat.add_sub_assoc. 2: {
+  apply (Nat.add_le_mono_r _ _ (v * b)).
+  rewrite <- Huv.
+  rewrite Nat.sub_add. 2: {
+    rewrite Nat.mul_shuffle0.
+    apply Nat.mul_le_mono_r.
+    rewrite Hk.
+    rewrite <- Nat.mul_max_distr_r.
+    etransitivity; [ | apply Nat.le_max_r ].
+    specialize (Nat.div_mod v a) as H1.
+    specialize (H1 Haz).
+    rewrite Nat.mul_add_distr_r, Nat.mul_1_l, Nat.mul_comm.
+    rewrite H1 at 1.
+    apply Nat.add_le_mono_l.
+    now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+  }
+  apply Nat.mul_le_mono_r.
+  rewrite Hk.
+  rewrite <- Nat.mul_max_distr_r.
+  etransitivity; [ | apply Nat.le_max_l ].
+  specialize (Nat.div_mod u b) as H1.
+  specialize (H1 Hbz).
+  rewrite Nat.mul_add_distr_r, Nat.mul_1_l, Nat.mul_comm.
+  rewrite H1 at 1.
+  apply Nat.add_le_mono_l.
+  now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+}
+rewrite Nat.add_comm, Nat.add_sub.
+now rewrite Nat.mul_shuffle0.
+Qed.
+
+Theorem Nat_bezout_mul : ∀ a b c,
+  Nat.Bezout a c 1
+  → Nat.Bezout b c 1
+  → Nat.Bezout (a * b) c 1.
+Proof.
+intros * (ua & uc & Hu) (vb & vc & Hv).
+exists (ua * vb).
+replace (ua * vb * (a * b)) with ((ua * a) * (vb * b)) by flia.
+rewrite Hu, Hv.
+exists (uc * vc * c + uc + vc).
+ring.
+Qed.
+
+Theorem Nat_gcd_1_mul_r : ∀ a b c,
+  Nat.gcd a b = 1
+  → Nat.gcd a c = 1
+  → Nat.gcd a (b * c) = 1.
+Proof.
+intros * Hab Hac.
+destruct (Nat.eq_dec a 0) as [Haz| Haz]. {
+  now subst a; cbn in Hab, Hac; subst b c.
+}
+destruct (Nat.eq_dec b 0) as [Hbz| Hbz]; [ now subst b | ].
+destruct (Nat.eq_dec c 0) as [Hcz| Hcz]. {
+  now subst c; rewrite Nat.mul_0_r.
+}
+apply Nat.bezout_1_gcd.
+apply Nat_bezout_comm; [ easy | ].
+apply Nat_bezout_mul. {
+  rewrite <- Hab, Nat.gcd_comm.
+  apply Nat.gcd_bezout_pos.
+  flia Hbz.
+} {
+  rewrite <- Hac, Nat.gcd_comm.
+  apply Nat.gcd_bezout_pos.
+  flia Hcz.
+}
+Qed.
+
 Theorem List_hd_nth_0 {A} : ∀ l (d : A), hd d l = nth 0 l d.
 Proof. intros; now destruct l. Qed.
 
