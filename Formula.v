@@ -2803,19 +2803,11 @@ Theorem fermat_little : ∀ p,
   is_prime p = true → ∀ a, 1 < a < p → a ^ (p - 1) mod p = 1.
 Proof.
 intros * Hp * Hap.
-remember (fold_left (λ c i, c * (a * i)) (seq 1 (p - 1)) 1) as x eqn:Hx.
+remember (fold_left Nat.mul (map (Nat.mul a) (seq 1 (p - 1))) 1) as x eqn:Hx.
 specialize (smaller_than_prime_all_different_multiples p Hp a Hap) as H1.
-assert (Hxx : x = fold_left Nat.mul (map (Nat.mul a) (seq 1 (p - 1))) 1). {
-  subst x.
-  remember (seq 1 (p - 1)) as l eqn:Hl.
-  clear.
-  induction l as [| b l]; [ easy | ].
-  cbn; rewrite Nat.add_0_r.
-  setoid_rewrite fold_left_mul_from_1.
-  now rewrite IHl.
-}
+assert (map (Nat.mul a) (seq 1 (p - 1)) 1 = a ^ (p - 1) * ...
 assert (Hx1 : x mod p = fact (p - 1) mod p). {
-  rewrite H; clear H.
+  subst x.
 ...
 assert (Hx2 : x mod p = (fact (p - 1) * a ^ (p - 1)) mod p). {
   subst x.
