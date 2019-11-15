@@ -2819,10 +2819,8 @@ assert (Permutation (map (λ i, (i * a) mod p) (seq 1 (p - 1))) (seq 1 (p - 1)))
     cbn - [ "mod" ].
     rewrite Nat.add_0_r.
     destruct (Nat.eq_dec a 2) as [Ha2| Ha2]. {
-      subst a.
-      specialize (H1 0 2) as H2.
-      assert (H : 0 < 2 < 4) by flia.
-      now specialize (H2 H).
+      subst a; exfalso.
+      apply (H1 0 2); [ flia | easy ].
     }
     replace a with 3 in * by flia Hap Ha2; cbn.
     apply Permutation_rev.
@@ -2843,6 +2841,24 @@ assert (Permutation (map (λ i, (i * a) mod p) (seq 1 (p - 1))) (seq 1 (p - 1)))
       apply perm_swap.
     }
     replace a with 4 by flia Hap Ha2 Ha3; cbn.
+    apply Permutation_rev.
+  }
+  destruct p. {
+    cbn - [ "mod" ].
+    rewrite Nat.add_0_r.
+    destruct (Nat.eq_dec a 2) as [Ha2| Ha2]. {
+      subst a; exfalso.
+      apply (H1 0 3); [ flia | easy ].
+    }
+    destruct (Nat.eq_dec a 3) as [Ha3| Ha3]. {
+      subst a; exfalso.
+      apply (H1 0 2); [ flia | easy ].
+    }
+    destruct (Nat.eq_dec a 4) as [Ha4| Ha4]. {
+      subst a; exfalso.
+      apply (H1 0 3); [ flia | easy ].
+    }
+    replace a with 5 by flia Hap Ha2 Ha3 Ha4; cbn.
     apply Permutation_rev.
   }
 ...
