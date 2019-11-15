@@ -2797,10 +2797,10 @@ Qed.
 
 Theorem glop : ∀ p,
   is_prime p = true
-  → ∀ a, 1 < a → a mod p ≠ 0
+  → ∀ a, 1 < a mod p
   → ∀ i j, i < j < p → a ^ i mod p ≠ a ^ j mod p.
 Proof.
-intros * Hp * Ha Hap * Hij.
+intros * Hp * Hap * Hij.
 assert (Hpz : p ≠ 0) by now intros H; rewrite H in Hp.
 replace j with (i + S (j - S i)) by flia Hij.
 rewrite Nat.pow_add_r.
@@ -2847,6 +2847,20 @@ assert (H : Nat.gcd n m = 1). {
     apply prime_relatively_prime; [ easy | ].
     split; [ | now apply Nat.mod_upper_bound ].
     apply Nat.neq_0_lt_0.
+    intros H; apply Nat.mod_divides in H; [ | easy ].
+    destruct H as (c, Hc).
+    destruct a; [ now rewrite Nat.mod_0_l in Hap | ].
+    rewrite Nat.sub_succ, Nat.sub_0_r in Hc.
+    rewrite Hc, Nat.mul_comm in Hap.
+    rewrite <- (Nat.add_1_l (_ * _)) in Hap.
+    rewrite Nat.mod_add in Hap; [ | easy ].
+    rewrite Nat.mod_small in Hap; [ flia Hap | ].
+    destruct m; [ easy | ].
+    destruct m; [ easy | flia ].
+  }
+}
+specialize (H4 H); clear H.
+destruct H4 as (c, Hc).
 ...
 
 Theorem fermat_little : ∀ p,
