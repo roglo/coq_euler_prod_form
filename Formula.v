@@ -2797,7 +2797,7 @@ Qed.
 
 Theorem glop : ∀ p,
   is_prime p = true
-  → ∀ a, 1 < a mod p
+  → ∀ a, 1 < a < p
   → ∀ i j, i < j < p → a ^ i mod p ≠ a ^ j mod p.
 Proof.
 intros * Hp * Hap * Hij.
@@ -2839,6 +2839,7 @@ assert (H : Nat.gcd n m = 1). {
     rewrite <- Nat.gcd_mod; [ | easy ].
     rewrite Nat.gcd_comm.
     apply prime_relatively_prime; [ easy | ].
+...
     split; [ flia Hap | ].
     now apply Nat.mod_upper_bound.
   } {
