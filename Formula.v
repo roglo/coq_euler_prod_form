@@ -2803,6 +2803,18 @@ Proof.
 intros * Hp * Hap * Hij.
 assert (Hpz : p ≠ 0) by now intros H; rewrite H in Hp.
 replace j with (i + S (j - S i)) by flia Hij.
+(**)
+rewrite Nat.pow_add_r.
+intros Haa; symmetry in Haa.
+rewrite <- (Nat.mul_1_r (a ^ i)) in Haa at 2.
+apply Nat_eq_mod_sub_0 in Haa. 2: {
+  apply Nat.mul_le_mono_l.
+  apply Nat.neq_0_lt_0, Nat.pow_nonzero; flia Hap.
+}
+rewrite <- Nat.mul_sub_distr_l in Haa.
+apply Nat.mod_divide in Haa; [ | flia Hap ].
+specialize (Nat.gauss _ _ _ Haa) as H1.
+...
 rewrite Nat.pow_add_r.
 remember (j - S i) as k eqn:Hk.
 replace j with (k + S i) in * by flia Hij Hk.

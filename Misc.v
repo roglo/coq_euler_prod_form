@@ -37,6 +37,20 @@ Qed.
 Theorem Nat_sub_succ_1 : ∀ n, S n - 1 = n.
 Proof. now intros; rewrite Nat.sub_succ, Nat.sub_0_r. Qed.
 
+Theorem Nat_eq_mod_sub_0 : ∀ a b c,
+  b ≤ a → a mod c = b mod c → (a - b) mod c = 0.
+Proof.
+intros * Hba Hab.
+destruct (Nat.eq_dec c 0) as [Hcz| Hcz]; [ now subst c | ].
+specialize (Nat.div_mod a c Hcz) as H1.
+specialize (Nat.div_mod b c Hcz) as H2.
+rewrite H1, H2, Hab.
+rewrite (Nat.add_comm (c * (b / c))).
+rewrite Nat.sub_add_distr, Nat.add_sub.
+rewrite <- Nat.mul_sub_distr_l, Nat.mul_comm.
+now apply Nat.mod_mul.
+Qed.
+
 Theorem Nat_mod_0_mod_div : ∀ a b,
   0 < b ≤ a → a mod b = 0 → a mod (a / b) = 0.
 Proof.
