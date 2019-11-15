@@ -2805,7 +2805,6 @@ Proof.
 intros * Hp * Hap.
 remember (fold_left Nat.mul (map (Nat.mul a) (seq 1 (p - 1))) 1) as x eqn:Hx.
 specialize (smaller_than_prime_all_different_multiples p Hp a Hap) as H1.
-assert (map (Nat.mul a) (seq 1 (p - 1)) 1 = a ^ (p - 1) * ...
 assert (Hx1 : x mod p = fact (p - 1) mod p). {
   subst x.
 ...
