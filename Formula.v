@@ -2808,29 +2808,22 @@ assert (Hpz : p ≠ 0) by now intros H; rewrite H in Hp.
 assert (Permutation (map (λ i, (i * a) mod p) (seq 1 (p - 1))) (seq 1 (p - 1))). {
   clear Hp.
   remember (λ i, (i * a) mod p) as f eqn:Hf.
-  assert (Hinj : ∀ i j, f i = f j → i mod p = j mod p). {
-    intros * Hff; subst f.
-    destruct (lt_dec (i mod p) (j mod p)) as [Hij| Hij]. {
-      specialize (H1 (i mod p) (j mod p)) as H1.
-      assert (H : i mod p < j mod p < p). {
-        split; [ easy | ].
-        now apply Nat.mod_upper_bound.
-      }
-      specialize (H1 H); clear H.
-      rewrite Nat.mul_mod_idemp_l in H1; [ | easy ].
-      now rewrite Nat.mul_mod_idemp_l in H1.
+  assert
+    (Hinj : ∀ i j,
+       0 ≤ i < p → 0 ≤ j < p →
+       f i = f j → i = j). {
+    intros * Hi Hj Hff; subst f.
+    destruct (lt_dec i j) as [Hij| Hij]. {
+      specialize (H1 i j) as H1.
+      assert (H : i < j < p) by easy.
+      now specialize (H1 H).
     }
     apply Nat.nlt_ge in Hij.
     symmetry in Hff.
-    destruct (lt_dec (j mod p) (i mod p)) as [Hji| Hji]. {
-      specialize (H1 (j mod p) (i mod p)) as H1.
-      assert (H : j mod p < i mod p < p). {
-        split; [ easy | ].
-        now apply Nat.mod_upper_bound.
-      }
-      specialize (H1 H); clear H.
-      rewrite Nat.mul_mod_idemp_l in H1; [ | easy ].
-      now rewrite Nat.mul_mod_idemp_l in H1.
+    destruct (lt_dec j i) as [Hji| Hji]. {
+      specialize (H1 j i) as H1.
+      assert (H : j < i < p) by easy.
+      now specialize (H1 H).
     }
     apply Nat.nlt_ge in Hji.
     flia Hij Hji.
