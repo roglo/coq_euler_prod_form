@@ -2822,46 +2822,64 @@ induction k; intros. {
     now rewrite Nat.sub_add_distr, Nat.add_sub.
   }
   rewrite <- Nat.mul_sub_distr_l in H3.
-remember (a ^ i * (a - 1)) as n eqn:Hn.
-rename p into m.
-remember (a ^ i * a / m - a ^ i / m) as p eqn:Hpp.
-specialize (Nat.gauss n m p) as H4.
-assert (H : Nat.divide n (m * p)). {
-  rewrite H3; apply Nat.divide_refl.
-}
-specialize (H4 H); clear H.
-assert (H : Nat.gcd n m = 1). {
-  rewrite Hn, Nat.gcd_comm.
-  apply Nat_gcd_1_mul_r. {
-    clear - Hp Hap Hpz.
-    induction i; [ cbn; apply Nat.gcd_1_r | cbn ].
-    apply Nat_gcd_1_mul_r; [ | easy ].
-    rewrite <- Nat.gcd_mod; [ | easy ].
-    rewrite Nat.gcd_comm.
-    apply prime_relatively_prime; [ easy | ].
-...
-    split; [ flia Hap | ].
-    now apply Nat.mod_upper_bound.
-  } {
-    rewrite <- Nat.gcd_mod; [ | easy ].
-    rewrite Nat.gcd_comm.
-    apply prime_relatively_prime; [ easy | ].
-    split; [ | now apply Nat.mod_upper_bound ].
-    apply Nat.neq_0_lt_0.
-    intros H; apply Nat.mod_divides in H; [ | easy ].
-    destruct H as (c, Hc).
-    destruct a; [ now rewrite Nat.mod_0_l in Hap | ].
-    rewrite Nat.sub_succ, Nat.sub_0_r in Hc.
-    rewrite Hc, Nat.mul_comm in Hap.
-    rewrite <- (Nat.add_1_l (_ * _)) in Hap.
-    rewrite Nat.mod_add in Hap; [ | easy ].
-    rewrite Nat.mod_small in Hap; [ flia Hap | ].
-    destruct m; [ easy | ].
-    destruct m; [ easy | flia ].
+  remember (a ^ i * (a - 1)) as n eqn:Hn.
+  rename p into m.
+  remember (a ^ i * a / m - a ^ i / m) as p eqn:Hpp.
+  specialize (Nat.gauss n m p) as H4.
+  assert (H : Nat.divide n (m * p)). {
+    rewrite H3; apply Nat.divide_refl.
   }
+  specialize (H4 H); clear H.
+  assert (H : Nat.gcd n m = 1). {
+    rewrite Hn, Nat.gcd_comm.
+    apply Nat_gcd_1_mul_r. {
+      clear - Hp Hap Hpz.
+      induction i; [ cbn; apply Nat.gcd_1_r | cbn ].
+      apply Nat_gcd_1_mul_r; [ | easy ].
+      rewrite <- Nat.gcd_mod; [ | easy ].
+      rewrite Nat.gcd_comm.
+      apply prime_relatively_prime; [ easy | ].
+      split; [ rewrite Nat.mod_small; flia Hap | ].
+      now apply Nat.mod_upper_bound.
+    } {
+      rewrite <- Nat.gcd_mod; [ | easy ].
+      rewrite Nat.gcd_comm.
+      apply prime_relatively_prime; [ easy | ].
+      split; [ | now apply Nat.mod_upper_bound ].
+      apply Nat.neq_0_lt_0.
+      intros H; apply Nat.mod_divides in H; [ | easy ].
+      destruct H as (c, Hc).
+      destruct a; [ flia Hap | ].
+      rewrite Nat.sub_succ, Nat.sub_0_r in Hc.
+      rewrite Hc, Nat.mul_comm in Hap.
+      rewrite <- (Nat.add_1_l (_ * _)) in Hap.
+      destruct c; [ flia Hap | cbn in Hap; flia Hap ].
+    }
+  }
+  specialize (H4 H); clear H.
+  destruct H4 as (c, Hc).
+  rewrite Hc, Nat.mul_assoc in H3.
+  remember (m * c) as mc eqn:Hmc; symmetry in Hmc.
+  destruct mc. {
+    apply Nat.eq_mul_0 in Hmc.
+    destruct Hmc as [Hmc| Hmc]; [ easy | ].
+    rewrite Hn in H3.
+    apply Nat.eq_mul_0 in H3.
+    destruct H3 as [H3| H3]; [ | flia Hap H3 ].
+    apply Nat.pow_nonzero in H3; [ easy | flia Hap ].
+  }
+  destruct mc. {
+    apply Nat.eq_mul_1 in Hmc.
+    destruct Hmc; subst m c; flia Hap.
+  }
+  replace n with 0 in * by now cbn in H3; flia H3.
+  symmetry in Hn.
+  apply Nat.eq_mul_0 in Hn.
+  destruct Hn as [Hn| Hn]; [ | flia Hap Hn ].
+  apply Nat.pow_nonzero in Hn; [ easy | flia Hap ].
 }
-specialize (H4 H); clear H.
-destruct H4 as (c, Hc).
+rewrite Nat.pow_succ_r; [ | flia ].
+rewrite Nat.mul_assoc.
 ...
 
 Theorem fermat_little : ∀ p,
