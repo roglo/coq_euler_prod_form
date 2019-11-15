@@ -2826,7 +2826,15 @@ assert
   apply Nat.nlt_ge in Hji.
   flia Hij Hji.
 }
-Search Permutation.
+assert (Hsurj : ∀ j, 0 ≤ j < p → ∃ i, 0 ≤ i < p ∧ f i = j). {
+  intros * Hj; subst f.
+  assert (H : ¬ ∀ i, 0 ≤ i < p → (i * a) mod p ≠ j). {
+    intros H2.
+    destruct j. {
+      specialize (H2 0 Hj); cbn in H2.
+      now rewrite Nat.mod_0_l in H2.
+    }
+    destruct j. {
 ...
 assert (Permutation (map (λ i, (i * a) mod p) (seq 1 (p - 1))) (seq 1 (p - 1))). {
   clear Hp.
