@@ -2808,6 +2808,17 @@ remember (j - S i) as k eqn:Hk.
 replace j with (k + S i) in * by flia Hij Hk.
 clear j Hk.
 destruct Hij as (_, Hki).
+...
+revert k Hki.
+induction i; intros. {
+  rewrite Nat.pow_0_r, Nat.mul_1_l, Nat.mod_1_l; [ | flia Hap ].
+  intros Ha; symmetry in Ha.
+...
+  induction k. {
+    rewrite Nat.pow_1_r in Ha.
+    rewrite Nat.mod_small in Ha; [ flia Hap Ha | easy ].
+  }
+...
 revert i Hki.
 induction k; intros. {
   cbn; rewrite Nat.mul_1_r.
