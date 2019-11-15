@@ -2800,7 +2800,45 @@ Theorem glop : ∀ p,
   → ∀ a, 1 < a → a mod p ≠ 0
   → ∀ i j, i < j < p → a ^ i mod p ≠ a ^ j mod p.
 Proof.
-intros * Hp * Hap * Hij.
+intros * Hp * Ha Hap * Hij.
+assert (Hpz : p ≠ 0) by now intros H; rewrite H in Hp.
+replace j with (i + S (j - S i)) by flia Hij.
+rewrite Nat.pow_add_r.
+remember (j - S i) as k eqn:Hk.
+replace j with (k + S i) in * by flia Hij Hk.
+clear j Hk.
+destruct Hij as (_, Hki).
+revert i Hki.
+induction k; intros. {
+  cbn; rewrite Nat.mul_1_r.
+  intros Haa.
+  specialize (Nat.div_mod (a ^ i) p Hpz) as H1.
+  specialize (Nat.div_mod (a ^ i * a) p Hpz) as H2.
+  rewrite <- Haa in H2.
+  assert (H3 : a ^ i * (a - 1) = p * (a ^ i * a / p) - p * (a ^ i / p)). {
+    rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
+    rewrite H2 at 1; rewrite H1 at 3.
+    rewrite (Nat.add_comm (p * (a ^ i / p))).
+    now rewrite Nat.sub_add_distr, Nat.add_sub.
+  }
+  rewrite <- Nat.mul_sub_distr_l in H3.
+remember (a ^ i * (a - 1)) as n eqn:Hn.
+rename p into m.
+remember (a ^ i * a / m - a ^ i / m) as p eqn:Hpp.
+specialize (Nat.gauss n m p) as H4.
+assert (H : Nat.divide n (m * p)). {
+  rewrite H3; apply Nat.divide_refl.
+}
+specialize (H4 H); clear H.
+assert (H : Nat.gcd n m = 1). {
+  rewrite Hn, Nat.gcd_comm.
+  apply Nat_gcd_1_mul_r. {
+    clear - Hp Hap.
+    induction i; [ cbn; apply Nat.gcd_1_r | cbn ].
+    apply Nat_gcd_1_mul_r; [ | easy ].
+Search (Nat.gcd _ _ = 1).
+...
+    apply prime_relatively_prime; [ easy | ].
 ...
 
 Theorem fermat_little : ∀ p,
