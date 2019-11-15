@@ -2806,6 +2806,20 @@ intros * Hp * Hap.
 specialize (smaller_than_prime_all_different_multiples p Hp a Hap) as H1.
 assert (Permutation (map (λ i, (i * a) mod p) (seq 1 (p - 1))) (seq 1 (p - 1))). {
   clear Hp.
+  destruct p; [ constructor | ].
+  destruct p; [ constructor | ].
+  destruct p; [ flia Hap | ].
+  destruct p. {
+    cbn - [ "mod" ].
+    rewrite Nat.add_0_r.
+    replace a with 2 by flia Hap; cbn.
+    constructor.
+  }
+  destruct p. {
+    cbn - [ "mod" ].
+    rewrite Nat.add_0_r.
+    destruct (Nat.eq_dec a 2) as [Ha2| Ha2]. {
+      subst a; cbn.
 ...
 remember (fold_left Nat.mul (map (Nat.mul a) (seq 1 (p - 1))) 1) as x eqn:Hx.
 assert (Hx1 : x mod p = fact (p - 1) mod p). {
