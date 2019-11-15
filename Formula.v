@@ -2779,7 +2779,7 @@ rewrite Nat.mul_comm.
 apply Nat.mod_mul; flia H2p.
 Qed.
 
-Theorem Nat_smaller_than_prime_all_different_multiples : ∀ p,
+Theorem smaller_than_prime_all_different_multiples : ∀ p,
   is_prime p = true
   → ∀ a, 1 < a < p
   → ∀ i j, i < j < p → (i * a) mod p ≠ (j * a) mod p.
@@ -2799,6 +2799,18 @@ specialize (H1 H); clear H.
 apply Nat.divide_pos_le in H1; [ flia H1 Hap | flia Hap ].
 Qed.
 
+Theorem fermat_little : ∀ p,
+  is_prime p = true → ∀ a, 1 < a < p → a ^ (p - 1) mod p = 1.
+Proof.
+intros * Hp * Hap.
+remember (fold_left (λ c i, c * (a * i)) (seq 1 (p - 1)) 1) as x eqn:Hx.
+specialize (smaller_than_prime_all_different_multiples p Hp a Hap) as H1.
+assert (Hx1 : x mod p = fact (p - 1) mod p). {
+  subst x.
+  assert (H : Sorte
+...
+assert (Hx2 : x mod p = (fact (p - 1) * a ^ (p - 1)) mod p). {
+  subst x.
 ...
 
 Theorem fermat_little_1 : ∀ p,
