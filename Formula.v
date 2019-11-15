@@ -2779,6 +2779,28 @@ rewrite Nat.mul_comm.
 apply Nat.mod_mul; flia H2p.
 Qed.
 
+Theorem Nat_smaller_than_prime_all_different_multiples : ∀ p,
+  is_prime p = true
+  → ∀ a, 1 < a < p
+  → ∀ i j, i < j < p → (i * a) mod p ≠ (j * a) mod p.
+Proof.
+intros * Hp * Hap * Hijp.
+intros Haa; symmetry in Haa.
+apply Nat_eq_mod_sub_0 in Haa. 2: {
+  now apply Nat.mul_le_mono_r, Nat.lt_le_incl.
+}
+rewrite <- Nat.mul_sub_distr_r in Haa.
+apply Nat.mod_divide in Haa; [ | flia Hap ].
+specialize (Nat.gauss _ _ _ Haa) as H1.
+assert (H : Nat.gcd p (j - i) = 1). {
+  apply prime_relatively_prime; [ easy | flia Hijp ].
+}
+specialize (H1 H); clear H.
+apply Nat.divide_pos_le in H1; [ flia H1 Hap | flia Hap ].
+Qed.
+
+...
+
 Theorem fermat_little_1 : ∀ p,
   is_prime p = true → ∀ a, a ^ p mod p = a mod p.
 Proof.
