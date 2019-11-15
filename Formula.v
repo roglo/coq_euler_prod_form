@@ -2833,12 +2833,20 @@ specialize (H4 H); clear H.
 assert (H : Nat.gcd n m = 1). {
   rewrite Hn, Nat.gcd_comm.
   apply Nat_gcd_1_mul_r. {
-    clear - Hp Hap.
+    clear - Hp Hap Hpz.
     induction i; [ cbn; apply Nat.gcd_1_r | cbn ].
     apply Nat_gcd_1_mul_r; [ | easy ].
-Search (Nat.gcd _ _ = 1).
-...
+    rewrite <- Nat.gcd_mod; [ | easy ].
+    rewrite Nat.gcd_comm.
     apply prime_relatively_prime; [ easy | ].
+    split; [ flia Hap | ].
+    now apply Nat.mod_upper_bound.
+  } {
+    rewrite <- Nat.gcd_mod; [ | easy ].
+    rewrite Nat.gcd_comm.
+    apply prime_relatively_prime; [ easy | ].
+    split; [ | now apply Nat.mod_upper_bound ].
+    apply Nat.neq_0_lt_0.
 ...
 
 Theorem fermat_little : ∀ p,
