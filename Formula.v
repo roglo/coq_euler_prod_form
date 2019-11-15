@@ -2814,6 +2814,21 @@ apply Nat_eq_mod_sub_0 in Haa. 2: {
 rewrite <- Nat.mul_sub_distr_l in Haa.
 apply Nat.mod_divide in Haa; [ | flia Hap ].
 specialize (Nat.gauss _ _ _ Haa) as H1.
+assert (H : Nat.gcd p (a ^ i) = 1). {
+  clear - Hp Hap Hpz.
+  induction i; [ cbn; apply Nat.gcd_1_r | cbn ].
+  apply Nat_gcd_1_mul_r; [ | easy ].
+  rewrite <- Nat.gcd_mod; [ | easy ].
+  rewrite Nat.gcd_comm.
+  apply prime_relatively_prime; [ easy | ].
+  split; [ rewrite Nat.mod_small; flia Hap | ].
+  now apply Nat.mod_upper_bound.
+}
+specialize (H1 H); clear H.
+assert (Hkp : 0 ≤ j - S i < p - 1) by flia Hij.
+remember (j - S i) as k eqn:Hk.
+clear - Hap Hkp H1.
+move k before a; move Hkp before Hap.
 ...
 rewrite Nat.pow_add_r.
 remember (j - S i) as k eqn:Hk.
