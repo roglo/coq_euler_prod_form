@@ -2819,7 +2819,32 @@ assert (Permutation (map (λ i, (i * a) mod p) (seq 1 (p - 1))) (seq 1 (p - 1)))
     cbn - [ "mod" ].
     rewrite Nat.add_0_r.
     destruct (Nat.eq_dec a 2) as [Ha2| Ha2]. {
+      subst a.
+      specialize (H1 0 2) as H2.
+      assert (H : 0 < 2 < 4) by flia.
+      now specialize (H2 H).
+    }
+    replace a with 3 in * by flia Hap Ha2; cbn.
+    apply Permutation_rev.
+  }
+  destruct p. {
+    cbn - [ "mod" ].
+    rewrite Nat.add_0_r.
+    destruct (Nat.eq_dec a 2) as [Ha2| Ha2]. {
       subst a; cbn.
+      eapply perm_trans; [ apply perm_skip | apply perm_swap ].
+      eapply perm_trans; [ apply perm_swap | apply perm_skip ].
+      apply perm_swap.
+    }
+    destruct (Nat.eq_dec a 3) as [Ha3| Ha3]. {
+      subst a; cbn.
+      eapply perm_trans; [ apply perm_swap | apply perm_skip ].
+      eapply perm_trans; [ apply perm_skip | apply perm_swap ].
+      apply perm_swap.
+    }
+    replace a with 4 by flia Hap Ha2 Ha3; cbn.
+    apply Permutation_rev.
+  }
 ...
 remember (fold_left Nat.mul (map (Nat.mul a) (seq 1 (p - 1))) 1) as x eqn:Hx.
 assert (Hx1 : x mod p = fact (p - 1) mod p). {
