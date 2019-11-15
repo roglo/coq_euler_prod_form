@@ -2805,29 +2805,31 @@ Proof.
 intros * Hp * Hap.
 specialize (smaller_than_prime_all_different_multiples p Hp a Hap) as H1.
 assert (Hpz : p ≠ 0) by now intros H; rewrite H in Hp.
+remember (λ i, (i * a) mod p) as f eqn:Hf.
+assert
+  (Hinj : ∀ i j,
+      0 ≤ i < p → 0 ≤ j < p →
+      f i = f j → i = j). {
+  intros * Hi Hj Hff; subst f.
+  destruct (lt_dec i j) as [Hij| Hij]. {
+    specialize (H1 i j) as H1.
+    assert (H : i < j < p) by easy.
+    now specialize (H1 H).
+  }
+  apply Nat.nlt_ge in Hij.
+  symmetry in Hff.
+  destruct (lt_dec j i) as [Hji| Hji]. {
+    specialize (H1 j i) as H1.
+    assert (H : j < i < p) by easy.
+    now specialize (H1 H).
+  }
+  apply Nat.nlt_ge in Hji.
+  flia Hij Hji.
+}
+Search Permutation.
+...
 assert (Permutation (map (λ i, (i * a) mod p) (seq 1 (p - 1))) (seq 1 (p - 1))). {
   clear Hp.
-  remember (λ i, (i * a) mod p) as f eqn:Hf.
-  assert
-    (Hinj : ∀ i j,
-       0 ≤ i < p → 0 ≤ j < p →
-       f i = f j → i = j). {
-    intros * Hi Hj Hff; subst f.
-    destruct (lt_dec i j) as [Hij| Hij]. {
-      specialize (H1 i j) as H1.
-      assert (H : i < j < p) by easy.
-      now specialize (H1 H).
-    }
-    apply Nat.nlt_ge in Hij.
-    symmetry in Hff.
-    destruct (lt_dec j i) as [Hji| Hji]. {
-      specialize (H1 j i) as H1.
-      assert (H : j < i < p) by easy.
-      now specialize (H1 H).
-    }
-    apply Nat.nlt_ge in Hji.
-    flia Hij Hji.
-  }
 ...
   destruct p; [ constructor | ].
   destruct p; [ constructor | ].
