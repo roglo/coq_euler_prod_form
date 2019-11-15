@@ -2806,6 +2806,10 @@ intros * Hp * Hap.
 specialize (smaller_than_prime_all_different_multiples p Hp a Hap) as H1.
 assert (Permutation (map (λ i, (i * a) mod p) (seq 1 (p - 1))) (seq 1 (p - 1))). {
   clear Hp.
+  remember (λ i, (i * a) mod p) as f eqn:Hf.
+  assert (Hinj : ∀ i j, f i = f j → i = j). {
+    intros * Hff; subst f.
+...
   destruct p; [ constructor | ].
   destruct p; [ constructor | ].
   destruct p; [ flia Hap | ].
