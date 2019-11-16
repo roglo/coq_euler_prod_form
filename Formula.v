@@ -2830,10 +2830,10 @@ assert
     destruct c; [ easy | ].
     cbn in Hap; flia Hap.
   } {
-    apply FinFun.Injective_map_NoDup; [ | apply seq_NoDup ].
-    intros i j Hij.
-(* not injective; must be applied to type {i:nat & i<p}
-   but NoDup_Permutation_bis apply only on nat type *)
+Search (NoDup (map _ _)).
+...
+  }
+}
 ...
 remember (fold_left Nat.mul (map (Nat.mul a) (seq 1 (p - 1))) 1) as x eqn:Hx.
 assert (Hx1 : x mod p = fact (p - 1) mod p). {
