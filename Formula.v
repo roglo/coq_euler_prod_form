@@ -2805,95 +2805,31 @@ Proof.
 intros * Hp * Hap.
 specialize (smaller_than_prime_all_different_multiples p Hp a Hap) as H1.
 assert (Hpz : p ≠ 0) by now intros H; rewrite H in Hp.
-remember (λ i, (i * a) mod p) as f eqn:Hf.
 assert
-  (Hinj : ∀ i j,
-      0 ≤ i < p → 0 ≤ j < p →
-      f i = f j → i = j). {
-  intros * Hi Hj Hff; subst f.
-  destruct (lt_dec i j) as [Hij| Hij]. {
-    specialize (H1 i j) as H1.
-    assert (H : i < j < p) by easy.
-    now specialize (H1 H).
-  }
-  apply Nat.nlt_ge in Hij.
-  symmetry in Hff.
-  destruct (lt_dec j i) as [Hji| Hji]. {
-    specialize (H1 j i) as H1.
-    assert (H : j < i < p) by easy.
-    now specialize (H1 H).
-  }
-  apply Nat.nlt_ge in Hji.
-  flia Hij Hji.
-}
-assert (Hsurj : ∀ j, 0 ≤ j < p → ∃ i, 0 ≤ i < p ∧ f i = j). {
-  intros * Hj; subst f.
-  assert (H : ¬ ∀ i, 0 ≤ i < p → (i * a) mod p ≠ j). {
-    intros H2.
-    destruct j. {
-      specialize (H2 0 Hj); cbn in H2.
-      now rewrite Nat.mod_0_l in H2.
-    }
-    destruct j. {
-...
-assert (Permutation (map (λ i, (i * a) mod p) (seq 1 (p - 1))) (seq 1 (p - 1))). {
-  clear Hp.
-...
-  destruct p; [ constructor | ].
-  destruct p; [ constructor | ].
-  destruct p; [ flia Hap | ].
-  destruct p. {
-    cbn - [ "mod" ].
-    rewrite Nat.add_0_r.
-    replace a with 2 by flia Hap; cbn.
-    constructor.
-  }
-  destruct p. {
-    cbn - [ "mod" ].
-    rewrite Nat.add_0_r.
-    destruct (Nat.eq_dec a 2) as [Ha2| Ha2]. {
-      subst a; exfalso.
-      apply (H1 0 2); [ flia | easy ].
-    }
-    replace a with 3 in * by flia Hap Ha2; cbn.
-    apply Permutation_rev.
-  }
-  destruct p. {
-    cbn - [ "mod" ].
-    rewrite Nat.add_0_r.
-    destruct (Nat.eq_dec a 2) as [Ha2| Ha2]. {
-      subst a; cbn.
-      eapply perm_trans; [ apply perm_skip | apply perm_swap ].
-      eapply perm_trans; [ apply perm_swap | apply perm_skip ].
-      apply perm_swap.
-    }
-    destruct (Nat.eq_dec a 3) as [Ha3| Ha3]. {
-      subst a; cbn.
-      eapply perm_trans; [ apply perm_swap | apply perm_skip ].
-      eapply perm_trans; [ apply perm_skip | apply perm_swap ].
-      apply perm_swap.
-    }
-    replace a with 4 by flia Hap Ha2 Ha3; cbn.
-    apply Permutation_rev.
-  }
-  destruct p. {
-    cbn - [ "mod" ].
-    rewrite Nat.add_0_r.
-    destruct (Nat.eq_dec a 2) as [Ha2| Ha2]. {
-      subst a; exfalso.
-      apply (H1 0 3); [ flia | easy ].
-    }
-    destruct (Nat.eq_dec a 3) as [Ha3| Ha3]. {
-      subst a; exfalso.
-      apply (H1 0 2); [ flia | easy ].
-    }
-    destruct (Nat.eq_dec a 4) as [Ha4| Ha4]. {
-      subst a; exfalso.
-      apply (H1 0 3); [ flia | easy ].
-    }
-    replace a with 5 by flia Hap Ha2 Ha3 Ha4; cbn.
-    apply Permutation_rev.
-  }
+  (Permutation (map (λ i, (i * a) mod p) (seq 1 (p - 1)))
+     (seq 1 (p - 1))). {
+  apply NoDup_Permutation_bis; [ | apply seq_NoDup | | ]; cycle 1. {
+    now rewrite map_length, seq_length.
+  } {
+    intros i Hi.
+    apply in_map_iff in Hi.
+    destruct Hi as (j & Hji & Hj).
+    apply in_seq in Hj.
+    rewrite <- Hji.
+    apply in_seq.
+    replace (1 + (p - 1)) with p in Hj |-* by flia Hpz.
+    split; [ | now apply Nat.mod_upper_bound ].
+    apply Nat.neq_0_lt_0.
+    intros Hi.
+    apply Nat.mod_divide in Hi; [ | easy ].
+    specialize (Nat.gauss _ _ _ Hi) as H2.
+    assert (H : Nat.gcd p j = 1) by now apply prime_relatively_prime.
+    specialize (H2 H); clear H.
+    destruct H2 as (c, Hc).
+    rewrite Hc in Hap.
+    destruct c; [ easy | ].
+    cbn in Hap; flia Hap.
+  } {
 ...
 remember (fold_left Nat.mul (map (Nat.mul a) (seq 1 (p - 1))) 1) as x eqn:Hx.
 assert (Hx1 : x mod p = fact (p - 1) mod p). {
