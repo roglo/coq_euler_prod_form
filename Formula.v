@@ -2962,6 +2962,9 @@ rewrite <- (Nat.mul_1_r (fact _)) in Hx1 at 2.
 rewrite <- Nat.mul_sub_distr_l in Hx1.
 apply Nat.mod_divide in Hx1; [ | easy ].
 specialize (Nat.gauss _ _ _ Hx1) as H2.
+assert (H : Nat.gcd p (fact (p - 1)) = 1). {
+Search (Nat.gcd _ _ = 1).
+Check Nat_gcd_1_mul_r.
 ...
 
 Theorem fermat_little_1 : ∀ p,
