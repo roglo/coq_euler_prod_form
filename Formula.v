@@ -2806,8 +2806,9 @@ intros * Hp * Hap.
 specialize (smaller_than_prime_all_different_multiples p Hp a Hap) as H1.
 assert (Hpz : p ≠ 0) by now intros H; rewrite H in Hp.
 assert
-  (Permutation (map (λ i, (i * a) mod p) (seq 1 (p - 1)))
-     (seq 1 (p - 1))). {
+  (Hperm :
+     Permutation (map (λ i, (i * a) mod p) (seq 1 (p - 1)))
+       (seq 1 (p - 1))). {
   apply NoDup_Permutation_bis; [ | apply seq_NoDup | | ]; cycle 1. {
     now rewrite map_length, seq_length.
   } {
@@ -2863,7 +2864,8 @@ assert
     now replace (1 + (p - 1)) with p by flia Hpz.
   }
 }
-remember (fold_left Nat.mul (map (Nat.mul a) (seq 1 (p - 1))) 1) as x eqn:Hx.
+remember (λ i : nat, (i * a) mod p) as f eqn:Hf.
+remember (fold_left Nat.mul (map f (seq 1 (p - 1))) 1) as x eqn:Hx.
 assert (Hx1 : x mod p = fact (p - 1) mod p). {
   subst x.
 ...
