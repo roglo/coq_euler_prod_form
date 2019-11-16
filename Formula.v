@@ -2904,26 +2904,11 @@ assert (Hx1 : x mod p = fact (p - 1) mod p). {
   (* lemma perhaps? *)
   remember (p - 1) as n; clear p Heqn.
   induction n; intros; [ easy | ].
-...
-  replace (seq 1 (S n)) with (seq 1 n ++ [2 + n]). 2: {
-    clear.
-    induction n; [ cbn | ].
-    replace (S n) with (1 + n) by easy.
-    remember 1 as s eqn:Hs; clear Hs.
-    (* lemma perhaps? *)
-    revert s.
-    induction n; intros; [ cbn | ].
-    cbn.
-...
-Search Permutation.
-
-Search (fold_left Nat.mul).
-
-Check @Permutation_f_prod_mul.
-specialize (@Permutation_f_prod_mul F) as H2.
-...
-rewrite (glop _ (seq 1 (p - 1))); [ | easy ].
-...
+  rewrite <- (Nat.add_1_r n) at 1.
+  rewrite seq_app.
+  rewrite fold_left_app.
+  now rewrite IHn, Nat_fact_succ, Nat.mul_comm.
+}
 assert (Hx2 : x mod p = (fact (p - 1) * a ^ (p - 1)) mod p). {
   subst x.
 ...
