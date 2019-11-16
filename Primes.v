@@ -1359,3 +1359,13 @@ Qed.
 (*
 Compute (prime_after 510).
 *)
+
+Theorem Nat_gcd_prime_fact_lt : ∀ p,
+  is_prime p = true → ∀ k, k < p → Nat.gcd p (fact k) = 1.
+Proof.
+intros * Hp * Hkp.
+induction k; [ apply Nat.gcd_1_r | ].
+rewrite Nat_fact_succ.
+apply Nat_gcd_1_mul_r; [ | apply IHk; flia Hkp ].
+apply prime_relatively_prime; [ easy | flia Hkp ].
+Qed.

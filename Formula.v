@@ -2225,7 +2225,7 @@ Notation "'Σ' ( i = b , e ) , g" :=
   (fold_left (λ c i, c + g) (seq b (S e - b)) 0)
   (at level 45, i at level 0, b at level 60, e at level 60).
 
-Theorem fold_left_add_from_0 {A} : ∀ a l (f : A → nat),
+Theorem fold_left_add_fun_from_0 {A} : ∀ a l (f : A → nat),
   fold_left (λ c i, c + f i) l a =
   a + fold_left (λ c i, c + f i) l 0.
 Proof.
@@ -2236,9 +2236,20 @@ rewrite IHl; symmetry; rewrite IHl.
 apply Nat.add_assoc.
 Qed.
 
-Theorem fold_left_mul_from_1 {A} : ∀ a l (f : A → nat),
+Theorem fold_left_mul_fun_from_1 {A} : ∀ a l (f : A → nat),
   fold_left (λ c i, c * f i) l a =
   a * fold_left (λ c i, c * f i) l 1.
+Proof.
+intros.
+revert a.
+induction l as [| x l]; intros; [ symmetry; apply Nat.mul_1_r | cbn ].
+rewrite IHl; symmetry; rewrite IHl.
+rewrite Nat.add_0_r.
+apply Nat.mul_assoc.
+Qed.
+
+Theorem fold_left_mul_from_1 : ∀ a l,
+  fold_left Nat.mul l a = a * fold_left Nat.mul l 1.
 Proof.
 intros.
 revert a.
@@ -2256,7 +2267,7 @@ intros * Hz.
 remember (S e - b) as n eqn:Hn.
 revert b Hz Hn.
 induction n; intros; [ easy | cbn ].
-rewrite fold_left_add_from_0.
+rewrite fold_left_add_fun_from_0.
 rewrite IHn; [ | | flia Hn ]. {
   rewrite Hz; [ easy | flia Hn ].
 }
@@ -2271,11 +2282,11 @@ intros.
 remember (S e - b) as n eqn:Hn.
 revert e a b Hn.
 induction n; intros; [ apply Nat.mul_0_r | cbn ].
-rewrite fold_left_add_from_0.
+rewrite fold_left_add_fun_from_0.
 rewrite Nat.mul_add_distr_l.
 rewrite (IHn e); [ | flia Hn ].
 symmetry.
-apply fold_left_add_from_0.
+apply fold_left_add_fun_from_0.
 Qed.
 
 Ltac rewrite_in_summation th :=
@@ -2368,10 +2379,10 @@ intros.
 remember (S e - b) as n eqn:Hn.
 revert b Hn.
 induction n; intros; [ easy | cbn ].
-rewrite fold_left_add_from_0.
+rewrite fold_left_add_fun_from_0.
 rewrite IHn; [ | flia Hn ].
-rewrite (fold_left_add_from_0 (f b)).
-rewrite (fold_left_add_from_0 (g b)).
+rewrite (fold_left_add_fun_from_0 (f b)).
+rewrite (fold_left_add_fun_from_0 (g b)).
 flia.
 Qed.
 
@@ -2383,7 +2394,7 @@ intros * Hbe.
 rewrite Nat.sub_succ.
 replace (S e - b) with (S (e - b)) by flia Hbe.
 cbn.
-apply fold_left_add_from_0.
+apply fold_left_add_fun_from_0.
 Qed.
 
 Theorem summation_split_last : ∀ b e f,
@@ -2401,10 +2412,10 @@ induction n; intros. {
   now replace (S e) with b by flia Hbe Hn.
 }
 remember (S n) as sn; cbn; subst sn.
-rewrite fold_left_add_from_0.
+rewrite fold_left_add_fun_from_0.
 rewrite IHn; [ | flia Hn | flia Hn ].
 rewrite Nat.add_assoc; f_equal; cbn.
-now rewrite (fold_left_add_from_0 (f b)).
+now rewrite (fold_left_add_fun_from_0 (f b)).
 Qed.
 
 Theorem summation_shift : ∀ b e f,
@@ -2415,7 +2426,7 @@ rewrite Nat.sub_succ.
 remember (S e - b) as n eqn:Hn.
 revert b Hn.
 induction n; intros; [ easy | cbn ].
-setoid_rewrite fold_left_add_from_0.
+setoid_rewrite fold_left_add_fun_from_0.
 rewrite IHn; [ easy | flia Hn ].
 Qed.
 
@@ -2427,8 +2438,8 @@ destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
 remember (S e - b) as m eqn:Hm.
 revert b Hm.
 induction m; intros; [ easy | cbn ].
-rewrite (fold_left_add_from_0 (f b)).
-rewrite (fold_left_add_from_0 (f b mod n)).
+rewrite (fold_left_add_fun_from_0 (f b)).
+rewrite (fold_left_add_fun_from_0 (f b mod n)).
 rewrite Nat.add_mod_idemp_l; [ | easy ].
 rewrite <- Nat.add_mod_idemp_r; [ symmetry | easy ].
 rewrite <- Nat.add_mod_idemp_r; [ symmetry | easy ].
@@ -2962,11 +2973,20 @@ rewrite <- (Nat.mul_1_r (fact _)) in Hx1 at 2.
 rewrite <- Nat.mul_sub_distr_l in Hx1.
 apply Nat.mod_divide in Hx1; [ | easy ].
 specialize (Nat.gauss _ _ _ Hx1) as H2.
-assert (H : Nat.gcd p (fact (p - 1)) = 1). {
-Search (Nat.gcd _ _ = 1).
-Check Nat_gcd_1_mul_r.
-...
+specialize (Nat_gcd_prime_fact_lt p Hp (p - 1)) as H3.
+assert (H : p - 1 < p) by flia Hpz.
+specialize (H3 H); clear H.
+specialize (H2 H3); clear H3.
+destruct H2 as (c, H2).
+replace (a ^ (p - 1)) with (1 + c * p). 2: {
+  assert (Ha : a ^ (p - 1) ≠ 0) by (apply Nat.pow_nonzero; flia Hap).
+  flia H2 Ha.
+}
+rewrite Nat.mod_add; [ | easy ].
+rewrite Nat.mod_small; [ easy | flia Hap ].
+Qed.
 
+(* proof simpler than fermat_little; but could be a corollary *)
 Theorem fermat_little_1 : ∀ p,
   is_prime p = true → ∀ a, a ^ p mod p = a mod p.
 Proof.
@@ -2982,158 +3002,6 @@ rewrite <- Nat.add_mod_idemp_l; [ | now intros H; rewrite H in Hp ].
 rewrite IHa.
 rewrite Nat.add_mod_idemp_l; [ easy | now intros H; rewrite H in Hp ].
 Qed.
-
-Theorem glop : ∀ p,
-  is_prime p = true
-  → ∀ a, 1 < a < p
-  → ∀ i j, i < j < p → a ^ i mod p ≠ a ^ j mod p.
-Proof.
-intros * Hp * Hap * Hij.
-assert (Hpz : p ≠ 0) by now intros H; rewrite H in Hp.
-replace j with (i + S (j - S i)) by flia Hij.
-(**)
-rewrite Nat.pow_add_r.
-intros Haa; symmetry in Haa.
-rewrite <- (Nat.mul_1_r (a ^ i)) in Haa at 2.
-apply Nat_eq_mod_sub_0 in Haa. 2: {
-  apply Nat.mul_le_mono_l.
-  apply Nat.neq_0_lt_0, Nat.pow_nonzero; flia Hap.
-}
-rewrite <- Nat.mul_sub_distr_l in Haa.
-apply Nat.mod_divide in Haa; [ | flia Hap ].
-specialize (Nat.gauss _ _ _ Haa) as H1.
-assert (H : Nat.gcd p (a ^ i) = 1). {
-  clear - Hp Hap Hpz.
-  induction i; [ cbn; apply Nat.gcd_1_r | cbn ].
-  apply Nat_gcd_1_mul_r; [ | easy ].
-  rewrite <- Nat.gcd_mod; [ | easy ].
-  rewrite Nat.gcd_comm.
-  apply prime_relatively_prime; [ easy | ].
-  split; [ rewrite Nat.mod_small; flia Hap | ].
-  now apply Nat.mod_upper_bound.
-}
-specialize (H1 H); clear H.
-assert (Hkp : 0 ≤ j - S i < p - 1) by flia Hij.
-remember (j - S i) as k eqn:Hk.
-clear - Hap Hkp H1.
-move k before a; move Hkp before Hap.
-...
-rewrite Nat.pow_add_r.
-remember (j - S i) as k eqn:Hk.
-replace j with (k + S i) in * by flia Hij Hk.
-clear j Hk.
-destruct Hij as (_, Hki).
-...
-revert k Hki.
-induction i; intros. {
-  rewrite Nat.pow_0_r, Nat.mul_1_l, Nat.mod_1_l; [ | flia Hap ].
-  intros Ha; symmetry in Ha.
-...
-  induction k. {
-    rewrite Nat.pow_1_r in Ha.
-    rewrite Nat.mod_small in Ha; [ flia Hap Ha | easy ].
-  }
-...
-revert i Hki.
-induction k; intros. {
-  cbn; rewrite Nat.mul_1_r.
-  intros Haa.
-  specialize (Nat.div_mod (a ^ i) p Hpz) as H1.
-  specialize (Nat.div_mod (a ^ i * a) p Hpz) as H2.
-  rewrite <- Haa in H2.
-  assert (H3 : a ^ i * (a - 1) = p * (a ^ i * a / p) - p * (a ^ i / p)). {
-    rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
-    rewrite H2 at 1; rewrite H1 at 3.
-    rewrite (Nat.add_comm (p * (a ^ i / p))).
-    now rewrite Nat.sub_add_distr, Nat.add_sub.
-  }
-  rewrite <- Nat.mul_sub_distr_l in H3.
-  remember (a ^ i * (a - 1)) as n eqn:Hn.
-  rename p into m.
-  remember (a ^ i * a / m - a ^ i / m) as p eqn:Hpp.
-  specialize (Nat.gauss n m p) as H4.
-  assert (H : Nat.divide n (m * p)). {
-    rewrite H3; apply Nat.divide_refl.
-  }
-  specialize (H4 H); clear H.
-  assert (H : Nat.gcd n m = 1). {
-    rewrite Hn, Nat.gcd_comm.
-    apply Nat_gcd_1_mul_r. {
-      clear - Hp Hap Hpz.
-      induction i; [ cbn; apply Nat.gcd_1_r | cbn ].
-      apply Nat_gcd_1_mul_r; [ | easy ].
-      rewrite <- Nat.gcd_mod; [ | easy ].
-      rewrite Nat.gcd_comm.
-      apply prime_relatively_prime; [ easy | ].
-      split; [ rewrite Nat.mod_small; flia Hap | ].
-      now apply Nat.mod_upper_bound.
-    } {
-      rewrite <- Nat.gcd_mod; [ | easy ].
-      rewrite Nat.gcd_comm.
-      apply prime_relatively_prime; [ easy | ].
-      split; [ | now apply Nat.mod_upper_bound ].
-      apply Nat.neq_0_lt_0.
-      intros H; apply Nat.mod_divides in H; [ | easy ].
-      destruct H as (c, Hc).
-      destruct a; [ flia Hap | ].
-      rewrite Nat.sub_succ, Nat.sub_0_r in Hc.
-      rewrite Hc, Nat.mul_comm in Hap.
-      rewrite <- (Nat.add_1_l (_ * _)) in Hap.
-      destruct c; [ flia Hap | cbn in Hap; flia Hap ].
-    }
-  }
-  specialize (H4 H); clear H.
-  destruct H4 as (c, Hc).
-  rewrite Hc, Nat.mul_assoc in H3.
-  remember (m * c) as mc eqn:Hmc; symmetry in Hmc.
-  destruct mc. {
-    apply Nat.eq_mul_0 in Hmc.
-    destruct Hmc as [Hmc| Hmc]; [ easy | ].
-    rewrite Hn in H3.
-    apply Nat.eq_mul_0 in H3.
-    destruct H3 as [H3| H3]; [ | flia Hap H3 ].
-    apply Nat.pow_nonzero in H3; [ easy | flia Hap ].
-  }
-  destruct mc. {
-    apply Nat.eq_mul_1 in Hmc.
-    destruct Hmc; subst m c; flia Hap.
-  }
-  replace n with 0 in * by now cbn in H3; flia H3.
-  symmetry in Hn.
-  apply Nat.eq_mul_0 in Hn.
-  destruct Hn as [Hn| Hn]; [ | flia Hap Hn ].
-  apply Nat.pow_nonzero in Hn; [ easy | flia Hap ].
-}
-rewrite Nat.pow_succ_r; [ | flia ].
-rewrite Nat.mul_assoc.
-...
-
-Theorem fermat_little : ∀ p,
-  is_prime p = true → ∀ a, a mod p ≠ 0 → a ^ (p - 1) mod p = 1.
-Proof.
-intros * Hp * Hap.
-assert (Hpz : p ≠ 0) by now intros H; rewrite H in Hp.
-specialize (fermat_little_1 p Hp a) as H1.
-replace p with (S (p - 1)) in H1 at 1 by flia Hpz.
-rewrite Nat.pow_succ_r in H1; [ | flia Hpz ].
-...
-specialize (glop p Hp a Hap) as H2.
-...
-rewrite <- Nat.mul_mod_idemp_r in H1; [ | easy ].
-remember (a ^ (p - 1) mod p) as n eqn:Hn; symmetry in Hn.
-destruct n. {
-  rewrite Nat.mul_0_r in H1.
-  rewrite Nat.mod_0_l in H1; [ | easy ].
-  now symmetry in H1.
-}
-destruct n; [ easy | exfalso ].
-replace (S (S n)) with (n + 2) in H1, Hn by flia.
-rewrite <- Nat.mul_mod_idemp_l in H1; [ | easy ].
-remember (a mod p) as r eqn:Hr; symmetry in Hr.
-destruct r; [ easy | clear Hap ].
-specialize (Nat.div_mod (S r * (n + 2)) p Hpz) as H2.
-rewrite H1 in H2.
-...
 
 Theorem Wilson : ∀ n, is_prime n = true ↔ fact (n - 1) mod n = n - 1.
 Proof.
