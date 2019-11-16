@@ -2830,8 +2830,37 @@ assert
     destruct c; [ easy | ].
     cbn in Hap; flia Hap.
   } {
-Search (NoDup (map _ _)).
-...
+    remember (λ i, (i * a) mod p) as f eqn:Hf.
+    assert (H2 : ∀ i j, i < j < p → f i ≠ f j) by now rewrite Hf.
+    assert
+      (H : ∀ {A} start len (f : nat → A),
+         (∀ i j, i < j < start + len → f i ≠ f j)
+         → NoDup (map f (seq start len))). {
+      clear; intros * Hij.
+      remember (seq start len) as l eqn:Hl; symmetry in Hl.
+      revert start len Hij Hl; induction l as [| i l]; intros; [ constructor | ].
+      rewrite map_cons; constructor. {
+        intros H1.
+        apply in_map_iff in H1.
+        destruct H1 as (j & Hji & Hj).
+        destruct len; [ easy | cbn in Hl ].
+        injection Hl; clear Hl; intros Hl Hb; subst i.
+        specialize (Hij start j) as H1.
+        assert (H : start < j < start + S len). {
+          rewrite <- Hl in Hj.
+          apply in_seq in Hj; flia Hj.
+        }
+        specialize (H1 H); clear H.
+        now symmetry in Hji.
+      }
+      destruct len; [ easy | ].
+      injection Hl; clear Hl; intros Hl Hi.
+      apply (IHl (S start) len); [ | easy ].
+      intros j k Hjk.
+      apply Hij; flia Hjk.
+    }
+    apply H.
+    now replace (1 + (p - 1)) with p by flia Hpz.
   }
 }
 ...
