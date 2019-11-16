@@ -2863,7 +2863,6 @@ assert
     now replace (1 + (p - 1)) with p by flia Hpz.
   }
 }
-...
 remember (fold_left Nat.mul (map (Nat.mul a) (seq 1 (p - 1))) 1) as x eqn:Hx.
 assert (Hx1 : x mod p = fact (p - 1) mod p). {
   subst x.
