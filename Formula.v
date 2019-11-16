@@ -112,6 +112,13 @@ do 2 rewrite <- f_add_assoc.
 apply f_equal, f_add_comm.
 Qed.
 
+Theorem f_mul_mul_swap {F : field} : ∀ x y z, (x * y * z = x * z * y)%F.
+Proof.
+intros.
+do 2 rewrite <- f_mul_assoc.
+apply f_equal, f_mul_comm.
+Qed.
+
 Theorem f_opp_involutive {F : field} : ∀ x, (- - x)%F = x.
 Proof.
 intros.
@@ -654,6 +661,16 @@ revert a.
 induction l as [| c l]; intros; [ easy | cbn ].
 rewrite <- IHl; f_equal.
 apply f_add_add_swap.
+Qed.
+
+Theorem fold_f_mul_assoc {F : field} : ∀ a b l,
+  fold_left f_mul l (a * b)%F = (fold_left f_mul l a * b)%F.
+Proof.
+intros.
+revert a.
+induction l as [| c l]; intros; [ easy | cbn ].
+rewrite <- IHl; f_equal.
+apply f_mul_mul_swap.
 Qed.
 
 Theorem fold_log_prod_add_on_rev {F : field} : ∀ u v n l,
@@ -2799,6 +2816,19 @@ specialize (H1 H); clear H.
 apply Nat.divide_pos_le in H1; [ flia H1 Hap | flia Hap ].
 Qed.
 
+Theorem Permutation_fold_mul : ∀ l1 l2 a,
+  Permutation l1 l2 → fold_left Nat.mul l1 a = fold_left Nat.mul l2 a.
+Proof.
+intros * Hperm.
+induction Hperm using Permutation_ind; [ easy | | | ]. {
+  cbn; do 2 rewrite <- List_fold_left_mul_assoc.
+  now rewrite IHHperm.
+} {
+  now cbn; rewrite Nat.mul_shuffle0.
+}
+etransitivity; [ apply IHHperm1 | apply IHHperm2 ].
+Qed.
+
 Theorem fermat_little : ∀ p,
   is_prime p = true → ∀ a, 1 < a < p → a ^ (p - 1) mod p = 1.
 Proof.
@@ -2868,6 +2898,31 @@ remember (λ i : nat, (i * a) mod p) as f eqn:Hf.
 remember (fold_left Nat.mul (map f (seq 1 (p - 1))) 1) as x eqn:Hx.
 assert (Hx1 : x mod p = fact (p - 1) mod p). {
   subst x.
+  erewrite Permutation_fold_mul; [ | apply Hperm ].
+  f_equal.
+  clear.
+  (* lemma perhaps? *)
+  remember (p - 1) as n; clear p Heqn.
+  induction n; intros; [ easy | ].
+...
+  replace (seq 1 (S n)) with (seq 1 n ++ [2 + n]). 2: {
+    clear.
+    induction n; [ cbn | ].
+    replace (S n) with (1 + n) by easy.
+    remember 1 as s eqn:Hs; clear Hs.
+    (* lemma perhaps? *)
+    revert s.
+    induction n; intros; [ cbn | ].
+    cbn.
+...
+Search Permutation.
+
+Search (fold_left Nat.mul).
+
+Check @Permutation_f_prod_mul.
+specialize (@Permutation_f_prod_mul F) as H2.
+...
+rewrite (glop _ (seq 1 (p - 1))); [ | easy ].
 ...
 assert (Hx2 : x mod p = (fact (p - 1) * a ^ (p - 1)) mod p). {
   subst x.
