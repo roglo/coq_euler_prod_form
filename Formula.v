@@ -2829,6 +2829,41 @@ induction Hperm using Permutation_ind; [ easy | | | ]. {
 etransitivity; [ apply IHHperm1 | apply IHHperm2 ].
 Qed.
 
+Theorem fold_left_mul_map_mod : ∀ a b l,
+  fold_left Nat.mul (map (λ i, i mod a) l) b mod a =
+  fold_left Nat.mul l b mod a.
+Proof.
+intros.
+destruct (Nat.eq_dec a 0) as [Haz| Haz]; [ now subst a | ].
+induction l as [| c l]; [ easy | cbn ].
+rewrite <- List_fold_left_mul_assoc.
+rewrite Nat.mul_mod_idemp_r; [ | easy ].
+rewrite <- Nat.mul_mod_idemp_l; [ | easy ].
+rewrite IHl.
+rewrite Nat.mul_mod_idemp_l; [ | easy ].
+now rewrite List_fold_left_mul_assoc.
+Qed.
+
+Theorem fold_left_mul_map_mul : ∀ b c l,
+  fold_left Nat.mul (map (λ a, a * b) l) c =
+  fold_left Nat.mul l c * b ^ length l.
+Proof.
+intros.
+induction l as [| a l]; [ now cbn; rewrite Nat.mul_1_r | cbn ].
+do 2 rewrite <- List_fold_left_mul_assoc.
+rewrite IHl; flia.
+Qed.
+
+Theorem fact_eq_fold_left : ∀ n,
+  fact n = fold_left Nat.mul (seq 1 n) 1.
+Proof.
+induction n; intros; [ easy | ].
+rewrite <- (Nat.add_1_r n) at 2.
+rewrite seq_app.
+rewrite fold_left_app.
+now rewrite <- IHn, Nat_fact_succ, Nat.mul_comm.
+Qed.
+
 Theorem fermat_little : ∀ p,
   is_prime p = true → ∀ a, 1 < a < p → a ^ (p - 1) mod p = 1.
 Proof.
@@ -2903,14 +2938,20 @@ assert (Hx1 : x mod p = fact (p - 1) mod p). {
   clear.
   (* lemma perhaps? *)
   remember (p - 1) as n; clear p Heqn.
-  induction n; intros; [ easy | ].
-  rewrite <- (Nat.add_1_r n) at 1.
-  rewrite seq_app.
-  rewrite fold_left_app.
-  now rewrite IHn, Nat_fact_succ, Nat.mul_comm.
+  symmetry.
+  apply fact_eq_fold_left.
 }
 assert (Hx2 : x mod p = (fact (p - 1) * a ^ (p - 1)) mod p). {
-  subst x.
+  subst x; rewrite Hf.
+  rewrite <- (map_map (λ i, i * a) (λ j, j mod p)).
+  rewrite fold_left_mul_map_mod.
+  rewrite fold_left_mul_map_mul.
+  rewrite seq_length.
+  f_equal; f_equal.
+  symmetry.
+  apply fact_eq_fold_left.
+}
+rewrite Hx1 in Hx2.
 ...
 
 Theorem fermat_little_1 : ∀ p,
