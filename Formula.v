@@ -2951,7 +2951,17 @@ assert (Hx2 : x mod p = (fact (p - 1) * a ^ (p - 1)) mod p). {
   symmetry.
   apply fact_eq_fold_left.
 }
-rewrite Hx1 in Hx2.
+rewrite Hx2 in Hx1.
+apply Nat_eq_mod_sub_0 in Hx1. 2: {
+  rewrite <- (Nat.mul_1_r (fact _)) at 1.
+  apply Nat.mul_le_mono_l.
+  apply Nat.neq_0_lt_0.
+  apply Nat.pow_nonzero; flia Hap.
+}
+rewrite <- (Nat.mul_1_r (fact _)) in Hx1 at 2.
+rewrite <- Nat.mul_sub_distr_l in Hx1.
+apply Nat.mod_divide in Hx1; [ | easy ].
+specialize (Nat.gauss _ _ _ Hx1) as H2.
 ...
 
 Theorem fermat_little_1 : ∀ p,
