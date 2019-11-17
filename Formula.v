@@ -3046,6 +3046,31 @@ Definition with_inv_pair p :=
 (* don't even try to compute "with_inv_pair 11": too big *)
 Compute (with_inv_pair 7).
 
+Theorem lt_prime_inv_is_diff : ∀ p,
+  is_prime p = true → ∀ a, 2 ≤ a ≤ p - 2 → a ^ (p - 2) mod p ≠ a mod p.
+Proof.
+intros * Hp * Hap Ha.
+assert (Hpz : p ≠ 0) by now intros H; rewrite H in Hp.
+apply Nat_eq_mod_sub_0 in Ha. 2: {
+  rewrite <- (Nat.pow_1_r a) at 1.
+  apply Nat.pow_le_mono_r; flia Hap.
+}
+rewrite <- (Nat.mul_1_r a) in Ha at 2.
+replace (p - 2) with (S (p - 3)) in Ha by flia Hap.
+rewrite Nat.pow_succ_r in Ha; [ | flia Hap ].
+rewrite <- Nat.mul_sub_distr_l in Ha.
+apply Nat.mod_divide in Ha; [ | easy ].
+specialize (Nat.gauss _ _ _ Ha) as H1.
+assert (H : Nat.gcd p a = 1). {
+  apply prime_relatively_prime; [ easy | flia Hap ].
+}
+specialize (H1 H); clear H.
+specialize (fermat_little _ Hp a) as H2.
+assert (H : 1 < a < p) by flia Hap.
+specialize (H2 H); clear H.
+destruct H1 as (c, Hc).
+...
+
 (* *)
 
 Theorem Wilson : ∀ n, is_prime n = true ↔ fact (n - 1) mod n = n - 1.
