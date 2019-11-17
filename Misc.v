@@ -1,7 +1,7 @@
 (* Theorems of general usage, which could be (or not) in Coq library *)
 
 Set Nested Proofs Allowed.
-Require Import Utf8 Arith Psatz Sorted.
+Require Import Utf8 Arith Psatz Sorted Permutation.
 Import List List.ListNotations.
 
 (* "fast" lia, to improve compilation speed *)
@@ -436,4 +436,17 @@ destruct b. {
   now apply filter_In in H.
 }
 now apply IHl.
+Qed.
+
+Theorem Permutation_fold_mul : ∀ l1 l2 a,
+  Permutation l1 l2 → fold_left Nat.mul l1 a = fold_left Nat.mul l2 a.
+Proof.
+intros * Hperm.
+induction Hperm using Permutation_ind; [ easy | | | ]. {
+  cbn; do 2 rewrite <- List_fold_left_mul_assoc.
+  now rewrite IHHperm.
+} {
+  now cbn; rewrite Nat.mul_shuffle0.
+}
+etransitivity; [ apply IHHperm1 | apply IHHperm2 ].
 Qed.

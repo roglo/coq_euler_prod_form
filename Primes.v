@@ -1,7 +1,7 @@
 (* Prime numbers *)
 
 Set Nested Proofs Allowed.
-Require Import Utf8 Arith SetoidList.
+Require Import Utf8 Arith SetoidList Permutation.
 Require Import Misc.
 Import List ListNotations.
 
@@ -1368,4 +1368,818 @@ induction k; [ apply Nat.gcd_1_r | ].
 rewrite Nat_fact_succ.
 apply Nat_gcd_1_mul_r; [ | apply IHk; flia Hkp ].
 apply prime_relatively_prime; [ easy | flia Hkp ].
+Qed.
+
+(* nth prime *)
+
+Fixpoint nth_prime_aux cnt n :=
+  let p := prime_after n in
+  match cnt with
+  | 0 => p
+  | S c => nth_prime_aux c (p + 1)
+  end.
+
+Definition nth_prime n := nth_prime_aux (n - 1) 0.
+
+(*
+Compute (nth_prime 30).
+*)
+
+(* slow but simple *)
+
+Definition firstn_primes n := map nth_prime (seq 1 n).
+
+(* fast but complicated *)
+
+Fixpoint firstn_primes_loop n p :=
+  match n with
+  | 0 => []
+  | S n' =>
+      let p' := prime_after p in
+      p' :: firstn_primes_loop n' (p' + 1)
+  end.
+
+Definition firstn_primes' n := firstn_primes_loop n 0.
+
+(*
+Time Compute (let n := 50 in firstn_primes n).
+Time Compute (let n := 50 in firstn_primes' n).
+Time Compute (let n := 100 in firstn_primes' n).
+*)
+
+(*
+Time Compute (firstn_primes 100).   (* slow *)
+Time Compute (firstn_primes' 100).  (* fast *)
+*)
+
+Notation "a ^ b" := (Nat.pow a b) : nat_scope.
+
+(* summation *)
+
+Notation "'Σ' ( i = b , e ) , g" :=
+  (fold_left (λ c i, c + g) (seq b (S e - b)) 0)
+  (at level 45, i at level 0, b at level 60, e at level 60).
+
+Theorem fold_left_add_fun_from_0 {A} : ∀ a l (f : A → nat),
+  fold_left (λ c i, c + f i) l a =
+  a + fold_left (λ c i, c + f i) l 0.
+Proof.
+intros.
+revert a.
+induction l as [| x l]; intros; [ symmetry; apply Nat.add_0_r | cbn ].
+rewrite IHl; symmetry; rewrite IHl.
+apply Nat.add_assoc.
+Qed.
+
+Theorem fold_left_mul_fun_from_1 {A} : ∀ a l (f : A → nat),
+  fold_left (λ c i, c * f i) l a =
+  a * fold_left (λ c i, c * f i) l 1.
+Proof.
+intros.
+revert a.
+induction l as [| x l]; intros; [ symmetry; apply Nat.mul_1_r | cbn ].
+rewrite IHl; symmetry; rewrite IHl.
+rewrite Nat.add_0_r.
+apply Nat.mul_assoc.
+Qed.
+
+Theorem fold_left_mul_from_1 : ∀ a l,
+  fold_left Nat.mul l a = a * fold_left Nat.mul l 1.
+Proof.
+intros.
+revert a.
+induction l as [| x l]; intros; [ symmetry; apply Nat.mul_1_r | cbn ].
+rewrite IHl; symmetry; rewrite IHl.
+rewrite Nat.add_0_r.
+apply Nat.mul_assoc.
+Qed.
+
+Theorem all_0_summation_0 : ∀ b e f,
+  (∀ i, b ≤ i ≤ e → f i = 0)
+  → Σ (i = b, e), f i = 0.
+Proof.
+intros * Hz.
+remember (S e - b) as n eqn:Hn.
+revert b Hz Hn.
+induction n; intros; [ easy | cbn ].
+rewrite fold_left_add_fun_from_0.
+rewrite IHn; [ | | flia Hn ]. {
+  rewrite Hz; [ easy | flia Hn ].
+}
+intros i Hi.
+apply Hz; flia Hi.
+Qed.
+
+Theorem mul_summation_distr_l : ∀ a b e f,
+  a * (Σ (i = b, e), f i) = Σ (i = b, e), a * f i.
+Proof.
+intros.
+remember (S e - b) as n eqn:Hn.
+revert e a b Hn.
+induction n; intros; [ apply Nat.mul_0_r | cbn ].
+rewrite fold_left_add_fun_from_0.
+rewrite Nat.mul_add_distr_l.
+rewrite (IHn e); [ | flia Hn ].
+symmetry.
+apply fold_left_add_fun_from_0.
+Qed.
+
+Ltac rewrite_in_summation th :=
+  let b := fresh "b" in
+  let e := fresh "e" in
+  let a := fresh "a" in
+  intros b e;
+  remember (S e - b) as n eqn:Hn;
+  remember 0 as a eqn:Ha; clear Ha;
+  revert e a b Hn;
+  induction n as [| n IHn]; intros; [ easy | cbn ];
+  rewrite th;
+  apply (IHn e); flia Hn.
+
+Theorem mul_add_distr_r_in_summation : ∀ b e f g h,
+  Σ (i = b, e), (f i + g i) * h i =
+  Σ (i = b, e), (f i * h i + g i * h i).
+Proof.
+intros; revert b e.
+rewrite_in_summation Nat.mul_add_distr_r.
+Qed.
+
+Theorem double_mul_assoc_in_summation : ∀ b e f g h k,
+  Σ (i = b, e), f i * g i * h i * k i = Σ (i = b, e), f i * (g i * h i * k i).
+Proof.
+intros.
+assert (H : ∀ a b c d, a * b * c * d = a * (b * c * d)) by flia.
+revert b e.
+rewrite_in_summation H.
+Qed.
+
+Theorem mul_assoc_in_summation : ∀ b e f g h,
+  Σ (i = b, e), f i * g i * h i = Σ (i = b, e), f i * (g i * h i).
+Proof.
+intros.
+assert (H : ∀ a b c, a * b * c = a * (b * c)) by flia.
+revert b e.
+rewrite_in_summation H.
+Qed.
+
+Theorem power_shuffle1_in_summation : ∀ b e a f g,
+  Σ (i = b, e), a * f i * a ^ (e - i) * g i =
+  Σ (i = b, e), f i * a ^ (S e - i) * g i.
+Proof.
+intros.
+(* failed to be able to use "rewrite_in_summation" here *)
+assert
+  (H : ∀ i e,
+   a * f i * a ^ (e - i) * g i = f i * a ^ (S (e - i)) * g i). {
+  clear e; intros; f_equal.
+  rewrite <- Nat.mul_assoc, Nat.mul_comm, <- Nat.mul_assoc.
+  f_equal.
+  rewrite Nat.mul_comm.
+  replace a with (a ^ 1) at 1 by apply Nat.pow_1_r.
+  now rewrite <- Nat.pow_add_r.
+}
+remember (S e - b) as n eqn:Hn.
+remember 0 as z eqn:Hz; clear Hz.
+revert e z b Hn.
+induction n as [| n IHn]; intros; [ easy | ].
+cbn - [ "-" ].
+rewrite IHn; [ | flia Hn ].
+f_equal; f_equal; rewrite H.
+f_equal; f_equal; f_equal; flia Hn.
+Qed.
+
+Theorem power_shuffle2_in_summation : ∀ b e a c f,
+  Σ (i = b, e), c * f i * a ^ (e - i) * c ^ i =
+  Σ (i = b, e), f i * a ^ (e - i) * c ^ S i.
+Proof.
+intros.
+remember (S e - b) as n eqn:Hn.
+remember 0 as z eqn:Hz; clear Hz.
+revert e z b Hn.
+induction n as [| n IHn]; intros; [ easy | ].
+cbn.
+rewrite IHn; [ | flia Hn ].
+f_equal; f_equal.
+do 2 rewrite <- Nat.mul_assoc.
+rewrite Nat.mul_comm.
+do 3 rewrite <- Nat.mul_assoc.
+f_equal; f_equal.
+apply Nat.mul_comm.
+Qed.
+
+Theorem summation_add : ∀ b e f g,
+  Σ (i = b, e), (f i + g i) = Σ (i = b, e), f i + Σ (i = b, e), g i.
+Proof.
+intros.
+remember (S e - b) as n eqn:Hn.
+revert b Hn.
+induction n; intros; [ easy | cbn ].
+rewrite fold_left_add_fun_from_0.
+rewrite IHn; [ | flia Hn ].
+rewrite (fold_left_add_fun_from_0 (f b)).
+rewrite (fold_left_add_fun_from_0 (g b)).
+flia.
+Qed.
+
+Theorem summation_split_first : ∀ b e f,
+  b ≤ e
+  → Σ (i = b, e), f i = f b + Σ (i = S b, e), f i.
+Proof.
+intros * Hbe.
+rewrite Nat.sub_succ.
+replace (S e - b) with (S (e - b)) by flia Hbe.
+cbn.
+apply fold_left_add_fun_from_0.
+Qed.
+
+Theorem summation_split_last : ∀ b e f,
+  b ≤ e
+  → 1 ≤ e
+  → Σ (i = b, e), f i = Σ (i = b, e - 1), f i + f e.
+Proof.
+intros * Hbe He.
+destruct e; [ flia He | clear He ].
+rewrite Nat.sub_succ, Nat.sub_0_r.
+replace (S (S e) - b) with (S (S e - b)) by flia Hbe.
+remember (S e - b) as n eqn:Hn.
+revert b Hbe Hn.
+induction n; intros. {
+  now replace (S e) with b by flia Hbe Hn.
+}
+remember (S n) as sn; cbn; subst sn.
+rewrite fold_left_add_fun_from_0.
+rewrite IHn; [ | flia Hn | flia Hn ].
+rewrite Nat.add_assoc; f_equal; cbn.
+now rewrite (fold_left_add_fun_from_0 (f b)).
+Qed.
+
+Theorem summation_shift : ∀ b e f,
+  Σ (i = S b, S e), f i = Σ (i = b, e), f (S i).
+Proof.
+intros.
+rewrite Nat.sub_succ.
+remember (S e - b) as n eqn:Hn.
+revert b Hn.
+induction n; intros; [ easy | cbn ].
+setoid_rewrite fold_left_add_fun_from_0.
+rewrite IHn; [ easy | flia Hn ].
+Qed.
+
+Theorem summation_mod_idemp : ∀ b e f n,
+  (Σ (i = b, e), f i) mod n = (Σ (i = b, e), f i mod n) mod n.
+Proof.
+intros.
+destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
+remember (S e - b) as m eqn:Hm.
+revert b Hm.
+induction m; intros; [ easy | cbn ].
+rewrite (fold_left_add_fun_from_0 (f b)).
+rewrite (fold_left_add_fun_from_0 (f b mod n)).
+rewrite Nat.add_mod_idemp_l; [ | easy ].
+rewrite <- Nat.add_mod_idemp_r; [ symmetry | easy ].
+rewrite <- Nat.add_mod_idemp_r; [ symmetry | easy ].
+f_equal; f_equal.
+apply IHm; flia Hm.
+Qed.
+
+(* binomial *)
+
+Fixpoint binomial n k :=
+  match k with
+  | 0 => 1
+  | S k' =>
+      match n with
+      | 0 => 0
+      | S n' => binomial n' k' + binomial n' k
+     end
+  end.
+
+Theorem binomial_succ_succ : ∀ n k,
+  binomial (S n) (S k) = binomial n k + binomial n (S k).
+Proof. easy. Qed.
+
+Theorem binomial_succ_r : ∀ n k,
+  binomial n (S k) =
+    match n with
+    | 0 => 0
+    | S n' => binomial n' k + binomial n' (S k)
+    end.
+Proof.
+intros.
+now destruct n.
+Qed.
+
+Theorem binomial_lt : ∀ n k, n < k → binomial n k = 0.
+Proof.
+intros * Hnk.
+revert k Hnk.
+induction n; intros; [ now destruct k | cbn ].
+destruct k; [ flia Hnk | ].
+apply Nat.succ_lt_mono in Hnk.
+rewrite IHn; [ | easy ].
+rewrite Nat.add_0_l.
+apply IHn; flia Hnk.
+Qed.
+
+Theorem binomial_succ_diag_r : ∀ n, binomial n (S n) = 0.
+Proof.
+intros.
+apply binomial_lt; flia.
+Qed.
+
+Theorem binomial_0_r : ∀ n, binomial n 0 = 1.
+Proof. now intros; destruct n. Qed.
+
+Theorem binomial_diag : ∀ n, binomial n n = 1.
+Proof.
+intros.
+induction n; [ easy | cbn ].
+now rewrite IHn, binomial_succ_diag_r, Nat.add_0_r.
+Qed.
+
+(* Code by Ralph D. Jeffords at math.stackexchange.com *)
+
+(* product of k consecutive numbers from n to n+k-1 *)
+(* prod_consec (m,k) = m...(m+k-1) *)
+Definition prod_consec k n := fact (n + k - 1) / fact (n - 1).
+
+Lemma prod_consec_rec_formula : ∀ m k,
+  2 ≤ m
+  → 2 ≤ k
+  → prod_consec k m = k * prod_consec (k - 1) m + prod_consec k (m - 1).
+Proof.
+intros * H2m H2k.
+replace (prod_consec k m) with (prod_consec (k - 1) m * (k + (m - 1))). 2: {
+  unfold prod_consec.
+  replace (m + (k - 1) - 1) with (m + k - 2) by flia H2k.
+  replace (m + k - 1) with (S (m + k - 2)) by flia H2m.
+  rewrite Nat_fact_succ.
+  replace (S (m + k - 2)) with (m + k - 1) by flia H2m.
+  rewrite Nat.divide_div_mul_exact; [ | apply fact_neq_0 | ]. 2: {
+    apply Nat_le_divides_fact; flia H2k.
+  }
+  rewrite Nat.mul_comm; f_equal; flia H2m.
+}
+rewrite Nat.mul_comm, Nat.mul_add_distr_r; f_equal.
+unfold prod_consec.
+replace (m - 1 - 1) with (m - 2) by flia H2m.
+replace (m + (k - 1) - 1) with (m + k - 2) by flia H2k.
+replace (m - 1 + k - 1) with (m + k - 2) by flia H2m.
+specialize (Nat_le_divides_fact (m + k - 2) (m - 1)) as H1.
+assert (H :  m - 1 ≤ m + k - 2) by flia H2k.
+specialize (H1 H) as (c, Hc); clear H.
+rewrite Hc, Nat.div_mul; [ | apply fact_neq_0 ].
+replace (m - 1) with (S (m - 2)) by flia H2m.
+rewrite Nat_fact_succ, Nat.mul_assoc.
+rewrite Nat.div_mul; [ | apply fact_neq_0 ].
+apply Nat.mul_comm.
+Qed.
+
+Theorem divide_fact_prod_consec : ∀ k m,
+  1 ≤ m
+  → 1 ≤ k
+  → Nat.divide (fact k) (prod_consec k m).
+Proof.
+intros * H1m H1k.
+remember (m + k) as n eqn:Hn.
+assert (H : m + k ≤ n) by flia Hn.
+clear Hn; rename H into Hn.
+revert k m Hn H1m H1k.
+induction n as (n, IHn) using lt_wf_rec; intros.
+destruct (Nat.eq_dec n 2) as [Hn2| Hn2]. {
+  replace m with 1 by flia Hn H1m H1k Hn2.
+  replace k with 1 by flia Hn H1m H1k Hn2.
+  apply Nat.divide_refl.
+}
+destruct (Nat.eq_dec m 1) as [Hm1| Hm1]. {
+  subst m; unfold prod_consec.
+  rewrite Nat.add_comm, Nat.add_sub, Nat.sub_diag.
+  rewrite Nat.div_1_r.
+  apply Nat.divide_refl.
+}
+destruct (Nat.eq_dec k 1) as [Hk1| Hk1]. {
+  subst k; apply Nat.divide_1_l.
+}
+assert (H2m : 2 ≤ m) by flia H1m Hm1.
+assert (H2k : 2 ≤ k) by flia H1k Hk1.
+specialize (prod_consec_rec_formula m k H2m H2k) as H1.
+assert (Hmn : m + (k - 1) < n) by flia Hn H2k.
+assert (H1k1 : 1 ≤ k - 1) by flia H2k.
+specialize (IHn (m + (k - 1)) Hmn (k - 1) m (le_refl _) H1m H1k1) as H2.
+apply (Nat.mul_divide_mono_l _ _ k) in H2.
+replace k with (S (k - 1)) in H2 at 1 by flia H1k.
+rewrite <- Nat_fact_succ in H2.
+replace (S (k - 1)) with k in H2 by flia H1k.
+rewrite H1.
+apply Nat.divide_add_r; [ easy | ].
+apply (IHn (m - 1 + k)); [ flia Hn H2m | easy | flia H2m | easy ].
+Qed.
+
+Theorem fact_divides_fact_over_fact : ∀ k n,
+  k ≤ n
+  → Nat.divide (fact k) (fact n / fact (n - k)).
+Proof.
+intros * Hkn.
+destruct (Nat.eq_dec k 0) as [Hkz| Hkz]. {
+  subst k; apply Nat.divide_1_l.
+}
+specialize (divide_fact_prod_consec k (n - k + 1)) as H1.
+unfold prod_consec in H1.
+rewrite Nat.add_shuffle0 in H1.
+do 2 rewrite Nat.add_sub in H1.
+rewrite Nat.sub_add in H1; [ | easy ].
+apply H1; [ flia Hkn | flia Hkz ].
+Qed.
+
+Theorem fact_fact_divides_fact : ∀ k n,
+  k ≤ n
+  → Nat.divide (fact k * fact (n - k)) (fact n).
+Proof.
+intros * Hkn.
+specialize (fact_divides_fact_over_fact k n Hkn) as H1.
+apply (Nat.mul_divide_cancel_r _ _ (fact (n - k))) in H1. 2: {
+  apply fact_neq_0.
+}
+eapply Nat.divide_trans; [ apply H1 | ].
+rewrite Nat.mul_comm.
+rewrite <- (proj2 (Nat.div_exact _ _ (fact_neq_0 _))). 2: {
+  apply Nat.mod_divide; [ apply fact_neq_0 | ].
+  apply Nat_divide_fact_fact.
+}
+apply Nat.divide_refl.
+Qed.
+
+Theorem binomial_fact : ∀ n k,
+  k ≤ n
+  → binomial n k = fact n / (fact k * fact (n - k)).
+Proof.
+intros * Hkn.
+revert k Hkn.
+induction n; intros; [ now apply Nat.le_0_r in Hkn; subst k | ].
+destruct k. {
+  cbn; rewrite Nat.add_0_r.
+  symmetry; apply Nat.div_same.
+  intros H; apply Nat.eq_add_0 in H.
+  destruct H as (H, _).
+  now apply fact_neq_0 in H.
+}
+apply Nat.succ_le_mono in Hkn.
+rewrite Nat.sub_succ.
+rewrite binomial_succ_r.
+rewrite IHn; [ | easy ].
+destruct (Nat.eq_dec k n) as [Hken| Hken]. {
+  rewrite Hken.
+  rewrite Nat.sub_diag.
+  rewrite Nat.mul_1_r, Nat.div_same; [ | apply fact_neq_0 ].
+  rewrite Nat.mul_1_r, Nat.div_same; [ | apply fact_neq_0 ].
+  now rewrite binomial_succ_diag_r, Nat.add_0_r.
+}
+assert (H : k < n) by flia Hkn Hken.
+clear Hkn Hken; rename H into Hkn.
+rewrite IHn; [ | flia Hkn ].
+(* lemma to do, perhaps? *)
+replace (n - k) with (S (n - S k)) by flia Hkn.
+do 3 rewrite Nat_fact_succ.
+replace (S (n - S k)) with (n - k) by flia Hkn.
+rewrite (Nat.mul_comm (fact k)).
+rewrite Nat.mul_shuffle0.
+do 2 rewrite <- Nat.mul_assoc.
+rewrite <- Nat.div_div; [ | flia Hkn | ]. 2: {
+  apply Nat.neq_mul_0; split; apply fact_neq_0.
+}
+rewrite <- (Nat.div_div _ (S k)); [ | easy | ]. 2: {
+  apply Nat.neq_mul_0; split; apply fact_neq_0.
+}
+rewrite Nat_add_div_same. 2: {
+  replace (fact (n - S k)) with (fact (n - k) / (n - k)). 2: {
+    replace (n - k) with (S (n - S k)) by flia Hkn.
+    rewrite Nat_fact_succ.
+    rewrite Nat.mul_comm, Nat.div_mul; [ easy | ].
+    flia Hkn.
+  }
+  rewrite <- Nat.divide_div_mul_exact; [ | flia Hkn | ]. 2: {
+    apply Nat_divide_small_fact; flia Hkn.
+  }
+  apply (Nat.mul_divide_cancel_l _ _ (n - k)); [ flia Hkn | ].
+  rewrite <- Nat.divide_div_mul_exact; [ | flia Hkn | ]. 2: {
+    apply (Nat.divide_trans _ (fact (n - k))). {
+      apply Nat_divide_small_fact; flia Hkn.
+    }
+    apply Nat.divide_factor_r.
+  }
+  rewrite Nat.mul_comm, Nat.div_mul; [ | flia Hkn ].
+  rewrite <- Nat.divide_div_mul_exact; [ | flia Hkn | ]. 2: {
+    apply Nat_divide_small_fact; flia Hkn.
+  }
+  rewrite (Nat.mul_comm (n - k)), Nat.div_mul; [ | flia Hkn ].
+  now apply fact_fact_divides_fact, Nat.lt_le_incl.
+}
+rewrite Nat.mul_shuffle1.
+rewrite <- (Nat.div_div (S n * _)); cycle 1. {
+  apply Nat.neq_mul_0; split; [ easy | flia Hkn ].
+} {
+  apply Nat.neq_mul_0; split; apply fact_neq_0.
+}
+f_equal.
+(* lemma to do, perhaps? *)
+rewrite <- (Nat.div_mul_cancel_l _ _ (S k)); [ | flia Hkn | easy ].
+rewrite <- (Nat.div_mul_cancel_r (fact n) _ (n - k)); [ | easy | flia Hkn ].
+rewrite Nat_add_div_same. 2: {
+  apply Nat.mul_divide_cancel_l; [ easy | ].
+  apply Nat_divide_small_fact; flia Hkn.
+}
+f_equal.
+rewrite (Nat.mul_comm (fact n)), <- Nat.mul_add_distr_r.
+f_equal.
+flia Hkn.
+Qed.
+
+Theorem newton_binomial : ∀ n a b,
+  (a + b) ^ n = Σ (k = 0, n), binomial n k * a ^ (n - k) * b ^ k.
+Proof.
+intros.
+induction n; [ easy | ].
+cbn - [ "-" binomial ].
+rewrite IHn.
+rewrite mul_summation_distr_l.
+rewrite mul_add_distr_r_in_summation.
+rewrite summation_add.
+do 2 rewrite <- double_mul_assoc_in_summation.
+rewrite power_shuffle1_in_summation.
+rewrite power_shuffle2_in_summation.
+symmetry.
+rewrite summation_split_first; [ | flia ].
+unfold binomial at 1.
+rewrite Nat.mul_1_l, Nat.sub_0_r, Nat.pow_0_r, Nat.mul_1_r at 1.
+rewrite summation_shift.
+cbn - [ "-" "^" ].
+rewrite mul_assoc_in_summation.
+rewrite mul_add_distr_r_in_summation.
+rewrite summation_add.
+rewrite Nat.add_assoc.
+do 2 rewrite <- mul_assoc_in_summation.
+rewrite Nat.add_shuffle0.
+f_equal.
+rewrite <- (summation_shift 0 n (λ i, binomial n i * a ^ (S n - i) * b ^ i)).
+rewrite summation_split_last; [ | flia | flia ].
+replace (S n - 1) with n by flia.
+rewrite binomial_succ_diag_r, Nat.mul_0_l, Nat.add_0_r.
+symmetry.
+rewrite summation_split_first; [ | flia ].
+now rewrite binomial_0_r, Nat.mul_1_l, Nat.sub_0_r, Nat.pow_0_r, Nat.mul_1_r.
+Qed.
+
+Theorem binomial_prime : ∀ p k,
+  is_prime p = true
+  → 1 ≤ k ≤ p - 1
+  → Nat.divide p (binomial p k).
+Proof.
+intros * Hp Hkp.
+rewrite binomial_fact; [ | flia Hkp ].
+assert (Hffz : fact k * fact (p - k) ≠ 0). {
+  apply Nat.neq_mul_0; split; apply fact_neq_0.
+}
+apply (Nat.gauss _ (fact k * fact (p - k))). {
+  rewrite <- (proj2 (Nat.div_exact _ _ Hffz)). 2: {
+    apply Nat.mod_divide; [ easy | ].
+    apply fact_fact_divides_fact; flia Hkp.
+  }
+  apply Nat_divide_small_fact; flia Hkp.
+}
+assert (Hjp : p - k ≤ p - 1) by flia Hkp.
+remember (p - k) as j; move j before p.
+clear Hffz Heqj; destruct Hkp as (_, Hkp).
+move Hjp before Hkp; rewrite Nat.mul_comm.
+(* lemma, perhaps? *)
+revert j Hjp.
+induction k; intros. {
+  rewrite Nat.mul_1_r.
+  clear Hkp.
+  induction j; [ apply Nat.gcd_1_r | ].
+  rewrite Nat_fact_succ.
+  apply Nat_gcd_1_mul_r. {
+    apply prime_relatively_prime; [ easy | flia Hjp ].
+  }
+  apply IHj; flia Hjp.
+}
+rewrite Nat_fact_succ, Nat.mul_comm, <- Nat.mul_assoc.
+apply Nat_gcd_1_mul_r. {
+  apply prime_relatively_prime; [ easy | flia Hkp ].
+}
+rewrite Nat.mul_comm.
+apply IHk; [ flia Hkp | easy ].
+Qed.
+
+Theorem sum_power_prime_mod : ∀ p, is_prime p = true →
+  ∀ a b, (a + b) ^ p mod p = (a ^ p + b ^ p) mod p.
+Proof.
+intros * Hp *.
+rewrite newton_binomial.
+rewrite summation_split_first; [ | flia ].
+rewrite binomial_0_r, Nat.mul_1_l, Nat.sub_0_r, Nat.pow_0_r, Nat.mul_1_r.
+specialize (prime_ge_2 p Hp) as H2p.
+rewrite summation_split_last; [ | flia H2p | flia H2p ].
+rewrite binomial_diag.
+rewrite Nat.sub_diag, Nat.pow_0_r, Nat.mul_1_r, Nat.mul_1_l.
+rewrite Nat.add_assoc, Nat.add_shuffle0.
+symmetry.
+remember (a ^ p + b ^ p) as x.
+replace x with (x + 0) at 1 by flia.
+rewrite <- Nat.add_mod_idemp_r; [ symmetry | flia H2p ].
+rewrite <- Nat.add_mod_idemp_r; [ symmetry | flia H2p ].
+f_equal; f_equal; clear x Heqx; symmetry.
+rewrite Nat.mod_0_l; [ | flia H2p ].
+rewrite summation_mod_idemp.
+rewrite all_0_summation_0. {
+  rewrite Nat.mod_0_l; [ easy | flia H2p ].
+}
+intros i Hi.
+specialize (binomial_prime _ _ Hp Hi) as (c, Hc).
+rewrite Hc, (Nat.mul_comm c).
+do 2 rewrite <- Nat.mul_assoc.
+rewrite Nat.mul_comm.
+apply Nat.mod_mul; flia H2p.
+Qed.
+
+Theorem smaller_than_prime_all_different_multiples : ∀ p,
+  is_prime p = true
+  → ∀ a, 1 < a < p
+  → ∀ i j, i < j < p → (i * a) mod p ≠ (j * a) mod p.
+Proof.
+intros * Hp * Hap * Hijp.
+intros Haa; symmetry in Haa.
+apply Nat_eq_mod_sub_0 in Haa. 2: {
+  now apply Nat.mul_le_mono_r, Nat.lt_le_incl.
+}
+rewrite <- Nat.mul_sub_distr_r in Haa.
+apply Nat.mod_divide in Haa; [ | flia Hap ].
+specialize (Nat.gauss _ _ _ Haa) as H1.
+assert (H : Nat.gcd p (j - i) = 1). {
+  apply prime_relatively_prime; [ easy | flia Hijp ].
+}
+specialize (H1 H); clear H.
+apply Nat.divide_pos_le in H1; [ flia H1 Hap | flia Hap ].
+Qed.
+
+Theorem fold_left_mul_map_mod : ∀ a b l,
+  fold_left Nat.mul (map (λ i, i mod a) l) b mod a =
+  fold_left Nat.mul l b mod a.
+Proof.
+intros.
+destruct (Nat.eq_dec a 0) as [Haz| Haz]; [ now subst a | ].
+induction l as [| c l]; [ easy | cbn ].
+rewrite <- List_fold_left_mul_assoc.
+rewrite Nat.mul_mod_idemp_r; [ | easy ].
+rewrite <- Nat.mul_mod_idemp_l; [ | easy ].
+rewrite IHl.
+rewrite Nat.mul_mod_idemp_l; [ | easy ].
+now rewrite List_fold_left_mul_assoc.
+Qed.
+
+Theorem fold_left_mul_map_mul : ∀ b c l,
+  fold_left Nat.mul (map (λ a, a * b) l) c =
+  fold_left Nat.mul l c * b ^ length l.
+Proof.
+intros.
+induction l as [| a l]; [ now cbn; rewrite Nat.mul_1_r | cbn ].
+do 2 rewrite <- List_fold_left_mul_assoc.
+rewrite IHl; flia.
+Qed.
+
+Theorem fact_eq_fold_left : ∀ n,
+  fact n = fold_left Nat.mul (seq 1 n) 1.
+Proof.
+induction n; intros; [ easy | ].
+rewrite <- (Nat.add_1_r n) at 2.
+rewrite seq_app.
+rewrite fold_left_app.
+now rewrite <- IHn, Nat_fact_succ, Nat.mul_comm.
+Qed.
+
+Theorem fermat_little : ∀ p,
+  is_prime p = true → ∀ a, 1 < a < p → a ^ (p - 1) mod p = 1.
+Proof.
+intros * Hp * Hap.
+specialize (smaller_than_prime_all_different_multiples p Hp a Hap) as H1.
+assert (Hpz : p ≠ 0) by now intros H; rewrite H in Hp.
+assert
+  (Hperm :
+     Permutation (map (λ i, (i * a) mod p) (seq 1 (p - 1)))
+       (seq 1 (p - 1))). {
+  apply NoDup_Permutation_bis; [ | apply seq_NoDup | | ]; cycle 1. {
+    now rewrite map_length, seq_length.
+  } {
+    intros i Hi.
+    apply in_map_iff in Hi.
+    destruct Hi as (j & Hji & Hj).
+    apply in_seq in Hj.
+    rewrite <- Hji.
+    apply in_seq.
+    replace (1 + (p - 1)) with p in Hj |-* by flia Hpz.
+    split; [ | now apply Nat.mod_upper_bound ].
+    apply Nat.neq_0_lt_0.
+    intros Hi.
+    apply Nat.mod_divide in Hi; [ | easy ].
+    specialize (Nat.gauss _ _ _ Hi) as H2.
+    assert (H : Nat.gcd p j = 1) by now apply prime_relatively_prime.
+    specialize (H2 H); clear H.
+    destruct H2 as (c, Hc).
+    rewrite Hc in Hap.
+    destruct c; [ easy | ].
+    cbn in Hap; flia Hap.
+  } {
+    remember (λ i, (i * a) mod p) as f eqn:Hf.
+    assert (H2 : ∀ i j, i < j < p → f i ≠ f j) by now rewrite Hf.
+    assert
+      (H : ∀ {A} start len (f : nat → A),
+         (∀ i j, i < j < start + len → f i ≠ f j)
+         → NoDup (map f (seq start len))). {
+      clear; intros * Hij.
+      remember (seq start len) as l eqn:Hl; symmetry in Hl.
+      revert start len Hij Hl; induction l as [| i l]; intros; [ constructor | ].
+      rewrite map_cons; constructor. {
+        intros H1.
+        apply in_map_iff in H1.
+        destruct H1 as (j & Hji & Hj).
+        destruct len; [ easy | cbn in Hl ].
+        injection Hl; clear Hl; intros Hl Hb; subst i.
+        specialize (Hij start j) as H1.
+        assert (H : start < j < start + S len). {
+          rewrite <- Hl in Hj.
+          apply in_seq in Hj; flia Hj.
+        }
+        specialize (H1 H); clear H.
+        now symmetry in Hji.
+      }
+      destruct len; [ easy | ].
+      injection Hl; clear Hl; intros Hl Hi.
+      apply (IHl (S start) len); [ | easy ].
+      intros j k Hjk.
+      apply Hij; flia Hjk.
+    }
+    apply H.
+    now replace (1 + (p - 1)) with p by flia Hpz.
+  }
+}
+remember (λ i : nat, (i * a) mod p) as f eqn:Hf.
+remember (fold_left Nat.mul (map f (seq 1 (p - 1))) 1) as x eqn:Hx.
+assert (Hx1 : x mod p = fact (p - 1) mod p). {
+  subst x.
+  erewrite Permutation_fold_mul; [ | apply Hperm ].
+  f_equal.
+  clear.
+  (* lemma perhaps? *)
+  remember (p - 1) as n; clear p Heqn.
+  symmetry.
+  apply fact_eq_fold_left.
+}
+assert (Hx2 : x mod p = (fact (p - 1) * a ^ (p - 1)) mod p). {
+  subst x; rewrite Hf.
+  rewrite <- (map_map (λ i, i * a) (λ j, j mod p)).
+  rewrite fold_left_mul_map_mod.
+  rewrite fold_left_mul_map_mul.
+  rewrite seq_length.
+  f_equal; f_equal.
+  symmetry.
+  apply fact_eq_fold_left.
+}
+rewrite Hx2 in Hx1.
+apply Nat_eq_mod_sub_0 in Hx1. 2: {
+  rewrite <- (Nat.mul_1_r (fact _)) at 1.
+  apply Nat.mul_le_mono_l.
+  apply Nat.neq_0_lt_0.
+  apply Nat.pow_nonzero; flia Hap.
+}
+rewrite <- (Nat.mul_1_r (fact _)) in Hx1 at 2.
+rewrite <- Nat.mul_sub_distr_l in Hx1.
+apply Nat.mod_divide in Hx1; [ | easy ].
+specialize (Nat.gauss _ _ _ Hx1) as H2.
+specialize (Nat_gcd_prime_fact_lt p Hp (p - 1)) as H3.
+assert (H : p - 1 < p) by flia Hpz.
+specialize (H3 H); clear H.
+specialize (H2 H3); clear H3.
+destruct H2 as (c, H2).
+replace (a ^ (p - 1)) with (1 + c * p). 2: {
+  assert (Ha : a ^ (p - 1) ≠ 0) by (apply Nat.pow_nonzero; flia Hap).
+  flia H2 Ha.
+}
+rewrite Nat.mod_add; [ | easy ].
+rewrite Nat.mod_small; [ easy | flia Hap ].
+Qed.
+
+(* proof simpler than fermat_little; but could be a corollary *)
+Theorem fermat_little_1 : ∀ p,
+  is_prime p = true → ∀ a, a ^ p mod p = a mod p.
+Proof.
+intros * Hp *.
+induction a. {
+  rewrite Nat.pow_0_l; [ easy | ].
+  now intros H; rewrite H in Hp.
+}
+rewrite <- Nat.add_1_r.
+rewrite sum_power_prime_mod; [ | easy ].
+rewrite Nat.pow_1_l.
+rewrite <- Nat.add_mod_idemp_l; [ | now intros H; rewrite H in Hp ].
+rewrite IHa.
+rewrite Nat.add_mod_idemp_l; [ easy | now intros H; rewrite H in Hp ].
 Qed.
