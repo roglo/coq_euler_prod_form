@@ -3039,6 +3039,17 @@ split.
     these pairs are supposed to cover [2, n-2] *)
 Search (fold_left Nat.mul).
 Check Permutation_fold_mul.
+Search (Nat.modulo (Nat.pow _ _)).
+Fixpoint Nat_pow_mod_loop a b n :=
+  match b with
+  | 0 => 1
+  | S b' => (a * Nat_pow_mod_loop a b' n) mod n
+  end.
+Definition Nat_pow_mod a b n := Nat_pow_mod_loop a b n.
+
+Definition map_inv_mod n :=
+  map (λ i, (i, Nat_pow_mod i (n - 2) n)) (seq 2 (n - 3)).
+Compute (map_inv_mod 11).
 ...
 
 Theorem ζ_Euler_product_eq : ...
