@@ -3046,6 +3046,22 @@ Definition with_inv_pair p :=
 (* don't even try to compute "with_inv_pair 11": too big *)
 Compute (with_inv_pair 7).
 
+Theorem lt_prime_sqr_not_1 : ∀ p,
+  is_prime p = true → ∀ a, 2 ≤ a ≤ p - 2 → a ^ 2 mod p ≠ 1.
+Proof.
+intros * Hp * Hap Ha.
+assert (Hpz : p ≠ 0) by now intros H; rewrite H in Hp.
+replace 1 with (1 mod p) in Ha at 2. 2: {
+  apply Nat.mod_1_l; flia Hap.
+}
+apply Nat_eq_mod_sub_0 in Ha. 2: {
+  destruct a; [ easy | ].
+  cbn; apply -> Nat.succ_le_mono.
+  apply Nat.le_0_l.
+}
+rewrite Nat_sqr_sub_1 in Ha.
+...
+
 Theorem lt_prime_inv_is_diff : ∀ p,
   is_prime p = true → ∀ a, 2 ≤ a ≤ p - 2 → a ^ (p - 2) mod p ≠ a mod p.
 Proof.
@@ -3069,6 +3085,31 @@ specialize (fermat_little _ Hp a) as H2.
 assert (H : 1 < a < p) by flia Hap.
 specialize (H2 H); clear H.
 destruct H1 as (c, Hc).
+apply Nat.add_sub_eq_nz in Hc. 2: {
+  intros H; apply Nat.eq_mul_0 in H.
+  destruct H as [H| H]; [ | easy ].
+  subst c; rewrite Nat.mul_0_l in Hc.
+  apply Nat.sub_0_le in Hc.
+  apply Nat.nlt_ge in Hc; apply Hc; clear Hc.
+  destruct p; [ easy | ].
+  destruct p; [ easy | ].
+  destruct p; [ flia Hap | ].
+  destruct p; [ flia Hap | ].
+  do 3 rewrite Nat.sub_succ.
+  rewrite Nat.sub_0_r; cbn.
+  unfold "<".
+  replace 2 with (2 * 1) by easy.
+  apply Nat.mul_le_mono; [ easy | ].
+  apply Nat.neq_0_lt_0.
+  apply Nat.pow_nonzero; flia Hap.
+}
+apply (f_equal (Nat.mul (a ^ 2))) in Hc.
+rewrite <- Nat.pow_add_r in Hc.
+replace (2 + (p - 3)) with (p - 1) in Hc by flia Hap.
+rewrite <- Hc in H2.
+rewrite Nat.mul_add_distr_l, Nat.mul_1_r in H2.
+rewrite Nat.mul_assoc in H2.
+rewrite Nat.mod_add in H2; [ | easy ].
 ...
 
 (* *)

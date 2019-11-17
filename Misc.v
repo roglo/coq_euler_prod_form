@@ -249,6 +249,19 @@ apply Nat_bezout_mul. {
 }
 Qed.
 
+Theorem Nat_sqr_sub_1 : ∀ a, a ^ 2 - 1 = (a + 1) * (a - 1).
+Proof.
+intros.
+destruct (Nat.eq_dec a 0) as [Haz| Haz]; [ now subst a | ].
+rewrite Nat.mul_add_distr_r, Nat.mul_1_l.
+rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
+rewrite Nat.add_sub_assoc; [ | flia Haz ].
+rewrite Nat.pow_2_r.
+rewrite Nat.sub_add; [ easy | ].
+destruct a; [ easy | ].
+cbn; remember (_ * _); flia.
+Qed.
+
 Theorem List_hd_nth_0 {A} : ∀ l (d : A), hd d l = nth 0 l d.
 Proof. intros; now destruct l. Qed.
 
