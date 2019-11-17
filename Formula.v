@@ -2222,6 +2222,14 @@ Definition with_inv_pair p :=
 (* don't even try to compute "with_inv_pair 11": too big *)
 Compute (with_inv_pair 7).
 
+(* partition [2, p-2] into two lists each value "a" of the first
+   list is paired with "a⁻¹ mod p" in the second list *)
+
+Definition partition_2_prime_sub_2 p :=
+  partition (λ i, i <? Nat_pow_mod i (p - 2) p) (seq 2 (p - 3)).
+
+Compute (partition_2_prime_sub_2 41).
+
 Theorem lt_prime_sqr_not_1 : ∀ p,
   is_prime p = true → ∀ a, 2 ≤ a ≤ p - 2 → a ^ 2 mod p ≠ 1.
 Proof.
@@ -2338,6 +2346,17 @@ split.
     a * b ≡ 1 (mod n). We not by Fermat's little theorem that
     a * a^(n-2) indeed equals 1 mod n. So b=a^(n-2) mod n. All
     these pairs are supposed to cover [2, n-2] *)
+(**)
+ remember (seq 2 (n - 3)) as l eqn:Hl.
+ remember (partition_2_prime_sub_2 n) as ll eqn:Hll.
+ symmetry in Hll.
+ destruct ll as (l1, l2).
+ assert (H : length l = length l1 + length l2). {
+   unfold partition_2_prime_sub_2 in Hll.
+   rewrite <- Hl in Hll.
+   eapply partition_length; apply Hll.
+ }
+...
  remember (seq 2 (n - 3)) as l eqn:Hl.
  remember (with_inv_pair n) as l' eqn:Hl'.
  move l' before l.
