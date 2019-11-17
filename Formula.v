@@ -3008,6 +3008,35 @@ Proof.
 intros.
 split.
 -intros Hn.
+ destruct (lt_dec n 3) as [H3n| H3n]. {
+   specialize (prime_ge_2 n Hn) as H2n.
+   now replace n with 2 by flia H2n H3n.
+ }
+ apply Nat.nlt_ge in H3n.
+ replace (n - 1) with (S (n - 2)) at 1 by flia H3n.
+ rewrite Nat_fact_succ.
+ replace (S (n - 2)) with (n - 1) by flia H3n.
+ rewrite <- Nat.mul_mod_idemp_r; [ | flia H3n ].
+ enough (H : fact (n - 2) mod n = 1). {
+   rewrite H, Nat.mul_1_r.
+   apply Nat.mod_small; flia H3n.
+ }
+ rewrite fact_eq_fold_left.
+ enough (H : fold_left Nat.mul (seq 2 (n - 3)) 1 mod n = 1). {
+   replace (seq 1 (n - 2)) with (1 :: seq 2 (n - 3)). 2: {
+     clear - H3n.
+     destruct n; [ flia H3n | ].
+     destruct n; [ flia H3n | ].
+     destruct n; [ flia H3n | ].
+     now cbn; rewrite Nat.sub_0_r.
+   }
+   easy.
+ }
+ (* now we must prove that the multiplication can be done by
+    associating pairs of (a, b) in interval [2, n-2] such that
+    a * b ≡ 1 (mod n). We not by Fermat's little theorem that
+    a * a^(n-2) indeed equals 1 mod n. So b=a^(n-2) mod n. All
+    these pairs are supposed to cover [2, n-2] *)
 ...
 
 Theorem ζ_Euler_product_eq : ...
