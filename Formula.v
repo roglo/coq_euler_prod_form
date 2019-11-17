@@ -3027,20 +3027,22 @@ Definition Nat_pow_mod a b c := Nat_pow_mod_loop a b c.
 (* version testable with Compute *)
 
 Definition with_inv_pair' p :=
-  concat
-    (map (λ c, [fst c; snd c])
-      (filter (λ c, fst c <? snd c)
-         (map (λ i, (i, Nat_pow_mod i (p - 2) p)) (seq 2 (p - 3))))).
+  fold_right
+     (λ i l,
+      let i_inv := Nat_pow_mod i (p - 2) p in
+      if i <? i_inv then i :: i_inv :: l else l)
+     [] (seq 2 (p - 3)).
 Compute (with_inv_pair' 11).
 
 (* same code easier for proofs but not testable because computing
    a^b mod c by computing a^b indeed *)
 
 Definition with_inv_pair p :=
-  concat
-    (map (λ c, [fst c; snd c])
-      (filter (λ c, fst c <? snd c)
-         (map (λ i, (i, i ^ (p - 2) mod p)) (seq 2 (p - 3))))).
+  fold_right
+     (λ i l,
+      let i_inv := i ^ (p - 2) mod p in
+      if i <? i_inv then i :: i_inv :: l else l)
+     [] (seq 2 (p - 3)).
 (* don't even try to compute "with_inv_pair 11": too big *)
 Compute (with_inv_pair 7).
 
@@ -3088,9 +3090,6 @@ split.
      rewrite Hl, Hl'.
      rewrite seq_length.
      unfold with_inv_pair.
-     rewrite <- flat_map_concat_map.
-     rewrite List_flat_map_length.
-     rewrite map_map; cbn - [ "<?" ].
      (* even comparison of lengths is not easy to proof *)
 ...
 
