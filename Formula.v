@@ -3003,6 +3003,49 @@ rewrite IHa.
 rewrite Nat.add_mod_idemp_l; [ easy | now intros H; rewrite H in Hp ].
 Qed.
 
+(* (a ^ b) mod c for testing, without computing a ^ b but
+   using mod along the way *)
+
+Fixpoint Nat_pow_mod_loop a b c :=
+  match b with
+  | 0 => 1
+  | S b' => (a * Nat_pow_mod_loop a b' c) mod c
+  end.
+
+Definition Nat_pow_mod a b c := Nat_pow_mod_loop a b c.
+
+(* from a prime number p, group together values "a" between 2 and
+   p-2 with their inverse modulo p, which is "a^(p-2)" according
+   to Fermat's little theorem; return a list where these pairs
+   are concatened. E.g. with_inv_pair 11 returns
+        [2; 6; 3; 4; 5; 9; 7; 8]
+   with 2*6≡1, 3*4≡1, 5*9≡1, 7*8≡1 [mod 11].
+   This list is a permutation of the sequence of numbers from 2
+   to p-2 (to be proven). So, the product of all elements of this
+   list is at the same time 1 and 2*3*4..*(n-2) [mod p] *)
+
+(* version testable with Compute *)
+
+Definition with_inv_pair' p :=
+  concat
+    (map (λ c, [fst c; snd c])
+      (filter (λ c, fst c <? snd c)
+         (map (λ i, (i, Nat_pow_mod i (p - 2) p)) (seq 2 (p - 3))))).
+Compute (with_inv_pair' 11).
+
+(* same code easier for proofs but not testable because computing
+   a^b mod c by computing a^b indeed *)
+
+Definition with_inv_pair p :=
+  concat
+    (map (λ c, [fst c; snd c])
+      (filter (λ c, fst c <? snd c)
+         (map (λ i, (i, i ^ (p - 2) mod p)) (seq 2 (p - 3))))).
+(* don't even try to compute "with_inv_pair 11": too big *)
+Compute (with_inv_pair 7).
+
+(* *)
+
 Theorem Wilson : ∀ n, is_prime n = true ↔ fact (n - 1) mod n = n - 1.
 Proof.
 intros.
@@ -3037,19 +3080,18 @@ split.
     a * b ≡ 1 (mod n). We not by Fermat's little theorem that
     a * a^(n-2) indeed equals 1 mod n. So b=a^(n-2) mod n. All
     these pairs are supposed to cover [2, n-2] *)
-Search (fold_left Nat.mul).
-Check Permutation_fold_mul.
-Search (Nat.modulo (Nat.pow _ _)).
-Fixpoint Nat_pow_mod_loop a b n :=
-  match b with
-  | 0 => 1
-  | S b' => (a * Nat_pow_mod_loop a b' n) mod n
-  end.
-Definition Nat_pow_mod a b n := Nat_pow_mod_loop a b n.
-
-Definition map_inv_mod n :=
-  map (λ i, (i, Nat_pow_mod i (n - 2) n)) (seq 2 (n - 3)).
-Compute (map_inv_mod 11).
+ remember (seq 2 (n - 3)) as l eqn:Hl.
+ remember (with_inv_pair n) as l' eqn:Hl'.
+ move l' before l.
+ assert (Hperm : Permutation l l'). {
+   assert (length l = length l'). {
+     rewrite Hl, Hl'.
+     rewrite seq_length.
+     unfold with_inv_pair.
+     rewrite <- flat_map_concat_map.
+     rewrite List_flat_map_length.
+     rewrite map_map; cbn - [ "<?" ].
+     (* even comparison of lengths is not easy to proof *)
 ...
 
 Theorem ζ_Euler_product_eq : ...
