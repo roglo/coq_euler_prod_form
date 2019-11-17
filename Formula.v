@@ -3060,7 +3060,19 @@ apply Nat_eq_mod_sub_0 in Ha. 2: {
   apply Nat.le_0_l.
 }
 rewrite Nat_sqr_sub_1 in Ha.
-...
+apply Nat.mod_divide in Ha; [ | easy ].
+specialize (Nat.gauss _ _ _ Ha) as H1.
+assert (H : Nat.gcd p (a + 1) = 1). {
+  apply prime_relatively_prime; [ easy | flia Hap ].
+}
+specialize (H1 H); clear H.
+destruct H1 as (c, Hc).
+destruct c; [ flia Hc Hap | ].
+cbn in Hc; flia Hc Hap.
+Qed.
+
+(* if 2≤a≤p-2 then a ≠ a⁻¹ [mod p]; we know that a⁻¹=a^(p-2) by
+   Fermat's little theorem *)
 
 Theorem lt_prime_inv_is_diff : ∀ p,
   is_prime p = true → ∀ a, 2 ≤ a ≤ p - 2 → a ^ (p - 2) mod p ≠ a mod p.
@@ -3110,7 +3122,9 @@ rewrite <- Hc in H2.
 rewrite Nat.mul_add_distr_l, Nat.mul_1_r in H2.
 rewrite Nat.mul_assoc in H2.
 rewrite Nat.mod_add in H2; [ | easy ].
-...
+revert H2.
+now apply lt_prime_sqr_not_1.
+Qed.
 
 (* *)
 
