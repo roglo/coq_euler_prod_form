@@ -2341,6 +2341,8 @@ split.
  remember (seq 2 (n - 3)) as l eqn:Hl.
  remember (with_inv_pair n) as l' eqn:Hl'.
  move l' before l.
+Search (list _ * list _)%type.
+Print partition.
  assert (Hperm : Permutation l l'). {
    assert (length l = length l'). {
      rewrite Hl, Hl'.
