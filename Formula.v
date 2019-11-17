@@ -3037,6 +3037,8 @@ split.
     a * b ≡ 1 (mod n). We not by Fermat's little theorem that
     a * a^(n-2) indeed equals 1 mod n. So b=a^(n-2) mod n. All
     these pairs are supposed to cover [2, n-2] *)
+Search (fold_left Nat.mul).
+Check Permutation_fold_mul.
 ...
 
 Theorem ζ_Euler_product_eq : ...
