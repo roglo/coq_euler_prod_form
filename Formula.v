@@ -2211,7 +2211,7 @@ Definition with_inv_pair' p :=
 Compute (with_inv_pair' 11).
 
 (* same code easier for proofs but not testable because computing
-   a^b mod c by computing a^b indeed *)
+   a^b mod c by computing a^b which can produce huge numbers *)
 
 Definition with_inv_pair p :=
   fold_right
