@@ -2225,10 +2225,14 @@ Compute (with_inv_pair 7).
 (* partition [2, p-2] into two lists each value "a" of the first
    list is paired with "a⁻¹ mod p" in the second list *)
 
+(* bad: this code is not pairing *)
 Definition partition_2_prime_sub_2 p :=
   partition (λ i, i <? Nat_pow_mod i (p - 2) p) (seq 2 (p - 3)).
 
-Compute (partition_2_prime_sub_2 41).
+...
+
+Compute (partition_2_prime_sub_2 7).
+Compute (with_inv_pair' 7).
 
 Theorem lt_prime_sqr_not_1 : ∀ p,
   is_prime p = true → ∀ a, 2 ≤ a ≤ p - 2 → a ^ 2 mod p ≠ 1.
@@ -2356,6 +2360,7 @@ split.
    rewrite <- Hl in Hll.
    eapply partition_length; apply Hll.
  }
+Search partition.
 ...
  remember (seq 2 (n - 3)) as l eqn:Hl.
  remember (with_inv_pair n) as l' eqn:Hl'.
