@@ -2438,50 +2438,6 @@ split. {
 }
 Qed.
 
-Theorem fold_mod_succ : ∀ n d, d - snd (Nat.divmod n d 0 d) = n mod (S d).
-Proof. easy. Qed.
-
-Theorem Nat_mod_pow_mod : ∀ a b c, (a mod b) ^ c mod b = a ^ c mod b.
-Proof.
-intros.
-revert b c.
-induction a; intros. {
-  destruct (Nat.eq_dec b 0) as [Hbz| Hbz]; [ now subst b | ].
-  now rewrite Nat.mod_0_l.
-}
-...
-destruct (Nat.eq_dec b 0) as [Hbz| Hbz]; [ now subst b | ].
-destruct (Nat.eq_dec c 0) as [Hcz| Hcz]; [ now subst c | ].
-destruct (Nat.eq_dec c 1) as [H1c| H1c]. {
-  rewrite H1c.
-  do 2 rewrite Nat.pow_1_r.
-  now apply Nat.mod_mod.
-}
-destruct (Nat.eq_dec c 2) as [H2c| H2c]. {
-  subst c.
-...
-destruct b; [ easy | ].
-destruct b; [ easy | ].
-destruct b. {
-  remember (a mod 2) as b eqn:Hb; symmetry in Hb.
-  revert a Hb.
-  induction b; intros. {
-    rewrite Nat.pow_0_l; [ | easy ].
-    rewrite Nat.mod_0_l; [ | easy ].
-    apply Nat.mod_divide in Hb; [ | easy ].
-    destruct Hb as (b, Hb).
-    rewrite Hb.
-    rewrite Nat.pow_mul_l.
-    destruct c; [ easy | ].
-    rewrite (Nat.pow_succ_r 2); [ | flia ].
-    rewrite (Nat.mul_comm 2), Nat.mul_assoc.
-    rewrite Nat.mul_mod; [ | easy ].
-    rewrite Nat.mod_same; [ | easy ].
-    now rewrite Nat.mul_0_r.
-  }
-  rewrite Nat.pow_succ_l.
-...
-
 Theorem inv_mod_prime_involutive : ∀ i p,
   is_prime p = true
   → 2 ≤ i ≤ p - 2
@@ -2492,8 +2448,8 @@ assert (Hpz : p ≠ 0) by now intros H; rewrite H in Hp.
 unfold inv_mod.
 rewrite Nat_pow_mod_is_pow_mod; [ | now intros H; subst p ].
 rewrite Nat_pow_mod_is_pow_mod; [ | now intros H; subst p ].
-...
 rewrite Nat_mod_pow_mod.
+rewrite <- Nat.pow_mul_r.
 ... faut réfléchir ...
 specialize (fermat_little p Hp (i ^ (p - 2) mod p)) as H1.
 assert (H : 1 < i ^ (p - 2) mod p < p). {

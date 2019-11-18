@@ -593,6 +593,18 @@ apply (Nat.le_trans _ a); [ easy | ].
 apply Nat.le_add_r.
 Qed.
 
+Theorem Nat_mod_pow_mod : ∀ a b c, (a mod b) ^ c mod b = a ^ c mod b.
+Proof.
+intros.
+destruct (Nat.eq_dec b 0) as [Hbz| Hbz]; [ now subst b | ].
+revert a b Hbz.
+induction c; intros; [ easy | cbn ].
+rewrite Nat.mul_mod_idemp_l; [ | easy ].
+rewrite <- Nat.mul_mod_idemp_r; [ | easy ].
+rewrite IHc; [ | easy ].
+now rewrite Nat.mul_mod_idemp_r.
+Qed.
+
 Theorem List_hd_nth_0 {A} : ∀ l (d : A), hd d l = nth 0 l d.
 Proof. intros; now destruct l. Qed.
 
