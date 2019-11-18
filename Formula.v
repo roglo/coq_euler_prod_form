@@ -2179,61 +2179,6 @@ Check @ζ_times_product_on_primes_close_to_1.
 
 (* below to be moved to Primes.v when working *)
 
-(* (a ^ b) mod c for testing, without computing a ^ b but
-   using mod along the way *)
-
-Fixpoint Nat_pow_mod_loop a b c :=
-  match b with
-  | 0 => 1
-  | S b' => (a * Nat_pow_mod_loop a b' c) mod c
-  end.
-
-Definition Nat_pow_mod a b c := Nat_pow_mod_loop a b c.
-
-(* from a prime number p, group together values "a" between 2 and
-   p-2 with their inverse modulo p, which is "a^(p-2)" according
-   to Fermat's little theorem; return a list where these pairs
-   are concatened. E.g. with_inv_pair 11 returns
-        [2; 6; 3; 4; 5; 9; 7; 8]
-   with 2*6≡1, 3*4≡1, 5*9≡1, 7*8≡1 [mod 11].
-   This list is a permutation of the sequence of numbers from 2
-   to p-2 (to be proven). So, the product of all elements of this
-   list is at the same time 1 and 2*3*4..*(n-2) [mod p] *)
-
-(* version testable with Compute *)
-
-Definition with_inv_pair' p :=
-  fold_right
-     (λ i l,
-      let i_inv := Nat_pow_mod i (p - 2) p in
-      if i <? i_inv then i :: i_inv :: l else l)
-     [] (seq 2 (p - 3)).
-Compute (with_inv_pair' 11).
-
-(* same code easier for proofs but not testable because computing
-   a^b mod c by computing a^b which can produce huge numbers *)
-
-Definition with_inv_pair p :=
-  fold_right
-     (λ i l,
-      let i_inv := i ^ (p - 2) mod p in
-      if i <? i_inv then i :: i_inv :: l else l)
-     [] (seq 2 (p - 3)).
-(* don't even try to compute "with_inv_pair 11": too big *)
-Compute (with_inv_pair 7).
-
-(* partition [2, p-2] into two lists each value "a" of the first
-   list is paired with "a⁻¹ mod p" in the second list *)
-
-(* bad: this code is not pairing *)
-Definition partition_2_prime_sub_2 p :=
-  partition (λ i, i <? Nat_pow_mod i (p - 2) p) (seq 2 (p - 3)).
-
-...
-
-Compute (partition_2_prime_sub_2 7).
-Compute (with_inv_pair' 7).
-
 Theorem lt_prime_sqr_not_1 : ∀ p,
   is_prime p = true → ∀ a, 2 ≤ a ≤ p - 2 → a ^ 2 mod p ≠ 1.
 Proof.
@@ -2313,6 +2258,97 @@ rewrite Nat.mod_add in H2; [ | easy ].
 revert H2.
 now apply lt_prime_sqr_not_1.
 Qed.
+
+(* (a ^ b) mod c for testing, without computing a ^ b but
+   using mod along the way *)
+
+Fixpoint Nat_pow_mod_loop a b c :=
+  match b with
+  | 0 => 1
+  | S b' => (a * Nat_pow_mod_loop a b' c) mod c
+  end.
+
+Definition Nat_pow_mod a b c := Nat_pow_mod_loop a b c.
+
+(* from a prime number p, group together values "a" between 2 and
+   p-2 with their inverse modulo p, which is "a^(p-2)" according
+   to Fermat's little theorem; return a list where these pairs
+   are concatened. E.g. with_inv_pair 11 returns
+        [2; 6; 3; 4; 5; 9; 7; 8]
+   with 2*6≡1, 3*4≡1, 5*9≡1, 7*8≡1 [mod 11].
+   This list is a permutation of the sequence of numbers from 2
+   to p-2 (to be proven). So, the product of all elements of this
+   list is at the same time 1 and 2*3*4..*(n-2) [mod p] *)
+
+Definition with_inv_pair p :=
+  fold_right
+     (λ i l,
+      let i_inv := Nat_pow_mod i (p - 2) p in
+      if i <? i_inv then i :: i_inv :: l else l)
+     [] (seq 2 (p - 3)).
+Compute (with_inv_pair 11).
+
+Fixpoint glop it p i :=
+  match it with
+  | 0 => []
+  | S it' =>
+      if lt_dec i (p - 2) then
+        let l := glop it' p (i + 1) in
+        if in_dec Nat.eq_dec i l then l
+        else i :: Nat_pow_mod i (p - 2) p :: l
+      else []
+  end.
+
+Definition pouet p := glop p p 2.
+
+Fixpoint glop' l p i :=
+  match i with
+  | 0 | 1 => l
+  | S i' =>
+      if in_dec Nat.eq_dec i l then glop' l p i'
+      else glop' (i :: Nat_pow_mod i (p - 2) p :: l) p i'
+  end.
+
+Definition pouet' p := glop' [] p (p - 2).
+
+Fixpoint glop'' it l p i :=
+  match it with
+  | 0 => l
+  | S it' =>
+      if lt_dec i (p - 2) then
+        if in_dec Nat.eq_dec i l then glop'' it' l p (i + 1)
+        else glop'' it' (i :: Nat_pow_mod i (p - 2) p :: l) p (i + 1)
+      else l
+  end.
+
+Definition pouet'' p := glop'' p [] p 2.
+
+Fixpoint glop''' it p i :=
+  match it with
+  | 0 => []
+  | S it' =>
+      if lt_dec i (p - 2) then
+        i :: Nat_pow_mod i (p - 2) p :: glop''' it' p (i + 1)
+      else []
+  end.
+
+Definition pouet''' p := nodup Nat.eq_dec (glop''' p p 2).
+
+Fixpoint glop'''' l p i :=
+  match i with
+  | 0 | 1 => l
+  | S i' => glop'''' (i :: Nat_pow_mod i (p - 2) p :: l) p i'
+  end.
+
+Definition pouet'''' p := nodup Nat.eq_dec (glop'''' [] p (p - 2)).
+
+Compute (pouet 11).
+Compute (pouet' 11).
+Compute (pouet'' 11).
+Compute (pouet''' 11).
+Compute (pouet'''' 11).
+Compute (with_inv_pair 11).
+...
 
 (* *)
 
