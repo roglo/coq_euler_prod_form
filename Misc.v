@@ -22,6 +22,269 @@ Definition List_combine_all {A} (l1 l2 : list A) (d : A) :=
   in
   List.combine l'1 l'2.
 
+(* summations *)
+
+Notation "'Σ' ( i = b , e ) , g" :=
+  (fold_left (λ c i, c + g) (seq b (S e - b)) 0)
+  (at level 45, i at level 0, b at level 60, e at level 60).
+
+Theorem fold_left_add_fun_from_0 {A} : ∀ a l (f : A → nat),
+  fold_left (λ c i, c + f i) l a =
+  a + fold_left (λ c i, c + f i) l 0.
+Proof.
+intros.
+revert a.
+induction l as [| x l]; intros; [ symmetry; apply Nat.add_0_r | cbn ].
+rewrite IHl; symmetry; rewrite IHl.
+apply Nat.add_assoc.
+Qed.
+
+Theorem fold_left_mul_fun_from_1 {A} : ∀ a l (f : A → nat),
+  fold_left (λ c i, c * f i) l a =
+  a * fold_left (λ c i, c * f i) l 1.
+Proof.
+intros.
+revert a.
+induction l as [| x l]; intros; [ symmetry; apply Nat.mul_1_r | cbn ].
+rewrite IHl; symmetry; rewrite IHl.
+rewrite Nat.add_0_r.
+apply Nat.mul_assoc.
+Qed.
+
+Theorem fold_left_mul_from_1 : ∀ a l,
+  fold_left Nat.mul l a = a * fold_left Nat.mul l 1.
+Proof.
+intros.
+revert a.
+induction l as [| x l]; intros; [ symmetry; apply Nat.mul_1_r | cbn ].
+rewrite IHl; symmetry; rewrite IHl.
+rewrite Nat.add_0_r.
+apply Nat.mul_assoc.
+Qed.
+
+Theorem summation_split_first : ∀ b e f,
+  b ≤ e
+  → Σ (i = b, e), f i = f b + Σ (i = S b, e), f i.
+Proof.
+intros * Hbe.
+rewrite Nat.sub_succ.
+replace (S e - b) with (S (e - b)) by flia Hbe.
+cbn.
+apply fold_left_add_fun_from_0.
+Qed.
+
+Theorem summation_split_last : ∀ b e f,
+  b ≤ e
+  → 1 ≤ e
+  → Σ (i = b, e), f i = Σ (i = b, e - 1), f i + f e.
+Proof.
+intros * Hbe He.
+destruct e; [ flia He | clear He ].
+rewrite Nat.sub_succ, Nat.sub_0_r.
+replace (S (S e) - b) with (S (S e - b)) by flia Hbe.
+remember (S e - b) as n eqn:Hn.
+revert b Hbe Hn.
+induction n; intros. {
+  now replace (S e) with b by flia Hbe Hn.
+}
+remember (S n) as sn; cbn; subst sn.
+rewrite fold_left_add_fun_from_0.
+rewrite IHn; [ | flia Hn | flia Hn ].
+rewrite Nat.add_assoc; f_equal; cbn.
+now rewrite (fold_left_add_fun_from_0 (f b)).
+Qed.
+
+Theorem all_0_summation_0 : ∀ b e f,
+  (∀ i, b ≤ i ≤ e → f i = 0)
+  → Σ (i = b, e), f i = 0.
+Proof.
+intros * Hz.
+remember (S e - b) as n eqn:Hn.
+revert b Hz Hn.
+induction n; intros; [ easy | cbn ].
+rewrite fold_left_add_fun_from_0.
+rewrite IHn; [ | | flia Hn ]. {
+  rewrite Hz; [ easy | flia Hn ].
+}
+intros i Hi.
+apply Hz; flia Hi.
+Qed.
+
+Ltac rewrite_in_summation th :=
+  let b := fresh "b" in
+  let e := fresh "e" in
+  let a := fresh "a" in
+  intros b e;
+  remember (S e - b) as n eqn:Hn;
+  remember 0 as a eqn:Ha; clear Ha;
+  revert e a b Hn;
+  induction n as [| n IHn]; intros; [ easy | cbn ];
+  rewrite th;
+  apply (IHn e); flia Hn.
+
+Theorem summation_eq_compat : ∀ b e g h,
+  (∀ i, b ≤ i ≤ e → g i = h i)
+  → Σ (i = b, e), g i = Σ (i = b, e), h i.
+Proof.
+intros * Hgh.
+remember (S e - b) as n eqn:Hn.
+remember 0 as a eqn:Ha; clear Ha.
+revert e a b Hn Hgh.
+induction n as [| n IHn]; intros; [ easy | cbn ].
+rewrite Hgh; [ | flia Hn ].
+rewrite (IHn e); [ easy | flia Hn | ].
+intros i Hbie.
+apply Hgh; flia Hbie.
+Qed.
+
+Theorem mul_add_distr_r_in_summation : ∀ b e f g h,
+  Σ (i = b, e), (f i + g i) * h i =
+  Σ (i = b, e), (f i * h i + g i * h i).
+Proof.
+intros; revert b e.
+rewrite_in_summation Nat.mul_add_distr_r.
+Qed.
+
+Theorem double_mul_assoc_in_summation : ∀ b e f g h k,
+  Σ (i = b, e), f i * g i * h i * k i = Σ (i = b, e), f i * (g i * h i * k i).
+Proof.
+intros.
+assert (H : ∀ a b c d, a * b * c * d = a * (b * c * d)) by flia.
+revert b e.
+rewrite_in_summation H.
+Qed.
+
+Theorem mul_assoc_in_summation : ∀ b e f g h,
+  Σ (i = b, e), f i * g i * h i = Σ (i = b, e), f i * (g i * h i).
+Proof.
+intros.
+assert (H : ∀ a b c, a * b * c = a * (b * c)) by flia.
+revert b e.
+rewrite_in_summation H.
+Qed.
+
+Theorem mul_comm_in_summation : ∀ b e f g,
+  Σ (i = b, e), f i * g i = Σ (i = b, e), g i * f i.
+Proof.
+intros.
+assert (H : ∀ a b, a * b = b * a) by flia.
+revert b e.
+rewrite_in_summation H.
+Qed.
+
+Theorem mul_summation_distr_l : ∀ a b e f,
+  a * (Σ (i = b, e), f i) = Σ (i = b, e), a * f i.
+Proof.
+intros.
+remember (S e - b) as n eqn:Hn.
+revert e a b Hn.
+induction n; intros; [ apply Nat.mul_0_r | cbn ].
+rewrite fold_left_add_fun_from_0.
+rewrite Nat.mul_add_distr_l.
+rewrite (IHn e); [ | flia Hn ].
+symmetry.
+apply fold_left_add_fun_from_0.
+Qed.
+
+Theorem mul_summation_distr_r : ∀ a b e f,
+  (Σ (i = b, e), f i) * a = Σ (i = b, e), f i * a.
+Proof.
+intros.
+rewrite Nat.mul_comm.
+rewrite mul_summation_distr_l.
+now rewrite mul_comm_in_summation.
+Qed.
+
+Theorem power_shuffle1_in_summation : ∀ b e a f g,
+  Σ (i = b, e), a * f i * a ^ (e - i) * g i =
+  Σ (i = b, e), f i * a ^ (S e - i) * g i.
+Proof.
+intros.
+(* failed to be able to use "rewrite_in_summation" here *)
+assert
+  (H : ∀ i e,
+   a * f i * a ^ (e - i) * g i = f i * a ^ (S (e - i)) * g i). {
+  clear e; intros; f_equal.
+  rewrite <- Nat.mul_assoc, Nat.mul_comm, <- Nat.mul_assoc.
+  f_equal.
+  rewrite Nat.mul_comm.
+  replace a with (a ^ 1) at 1 by apply Nat.pow_1_r.
+  now rewrite <- Nat.pow_add_r.
+}
+remember (S e - b) as n eqn:Hn.
+remember 0 as z eqn:Hz; clear Hz.
+revert e z b Hn.
+induction n as [| n IHn]; intros; [ easy | ].
+cbn - [ "-" ].
+rewrite IHn; [ | flia Hn ].
+f_equal; f_equal; rewrite H.
+f_equal; f_equal; f_equal; flia Hn.
+Qed.
+
+Theorem power_shuffle2_in_summation : ∀ b e a c f,
+  Σ (i = b, e), c * f i * a ^ (e - i) * c ^ i =
+  Σ (i = b, e), f i * a ^ (e - i) * c ^ S i.
+Proof.
+intros.
+remember (S e - b) as n eqn:Hn.
+remember 0 as z eqn:Hz; clear Hz.
+revert e z b Hn.
+induction n as [| n IHn]; intros; [ easy | ].
+cbn.
+rewrite IHn; [ | flia Hn ].
+f_equal; f_equal.
+do 2 rewrite <- Nat.mul_assoc.
+rewrite Nat.mul_comm.
+do 3 rewrite <- Nat.mul_assoc.
+f_equal; f_equal.
+apply Nat.mul_comm.
+Qed.
+
+Theorem summation_add : ∀ b e f g,
+  Σ (i = b, e), (f i + g i) = Σ (i = b, e), f i + Σ (i = b, e), g i.
+Proof.
+intros.
+remember (S e - b) as n eqn:Hn.
+revert b Hn.
+induction n; intros; [ easy | cbn ].
+rewrite fold_left_add_fun_from_0.
+rewrite IHn; [ | flia Hn ].
+rewrite (fold_left_add_fun_from_0 (f b)).
+rewrite (fold_left_add_fun_from_0 (g b)).
+flia.
+Qed.
+
+Theorem summation_shift : ∀ b e f,
+  Σ (i = S b, S e), f i = Σ (i = b, e), f (S i).
+Proof.
+intros.
+rewrite Nat.sub_succ.
+remember (S e - b) as n eqn:Hn.
+revert b Hn.
+induction n; intros; [ easy | cbn ].
+setoid_rewrite fold_left_add_fun_from_0.
+rewrite IHn; [ easy | flia Hn ].
+Qed.
+
+Theorem summation_mod_idemp : ∀ b e f n,
+  (Σ (i = b, e), f i) mod n = (Σ (i = b, e), f i mod n) mod n.
+Proof.
+intros.
+destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
+remember (S e - b) as m eqn:Hm.
+revert b Hm.
+induction m; intros; [ easy | cbn ].
+rewrite (fold_left_add_fun_from_0 (f b)).
+rewrite (fold_left_add_fun_from_0 (f b mod n)).
+rewrite Nat.add_mod_idemp_l; [ | easy ].
+rewrite <- Nat.add_mod_idemp_r; [ symmetry | easy ].
+rewrite <- Nat.add_mod_idemp_r; [ symmetry | easy ].
+f_equal; f_equal.
+apply IHm; flia Hm.
+Qed.
+
+(* *)
+
 Theorem Nat_add_div_same : ∀ a b c,
   Nat.divide c a
   → a / c + b / c = (a + b) / c.
@@ -249,6 +512,45 @@ apply Nat_bezout_mul. {
 }
 Qed.
 
+Theorem Nat_pow_sub_pow : ∀ a b n,
+  n ≠ 0
+  → b ≤ a
+  → a ^ n - b ^ n =
+     (a - b) * Σ (i = 0, n - 1), a ^ (n - i - 1) * b ^ i.
+Proof.
+intros * Hnz Hba.
+destruct n; [ easy | clear Hnz ].
+induction n; [ now cbn; do 3 rewrite Nat.mul_1_r | ].
+remember (S n) as sn; cbn - [ "-" ]; subst sn.
+rewrite <- (Nat.sub_add (a * b ^ S n) (a * a ^ S n)). 2: {
+  apply Nat.mul_le_mono_l.
+  now apply Nat.pow_le_mono_l.
+}
+rewrite <- Nat.mul_sub_distr_l.
+rewrite <- Nat.add_sub_assoc; [ | now apply Nat.mul_le_mono_r ].
+rewrite <- Nat.mul_sub_distr_r.
+rewrite (Nat.mul_comm a).
+rewrite IHn, <- Nat.mul_assoc.
+rewrite <- Nat.mul_add_distr_l; f_equal.
+do 2 rewrite Nat.sub_succ.
+replace (n - 0) with n by now rewrite Nat.sub_0_r.
+replace (S n - 0) with (S n) at 2 by now rewrite Nat.sub_0_r.
+rewrite (summation_split_last _ (S n)); [ | flia | flia ].
+rewrite Nat.sub_succ.
+replace (n - 0) with n by now rewrite Nat.sub_0_r.
+replace (S (S n) - S n - 1) with 0 by flia.
+rewrite Nat.pow_0_r, Nat.mul_1_l.
+f_equal.
+rewrite mul_summation_distr_r.
+apply summation_eq_compat.
+intros i Hi.
+rewrite Nat.mul_shuffle0; f_equal.
+rewrite <- (Nat.pow_1_r a) at 2.
+rewrite <- Nat.pow_add_r.
+f_equal; flia Hi.
+Qed.
+
+(* could be a corollary of Nat_pow_sub_pow *)
 Theorem Nat_sqr_sub_1 : ∀ a, a ^ 2 - 1 = (a + 1) * (a - 1).
 Proof.
 intros.
