@@ -2217,7 +2217,7 @@ apply Nat_eq_mod_sub_0 in Ha. 2: {
   apply Nat.pow_nonzero; flia Hap.
 }
 specialize (fermat_little p Hp a) as H1.
-assert (H : 1 < a < p) by flia Hap.
+assert (H : 1 ≤ a < p) by flia Hap.
 specialize (H1 H); clear H.
 replace (p - 1) with (S (p - 2)) in H1 by flia Hap.
 cbn in H1.
@@ -2257,7 +2257,7 @@ assert (H : Nat.gcd p a = 1). {
 }
 specialize (H1 H); clear H.
 specialize (fermat_little _ Hp a) as H2.
-assert (H : 1 < a < p) by flia Hap.
+assert (H : 1 ≤ a < p) by flia Hap.
 specialize (H2 H); clear H.
 destruct H1 as (c, Hc).
 apply Nat.add_sub_eq_nz in Hc. 2: {
@@ -2315,6 +2315,24 @@ Qed.
 (* inverse modulo (true when n is prime) *)
 
 Definition inv_mod i n := Nat_pow_mod i (n - 2) n.
+
+Theorem mul_inv_diag_l : ∀ i p,
+  is_prime p = true → 1 ≤ i ≤ p - 1 → (inv_mod i p * i) mod p = 1.
+Proof.
+intros * Hp Hip.
+assert (Hpz : p ≠ 0) by now intros H; rewrite H in Hp.
+unfold inv_mod.
+rewrite Nat_pow_mod_is_pow_mod; [ | easy ].
+rewrite Nat.mul_mod_idemp_l; [ | easy ].
+replace i with (i ^ 1) at 2 by now rewrite Nat.pow_1_r.
+rewrite <- Nat.pow_add_r.
+replace (p - 2 + 1) with (p - 1) by flia Hip.
+apply fermat_little; [ easy | flia Hip ].
+Qed.
+
+Theorem mul_inv_diag_r : ∀ i p,
+  is_prime p = true → 1 ≤ i ≤ p - 1 → (i * inv_mod i p) mod p = 1.
+Proof. now intros; rewrite Nat.mul_comm; apply mul_inv_diag_l. Qed.
 
 Theorem inv_mod_neq : ∀ i p,
   is_prime p = true → 2 ≤ i ≤ p - 2 → inv_mod i p ≠ i.
@@ -2386,7 +2404,7 @@ split. {
   }
   destruct j; [ clear Hi | flia Hi ].
   specialize (fermat_little p Hp i) as H1.
-  assert (H : 1 < i < p) by flia Hip.
+  assert (H : 1 ≤ i < p) by flia Hip.
   specialize (H1 H); clear H.
   replace (p - 1) with (S (p - 2)) in H1 by flia Hip.
   cbn in H1.
@@ -2402,7 +2420,7 @@ split. {
   }
   clear j Hi.
   specialize (fermat_little p Hp i) as H1.
-  assert (H : 1 < i < p) by flia Hip.
+  assert (H : 1 ≤ i < p) by flia Hip.
   specialize (H1 H); clear H.
   replace (p - 1) with (S (p - 2)) in H1 by flia Hip.
   cbn in H1.
@@ -2553,6 +2571,7 @@ Theorem eq_fold_left_mul_seq_2_prime_sub_3_1 : ∀ p,
 Proof.
 intros * Hp H3p.
 Search (2 ≤ _ ≤ _ - _).
+Search inv_mod.
 ...
 assert (H : ∀ i, i ∈ seq 2 (p - 3) → ∃ j, ...
 ...

@@ -1775,7 +1775,7 @@ Qed.
 
 Theorem smaller_than_prime_all_different_multiples : ∀ p,
   is_prime p = true
-  → ∀ a, 1 < a < p
+  → ∀ a, 1 ≤ a < p
   → ∀ i j, i < j < p → (i * a) mod p ≠ (j * a) mod p.
 Proof.
 intros * Hp * Hap * Hijp.
@@ -1829,7 +1829,7 @@ now rewrite <- IHn, Nat_fact_succ, Nat.mul_comm.
 Qed.
 
 Theorem fermat_little : ∀ p,
-  is_prime p = true → ∀ a, 1 < a < p → a ^ (p - 1) mod p = 1.
+  is_prime p = true → ∀ a, 1 ≤ a < p → a ^ (p - 1) mod p = 1.
 Proof.
 intros * Hp * Hap.
 specialize (smaller_than_prime_all_different_multiples p Hp a Hap) as H1.
