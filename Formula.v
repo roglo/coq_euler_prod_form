@@ -2478,9 +2478,7 @@ rewrite fermat_little_1; [ | easy ].
 apply Nat.mod_small; flia Hip.
 Qed.
 
-Inspect 1.
-
-...
+Search inv_mod.
 
 (* from a prime number p, group together values "a" between 2 and
    p-2 with their inverse modulo p, which is "a^(p-2)" according
@@ -2554,7 +2552,8 @@ Theorem eq_fold_left_mul_seq_2_prime_sub_3_1 : ∀ p,
   → fold_left Nat.mul (seq 2 (p - 3)) 1 mod p = 1.
 Proof.
 intros * Hp H3p.
-Inspect 5.
+Search (2 ≤ _ ≤ _ - _).
+...
 assert (H : ∀ i, i ∈ seq 2 (p - 3) → ∃ j, ...
 ...
 
