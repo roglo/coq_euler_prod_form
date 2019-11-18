@@ -2280,74 +2280,57 @@ Definition Nat_pow_mod a b c := Nat_pow_mod_loop a b c.
    to p-2 (to be proven). So, the product of all elements of this
    list is at the same time 1 and 2*3*4..*(n-2) [mod p] *)
 
-Definition with_inv_pair p :=
-  fold_right
-     (λ i l,
-      let i_inv := Nat_pow_mod i (p - 2) p in
-      if i <? i_inv then i :: i_inv :: l else l)
-     [] (seq 2 (p - 3)).
+Fixpoint with_inv_pair_loop p i :=
+  match i with
+  | 0 | 1 => []
+  | S i' => i :: Nat_pow_mod i (p - 2) p :: with_inv_pair_loop p i'
+  end.
+
+Definition with_inv_pair p := nodup Nat.eq_dec (with_inv_pair_loop p (p - 2)).
+
 Compute (with_inv_pair 11).
 
-Fixpoint glop it p i :=
-  match it with
-  | 0 => []
-  | S it' =>
-      if lt_dec i (p - 2) then
-        let l := glop it' p (i + 1) in
-        if in_dec Nat.eq_dec i l then l
-        else i :: Nat_pow_mod i (p - 2) p :: l
-      else []
-  end.
+Theorem length_with_inv_pair_loop : ∀ p i,
+  length (with_inv_pair_loop p i) = 2 * i - 2.
+Proof.
+intros.
+revert p.
+induction i; intros; [ easy | ].
+cbn - [ "/" ].
+destruct i; [ easy | ].
+cbn - [ with_inv_pair_loop ].
+rewrite IHi; flia.
+Qed.
 
-Definition pouet p := glop p p 2.
+Theorem glop : ∀ p i,
+  length (nodup Nat.eq_dec (with_inv_pair_loop p i)) = i - 1.
+Proof.
+intros.
+revert p.
+induction i; intros; [ easy | cbn ].
+destruct i; [ easy | ].
+(* bof *)
+...
 
-Fixpoint glop' l p i :=
-  match i with
-  | 0 | 1 => l
-  | S i' =>
-      if in_dec Nat.eq_dec i l then glop' l p i'
-      else glop' (i :: Nat_pow_mod i (p - 2) p :: l) p i'
-  end.
+Theorem length_with_inv_pair : ∀ p, length (with_inv_pair p) = p - 3.
+Proof.
+intros.
+unfold with_inv_pair.
+remember (with_inv_pair_loop p (p - 2)) as l eqn:Hl.
+assert (Hocc : ∀ i, i ∈ l → count_occ Nat.eq_dec l i = 2). {
+  intros * Hil.
+  revert i Hil.
+  induction l as [| j l]; intros; [ easy | ].
+  destruct Hil as [Hil| Hil]. {
+    subst j; cbn.
+    destruct (Nat.eq_dec i i) as [Hii| Hii]; [ clear Hii | easy ].
+    f_equal.
+    apply IHl.
+...
 
-Definition pouet' p := glop' [] p (p - 2).
-
-Fixpoint glop'' it l p i :=
-  match it with
-  | 0 => l
-  | S it' =>
-      if lt_dec i (p - 2) then
-        if in_dec Nat.eq_dec i l then glop'' it' l p (i + 1)
-        else glop'' it' (i :: Nat_pow_mod i (p - 2) p :: l) p (i + 1)
-      else l
-  end.
-
-Definition pouet'' p := glop'' p [] p 2.
-
-Fixpoint glop''' it p i :=
-  match it with
-  | 0 => []
-  | S it' =>
-      if lt_dec i (p - 2) then
-        i :: Nat_pow_mod i (p - 2) p :: glop''' it' p (i + 1)
-      else []
-  end.
-
-Definition pouet''' p := nodup Nat.eq_dec (glop''' p p 2).
-
-Fixpoint glop'''' l p i :=
-  match i with
-  | 0 | 1 => l
-  | S i' => glop'''' (i :: Nat_pow_mod i (p - 2) p :: l) p i'
-  end.
-
-Definition pouet'''' p := nodup Nat.eq_dec (glop'''' [] p (p - 2)).
-
-Compute (pouet 11).
-Compute (pouet' 11).
-Compute (pouet'' 11).
-Compute (pouet''' 11).
-Compute (pouet'''' 11).
-Compute (with_inv_pair 11).
+Search count_occ.
+Search nodup.
+Search (length (nodup _)).
 ...
 
 (* *)
@@ -2386,23 +2369,9 @@ split.
     a * b ≡ 1 (mod n). We not by Fermat's little theorem that
     a * a^(n-2) indeed equals 1 mod n. So b=a^(n-2) mod n. All
     these pairs are supposed to cover [2, n-2] *)
-(**)
- remember (seq 2 (n - 3)) as l eqn:Hl.
- remember (partition_2_prime_sub_2 n) as ll eqn:Hll.
- symmetry in Hll.
- destruct ll as (l1, l2).
- assert (H : length l = length l1 + length l2). {
-   unfold partition_2_prime_sub_2 in Hll.
-   rewrite <- Hl in Hll.
-   eapply partition_length; apply Hll.
- }
-Search partition.
-...
  remember (seq 2 (n - 3)) as l eqn:Hl.
  remember (with_inv_pair n) as l' eqn:Hl'.
  move l' before l.
-Search (list _ * list _)%type.
-Print partition.
  assert (Hperm : Permutation l l'). {
    assert (length l = length l'). {
      rewrite Hl, Hl'.
