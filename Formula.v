@@ -2264,7 +2264,7 @@ Qed.
 
 Fixpoint Nat_pow_mod_loop a b c :=
   match b with
-  | 0 => 1
+  | 0 => 1 mod c
   | S b' => (a * Nat_pow_mod_loop a b' c) mod c
   end.
 
@@ -2277,22 +2277,18 @@ Theorem Nat_pow_mod_is_pow_mod : ∀ a b c,
   c ≠ 0 → Nat_pow_mod a b c = (a ^ b) mod c.
 Proof.
 intros * Hcz.
-destruct (le_dec c 1) as [Hc1 | Hc1]. {
-  unfold Nat_pow_mod.
-  destruct c; [ easy | ].
-    destruct b.
-cbn.
-...
-revert a c.
-induction b; intros. {
-  cbn. rewrite Nat.mod_small.
-...
+revert a.
+induction b; intros; [ easy | ].
+cbn; rewrite IHb.
+now rewrite Nat.mul_mod_idemp_r.
+Qed.
 
 Theorem inv_mod_neq : ∀ i p,
   is_prime p = true → 2 ≤ i ≤ p - 2 → inv_mod i p ≠ i.
 Proof.
 intros * Hp Hip Hcon.
 unfold inv_mod in Hcon.
+rewrite Nat_pow_mod_is_pow_mod in Hcon; [ | now intros H; subst p ].
 ...
 
 (* from a prime number p, group together values "a" between 2 and
