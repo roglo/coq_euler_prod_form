@@ -2316,10 +2316,10 @@ Qed.
 
 Definition inv_mod i n := Nat_pow_mod i (n - 2) n.
 
-Theorem mul_inv_diag_l : ∀ i p,
-  is_prime p = true → 1 ≤ i ≤ p - 1 → (inv_mod i p * i) mod p = 1.
+Theorem mul_inv_diag_l_mod : ∀ p,
+  is_prime p = true → ∀i, 1 ≤ i ≤ p - 1 → (inv_mod i p * i) mod p = 1.
 Proof.
-intros * Hp Hip.
+intros * Hp * Hip.
 assert (Hpz : p ≠ 0) by now intros H; rewrite H in Hp.
 unfold inv_mod.
 rewrite Nat_pow_mod_is_pow_mod; [ | easy ].
@@ -2330,14 +2330,14 @@ replace (p - 2 + 1) with (p - 1) by flia Hip.
 apply fermat_little; [ easy | flia Hip ].
 Qed.
 
-Theorem mul_inv_diag_r : ∀ i p,
-  is_prime p = true → 1 ≤ i ≤ p - 1 → (i * inv_mod i p) mod p = 1.
-Proof. now intros; rewrite Nat.mul_comm; apply mul_inv_diag_l. Qed.
+Theorem mul_inv_diag_r_mod : ∀ p,
+  is_prime p = true → ∀ i, 1 ≤ i ≤ p - 1 → (i * inv_mod i p) mod p = 1.
+Proof. now intros; rewrite Nat.mul_comm; apply mul_inv_diag_l_mod. Qed.
 
-Theorem inv_mod_neq : ∀ i p,
-  is_prime p = true → 2 ≤ i ≤ p - 2 → inv_mod i p ≠ i.
+Theorem inv_mod_neq : ∀ p,
+  is_prime p = true → ∀ i, 2 ≤ i ≤ p - 2 → inv_mod i p ≠ i.
 Proof.
-intros * Hp Hip Hcon.
+intros * Hp * Hip Hcon.
 assert (Hpz : p ≠ 0) by now intros H; rewrite H in Hp.
 unfold inv_mod in Hcon.
 rewrite Nat_pow_mod_is_pow_mod in Hcon; [ | now intros H; subst p ].
@@ -2388,10 +2388,10 @@ specialize (H1 H); clear H.
 apply IHn, H1.
 Qed.
 
-Theorem inv_mod_interv : ∀ i p,
-  is_prime p = true → 2 ≤ i ≤ p - 2 → 2 ≤ inv_mod i p ≤ p - 2.
+Theorem inv_mod_interv : ∀ p, is_prime p = true →
+  ∀ i, 2 ≤ i ≤ p - 2 → 2 ≤ inv_mod i p ≤ p - 2.
 Proof.
-intros * Hp Hip.
+intros * Hp * Hip.
 assert (Hpz : p ≠ 0) by now intros H; rewrite H in Hp.
 unfold inv_mod.
 rewrite Nat_pow_mod_is_pow_mod; [ | now intros H; subst p ].
@@ -2456,12 +2456,12 @@ split. {
 }
 Qed.
 
-Theorem inv_mod_prime_involutive : ∀ i p,
+Theorem inv_mod_prime_involutive : ∀ p,
   is_prime p = true
-  → 2 ≤ i ≤ p - 2
+  → ∀ i, 2 ≤ i ≤ p - 2
   → inv_mod (inv_mod i p) p = i.
 Proof.
-intros * Hp Hip.
+intros * Hp * Hip.
 assert (Hpz : p ≠ 0) by now intros H; rewrite H in Hp.
 unfold inv_mod.
 rewrite Nat_pow_mod_is_pow_mod; [ | now intros H; subst p ].
@@ -2570,10 +2570,27 @@ Theorem eq_fold_left_mul_seq_2_prime_sub_3_1 : ∀ p,
   → fold_left Nat.mul (seq 2 (p - 3)) 1 mod p = 1.
 Proof.
 intros * Hp H3p.
-Search (2 ≤ _ ≤ _ - _).
-Search inv_mod.
-...
-assert (H : ∀ i, i ∈ seq 2 (p - 3) → ∃ j, ...
+destruct p; [ easy | ].
+destruct p; [ easy | ].
+destruct p; [ easy | ].
+clear H3p.
+remember (S (S (S p))) as n eqn:Hn.
+specialize (inv_mod_prime_involutive n Hp) as Hinv.
+specialize (inv_mod_neq n Hp) as Himn.
+specialize (mul_inv_diag_l_mod n Hp) as Hmil.
+specialize (mul_inv_diag_r_mod n Hp) as Hmir.
+specialize (inv_mod_interv n Hp) as Himi.
+clear Hp.
+replace (S (S (S p))) with (p + 3) in Hn by flia.
+subst n.
+replace (p + 3 - 2) with (p + 1) in * by flia.
+replace (p + 3 - 1) with (p + 2) in * by flia.
+rewrite Nat.add_sub.
+induction p; [ easy | ].
+replace (S p + 1) with (p + 2) in * by flia.
+replace (S p + 2) with (p + 3) in * by flia.
+replace (S p + 3) with (p + 4) in * by flia.
+cbn.
 ...
 
 (* *)
