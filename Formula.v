@@ -2444,11 +2444,11 @@ Theorem inv_mod_prime_involutive : ∀ i p,
   → inv_mod (inv_mod i p) p = i.
 Proof.
 intros * Hp Hip.
-... faut réfléchir ...
 assert (Hpz : p ≠ 0) by now intros H; rewrite H in Hp.
 unfold inv_mod.
 rewrite Nat_pow_mod_is_pow_mod; [ | now intros H; subst p ].
 rewrite Nat_pow_mod_is_pow_mod; [ | now intros H; subst p ].
+... faut réfléchir ...
 specialize (fermat_little p Hp (i ^ (p - 2) mod p)) as H1.
 assert (H : 1 < i ^ (p - 2) mod p < p). {
   split. {
