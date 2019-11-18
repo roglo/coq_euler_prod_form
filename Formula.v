@@ -2450,62 +2450,36 @@ rewrite Nat_pow_mod_is_pow_mod; [ | now intros H; subst p ].
 rewrite Nat_pow_mod_is_pow_mod; [ | now intros H; subst p ].
 rewrite Nat_mod_pow_mod.
 rewrite <- Nat.pow_mul_r.
-... faut réfléchir ...
-specialize (fermat_little p Hp (i ^ (p - 2) mod p)) as H1.
-assert (H : 1 < i ^ (p - 2) mod p < p). {
-  split. {
-    specialize (inv_mod_interv i p Hp Hip) as H2.
-    unfold inv_mod in H2.
-    rewrite Nat_pow_mod_is_pow_mod in H2; [ | easy ].
-    flia H2.
-  }
-  now apply Nat.mod_upper_bound.
+rewrite Nat.mul_sub_distr_r.
+do 2 rewrite Nat.mul_sub_distr_l.
+rewrite Nat_sub_sub_distr. 2: {
+  split; [ flia Hip | ].
+  rewrite <- Nat.mul_sub_distr_l.
+  rewrite Nat.mul_comm.
+  apply Nat.mul_le_mono_l.
+  flia Hip.
 }
-specialize (H1 H); clear H.
-replace (p - 1) with (S (p - 2)) in H1 by flia Hip.
-cbn in H1.
-rewrite <- Nat.mul_mod_idemp_r in H1; [ | easy ].
-remember ((i ^ (p - 2) mod p) ^ (p - 2) mod p) as j eqn:Hj.
-specialize (fermat_little p Hp j) as H2.
-assert (H : 1 < j < p). {
-  split. {
-    symmetry in Hj.
-    destruct j. {
-      exfalso; revert Hj.
-      apply pow_mod_prime_ne_0; [ easy | ].
-      split. {
-        apply Nat.neq_0_lt_0.
-        apply pow_mod_prime_ne_0; [ easy | flia Hip ].
-      }
-      now apply Nat.mod_upper_bound.
-    }
-    destruct j; [ exfalso | flia ].
-    rewrite Nat.mul_1_r in H1.
-    rewrite Nat.mod_mod in H1; [ | easy ].
-    revert H1.
-    now apply lt_prime_pow_sub_2_not_1.
-  }
-  rewrite Hj.
-  now apply Nat.mod_upper_bound.
-}
-specialize (H2 H); clear H.
-specialize (fermat_little p Hp i) as H3.
-assert (H : 1 < i < p) by flia Hip.
-specialize (H3 H); clear H.
-destruct (le_dec i j) as [Hij| Hij]. {
-  rewrite <- H3 in H2 at 2.
-  apply Nat_eq_mod_sub_0 in H2; [ | now apply Nat.pow_le_mono_l ].
-  rewrite Nat_pow_sub_pow in H2; [ | flia Hip | easy ].
-  apply Nat.mod_divide in H2; [ | easy ].
-  specialize (Nat.gauss _ _ _ H2) as H4.
-  destruct (Nat.eq_dec j i) as [Hji| Hji]; [ easy | ].
-  assert (H : Nat.gcd p (j - 1) = 1). {
-...
-}
-destruct (le_dec j i) as [Hji| Hji]. {
-  rewrite <- H3 in H2 at 2.
-  apply Nat_eq_mod_sub_0 in H2; [ | now apply Nat.pow_le_mono_l ].
-}
+rewrite (Nat.mul_comm 2).
+rewrite <- Nat.sub_add_distr.
+rewrite <- Nat.mul_add_distr_l.
+replace (2 + 2) with 4 by easy.
+replace (2 * 2) with 4 by easy.
+rewrite <- Nat.mul_sub_distr_l.
+rewrite Nat.pow_add_r.
+rewrite Nat.pow_mul_r.
+rewrite <- Nat.mul_mod_idemp_l; [ | easy ].
+rewrite <- Nat_mod_pow_mod.
+rewrite fermat_little_1; [ | easy ].
+rewrite Nat_mod_pow_mod.
+rewrite Nat.mul_mod_idemp_l; [ | easy ].
+rewrite <- Nat.pow_add_r.
+rewrite Nat.sub_add; [ | flia Hip ].
+rewrite fermat_little_1; [ | easy ].
+apply Nat.mod_small; flia Hip.
+Qed.
+
+Inspect 1.
+
 ...
 
 (* from a prime number p, group together values "a" between 2 and
