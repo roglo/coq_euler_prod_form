@@ -2318,6 +2318,60 @@ specialize (H3 H); clear H.
 apply Nat.divide_pos_le in H3; [ flia Hip H3 | flia Hip ].
 Qed.
 
+Theorem pow_mod_prime_ne_0 : ∀ i n p,
+  is_prime p = true
+  → 1 ≤ i < p
+  → i ^ n mod p ≠ 0.
+Proof.
+intros * Hp Hip Hinp.
+assert (Hpz : p ≠ 0) by now intros H; rewrite H in Hp.
+apply Nat.mod_divide in Hinp; [ | easy ].
+induction n. {
+  cbn in Hinp.
+  destruct Hinp as (c, Hc).
+  symmetry in Hc.
+  apply Nat.eq_mul_1 in Hc.
+  now rewrite (proj2 Hc) in Hp.
+}
+cbn in Hinp.
+specialize (Nat.gauss _ _ _ Hinp) as H1.
+assert (H : Nat.gcd p i = 1) by now apply eq_gcd_prime_small_1.
+specialize (H1 H); clear H.
+apply IHn, H1.
+Qed.
+
+Theorem inv_mod_interv : ∀ i p,
+  is_prime p = true → 2 ≤ i ≤ p - 2 → 2 ≤ inv_mod i p ≤ p - 2.
+Proof.
+intros * Hp Hip.
+assert (Hpz : p ≠ 0) by now intros H; rewrite H in Hp.
+unfold inv_mod.
+rewrite Nat_pow_mod_is_pow_mod; [ | now intros H; subst p ].
+split. {
+  apply Nat.nlt_ge; intros Hi.
+  remember (i ^ (p - 2) mod p) as j eqn:Hj; symmetry in Hj.
+  destruct j. {
+    revert Hj.
+    apply pow_mod_prime_ne_0; [ easy | flia Hip ].
+  }
+  destruct j; [ clear Hi | flia Hi ].
+  specialize (fermat_little p Hp i) as H1.
+  assert (H : 1 < i < p) by flia Hip.
+  specialize (H1 H); clear H.
+  replace (p - 1) with (S (p - 2)) in H1 by flia Hip.
+  cbn in H1.
+  rewrite <- Nat.mul_mod_idemp_r in H1; [ | easy ].
+  rewrite Hj, Nat.mul_1_r in H1.
+  rewrite Nat.mod_small in H1; [ flia Hip H1 | flia Hip ].
+} {
+  apply Nat.nlt_ge; intros Hi.
+  remember (i ^ (p - 2) mod p) as j eqn:Hj; symmetry in Hj.
+  replace j with (p - 1) in Hj. 2: {
+    specialize (Nat.mod_upper_bound (i ^ (p - 2)) p Hpz) as H1.
+    rewrite Hj in H1; flia Hi H1.
+  }
+...
+
 (* from a prime number p, group together values "a" between 2 and
    p-2 with their inverse modulo p, which is "a^(p-2)" according
    to Fermat's little theorem; return a list where these pairs
