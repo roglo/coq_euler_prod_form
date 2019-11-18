@@ -2438,13 +2438,6 @@ split. {
 }
 Qed.
 
-...
-
-Search (_ ^ 2 - 1).
-About Nat_sqr_sub_1.
-
-...
-
 Theorem inv_mod_prime_involutive : ∀ i p,
   is_prime p = true
   → 2 ≤ i ≤ p - 2
@@ -2500,9 +2493,10 @@ destruct (le_dec i j) as [Hij| Hij]. {
   exfalso.
   rewrite <- H3 in H2 at 2.
   apply Nat_eq_mod_sub_0 in H2; [ | now apply Nat.pow_le_mono_l ].
-Search (_ ^ 2 - 1).
+  rewrite Nat_pow_sub_pow in H2; [ | flia Hip | easy ].
+  apply Nat.mod_divide in H2; [ | easy ].
+  specialize (Nat.gauss _ _ _ H2) as H4.
 ...
-rewrite Nat_pow_sub_pow in H2.
 }
 destruct (le_dec j i) as [Hji| Hji]. {
   rewrite <- H3 in H2 at 2.
