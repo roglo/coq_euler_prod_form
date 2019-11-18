@@ -2328,10 +2328,12 @@ Qed.
    to p-2 (to be proven). So, the product of all elements of this
    list is at the same time 1 and 2*3*4..*(n-2) [mod p] *)
 
+Print inv_mod.
+
 Fixpoint with_inv_pair_loop p i :=
   match i with
   | 0 | 1 => []
-  | S i' => i :: Nat_pow_mod i (p - 2) p :: with_inv_pair_loop p i'
+  | S i' => i :: inv_mod i p :: with_inv_pair_loop p i'
   end.
 
 Definition with_inv_pair p := nodup Nat.eq_dec (with_inv_pair_loop p (p - 2)).
@@ -2357,6 +2359,8 @@ intros.
 revert p.
 induction i; intros; [ easy | cbn ].
 destruct i; [ easy | ].
+Search (nodup _ (_ :: _)).
+
 (* bof *)
 ...
 
