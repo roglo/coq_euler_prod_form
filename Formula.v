@@ -2370,7 +2370,43 @@ split. {
     specialize (Nat.mod_upper_bound (i ^ (p - 2)) p Hpz) as H1.
     rewrite Hj in H1; flia Hi H1.
   }
-...
+  clear j Hi.
+  specialize (fermat_little p Hp i) as H1.
+  assert (H : 1 < i < p) by flia Hip.
+  specialize (H1 H); clear H.
+  replace (p - 1) with (S (p - 2)) in H1 by flia Hip.
+  cbn in H1.
+  rewrite <- Nat.mul_mod_idemp_r in H1; [ | easy ].
+  rewrite Hj in H1.
+  replace 1 with (1 mod p) in H1 at 2; [ | rewrite Nat.mod_small; flia Hip ].
+  apply Nat_eq_mod_sub_0 in H1. 2: {
+    destruct i; [ flia Hip | ].
+    destruct p; [ flia Hip | ].
+    destruct p; [ flia Hip | ].
+    cbn; remember (i * S p); flia.
+  }
+  apply Nat.mod_divide in H1; [ | easy ].
+  destruct H1 as (c, Hc).
+  rewrite Nat.mul_sub_distr_l, Nat.mul_1_r in Hc.
+  rewrite <- Nat.sub_add_distr in Hc.
+  assert (H : Nat.divide p (i + 1)). {
+    exists (i - c).
+    rewrite Nat.mul_sub_distr_r, <- Hc.
+    rewrite Nat_sub_sub_distr. 2: {
+      split; [ | easy ].
+      destruct p; [ easy | ].
+      rewrite Nat.mul_succ_r.
+      destruct i; [ easy | ].
+      destruct p; [ easy | ].
+      cbn; remember (i * S p); flia.
+    }
+    now rewrite Nat.sub_diag, Nat.add_0_l.
+  }
+  clear Hc; rename H into Hc.
+  apply Nat.divide_pos_le in Hc; [ | flia ].
+  flia Hip Hc.
+}
+Qed.
 
 (* from a prime number p, group together values "a" between 2 and
    p-2 with their inverse modulo p, which is "a^(p-2)" according
@@ -2381,8 +2417,6 @@ split. {
    This list is a permutation of the sequence of numbers from 2
    to p-2 (to be proven). So, the product of all elements of this
    list is at the same time 1 and 2*3*4..*(n-2) [mod p] *)
-
-Print inv_mod.
 
 Fixpoint with_inv_pair_loop p i :=
   match i with
@@ -2414,7 +2448,6 @@ revert p.
 induction i; intros; [ easy | cbn ].
 destruct i; [ easy | ].
 Search (nodup _ (_ :: _)).
-
 (* bof *)
 ...
 
