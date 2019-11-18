@@ -911,7 +911,7 @@ rewrite Hk, <- Hl.
 symmetry; apply List_fold_left_mul_assoc.
 Qed.
 
-Theorem prime_relatively_prime : ∀ p n,
+Theorem eq_gcd_prime_small_1 : ∀ p n,
   is_prime p = true
   → 0 < n < p
   → Nat.gcd p n = 1.
@@ -963,7 +963,7 @@ rewrite Nat_fact_succ in Hnm.
 specialize (Nat.gauss _ _ _ Hnm) as H1.
 apply Nat.nlt_ge; intros Hnsm.
 assert (H : Nat.gcd n (S m) = 1). {
-  apply prime_relatively_prime; [ easy | ].
+  apply eq_gcd_prime_small_1; [ easy | ].
   split; [ flia | easy ].
 }
 specialize (H1 H); clear H.
@@ -1367,7 +1367,7 @@ intros * Hp * Hkp.
 induction k; [ apply Nat.gcd_1_r | ].
 rewrite Nat_fact_succ.
 apply Nat_gcd_1_mul_r; [ | apply IHk; flia Hkp ].
-apply prime_relatively_prime; [ easy | flia Hkp ].
+apply eq_gcd_prime_small_1; [ easy | flia Hkp ].
 Qed.
 
 (* nth prime *)
@@ -1958,13 +1958,13 @@ induction k; intros. {
   induction j; [ apply Nat.gcd_1_r | ].
   rewrite Nat_fact_succ.
   apply Nat_gcd_1_mul_r. {
-    apply prime_relatively_prime; [ easy | flia Hjp ].
+    apply eq_gcd_prime_small_1; [ easy | flia Hjp ].
   }
   apply IHj; flia Hjp.
 }
 rewrite Nat_fact_succ, Nat.mul_comm, <- Nat.mul_assoc.
 apply Nat_gcd_1_mul_r. {
-  apply prime_relatively_prime; [ easy | flia Hkp ].
+  apply eq_gcd_prime_small_1; [ easy | flia Hkp ].
 }
 rewrite Nat.mul_comm.
 apply IHk; [ flia Hkp | easy ].
@@ -2015,7 +2015,7 @@ rewrite <- Nat.mul_sub_distr_r in Haa.
 apply Nat.mod_divide in Haa; [ | flia Hap ].
 specialize (Nat.gauss _ _ _ Haa) as H1.
 assert (H : Nat.gcd p (j - i) = 1). {
-  apply prime_relatively_prime; [ easy | flia Hijp ].
+  apply eq_gcd_prime_small_1; [ easy | flia Hijp ].
 }
 specialize (H1 H); clear H.
 apply Nat.divide_pos_le in H1; [ flia H1 Hap | flia Hap ].
@@ -2081,7 +2081,7 @@ assert
     intros Hi.
     apply Nat.mod_divide in Hi; [ | easy ].
     specialize (Nat.gauss _ _ _ Hi) as H2.
-    assert (H : Nat.gcd p j = 1) by now apply prime_relatively_prime.
+    assert (H : Nat.gcd p j = 1) by now apply eq_gcd_prime_small_1.
     specialize (H2 H); clear H.
     destruct H2 as (c, Hc).
     rewrite Hc in Hap.

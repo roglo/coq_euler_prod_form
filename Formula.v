@@ -2196,7 +2196,7 @@ rewrite Nat_sqr_sub_1 in Ha.
 apply Nat.mod_divide in Ha; [ | easy ].
 specialize (Nat.gauss _ _ _ Ha) as H1.
 assert (H : Nat.gcd p (a + 1) = 1). {
-  apply prime_relatively_prime; [ easy | flia Hap ].
+  apply eq_gcd_prime_small_1; [ easy | flia Hap ].
 }
 specialize (H1 H); clear H.
 destruct H1 as (c, Hc).
@@ -2223,7 +2223,7 @@ rewrite <- Nat.mul_sub_distr_l in Ha.
 apply Nat.mod_divide in Ha; [ | easy ].
 specialize (Nat.gauss _ _ _ Ha) as H1.
 assert (H : Nat.gcd p a = 1). {
-  apply prime_relatively_prime; [ easy | flia Hap ].
+  apply eq_gcd_prime_small_1; [ easy | flia Hap ].
 }
 specialize (H1 H); clear H.
 specialize (fermat_little _ Hp a) as H2.
@@ -2269,9 +2269,8 @@ Fixpoint Nat_pow_mod_loop a b c :=
   end.
 
 Definition Nat_pow_mod a b c := Nat_pow_mod_loop a b c.
-Definition inv_mod i n := Nat_pow_mod i (n - 2) n.
 
-(* *)
+(* but they are the same (if c ≠ 0) *)
 
 Theorem Nat_pow_mod_is_pow_mod : ∀ a b c,
   c ≠ 0 → Nat_pow_mod a b c = (a ^ b) mod c.
@@ -2283,13 +2282,41 @@ cbn; rewrite IHb.
 now rewrite Nat.mul_mod_idemp_r.
 Qed.
 
+(* inverse modulo (true when n is prime) *)
+
+Definition inv_mod i n := Nat_pow_mod i (n - 2) n.
+
 Theorem inv_mod_neq : ∀ i p,
   is_prime p = true → 2 ≤ i ≤ p - 2 → inv_mod i p ≠ i.
 Proof.
 intros * Hp Hip Hcon.
+assert (Hpz : p ≠ 0) by now intros H; rewrite H in Hp.
 unfold inv_mod in Hcon.
 rewrite Nat_pow_mod_is_pow_mod in Hcon; [ | now intros H; subst p ].
-...
+specialize (fermat_little_1 p Hp i) as H1.
+rewrite (Nat.mod_small i) in H1; [ | flia Hip ].
+rewrite <- Hcon in H1 at 2.
+apply Nat_eq_mod_sub_0 in H1; [ | apply Nat.pow_le_mono_r; flia Hip ].
+replace p with (p - 2 + 2) in H1 at 1 by flia Hip.
+rewrite <- (Nat.mul_1_r (_ ^ (p - 2))) in H1.
+rewrite Nat.pow_add_r in H1.
+rewrite <- Nat.mul_sub_distr_l in H1.
+rewrite <- Nat.mul_mod_idemp_l in H1; [ | easy ].
+rewrite Hcon in H1.
+apply Nat.mod_divide in H1; [ | easy ].
+specialize (Nat.gauss _ _ _ H1) as H2.
+assert (H : Nat.gcd p i = 1). {
+  apply eq_gcd_prime_small_1; [ easy | flia Hip ].
+}
+specialize (H2 H); clear H.
+rewrite Nat_sqr_sub_1 in H2.
+specialize (Nat.gauss _ _ _ H2) as H3.
+assert (H : Nat.gcd p (i + 1) = 1). {
+  apply eq_gcd_prime_small_1; [ easy | flia Hip ].
+}
+specialize (H3 H); clear H.
+apply Nat.divide_pos_le in H3; [ flia Hip H3 | flia Hip ].
+Qed.
 
 (* from a prime number p, group together values "a" between 2 and
    p-2 with their inverse modulo p, which is "a^(p-2)" according
