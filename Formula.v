@@ -2408,6 +2408,36 @@ split. {
 }
 Qed.
 
+Theorem inv_mod_prime_involutive : ∀ i p,
+  is_prime p = true
+  → 2 ≤ i ≤ p - 2
+  → inv_mod (inv_mod i p) p = i.
+Proof.
+intros * Hp Hip.
+assert (Hpz : p ≠ 0) by now intros H; rewrite H in Hp.
+unfold inv_mod.
+rewrite Nat_pow_mod_is_pow_mod; [ | now intros H; subst p ].
+rewrite Nat_pow_mod_is_pow_mod; [ | now intros H; subst p ].
+specialize (fermat_little p Hp (i ^ (p - 2) mod p)) as H1.
+assert (H : 1 < i ^ (p - 2) mod p < p). {
+  split. {
+    specialize (inv_mod_interv i p Hp Hip) as H2.
+    unfold inv_mod in H2.
+    rewrite Nat_pow_mod_is_pow_mod in H2; [ | easy ].
+    flia H2.
+  }
+  now apply Nat.mod_upper_bound.
+}
+specialize (H1 H); clear H.
+replace (p - 1) with (S (p - 2)) in H1 by flia Hip.
+cbn in H1.
+rewrite <- Nat.mul_mod_idemp_r in H1; [ | easy ].
+remember ((i ^ (p - 2) mod p) ^ (p - 2) mod p) as j eqn:Hj.
+specialize (fermat_little p Hp j) as H2.
+assert (H : 1 < j < p). {
+  split. {
+...
+
 (* from a prime number p, group together values "a" between 2 and
    p-2 with their inverse modulo p, which is "a^(p-2)" according
    to Fermat's little theorem; return a list where these pairs
@@ -2440,6 +2470,7 @@ cbn - [ with_inv_pair_loop ].
 rewrite IHi; flia.
 Qed.
 
+(*
 Theorem glop : ∀ p i,
   length (nodup Nat.eq_dec (with_inv_pair_loop p i)) = i - 1.
 Proof.
@@ -2470,6 +2501,17 @@ assert (Hocc : ∀ i, i ∈ l → count_occ Nat.eq_dec l i = 2). {
 Search count_occ.
 Search nodup.
 Search (length (nodup _)).
+...
+*)
+
+Theorem eq_fold_left_mul_seq_2_prime_sub_3_1 : ∀ p,
+  is_prime p = true
+  → 3 ≤ p
+  → fold_left Nat.mul (seq 2 (p - 3)) 1 mod p = 1.
+Proof.
+intros * Hp H3p.
+Inspect 5.
+assert (H : ∀ i, i ∈ seq 2 (p - 3) → ∃ j, ...
 ...
 
 (* *)
@@ -2509,6 +2551,8 @@ split.
     a * a^(n-2) indeed equals 1 mod n. So b=a^(n-2) mod n. All
     these pairs are supposed to cover [2, n-2] *)
  remember (seq 2 (n - 3)) as l eqn:Hl.
+subst l.
+...
  remember (with_inv_pair n) as l' eqn:Hl'.
  move l' before l.
  assert (Hperm : Permutation l l'). {
