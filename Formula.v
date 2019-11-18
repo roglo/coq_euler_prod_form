@@ -2204,6 +2204,36 @@ destruct c; [ flia Hc Hap | ].
 cbn in Hc; flia Hc Hap.
 Qed.
 
+Theorem lt_prime_pow_sub_2_not_1 : ∀ p,
+  is_prime p = true → ∀ a : nat, 2 ≤ a ≤ p - 2 → a ^ (p - 2) mod p ≠ 1.
+Proof.
+intros * Hp * Hap Ha.
+assert (Hpz : p ≠ 0) by now intros H; rewrite H in Hp.
+replace 1 with (1 mod p) in Ha at 2. 2: {
+  apply Nat.mod_1_l; flia Hap.
+}
+apply Nat_eq_mod_sub_0 in Ha. 2: {
+  apply Nat.neq_0_lt_0.
+  apply Nat.pow_nonzero; flia Hap.
+}
+specialize (fermat_little p Hp a) as H1.
+assert (H : 1 < a < p) by flia Hap.
+specialize (H1 H); clear H.
+replace (p - 1) with (S (p - 2)) in H1 by flia Hap.
+cbn in H1.
+rewrite <- (Nat.sub_add 1 (a ^ (p - 2))) in H1 at 1. 2: {
+  apply Nat.neq_0_lt_0.
+  apply Nat.pow_nonzero; flia Hap.
+}
+rewrite Nat.mul_add_distr_l, Nat.mul_1_r in H1.
+rewrite <- Nat.add_mod_idemp_l in H1; [ | easy ].
+rewrite <- Nat.mul_mod_idemp_r in H1; [ | easy ].
+rewrite Ha, Nat.mul_0_r in H1.
+rewrite Nat.mod_0_l in H1; [ | easy ].
+rewrite Nat.add_0_l in H1.
+rewrite Nat.mod_small in H1; [ flia Hap H1 | flia Hap ].
+Qed.
+
 (* if 2≤a≤p-2 then a ≠ a⁻¹ [mod p]; we know that a⁻¹=a^(p-2) by
    Fermat's little theorem *)
 
@@ -2436,6 +2466,43 @@ remember ((i ^ (p - 2) mod p) ^ (p - 2) mod p) as j eqn:Hj.
 specialize (fermat_little p Hp j) as H2.
 assert (H : 1 < j < p). {
   split. {
+    symmetry in Hj.
+    destruct j. {
+      exfalso; revert Hj.
+      apply pow_mod_prime_ne_0; [ easy | ].
+      split. {
+        apply Nat.neq_0_lt_0.
+        apply pow_mod_prime_ne_0; [ easy | flia Hip ].
+      }
+      now apply Nat.mod_upper_bound.
+    }
+    destruct j; [ exfalso | flia ].
+    rewrite Nat.mul_1_r in H1.
+    rewrite Nat.mod_mod in H1; [ | easy ].
+    revert H1.
+    now apply lt_prime_pow_sub_2_not_1.
+  }
+  rewrite Hj.
+  now apply Nat.mod_upper_bound.
+}
+specialize (H2 H); clear H.
+specialize (fermat_little p Hp i) as H3.
+assert (H : 1 < i < p) by flia Hip.
+specialize (H3 H); clear H.
+destruct (le_dec i j) as [Hij| Hij]. {
+  exfalso.
+  rewrite <- H3 in H2 at 2.
+  apply Nat_eq_mod_sub_0 in H2; [ | now apply Nat.pow_le_mono_l ].
+Search (_ ^ 2 - 1).
+...
+Theorem Nat_pow_sub_pow : ∀ a b c,
+  a ^ c - b ^ c = (a - b) * (a ^ (c - 1) + a ^ (c - 2) * b + ... + b ^ (c - 1)).
+...
+}
+destruct (le_dec j i) as [Hji| Hji]. {
+  rewrite <- H3 in H2 at 2.
+  apply Nat_eq_mod_sub_0 in H2; [ | now apply Nat.pow_le_mono_l ].
+}
 ...
 
 (* from a prime number p, group together values "a" between 2 and
