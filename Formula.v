@@ -2444,6 +2444,7 @@ Theorem inv_mod_prime_involutive : ∀ i p,
   → inv_mod (inv_mod i p) p = i.
 Proof.
 intros * Hp Hip.
+... faut réfléchir ...
 assert (Hpz : p ≠ 0) by now intros H; rewrite H in Hp.
 unfold inv_mod.
 rewrite Nat_pow_mod_is_pow_mod; [ | now intros H; subst p ].
@@ -2490,12 +2491,13 @@ specialize (fermat_little p Hp i) as H3.
 assert (H : 1 < i < p) by flia Hip.
 specialize (H3 H); clear H.
 destruct (le_dec i j) as [Hij| Hij]. {
-  exfalso.
   rewrite <- H3 in H2 at 2.
   apply Nat_eq_mod_sub_0 in H2; [ | now apply Nat.pow_le_mono_l ].
   rewrite Nat_pow_sub_pow in H2; [ | flia Hip | easy ].
   apply Nat.mod_divide in H2; [ | easy ].
   specialize (Nat.gauss _ _ _ H2) as H4.
+  destruct (Nat.eq_dec j i) as [Hji| Hji]; [ easy | ].
+  assert (H : Nat.gcd p (j - 1) = 1). {
 ...
 }
 destruct (le_dec j i) as [Hji| Hji]. {
