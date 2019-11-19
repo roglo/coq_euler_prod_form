@@ -2496,8 +2496,6 @@ rewrite fermat_little_1; [ | easy ].
 apply Nat.mod_small; flia Hip.
 Qed.
 
-Search inv_mod.
-
 (* from a prime number p, group together values "a" between 2 and
    p-2 with their inverse modulo p, which is "a^(p-2)" according
    to Fermat's little theorem; return a list where these pairs
@@ -2530,40 +2528,6 @@ cbn - [ with_inv_pair_loop ].
 rewrite IHi; flia.
 Qed.
 
-(*
-Theorem glop : ∀ p i,
-  length (nodup Nat.eq_dec (with_inv_pair_loop p i)) = i - 1.
-Proof.
-intros.
-revert p.
-induction i; intros; [ easy | cbn ].
-destruct i; [ easy | ].
-Search (nodup _ (_ :: _)).
-(* bof *)
-...
-
-Theorem length_with_inv_pair : ∀ p, length (with_inv_pair p) = p - 3.
-Proof.
-intros.
-unfold with_inv_pair.
-remember (with_inv_pair_loop p (p - 2)) as l eqn:Hl.
-assert (Hocc : ∀ i, i ∈ l → count_occ Nat.eq_dec l i = 2). {
-  intros * Hil.
-  revert i Hil.
-  induction l as [| j l]; intros; [ easy | ].
-  destruct Hil as [Hil| Hil]. {
-    subst j; cbn.
-    destruct (Nat.eq_dec i i) as [Hii| Hii]; [ clear Hii | easy ].
-    f_equal.
-    apply IHl.
-...
-
-Search count_occ.
-Search nodup.
-Search (length (nodup _)).
-...
-*)
-
 Theorem seq_succ_r : ∀ a b, seq a (S b) = seq a b ++ [a + b].
 Proof.
 intros.
@@ -2573,11 +2537,53 @@ remember (S b) as sb; cbn; subst sb.
 now rewrite IHb, Nat.add_succ_comm.
 Qed.
 
+Theorem inv_mod_autom : ∀ p (P := λ i, 2 ≤ i ≤ p - 2), is_prime p = true →
+  (∀ i, P i → P (inv_mod i p)) ∧
+  (∀ i j, P i → P j → inv_mod i p = inv_mod j p → i = j) ∧
+  (∀ j, P j → ∃ i, P i ∧ inv_mod i p = j) ∧
+  (∀ i, P i → inv_mod i p ≠ i) ∧
+  (∀ i, P i → (i * inv_mod i p) mod p = 1) ∧
+  (∀ i, P i → (inv_mod i p * i) mod p = 1).
+Proof.
+intros * Hp.
+assert (Hpz : p ≠ 0) by now intros H; rewrite H in Hp.
+split; [ now apply inv_mod_interv | ].
+split. {
+  unfold P; intros * HPi HPj Hijp.
+  unfold inv_mod in Hijp.
+  rewrite Nat_pow_mod_is_pow_mod in Hijp; [ | easy ].
+  rewrite Nat_pow_mod_is_pow_mod in Hijp; [ | easy ].
+  destruct (le_dec i j) as [Hij| Hij]. {
+    symmetry in Hijp.
+    apply Nat_eq_mod_sub_0 in Hijp; [ | now apply Nat.pow_le_mono_l ].
+    rewrite Nat_pow_sub_pow in Hijp; [ | flia HPi | easy ].
+    apply Nat.mod_divide in Hijp; [ | easy ].
+    specialize (Nat.gauss _ _ _ Hijp) as H1.
+...
+    specialize (H1 i j) as H1.
+    assert (H : i < j < p) by easy.
+    now specialize (H1 H).
+-  }
+-  apply Nat.nlt_ge in Hij.
+-  symmetry in Hff.
+-  destruct (lt_dec j i) as [Hji| Hji]. {
+-    specialize (H1 j i) as H1.
+-    assert (H : j < i < p) by easy.
+-    now specialize (H1 H).
+-  }
+-  apply Nat.nlt_ge in Hji.
+-  flia Hij Hji.
+  apply Nat.eq
+...
+
 Theorem eq_fold_left_mul_seq_2_prime_sub_3_1 : ∀ p,
   is_prime p = true
   → 3 ≤ p
   → fold_left Nat.mul (seq 2 (p - 3)) 1 mod p = 1.
 Proof.
+intros * Hp H3p.
+Search inv_mod.
+...
 intros * Hp H3p.
 remember (seq 2 (p - 3)) as l eqn:Hl.
 assert
