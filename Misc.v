@@ -436,41 +436,70 @@ destruct (Nat.eq_dec a 0) as [Haz| Haz]. {
   rewrite (proj1 Huv).
   now exists 0, 0.
 }
-remember (max (u / b + 1) (v / a + 1)) as k eqn:Hk.
-exists (k * a - v), (k * b - u).
-do 2 rewrite Nat.mul_sub_distr_r.
-rewrite Huv.
-rewrite (Nat.add_comm _ (v * b)).
-rewrite Nat.sub_add_distr.
-rewrite Nat.add_sub_assoc. 2: {
-  apply (Nat.add_le_mono_r _ _ (v * b)).
-  rewrite <- Huv.
-  rewrite Nat.sub_add. 2: {
-    rewrite Nat.mul_shuffle0.
+remember (u / b <=? v / a) as m eqn:Hm; symmetry in Hm.
+destruct m. {
+  apply Nat.leb_le in Hm.
+  remember (v / a + 1) as k eqn:Hk.
+  exists (k * a - v), (k * b - u).
+  do 2 rewrite Nat.mul_sub_distr_r.
+  rewrite Huv.
+  rewrite (Nat.add_comm _ (v * b)).
+  rewrite Nat.sub_add_distr.
+  rewrite Nat.add_sub_assoc. 2: {
+    apply (Nat.add_le_mono_r _ _ (v * b)).
+    rewrite <- Huv.
+    rewrite Nat.sub_add. 2: {
+      rewrite Nat.mul_shuffle0.
+      apply Nat.mul_le_mono_r.
+      rewrite Hk.
+      specialize (Nat.div_mod v a Haz) as H1.
+      rewrite Nat.mul_add_distr_r, Nat.mul_1_l, Nat.mul_comm.
+      rewrite H1 at 1.
+      apply Nat.add_le_mono_l.
+      now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+    }
     apply Nat.mul_le_mono_r.
     rewrite Hk.
-    rewrite <- Nat.mul_max_distr_r.
-    etransitivity; [ | apply Nat.le_max_r ].
-    specialize (Nat.div_mod v a) as H1.
-    specialize (H1 Haz).
+    specialize (Nat.div_mod u b Hbz) as H1.
+    rewrite Nat.mul_add_distr_r, Nat.mul_1_l, Nat.mul_comm.
+    rewrite H1 at 1.
+    apply Nat.add_le_mono; [ now apply Nat.mul_le_mono_l | ].
+    now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+  }
+  rewrite Nat.add_comm, Nat.add_sub.
+  now rewrite Nat.mul_shuffle0.
+} {
+  apply Nat.leb_gt, Nat.lt_le_incl in Hm.
+  remember (u / b + 1) as k eqn:Hk.
+  exists (k * a - v), (k * b - u).
+  do 2 rewrite Nat.mul_sub_distr_r.
+  rewrite Huv.
+  rewrite (Nat.add_comm _ (v * b)).
+  rewrite Nat.sub_add_distr.
+  rewrite Nat.add_sub_assoc. 2: {
+    apply (Nat.add_le_mono_r _ _ (v * b)).
+    rewrite Nat.sub_add. 2: {
+      rewrite Nat.mul_shuffle0.
+      apply Nat.mul_le_mono_r.
+      rewrite Hk.
+      specialize (Nat.div_mod v a Haz) as H1.
+      rewrite Nat.mul_add_distr_r, Nat.mul_1_l, Nat.mul_comm.
+      rewrite H1 at 1.
+      apply Nat.add_le_mono; [ now apply Nat.mul_le_mono_l | ].
+      now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+    }
+    rewrite <- Huv.
+    apply Nat.mul_le_mono_r.
+    rewrite Hk.
+    specialize (Nat.div_mod u b Hbz) as H1.
     rewrite Nat.mul_add_distr_r, Nat.mul_1_l, Nat.mul_comm.
     rewrite H1 at 1.
     apply Nat.add_le_mono_l.
     now apply Nat.lt_le_incl, Nat.mod_upper_bound.
   }
-  apply Nat.mul_le_mono_r.
-  rewrite Hk.
-  rewrite <- Nat.mul_max_distr_r.
-  etransitivity; [ | apply Nat.le_max_l ].
-  specialize (Nat.div_mod u b) as H1.
-  specialize (H1 Hbz).
-  rewrite Nat.mul_add_distr_r, Nat.mul_1_l, Nat.mul_comm.
-  rewrite H1 at 1.
-  apply Nat.add_le_mono_l.
-  now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+  rewrite Nat.add_comm, Nat.add_sub.
+  now rewrite Nat.mul_shuffle0.
 }
-rewrite Nat.add_comm, Nat.add_sub.
-now rewrite Nat.mul_shuffle0.
 Qed.
 
 Theorem Nat_bezout_mul : ∀ a b c,
