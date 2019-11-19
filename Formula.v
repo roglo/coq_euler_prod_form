@@ -2583,7 +2583,21 @@ remember (seq 2 (p - 3)) as l eqn:Hl.
 assert
   (Hij : ∀ i, i ∈ l →
    ∃ j, j ∈ l ∧ (i * j) mod p = 1 ∧ i ≠ j). {
-  admit.
+  intros i Hi.
+  exists (inv_mod i p).
+  subst l.
+  apply in_seq in Hi.
+  split. {
+    apply in_seq.
+    specialize (inv_mod_interv p Hp i) as H1.
+    assert (H : 2 ≤ i ≤ p - 2) by flia Hi.
+    specialize (H1 H); flia H1.
+  }
+  split. {
+    apply mul_inv_diag_r_mod; [ easy | flia Hi ].
+  }
+  apply not_eq_sym.
+  apply inv_mod_neq; [ easy | flia Hi ].
 }
 destruct l as [| a l]. {
   cbn; rewrite Nat.mod_1_l; flia H3p.
