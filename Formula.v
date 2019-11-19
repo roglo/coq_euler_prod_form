@@ -2564,33 +2564,56 @@ Search (length (nodup _)).
 ...
 *)
 
+Theorem seq_succ_r : ∀ a b, seq a (S b) = seq a b ++ [a + b].
+Proof.
+intros.
+revert a.
+induction b; intros; [ now cbn; rewrite Nat.add_0_r | ].
+remember (S b) as sb; cbn; subst sb.
+now rewrite IHb, Nat.add_succ_comm.
+Qed.
+
 Theorem eq_fold_left_mul_seq_2_prime_sub_3_1 : ∀ p,
   is_prime p = true
   → 3 ≤ p
   → fold_left Nat.mul (seq 2 (p - 3)) 1 mod p = 1.
 Proof.
 intros * Hp H3p.
-destruct p; [ easy | ].
-destruct p; [ easy | ].
-destruct p; [ easy | ].
-clear H3p.
-remember (S (S (S p))) as n eqn:Hn.
-specialize (inv_mod_prime_involutive n Hp) as Hinv.
-specialize (inv_mod_neq n Hp) as Himn.
-specialize (mul_inv_diag_l_mod n Hp) as Hmil.
-specialize (mul_inv_diag_r_mod n Hp) as Hmir.
-specialize (inv_mod_interv n Hp) as Himi.
-clear Hp.
-replace (S (S (S p))) with (p + 3) in Hn by flia.
-subst n.
-replace (p + 3 - 2) with (p + 1) in * by flia.
-replace (p + 3 - 1) with (p + 2) in * by flia.
-rewrite Nat.add_sub.
-induction p; [ easy | ].
-replace (S p + 1) with (p + 2) in * by flia.
-replace (S p + 2) with (p + 3) in * by flia.
-replace (S p + 3) with (p + 4) in * by flia.
-cbn.
+remember (seq 2 (p - 3)) as l eqn:Hl.
+assert
+  (Hij : ∀ i, i ∈ l →
+   ∃ j, j ∈ l ∧ (i * j) mod p = 1 ∧ i ≠ j). {
+  admit.
+}
+destruct l as [| a l]. {
+  cbn; rewrite Nat.mod_1_l; flia H3p.
+}
+cbn; rewrite Nat.add_0_r.
+assert (Ha2: a = 2). {
+  remember (p - 3) as len eqn:Hlen.
+  destruct len; [ easy | ].
+  cbn in Hl.
+  now injection Hl; intros.
+}
+subst a.
+specialize (Hij 2 (or_introl (eq_refl _))) as H1.
+destruct H1 as (i2 & Hi2 & H2i2 & H2i).
+destruct Hi2 as [Hi2| Hi2]; [ easy | ].
+specialize (in_split i2 l Hi2) as (l1 & l2 & Hll).
+rewrite Hll.
+rewrite fold_left_app; cbn.
+rewrite fold_left_mul_from_1.
+rewrite Nat.mul_shuffle0, Nat.mul_comm.
+rewrite fold_left_mul_from_1.
+do 2 rewrite Nat.mul_assoc.
+remember (i2 * 2) as x.
+rewrite <- Nat.mul_assoc; subst x.
+rewrite <- Nat.mul_mod_idemp_l; [ | flia H3p ].
+rewrite (Nat.mul_comm i2).
+rewrite H2i2, Nat.mul_1_l.
+rewrite Nat.mul_comm.
+rewrite List_fold_left_mul_assoc, Nat.mul_1_l.
+rewrite <- fold_left_app.
 ...
 
 (* *)
