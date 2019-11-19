@@ -424,21 +424,22 @@ replace (fact b * (fact n / fact b)) with (fact n). 2: {
 easy.
 Qed.
 
+(** Bezout commutes *)
+
 Theorem Nat_bezout_comm : ∀ a b g,
-  b ≠ 0
-  → Nat.Bezout a b g → Nat.Bezout b a g.
+  b ≠ 0 → Nat.Bezout a b g → Nat.Bezout b a g.
 Proof.
 intros * Hbz (u & v & Huv).
-destruct (Nat.eq_dec a 0) as [Haz| Haz]. {
-  subst a.
+destruct (Nat.eq_0_gt_0_cases a) as [Haz| Haz]. {
+  rewrite Haz in Huv |-*.
   rewrite Nat.mul_0_r in Huv; symmetry in Huv.
   apply Nat.eq_add_0 in Huv.
   rewrite (proj1 Huv).
-  now exists 0, 0.
+  now exists 0, 0; Nat.nzsimpl.
 }
-remember (u / b <=? v / a) as m eqn:Hm; symmetry in Hm.
-destruct m. {
-  apply Nat.leb_le in Hm.
+apply Nat.neq_0_lt_0 in Haz.
+destruct (Nat.lt_trichotomy (u / b) (v / a)) as [Hm|Hm]. {
+  apply Nat.lt_le_incl in Hm.
   remember (v / a + 1) as k eqn:Hk.
   exists (k * a - v), (k * b - u).
   do 2 rewrite Nat.mul_sub_distr_r.
@@ -456,7 +457,9 @@ destruct m. {
       rewrite Nat.mul_add_distr_r, Nat.mul_1_l, Nat.mul_comm.
       rewrite H1 at 1.
       apply Nat.add_le_mono_l.
-      now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+      apply Nat.lt_le_incl.
+      apply Nat.mod_bound_pos; [ apply Nat.le_0_l | ].
+      now apply Nat.neq_0_lt_0.
     }
     apply Nat.mul_le_mono_r.
     rewrite Hk.
@@ -464,12 +467,13 @@ destruct m. {
     rewrite Nat.mul_add_distr_r, Nat.mul_1_l, Nat.mul_comm.
     rewrite H1 at 1.
     apply Nat.add_le_mono; [ now apply Nat.mul_le_mono_l | ].
-    now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+    apply Nat.lt_le_incl.
+    apply Nat.mod_bound_pos; [ apply Nat.le_0_l | ].
+    now apply Nat.neq_0_lt_0.
   }
   rewrite Nat.add_comm, Nat.add_sub.
   now rewrite Nat.mul_shuffle0.
 } {
-  apply Nat.leb_gt, Nat.lt_le_incl in Hm.
   remember (u / b + 1) as k eqn:Hk.
   exists (k * a - v), (k * b - u).
   do 2 rewrite Nat.mul_sub_distr_r.
@@ -485,8 +489,14 @@ destruct m. {
       specialize (Nat.div_mod v a Haz) as H1.
       rewrite Nat.mul_add_distr_r, Nat.mul_1_l, Nat.mul_comm.
       rewrite H1 at 1.
-      apply Nat.add_le_mono; [ now apply Nat.mul_le_mono_l | ].
-      now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+      apply Nat.add_le_mono. {
+        apply Nat.mul_le_mono_l.
+        destruct Hm as [Hm| Hm]; [ now rewrite Hm | ].
+        now apply Nat.lt_le_incl.
+      }
+      apply Nat.lt_le_incl.
+      apply Nat.mod_bound_pos; [ apply Nat.le_0_l | ].
+      now apply Nat.neq_0_lt_0.
     }
     rewrite <- Huv.
     apply Nat.mul_le_mono_r.
@@ -495,7 +505,9 @@ destruct m. {
     rewrite Nat.mul_add_distr_r, Nat.mul_1_l, Nat.mul_comm.
     rewrite H1 at 1.
     apply Nat.add_le_mono_l.
-    now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+    apply Nat.lt_le_incl.
+    apply Nat.mod_bound_pos; [ apply Nat.le_0_l | ].
+    now apply Nat.neq_0_lt_0.
   }
   rewrite Nat.add_comm, Nat.add_sub.
   now rewrite Nat.mul_shuffle0.
