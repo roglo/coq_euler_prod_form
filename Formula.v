@@ -2537,9 +2537,8 @@ remember (S b) as sb; cbn; subst sb.
 now rewrite IHb, Nat.add_succ_comm.
 Qed.
 
-(* all values between 2 and p-2 have an inverse modulo p, which is not
-   themselves *)
-
+(* all values between 2 and p-2 have an inverse modulo p, which is
+   also between 2 and p-2, but not themselves *)
 (* more than automorphism, actually;
    extra properties: f(i)≠i, i*f(i)≡1 *)
 Theorem inv_mod_autom : ∀ p (P := λ i, 2 ≤ i ≤ p - 2), is_prime p = true →
