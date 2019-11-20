@@ -2496,38 +2496,6 @@ rewrite fermat_little_1; [ | easy ].
 apply Nat.mod_small; flia Hip.
 Qed.
 
-(* from a prime number p, group together values "a" between 2 and
-   p-2 with their inverse modulo p, which is "a^(p-2)" according
-   to Fermat's little theorem; return a list where these pairs
-   are concatened. E.g. with_inv_pair 11 returns
-        [2; 6; 3; 4; 5; 9; 7; 8]
-   with 2*6≡1, 3*4≡1, 5*9≡1, 7*8≡1 [mod 11].
-   This list is a permutation of the sequence of numbers from 2
-   to p-2 (to be proven). So, the product of all elements of this
-   list is at the same time 1 and 2*3*4..*(n-2) [mod p] *)
-
-Fixpoint with_inv_pair_loop p i :=
-  match i with
-  | 0 | 1 => []
-  | S i' => i :: inv_mod i p :: with_inv_pair_loop p i'
-  end.
-
-Definition with_inv_pair p := nodup Nat.eq_dec (with_inv_pair_loop p (p - 2)).
-
-Compute (with_inv_pair 11).
-
-Theorem length_with_inv_pair_loop : ∀ p i,
-  length (with_inv_pair_loop p i) = 2 * i - 2.
-Proof.
-intros.
-revert p.
-induction i; intros; [ easy | ].
-cbn - [ "/" ].
-destruct i; [ easy | ].
-cbn - [ with_inv_pair_loop ].
-rewrite IHi; flia.
-Qed.
-
 Theorem seq_succ_r : ∀ a b, seq a (S b) = seq a b ++ [a + b].
 Proof.
 intros.
@@ -2535,44 +2503,6 @@ revert a.
 induction b; intros; [ now cbn; rewrite Nat.add_0_r | ].
 remember (S b) as sb; cbn; subst sb.
 now rewrite IHb, Nat.add_succ_comm.
-Qed.
-
-(* all values between 2 and p-2 have an inverse modulo p, which is
-   also between 2 and p-2, but not themselves *)
-(* more than automorphism, actually;
-   extra properties: f(i)≠i, i*f(i)≡1 *)
-Theorem inv_mod_autom : ∀ p (P := λ i, 2 ≤ i ≤ p - 2), is_prime p = true →
-  (∀ i, P i → P (inv_mod i p)) ∧
-  (∀ i j, P i → P j → inv_mod i p = inv_mod j p → i = j) ∧
-  (∀ j, P j → ∃ i, P i ∧ inv_mod i p = j) ∧
-  (∀ i, P i → inv_mod i p ≠ i) ∧
-  (∀ i, P i → (i * inv_mod i p) mod p = 1) ∧
-  (∀ i, P i → (inv_mod i p * i) mod p = 1).
-Proof.
-intros * Hp.
-assert (Hpz : p ≠ 0) by now intros H; rewrite H in Hp.
-split; [ now apply inv_mod_interv | ].
-split. {
-  unfold P; intros * HPi HPj Hijp.
-  apply (f_equal (λ i, inv_mod i p)) in Hijp.
-  rewrite inv_mod_prime_involutive in Hijp; [ | easy | easy ].
-  now rewrite inv_mod_prime_involutive in Hijp.
-}
-split. {
-  intros * HPj.
-  exists (inv_mod j p).
-  rewrite inv_mod_prime_involutive; [ | easy | easy ].
-  split; [ | easy ].
-  now apply inv_mod_interv.
-}
-split; [ now apply inv_mod_neq | ].
-split. {
-  intros * H; apply mul_inv_diag_r_mod; [ easy | ].
-  unfold P in H; flia H.
-} {
-  intros * H; apply mul_inv_diag_l_mod; [ easy | ].
-  unfold P in H; flia H.
-}
 Qed.
 
 Theorem eq_fold_left_mul_seq_2_prime_sub_3_1 : ∀ p,
@@ -2653,7 +2583,6 @@ assert
   rewrite H4 in H1.
   apply in_seq in H1; flia H1.
 }
-(**)
 clear Hl.
 remember (length l) as len eqn:Hlen; symmetry in Hlen.
 revert l Hnd Hij Hlen.
@@ -2759,13 +2688,12 @@ Qed.
 
 (* *)
 
-Theorem Wilson : ∀ n, is_prime n = true ↔ fact (n - 1) mod n = n - 1.
+Theorem Wilson : ∀ n, 2 ≤ n → is_prime n = true ↔ fact (n - 1) mod n = n - 1.
 Proof.
-intros.
+intros * H2n.
 split.
 -intros Hn.
  destruct (lt_dec n 3) as [H3n| H3n]. {
-   specialize (prime_ge_2 n Hn) as H2n.
    now replace n with 2 by flia H2n H3n.
  }
  apply Nat.nlt_ge in H3n.
@@ -2795,6 +2723,22 @@ split.
     these pairs are supposed to cover [2, n-2] *)
  now apply eq_fold_left_mul_seq_2_prime_sub_3_1.
 -intros Hf.
+ destruct (lt_dec 5 n) as [H5n| H5n]. {
+   apply Bool.not_false_iff_true.
+   intros H.
+   apply Wilson_on_composite in H; [ | easy ].
+   rewrite H in Hf.
+   flia Hf H5n.
+ }
+ apply Nat.nlt_ge in H5n.
+ destruct n; [ easy | ].
+ destruct n; [ flia H2n | ].
+ destruct n; [ easy | ].
+ destruct n; [ easy | ].
+ destruct n; [ easy | ].
+ destruct n; [ easy | flia H5n ].
+Qed.
+
 ...
 
 Theorem ζ_Euler_product_eq : ...
