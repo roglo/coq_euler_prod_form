@@ -1707,7 +1707,7 @@ now rewrite binomial_0_r, Nat.mul_1_l, Nat.sub_0_r, Nat.pow_0_r, Nat.mul_1_r.
 Qed.
 
 Theorem binomial_prime : ∀ p k,
-  is_prime p = true
+  prime p
   → 1 ≤ k ≤ p - 1
   → Nat.divide p (binomial p k).
 Proof.
