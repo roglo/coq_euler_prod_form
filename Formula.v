@@ -2585,7 +2585,8 @@ specialize (seq_NoDup (p - 3) 2) as Hnd.
 remember (seq 2 (p - 3)) as l eqn:Hl.
 assert
   (Hij : ∀ i, i ∈ l →
-   ∃ j, j ∈ l ∧ i ≠ j ∧ (i * j) mod p = 1). {
+   ∃j, j ∈ l ∧ i ≠ j ∧ (i * j) mod p = 1 ∧
+        ∀ k, k ≠ i → (k * j) mod p ≠ 1). {
   intros i Hi.
   exists (inv_mod i p).
   subst l.
@@ -2600,15 +2601,21 @@ assert
     apply not_eq_sym.
     apply inv_mod_neq; [ easy | flia Hi ].
   }
-  apply mul_inv_diag_r_mod; [ easy | flia Hi ].
+  split. {
+    apply mul_inv_diag_r_mod; [ easy | flia Hi ].
+  }
+  intros k Hki Hk.
+  specialize (inv_mod_prime_involutive p Hp k) as H1.
+...
 }
 (**)
 clear Hl.
+...
 destruct l as [| a l]. {
   cbn; rewrite Nat.mod_1_l; flia H3p.
 }
 specialize (Hij a (or_introl (eq_refl _))) as H1.
-destruct H1 as (i2 & Hi2l & Hai2 & Hai2p).
+destruct H1 as (i2 & (Hi2l & Hai2 & Hai2p) & Huniq).
 destruct Hi2l as [Hi2l| Hi2l]; [ easy | ].
 specialize (in_split i2 l Hi2l) as (l1 & l2 & Hll).
 rewrite Hll.
@@ -2638,9 +2645,47 @@ assert
     destruct Hi as [Hi| Hi]; [ now left | now right; right ].
   }
   specialize (H1 H); clear H.
-  destruct H1 as (j & Hjall & Hinj & Hijp).
+  destruct H1 as (j & (Hjall & Hinj & Hijp) & Huniq2).
   destruct Hjall as [Hjall| Hjall]. {
-    subst j.
+    subst j; exfalso.
+    specialize (Huniq i) as H1.
+    assert (H : i ∈ a :: l1 ++ i2 :: l2 ∧ a ≠ i ∧ (a * i) mod p = 1). {
+      split. {
+        right.
+        apply in_app_or in Hi.
+        apply in_or_app.
+        destruct Hi as [Hi| Hi]; [ now left | now right; right ].
+      }
+      split; [ flia Hinj | now rewrite Nat.mul_comm ].
+    }
+    specialize (H1 H); clear H.
+    subst i2.
+    move Hnd at bottom; move Hi at bottom.
+    apply NoDup_cons_iff in Hnd.
+    destruct Hnd as (_, Hnd).
+    now apply NoDup_remove_2 in Hnd.
+  }
+  destruct (Nat.eq_dec j i2) as [Hji2| Hji2]. {
+    subst i2.
+    clear Hjall Hi2l.
+    specialize (Huniq2 a) as H1.
+    exfalso; apply Hai2; symmetry.
+    apply H1.
+    split; [ now left | ].
+    move Hnd at bottom; move Hi at bottom.
+    apply NoDup_cons_iff in Hnd.
+    destruct Hnd as (Hnd, _).
+    split. {
+      intros H; subst a.
+      apply Hnd.
+      apply in_app_or in Hi.
+      apply in_or_app.
+      destruct Hi as [Hi| Hi]; [ now left | now right; right ].
+    }
+...
+    specialize (Huniq a) as H1.
+    specialize (
+    specialize (Huniq a (or_introl (eq_refl _))) as H1.
 ...
     subst j.
     move H2i2 at bottom.

@@ -11,6 +11,10 @@ Notation "x ≤ y ≤ z" := (x <= y ∧ y <= z)%nat (at level 70, y at next leve
 Notation "x < y ≤ z" := (x < y ∧ y <= z)%nat (at level 70, y at next level).
 Notation "x ≤ y < z" := (x ≤ y ∧ y < z)%nat (at level 70, y at next level).
 Notation "x < y < z" := (x < y ∧ y < z)%nat (at level 70, y at next level).
+Notation "∃! x .. y , p" :=
+  (ex (unique (λ x, .. (ex (unique (λ y, p))) ..)))
+    (at level 200, x binder, right associativity)
+  : type_scope.
 
 Definition List_combine_all {A} (l1 l2 : list A) (d : A) :=
   let '(l'1, l'2) :=
