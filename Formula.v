@@ -2585,7 +2585,7 @@ specialize (seq_NoDup (p - 3) 2) as Hnd.
 remember (seq 2 (p - 3)) as l eqn:Hl.
 assert
   (Hij : ∀ i, i ∈ l →
-   ∃ j, j ∈ l ∧ (i * j) mod p = 1 ∧ i ≠ j). {
+   ∃ j, j ∈ l ∧ i ≠ j ∧ (i * j) mod p = 1). {
   intros i Hi.
   exists (inv_mod i p).
   subst l.
@@ -2597,21 +2597,20 @@ assert
     specialize (H1 H); flia H1.
   }
   split. {
-    apply mul_inv_diag_r_mod; [ easy | flia Hi ].
+    apply not_eq_sym.
+    apply inv_mod_neq; [ easy | flia Hi ].
   }
-  apply not_eq_sym.
-  apply inv_mod_neq; [ easy | flia Hi ].
+  apply mul_inv_diag_r_mod; [ easy | flia Hi ].
 }
 (**)
 clear Hl.
-...
 destruct l as [| a l]. {
   cbn; rewrite Nat.mod_1_l; flia H3p.
 }
 specialize (Hij a (or_introl (eq_refl _))) as H1.
-destruct H1 as (i2 & Hi2 & H2i2 & H2i).
-destruct Hi2 as [Hi2| Hi2]; [ easy | ].
-specialize (in_split i2 l Hi2) as (l1 & l2 & Hll).
+destruct H1 as (i2 & Hi2l & Hai2 & Hai2p).
+destruct Hi2l as [Hi2l| Hi2l]; [ easy | ].
+specialize (in_split i2 l Hi2l) as (l1 & l2 & Hll).
 rewrite Hll.
 cbn; rewrite Nat.add_0_r.
 rewrite fold_left_app; cbn.
@@ -2623,16 +2622,13 @@ remember (i2 * 2) as x.
 rewrite <- Nat.mul_assoc; subst x.
 rewrite <- Nat.mul_mod_idemp_l; [ | flia H3p ].
 rewrite (Nat.mul_comm i2).
-rewrite H2i2, Nat.mul_1_l.
+rewrite Hai2p, Nat.mul_1_l.
 rewrite Nat.mul_comm.
 rewrite List_fold_left_mul_assoc, Nat.mul_1_l.
 rewrite <- fold_left_app.
 subst l.
-(*
-clear Hi2 H2i H2i2.
-*)
-assert (H : ∀ i,
-  i ∈ l1 ++ l2 → ∃ j, j ∈ l1 ++ l2 ∧ (i * j) mod p = 1 ∧ i ≠ j). {
+assert
+  (H : ∀ i, i ∈ l1 ++ l2 → ∃ j, j ∈ l1 ++ l2 ∧ i ≠ j ∧ (i * j) mod p = 1). {
   intros i Hi.
   specialize (Hij i) as H1.
   assert (H : i ∈ a :: l1 ++ i2 :: l2). {
@@ -2642,8 +2638,10 @@ assert (H : ∀ i,
     destruct Hi as [Hi| Hi]; [ now left | now right; right ].
   }
   specialize (H1 H); clear H.
-  destruct H1 as (j & Hj & Hijp & Hinj).
-  destruct Hj as [Hj| Hj]. {
+  destruct H1 as (j & Hjall & Hinj & Hijp).
+  destruct Hjall as [Hjall| Hjall]. {
+    subst j.
+...
     subst j.
     move H2i2 at bottom.
     rewrite Nat.mul_comm, <- Hijp in H2i2.
