@@ -2581,6 +2581,7 @@ Theorem eq_fold_left_mul_seq_2_prime_sub_3_1 : ∀ p,
   → fold_left Nat.mul (seq 2 (p - 3)) 1 mod p = 1.
 Proof.
 intros * Hp H3p.
+assert (Hpz : p ≠ 0) by now intros H; rewrite H in Hp.
 specialize (seq_NoDup (p - 3) 2) as Hnd.
 remember (seq 2 (p - 3)) as l eqn:Hl.
 assert
@@ -2608,17 +2609,57 @@ assert
   }
   split; [ easy | ].
   intros k Hkl Hki Hk.
-  specialize (inv_mod_prime_involutive p Hp k) as H4.
-...
+  apply Hki; clear Hki.
+  rewrite <- H3 in Hk.
+  destruct (Nat.eq_dec i k) as [Hink| Hink]; [ easy | ].
+  destruct (le_dec i k) as [Hik| Hik]. {
+    apply Nat_eq_mod_sub_0 in Hk; [ | now apply Nat.mul_le_mono_r ].
+    rewrite <- Nat.mul_sub_distr_r in Hk.
+    apply Nat.mod_divide in Hk; [ | easy ].
+    specialize (Nat.gauss _ _ _ Hk) as H4.
+    assert (H : Nat.gcd p (k - i) = 1). {
+      apply eq_gcd_prime_small_1; [ easy | ].
+      apply in_seq in Hkl.
+      flia Hi Hkl Hink Hik.
+    }
+    specialize (H4 H); clear H.
+    apply Nat.mod_divide in H4; [ | easy ].
+    rewrite Nat.mod_small in H4. 2: {
+      unfold inv_mod.
+      rewrite Nat_pow_mod_is_pow_mod; [ | easy ].
+      now apply Nat.mod_upper_bound.
+    }
+    rewrite H4 in H1.
+    apply in_seq in H1; flia H1.
+  }
+  apply Nat.nle_gt in Hik.
+  symmetry in Hk.
+  apply Nat_eq_mod_sub_0 in Hk; [ | apply Nat.mul_le_mono_r; flia Hik ].
+  rewrite <- Nat.mul_sub_distr_r in Hk.
+  apply Nat.mod_divide in Hk; [ | easy ].
+  specialize (Nat.gauss _ _ _ Hk) as H4.
+  assert (H : Nat.gcd p (i - k) = 1). {
+    apply eq_gcd_prime_small_1; [ easy | ].
+    apply in_seq in Hkl.
+    flia Hi Hkl Hink Hik.
+  }
+  specialize (H4 H); clear H.
+  apply Nat.mod_divide in H4; [ | easy ].
+  rewrite Nat.mod_small in H4. 2: {
+    unfold inv_mod.
+    rewrite Nat_pow_mod_is_pow_mod; [ | easy ].
+    now apply Nat.mod_upper_bound.
+  }
+  rewrite H4 in H1.
+  apply in_seq in H1; flia H1.
 }
 (**)
 clear Hl.
-...
 destruct l as [| a l]. {
   cbn; rewrite Nat.mod_1_l; flia H3p.
 }
 specialize (Hij a (or_introl (eq_refl _))) as H1.
-destruct H1 as (i2 & (Hi2l & Hai2 & Hai2p) & Huniq).
+destruct H1 as (i2 & Hi2l & Hai2 & Hai2p & Hk).
 destruct Hi2l as [Hi2l| Hi2l]; [ easy | ].
 specialize (in_split i2 l Hi2l) as (l1 & l2 & Hll).
 rewrite Hll.
@@ -2637,8 +2678,10 @@ rewrite Nat.mul_comm.
 rewrite List_fold_left_mul_assoc, Nat.mul_1_l.
 rewrite <- fold_left_app.
 subst l.
-assert
-  (H : ∀ i, i ∈ l1 ++ l2 → ∃ j, j ∈ l1 ++ l2 ∧ i ≠ j ∧ (i * j) mod p = 1). {
+assert (H :
+  ∀ i, i ∈ l1 ++ l2
+  → ∃ j, j ∈ l1 ++ l2 ∧ i ≠ j ∧ (i * j) mod p = 1 ∧
+        ∀ k, k ∈ l1 ++ l2 → k ≠ i → (k * j) mod p ≠ 1). {
   intros i Hi.
   specialize (Hij i) as H1.
   assert (H : i ∈ a :: l1 ++ i2 :: l2). {
@@ -2648,25 +2691,63 @@ assert
     destruct Hi as [Hi| Hi]; [ now left | now right; right ].
   }
   specialize (H1 H); clear H.
-  destruct H1 as (j & (Hjall & Hinj & Hijp) & Huniq2).
-  destruct Hjall as [Hjall| Hjall]. {
-    subst j; exfalso.
-    specialize (Huniq i) as H1.
-    assert (H : i ∈ a :: l1 ++ i2 :: l2 ∧ a ≠ i ∧ (a * i) mod p = 1). {
-      split. {
-        right.
-        apply in_app_or in Hi.
-        apply in_or_app.
-        destruct Hi as [Hi| Hi]; [ now left | now right; right ].
+  destruct H1 as (j & Hjall & Hinj & Hijp & Hk').
+  exists j.
+  split. {
+    destruct Hjall as [Hjall| Hjall]. {
+      subst j; exfalso.
+      specialize (Hk' i2) as H1.
+      assert (H : i2 ∈ a :: l1 ++ i2 :: l2). {
+        now right; apply in_or_app; right; left.
       }
-      split; [ flia Hinj | now rewrite Nat.mul_comm ].
+      specialize (H1 H); clear H.
+      assert (H : i2 ≠ i). {
+        intros H; subst i2.
+        move Hnd at bottom; move Hi at bottom.
+        apply NoDup_cons_iff in Hnd.
+        destruct Hnd as (_, Hnd).
+        now apply NoDup_remove_2 in Hnd.
+      }
+      specialize (H1 H).
+      now rewrite Nat.mul_comm in H1.
     }
-    specialize (H1 H); clear H.
-    subst i2.
-    move Hnd at bottom; move Hi at bottom.
-    apply NoDup_cons_iff in Hnd.
-    destruct Hnd as (_, Hnd).
-    now apply NoDup_remove_2 in Hnd.
+    apply in_app_or in Hjall.
+    apply in_or_app.
+    destruct Hjall as [Hjall| Hjall]; [ now left | ].
+    destruct Hjall as [Hjall| Hjall]; [ | now right ].
+    subst j.
+    destruct (Nat.eq_dec a i) as [Hai| Hai]. {
+      subst i.
+      move Hnd at bottom.
+      apply NoDup_cons_iff in Hnd.
+      destruct Hnd as (Hnd, _).
+      exfalso; apply Hnd.
+      apply in_app_or in Hi.
+      apply in_or_app.
+      destruct Hi as [Hi| Hi]; [ now left | now right; right ].
+    }
+    now specialize (Hk' a (or_introl eq_refl) Hai) as H2.
+  }
+  split; [ easy | ].
+  split; [ easy | ].
+  intros k Hkll Hki.
+  apply Hk'; [ | easy ].
+  right.
+  apply in_app_or in Hkll.
+  apply in_or_app.
+  destruct Hkll as [Hkll| Hkll]; [ now left | now right; right ].
+}
+move H before Hij; clear Hij; rename H into Hij.
+assert (H : NoDup (l1 ++ l2)). {
+  apply NoDup_cons_iff in Hnd.
+  destruct Hnd as (_, Hnd).
+  now apply NoDup_remove_1 in Hnd.
+}
+move H before Hnd; clear Hnd; rename H into Hnd.
+clear a i2 Hi2l Hai2 Hai2p Hk.
+remember (l1 ++ l2) as l eqn:Hl.
+clear l1 l2 Hl.
+...
   }
   destruct (Nat.eq_dec j i2) as [Hji2| Hji2]. {
     subst i2.
