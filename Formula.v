@@ -2575,15 +2575,12 @@ split. {
 }
 Qed.
 
-...
-
 Theorem eq_fold_left_mul_seq_2_prime_sub_3_1 : ∀ p,
   is_prime p = true
   → 3 ≤ p
   → fold_left Nat.mul (seq 2 (p - 3)) 1 mod p = 1.
 Proof.
 intros * Hp H3p.
-Search inv_mod.
 ...
 intros * Hp H3p.
 remember (seq 2 (p - 3)) as l eqn:Hl.
