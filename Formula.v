@@ -2586,26 +2586,29 @@ remember (seq 2 (p - 3)) as l eqn:Hl.
 assert
   (Hij : ∀ i, i ∈ l →
    ∃j, j ∈ l ∧ i ≠ j ∧ (i * j) mod p = 1 ∧
-        ∀ k, k ≠ i → (k * j) mod p ≠ 1). {
+        ∀ k, k ∈ l → k ≠ i → (k * j) mod p ≠ 1). {
   intros i Hi.
   exists (inv_mod i p).
   subst l.
   apply in_seq in Hi.
-  split. {
+  assert (H1 : inv_mod i p ∈ seq 2 (p - 3)). {
     apply in_seq.
     specialize (inv_mod_interv p Hp i) as H1.
     assert (H : 2 ≤ i ≤ p - 2) by flia Hi.
     specialize (H1 H); flia H1.
   }
-  split. {
+  split; [ easy | ].
+  assert (H2 : i ≠ inv_mod i p). {
     apply not_eq_sym.
     apply inv_mod_neq; [ easy | flia Hi ].
   }
-  split. {
+  split; [ easy | ].
+  assert (H3 : (i * inv_mod i p) mod p = 1). {
     apply mul_inv_diag_r_mod; [ easy | flia Hi ].
   }
-  intros k Hki Hk.
-  specialize (inv_mod_prime_involutive p Hp k) as H1.
+  split; [ easy | ].
+  intros k Hkl Hki Hk.
+  specialize (inv_mod_prime_involutive p Hp k) as H4.
 ...
 }
 (**)
