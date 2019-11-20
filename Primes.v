@@ -207,7 +207,7 @@ split.
 -apply Nat.divide_pos_le; [ flia | easy ].
 Qed.
 
-Theorem infinitely_many_primes : ∀ n, ∃ m, m > n ∧ is_prime m = true.
+Theorem infinitely_many_primes : ∀ n, ∃ m, m > n ∧ prime m.
 Proof.
 intros.
 specialize (next_prime_bounded n) as (m & (Hnm & _) & Hp).
@@ -329,7 +329,7 @@ replace (k + 2 + 1) with (S k + 2) in Hpn by flia.
 now apply IHn.
 Qed.
 
-Theorem prime_ge_2 : ∀ n, is_prime n = true → 2 ≤ n.
+Theorem prime_ge_2 : ∀ n, prime n → 2 ≤ n.
 Proof.
 intros * Hp.
 destruct n; [ easy | ].
