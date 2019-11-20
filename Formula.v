@@ -2655,9 +2655,14 @@ assert
 }
 (**)
 clear Hl.
-destruct l as [| a l]. {
-  cbn; rewrite Nat.mod_1_l; flia H3p.
+remember (length l) as len eqn:Hlen; symmetry in Hlen.
+revert l Hnd Hij Hlen.
+induction len as (len, IHlen) using lt_wf_rec; intros.
+destruct len. {
+  apply length_zero_iff_nil in Hlen.
+  subst l; cbn; rewrite Nat.mod_1_l; flia H3p.
 }
+destruct l as [| a l]; [ easy | ].
 specialize (Hij a (or_introl (eq_refl _))) as H1.
 destruct H1 as (i2 & Hi2l & Hai2 & Hai2p & Hk).
 destruct Hi2l as [Hi2l| Hi2l]; [ easy | ].
@@ -2744,79 +2749,13 @@ assert (H : NoDup (l1 ++ l2)). {
   now apply NoDup_remove_1 in Hnd.
 }
 move H before Hnd; clear Hnd; rename H into Hnd.
-clear a i2 Hi2l Hai2 Hai2p Hk.
-remember (l1 ++ l2) as l eqn:Hl.
-clear l1 l2 Hl.
-...
-  }
-  destruct (Nat.eq_dec j i2) as [Hji2| Hji2]. {
-    subst i2.
-    clear Hjall Hi2l.
-    specialize (Huniq2 a) as H1.
-    exfalso; apply Hai2; symmetry.
-    apply H1.
-    split; [ now left | ].
-    move Hnd at bottom; move Hi at bottom.
-    apply NoDup_cons_iff in Hnd.
-    destruct Hnd as (Hnd, _).
-    split. {
-      intros H; subst a.
-      apply Hnd.
-      apply in_app_or in Hi.
-      apply in_or_app.
-      destruct Hi as [Hi| Hi]; [ now left | now right; right ].
-    }
-...
-    specialize (Huniq a) as H1.
-    specialize (
-    specialize (Huniq a (or_introl (eq_refl _))) as H1.
-...
-    subst j.
-    move H2i2 at bottom.
-    rewrite Nat.mul_comm, <- Hijp in H2i2.
-    destruct (Nat.lt_trichotomy i i2) as [Hii| [Hii| Hii]]. {
-      apply Nat_eq_mod_sub_0 in H2i2. 2: {
-        now apply Nat.mul_le_mono_r, Nat.lt_le_incl.
-      }
-      rewrite <- Nat.mul_sub_distr_r in H2i2.
-      apply Nat.mod_divide in H2i2; [ | flia H3p ].
-      specialize (Nat.gauss _ _ _ H2i2) as H1.
-...
-
-destruct l as [| a l]. {
-  cbn; rewrite Nat.mod_1_l; flia H3p.
-}
-cbn; rewrite Nat.add_0_r.
-assert (Ha2: a = 2). {
-  remember (p - 3) as len eqn:Hlen.
-  destruct len; [ easy | ].
-  cbn in Hl.
-  now injection Hl; intros.
-}
-subst a.
-specialize (Hij 2 (or_introl (eq_refl _))) as H1.
-destruct H1 as (i2 & Hi2 & H2i2 & H2i).
-destruct Hi2 as [Hi2| Hi2]; [ easy | ].
-specialize (in_split i2 l Hi2) as (l1 & l2 & Hll).
-rewrite Hll.
-rewrite fold_left_app; cbn.
-rewrite fold_left_mul_from_1.
-rewrite Nat.mul_shuffle0, Nat.mul_comm.
-rewrite fold_left_mul_from_1.
-do 2 rewrite Nat.mul_assoc.
-remember (i2 * 2) as x.
-rewrite <- Nat.mul_assoc; subst x.
-rewrite <- Nat.mul_mod_idemp_l; [ | flia H3p ].
-rewrite (Nat.mul_comm i2).
-rewrite H2i2, Nat.mul_1_l.
-rewrite Nat.mul_comm.
-rewrite List_fold_left_mul_assoc, Nat.mul_1_l.
-rewrite <- fold_left_app.
-subst l.
-symmetry in Hl.
-rewrite <- Hl in Hij.
-clear Hi2 H2i.
-...
+cbn in Hlen.
+apply (IHlen (len - 1)); [ flia | easy | easy | ].
+apply Nat.succ_inj in Hlen.
+rewrite <- Hlen.
+do 2 rewrite app_length.
+cbn; flia.
+Qed.
 
 (* *)
 
@@ -2854,17 +2793,8 @@ split.
     a * b ≡ 1 (mod n). We not by Fermat's little theorem that
     a * a^(n-2) indeed equals 1 mod n. So b=a^(n-2) mod n. All
     these pairs are supposed to cover [2, n-2] *)
- remember (seq 2 (n - 3)) as l eqn:Hl.
-subst l.
-...
- remember (with_inv_pair n) as l' eqn:Hl'.
- move l' before l.
- assert (Hperm : Permutation l l'). {
-   assert (length l = length l'). {
-     rewrite Hl, Hl'.
-     rewrite seq_length.
-     unfold with_inv_pair.
-     (* even comparison of lengths is not easy to proof *)
+ now apply eq_fold_left_mul_seq_2_prime_sub_3_1.
+-intros Hf.
 ...
 
 Theorem ζ_Euler_product_eq : ...
