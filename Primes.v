@@ -336,13 +336,11 @@ destruct n; [ easy | ].
 destruct n; [ easy | flia ].
 Qed.
 
-Theorem prime_decomp_of_prime : ∀ n,
-  is_prime n = true
-  → prime_decomp n = [n].
+Theorem prime_decomp_of_prime : ∀ n, prime n → prime_decomp n = [n].
 Proof.
 intros * Hpn.
 specialize (prime_ge_2 _ Hpn) as Hn.
-unfold is_prime in Hpn.
+unfold prime, is_prime in Hpn.
 unfold prime_decomp.
 replace n with (S (S (n - 2))) in Hpn at 1 by flia Hn.
 replace n with (S (S (n - 2))) at 1 by flia Hn.
@@ -641,8 +639,7 @@ replace (S cnt + d) with (cnt + S d) in Hcnt by flia.
 apply (IHcnt (S d)); [ flia H2d | easy | easy | easy ].
 Qed.
 
-Theorem first_in_decomp_is_prime : ∀ n,
-  is_prime (List.hd 2 (prime_decomp n)) = true.
+Theorem first_in_decomp_is_prime : ∀ n, prime (List.hd 2 (prime_decomp n)).
 Proof.
 intros.
 unfold is_prime, prime_decomp.
@@ -652,6 +649,7 @@ assert (H2n : 2 ≤ S (S n)) by flia.
 remember (S (S n)) as n'.
 clear n Heqn'; rename n' into n.
 specialize (hd_prime_decomp_aux_ge n n 2 (le_refl _)) as H2b.
+unfold prime, is_prime.
 remember (hd 2 (prime_decomp_aux n n 2)) as b eqn:Hb.
 move b before n; move H2b before H2n.
 replace b with (S (S (b - 2))) by flia H2b.
@@ -956,7 +954,7 @@ now apply Nat.add_cancel_l in H1.
 Qed.
 
 Theorem prime_divides_fact_ge : ∀ n m,
-  is_prime n = true
+  prime n
   → Nat.divide n (fact m)
   → n ≤ m.
 Proof.
@@ -1187,7 +1185,7 @@ Qed.
 
 Lemma bounded_phony_prime_after_is_after : ∀ n p,
   n ≤ p
-  → is_prime p = true
+  → prime p
   → n ≤ phony_prime_after (p - n) n.
 Proof.
 intros * Hnm Hm.
@@ -1948,8 +1946,7 @@ rewrite Nat.mod_small; [ easy | flia Hap ].
 Qed.
 
 (* proof simpler than fermat_little; but could be a corollary *)
-Theorem fermat_little_1 : ∀ p,
-  is_prime p = true → ∀ a, a ^ p mod p = a mod p.
+Theorem fermat_little_1 : ∀ p, prime p → ∀ a, a ^ p mod p = a mod p.
 Proof.
 intros * Hp *.
 induction a. {
