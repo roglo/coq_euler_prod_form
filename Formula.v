@@ -2601,6 +2601,33 @@ assert
   apply not_eq_sym.
   apply inv_mod_neq; [ easy | flia Hi ].
 }
+(**)
+clear Hl.
+destruct l as [| a l]. {
+  cbn; rewrite Nat.mod_1_l; flia H3p.
+}
+specialize (Hij a (or_introl (eq_refl _))) as H1.
+destruct H1 as (i2 & Hi2 & H2i2 & H2i).
+destruct Hi2 as [Hi2| Hi2]; [ easy | ].
+specialize (in_split i2 l Hi2) as (l1 & l2 & Hll).
+rewrite Hll.
+cbn; rewrite Nat.add_0_r.
+rewrite fold_left_app; cbn.
+rewrite fold_left_mul_from_1.
+rewrite Nat.mul_shuffle0, Nat.mul_comm.
+rewrite fold_left_mul_from_1.
+do 2 rewrite Nat.mul_assoc.
+remember (i2 * 2) as x.
+rewrite <- Nat.mul_assoc; subst x.
+rewrite <- Nat.mul_mod_idemp_l; [ | flia H3p ].
+rewrite (Nat.mul_comm i2).
+rewrite H2i2, Nat.mul_1_l.
+rewrite Nat.mul_comm.
+rewrite List_fold_left_mul_assoc, Nat.mul_1_l.
+rewrite <- fold_left_app.
+subst l.
+clear Hi2 H2i H2i2.
+...
 destruct l as [| a l]. {
   cbn; rewrite Nat.mod_1_l; flia H3p.
 }
