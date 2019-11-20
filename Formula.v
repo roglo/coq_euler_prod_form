@@ -2581,6 +2581,7 @@ Theorem eq_fold_left_mul_seq_2_prime_sub_3_1 : ∀ p,
   → fold_left Nat.mul (seq 2 (p - 3)) 1 mod p = 1.
 Proof.
 intros * Hp H3p.
+specialize (seq_NoDup (p - 3) 2) as Hnd.
 remember (seq 2 (p - 3)) as l eqn:Hl.
 assert
   (Hij : ∀ i, i ∈ l →
@@ -2626,8 +2627,34 @@ rewrite Nat.mul_comm.
 rewrite List_fold_left_mul_assoc, Nat.mul_1_l.
 rewrite <- fold_left_app.
 subst l.
+(*
 clear Hi2 H2i H2i2.
+*)
+assert (H : ∀ i,
+  i ∈ l1 ++ l2 → ∃ j, j ∈ l1 ++ l2 ∧ (i * j) mod p = 1 ∧ i ≠ j). {
+  intros i Hi.
+  specialize (Hij i) as H1.
+  assert (H : i ∈ a :: l1 ++ i2 :: l2). {
+    right.
+    apply in_app_or in Hi.
+    apply in_or_app.
+    destruct Hi as [Hi| Hi]; [ now left | now right; right ].
+  }
+  specialize (H1 H); clear H.
+  destruct H1 as (j & Hj & Hijp & Hinj).
+  destruct Hj as [Hj| Hj]. {
+    subst j.
+    move H2i2 at bottom.
+    rewrite Nat.mul_comm, <- Hijp in H2i2.
+    destruct (Nat.lt_trichotomy i i2) as [Hii| [Hii| Hii]]. {
+      apply Nat_eq_mod_sub_0 in H2i2. 2: {
+        now apply Nat.mul_le_mono_r, Nat.lt_le_incl.
+      }
+      rewrite <- Nat.mul_sub_distr_r in H2i2.
+      apply Nat.mod_divide in H2i2; [ | flia H3p ].
+      specialize (Nat.gauss _ _ _ H2i2) as H1.
 ...
+
 destruct l as [| a l]. {
   cbn; rewrite Nat.mod_1_l; flia H3p.
 }
