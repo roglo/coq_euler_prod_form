@@ -24,6 +24,15 @@ Definition is_prime n :=
   | S (S c) => prime_test c n 2
   end.
 
+Definition prime p := is_prime p = true.
+
+Theorem prime_dec : ∀ n, { prime n } + { ¬ prime n }.
+Proof.
+intros.
+unfold prime.
+now destruct (is_prime n); [ left | right ].
+Qed.
+
 Theorem prime_test_false_exists_div_iff : ∀ n k,
   2 ≤ k
   → (∀ d, 2 ≤ d < k → n mod d ≠ 0)
@@ -96,10 +105,11 @@ split.
 Qed.
 
 Theorem not_prime_decomp : ∀ n, 2 ≤ n →
-  is_prime n = false
+  ¬ prime n
   → ∃ a b, 2 ≤ a ∧ 2 ≤ b ∧ n = a * b.
 Proof.
 intros n Hn Hp.
+apply Bool.not_true_iff_false in Hp.
 unfold is_prime in Hp.
 destruct n; [ flia Hn | ].
 destruct n; [ flia Hn | ].
@@ -109,7 +119,7 @@ intros * H; flia H.
 Qed.
 
 Theorem not_prime_exists_div : ∀ n, 2 ≤ n →
-  is_prime n = false
+  ¬ prime n
   → ∃ a, 2 ≤ a < n ∧ Nat.divide a n.
 Proof.
 intros n Hn Hp.
@@ -125,12 +135,11 @@ cbn; remember (b * S a); flia.
 Qed.
 
 Theorem prime_divisor : ∀ n, 2 ≤ n →
-  ∃ d, is_prime d = true ∧ Nat.divide d n.
+  ∃ d, prime d ∧ Nat.divide d n.
 Proof.
 intros * Hn.
 induction n as (n, IHn) using (well_founded_ind lt_wf).
-remember (is_prime n) as b eqn:Hb; symmetry in Hb.
-destruct b; [ now exists n | ].
+destruct (prime_dec n) as [Hb| Hb]; [ now exists n | ].
 specialize (not_prime_exists_div n Hn Hb) as (a & Han & Hd).
 specialize (IHn a (proj2 Han) (proj1 Han)) as H1.
 destruct H1 as (d & Hpd & Hda).
@@ -974,7 +983,7 @@ Qed.
 
 (* https://en.wikipedia.org/wiki/Factorial#Number_theory *)
 Theorem Wilson_on_composite :
-  ∀ n, 5 < n → is_prime n = false ↔ fact (n - 1) mod n = 0.
+  ∀ n, 5 < n → ¬ prime n ↔ fact (n - 1) mod n = 0.
 Proof.
 intros * H5n.
 split.
@@ -1044,8 +1053,7 @@ split.
  +assert (H : b < a) by flia Halb Haeb.
   rewrite Nat.mul_comm.
   now apply Nat_divide_mul_fact.
--intros Hn.
- apply Bool.not_true_iff_false; intros Hp.
+-intros Hn Hp.
  apply Nat.mod_divide in Hn; [ | flia H5n ].
  specialize (prime_divides_fact_ge _ _ Hp Hn) as H1.
  flia H5n H1.
@@ -2302,7 +2310,7 @@ apply in_or_app.
 destruct Hkll as [Hkll| Hkll]; [ now left | now right; right ].
 Qed.
 
-Theorem Wilson : ∀ n, 2 ≤ n → is_prime n = true ↔ fact (n - 1) mod n = n - 1.
+Theorem Wilson : ∀ n, 2 ≤ n → prime n ↔ fact (n - 1) mod n = n - 1.
 Proof.
 intros * H2n.
 split.
@@ -2338,8 +2346,7 @@ split.
  now apply eq_fold_left_mul_seq_2_prime_sub_3_1.
 -intros Hf.
  destruct (lt_dec 5 n) as [H5n| H5n]. {
-   apply Bool.not_false_iff_true.
-   intros H.
+   destruct (prime_dec n) as [H| H]; [ easy | ].
    apply Wilson_on_composite in H; [ | easy ].
    rewrite H in Hf.
    flia Hf H5n.
