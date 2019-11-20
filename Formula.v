@@ -2581,8 +2581,6 @@ Theorem eq_fold_left_mul_seq_2_prime_sub_3_1 : ∀ p,
   → fold_left Nat.mul (seq 2 (p - 3)) 1 mod p = 1.
 Proof.
 intros * Hp H3p.
-...
-intros * Hp H3p.
 remember (seq 2 (p - 3)) as l eqn:Hl.
 assert
   (Hij : ∀ i, i ∈ l →
@@ -2632,6 +2630,10 @@ rewrite H2i2, Nat.mul_1_l.
 rewrite Nat.mul_comm.
 rewrite List_fold_left_mul_assoc, Nat.mul_1_l.
 rewrite <- fold_left_app.
+subst l.
+symmetry in Hl.
+rewrite <- Hl in Hij.
+clear Hi2 H2i.
 ...
 
 (* *)
