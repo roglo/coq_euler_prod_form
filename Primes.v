@@ -172,7 +172,7 @@ rewrite Hc, Nat_fact_succ.
 now rewrite Nat.mul_assoc, Nat.mul_shuffle0.
 Qed.
 
-Lemma next_prime_bounded : ∀ n, ∃ m, n < m ≤ fact n + 1 ∧ is_prime m = true.
+Lemma next_prime_bounded : ∀ n, ∃ m, n < m ≤ fact n + 1 ∧ prime m.
 Proof.
 intros.
 specialize (prime_divisor (fact n + 1)) as H1.
@@ -874,8 +874,7 @@ apply IHl.
  now rewrite Ha; left.
 Qed.
 
-Theorem in_prime_decomp_is_prime : ∀ n d,
-  d ∈ prime_decomp n → is_prime d = true.
+Theorem in_prime_decomp_is_prime : ∀ n d, d ∈ prime_decomp n → prime d.
 Proof.
 intros * Hdn.
 specialize (In_nth (prime_decomp n) d 2 Hdn) as (i & Hilen & Hid).
@@ -1136,7 +1135,7 @@ now replace (S niter + n) with (niter + (n + 1)) in Hm by flia.
 Qed.
 
 Lemma phony_prime_after_is_prime : ∀ n,
-  is_prime (phony_prime_after (fact n + 1) n) = true.
+  prime (phony_prime_after (fact n + 1) n).
 Proof.
 intros.
 specialize (next_prime_bounded n) as (m & Hm & Hmp).
@@ -1162,7 +1161,7 @@ now apply IHniter1 in H1.
 Qed.
 
 Lemma prime_after_aux_is_prime : ∀ niter n,
-  is_prime (prime_after_aux niter n) = true.
+  prime (prime_after_aux niter n).
 Proof.
 intros.
 revert n.
@@ -1178,7 +1177,7 @@ destruct b; [ easy | ].
 apply IHniter.
 Qed.
 
-Theorem prime_after_is_prime : ∀ n, is_prime (prime_after n) = true.
+Theorem prime_after_is_prime : ∀ n, prime (prime_after n).
 Proof.
 intros.
 apply prime_after_aux_is_prime.
@@ -1308,6 +1307,7 @@ induction niter; intros. {
 cbn.
 remember (is_prime n) as b eqn:Hb; symmetry in Hb.
 destruct b; [ easy | ].
+unfold prime in Hpp.
 destruct i; [ now rewrite Nat.add_0_r, Hb in Hpp | ].
 apply Nat.succ_le_mono in Hni.
 replace (n + S i) with (n + 1 + i) in Hpp by flia.
@@ -2401,3 +2401,5 @@ rewrite Nat.sub_add; [ | flia Hip ].
 rewrite fermat_little_1; [ | easy ].
 apply Nat.mod_small; flia Hip.
 Qed.
+
+Search (is_prime _ = true).
