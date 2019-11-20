@@ -2611,79 +2611,77 @@ rewrite Hai2p, Nat.mul_1_l.
 rewrite Nat.mul_comm.
 rewrite List_fold_left_mul_assoc, Nat.mul_1_l.
 rewrite <- fold_left_app.
-subst l.
-assert (H :
-  ∀ i, i ∈ l1 ++ l2
-  → ∃ j, j ∈ l1 ++ l2 ∧ i ≠ j ∧ (i * j) mod p = 1 ∧
-        ∀ k, k ∈ l1 ++ l2 → k ≠ i → (k * j) mod p ≠ 1). {
-  intros i Hi.
-  specialize (Hij i) as H1.
-  assert (H : i ∈ a :: l1 ++ i2 :: l2). {
-    right.
+(**)
+apply (IHlen (len - 1)); [ flia | | | ]. 3: {
+  cbn in Hlen.
+  apply Nat.succ_inj in Hlen.
+  rewrite <- Hlen, Hll.
+  do 2 rewrite app_length.
+  cbn; flia.
+} {
+  apply NoDup_cons_iff in Hnd.
+  destruct Hnd as (_, Hnd).
+  rewrite Hll in Hnd.
+  now apply NoDup_remove_1 in Hnd.
+}
+intros i Hi.
+specialize (Hij i) as H1.
+assert (H : i ∈ a :: l). {
+  right; rewrite Hll.
+  apply in_app_or in Hi.
+  apply in_or_app.
+  destruct Hi as [Hi| Hi]; [ now left | now right; right ].
+}
+specialize (H1 H); clear H.
+destruct H1 as (j & Hjall & Hinj & Hijp & Hk').
+exists j.
+split. {
+  destruct Hjall as [Hjall| Hjall]. {
+    subst j; exfalso.
+    specialize (Hk' i2) as H1.
+    assert (H : i2 ∈ a :: l). {
+      now rewrite Hll; right; apply in_or_app; right; left.
+    }
+    specialize (H1 H); clear H.
+    assert (H : i2 ≠ i). {
+      intros H; subst i2.
+      move Hnd at bottom; move Hi at bottom.
+      apply NoDup_cons_iff in Hnd.
+      destruct Hnd as (_, Hnd).
+      rewrite Hll in Hnd.
+      now apply NoDup_remove_2 in Hnd.
+    }
+    specialize (H1 H).
+    now rewrite Nat.mul_comm in H1.
+  }
+  rewrite Hll in Hjall.
+  apply in_app_or in Hjall.
+  apply in_or_app.
+  destruct Hjall as [Hjall| Hjall]; [ now left | ].
+  destruct Hjall as [Hjall| Hjall]; [ | now right ].
+  subst j.
+  destruct (Nat.eq_dec a i) as [Hai| Hai]. {
+    subst i.
+    move Hnd at bottom.
+    apply NoDup_cons_iff in Hnd.
+    destruct Hnd as (Hnd, _).
+    exfalso; apply Hnd; clear Hnd.
+    rewrite Hll.
     apply in_app_or in Hi.
     apply in_or_app.
     destruct Hi as [Hi| Hi]; [ now left | now right; right ].
   }
-  specialize (H1 H); clear H.
-  destruct H1 as (j & Hjall & Hinj & Hijp & Hk').
-  exists j.
-  split. {
-    destruct Hjall as [Hjall| Hjall]. {
-      subst j; exfalso.
-      specialize (Hk' i2) as H1.
-      assert (H : i2 ∈ a :: l1 ++ i2 :: l2). {
-        now right; apply in_or_app; right; left.
-      }
-      specialize (H1 H); clear H.
-      assert (H : i2 ≠ i). {
-        intros H; subst i2.
-        move Hnd at bottom; move Hi at bottom.
-        apply NoDup_cons_iff in Hnd.
-        destruct Hnd as (_, Hnd).
-        now apply NoDup_remove_2 in Hnd.
-      }
-      specialize (H1 H).
-      now rewrite Nat.mul_comm in H1.
-    }
-    apply in_app_or in Hjall.
-    apply in_or_app.
-    destruct Hjall as [Hjall| Hjall]; [ now left | ].
-    destruct Hjall as [Hjall| Hjall]; [ | now right ].
-    subst j.
-    destruct (Nat.eq_dec a i) as [Hai| Hai]. {
-      subst i.
-      move Hnd at bottom.
-      apply NoDup_cons_iff in Hnd.
-      destruct Hnd as (Hnd, _).
-      exfalso; apply Hnd.
-      apply in_app_or in Hi.
-      apply in_or_app.
-      destruct Hi as [Hi| Hi]; [ now left | now right; right ].
-    }
-    now specialize (Hk' a (or_introl eq_refl) Hai) as H2.
-  }
-  split; [ easy | ].
-  split; [ easy | ].
-  intros k Hkll Hki.
-  apply Hk'; [ | easy ].
-  right.
-  apply in_app_or in Hkll.
-  apply in_or_app.
-  destruct Hkll as [Hkll| Hkll]; [ now left | now right; right ].
+  now specialize (Hk' a (or_introl eq_refl) Hai) as H2.
 }
-move H before Hij; clear Hij; rename H into Hij.
-assert (H : NoDup (l1 ++ l2)). {
-  apply NoDup_cons_iff in Hnd.
-  destruct Hnd as (_, Hnd).
-  now apply NoDup_remove_1 in Hnd.
-}
-move H before Hnd; clear Hnd; rename H into Hnd.
-cbn in Hlen.
-apply (IHlen (len - 1)); [ flia | easy | easy | ].
-apply Nat.succ_inj in Hlen.
-rewrite <- Hlen.
-do 2 rewrite app_length.
-cbn; flia.
+split; [ easy | ].
+split; [ easy | ].
+intros k Hkll Hki.
+apply Hk'; [ | easy ].
+right.
+rewrite Hll.
+apply in_app_or in Hkll.
+apply in_or_app.
+destruct Hkll as [Hkll| Hkll]; [ now left | now right; right ].
 Qed.
 
 (* *)
