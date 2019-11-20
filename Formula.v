@@ -2604,6 +2604,7 @@ assert
 }
 (**)
 clear Hl.
+...
 destruct l as [| a l]. {
   cbn; rewrite Nat.mod_1_l; flia H3p.
 }
