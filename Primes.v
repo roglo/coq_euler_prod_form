@@ -2352,3 +2352,45 @@ split.
  destruct n; [ easy | ].
  destruct n; [ easy | flia H5n ].
 Qed.
+
+(* *)
+
+Theorem inv_mod_prime_involutive : ∀ p,
+  is_prime p = true
+  → ∀ i, 2 ≤ i ≤ p - 2
+  → inv_mod (inv_mod i p) p = i.
+Proof.
+intros * Hp * Hip.
+assert (Hpz : p ≠ 0) by now intros H; rewrite H in Hp.
+unfold inv_mod.
+rewrite Nat_pow_mod_is_pow_mod; [ | now intros H; subst p ].
+rewrite Nat_pow_mod_is_pow_mod; [ | now intros H; subst p ].
+rewrite Nat_mod_pow_mod.
+rewrite <- Nat.pow_mul_r.
+rewrite Nat.mul_sub_distr_r.
+do 2 rewrite Nat.mul_sub_distr_l.
+rewrite Nat_sub_sub_distr. 2: {
+  split; [ flia Hip | ].
+  rewrite <- Nat.mul_sub_distr_l.
+  rewrite Nat.mul_comm.
+  apply Nat.mul_le_mono_l.
+  flia Hip.
+}
+rewrite (Nat.mul_comm 2).
+rewrite <- Nat.sub_add_distr.
+rewrite <- Nat.mul_add_distr_l.
+replace (2 + 2) with 4 by easy.
+replace (2 * 2) with 4 by easy.
+rewrite <- Nat.mul_sub_distr_l.
+rewrite Nat.pow_add_r.
+rewrite Nat.pow_mul_r.
+rewrite <- Nat.mul_mod_idemp_l; [ | easy ].
+rewrite <- Nat_mod_pow_mod.
+rewrite fermat_little_1; [ | easy ].
+rewrite Nat_mod_pow_mod.
+rewrite Nat.mul_mod_idemp_l; [ | easy ].
+rewrite <- Nat.pow_add_r.
+rewrite Nat.sub_add; [ | flia Hip ].
+rewrite fermat_little_1; [ | easy ].
+apply Nat.mod_small; flia Hip.
+Qed.
