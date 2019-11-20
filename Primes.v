@@ -234,7 +234,7 @@ apply (IHcnt (S n) (k + 1)); [ easy | flia Hcnt | easy | flia Hd Hkd ].
 Qed.
 
 Theorem prime_divisors : ∀ p,
-  is_prime p = true → ∀ a, Nat.divide a p → a = 1 ∨ a = p.
+  prime p → ∀ a, Nat.divide a p → a = 1 ∨ a = p.
 Proof.
 intros * Hp a * Hap.
 unfold is_prime in Hp.
@@ -273,8 +273,7 @@ now rewrite Nat.mod_mul.
 Qed.
 
 Theorem eq_primes_gcd_1 : ∀ a b,
-  is_prime a = true → is_prime b = true → a ≠ b
-  → Nat.gcd a b = 1.
+  prime a → prime b → a ≠ b → Nat.gcd a b = 1.
 Proof.
 intros p q Hp Hq Hpq.
 specialize (prime_divisors _ Hp) as Hpp.
@@ -918,7 +917,7 @@ symmetry; apply List_fold_left_mul_assoc.
 Qed.
 
 Theorem eq_gcd_prime_small_1 : ∀ p n,
-  is_prime p = true
+  prime p
   → 0 < n < p
   → Nat.gcd p n = 1.
 Proof.
@@ -1113,8 +1112,8 @@ Definition prime_after n := prime_after_aux n n.
 
 Lemma bounded_phony_prime_after : ∀ n p,
   n < p
-  → is_prime p = true
-  → is_prime (phony_prime_after (p - n) n) = true.
+  → prime p
+  → prime (phony_prime_after (p - n) n).
 Proof.
 intros * Hnm Hm.
 remember (p - n) as niter eqn:Hniter.
@@ -1367,7 +1366,7 @@ Compute (prime_after 510).
 *)
 
 Theorem Nat_gcd_prime_fact_lt : ∀ p,
-  is_prime p = true → ∀ k, k < p → Nat.gcd p (fact k) = 1.
+  prime p → ∀ k, k < p → Nat.gcd p (fact k) = 1.
 Proof.
 intros * Hp * Hkp.
 induction k; [ apply Nat.gcd_1_r | ].
@@ -1748,7 +1747,7 @@ rewrite Nat.mul_comm.
 apply IHk; [ flia Hkp | easy ].
 Qed.
 
-Theorem sum_power_prime_mod : ∀ p, is_prime p = true →
+Theorem sum_power_prime_mod : ∀ p, prime p →
   ∀ a b, (a + b) ^ p mod p = (a ^ p + b ^ p) mod p.
 Proof.
 intros * Hp *.
