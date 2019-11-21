@@ -2175,8 +2175,6 @@ replace 1%F with ζ~{1} by easy.
 now apply times_product_on_primes_close_to.
 Qed.
 
-Check @ζ_times_product_on_primes_close_to_1.
-
 Definition lim_tow_inf_eq {F : field} (f : nat → ln_series) (y : ln_series) :=
   ∀ i, i ≠ 0 → ∃ n, ∀ m, m > n → (f m)~{i} = y~{i}.
 
@@ -2198,5 +2196,7 @@ replace (1~{i}) with 0%F. 2: {
 apply H2.
 flia Hi H1i Hmi.
 Qed.
+
+Check @lim_ζ_times_product_on_primes.
 
 Theorem ζ_Euler_product_eq : ...
