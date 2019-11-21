@@ -26,13 +26,6 @@ Definition is_prime n :=
 
 Definition prime p := is_prime p = true.
 
-Theorem prime_dec : ∀ n, { prime n } + { ¬ prime n }.
-Proof.
-intros.
-unfold prime.
-now destruct (is_prime n); [ left | right ].
-Qed.
-
 Theorem prime_test_false_exists_div_iff : ∀ n k,
   2 ≤ k
   → (∀ d, 2 ≤ d < k → n mod d ≠ 0)
@@ -139,7 +132,9 @@ Theorem prime_divisor : ∀ n, 2 ≤ n →
 Proof.
 intros * Hn.
 induction n as (n, IHn) using (well_founded_ind lt_wf).
-destruct (prime_dec n) as [Hb| Hb]; [ now exists n | ].
+remember (is_prime n) as b eqn:Hb; symmetry in Hb.
+destruct b; [ now exists n | ].
+apply Bool.not_true_iff_false in Hb.
 specialize (not_prime_exists_div n Hn Hb) as (a & Han & Hd).
 specialize (IHn a (proj2 Han) (proj1 Han)) as H1.
 destruct H1 as (d & Hpd & Hda).
@@ -1150,10 +1145,9 @@ induction niter1; intros. {
   now apply Nat.le_0_r in Hni; subst niter2.
 }
 cbn.
-...
-destruct niter2; cbn in H1; [ now destruct (prime_dec n) | ].
-destruct (prime_dec n) as [| Hb]; [ easy | ].
+destruct niter2; cbn in H1; [ now destruct (is_prime n) | ].
 apply Nat.succ_le_mono in Hni.
+destruct (is_prime n) as [| Hb]; [ easy | ].
 now apply IHniter1 in H1.
 Qed.
 
@@ -1164,11 +1158,13 @@ intros.
 revert n.
 induction niter; intros. {
   cbn - [ "/" ].
-  destruct (prime_dec n) as [| Hb]; [ easy | ].
+  remember (is_prime n) as b eqn:Hb; symmetry in Hb.
+  destruct b; [ easy | ].
   apply phony_prime_after_is_prime.
 }
 cbn.
-destruct (prime_dec n) as [| Hb]; [ easy | ].
+remember (is_prime n) as b eqn:Hb; symmetry in Hb.
+destruct b; [ easy | ].
 apply IHniter.
 Qed.
 
@@ -1191,10 +1187,12 @@ replace p with (niter + n) in * by flia Hniter Hnm.
 clear p Hnm Hniter.
 revert n Hm.
 induction niter; intros. {
-  now cbn in Hm; cbn; destruct (prime_dec n).
+  cbn in Hm; cbn.
+  unfold prime in Hm.
+  now destruct (is_prime n).
 }
 cbn.
-destruct (prime_dec n) as [| Hb]; [ easy | ].
+destruct (is_prime n); [ easy | ].
 transitivity (n + 1); [ flia | ].
 apply IHniter.
 now replace (S niter + n) with (niter + (n + 1)) in Hm by flia.
@@ -1217,9 +1215,10 @@ clear m Hm Hk Hl; move l before k.
 revert n l Hmp.
 induction k; intros; cbn. {
   rewrite Nat.add_0_r in Hmp.
-  now destruct l; cbn; destruct (prime_dec n).
+  unfold prime in Hmp.
+  now destruct l; cbn; destruct (is_prime n).
 }
-destruct (prime_dec n); [ easy |].
+destruct (is_prime n); [ easy | ].
 replace (n + S k) with (n + 1 + k) in Hmp by flia.
 now apply IHk.
 Qed.
@@ -1229,10 +1228,10 @@ Proof.
 intros.
 revert n.
 induction niter; intros; cbn. {
-  destruct (prime_dec n); [ easy | ].
+  destruct (is_prime n); [ easy | ].
   apply phony_prime_after_is_after.
 }
-destruct (prime_dec n); [ easy | ].
+destruct (is_prime n); [ easy | ].
 transitivity (n + 1); [ flia | apply IHniter ].
 Qed.
 
@@ -1262,17 +1261,23 @@ destruct Hni as (_, Hnj).
 revert it q n Hb Hnj Hq Hpq.
 induction j; intros; [ now rewrite Nat.add_0_r | ].
 rewrite <- Nat.add_succ_comm in Hnj |-*.
+apply Bool.not_true_iff_false in Hb.
 destruct it; cbn in Hq. {
-  destruct (prime_dec n); [ easy | now subst q ].
+  destruct (is_prime n); [ easy | now subst q ].
 }
 rewrite Nat.add_1_r in Hq.
-destruct (prime_dec n); [ easy | ].
-destruct it; cbn in Hq. {
-  destruct (prime_dec (S n)); subst q; [ flia Hnj | easy ].
+destruct (is_prime n); [ easy | clear Hb ].
+destruct it. {
+  remember (S n) as sn; cbn in Hq; subst sn.
+  destruct (is_prime (S n)); subst q; [ flia Hnj | easy ].
 }
-destruct (prime_dec (S n)); [ now subst q; flia Hnj | ].
-eapply (IHj (S it)); [ easy | apply Hnj | cbn | easy ].
-now destruct (prime_dec (S n)).
+remember (S n) as sn; cbn in Hq; subst sn.
+remember (is_prime (S n)) as b eqn:Hb; symmetry in Hb.
+destruct b; [ now subst q; flia Hnj | ].
+eapply (IHj (S it)); [ | apply Hnj | | easy ]. {
+  now apply Bool.not_true_iff_false in Hb.
+}
+now remember (S n) as sn; cbn; rewrite Hb.
 Qed.
 
 Theorem phony_prime_after_more_iter : ∀ k n niter,
@@ -1290,11 +1295,15 @@ revert i k n Hpp Hni.
 induction niter; intros. {
   apply Nat.le_0_r in Hni.
   rewrite Hni, Nat.add_0_r in Hpp; cbn.
-  destruct (prime_dec n) as [Hb| ]; [ | easy ].
-  now destruct k; cbn; destruct (prime_dec n).
+  unfold prime in Hpp.
+  rewrite Hpp.
+  now destruct k; cbn; rewrite Hpp.
 }
 cbn.
-destruct (prime_dec n) as [| Hb]; [ easy | ].
+remember (is_prime n) as b eqn:Hb; symmetry in Hb.
+destruct b; [ easy | ].
+apply Bool.not_true_iff_false in Hb.
+unfold prime in Hpp.
 destruct i; [ now rewrite Nat.add_0_r in Hpp | ].
 apply Nat.succ_le_mono in Hni.
 replace (n + S i) with (n + 1 + i) in Hpp by flia.
@@ -1307,17 +1316,20 @@ Proof.
 intros * Hni.
 destruct niter. {
   cbn - [ "/" ] in Hni.
-  destruct (prime_dec n) as [| Hb]; [ flia Hni | ].
+  remember (is_prime n) as b eqn:Hb; symmetry in Hb.
+  destruct b; [ flia Hni | ].
+  apply Bool.not_true_iff_false in Hb.
   now apply (no_prime_before_phony_prime_after n).
 }
 cbn in Hni.
-destruct (prime_dec n) as [| Hb]; [ flia Hni | ].
+remember (is_prime n) as b eqn:Hb; symmetry in Hb.
+destruct b; [ flia Hni | ].
 revert n i Hb Hni.
 induction niter; intros. {
   cbn in Hni.
-  destruct (prime_dec (n + 1)) as [| Hb']. {
-    now replace i with n by flia Hni.
-  }
+  remember (is_prime (n + 1)) as b eqn:Hb1; symmetry in Hb1.
+  apply Bool.not_true_iff_false in Hb.
+  destruct b; [ now replace i with n by flia Hni | ].
   apply (no_prime_before_phony_prime_after n); [ easy | ].
   split; [ easy | ].
   eapply lt_le_trans; [ apply Hni | ].
@@ -1329,12 +1341,12 @@ induction niter; intros. {
     cbn; flia.
   }
   cbn.
-  now destruct (prime_dec n).
+  now destruct (is_prime n).
 }
 cbn in Hni.
-destruct (prime_dec (n + 1)) as [| Hb1]. {
-  now replace i with n by flia Hni.
-}
+remember (is_prime (n + 1)) as b1 eqn:Hb1; symmetry in Hb1.
+apply Bool.not_true_iff_false in Hb.
+destruct b1; [ now replace i with n by flia Hni | ].
 destruct (Nat.eq_dec n i) as [Hni1| Hni1]; [ now subst i | ].
 apply (IHniter (n + 1)); [ easy | ].
 split; [ | easy ].
@@ -2331,7 +2343,9 @@ split.
  now apply eq_fold_left_mul_seq_2_prime_sub_3_1.
 -intros Hf.
  destruct (lt_dec 5 n) as [H5n| H5n]. {
-   destruct (prime_dec n) as [H| H]; [ easy | ].
+   unfold prime.
+   apply Bool.not_false_iff_true; intros H1.
+   assert (H : ¬ prime n) by now unfold prime; rewrite H1.
    apply Wilson_on_composite in H; [ | easy ].
    rewrite H in Hf.
    flia Hf H5n.
