@@ -2175,8 +2175,8 @@ replace 1%F with ζ~{1} by easy.
 now apply times_product_on_primes_close_to.
 Qed.
 
-Definition lim_tow_inf_eq {F : field} (f : nat → ln_series) (y : ln_series) :=
-  ∀ i, i ≠ 0 → ∃ n, ∀ m, m > n → (f m)~{i} = y~{i}.
+Definition lim_tow_inf_eq {F : field} (f : nat → ln_series) (s : ln_series) :=
+  ∀ i, i ≠ 0 → ∃ n, ∀ m, m > n → (f m)~{i} = s~{i}.
 
 Notation "'lim' ( n '→' '∞' ) x = y" := (lim_tow_inf_eq (λ n, x%LS) y%LS)
   (at level 70, n at level 1, x at level 50).
