@@ -1147,7 +1147,7 @@ induction niter1; intros. {
 cbn.
 destruct niter2; cbn in H1; [ now destruct (is_prime n) | ].
 apply Nat.succ_le_mono in Hni.
-destruct (is_prime n) as [| Hb]; [ easy | ].
+destruct (is_prime n); [ easy | ].
 now apply IHniter1 in H1.
 Qed.
 
