@@ -1554,6 +1554,37 @@ apply Nat.divide_add_r; [ easy | ].
 apply (IHn (m - 1 + k)); [ flia Hn H2m | easy | flia H2m | easy ].
 Qed.
 
+(* other proof *)
+
+(* taking k elements among n elements where 0 < k ≤ n
+     1st : n choices
+     2nd : (n-1) choices
+     3rd : (n-2) choices
+     ...
+     kth : (n - k + 1) choices =
+   number of injections between {1..k} to {1..n}
+   number of functions {f : [1..k] → [1..n] | ∀ a b, f a = f b → a = b} *)
+
+Check (λ n k, {f : {i & i < k} → {i & i < n} & ∀ a b, f a = f b → a = b}).
+Check
+  (λ n k,
+   {f : {i & i < k} * {i & i < n} → Type &
+    (∀ a b c, f (a, c)
+    (∀ a b c, f (a, c) → f (b, c) → a = b})).
+
+Theorem arrangements : ∀ k n,
+...
+  prod_conseq k n.
+...
+
+Theorem divide_fact_prod_consec' : ∀ k m,
+  1 ≤ m
+  → 1 ≤ k
+  → Nat.divide (fact k) (prod_consec k m).
+Proof.
+intros * H1m H1k.
+...
+
 Theorem fact_divides_fact_over_fact : ∀ k n,
   k ≤ n
   → Nat.divide (fact k) (fact n / fact (n - k)).
