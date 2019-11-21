@@ -1569,8 +1569,8 @@ Check (λ n k, {f : {i & i < k} → {i & i < n} & ∀ a b, f a = f b → a = b})
 Check
   (λ n k,
    {f : {i & i < k} * {i & i < n} → Type &
-    (∀ a b c, f (a, c)
-    (∀ a b c, f (a, c) → f (b, c) → a = b})).
+    ((∀ a, { b & (f (a, b) * ∀ c, f (a, c) → b = c )}) *
+     (∀ a b c, f (a, c) → f (b, c) → a = b))%type}).
 
 Theorem arrangements : ∀ k n,
 ...
