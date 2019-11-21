@@ -1077,7 +1077,7 @@ Qed.
  *)
 
 Fixpoint phony_prime_after niter n :=
-  if prime_dec n then n
+  if is_prime n then n
   else
     match niter with
     | 0 => 0
@@ -1085,7 +1085,7 @@ Fixpoint phony_prime_after niter n :=
     end.
 
 Fixpoint prime_after_aux niter n :=
-  if prime_dec n then n
+  if is_prime n then n
   else
     match niter with
     | 0 =>
@@ -1121,10 +1121,13 @@ clear p Hnm Hniter.
 revert n Hm.
 induction niter; intros. {
   cbn in Hm; cbn.
-  now destruct (prime_dec n).
+  remember (is_prime n) as b eqn:Hb; symmetry in Hb.
+  destruct b; [ easy |].
+  now apply Bool.not_true_iff_false in Hb.
 }
 cbn.
-destruct (prime_dec) as [| Hb]; [ easy | ].
+remember (is_prime n) as b eqn:Hb; symmetry in Hb.
+destruct b; [ easy | ].
 apply IHniter.
 now replace (S niter + n) with (niter + (n + 1)) in Hm by flia.
 Qed.
@@ -1147,6 +1150,7 @@ induction niter1; intros. {
   now apply Nat.le_0_r in Hni; subst niter2.
 }
 cbn.
+...
 destruct niter2; cbn in H1; [ now destruct (prime_dec n) | ].
 destruct (prime_dec n) as [| Hb]; [ easy | ].
 apply Nat.succ_le_mono in Hni.
