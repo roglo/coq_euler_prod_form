@@ -2190,11 +2190,13 @@ intros m Hmi.
 specialize (ζ_times_product_on_primes_close_to_1 _ m (eq_refl _)) as H1.
 destruct H1 as (H1, H2).
 destruct (Nat.eq_dec i 1) as [H1i| H1i]; [ now subst i | ].
-replace (1~{i}) with 0%F. 2: {
-  destruct i; [ easy | now destruct i ].
-}
+replace (1~{i}) with 0%F by now destruct i; [ | destruct i ].
 apply H2.
-flia Hi H1i Hmi.
+split; [ | easy ].
+destruct i; [ easy | ].
+destruct i; [ easy | ].
+apply -> Nat.succ_lt_mono.
+apply Nat.lt_0_succ.
 Qed.
 
 Check @lim_ζ_times_product_on_primes.
