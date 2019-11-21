@@ -1554,14 +1554,6 @@ apply Nat.divide_add_r; [ easy | ].
 apply (IHn (m - 1 + k)); [ flia Hn H2m | easy | flia H2m | easy ].
 Qed.
 
-Theorem divide_fact_prod_consec' : ∀ k m,
-  1 ≤ m
-  → 1 ≤ k
-  → Nat.divide (fact k) (prod_consec k m).
-Proof.
-intros * H1m H1k.
-...
-
 Theorem fact_divides_fact_over_fact : ∀ k n,
   k ≤ n
   → Nat.divide (fact k) (fact n / fact (n - k)).
