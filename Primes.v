@@ -266,6 +266,13 @@ apply H2; rewrite <- Hk.
 now rewrite Nat.mod_mul.
 Qed.
 
+Theorem prime_prop : ∀ p, prime p → ∀ i, 2 ≤ i ≤ p - 1 → ¬ Nat.divide i p.
+Proof.
+intros * Hp i Hi Hdiv.
+specialize (prime_divisors p Hp i Hdiv) as H1.
+flia Hi H1.
+Qed.
+
 Theorem eq_primes_gcd_1 : ∀ a b,
   prime a → prime b → a ≠ b → Nat.gcd a b = 1.
 Proof.
