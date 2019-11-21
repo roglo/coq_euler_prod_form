@@ -2177,17 +2177,26 @@ Qed.
 
 Check @ζ_times_product_on_primes_close_to_1.
 
-Definition lim_tow_inf {F : field} (n : nat) (x y : ln_series) := True.
-Notation "'lim' ( n '→' '∞' ) x = y" := (lim_tow_inf n x%LS y%LS) (at level 70, n at level 1, x at level 50).
-Corollary ζ_times_product_on_primes_O {F : field} : ∀ n,
+Definition lim_tow_inf_eq {F : field} (f : nat → ln_series) (y : ln_series) :=
+  ∀ i, i ≠ 0 → ∃ n, ∀ m, m > n → (f m)~{i} = y~{i}.
+
+Notation "'lim' ( n '→' '∞' ) x = y" := (lim_tow_inf_eq (λ n, x%LS) y%LS)
+  (at level 70, n at level 1, x at level 50).
+
+Theorem lim_ζ_times_product_on_primes {F : field} :
   lim (n → ∞) ζ * Π (p ∈ primes_upto n), (1 - pol_pow p) = 1.
 Proof.
-...
-
-Notation "x ≤ y < z" := (ls_le x y ∧ ls_lt y z) (at level 70, y at next level).
-Corollary ζ_times_product_on_primes_O {F : field} : ∀ n,
-  (1 ≤ ζ * Π (p ∈ primes_upto n), (1 - pol_pow p) < 1 + pol_pow n)%LS.
-Proof.
-...
+intros i Hi.
+exists i.
+intros m Hmi.
+specialize (ζ_times_product_on_primes_close_to_1 _ m (eq_refl _)) as H1.
+destruct H1 as (H1, H2).
+destruct (Nat.eq_dec i 1) as [H1i| H1i]; [ now subst i | ].
+replace (1~{i}) with 0%F. 2: {
+  destruct i; [ easy | now destruct i ].
+}
+apply H2.
+flia Hi H1i Hmi.
+Qed.
 
 Theorem ζ_Euler_product_eq : ...
