@@ -237,7 +237,6 @@ Theorem prime_divisors : ∀ p,
   prime p → ∀ a, Nat.divide a p → a = 1 ∨ a = p.
 Proof.
 intros * Hp a * Hap.
-unfold is_prime in Hp.
 destruct (lt_dec p 2) as [Hp2| Hp2]. {
   destruct p; [ easy | ].
   destruct p; [ easy | flia Hp2 ].
@@ -818,7 +817,7 @@ Theorem prime_decomp_cons : ∀ n a l,
   → prime_decomp (n / a) = l.
 Proof.
 intros * Hl.
-assert (Hap : is_prime a = true). {
+assert (Hap : prime a). {
   specialize (first_in_decomp_is_prime n) as H1.
   now rewrite Hl in H1.
 }
@@ -1078,7 +1077,7 @@ Qed.
  *)
 
 Fixpoint phony_prime_after niter n :=
-  if is_prime n then n
+  if prime_dec n then n
   else
     match niter with
     | 0 => 0
@@ -1086,7 +1085,7 @@ Fixpoint phony_prime_after niter n :=
     end.
 
 Fixpoint prime_after_aux niter n :=
-  if is_prime n then n
+  if prime_dec n then n
   else
     match niter with
     | 0 =>
@@ -1122,11 +1121,10 @@ clear p Hnm Hniter.
 revert n Hm.
 induction niter; intros. {
   cbn in Hm; cbn.
-  now rewrite Hm.
+  now destruct (prime_dec n).
 }
 cbn.
-remember (is_prime n) as b eqn:Hb; symmetry in Hb.
-destruct b; [ easy | ].
+destruct (prime_dec) as [| Hb]; [ easy | ].
 apply IHniter.
 now replace (S niter + n) with (niter + (n + 1)) in Hm by flia.
 Qed.
@@ -1149,10 +1147,8 @@ induction niter1; intros. {
   now apply Nat.le_0_r in Hni; subst niter2.
 }
 cbn.
-remember (is_prime n) as b eqn:Hb; symmetry in Hb.
-destruct b; [ easy | ].
-destruct niter2; [ now cbn in H1; rewrite Hb in H1 | ].
-cbn in H1; rewrite Hb in H1.
+destruct niter2; cbn in H1; [ now destruct (prime_dec n) | ].
+destruct (prime_dec n) as [| Hb]; [ easy | ].
 apply Nat.succ_le_mono in Hni.
 now apply IHniter1 in H1.
 Qed.
@@ -1164,13 +1160,11 @@ intros.
 revert n.
 induction niter; intros. {
   cbn - [ "/" ].
-  remember (is_prime n) as b eqn:Hb; symmetry in Hb.
-  destruct b; [ easy | ].
+  destruct (prime_dec n) as [| Hb]; [ easy | ].
   apply phony_prime_after_is_prime.
 }
 cbn.
-remember (is_prime n) as b eqn:Hb; symmetry in Hb.
-destruct b; [ easy | ].
+destruct (prime_dec n) as [| Hb]; [ easy | ].
 apply IHniter.
 Qed.
 
@@ -1193,12 +1187,10 @@ replace p with (niter + n) in * by flia Hniter Hnm.
 clear p Hnm Hniter.
 revert n Hm.
 induction niter; intros. {
-  cbn in Hm; cbn.
-  now rewrite Hm.
+  now cbn in Hm; cbn; destruct (prime_dec n).
 }
 cbn.
-remember (is_prime n) as b eqn:Hb; symmetry in Hb.
-destruct b; [ easy | ].
+destruct (prime_dec n) as [| Hb]; [ easy | ].
 transitivity (n + 1); [ flia | ].
 apply IHniter.
 now replace (S niter + n) with (niter + (n + 1)) in Hm by flia.
@@ -1220,11 +1212,10 @@ remember (fact n + 1 - k) as l eqn:Hl.
 clear m Hm Hk Hl; move l before k.
 revert n l Hmp.
 induction k; intros; cbn. {
-  rewrite Nat.add_0_r in Hmp; rewrite Hmp.
-  now destruct l; cbn; rewrite Hmp.
+  rewrite Nat.add_0_r in Hmp.
+  now destruct l; cbn; destruct (prime_dec n).
 }
-remember (is_prime n) as b eqn:Hb; symmetry in Hb.
-destruct b; [ easy |].
+destruct (prime_dec n); [ easy |].
 replace (n + S k) with (n + 1 + k) in Hmp by flia.
 now apply IHk.
 Qed.
@@ -1234,10 +1225,10 @@ Proof.
 intros.
 revert n.
 induction niter; intros; cbn. {
-  destruct (is_prime n); [ easy | ].
+  destruct (prime_dec n); [ easy | ].
   apply phony_prime_after_is_after.
 }
-destruct (is_prime n); [ easy | ].
+destruct (prime_dec n); [ easy | ].
 transitivity (n + 1); [ flia | apply IHniter ].
 Qed.
 
@@ -1250,9 +1241,9 @@ Qed.
 (* there is no prime between "n" and "next_prime n" *)
 
 Lemma no_prime_before_phony_prime_after : ∀ n i,
-  is_prime n = false
+  ¬ prime n
   → n ≤ i < phony_prime_after (fact n + 1) n
-  → is_prime i = false.
+  → ¬ prime i.
 Proof.
 intros * Hb Hni.
 specialize (next_prime_bounded n) as (p & Hp & Hpp).
@@ -1264,23 +1255,20 @@ remember (i - n) as j eqn:Hj.
 replace i with (n + j) in * by flia Hj Hni.
 clear i Hj.
 destruct Hni as (_, Hnj).
-revert n q it Hb Hnj Hq Hpq.
+revert it q n Hb Hnj Hq Hpq.
 induction j; intros; [ now rewrite Nat.add_0_r | ].
 rewrite <- Nat.add_succ_comm in Hnj |-*.
-destruct it; cbn in Hq; rewrite Hb in Hq; [ now subst q | ].
-rewrite Nat.add_1_r in Hq.
-remember (is_prime (S n)) as b eqn:Hb1; symmetry in Hb1.
-destruct b. {
-  destruct it. {
-    remember (S n) as sn; cbn in Hq; subst sn.
-    rewrite Hb1 in Hq.
-    subst q; flia Hnj.
-  }
-  remember (S n) as sn; cbn in Hq; subst sn.
-  rewrite Hb1 in Hq.
-  flia Hq Hnj.
+destruct it; cbn in Hq. {
+  destruct (prime_dec n); [ easy | now subst q ].
 }
-eapply IHj; [ easy | apply Hnj | apply Hq | easy ].
+rewrite Nat.add_1_r in Hq.
+destruct (prime_dec n); [ easy | ].
+destruct it; cbn in Hq. {
+  destruct (prime_dec (S n)); subst q; [ flia Hnj | easy ].
+}
+destruct (prime_dec (S n)); [ now subst q; flia Hnj | ].
+eapply (IHj (S it)); [ easy | apply Hnj | cbn | easy ].
+now destruct (prime_dec (S n)).
 Qed.
 
 Theorem phony_prime_after_more_iter : ∀ k n niter,
@@ -1297,38 +1285,35 @@ clear p Hnit Hnp.
 revert i k n Hpp Hni.
 induction niter; intros. {
   apply Nat.le_0_r in Hni.
-  rewrite Hni, Nat.add_0_r in Hpp.
-  cbn; rewrite Hpp.
-  now destruct k; cbn; rewrite Hpp.
+  rewrite Hni, Nat.add_0_r in Hpp; cbn.
+  destruct (prime_dec n) as [Hb| ]; [ | easy ].
+  now destruct k; cbn; destruct (prime_dec n).
 }
 cbn.
-remember (is_prime n) as b eqn:Hb; symmetry in Hb.
-destruct b; [ easy | ].
-unfold prime in Hpp.
-destruct i; [ now rewrite Nat.add_0_r, Hb in Hpp | ].
+destruct (prime_dec n) as [| Hb]; [ easy | ].
+destruct i; [ now rewrite Nat.add_0_r in Hpp | ].
 apply Nat.succ_le_mono in Hni.
 replace (n + S i) with (n + 1 + i) in Hpp by flia.
 now apply (IHniter i).
 Qed.
 
 Lemma no_prime_before_after_aux : ∀ niter n i,
-  n ≤ i < prime_after_aux niter n → is_prime i = false.
+  n ≤ i < prime_after_aux niter n → ¬ prime i.
 Proof.
 intros * Hni.
 destruct niter. {
   cbn - [ "/" ] in Hni.
-  remember (is_prime n) as b eqn:Hb; symmetry in Hb.
-  destruct b; [ flia Hni | ].
+  destruct (prime_dec n) as [| Hb]; [ flia Hni | ].
   now apply (no_prime_before_phony_prime_after n).
 }
 cbn in Hni.
-remember (is_prime n) as b eqn:Hb; symmetry in Hb.
-destruct b; [ flia Hni | ].
+destruct (prime_dec n) as [| Hb]; [ flia Hni | ].
 revert n i Hb Hni.
 induction niter; intros. {
   cbn in Hni.
-  remember (is_prime (n + 1)) as b eqn:Hb1; symmetry in Hb1.
-  destruct b; [ now replace i with n by flia Hni | ].
+  destruct (prime_dec (n + 1)) as [| Hb']. {
+    now replace i with n by flia Hni.
+  }
   apply (no_prime_before_phony_prime_after n); [ easy | ].
   split; [ easy | ].
   eapply lt_le_trans; [ apply Hni | ].
@@ -1339,12 +1324,13 @@ induction niter; intros. {
     rewrite (Nat.add_1_r n).
     cbn; flia.
   }
-  now cbn; rewrite Hb.
+  cbn.
+  now destruct (prime_dec n).
 }
 cbn in Hni.
-
-remember (is_prime (n + 1)) as b eqn:Hb1; symmetry in Hb1.
-destruct b; [ now replace i with n by flia Hni | ].
+destruct (prime_dec (n + 1)) as [| Hb1]. {
+  now replace i with n by flia Hni.
+}
 destruct (Nat.eq_dec n i) as [Hni1| Hni1]; [ now subst i | ].
 apply (IHniter (n + 1)); [ easy | ].
 split; [ | easy ].
@@ -1352,7 +1338,7 @@ flia Hni Hni1.
 Qed.
 
 Theorem no_prime_before_after : ∀ n i,
-  n ≤ i < prime_after n → is_prime i = false.
+  n ≤ i < prime_after n → ¬ prime i.
 Proof.
 intros * Hni.
 now apply (no_prime_before_after_aux n n i).
@@ -1779,7 +1765,7 @@ apply Nat.mod_mul; flia H2p.
 Qed.
 
 Theorem smaller_than_prime_all_different_multiples : ∀ p,
-  is_prime p = true
+  prime p
   → ∀ a, 1 ≤ a < p
   → ∀ i j, i < j < p → (i * a) mod p ≠ (j * a) mod p.
 Proof.
@@ -1834,7 +1820,7 @@ now rewrite <- IHn, Nat_fact_succ, Nat.mul_comm.
 Qed.
 
 Theorem fermat_little : ∀ p,
-  is_prime p = true → ∀ a, 1 ≤ a < p → a ^ (p - 1) mod p = 1.
+  prime p → ∀ a, 1 ≤ a < p → a ^ (p - 1) mod p = 1.
 Proof.
 intros * Hp * Hap.
 specialize (smaller_than_prime_all_different_multiples p Hp a Hap) as H1.
@@ -1988,7 +1974,7 @@ Qed.
 Definition inv_mod i n := Nat_pow_mod i (n - 2) n.
 
 Theorem pow_mod_prime_ne_0 : ∀ i n p,
-  is_prime p = true
+  prime p
   → 1 ≤ i < p
   → i ^ n mod p ≠ 0.
 Proof.
@@ -2009,7 +1995,7 @@ specialize (H1 H); clear H.
 apply IHn, H1.
 Qed.
 
-Theorem inv_mod_interv : ∀ p, is_prime p = true →
+Theorem inv_mod_interv : ∀ p, prime p →
   ∀ i, 2 ≤ i ≤ p - 2 → 2 ≤ inv_mod i p ≤ p - 2.
 Proof.
 intros * Hp * Hip.
@@ -2077,8 +2063,7 @@ split. {
 }
 Qed.
 
-Theorem inv_mod_neq : ∀ p,
-  is_prime p = true → ∀ i, 2 ≤ i ≤ p - 2 → inv_mod i p ≠ i.
+Theorem inv_mod_neq : ∀ p, prime p → ∀ i, 2 ≤ i ≤ p - 2 → inv_mod i p ≠ i.
 Proof.
 intros * Hp * Hip Hcon.
 assert (Hpz : p ≠ 0) by now intros H; rewrite H in Hp.
@@ -2110,7 +2095,7 @@ apply Nat.divide_pos_le in H3; [ flia Hip H3 | flia Hip ].
 Qed.
 
 Theorem mul_inv_diag_l_mod : ∀ p,
-  is_prime p = true → ∀i, 1 ≤ i ≤ p - 1 → (inv_mod i p * i) mod p = 1.
+  prime p → ∀i, 1 ≤ i ≤ p - 1 → (inv_mod i p * i) mod p = 1.
 Proof.
 intros * Hp * Hip.
 assert (Hpz : p ≠ 0) by now intros H; rewrite H in Hp.
@@ -2124,11 +2109,11 @@ apply fermat_little; [ easy | flia Hip ].
 Qed.
 
 Theorem mul_inv_diag_r_mod : ∀ p,
-  is_prime p = true → ∀ i, 1 ≤ i ≤ p - 1 → (i * inv_mod i p) mod p = 1.
+  prime p → ∀ i, 1 ≤ i ≤ p - 1 → (i * inv_mod i p) mod p = 1.
 Proof. now intros; rewrite Nat.mul_comm; apply mul_inv_diag_l_mod. Qed.
 
 Lemma eq_fold_left_mul_seq_2_prime_sub_3_1 : ∀ p,
-  is_prime p = true
+  prime p
   → 3 ≤ p
   → fold_left Nat.mul (seq 2 (p - 3)) 1 mod p = 1.
 Proof.
@@ -2359,7 +2344,7 @@ Qed.
 (* *)
 
 Theorem inv_mod_prime_involutive : ∀ p,
-  is_prime p = true
+  prime p
   → ∀ i, 2 ≤ i ≤ p - 2
   → inv_mod (inv_mod i p) p = i.
 Proof.
@@ -2397,5 +2382,3 @@ rewrite Nat.sub_add; [ | flia Hip ].
 rewrite fermat_little_1; [ | easy ].
 apply Nat.mod_small; flia Hip.
 Qed.
-
-Search (is_prime _ = true).

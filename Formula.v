@@ -1958,7 +1958,7 @@ now apply Nat.succ_inj_wd_neg.
 Qed.
 
 Corollary list_of_1_sub_pow_primes_times_ζ {F : field} : ∀ l,
-  (∀ p, p ∈ l → is_prime p = true)
+  (∀ p, p ∈ l → prime p)
   → NoDup l
   → (ζ * Π (p ∈ l), (pol_pow 1 - pol_pow p) =
      fold_right series_but_mul_of ζ l)%LS.
@@ -2005,7 +2005,7 @@ Compute (primes_upto 17).
 
 Theorem primes_upto_are_primes : ∀ k p,
   p ∈ primes_upto k
-  → is_prime p = true.
+  → prime p.
 Proof.
 intros * Hp.
 now apply filter_In in Hp.
