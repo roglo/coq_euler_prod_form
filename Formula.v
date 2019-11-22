@@ -2175,38 +2175,6 @@ replace 1%F with ζ~{1} by easy.
 now apply times_product_on_primes_close_to.
 Qed.
 
-(**)
-
-Definition lim_sequence_eq {A} (f : nat → nat → A) (v : nat → A) :=
-  ∀ i, ∃ n, ∀ m, m > n → f m i = v i.
-
-Notation "'lim' ( n → ∞ ) x = y" := (lim_sequence_eq (λ n, x%LS) y%LS)
-  (at level 70, n at level 1, x at level 50).
-
-Definition ls1 {F : field} s i := s~{i+1}.
-
-Notation "'ln_series_lim' ( n → ∞ ) x = y" := (lim (n → ∞) ls1 x = ls1 y)
-  (at level 70, n at level 1, x at level 50).
-
-Theorem lim_ζ_times_product_on_primes {F : field} :
-  ln_series_lim (n → ∞) ζ * Π (p ∈ primes_upto n), (1 - pol_pow p) = 1.
-Proof.
-intros i.
-exists (i + 1).
-intros m Hmi.
-specialize (ζ_times_product_on_primes_close_to_1 _ m (eq_refl _)) as H1.
-destruct H1 as (H1, H2).
-unfold ls1.
-destruct (Nat.eq_dec i 0) as [Hzi| Hzi]; [ now subst i | ].
-replace (1~{i+1}) with 0%F by now destruct i; [ | destruct i ].
-apply H2.
-split; [ | easy ].
-destruct i; [ easy | ].
-rewrite Nat.add_1_r.
-apply -> Nat.succ_lt_mono.
-apply Nat.lt_0_succ.
-Qed.
-
 (*
 Definition lim_tow_inf_eq {F : field} (f : nat → ln_series) (s : ln_series) :=
   ∀ i, i ≠ 0 → ∃ n, ∀ m, m > n → (f m)~{i} = s~{i}.
@@ -2232,6 +2200,36 @@ apply -> Nat.succ_lt_mono.
 apply Nat.lt_0_succ.
 Qed.
 *)
+
+Definition limit_sequence_equal {A} (f : nat → nat → A) (v : nat → A) :=
+  ∀ i, ∃ n, ∀ m, m > n → f m i = v i.
+
+Notation "'lim' ( n → ∞ ) x = y" := (limit_sequence_equal (λ n, x%LS) y%LS)
+  (at level 70, n at level 1, x at level 50).
+
+Definition ls1 {F : field} s i := s~{i+1}.
+
+Notation "'ln_series_lim' ( n → ∞ ) x = y" := (lim (n → ∞) ls1 x = ls1 y)
+  (at level 70, n at level 1, x at level 50).
+
+Theorem lim_ζ_times_product_on_primes {F : field} :
+  ln_series_lim (n → ∞) ζ * Π (p ∈ primes_upto n), (1 - pol_pow p) = 1.
+Proof.
+intros i.
+exists (i + 1).
+intros m Hmi.
+specialize (ζ_times_product_on_primes_close_to_1 _ m (eq_refl _)) as H1.
+destruct H1 as (H1, H2).
+unfold ls1.
+destruct (Nat.eq_dec i 0) as [Hzi| Hzi]; [ now subst i | ].
+replace (1~{i+1}) with 0%F by now destruct i; [ | destruct i ].
+apply H2.
+split; [ | easy ].
+destruct i; [ easy | ].
+rewrite Nat.add_1_r.
+apply -> Nat.succ_lt_mono.
+apply Nat.lt_0_succ.
+Qed.
 
 Check @lim_ζ_times_product_on_primes.
 
