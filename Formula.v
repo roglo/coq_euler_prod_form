@@ -2235,4 +2235,6 @@ Qed.
 
 Check @lim_ζ_times_product_on_primes.
 
+(*
 Theorem ζ_Euler_product_eq : ...
+*)
