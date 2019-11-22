@@ -2204,12 +2204,12 @@ Qed.
 Definition limit_sequence_equal {A} (f : nat → nat → A) (v : nat → A) :=
   ∀ i, ∃ n, ∀ m, m > n → f m i = v i.
 
-Notation "'lim' ( n → ∞ ) x = y" := (limit_sequence_equal (λ n, x%LS) y%LS)
+Notation "'lim' ( n → ∞ ) x = y" := (limit_sequence_equal (λ n, x) y)
   (at level 70, n at level 1, x at level 50).
 
 Definition ls1 {F : field} s i := s~{i+1}.
 
-Notation "'ln_series_lim' ( n → ∞ ) x = y" := (lim (n → ∞) ls1 x = ls1 y)
+Notation "'ln_series_lim' ( n → ∞ ) x = y" := (lim (n → ∞) ls1 x%LS = ls1 y%LS)
   (at level 70, n at level 1, x at level 50).
 
 Theorem lim_ζ_times_product_on_primes {F : field} :
