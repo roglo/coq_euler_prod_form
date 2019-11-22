@@ -2202,7 +2202,7 @@ Qed.
 *)
 
 Definition limit_sequence_equal {A} (f : nat → nat → A) (v : nat → A) :=
-  ∀ i, { n & ∀ m, m > n → f m i = v i }.
+  ∀ i, { n & ∀ m, n ≤ m → f m i = v i }.
 
 Notation "'lim' ( n → ∞ ) x = y" := (limit_sequence_equal (λ n, x) y)
   (at level 70, n at level 1, x at level 50).
@@ -2216,7 +2216,7 @@ Theorem lim_ζ_times_product_on_primes {F : field} :
   ln_series_lim (n → ∞) ζ * Π (p ∈ primes_upto n), (1 - pol_pow p) = 1.
 Proof.
 intros i.
-exists (i + 1).
+exists (i + 2).
 intros m Hmi.
 specialize (ζ_times_product_on_primes_close_to_1 _ m (eq_refl _)) as H1.
 destruct H1 as (H1, H2).
@@ -2224,7 +2224,7 @@ unfold ls1.
 destruct (Nat.eq_dec i 0) as [Hzi| Hzi]; [ now subst i | ].
 replace (1~{i+1}) with 0%F by now destruct i; [ | destruct i ].
 apply H2.
-split; [ | easy ].
+split; [ | flia Hmi ].
 destruct i; [ easy | ].
 rewrite Nat.add_1_r.
 apply -> Nat.succ_lt_mono.
