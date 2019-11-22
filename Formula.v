@@ -2202,7 +2202,7 @@ Qed.
 *)
 
 Definition limit_sequence_equal {A} (f : nat → nat → A) (v : nat → A) :=
-  ∀ i, ∃ n, ∀ m, m > n → f m i = v i.
+  ∀ i, { n & ∀ m, m > n → f m i = v i }.
 
 Notation "'lim' ( n → ∞ ) x = y" := (limit_sequence_equal (λ n, x) y)
   (at level 70, n at level 1, x at level 50).
