@@ -2270,6 +2270,12 @@ rewrite Hd.
 apply Nat.divide_factor_r.
 Qed.
 
+Theorem glop : ∀ p a,
+  prime p → a ^ 2 mod p = 1 → a mod p = 1 ∨ a mod p = p - 1.
+Proof.
+intros * Hp Hap.
+...
+
 Theorem glop : ∀ p, prime p → ∀ a, 1 ≤ a < p
   → a ^ ((p - 1) / 2) mod p = 1 ∨
      a ^ ((p - 1) / 2) mod p = p - 1.
