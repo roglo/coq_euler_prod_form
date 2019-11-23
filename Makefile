@@ -1,4 +1,4 @@
-TARGET=Misc.vo Primes.vo Formula.vo
+TARGET=Misc.vo Primes.vo
 FILESFORDEP=`LC_ALL=C ls *.v`
 
 all: $(TARGET)

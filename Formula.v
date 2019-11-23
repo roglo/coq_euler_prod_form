@@ -2237,3 +2237,17 @@ Check @lim_ζ_times_product_on_primes.
 (*
 Theorem ζ_Euler_product_eq : ...
 *)
+
+Compute (let p := 5 in (Nat_pow_mod 3 ((p - 1)/2) p, p)).
+Compute (let p := 5 in map (λ n, Nat_pow_mod n ((p - 1)/2) p) (seq 2 (p - 3))).
+Compute (let p := 19 in map (λ n, Nat_pow_mod n ((p - 1)/2) p) (seq 2 (p - 3))).
+
+...
+
+(* this is false: counter example
+Compute (map (λ n, Nat_pow_mod 2 n 5) (seq 2 6)).
+Theorem smaller_than_prime_all_different_powers : ∀ p,
+  prime p
+  → ∀ a, 2 ≤ a ≤ p - 2
+  → ∀ i j, i < j < p → a ^ i mod p ≠ a ^ j mod p.
+*)
