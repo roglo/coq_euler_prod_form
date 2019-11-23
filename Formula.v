@@ -2359,7 +2359,8 @@ Theorem glop : ∀ n nm f fm bm,
   → decidable (∀ b, b ≤ bm → f b ≠ n).
 Proof.
 intros * Hb Hn.
-induction fm. {
+revert f n nm Hb Hn.
+induction fm; intros. {
   destruct (Nat.eq_dec n 0) as [Hnz| Hnz]. {
     right.
     specialize (Hb 0 (Nat.le_0_l _)) as H1.
@@ -2373,6 +2374,28 @@ induction fm. {
   specialize (Hb b Hbm) as H1.
   now apply Nat.le_0_r in H1.
 }
+specialize (IHfm (λ b, f b - 1) (n - 1) (nm - 1)) as H1.
+cbn in H1.
+assert (H : ∀ b, b ≤ bm → f b - 1 ≤ fm). {
+  intros b Hbm.
+  specialize (Hb b Hbm) as H2.
+  flia H2.
+}
+specialize (H1 H); clear H.
+assert (H : n - 1 ≤ nm - 1) by flia Hn.
+specialize (H1 H); clear H.
+destruct H1 as [H1| H1]. {
+  left.
+  intros b Hbm.
+  specialize (H1 b Hbm) as H2.
+  flia H2.
+} {
+  right.
+  intros H2; apply H1; clear H1.
+  intros b Hbm H.
+  specialize (H2 b Hbm) as H3.
+  destruct n. {
+    cbn in H.
 ...
 (*
 Theorem decidable_forall_nat_neq : ∀ a (f : nat → nat) a1 a2 b1 b2,
