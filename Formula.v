@@ -2404,23 +2404,29 @@ Theorem exists_non_residue : ∀ p,
   prime p → 3 ≤ p → ∃ a, ∀ b, b ^ 2 mod p ≠ a mod p.
 Proof.
 intros * Hp H3p.
+...
+intros * Hp H3p.
 remember (p - 3) as q eqn:Hq; symmetry in Hq.
-revert p Hp H3p Hq.
+clear Hp.
+revert p (*Hp*) H3p Hq.
 induction q; intros. {
   replace p with 3 by flia H3p Hq.
   exists 2.
   intros b Hb.
   replace (2 mod 3) with 2 in Hb by easy.
-...
-  specialize (Nat.div_mod (b ^ 2) 3 (Nat.neq_succ_0 _)) as H1.
-  rewrite Hb in H1.
+  rewrite Nat.pow_2_r in Hb.
+  rewrite <- Nat.mul_mod_idemp_l in Hb; [ | easy ].
+  rewrite <- Nat.mul_mod_idemp_r in Hb; [ | easy ].
   clear - Hb.
-  induction b; [ easy | ].
-  replace (S b) with (b + 1) in Hb by flia.
-  cbn - [ "mod" ] in Hb.
-  rewrite Nat.mul_1_r in Hb.
-  rewrite Nat.mul_add_distr_l, Nat.mul_1_r in Hb.
-  rewrite Nat.mul_add_distr_r, Nat.mul_1_l in Hb.
+  remember (b mod 3) as n eqn:Hn; symmetry in Hn.
+  destruct n; [ easy | ].
+  destruct n; [ easy | ].
+  destruct n; [ easy | ].
+  specialize (Nat.mod_upper_bound b 3 (Nat.neq_succ_0 _)) as H1.
+  rewrite Hn in H1; flia H1.
+}
+destruct p; [ easy | ].
+specialize (IHq p) as H1.
 ...
 apply (not_forall_in_interv_imp_exist 1 (p - 1)). {
   intros.
