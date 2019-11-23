@@ -2352,6 +2352,7 @@ apply sqr_mod_prime_is_1; [ easy | ].
 now rewrite Nat.pow_mul_r in H1.
 Qed.
 
+(*
 Theorem not_all_div_2_mod_add_1_eq_1 : ∀ a,
   2 ≤ a
   → (∀ b, 1 ≤ b ≤ a → b ^ (a / 2) mod (a + 1) = 1)
@@ -2359,9 +2360,18 @@ Theorem not_all_div_2_mod_add_1_eq_1 : ∀ a,
 Proof.
 intros * H3a Hcon.
 ...
+*)
 
-Theorem glop : ∀ p, prime p → ∃ n, n ^ ((p - 1) / 2) mod p = p - 1.
+Theorem glop : ∀ p, prime p → ∃ a, a ^ ((p - 1) / 2) mod p = p - 1.
 Proof.
+intros * Hp.
+destruct (Nat.eq_dec p 2) as [Hp2| Hp2]; [ now exists 1; subst p | ].
+assert (H2p : 2 ≤ p) by now apply prime_ge_2.
+assert (H3p : 3 ≤ p) by flia Hp2 H2p.
+clear Hp2 H2p.
+(* a must be a quadratic nonresidue of p *)
+(* https://en.wikipedia.org/wiki/Euler%27s_criterion *)
+...
 intros * Hp.
 destruct (Nat.eq_dec p 2) as [Hp2| Hp2]; [ now exists 1; subst p | ].
 assert (H2p : 2 ≤ p) by now apply prime_ge_2.
