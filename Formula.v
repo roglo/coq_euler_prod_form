@@ -2270,7 +2270,7 @@ rewrite Hd.
 apply Nat.divide_factor_r.
 Qed.
 
-Theorem glop : ∀ p a,
+Theorem sqr_mod_prime_is_1 : ∀ p a,
   prime p → a ^ 2 mod p = 1 → a mod p = 1 ∨ a mod p = p - 1.
 Proof.
 intros * Hp Hap.
@@ -2279,6 +2279,10 @@ assert (H2p : 2 ≤ p) by now apply prime_ge_2.
 destruct (Nat.eq_dec a 0) as [Haz| Haz]. {
   rewrite Haz, Nat.pow_0_l in Hap; [ | easy ].
   now rewrite Nat.mod_0_l in Hap.
+}
+destruct (Nat.eq_dec a 1) as [Ha1| Ha1]. {
+  left; rewrite Ha1.
+  apply Nat.mod_small; flia H2p.
 }
 replace 1 with (1 mod p) in Hap at 2 by now rewrite Nat.mod_1_l.
 apply Nat_eq_mod_sub_0 in Hap. 2: {
@@ -2292,31 +2296,38 @@ specialize (Nat.gauss _ _ _ Hap) as H1.
 destruct (Nat.eq_dec ((a + 1) mod p) 0) as [Ha1p| Ha1p]. {
   right.
   apply Nat.mod_divide in Ha1p; [ | easy ].
-  destruct Ha1p as (c, Hc).
-  destruct c; [ flia Hc | cbn in Hc ].
-  apply Nat.add_sub_eq_r in Hc.
-  rewrite <- Hc, Nat.add_comm.
+  destruct Ha1p as (d, Hd).
+  destruct d; [ flia Hd | cbn in Hd ].
+  apply Nat.add_sub_eq_r in Hd.
+  rewrite <- Hd, Nat.add_comm.
   rewrite <- Nat.add_sub_assoc; [ | flia H2p ].
   rewrite Nat.add_comm.
   rewrite Nat.mod_add; [ | easy ].
   apply Nat.mod_small; flia Hpz.
+} {
+  left.
+  assert (H : Nat.gcd p (a + 1) = 1). {
+    rewrite <- Nat.gcd_mod; [ | easy ].
+    rewrite Nat.gcd_comm.
+    apply eq_gcd_prime_small_1; [ easy | ].
+    split; [ flia Ha1p | ].
+    now apply Nat.mod_upper_bound.
+  }
+  specialize (H1 H); clear H.
+  destruct H1 as (d, Hd).
+  apply Nat.add_sub_eq_nz in Hd. 2: {
+    apply Nat.neq_mul_0.
+    split; [ | easy ].
+    intros H; rewrite H, Nat.mul_0_l in Hd.
+    flia Haz Ha1 Hd.
+  }
+  rewrite <- Hd.
+  rewrite Nat.mod_add; [ | easy ].
+  now apply Nat.mod_1_l.
 }
-...
-intros * Hp Hap.
-assert (Hpz : p ≠ 0) by now intros H; rewrite H in Hp.
-specialize (Nat.div_mod (a ^ 2) p Hpz) as H1.
-rewrite Hap in H1.
-specialize (Nat.div_mod a p Hpz) as H2.
-remember (a / p) as q eqn:Hq.
-remember (a ^ 2 / p) as q2 eqn:Hq2.
-remember (a mod p) as r eqn:Hr.
-move q before a; move q2 before q; move r before q2.
-move H1 before H2.
-cbn in H1; rewrite Nat.mul_1_r in H1.
-rewrite H2 in H1.
-...
+Qed.
 
-Theorem glop : ∀ p, prime p → ∀ a, 1 ≤ a < p
+Theorem pow_prime_sub_1_div_2 : ∀ p, prime p → ∀ a, 1 ≤ a < p
   → a ^ ((p - 1) / 2) mod p = 1 ∨
      a ^ ((p - 1) / 2) mod p = p - 1.
 Proof.
@@ -2337,18 +2348,15 @@ replace (p - 1) with ((p - 1) / 2 * 2) in H1. 2: {
   }
   now rewrite Nat.add_0_r, Nat.mul_comm in H2.
 }
-rewrite Nat.pow_mul_r in H1.
-remember (a ^ ((p - 1) / 2)) as b eqn:Hb.
-...
-specialize (Nat.div_mod (b ^ 2) p Hpz) as H2.
-rewrite H1 in H2.
-specialize (Nat.div_mod b p Hpz) as H3.
-...
+apply sqr_mod_prime_is_1; [ easy | ].
+now rewrite Nat.pow_mul_r in H1.
+Qed.
 
 Theorem glop : ∀ p, prime p → ∃ n, n ^ ((p - 1) / 2) mod p = p - 1.
 Proof.
 intros * Hp.
 specialize (fermat_little p Hp) as H1.
+Inspect 1.
 ...
 
 (* this is false: counter example
