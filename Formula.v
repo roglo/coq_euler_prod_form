@@ -2356,7 +2356,7 @@ Theorem glop : ∀ p, prime p → ∃ n, n ^ ((p - 1) / 2) mod p = p - 1.
 Proof.
 intros * Hp.
 specialize (fermat_little p Hp) as H1.
-Inspect 1.
+specialize (pow_prime_sub_1_div_2 p Hp) as H2.
 ...
 
 (* this is false: counter example
