@@ -2403,8 +2403,7 @@ destruct H1 as [H1| H1]. {
 Theorem exists_non_residue : ∀ p,
   prime p → 3 ≤ p → ∃ a, ∀ b, b ^ 2 mod p ≠ a mod p.
 Proof.
-intros * Hp H3p.
-...
+(*
 intros * Hp H3p.
 remember (p - 3) as q eqn:Hq; symmetry in Hq.
 clear Hp.
@@ -2428,7 +2427,9 @@ induction q; intros. {
 destruct p; [ easy | ].
 specialize (IHq p) as H1.
 ...
-apply (not_forall_in_interv_imp_exist 1 (p - 1)). {
+*)
+intros * Hp H3p.
+apply (not_forall_in_interv_imp_exist 1 (p - 1)); [ | flia H3p | ]. {
   intros.
 ...
   apply decidable_forall_nat_neq.
