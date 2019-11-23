@@ -2355,8 +2355,19 @@ Qed.
 Theorem glop : ∀ p, prime p → ∃ n, n ^ ((p - 1) / 2) mod p = p - 1.
 Proof.
 intros * Hp.
-specialize (fermat_little p Hp) as H1.
-specialize (pow_prime_sub_1_div_2 p Hp) as H2.
+assert (H2p : 2 ≤ p) by now apply prime_ge_2.
+specialize (pow_prime_sub_1_div_2 p Hp) as H1.
+apply (not_forall_in_interv_imp_exist 1 (p - 1)); [ | flia H2p | ]. {
+  intros; apply Nat.eq_decidable.
+}
+intros H2.
+assert (Hap1 : ∀ a, 1 ≤ a ≤ p - 1 → a ^ ((p - 1) / 2) mod p = 1). {
+  intros a Ha.
+  specialize (H2 a Ha).
+  assert (H : 1 ≤ a < p) by flia Ha.
+  now destruct (H1 a H).
+}
+clear H1 H2.
 ...
 
 (* this is false: counter example

@@ -1,7 +1,7 @@
 (* Theorems of general usage, which could be (or not) in Coq library *)
 
 Set Nested Proofs Allowed.
-Require Import Utf8 Arith Psatz Sorted Permutation.
+Require Import Utf8 Arith Psatz Sorted Permutation Decidable.
 Import List List.ListNotations.
 
 (* "fast" lia, to improve compilation speed *)
@@ -837,4 +837,37 @@ induction Hperm using Permutation_ind; [ easy | | | ]. {
   now cbn; rewrite Nat.mul_shuffle0.
 }
 etransitivity; [ apply IHHperm1 | apply IHHperm2 ].
+Qed.
+
+Theorem not_forall_in_interv_imp_exist : ∀ a b (P : nat → Prop),
+  (∀ n, decidable (P n))
+  → a ≤ b
+  → (¬ (∀ n, a ≤ n ≤ b → ¬ P n))
+  → ∃ n, P n.
+Proof.
+intros * Hdec Hab Hnab.
+revert a Hab Hnab.
+induction b; intros. {
+  apply Nat.le_0_r in Hab; subst a.
+  exists 0.
+  destruct (Hdec 0) as [H1| H1]; [ easy | ].
+  exfalso; apply Hnab.
+  intros * Hn.
+  now replace n with 0 by flia Hn.
+}
+destruct (Nat.eq_dec a (S b)) as [Hasb| Hasb]. {
+  exists (S b).
+  destruct (Hdec (S b)) as [H1| H1]; [ easy | ].
+  exfalso; apply Hnab.
+  intros * Hn.
+  now replace n with (S b) by flia Hasb Hn.
+}
+assert (H : a ≤ b) by flia Hab Hasb.
+move H before Hab; clear Hab Hasb; rename H into Hab.
+destruct (Hdec (S b)) as [H1| H1]; [ now exists (S b) | ].
+apply (IHb a); [ easy | ].
+intros H; apply Hnab.
+intros n Hn.
+destruct (Nat.eq_dec n (S b)) as [H2| H2]; [ now rewrite H2 | ].
+apply H; flia Hn H2.
 Qed.
