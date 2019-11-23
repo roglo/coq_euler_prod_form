@@ -2352,8 +2352,29 @@ apply sqr_mod_prime_is_1; [ easy | ].
 now rewrite Nat.pow_mul_r in H1.
 Qed.
 
-(*
 Require Import Decidable.
+Theorem glop : ∀ n nm f fm bm,
+  (∀ b, b ≤ bm → f b ≤ fm)
+  → n ≤ nm
+  → decidable (∀ b, b ≤ bm → f b ≠ n).
+Proof.
+intros * Hb Hn.
+induction fm. {
+  destruct (Nat.eq_dec n 0) as [Hnz| Hnz]. {
+    right.
+    specialize (Hb 0 (Nat.le_0_l _)) as H1.
+    apply Nat.le_0_r in H1.
+    intros H.
+    specialize (H 0 (Nat.le_0_l _)) as H2.
+    congruence.
+  }
+  left.
+  intros b Hbm H; rewrite <- H in Hnz.
+  specialize (Hb b Hbm) as H1.
+  now apply Nat.le_0_r in H1.
+}
+...
+(*
 Theorem decidable_forall_nat_neq : ∀ a (f : nat → nat) a1 a2 b1 b2,
   a1 ≤ a ≤ a2
   → (∀ b, b1 ≤ f b ≤ b2)
