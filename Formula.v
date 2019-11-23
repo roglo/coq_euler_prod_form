@@ -2352,12 +2352,23 @@ apply sqr_mod_prime_is_1; [ easy | ].
 now rewrite Nat.pow_mul_r in H1.
 Qed.
 
+Theorem not_all_div_2_mod_add_1_eq_1 : ∀ a,
+  2 ≤ a
+  → (∀ b, 1 ≤ b ≤ a → b ^ (a / 2) mod (a + 1) = 1)
+  → False.
+Proof.
+intros * H3a Hcon.
+...
+
 Theorem glop : ∀ p, prime p → ∃ n, n ^ ((p - 1) / 2) mod p = p - 1.
 Proof.
 intros * Hp.
+destruct (Nat.eq_dec p 2) as [Hp2| Hp2]; [ now exists 1; subst p | ].
 assert (H2p : 2 ≤ p) by now apply prime_ge_2.
+assert (H3p : 3 ≤ p) by flia Hp2 H2p.
+clear Hp2 H2p.
 specialize (pow_prime_sub_1_div_2 p Hp) as H1.
-apply (not_forall_in_interv_imp_exist 1 (p - 1)); [ | flia H2p | ]. {
+apply (not_forall_in_interv_imp_exist 1 (p - 1)); [ | flia H3p | ]. {
   intros; apply Nat.eq_decidable.
 }
 intros H2.
@@ -2368,7 +2379,13 @@ assert (Hap1 : ∀ a, 1 ≤ a ≤ p - 1 → a ^ ((p - 1) / 2) mod p = 1). {
   now destruct (H1 a H).
 }
 clear H1 H2.
+Compute (let p := 3 in map (λ n, Nat_pow_mod n ((p - 1)/2) p) (seq 1 (p - 1))).
 ...
+specialize (not_all_div_2_mod_add_1_eq_1 (p - 1)) as H1.
+assert (H : 2 ≤ p - 1) by flia H3p.
+specialize (H1 H); clear H.
+rewrite Nat.sub_add in H1; [ easy | flia H3p ].
+Qed.
 
 (* this is false: counter example
 Compute (map (λ n, Nat_pow_mod 2 n 5) (seq 2 6)).
