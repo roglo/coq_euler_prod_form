@@ -2241,7 +2241,68 @@ Theorem ζ_Euler_product_eq : ...
 Compute (let p := 5 in (Nat_pow_mod 3 ((p - 1)/2) p, p)).
 Compute (let p := 5 in map (λ n, Nat_pow_mod n ((p - 1)/2) p) (seq 2 (p - 3))).
 Compute (let p := 19 in map (λ n, Nat_pow_mod n ((p - 1)/2) p) (seq 2 (p - 3))).
+Compute (let p := 53 in map (λ n, Nat_pow_mod n ((p - 1)/2) p) (seq 2 (p - 3))).
 
+Theorem odd_prime : ∀ p, prime p → p ≠ 2 → p mod 2 = 1.
+Proof.
+intros * Hp Hp2.
+remember (p mod 2) as r eqn:Hp2z; symmetry in Hp2z.
+destruct r. 2: {
+  destruct r; [ easy | ].
+  specialize (Nat.mod_upper_bound p 2 (Nat.neq_succ_0 _)) as H1.
+  flia Hp2z H1.
+}
+exfalso.
+apply Nat.mod_divides in Hp2z; [ | easy ].
+destruct Hp2z as (d, Hd).
+destruct (lt_dec d 2) as [Hd2| Hd2]. {
+  destruct d; [ now subst p; rewrite Nat.mul_0_r in Hp | ].
+  destruct d; [ now subst p | flia Hd2 ].
+}
+apply Nat.nlt_ge in Hd2.
+specialize (prime_prop p Hp d) as H1.
+assert (H : 2 ≤ d ≤ p - 1). {
+  split; [ easy | flia Hd ].
+}
+specialize (H1 H); clear H.
+apply H1; clear H1.
+rewrite Hd.
+apply Nat.divide_factor_r.
+Qed.
+
+Theorem glop : ∀ p, prime p → ∀ a, 1 ≤ a < p
+  → a ^ ((p - 1) / 2) mod p = 1 ∨
+     a ^ ((p - 1) / 2) mod p = p - 1.
+Proof.
+intros * Hp * Hap.
+assert (Hpz : p ≠ 0) by now intros H; rewrite H in Hp.
+move Hpz before Hp.
+specialize (fermat_little p Hp a Hap) as H1.
+destruct (Nat.eq_dec p 2) as [Hp2| Hp2]; [ now rewrite Hp2; left | ].
+move Hp2 before Hpz.
+replace (p - 1) with ((p - 1) / 2 * 2) in H1. 2: {
+  specialize (Nat.div_mod (p - 1) 2 (Nat.neq_succ_0 _)) as H2.
+  replace ((p - 1) mod 2) with 0 in H2. 2: {
+    symmetry.
+    specialize (odd_prime p Hp Hp2) as H3.
+    specialize (Nat.div_mod p 2 (Nat.neq_succ_0 _)) as H4.
+    rewrite H4, H3, Nat.add_sub.
+    now rewrite Nat.mul_comm, Nat.mod_mul.
+  }
+  now rewrite Nat.add_0_r, Nat.mul_comm in H2.
+}
+rewrite Nat.pow_mul_r in H1.
+remember (a ^ ((p - 1) / 2)) as b eqn:Hb.
+...
+specialize (Nat.div_mod (b ^ 2) p Hpz) as H2.
+rewrite H1 in H2.
+specialize (Nat.div_mod b p Hpz) as H3.
+...
+
+Theorem glop : ∀ p, prime p → ∃ n, n ^ ((p - 1) / 2) mod p = p - 1.
+Proof.
+intros * Hp.
+specialize (fermat_little p Hp) as H1.
 ...
 
 (* this is false: counter example
