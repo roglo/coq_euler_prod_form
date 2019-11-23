@@ -2274,6 +2274,46 @@ Theorem glop : ∀ p a,
   prime p → a ^ 2 mod p = 1 → a mod p = 1 ∨ a mod p = p - 1.
 Proof.
 intros * Hp Hap.
+assert (Hpz : p ≠ 0) by now intros H; rewrite H in Hp.
+assert (H2p : 2 ≤ p) by now apply prime_ge_2.
+destruct (Nat.eq_dec a 0) as [Haz| Haz]. {
+  rewrite Haz, Nat.pow_0_l in Hap; [ | easy ].
+  now rewrite Nat.mod_0_l in Hap.
+}
+replace 1 with (1 mod p) in Hap at 2 by now rewrite Nat.mod_1_l.
+apply Nat_eq_mod_sub_0 in Hap. 2: {
+  destruct a; [ easy | ].
+  cbn; rewrite Nat.mul_1_r.
+  remember (a * S a); flia.
+}
+apply Nat.mod_divide in Hap; [ | easy ].
+rewrite Nat_sqr_sub_1 in Hap.
+specialize (Nat.gauss _ _ _ Hap) as H1.
+destruct (Nat.eq_dec ((a + 1) mod p) 0) as [Ha1p| Ha1p]. {
+  right.
+  apply Nat.mod_divide in Ha1p; [ | easy ].
+  destruct Ha1p as (c, Hc).
+  destruct c; [ flia Hc | cbn in Hc ].
+  apply Nat.add_sub_eq_r in Hc.
+  rewrite <- Hc, Nat.add_comm.
+  rewrite <- Nat.add_sub_assoc; [ | flia H2p ].
+  rewrite Nat.add_comm.
+  rewrite Nat.mod_add; [ | easy ].
+  apply Nat.mod_small; flia Hpz.
+}
+...
+intros * Hp Hap.
+assert (Hpz : p ≠ 0) by now intros H; rewrite H in Hp.
+specialize (Nat.div_mod (a ^ 2) p Hpz) as H1.
+rewrite Hap in H1.
+specialize (Nat.div_mod a p Hpz) as H2.
+remember (a / p) as q eqn:Hq.
+remember (a ^ 2 / p) as q2 eqn:Hq2.
+remember (a mod p) as r eqn:Hr.
+move q before a; move q2 before q; move r before q2.
+move H1 before H2.
+cbn in H1; rewrite Nat.mul_1_r in H1.
+rewrite H2 in H1.
 ...
 
 Theorem glop : ∀ p, prime p → ∀ a, 1 ≤ a < p
