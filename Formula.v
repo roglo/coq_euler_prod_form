@@ -2352,6 +2352,7 @@ apply sqr_mod_prime_is_1; [ easy | ].
 now rewrite Nat.pow_mul_r in H1.
 Qed.
 
+(*
 Require Import Decidable.
 Theorem decidable_forall_nat_neq : ∀ a (f : nat → nat) a1 a2 b1 b2,
   a1 ≤ a ≤ a2
@@ -2369,6 +2370,7 @@ induction a; intros. {
     specialize (H 0).
     now apply Nat.le_0_r in Hbb.
   }
+...
   destruct b1. {
     specialize (IHb2 0 (λ b, f (b - 1))) as H1.
     cbn in H1.
@@ -2377,6 +2379,7 @@ induction a; intros. {
       specialize (Hbb (b - 1)) as H2.
 (* ah mais oui mais non *)
 ...
+*)
 
 Theorem exists_non_residue : ∀ p, prime p → ∃ a, ∀ b, b ^ 2 mod p ≠ a mod p.
 Proof.
