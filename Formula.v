@@ -2400,9 +2400,27 @@ destruct H1 as [H1| H1]. {
 ...
 *)
 
-Theorem exists_non_residue : ∀ p, prime p → ∃ a, ∀ b, b ^ 2 mod p ≠ a mod p.
+Theorem exists_non_residue : ∀ p,
+  prime p → 3 ≤ p → ∃ a, ∀ b, b ^ 2 mod p ≠ a mod p.
 Proof.
-intros * Hp.
+intros * Hp H3p.
+remember (p - 3) as q eqn:Hq; symmetry in Hq.
+revert p Hp H3p Hq.
+induction q; intros. {
+  replace p with 3 by flia H3p Hq.
+  exists 2.
+  intros b Hb.
+  replace (2 mod 3) with 2 in Hb by easy.
+...
+  specialize (Nat.div_mod (b ^ 2) 3 (Nat.neq_succ_0 _)) as H1.
+  rewrite Hb in H1.
+  clear - Hb.
+  induction b; [ easy | ].
+  replace (S b) with (b + 1) in Hb by flia.
+  cbn - [ "mod" ] in Hb.
+  rewrite Nat.mul_1_r in Hb.
+  rewrite Nat.mul_add_distr_l, Nat.mul_1_r in Hb.
+  rewrite Nat.mul_add_distr_r, Nat.mul_1_l in Hb.
 ...
 apply (not_forall_in_interv_imp_exist 1 (p - 1)). {
   intros.
