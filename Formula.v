@@ -2352,11 +2352,46 @@ apply sqr_mod_prime_is_1; [ easy | ].
 now rewrite Nat.pow_mul_r in H1.
 Qed.
 
+Fixpoint eulers_residue_loop it a p :=
+  match it with
+  | 0 => []
+  | S it' =>
+      match Nat_pow_mod a ((p - 1) / 2) p with
+      | 1 => a :: eulers_residue_loop it' (a + 1) p
+      | _ => eulers_residue_loop it' (a + 1) p
+      end
+  end.
+
+Definition eulers_residues p := eulers_residue_loop p 0 p.
+
+Definition quadratic_residues p :=
+  (map (λ a, Nat_pow_mod a 2 p) (seq 1 (p - 1))).
+
+Compute (let p := 13 in (eulers_residues p, quadratic_residues p)).
+
+...
+
+Theorem quadratic_residues_iff_euler's : ∀ p a,
+  a ∈ quadratic_residues p ↔ ∃ q, q ^ 2 mod p = a.
+Proof.
+...
+
+Theorem quadratic_residues_iff : ∀ p a,
+  a ∈ quadratic_residues p ↔ ∃ q, q ^ 2 mod p = a.
+Proof.
+intros *.
+split. 2: {
+  intros (q & Hqpa).
+...
+
 Theorem exists_nonresidue : ∀ p,
   prime p → 3 ≤ p → ∃ a, ∀ b, b ^ 2 mod p ≠ a mod p.
 Proof.
-(*
 intros * Hp H3p.
+assert (H : ¬ ∀ a, ∃ b, b ^ 2 mod p = a mod p). {
+  intros Hcon.
+...
+(*
 remember (p - 3) as q eqn:Hq; symmetry in Hq.
 clear Hp.
 revert p (*Hp*) H3p Hq.
