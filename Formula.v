@@ -2422,16 +2422,27 @@ Fixpoint uniq l :=
 Compute (let p := 13 in (eulers_residues p, uniq (sort (quadratic_residues p)))).
 Compute (let p := 23 in (eulers_residues p, uniq (sort (quadratic_residues p)))).
 
-Theorem eulers_residues_if : ∀ p a,
-  a ∈ eulers_residues p → a ^ ((p - 1) / 2) mod p = 1.
+Theorem eulers_residues_iff : ∀ p a,
+  a ∈ eulers_residues p ↔ 0 ≤ a < p ∧ a ^ ((p - 1) / 2) mod p = 1.
 Proof.
-intros * Hap.
-destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
-unfold eulers_residues in Hap.
-apply filter_In in Hap.
-destruct Hap as (Ha, Hap).
-rewrite Nat_pow_mod_is_pow_mod in Hap; [ | easy ].
-now apply Nat.eqb_eq in Hap.
+intros.
+split. {
+  intros Hap.
+  destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
+  unfold eulers_residues in Hap.
+  apply filter_In in Hap.
+  destruct Hap as (Ha, Hap).
+  rewrite Nat_pow_mod_is_pow_mod in Hap; [ | easy ].
+  apply in_seq in Ha.
+  now apply Nat.eqb_eq in Hap.
+} {
+  intros (Hzap, Hap).
+  destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
+  unfold eulers_residues.
+  apply filter_In.
+  rewrite Nat_pow_mod_is_pow_mod; [ | easy ].
+  split; [ now apply in_seq | now apply Nat.eqb_eq ].
+}
 Qed.
 
 Theorem quadratic_residues_if : ∀ p a,
