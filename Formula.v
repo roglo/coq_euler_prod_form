@@ -2515,14 +2515,6 @@ split; intros Hap. 2: {
     }
     now rewrite Nat.mod_0_l in Happ.
   }
-(*
-  destruct (Nat.eq_dec a 1) as [H1a| H1a]. {
-    subst a.
-    exists 1.
-    split; [ easy | ].
-    now rewrite Nat.pow_1_l, Nat.mod_1_l.
-  }
-*)
   specialize (Nat.div_mod (a ^ ((p - 1) / 2)) p Hpz) as H1.
   rewrite Happ in H1.
   remember (a ^ ((p - 1) / 2) / p) as q1 eqn:Hq1.
