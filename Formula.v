@@ -2445,16 +2445,34 @@ split. {
 }
 Qed.
 
-Theorem quadratic_residues_if : ∀ p a,
-  a ∈ quadratic_residues p → ∃ q, q ^ 2 mod p = a.
+Theorem quadratic_residues_iff : ∀ p a,
+  a ∈ quadratic_residues p ↔ ∃ q, 1 ≤ q < p ∧ q ^ 2 mod p = a.
 Proof.
-intros * Hap.
-destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
-unfold quadratic_residues in Hap.
-apply in_map_iff in Hap.
-destruct Hap as (b & Hpa & Hb).
-exists b.
-now rewrite Nat_pow_mod_is_pow_mod in Hpa.
+intros.
+split. {
+  intros Hap.
+  destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
+  unfold quadratic_residues in Hap.
+  apply in_map_iff in Hap.
+  destruct Hap as (b & Hpa & Hb).
+  rewrite Nat_pow_mod_is_pow_mod in Hpa; [ | easy ].
+  apply in_seq in Hb.
+  replace (1 + (p - 1)) with p in Hb by flia Hpz.
+  now exists b.
+} {
+  intros (q & Hqp & Hq).
+  destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
+  unfold quadratic_residues.
+  apply in_map_iff.
+  exists (q mod p).
+  rewrite Nat_pow_mod_is_pow_mod; [ | easy ].
+  rewrite Nat_mod_pow_mod.
+  split; [ easy | ].
+  apply in_seq.
+  replace (1 + (p - 1)) with p  by flia Hpz.
+  split; [ now rewrite Nat.mod_small | ].
+  now apply Nat.mod_upper_bound.
+}
 Qed.
 
 ...
