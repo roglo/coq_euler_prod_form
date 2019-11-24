@@ -2352,82 +2352,6 @@ apply sqr_mod_prime_is_1; [ easy | ].
 now rewrite Nat.pow_mul_r in H1.
 Qed.
 
-Require Import Decidable.
-Theorem forall_bounded_fun_neq_dec : ∀ m a (f : nat → nat),
-  (∀ b, f b < m)
-  → decidable (∀ b, f b ≠ a).
-Proof.
-intros * Hfm.
-revert a f Hfm.
-induction m; intros; [ specialize (Hfm 0); flia Hfm | ].
-specialize (IHm (a - 1) (λ b, f b - 1)) as H1.
-cbn in H1.
-assert (H : ∀ b, f b - 1 < m). {
-  intros b.
-  specialize (Hfm b).
-...
-}
-specialize (H1 H); clear H.
-destruct H1 as [H1| H1]. {
-  left.
-  intros b.
-  specialize (H1 b).
-  flia H1.
-} {
-  right.
-  intros H; apply H1; intros b.
-  specialize (H b).
-  flia H.
-...
-
-(*
-Require Import Decidable.
-Theorem glop : ∀ n nm f fm bm,
-  (∀ b, b ≤ bm → f b ≤ fm)
-  → n ≤ nm
-  → decidable (∀ b, b ≤ bm → f b ≠ n).
-Proof.
-intros * Hb Hn.
-revert f n nm Hb Hn.
-induction fm; intros. {
-  destruct (Nat.eq_dec n 0) as [Hnz| Hnz]. {
-    right.
-    specialize (Hb 0 (Nat.le_0_l _)) as H1.
-    apply Nat.le_0_r in H1.
-    intros H.
-    specialize (H 0 (Nat.le_0_l _)) as H2.
-    congruence.
-  }
-  left.
-  intros b Hbm H; rewrite <- H in Hnz.
-  specialize (Hb b Hbm) as H1.
-  now apply Nat.le_0_r in H1.
-}
-specialize (IHfm (λ b, f b - 1) (n - 1) (nm - 1)) as H1.
-cbn in H1.
-assert (H : ∀ b, b ≤ bm → f b - 1 ≤ fm). {
-  intros b Hbm.
-  specialize (Hb b Hbm) as H2.
-  flia H2.
-}
-specialize (H1 H); clear H.
-assert (H : n - 1 ≤ nm - 1) by flia Hn.
-specialize (H1 H); clear H.
-destruct H1 as [H1| H1]. {
-  left.
-  intros b Hbm.
-  specialize (H1 b Hbm) as H2.
-  flia H2.
-} {
-  right.
-  intros H2; apply H1; clear H1.
-  intros b Hbm H.
-  specialize (H2 b Hbm) as H3.
-  destruct n. {
-    cbn in H.
-...
-*)
-
 Theorem exists_non_residue : ∀ p,
   prime p → 3 ≤ p → ∃ a, ∀ b, b ^ 2 mod p ≠ a mod p.
 Proof.
@@ -2459,10 +2383,6 @@ specialize (IHq p) as H1.
 intros * Hp H3p.
 apply (not_forall_in_interv_imp_exist 1 (p - 1)); [ | flia H3p | ]. {
   intros.
-...
-apply (forall_bounded_fun_neq_dec p).
-...
-  apply decidable_forall_nat_neq.
 ...
 
 (*
