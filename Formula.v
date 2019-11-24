@@ -2475,6 +2475,13 @@ split. {
 }
 Qed.
 
+Theorem euler_quadratic_residue_iff : ∀ p a,
+  a ∈ eulers_residues p ↔ a ∈ quadratic_residues p.
+Proof.
+intros.
+split; intros Hap. {
+  apply eulers_residues_iff in Hap.
+  apply quadratic_residues_iff.
 ...
 
 Theorem exists_nonresidue : ∀ p,
