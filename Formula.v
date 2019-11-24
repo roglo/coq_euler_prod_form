@@ -2352,6 +2352,34 @@ apply sqr_mod_prime_is_1; [ easy | ].
 now rewrite Nat.pow_mul_r in H1.
 Qed.
 
+Require Import Decidable.
+Theorem forall_bounded_fun_neq_dec : ∀ m a (f : nat → nat),
+  (∀ b, f b < m)
+  → decidable (∀ b, f b ≠ a).
+Proof.
+intros * Hfm.
+revert a f Hfm.
+induction m; intros; [ specialize (Hfm 0); flia Hfm | ].
+specialize (IHm (a - 1) (λ b, f b - 1)) as H1.
+cbn in H1.
+assert (H : ∀ b, f b - 1 < m). {
+  intros b.
+  specialize (Hfm b).
+...
+}
+specialize (H1 H); clear H.
+destruct H1 as [H1| H1]. {
+  left.
+  intros b.
+  specialize (H1 b).
+  flia H1.
+} {
+  right.
+  intros H; apply H1; intros b.
+  specialize (H b).
+  flia H.
+...
+
 (*
 Require Import Decidable.
 Theorem glop : ∀ n nm f fm bm,
@@ -2431,6 +2459,8 @@ specialize (IHq p) as H1.
 intros * Hp H3p.
 apply (not_forall_in_interv_imp_exist 1 (p - 1)); [ | flia H3p | ]. {
   intros.
+...
+apply (forall_bounded_fun_neq_dec p).
 ...
   apply decidable_forall_nat_neq.
 ...
