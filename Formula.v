@@ -2352,6 +2352,7 @@ apply sqr_mod_prime_is_1; [ easy | ].
 now rewrite Nat.pow_mul_r in H1.
 Qed.
 
+(*
 Fixpoint eulers_residue_loop it a p :=
   match it with
   | 0 => []
@@ -2363,9 +2364,15 @@ Fixpoint eulers_residue_loop it a p :=
   end.
 
 Definition eulers_residues p := eulers_residue_loop p 0 p.
+*)
+
+Check Nat.eqb.
+
+Definition eulers_residues p :=
+  filter (λ a, Nat_pow_mod a ((p - 1) / 2) p =? 1) (seq 0 p).
 
 Definition quadratic_residues p :=
-  (map (λ a, Nat_pow_mod a 2 p) (seq 1 (p - 1))).
+  map (λ a, Nat_pow_mod a 2 p) (seq 1 (p - 1)).
 
 Compute (let p := 13 in (eulers_residues p, quadratic_residues p)).
 
@@ -2421,31 +2428,10 @@ Proof.
 intros * Hap.
 destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
 unfold eulers_residues in Hap.
-assert (H : ∀ it a b p,
-  b ∈ eulers_residue_loop it a p
-  → b ^ ((p - 1) / 2) mod p = 1). {
-  clear; intros * Hb.
-  destruct (Nat.eq_dec p 0) as [Hpz| Hpz]. {
-    exfalso.
-    subst p; cbn in Hb.
-    revert a Hb.
-    induction it; intros; [ easy | cbn in Hb ].
-    now apply (IHit (a + 1)).
-  }
-  revert a b Hb.
-  induction it; intros; [ easy | ].
-  cbn - [ "/" ] in Hb.
-  rewrite Nat_pow_mod_is_pow_mod in Hb; [ | easy ].
-  remember (a ^ ((p - 1) / 2) mod p) as x eqn:Hx; symmetry in Hx.
-  destruct (Nat.eq_dec x 1) as [Hx1| Hx1]. {
-    rewrite Hx1 in Hb.
-    destruct Hb as [Hb| Hb]; [ congruence | ].
-    now apply (IHit (a + 1)).
-  }
-  apply (IHit (a + 1)).
-  destruct x; [ easy | now destruct x ].
-}
-now apply (H p 0).
+apply filter_In in Hap.
+destruct Hap as (Ha, Hap).
+rewrite Nat_pow_mod_is_pow_mod in Hap; [ | easy ].
+now apply Nat.eqb_eq in Hap.
 Qed.
 
 Theorem quadratic_residues_if : ∀ p a,
