@@ -2423,7 +2423,7 @@ Compute (let p := 13 in (eulers_residues p, uniq (sort (quadratic_residues p))))
 Compute (let p := 23 in (eulers_residues p, uniq (sort (quadratic_residues p)))).
 
 Theorem eulers_residues_iff : ∀ p a,
-  a ∈ eulers_residues p ↔ 0 ≤ a < p ∧ a ^ ((p - 1) / 2) mod p = 1.
+  a ∈ eulers_residues p ↔ a < p ∧ a ^ ((p - 1) / 2) mod p = 1.
 Proof.
 intros.
 split. {
@@ -2441,7 +2441,7 @@ split. {
   unfold eulers_residues.
   apply filter_In.
   rewrite Nat_pow_mod_is_pow_mod; [ | easy ].
-  split; [ now apply in_seq | now apply Nat.eqb_eq ].
+  split; [ apply in_seq; flia Hzap | now apply Nat.eqb_eq ].
 }
 Qed.
 
