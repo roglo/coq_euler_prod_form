@@ -2369,19 +2369,93 @@ Definition quadratic_residues p :=
 
 Compute (let p := 13 in (eulers_residues p, quadratic_residues p)).
 
-...
+Fixpoint merge l1 l2 :=
+  let fix merge_aux l2 :=
+  match l1, l2 with
+  | [], _ => l2
+  | _, [] => l1
+  | a1::l1', a2::l2' =>
+      if a1 <=? a2 then a1 :: merge l1' l2 else a2 :: merge_aux l2'
+  end
+  in merge_aux l2.
 
-Theorem quadratic_residues_iff_euler's : ∀ p a,
-  a ∈ quadratic_residues p ↔ ∃ q, q ^ 2 mod p = a.
+Fixpoint merge_list_to_stack stack l :=
+  match stack with
+  | [] => [Some l]
+  | None :: stack' => Some l :: stack'
+  | Some l' :: stack' => None :: merge_list_to_stack stack' (merge l' l)
+  end.
+
+Fixpoint merge_stack stack :=
+  match stack with
+  | [] => []
+  | None :: stack' => merge_stack stack'
+  | Some l :: stack' => merge l (merge_stack stack')
+  end.
+
+Fixpoint iter_merge stack l :=
+  match l with
+  | [] => merge_stack stack
+  | a::l' => iter_merge (merge_list_to_stack stack [a]) l'
+  end.
+
+Definition sort := iter_merge [].
+
+Fixpoint uniq l :=
+  match l with
+  | [] => []
+  | a :: l' =>
+      match l' with
+      | [] => [a]
+      | b :: _ =>
+          if Nat.eq_dec a b then uniq l' else a :: uniq l'
+      end
+  end.
+
+Compute (let p := 13 in (eulers_residues p, uniq (sort (quadratic_residues p)))).
+Compute (let p := 23 in (eulers_residues p, uniq (sort (quadratic_residues p)))).
+
+Theorem eulers_residues_iff : ∀ p a,
+  a ∈ eulers_residues p ↔ a ^ ((p - 1) / 2) mod p = 1.
 Proof.
+intros *.
+split. {
+  intros Hap.
+  destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
+  unfold eulers_residues in Hap.
+  assert (H : ∀ it a b p,
+    b ∈ eulers_residue_loop it a p
+    → b ^ ((p - 1) / 2) mod p = 1). {
+    clear; intros * Hb.
+    destruct (Nat.eq_dec p 0) as [Hpz| Hpz]. {
+      exfalso.
+      subst p; cbn in Hb.
+      revert a Hb.
+      induction it; intros; [ easy | cbn in Hb ].
+      now apply (IHit (a + 1)).
+    }
+    revert a b Hb.
+    induction it; intros; [ easy | ].
+    cbn - [ "/" ] in Hb.
+    rewrite Nat_pow_mod_is_pow_mod in Hb; [ | easy ].
+    remember (a ^ ((p - 1) / 2) mod p) as x eqn:Hx; symmetry in Hx.
+    destruct (Nat.eq_dec x 1) as [Hx1| Hx1]. {
+      rewrite Hx1 in Hb.
+      destruct Hb as [Hb| Hb]; [ congruence | ].
+      now apply (IHit (a + 1)).
+    }
+    apply (IHit (a + 1)).
+    destruct x; [ easy | now destruct x ].
+  }
+  now apply (H p 0).
+} {
+  intros Hap.
 ...
 
 Theorem quadratic_residues_iff : ∀ p a,
   a ∈ quadratic_residues p ↔ ∃ q, q ^ 2 mod p = a.
 Proof.
-intros *.
-split. 2: {
-  intros (q & Hqpa).
+
 ...
 
 Theorem exists_nonresidue : ∀ p,
