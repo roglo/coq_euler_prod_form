@@ -2415,46 +2415,50 @@ Fixpoint uniq l :=
 Compute (let p := 13 in (eulers_residues p, uniq (sort (quadratic_residues p)))).
 Compute (let p := 23 in (eulers_residues p, uniq (sort (quadratic_residues p)))).
 
-Theorem eulers_residues_iff : ∀ p a,
-  a ∈ eulers_residues p ↔ a ^ ((p - 1) / 2) mod p = 1.
+Theorem eulers_residues_if : ∀ p a,
+  a ∈ eulers_residues p → a ^ ((p - 1) / 2) mod p = 1.
 Proof.
-intros *.
-split. {
-  intros Hap.
-  destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
-  unfold eulers_residues in Hap.
-  assert (H : ∀ it a b p,
-    b ∈ eulers_residue_loop it a p
-    → b ^ ((p - 1) / 2) mod p = 1). {
-    clear; intros * Hb.
-    destruct (Nat.eq_dec p 0) as [Hpz| Hpz]. {
-      exfalso.
-      subst p; cbn in Hb.
-      revert a Hb.
-      induction it; intros; [ easy | cbn in Hb ].
-      now apply (IHit (a + 1)).
-    }
-    revert a b Hb.
-    induction it; intros; [ easy | ].
-    cbn - [ "/" ] in Hb.
-    rewrite Nat_pow_mod_is_pow_mod in Hb; [ | easy ].
-    remember (a ^ ((p - 1) / 2) mod p) as x eqn:Hx; symmetry in Hx.
-    destruct (Nat.eq_dec x 1) as [Hx1| Hx1]. {
-      rewrite Hx1 in Hb.
-      destruct Hb as [Hb| Hb]; [ congruence | ].
-      now apply (IHit (a + 1)).
-    }
-    apply (IHit (a + 1)).
-    destruct x; [ easy | now destruct x ].
+intros * Hap.
+destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
+unfold eulers_residues in Hap.
+assert (H : ∀ it a b p,
+  b ∈ eulers_residue_loop it a p
+  → b ^ ((p - 1) / 2) mod p = 1). {
+  clear; intros * Hb.
+  destruct (Nat.eq_dec p 0) as [Hpz| Hpz]. {
+    exfalso.
+    subst p; cbn in Hb.
+    revert a Hb.
+    induction it; intros; [ easy | cbn in Hb ].
+    now apply (IHit (a + 1)).
   }
-  now apply (H p 0).
-} {
-  intros Hap.
-...
+  revert a b Hb.
+  induction it; intros; [ easy | ].
+  cbn - [ "/" ] in Hb.
+  rewrite Nat_pow_mod_is_pow_mod in Hb; [ | easy ].
+  remember (a ^ ((p - 1) / 2) mod p) as x eqn:Hx; symmetry in Hx.
+  destruct (Nat.eq_dec x 1) as [Hx1| Hx1]. {
+    rewrite Hx1 in Hb.
+    destruct Hb as [Hb| Hb]; [ congruence | ].
+    now apply (IHit (a + 1)).
+  }
+  apply (IHit (a + 1)).
+  destruct x; [ easy | now destruct x ].
+}
+now apply (H p 0).
+Qed.
 
-Theorem quadratic_residues_iff : ∀ p a,
-  a ∈ quadratic_residues p ↔ ∃ q, q ^ 2 mod p = a.
+Theorem quadratic_residues_if : ∀ p a,
+  a ∈ quadratic_residues p → ∃ q, q ^ 2 mod p = a.
 Proof.
+intros * Hap.
+destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
+unfold quadratic_residues in Hap.
+apply in_map_iff in Hap.
+destruct Hap as (b & Hpa & Hb).
+exists b.
+now rewrite Nat_pow_mod_is_pow_mod in Hpa.
+Qed.
 
 ...
 
