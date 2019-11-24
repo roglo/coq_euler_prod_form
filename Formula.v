@@ -2352,7 +2352,7 @@ apply sqr_mod_prime_is_1; [ easy | ].
 now rewrite Nat.pow_mul_r in H1.
 Qed.
 
-Theorem exists_non_residue : ∀ p,
+Theorem exists_nonresidue : ∀ p,
   prime p → 3 ≤ p → ∃ a, ∀ b, b ^ 2 mod p ≠ a mod p.
 Proof.
 (*
