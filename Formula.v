@@ -2500,6 +2500,49 @@ split; intros Hap. 2: {
   apply quadratic_residues_iff.
   destruct Hap as (Hap & Happ).
 ...
+  destruct (Nat.eq_dec p 2) as [Hp2| Hp2]. {
+    ... (* must be refuted by adding p ≠ 2 as hypothesis *)
+  }
+  destruct (Nat.eq_dec a 0) as [Hza| Hza]. {
+    subst a.
+    rewrite Nat.pow_0_l in Happ. 2: {
+      destruct p; [ easy | ].
+      rewrite Nat.sub_succ, Nat.sub_0_r.
+      destruct p; [ easy | ].
+      destruct p; [ easy | ].
+      replace (S (S p)) with (p + 1 * 2) by flia.
+      rewrite Nat.div_add; [ flia | easy ].
+    }
+    now rewrite Nat.mod_0_l in Happ.
+  }
+(*
+  destruct (Nat.eq_dec a 1) as [H1a| H1a]. {
+    subst a.
+    exists 1.
+    split; [ easy | ].
+    now rewrite Nat.pow_1_l, Nat.mod_1_l.
+  }
+*)
+  specialize (Nat.div_mod (a ^ ((p - 1) / 2)) p Hpz) as H1.
+  rewrite Happ in H1.
+  remember (a ^ ((p - 1) / 2) / p) as q1 eqn:Hq1.
+  apply (f_equal (λ x, Nat.pow x 2)) in H1.
+  rewrite <- Nat.pow_mul_r in H1.
+  specialize (odd_prime p Hp Hp2) as H2.
+  specialize (Nat.div_mod (p - 1) 2 (Nat.neq_succ_0 _)) as H3.
+  replace ((p - 1) mod 2) with 0 in H3. 2: {
+    specialize (Nat.div_mod p 2 (Nat.neq_succ_0 _)) as H4.
+    rewrite H2 in H4.
+    rewrite H4, Nat.add_sub.
+    now rewrite Nat.mul_comm, Nat.mod_mul.
+  }
+  rewrite Nat.add_0_r in H3.
+  rewrite Nat.mul_comm, <- H3 in H1.
+  apply (f_equal (λ x, x mod p)) in H1.
+  rewrite fermat_little in H1; [ | easy | flia Hza Hap ].
+  symmetry in H1.
+  move H1 at bottom.
+...
 
 Theorem exists_nonresidue : ∀ p,
   prime p → 3 ≤ p → ∃ a, ∀ b, b ^ 2 mod p ≠ a mod p.
