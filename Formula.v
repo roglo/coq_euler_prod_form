@@ -2475,13 +2475,30 @@ split. {
 }
 Qed.
 
-Theorem euler_quadratic_residue_iff : ∀ p a,
+Theorem euler_quadratic_residue_iff : ∀ p a, prime p →
   a ∈ eulers_residues p ↔ a ∈ quadratic_residues p.
 Proof.
-intros.
-split; intros Hap. {
+intros * Hp.
+destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
+split; intros Hap. 2: {
+  apply quadratic_residues_iff in Hap.
+  apply eulers_residues_iff.
+  destruct Hap as (q & Hqp & Hqpa).
+  rewrite <- Hqpa.
+  split; [ now apply Nat.mod_upper_bound | ].
+  rewrite Nat_mod_pow_mod.
+  rewrite <- Nat.pow_mul_r.
+  destruct (Nat.eq_dec p 2) as [Hp2| Hp2]; [ now subst p | ].
+  rewrite <- (proj2 (Nat.div_exact _ _ (Nat.neq_succ_0 _))). 2: {
+    specialize (odd_prime p Hp Hp2) as H1.
+    specialize (Nat.div_mod p 2 (Nat.neq_succ_0 _)) as H2.
+    now rewrite H2, H1, Nat.add_sub, Nat.mul_comm, Nat.mod_mul.
+  }
+  now apply fermat_little.
+} {
   apply eulers_residues_iff in Hap.
   apply quadratic_residues_iff.
+  destruct Hap as (Hap & Happ).
 ...
 
 Theorem exists_nonresidue : ∀ p,
