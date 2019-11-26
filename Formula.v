@@ -2475,6 +2475,54 @@ split. {
 }
 Qed.
 
+Lemma glop : ∀ n, quadratic_residues n = rev (quadratic_residues n).
+Proof.
+(*
+intros.
+remember (length (quadratic_residues n)) as len eqn:Hlen.
+symmetry in Hlen.
+revert n Hlen.
+induction len as (len, IHlen) using lt_wf_rec; intros.
+destruct len. {
+  apply length_zero_iff_nil in Hlen.
+  now rewrite Hlen.
+}
+...
+*)
+intros.
+remember (n mod 2) as n2 eqn:Hn2; symmetry in Hn2.
+destruct n2. 2: {
+  destruct n2. 2: {
+    specialize (Nat.mod_upper_bound n 2 (Nat.neq_succ_0 _)) as H1.
+    flia Hn2 H1.
+  }
+  remember (quadratic_residues n) as l eqn:Hl; symmetry in Hl.
+  revert n Hn2 Hl.
+  induction l as [| a l]; intros; [ easy | ].
+  cbn.
+  assert (Hln : l ≠ []). {
+    intros H; subst l.
+...
+
+Lemma glop : ∀ p x, (p - x) ^ 2 mod p = x ^ 2 mod p.
+Proof.
+Print quadratic_residues.
+...
+
+Lemma quadratic_residues_le : ∀ p,
+  prime p → length (quadratic_residues p) ≤ (p - 1) / 2.
+Proof.
+intros p Hp.
+...
+
+Lemma number_of_residues_ge : ∀ p,
+  prime p → (p - 1) /2 ≤ length (quadratic_residues p).
+Proof.
+intros p Hp.
+apply Nat.nlt_ge.
+intros Hcon.
+...
+
 Theorem euler_quadratic_residue_iff : ∀ p a, prime p →
   a ∈ eulers_residues p ↔ a ∈ quadratic_residues p.
 Proof.
