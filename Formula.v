@@ -2352,22 +2352,6 @@ apply sqr_mod_prime_is_1; [ easy | ].
 now rewrite Nat.pow_mul_r in H1.
 Qed.
 
-(*
-Fixpoint eulers_residue_loop it a p :=
-  match it with
-  | 0 => []
-  | S it' =>
-      match Nat_pow_mod a ((p - 1) / 2) p with
-      | 1 => a :: eulers_residue_loop it' (a + 1) p
-      | _ => eulers_residue_loop it' (a + 1) p
-      end
-  end.
-
-Definition eulers_residues p := eulers_residue_loop p 0 p.
-*)
-
-Check Nat.eqb.
-
 Definition eulers_residues p :=
   filter (λ a, Nat_pow_mod a ((p - 1) / 2) p =? 1) (seq 0 p).
 
@@ -2547,6 +2531,7 @@ split; intros Hap. 2: {
   apply eulers_residues_iff in Hap.
   apply quadratic_residues_iff.
   destruct Hap as (Hap & Happ).
+Compute (let p := 17 in (eulers_residues p, quadratic_residues p)).
 ...
   destruct (Nat.eq_dec p 2) as [Hp2| Hp2]. {
     ... (* must be refuted by adding p ≠ 2 as hypothesis *)
