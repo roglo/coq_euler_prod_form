@@ -2440,20 +2440,20 @@ Theorem sqr_mod_sqr_sub_mod : ∀ a n,
   a ≤ n → a ^ 2 mod n = (n - a) ^ 2 mod n.
 Proof.
 intros * Han.
+destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
+do 2 rewrite Nat.pow_2_r.
+rewrite Nat.mul_sub_distr_l.
+do 2 rewrite Nat.mul_sub_distr_r.
+rewrite (Nat.mul_comm a n).
+rewrite <- Nat.sub_add_distr.
+rewrite (Nat.add_comm (n * a)).
+rewrite Nat.sub_add_distr.
+rewrite Nat_sub_sub_assoc. 2: {
+  split; [ apply Nat.mul_le_mono_r; flia Han | ].
+  transitivity (n * n); [ | flia ].
+  apply Nat.mul_le_mono_l; flia Han.
+}
 destruct (le_dec (2 * a) n) as [H2an| H2an]. {
-  destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
-  do 2 rewrite Nat.pow_2_r.
-  rewrite Nat.mul_sub_distr_l.
-  do 2 rewrite Nat.mul_sub_distr_r.
-  rewrite (Nat.mul_comm a n).
-  rewrite <- Nat.sub_add_distr.
-  rewrite (Nat.add_comm (n * a)).
-  rewrite Nat.sub_add_distr.
-  rewrite Nat_sub_sub_assoc. 2: {
-    split; [ apply Nat.mul_le_mono_r; flia Han | ].
-    transitivity (n * n); [ | flia ].
-    apply Nat.mul_le_mono_l; flia Han.
-  }
   rewrite <- Nat.sub_add_distr.
   rewrite (Nat.add_comm (n * n)).
   rewrite <- Nat.add_sub_assoc. 2: {
@@ -2466,20 +2466,7 @@ destruct (le_dec (2 * a) n) as [H2an| H2an]. {
   rewrite (Nat.mul_comm n).
   now rewrite Nat.mod_add.
 } {
-  destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
   apply Nat.nle_gt in H2an.
-  do 2 rewrite Nat.pow_2_r.
-  rewrite Nat.mul_sub_distr_l.
-  do 2 rewrite Nat.mul_sub_distr_r.
-  rewrite (Nat.mul_comm a n).
-  rewrite <- Nat.sub_add_distr.
-  rewrite (Nat.add_comm (n * a)).
-  rewrite Nat.sub_add_distr.
-  rewrite Nat_sub_sub_assoc. 2: {
-    split; [ apply Nat.mul_le_mono_r; flia Han | ].
-    transitivity (n * n); [ | flia ].
-    now apply Nat.mul_le_mono_l.
-  }
   rewrite <- (Nat.mod_add (_ - _) a); [ | easy ].
   rewrite (Nat.mul_comm n a).
   rewrite Nat.sub_add. 2: {
