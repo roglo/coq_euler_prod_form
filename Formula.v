@@ -2438,6 +2438,18 @@ Qed.
 
 Theorem glop : ∀ n, quad_res n = rev (quad_res n).
 Proof.
+intros n.
+unfold quad_res.
+destruct n; [ easy | ].
+rewrite Nat.sub_succ, Nat.sub_0_r.
+destruct n; [ easy | ].
+destruct n; [ easy | ].
+destruct n; [ easy | ].
+destruct n; [ easy | ].
+destruct n; [ easy | ].
+destruct n; [ easy | ].
+destruct n; [ easy | ].
+...
 (*
 intros n.
 unfold quad_res.
