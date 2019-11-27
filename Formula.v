@@ -2449,17 +2449,19 @@ assert
    x ^ 2 mod p = a ∧ y ^ 2 mod p = a ∧ z ^ 2 mod p = a ∧
    x ≠ y ∧ y ≠ z ∧ z ≠ x). {
   specialize (quad_res_in_seq p Hp) as H1.
-  remember (quad_res p) as l; clear Heql.
-...
-  remember (length (quad_res n)) as len eqn:Hlen; symmetry in Hlen.
-  revert n Hn Hlen Hcon.
+  remember (quad_res p) as l; clear Heql Hp.
+  remember (length l) as len eqn:Hlen; symmetry in Hlen.
+  revert p Hlen Hcon H1.
   induction len as (len, IHlen) using lt_wf_rec; intros.
-  destruct n; [ easy | ].
-  destruct n; [ easy | ].
+  destruct p; [ easy | ].
+  destruct p; [ easy | ].
   specialize (IHlen (len - 2)).
+  destruct (Nat.eq_dec len 0) as [Hzlen| Hzlen]. {
+...
   assert (Hzlen : len ≠ 0). {
     intros H; rewrite H in Hlen.
     apply length_zero_iff_nil in Hlen.
+...
     unfold quad_res in Hlen.
     now apply map_eq_nil in Hlen.
   }
@@ -2467,8 +2469,6 @@ assert
   replace (S (S n)) with (n + 1 * 2) in Hn by flia.
   rewrite Nat.mod_add in Hn; [ | easy ].
   specialize (IHlen H n Hn); clear H.
-(* induction on length does not work: quad_res(n+2) has nothing to do
-   with quad_res(n) *)
 ...
   remember (quad_res n) as l eqn:Hl; symmetry in Hl.
   revert n Hn Hl Hcon.
