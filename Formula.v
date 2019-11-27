@@ -2563,8 +2563,6 @@ rewrite <- map_rev.
 now apply H.
 Qed.
 
-...
-
 Theorem glop : ∀ p,
   prime p → (p - 1) / 2 ≤ length (uniq (sort (quad_res p))).
 Proof.
