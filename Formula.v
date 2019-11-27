@@ -2453,7 +2453,6 @@ rewrite Nat_sub_sub_assoc. 2: {
   transitivity (n * n); [ | flia ].
   apply Nat.mul_le_mono_l; flia Han.
 }
-(**)
 rewrite <- (Nat.mod_add (_ - _) a); [ | easy ].
 rewrite (Nat.mul_comm n a).
 rewrite Nat.sub_add. 2: {
