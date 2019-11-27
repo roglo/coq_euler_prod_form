@@ -706,6 +706,23 @@ remember (l ++ [a]) as l' eqn:Hl'.
 destruct l'; [ now destruct l | apply IHl ].
 Qed.
 
+Theorem List_map_fun {A} : ∀ l l' (f : nat → A),
+  length l = length l'
+  → (∀ i, f (nth i l 0) = f (nth i l' 0))
+  → map f l = map f l'.
+Proof.
+intros * Hlen Hf.
+revert l' Hlen Hf.
+induction l as [| a l]; intros; [ now destruct l' | ].
+destruct l' as [| a' l']; [ easy | cbn ].
+specialize (Hf 0) as H1; cbn in H1.
+rewrite H1; f_equal.
+cbn in Hlen; apply Nat.succ_inj in Hlen.
+apply IHl; [ easy | ].
+intros i.
+now specialize (Hf (S i)).
+Qed.
+
 Theorem not_equiv_imp_False : ∀ P : Prop, (P → False) ↔ ¬ P.
 Proof. easy. Qed.
 
