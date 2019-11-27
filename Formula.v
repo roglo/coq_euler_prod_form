@@ -2453,39 +2453,23 @@ rewrite Nat_sub_sub_assoc. 2: {
   transitivity (n * n); [ | flia ].
   apply Nat.mul_le_mono_l; flia Han.
 }
-destruct (le_dec (2 * a) n) as [H2an| H2an]. {
-  rewrite <- Nat.sub_add_distr.
-  rewrite (Nat.add_comm (n * n)).
-  rewrite <- Nat.add_sub_assoc. 2: {
-    rewrite <- Nat.mul_add_distr_l.
-    apply Nat.mul_le_mono_l.
-    flia H2an.
-  }
-  rewrite <- Nat.mul_add_distr_l.
-  rewrite <- Nat.mul_sub_distr_l.
-  rewrite (Nat.mul_comm n).
-  now rewrite Nat.mod_add.
-} {
-  apply Nat.nle_gt in H2an.
-  rewrite <- (Nat.mod_add (_ - _) a); [ | easy ].
-  rewrite (Nat.mul_comm n a).
-  rewrite Nat.sub_add. 2: {
-    rewrite Nat.add_sub_swap; [ | now apply Nat.mul_le_mono_r ].
-    rewrite <- Nat.mul_sub_distr_r.
-    apply Nat.le_sub_le_add_r.
-    rewrite <- Nat.mul_sub_distr_l, Nat.mul_comm.
-    now apply Nat.mul_le_mono_l.
-  }
-  rewrite <- (Nat.mod_add (_ - _) a); [ | easy ].
-  rewrite Nat.sub_add. 2: {
-    transitivity (n * n); [ | flia ].
-    now apply Nat.mul_le_mono_r.
-  }
-  now rewrite Nat.add_comm, Nat.mod_add.
+(**)
+rewrite <- (Nat.mod_add (_ - _) a); [ | easy ].
+rewrite (Nat.mul_comm n a).
+rewrite Nat.sub_add. 2: {
+  rewrite Nat.add_sub_swap; [ | now apply Nat.mul_le_mono_r ].
+  rewrite <- Nat.mul_sub_distr_r.
+  apply Nat.le_sub_le_add_r.
+  rewrite <- Nat.mul_sub_distr_l, Nat.mul_comm.
+  now apply Nat.mul_le_mono_l.
 }
+rewrite <- (Nat.mod_add (_ - _) a); [ | easy ].
+rewrite Nat.sub_add. 2: {
+  transitivity (n * n); [ | flia ].
+  now apply Nat.mul_le_mono_r.
+}
+now rewrite Nat.add_comm, Nat.mod_add.
 Qed.
-
-...
 
 Theorem rev_quad_res : ∀ n, quad_res n = rev (quad_res n).
 Proof.
@@ -2535,6 +2519,7 @@ destruct (Nat.eq_dec r 1) as [Hn| Hn]. {
     rewrite seq_length.
     rewrite seq_nth; [ | easy ].
     rewrite seq_nth; [ | flia Hn2i ].
+...
     rewrite sqr_mod_sqr_sub_mod. 2: {
       transitivity (2 * n2); [ now apply Nat.mul_le_mono_l | ].
       specialize (Nat.div_mod (n - 1) 2 (Nat.neq_succ_0 _)) as H1.
