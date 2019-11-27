@@ -2406,10 +2406,10 @@ Fixpoint uniq l :=
 Compute (let p := 13 in (euler_res p, uniq (sort (quad_res p)))).
 Compute (let p := 23 in (euler_res p, uniq (sort (quad_res p)))).
 
-Theorem quad_res_in_seq : ∀ p a,
-  prime p → a ∈ quad_res p → a ∈ seq 1 (p - 1).
+Theorem quad_res_in_seq : ∀ p, prime p →
+  ∀ a, a ∈ quad_res p → a ∈ seq 1 (p - 1).
 Proof.
-intros * Hp Ha.
+intros * Hp * Ha.
 destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
 unfold quad_res in Ha.
 apply in_map_iff in Ha.
@@ -2436,18 +2436,20 @@ split. {
 }
 Qed.
 
-Theorem glop : ∀ n,
-  n mod 2 = 0 → (n - 1) / 2 ≤ length (quad_res n).
+Theorem glop : ∀ p,
+  prime p → (p - 1) / 2 ≤ length (quad_res p).
 Proof.
-intros n Hn.
+intros p Hp.
 apply Nat.nlt_ge; intros Hcon.
-(* there must be at least one a ∈ quad_res n such that
+(* there must be at least one a ∈ quad_res p such that
    ∃ x y z such that x²=a y²=a z²=a ⇒ contradiction *)
 assert
   (H : ∃ a x y z,
-   a ∈ quad_res n ∧
-   x ^ 2 mod n = a ∧ y ^ 2 mod n = a ∧ z ^ 2 mod n = a ∧
+   a ∈ quad_res p ∧
+   x ^ 2 mod p = a ∧ y ^ 2 mod p = a ∧ z ^ 2 mod p = a ∧
    x ≠ y ∧ y ≠ z ∧ z ≠ x). {
+  specialize (quad_res_in_seq p Hp) as H1.
+  remember (quad_res p) as l; clear Heql.
 ...
   remember (length (quad_res n)) as len eqn:Hlen; symmetry in Hlen.
   revert n Hn Hlen Hcon.
