@@ -2483,9 +2483,10 @@ intros i.
 now specialize (Hf (S i)).
 Qed.
 
-Theorem glop : ∀ n, n mod 2 = 1 → quad_res n = rev (quad_res n).
+Theorem rev_quad_res : ∀ n, n mod 2 = 1 → quad_res n = rev (quad_res n).
 Proof.
 intros n Hn.
+destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
 unfold quad_res.
 rewrite <- map_rev.
 replace (n - 1) with ((n - 1) / 2 + (n - 1) / 2). 2: {
@@ -2503,21 +2504,24 @@ rewrite rev_app_distr.
 rewrite map_app.
 f_equal. {
   apply map_fun. {
-...
-intros.
-rewrite Nat_pow_mod_is_pow_mod.
-rewrite Nat_pow_mod_is_pow_mod.
-rewrite seq_nth.
-rewrite rev_nth.
-rewrite seq_nth.
-Inspect 2.
-rewrite seq_length.
-...
-  clear.
-  induction n2; [ easy | ].
-  cbn - [ Nat_pow_mod ].
-  rewrite Nat_pow_mod_is_pow_mod.
-Inspect 1.
+    rewrite seq_length.
+    rewrite rev_length.
+    now rewrite seq_length.
+  }
+  intros i.
+  rewrite Nat_pow_mod_is_pow_mod; [ | easy ].
+  rewrite Nat_pow_mod_is_pow_mod; [ | easy ].
+  destruct (le_dec n2 i) as [Hn2i| Hn2i]. {
+    rewrite nth_overflow; [ | now rewrite seq_length ].
+    rewrite nth_overflow; [ | now rewrite rev_length, seq_length ].
+    easy.
+  }
+  apply Nat.nle_gt in Hn2i.
+  rewrite rev_nth; [ | now rewrite seq_length ].
+  rewrite seq_length.
+  rewrite seq_nth; [ | easy ].
+  rewrite seq_nth; [ | flia Hn2i ].
+  rewrite sqr_mod_sqr_sub_mod.
 ...
 
 Theorem glop : ∀ p,
