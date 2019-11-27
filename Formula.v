@@ -2352,13 +2352,13 @@ apply sqr_mod_prime_is_1; [ easy | ].
 now rewrite Nat.pow_mul_r in H1.
 Qed.
 
-Definition euler_res p :=
+Definition euler_crit p :=
   filter (λ a, Nat_pow_mod a ((p - 1) / 2) p =? 1) (seq 0 p).
 
 Definition quad_res p :=
   map (λ a, Nat_pow_mod a 2 p) (seq 1 (p - 1)).
 
-Compute (let p := 13 in (euler_res p, quad_res p)).
+Compute (let p := 13 in (euler_crit p, quad_res p)).
 
 Fixpoint merge l1 l2 :=
   let fix merge_aux l2 :=
@@ -2403,8 +2403,8 @@ Fixpoint uniq l :=
       end
   end.
 
-Compute (let p := 13 in (euler_res p, uniq (sort (quad_res p)))).
-Compute (let p := 23 in (euler_res p, uniq (sort (quad_res p)))).
+Compute (let p := 13 in (euler_crit p, uniq (sort (quad_res p)))).
+Compute (let p := 23 in (euler_crit p, uniq (sort (quad_res p)))).
 
 Theorem quad_res_in_seq : ∀ p, prime p →
   ∀ a, a ∈ quad_res p → a ∈ seq 1 (p - 1).
@@ -2660,14 +2660,14 @@ Compute (quad_res 13).
   specialize (IHl (n + 2) Hn) as H1.
 ...
 
-Theorem euler_res_iff : ∀ p a,
-  a ∈ euler_res p ↔ a < p ∧ a ^ ((p - 1) / 2) mod p = 1.
+Theorem euler_crit_iff : ∀ p a,
+  a ∈ euler_crit p ↔ a < p ∧ a ^ ((p - 1) / 2) mod p = 1.
 Proof.
 intros.
 split. {
   intros Hap.
   destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
-  unfold euler_res in Hap.
+  unfold euler_crit in Hap.
   apply filter_In in Hap.
   destruct Hap as (Ha, Hap).
   rewrite Nat_pow_mod_is_pow_mod in Hap; [ | easy ].
@@ -2676,7 +2676,7 @@ split. {
 } {
   intros (Hzap, Hap).
   destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
-  unfold euler_res.
+  unfold euler_crit.
   apply filter_In.
   rewrite Nat_pow_mod_is_pow_mod; [ | easy ].
   split; [ apply in_seq; flia Hzap | now apply Nat.eqb_eq ].
@@ -2713,14 +2713,14 @@ split. {
 }
 Qed.
 
-Theorem euler_quadratic_residue_iff : ∀ p a, prime p →
-  a ∈ euler_res p ↔ a ∈ quad_res p.
+Theorem euler_criterion_quadratic_residue_iff : ∀ p a, prime p →
+  a ∈ euler_crit p ↔ a ∈ quad_res p.
 Proof.
 intros * Hp.
 destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
 split; intros Hap. 2: {
   apply quad_res_iff in Hap.
-  apply euler_res_iff.
+  apply euler_crit_iff.
   destruct Hap as (q & Hqp & Hqpa).
   rewrite <- Hqpa.
   split; [ now apply Nat.mod_upper_bound | ].
@@ -2734,10 +2734,10 @@ split; intros Hap. 2: {
   }
   now apply fermat_little.
 } {
-  apply euler_res_iff in Hap.
+  apply euler_crit_iff in Hap.
   apply quad_res_iff.
   destruct Hap as (Hap & Happ).
-Compute (let p := 17 in (euler_res p, quad_res p)).
+Compute (let p := 17 in (euler_crit p, quad_res p)).
 ...
   destruct (Nat.eq_dec p 2) as [Hp2| Hp2]. {
     ... (* must be refuted by adding p ≠ 2 as hypothesis *)
