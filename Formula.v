@@ -2440,6 +2440,8 @@ Theorem glop : ∀ n, quad_res n = rev (quad_res n).
 Proof.
 intros n.
 unfold quad_res.
+rewrite <- map_rev.
+...
 induction n; [ easy | ].
 rewrite Nat.sub_succ, Nat.sub_0_r.
 cbn - [ "mod" ].
@@ -2452,7 +2454,6 @@ rewrite (Nat.mod_small 1); [ | flia ].
 cbn - [ "mod" ] in IHn.
 rewrite Nat.sub_0_r in IHn.
 ...
-
 destruct n; [ easy | ].
 rewrite Nat.sub_succ, Nat.sub_0_r.
 destruct n; [ easy | ].
