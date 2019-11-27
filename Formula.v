@@ -2521,7 +2521,19 @@ f_equal. {
   rewrite seq_length.
   rewrite seq_nth; [ | easy ].
   rewrite seq_nth; [ | flia Hn2i ].
-  rewrite sqr_mod_sqr_sub_mod.
+  rewrite sqr_mod_sqr_sub_mod. 2: {
+    transitivity (2 * n2); [ now apply Nat.mul_le_mono_l | ].
+    specialize (Nat.div_mod (n - 1) 2 (Nat.neq_succ_0 _)) as H1.
+    rewrite <- Hn2 in H1.
+    replace ((n - 1) mod 2) with 0 in H1. 2: {
+      specialize (Nat.div_mod n 2 (Nat.neq_succ_0 _)) as H2.
+      rewrite Hn in H2.
+      rewrite H2, Nat.add_sub.
+      now rewrite Nat.mul_comm, Nat.mod_mul.
+    }
+    rewrite Nat.add_0_r in H1.
+    rewrite <- H1; flia Hnz.
+  }
 ...
 
 Theorem glop : ∀ p,
