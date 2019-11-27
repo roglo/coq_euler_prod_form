@@ -2448,19 +2448,24 @@ assert
    a ∈ quad_res p ∧
    x ^ 2 mod p = a ∧ y ^ 2 mod p = a ∧ z ^ 2 mod p = a ∧
    x ≠ y ∧ y ≠ z ∧ z ≠ x). {
+  assert (Hp3 : 3 ≤ p). {
+    destruct p; [ easy | ].
+    destruct p; [ easy | ].
+    destruct p; [ cbn in Hcon; flia Hcon | ].
+    destruct p; [ easy | flia ].
+  }
   specialize (quad_res_in_seq p Hp) as H1.
   remember (quad_res p) as l; clear Heql Hp.
   remember (length l) as len eqn:Hlen; symmetry in Hlen.
-  revert p Hlen Hcon H1.
+  revert p Hp3 Hlen Hcon H1.
   induction len as (len, IHlen) using lt_wf_rec; intros.
   destruct p; [ easy | ].
   destruct p; [ easy | ].
   specialize (IHlen (len - 2)).
   destruct (Nat.eq_dec len 0) as [Hzlen| Hzlen]. {
-...
-  assert (Hzlen : len ≠ 0). {
-    intros H; rewrite H in Hlen.
+    rewrite Hzlen in Hlen.
     apply length_zero_iff_nil in Hlen.
+    destruct p; [ easy | ].
 ...
     unfold quad_res in Hlen.
     now apply map_eq_nil in Hlen.
