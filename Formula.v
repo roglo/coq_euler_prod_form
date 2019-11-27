@@ -2352,13 +2352,13 @@ apply sqr_mod_prime_is_1; [ easy | ].
 now rewrite Nat.pow_mul_r in H1.
 Qed.
 
-Definition eulers_residues p :=
+Definition euler_res p :=
   filter (λ a, Nat_pow_mod a ((p - 1) / 2) p =? 1) (seq 0 p).
 
-Definition quadratic_residues p :=
+Definition quad_res p :=
   map (λ a, Nat_pow_mod a 2 p) (seq 1 (p - 1)).
 
-Compute (let p := 13 in (eulers_residues p, quadratic_residues p)).
+Compute (let p := 13 in (euler_res p, quad_res p)).
 
 Fixpoint merge l1 l2 :=
   let fix merge_aux l2 :=
@@ -2403,11 +2403,41 @@ Fixpoint uniq l :=
       end
   end.
 
-Compute (let p := 13 in (eulers_residues p, uniq (sort (quadratic_residues p)))).
-Compute (let p := 23 in (eulers_residues p, uniq (sort (quadratic_residues p)))).
+Compute (let p := 13 in (euler_res p, uniq (sort (quad_res p)))).
+Compute (let p := 23 in (euler_res p, uniq (sort (quad_res p)))).
+
+Theorem quad_res_in_seq : ∀ p a,
+  prime p → a ∈ quad_res p → a ∈ seq 1 (p - 1).
+Proof.
+intros * Hp Ha.
+destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
+unfold quad_res in Ha.
+apply in_map_iff in Ha.
+destruct Ha as (x & Hxa & Hx).
+rewrite <- Hxa.
+rewrite Nat_pow_mod_is_pow_mod; [ | easy ].
+apply in_seq.
+split. {
+  apply in_seq in Hx.
+  replace (1 + (p - 1)) with p in Hx by flia Hpz.
+  apply Nat.nlt_ge.
+  intros H1.
+  apply Nat.lt_1_r in H1.
+  apply Nat.mod_divide in H1; [ | easy ].
+  rewrite Nat.pow_2_r in H1.
+  specialize (Nat.gauss _ _ _ H1) as H2.
+  assert (H : Nat.gcd p x = 1) by now apply eq_gcd_prime_small_1.
+  specialize (H2 H); clear H.
+  apply Nat.mod_divide in H2; [ | easy ].
+  rewrite Nat.mod_small in H2; [ flia Hx H2 | easy ].
+} {
+  replace (1 + (p - 1)) with p by flia Hpz.
+  now apply Nat.mod_upper_bound.
+}
+Qed.
 
 Theorem glop : ∀ n,
-  n mod 2 = 0 → (n - 1) / 2 ≤ length (quadratic_residues n).
+  n mod 2 = 0 → (n - 1) / 2 ≤ length (quad_res n).
 Proof.
 intros n Hn.
 apply Nat.nlt_ge; intros Hcon.
@@ -2415,11 +2445,11 @@ apply Nat.nlt_ge; intros Hcon.
    ∃ x y z such that x²=a y²=a z²=a ⇒ contradiction *)
 assert
   (H : ∃ a x y z,
-   a ∈ quadratic_residues n ∧
+   a ∈ quad_res n ∧
    x ^ 2 mod n = a ∧ y ^ 2 mod n = a ∧ z ^ 2 mod n = a ∧
    x ≠ y ∧ y ≠ z ∧ z ≠ x). {
 ...
-  remember (length (quadratic_residues n)) as len eqn:Hlen; symmetry in Hlen.
+  remember (length (quad_res n)) as len eqn:Hlen; symmetry in Hlen.
   revert n Hn Hlen Hcon.
   induction len as (len, IHlen) using lt_wf_rec; intros.
   destruct n; [ easy | ].
@@ -2428,7 +2458,7 @@ assert
   assert (Hzlen : len ≠ 0). {
     intros H; rewrite H in Hlen.
     apply length_zero_iff_nil in Hlen.
-    unfold quadratic_residues in Hlen.
+    unfold quad_res in Hlen.
     now apply map_eq_nil in Hlen.
   }
   assert (H : len - 2 < len) by flia Hzlen.
@@ -2438,10 +2468,10 @@ assert
 (* induction on length does not work: quad_res(n+2) has nothing to do
    with quad_res(n) *)
 ...
-  remember (quadratic_residues n) as l eqn:Hl; symmetry in Hl.
+  remember (quad_res n) as l eqn:Hl; symmetry in Hl.
   revert n Hn Hl Hcon.
   induction l as [| a l]; intros. {
-    unfold quadratic_residues in Hl.
+    unfold quad_res in Hl.
     apply map_eq_nil in Hl.
     destruct n; [ easy | now destruct n ].
   }
@@ -2455,14 +2485,14 @@ assert
   specialize (IHl (n + 2) Hn) as H1.
 ...
 
-Theorem eulers_residues_iff : ∀ p a,
-  a ∈ eulers_residues p ↔ a < p ∧ a ^ ((p - 1) / 2) mod p = 1.
+Theorem euler_res_iff : ∀ p a,
+  a ∈ euler_res p ↔ a < p ∧ a ^ ((p - 1) / 2) mod p = 1.
 Proof.
 intros.
 split. {
   intros Hap.
   destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
-  unfold eulers_residues in Hap.
+  unfold euler_res in Hap.
   apply filter_In in Hap.
   destruct Hap as (Ha, Hap).
   rewrite Nat_pow_mod_is_pow_mod in Hap; [ | easy ].
@@ -2471,21 +2501,21 @@ split. {
 } {
   intros (Hzap, Hap).
   destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
-  unfold eulers_residues.
+  unfold euler_res.
   apply filter_In.
   rewrite Nat_pow_mod_is_pow_mod; [ | easy ].
   split; [ apply in_seq; flia Hzap | now apply Nat.eqb_eq ].
 }
 Qed.
 
-Theorem quadratic_residues_iff : ∀ p a,
-  a ∈ quadratic_residues p ↔ ∃ q, 1 ≤ q < p ∧ q ^ 2 mod p = a.
+Theorem quad_res_iff : ∀ p a,
+  a ∈ quad_res p ↔ ∃ q, 1 ≤ q < p ∧ q ^ 2 mod p = a.
 Proof.
 intros.
 split. {
   intros Hap.
   destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
-  unfold quadratic_residues in Hap.
+  unfold quad_res in Hap.
   apply in_map_iff in Hap.
   destruct Hap as (b & Hpa & Hb).
   rewrite Nat_pow_mod_is_pow_mod in Hpa; [ | easy ].
@@ -2495,7 +2525,7 @@ split. {
 } {
   intros (q & Hqp & Hq).
   destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
-  unfold quadratic_residues.
+  unfold quad_res.
   apply in_map_iff.
   exists (q mod p).
   rewrite Nat_pow_mod_is_pow_mod; [ | easy ].
@@ -2509,13 +2539,13 @@ split. {
 Qed.
 
 Theorem euler_quadratic_residue_iff : ∀ p a, prime p →
-  a ∈ eulers_residues p ↔ a ∈ quadratic_residues p.
+  a ∈ euler_res p ↔ a ∈ quad_res p.
 Proof.
 intros * Hp.
 destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
 split; intros Hap. 2: {
-  apply quadratic_residues_iff in Hap.
-  apply eulers_residues_iff.
+  apply quad_res_iff in Hap.
+  apply euler_res_iff.
   destruct Hap as (q & Hqp & Hqpa).
   rewrite <- Hqpa.
   split; [ now apply Nat.mod_upper_bound | ].
@@ -2529,10 +2559,10 @@ split; intros Hap. 2: {
   }
   now apply fermat_little.
 } {
-  apply eulers_residues_iff in Hap.
-  apply quadratic_residues_iff.
+  apply euler_res_iff in Hap.
+  apply quad_res_iff.
   destruct Hap as (Hap & Happ).
-Compute (let p := 17 in (eulers_residues p, quadratic_residues p)).
+Compute (let p := 17 in (euler_res p, quad_res p)).
 ...
   destruct (Nat.eq_dec p 2) as [Hp2| Hp2]. {
     ... (* must be refuted by adding p ≠ 2 as hypothesis *)
