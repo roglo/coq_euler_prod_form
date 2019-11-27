@@ -2534,6 +2534,20 @@ f_equal. {
     rewrite Nat.add_0_r in H1.
     rewrite <- H1; flia Hnz.
   }
+  f_equal; f_equal.
+  rewrite Nat.add_sub_assoc; [ | easy ].
+  f_equal.
+  specialize (Nat.div_mod (n - 1) 2 (Nat.neq_succ_0 _)) as H1.
+  rewrite <- Hn2 in H1.
+  replace ((n - 1) mod 2) with 0 in H1. 2: {
+    specialize (Nat.div_mod n 2 (Nat.neq_succ_0 _)) as H2.
+    rewrite Hn in H2.
+    rewrite H2, Nat.add_sub.
+    now rewrite Nat.mul_comm, Nat.mod_mul.
+  }
+  rewrite Nat.add_0_r in H1.
+  flia H1 Hnz.
+}
 ...
 
 Theorem glop : ∀ p,
