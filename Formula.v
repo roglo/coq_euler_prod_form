@@ -2518,11 +2518,10 @@ destruct (Nat.eq_dec r 1) as [Hn| Hn]. {
     rewrite seq_length.
     rewrite seq_nth; [ | easy ].
     rewrite seq_nth; [ | flia Hn2i ].
-...
     rewrite sqr_mod_sqr_sub_mod. 2: {
-      transitivity (2 * n2); [ now apply Nat.mul_le_mono_l | ].
+      transitivity n2; [ easy | rewrite Hn2 ].
+      apply (Nat.mul_le_mono_pos_l _ _ 2); [ flia | ].
       specialize (Nat.div_mod (n - 1) 2 (Nat.neq_succ_0 _)) as H1.
-      rewrite <- Hn2 in H1.
       replace ((n - 1) mod 2) with 0 in H1. 2: {
         specialize (Nat.div_mod n 2 (Nat.neq_succ_0 _)) as H2.
         rewrite Hn in H2.
@@ -2530,7 +2529,7 @@ destruct (Nat.eq_dec r 1) as [Hn| Hn]. {
         now rewrite Nat.mul_comm, Nat.mod_mul.
       }
       rewrite Nat.add_0_r in H1.
-      rewrite <- H1; flia Hnz.
+      rewrite <- H1; flia.
     }
     f_equal; f_equal.
     rewrite Nat.add_sub_assoc; [ | easy ].
