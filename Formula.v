@@ -2448,9 +2448,17 @@ assert (H : ∀ a, a ≤ n → a ^ 2 mod n = (n - a) ^ 2 mod n). {
   do 2 rewrite Nat.mul_sub_distr_r.
 (**)
   rewrite (Nat.mul_comm a n).
+  rewrite <- Nat.sub_add_distr.
+  rewrite (Nat.add_comm (n * a)).
+  rewrite Nat.sub_add_distr.
   rewrite Nat_sub_sub_assoc. 2: {
     split; [ now apply Nat.mul_le_mono_r | ].
-    rewrite <- Nat.add_sub_swap.
+    transitivity (n * n); [ | flia ].
+    now apply Nat.mul_le_mono_l.
+  }
+  rewrite (Nat.add_comm (n * n)).
+  rewrite <- Nat.sub_add_distr.
+  rewrite <- Nat.mul_add_distr_l.
 ...
   rewrite Nat_sub_sub_distr. 2: {
     split; [ now apply Nat.mul_le_mono_r | ].
