@@ -2406,6 +2406,55 @@ Fixpoint uniq l :=
 Compute (let p := 13 in (eulers_residues p, uniq (sort (quadratic_residues p)))).
 Compute (let p := 23 in (eulers_residues p, uniq (sort (quadratic_residues p)))).
 
+Theorem glop : ∀ n,
+  n mod 2 = 0 → (n - 1) / 2 ≤ length (quadratic_residues n).
+Proof.
+intros n Hn.
+apply Nat.nlt_ge; intros Hcon.
+(* there must be at least one a ∈ quad_res n such that
+   ∃ x y z such that x²=a y²=a z²=a ⇒ contradiction *)
+assert
+  (H : ∃ a x y z,
+   a ∈ quadratic_residues n ∧
+   x ^ 2 mod n = a ∧ y ^ 2 mod n = a ∧ z ^ 2 mod n = a ∧
+   x ≠ y ∧ y ≠ z ∧ z ≠ x). {
+(**)
+  remember (length (quadratic_residues n)) as len eqn:Hlen; symmetry in Hlen.
+  revert n Hn Hlen Hcon.
+  induction len as (len, IHlen) using lt_wf_rec; intros.
+  destruct n; [ easy | ].
+  destruct n; [ easy | ].
+  specialize (IHlen (len - 2)).
+  assert (Hzlen : len ≠ 0). {
+    intros H; rewrite H in Hlen.
+    apply length_zero_iff_nil in Hlen.
+    unfold quadratic_residues in Hlen.
+    now apply map_eq_nil in Hlen.
+  }
+  assert (H : len - 2 < len) by flia Hzlen.
+  replace (S (S n)) with (n + 1 * 2) in Hn by flia.
+  rewrite Nat.mod_add in Hn; [ | easy ].
+  specialize (IHlen H n Hn); clear H.
+(* induction on length does not work: quad_res(n+2) has nothing to do
+   with quad_res(n) *)
+...
+  remember (quadratic_residues n) as l eqn:Hl; symmetry in Hl.
+  revert n Hn Hl Hcon.
+  induction l as [| a l]; intros. {
+    unfold quadratic_residues in Hl.
+    apply map_eq_nil in Hl.
+    destruct n; [ easy | now destruct n ].
+  }
+  cbn - [ "/" ] in Hcon.
+  destruct n; [ easy | ].
+  rewrite Nat.sub_succ, Nat.sub_0_r in Hcon.
+  destruct n; [ easy | ].
+  destruct l as [| b l]; [ now destruct n | ].
+  cbn - [ "/" ] in Hcon.
+  replace (S (S n)) with (n + 2) in Hn by flia.
+  specialize (IHl (n + 2) Hn) as H1.
+...
+
 Theorem eulers_residues_iff : ∀ p a,
   a ∈ eulers_residues p ↔ a < p ∧ a ^ ((p - 1) / 2) mod p = 1.
 Proof.
