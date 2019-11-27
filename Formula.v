@@ -2437,7 +2437,7 @@ split. {
 Qed.
 
 Theorem glop : ∀ p,
-  prime p → (p - 1) / 2 ≤ length (quad_res p).
+  prime p → (p - 1) / 2 ≤ length (uniq (sort (quad_res p))).
 Proof.
 intros p Hp.
 apply Nat.nlt_ge; intros Hcon.
@@ -2454,9 +2454,14 @@ assert
     destruct p; [ cbn in Hcon; flia Hcon | ].
     destruct p; [ easy | flia ].
   }
+  assert (Hq3 : 2 ≤ length (quad_res p)). {
+...
   specialize (quad_res_in_seq p Hp) as H1.
+Compute (quad_res 3).
+...
   remember (quad_res p) as l; clear Heql Hp.
   remember (length l) as len eqn:Hlen; symmetry in Hlen.
+...
   revert p Hp3 Hlen Hcon H1.
   induction len as (len, IHlen) using lt_wf_rec; intros.
   destruct p; [ easy | ].
