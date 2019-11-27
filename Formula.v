@@ -2436,79 +2436,88 @@ split. {
 }
 Qed.
 
-Theorem glop : ∀ n, quad_res n = rev (quad_res n).
+Theorem sqr_mod_sqr_sub_mod : ∀ a n,
+  2 * a ≤ n → a ^ 2 mod n = (n - a) ^ 2 mod n.
 Proof.
-intros n.
-unfold quad_res.
-rewrite <- map_rev.
-assert (H : ∀ a, a ≤ n → a ^ 2 mod n = (n - a) ^ 2 mod n). {
-  intros a Han.
-  do 2 rewrite Nat.pow_2_r.
-  rewrite Nat.mul_sub_distr_l.
-  do 2 rewrite Nat.mul_sub_distr_r.
-(**)
-  rewrite (Nat.mul_comm a n).
-  rewrite <- Nat.sub_add_distr.
-  rewrite (Nat.add_comm (n * a)).
-  rewrite Nat.sub_add_distr.
-  rewrite Nat_sub_sub_assoc. 2: {
-    split; [ now apply Nat.mul_le_mono_r | ].
-    transitivity (n * n); [ | flia ].
-    now apply Nat.mul_le_mono_l.
-  }
-  rewrite (Nat.add_comm (n * n)).
-  rewrite <- Nat.sub_add_distr.
+intros * Han.
+destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
+do 2 rewrite Nat.pow_2_r.
+rewrite Nat.mul_sub_distr_l.
+do 2 rewrite Nat.mul_sub_distr_r.
+rewrite (Nat.mul_comm a n).
+rewrite <- Nat.sub_add_distr.
+rewrite (Nat.add_comm (n * a)).
+rewrite Nat.sub_add_distr.
+rewrite Nat_sub_sub_assoc. 2: {
+  split; [ apply Nat.mul_le_mono_r; flia Han | ].
+  transitivity (n * n); [ | flia ].
+  apply Nat.mul_le_mono_l; flia Han.
+}
+rewrite <- Nat.sub_add_distr.
+rewrite (Nat.add_comm (n * n)).
+rewrite <- Nat.add_sub_assoc. 2: {
   rewrite <- Nat.mul_add_distr_l.
-...
-  rewrite Nat_sub_sub_distr. 2: {
-    split; [ now apply Nat.mul_le_mono_r | ].
-    rewrite <- Nat.mul_sub_distr_r.
-    rewrite Nat.mul_comm.
-    apply Nat.mul_le_mono_r.
-...
-induction n; [ easy | ].
-rewrite Nat.sub_succ, Nat.sub_0_r.
-cbn - [ "mod" ].
-destruct n; [ easy | ].
-rewrite Nat.mod_small; [ | flia ].
-cbn - [ "mod" ].
-rewrite Nat.add_0_r.
-rewrite (Nat.mod_small 1); [ | flia ].
-rewrite (Nat.mod_small 1); [ | flia ].
-cbn - [ "mod" ] in IHn.
-rewrite Nat.sub_0_r in IHn.
-...
-destruct n; [ easy | ].
-rewrite Nat.sub_succ, Nat.sub_0_r.
-destruct n; [ easy | ].
-destruct n; [ easy | ].
-destruct n; [ easy | ].
-destruct n; [ easy | ].
-destruct n; [ easy | ].
-destruct n; [ easy | ].
-destruct n; [ easy | ].
-...
-(*
-intros n.
+  apply Nat.mul_le_mono_l.
+  flia Han.
+}
+rewrite <- Nat.mul_add_distr_l.
+rewrite <- Nat.mul_sub_distr_l.
+rewrite (Nat.mul_comm n).
+now rewrite Nat.mod_add.
+Qed.
+
+Theorem map_fun {A} : ∀ l l' (f : nat → A),
+  length l = length l'
+  → (∀ i, f (nth i l 0) = f (nth i l' 0))
+  → map f l = map f l'.
+Proof.
+intros * Hlen Hf.
+revert l' Hlen Hf.
+induction l as [| a l]; intros; [ now destruct l' | ].
+destruct l' as [| a' l']; [ easy | cbn ].
+specialize (Hf 0) as H1; cbn in H1.
+rewrite H1; f_equal.
+cbn in Hlen; apply Nat.succ_inj in Hlen.
+apply IHl; [ easy | ].
+intros i.
+now specialize (Hf (S i)).
+Qed.
+
+Theorem glop : ∀ n, n mod 2 = 1 → quad_res n = rev (quad_res n).
+Proof.
+intros n Hn.
 unfold quad_res.
 rewrite <- map_rev.
-remember (seq 1 (n - 1)) as l eqn:Hl; symmetry in Hl.
-remember (length l) as len eqn:Hlen; symmetry in Hlen.
-revert n l Hl Hlen.
-induction len as (len, IHlen) using lt_wf_rec; intros.
+replace (n - 1) with ((n - 1) / 2 + (n - 1) / 2). 2: {
+  specialize (Nat.div_mod n 2 (Nat.neq_succ_0 _)) as H1.
+  rewrite Hn in H1.
+  rewrite H1.
+  rewrite Nat.add_sub.
+  rewrite Nat.mul_comm.
+  rewrite Nat.div_mul; [ flia | easy ].
+}
+remember ((n - 1) / 2) as n2 eqn:Hn2.
+rewrite seq_app.
+rewrite map_app.
+rewrite rev_app_distr.
+rewrite map_app.
+f_equal. {
+  apply map_fun. {
 ...
-*)
-intros n.
-unfold quad_res.
-rewrite <- map_rev.
+intros.
+rewrite Nat_pow_mod_is_pow_mod.
+rewrite Nat_pow_mod_is_pow_mod.
+rewrite seq_nth.
+rewrite rev_nth.
+rewrite seq_nth.
+Inspect 2.
+rewrite seq_length.
 ...
-remember (seq 1 (n - 1)) as l eqn:Hl; symmetry in Hl.
-revert n Hl.
-induction l as [| a l]; intros; [ easy | cbn ].
-rewrite Nat.mod_1_l.
-rewrite Nat.mul_1_r.
-rewrite (Nat.mod_small a).
-specialize (IHl (n - 1)).
+  clear.
+  induction n2; [ easy | ].
+  cbn - [ Nat_pow_mod ].
+  rewrite Nat_pow_mod_is_pow_mod.
+Inspect 1.
 ...
 
 Theorem glop : ∀ p,
