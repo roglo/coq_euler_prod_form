@@ -2436,6 +2436,31 @@ split. {
 }
 Qed.
 
+Theorem glop : ∀ n, quad_res n = rev (quad_res n).
+Proof.
+(*
+intros n.
+unfold quad_res.
+rewrite <- map_rev.
+remember (seq 1 (n - 1)) as l eqn:Hl; symmetry in Hl.
+remember (length l) as len eqn:Hlen; symmetry in Hlen.
+revert n l Hl Hlen.
+induction len as (len, IHlen) using lt_wf_rec; intros.
+...
+*)
+intros n.
+unfold quad_res.
+rewrite <- map_rev.
+...
+remember (seq 1 (n - 1)) as l eqn:Hl; symmetry in Hl.
+revert n Hl.
+induction l as [| a l]; intros; [ easy | cbn ].
+rewrite Nat.mod_1_l.
+rewrite Nat.mul_1_r.
+rewrite (Nat.mod_small a).
+specialize (IHl (n - 1)).
+...
+
 Theorem glop : ∀ p,
   prime p → (p - 1) / 2 ≤ length (uniq (sort (quad_res p))).
 Proof.
@@ -2455,9 +2480,9 @@ assert
     destruct p; [ easy | flia ].
   }
   assert (Hq3 : 2 ≤ length (quad_res p)). {
+Compute (quad_res 13).
 ...
   specialize (quad_res_in_seq p Hp) as H1.
-Compute (quad_res 3).
 ...
   remember (quad_res p) as l; clear Heql Hp.
   remember (length l) as len eqn:Hlen; symmetry in Hlen.
