@@ -2502,7 +2502,14 @@ rewrite seq_app.
 rewrite map_app.
 rewrite rev_app_distr.
 rewrite map_app.
-f_equal. {
+assert (H : ∀ n n2,
+  n mod 2 = 1
+  → n ≠ 0
+  → n2 = (n - 1) / 2
+  → map (λ a : nat, Nat_pow_mod a 2 n) (seq 1 n2) =
+     map (λ a : nat, Nat_pow_mod a 2 n) (rev (seq (1 + n2) n2))). {
+  clear.
+  intros * Hn Hnz Hn2.
   apply map_fun. {
     rewrite seq_length.
     rewrite rev_length.
@@ -2548,6 +2555,14 @@ f_equal. {
   rewrite Nat.add_0_r in H1.
   flia H1 Hnz.
 }
+f_equal; [ now apply H | ].
+rewrite <- (rev_involutive (_ _ (seq _ _))).
+rewrite map_rev; f_equal.
+symmetry.
+rewrite <- map_rev.
+now apply H.
+Qed.
+
 ...
 
 Theorem glop : ∀ p,
