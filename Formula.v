@@ -2418,7 +2418,7 @@ assert
    a ∈ quadratic_residues n ∧
    x ^ 2 mod n = a ∧ y ^ 2 mod n = a ∧ z ^ 2 mod n = a ∧
    x ≠ y ∧ y ≠ z ∧ z ≠ x). {
-(**)
+...
   remember (length (quadratic_residues n)) as len eqn:Hlen; symmetry in Hlen.
   revert n Hn Hlen Hcon.
   induction len as (len, IHlen) using lt_wf_rec; intros.
