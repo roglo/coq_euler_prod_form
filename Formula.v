@@ -2441,6 +2441,22 @@ Proof.
 intros n.
 unfold quad_res.
 rewrite <- map_rev.
+assert (H : ∀ a, a ≤ n → a ^ 2 mod n = (n - a) ^ 2 mod n). {
+  intros a Han.
+  do 2 rewrite Nat.pow_2_r.
+  rewrite Nat.mul_sub_distr_l.
+  do 2 rewrite Nat.mul_sub_distr_r.
+(**)
+  rewrite (Nat.mul_comm a n).
+  rewrite Nat_sub_sub_assoc. 2: {
+    split; [ now apply Nat.mul_le_mono_r | ].
+    rewrite <- Nat.add_sub_swap.
+...
+  rewrite Nat_sub_sub_distr. 2: {
+    split; [ now apply Nat.mul_le_mono_r | ].
+    rewrite <- Nat.mul_sub_distr_r.
+    rewrite Nat.mul_comm.
+    apply Nat.mul_le_mono_r.
 ...
 induction n; [ easy | ].
 rewrite Nat.sub_succ, Nat.sub_0_r.
