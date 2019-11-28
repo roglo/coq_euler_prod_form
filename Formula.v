@@ -2724,41 +2724,12 @@ split; intros Hap. 2: {
   destruct Hap as (Hap & Happ).
   specialize (quad_res_all_diff p Hp) as H1.
   unfold quad_res in H1.
-...
-  destruct (Nat.eq_dec p 2) as [Hp2| Hp2]. {
-    ... (* must be refuted by adding p ≠ 2 as hypothesis *)
+  rewrite List_firstn_map in H1.
+  rewrite List_firstn_seq in H1.
+  rewrite Nat.min_l in H1. 2: {
+    rewrite <- Nat.div_1_r.
+    apply Nat.div_le_compat_l; flia.
   }
-  destruct (Nat.eq_dec a 0) as [Hza| Hza]. {
-    subst a.
-    rewrite Nat.pow_0_l in Happ. 2: {
-      destruct p; [ easy | ].
-      rewrite Nat.sub_succ, Nat.sub_0_r.
-      destruct p; [ easy | ].
-      destruct p; [ easy | ].
-      replace (S (S p)) with (p + 1 * 2) by flia.
-      rewrite Nat.div_add; [ flia | easy ].
-    }
-    now rewrite Nat.mod_0_l in Happ.
-  }
-  specialize (Nat.div_mod (a ^ ((p - 1) / 2)) p Hpz) as H1.
-  rewrite Happ in H1.
-  remember (a ^ ((p - 1) / 2) / p) as q1 eqn:Hq1.
-  apply (f_equal (λ x, Nat.pow x 2)) in H1.
-  rewrite <- Nat.pow_mul_r in H1.
-  specialize (odd_prime p Hp Hp2) as H2.
-  specialize (Nat.div_mod (p - 1) 2 (Nat.neq_succ_0 _)) as H3.
-  replace ((p - 1) mod 2) with 0 in H3. 2: {
-    specialize (Nat.div_mod p 2 (Nat.neq_succ_0 _)) as H4.
-    rewrite H2 in H4.
-    rewrite H4, Nat.add_sub.
-    now rewrite Nat.mul_comm, Nat.mod_mul.
-  }
-  rewrite Nat.add_0_r in H3.
-  rewrite Nat.mul_comm, <- H3 in H1.
-  apply (f_equal (λ x, x mod p)) in H1.
-  rewrite fermat_little in H1; [ | easy | flia Hza Hap ].
-  symmetry in H1.
-  move H1 at bottom.
 ...
 
 Theorem exists_nonresidue : ∀ p,
