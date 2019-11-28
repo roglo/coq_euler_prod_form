@@ -867,6 +867,29 @@ destruct b. {
 now apply IHl.
 Qed.
 
+Theorem NoDup_map {A B} : ∀ d l (f : A → B),
+  (∀ i j, f (nth i l d) = f (nth j l d) → i = j)
+  → NoDup (map f l).
+Proof.
+intros * Hinj.
+induction l as [| a l]; [ constructor | cbn ].
+apply NoDup_cons. {
+  intros Hcon.
+  apply in_map_iff in Hcon.
+  destruct Hcon as (b & Hba & Hb).
+  symmetry in Hba.
+  apply (In_nth _ _ d) in Hb.
+  destruct Hb as (n & Hlen & Hnth).
+  specialize (Hinj 0 (S n)) as H1.
+  cbn in H1; rewrite Hnth in H1.
+  now specialize (H1 Hba).
+}
+apply IHl.
+intros i j Hij.
+specialize (Hinj (S i) (S j) Hij) as H1.
+now apply Nat.succ_inj in H1.
+Qed.
+
 Theorem Permutation_fold_mul : ∀ l1 l2 a,
   Permutation l1 l2 → fold_left Nat.mul l1 a = fold_left Nat.mul l2 a.
 Proof.

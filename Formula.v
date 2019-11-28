@@ -2621,25 +2621,6 @@ split. {
 }
 Qed.
 
-Theorem NoDup_map {A B} : ∀ l (f : A → B) d,
-  (∀ i j, f (nth i l d) = f (nth j l d) → i = j)
-  → NoDup (map f l).
-Proof.
-intros * Hinj.
-induction l as [| a l]; [ constructor | cbn ].
-apply NoDup_cons. {
-  intros Hcon.
-  apply in_map_iff in Hcon.
-  destruct Hcon as (b & Hba & Hb).
-  symmetry in Hba.
-  apply (In_nth _ _ d) in Hb.
-  destruct Hb as (n & Hlen & Hnth).
-  specialize (Hinj 0 (S n)) as H1.
-  cbn in H1; rewrite Hnth in H1.
-  now specialize (H1 Hba).
-}
-...
-
 Theorem quad_res_all_diff : ∀ p,
   prime p → NoDup (firstn ((p - 1) / 2) (quad_res p)).
 Proof.
@@ -2659,7 +2640,8 @@ rewrite Nat.sub_diag, firstn_O, app_nil_r.
 rewrite List_firstn_map.
 rewrite List_firstn_seq.
 rewrite Nat.min_id.
-Search (NoDup (map _ _)).
+...
+apply (NoDup_map 0).
 ...
 remember (seq 1 ((p - 1) / 2)) as l eqn:Hl; symmetry in Hl.
 apply FinFun.Injective_map_NoDup; [ | subst l; apply seq_NoDup ].
