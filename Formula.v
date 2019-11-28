@@ -2638,7 +2638,14 @@ rewrite Nat_pow_mod_is_pow_mod in Hij; [ | easy ].
 rewrite seq_length in Hi, Hj.
 rewrite seq_nth in Hij; [ | easy ].
 rewrite seq_nth in Hij; [ | easy ].
-destruct (Nat.lt_trichotomy i j) as [Hlt| [Heq| Hgt]]; [ | easy | ]. {
+assert (H : ∀ i j,
+  i < (p - 1) / 2
+  → j < (p - 1) / 2
+  → (1 + i) ^ 2 mod p = (1 + j) ^ 2 mod p
+  → j ≤ i). {
+  clear i j Hi Hj Hij.
+  intros * Hi Hj Hij.
+  apply Nat.nlt_ge; intros Hlt.
   symmetry in Hij.
   assert (H1ij : 1 + i ≤ 1 + j). {
     apply Nat.add_le_mono_l.
@@ -2683,7 +2690,14 @@ destruct (Nat.lt_trichotomy i j) as [Hlt| [Heq| Hgt]]; [ | easy | ]. {
     destruct k; [ easy | ].
     cbn in Hij; flia Hij.
   }
+}
+destruct (Nat.lt_trichotomy i j) as [Hlt| [Heq| Hgt]]; [ | easy | ]. {
+  now exfalso; apply Nat.nle_gt in Hlt; apply Hlt, H.
 } {
+  now exfalso; apply Nat.nle_gt in Hgt; apply Hgt, H.
+}
+Qed.
+
 ...
 
 Theorem euler_criterion_quadratic_residue_iff : ∀ p a, prime p →
