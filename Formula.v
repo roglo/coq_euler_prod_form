@@ -2652,6 +2652,19 @@ destruct (Nat.lt_trichotomy i j) as [Hlt| [Heq| Hgt]]; [ | easy | ]. {
   apply Nat.mod_divide in Hij; [ | easy ].
   apply prime_divide_mul in Hij; [ | easy ].
   destruct Hij as [Hij| Hij]. {
+    destruct Hij as (k, Hk); cbn in Hk.
+    destruct k. {
+      cbn in Hk.
+      now apply Nat.sub_0_le, Nat.nlt_ge in Hk.
+    }
+    replace j with (i + p + k * p) in Hj by flia Hk Hpz.
+    exfalso; apply Nat.nle_gt in Hj; apply Hj.
+    transitivity (p - 1); [ | flia ].
+    rewrite <- Nat.div_1_r.
+    apply Nat.div_le_compat_l; flia.
+  } {
+    destruct Hij as (k, Hk); cbn in Hk.
+    destruct k; [ easy | ].
 ...
 
 Theorem euler_criterion_quadratic_residue_iff : ∀ p a, prime p →
