@@ -2698,8 +2698,6 @@ destruct (Nat.lt_trichotomy i j) as [Hlt| [Heq| Hgt]]; [ | easy | ]. {
 }
 Qed.
 
-...
-
 Theorem euler_criterion_quadratic_residue_iff : ∀ p a, prime p →
   a ∈ euler_crit p ↔ a ∈ quad_res p.
 Proof.
@@ -2725,6 +2723,7 @@ split; intros Hap. 2: {
   apply quad_res_iff.
   destruct Hap as (Hap & Happ).
 Compute (let p := 17 in (euler_crit p, quad_res p)).
+Inspect 1.
 ...
   destruct (Nat.eq_dec p 2) as [Hp2| Hp2]. {
     ... (* must be refuted by adding p ≠ 2 as hypothesis *)
