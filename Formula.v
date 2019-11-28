@@ -2732,6 +2732,8 @@ split; intros Hap. 2: {
   }
   specialize (proj1 (NoDup_map_iff 0 _ _) H1) as H2.
   cbn - [ "/" ] in H2.
+  rewrite Nat.mod_1_l in H2; [ | ].
+  remember (seq 1 ((p - 1) / 2)) as l eqn:Hl.
 ...
 
 Theorem exists_nonresidue : ∀ p,
