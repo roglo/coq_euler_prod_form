@@ -2621,11 +2621,22 @@ split. {
 }
 Qed.
 
-Theorem NoDup_map {A B} : ∀ l (f : A → B),
-  (∀ i j, i ∈ l → j ∈ l → f i = f j → i = j)
+Theorem NoDup_map {A B} : ∀ l (f : A → B) d,
+  (∀ i j, f (nth i l d) = f (nth j l d) → i = j)
   → NoDup (map f l).
 Proof.
 intros * Hinj.
+induction l as [| a l]; [ constructor | cbn ].
+apply NoDup_cons. {
+  intros Hcon.
+  apply in_map_iff in Hcon.
+  destruct Hcon as (b & Hba & Hb).
+  symmetry in Hba.
+  specialize (Hinj 0) as H1.
+  apply (In_nth _ _ d) in Hb.
+...
+  specialize (Hinj a b (or_introl eq_refl) (or_intror Hb) Hba) as H1.
+  subst b.
 ...
 
 Theorem quad_res_all_diff : ∀ p,
