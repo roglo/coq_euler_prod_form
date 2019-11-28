@@ -2621,6 +2621,12 @@ split. {
 }
 Qed.
 
+Theorem quad_res_all_diff : ∀ p,
+  prime p → NoDup (firstn (p - 1) (quad_res p)).
+Proof.
+intros * Hp.
+...
+
 Theorem euler_criterion_quadratic_residue_iff : ∀ p a, prime p →
   a ∈ euler_crit p ↔ a ∈ quad_res p.
 Proof.
