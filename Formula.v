@@ -2625,6 +2625,7 @@ Theorem quad_res_all_diff : ∀ p,
   prime p → NoDup (firstn ((p - 1) / 2) (quad_res p)).
 Proof.
 intros * Hp.
+destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
 unfold quad_res.
 destruct (Nat.eq_dec p 2) as [Hp2| Hp2]; [ subst p; cbn; constructor | ].
 replace (p - 1) with ((p - 1) / 2 + ((p - 1) / 2)) at 2. 2: {
@@ -2639,6 +2640,9 @@ rewrite Nat.sub_diag, firstn_O, app_nil_r.
 rewrite List_firstn_map.
 rewrite List_firstn_seq.
 rewrite Nat.min_id.
+apply FinFun.Injective_map_NoDup; [ | apply seq_NoDup ].
+intros a b Hab.
+rewrite Nat_pow_mod_is_pow_mod in Hab; [ | easy ].
 ...
 
 Theorem euler_criterion_quadratic_residue_iff : ∀ p a, prime p →
