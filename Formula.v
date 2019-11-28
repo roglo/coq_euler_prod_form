@@ -2722,8 +2722,8 @@ split; intros Hap. 2: {
   apply euler_crit_iff in Hap.
   apply quad_res_iff.
   destruct Hap as (Hap & Happ).
-Compute (let p := 17 in (euler_crit p, quad_res p)).
-Inspect 1.
+  specialize (quad_res_all_diff p Hp) as H1.
+  unfold quad_res in H1.
 ...
   destruct (Nat.eq_dec p 2) as [Hp2| Hp2]. {
     ... (* must be refuted by adding p ≠ 2 as hypothesis *)
