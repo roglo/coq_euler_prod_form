@@ -2621,6 +2621,13 @@ split. {
 }
 Qed.
 
+Theorem NoDup_map {A B} : ∀ l (f : A → B),
+  (∀ i j, i ∈ l → j ∈ l → f i = f j → i = j)
+  → NoDup (map f l).
+Proof.
+intros * Hinj.
+...
+
 Theorem quad_res_all_diff : ∀ p,
   prime p → NoDup (firstn ((p - 1) / 2) (quad_res p)).
 Proof.
