@@ -2730,6 +2730,7 @@ split; intros Hap. 2: {
     rewrite <- Nat.div_1_r.
     apply Nat.div_le_compat_l; flia.
   }
+Search (NoDup (map _ _)).
 ...
 
 Theorem exists_nonresidue : ∀ p,

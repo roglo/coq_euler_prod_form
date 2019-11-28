@@ -7,6 +7,9 @@ Import List List.ListNotations.
 (* "fast" lia, to improve compilation speed *)
 Tactic Notation "flia" hyp_list(Hs) := clear - Hs; lia.
 
+Notation "x '∈' l" := (List.In x l) (at level 70).
+Notation "x '∉' l" := (¬ List.In x l) (at level 70).
+
 Notation "x ≤ y ≤ z" := (x <= y ∧ y <= z)%nat (at level 70, y at next level).
 Notation "x < y ≤ z" := (x < y ∧ y <= z)%nat (at level 70, y at next level).
 Notation "x ≤ y < z" := (x ≤ y ∧ y < z)%nat (at level 70, y at next level).
@@ -867,31 +870,61 @@ destruct b. {
 now apply IHl.
 Qed.
 
-Theorem NoDup_map {A B} : ∀ d l (f : A → B),
-  (∀ i j,
-   i < length l → j < length l → f (nth i l d) = f (nth j l d) → i = j)
-  → NoDup (map f l).
+Theorem NoDup_map_iff {A B} : ∀ d l (f : A → B),
+  NoDup (map f l)
+  ↔ (∀ i j,
+      i < length l → j < length l → f (nth i l d) = f (nth j l d) → i = j).
 Proof.
-intros * Hinj.
-induction l as [| a l]; [ constructor | cbn ].
-apply NoDup_cons. {
-  intros Hcon.
-  apply in_map_iff in Hcon.
-  destruct Hcon as (b & Hba & Hb).
-  symmetry in Hba.
-  apply (In_nth _ _ d) in Hb.
-  destruct Hb as (n & Hlen & Hnth).
-  specialize (Hinj 0 (S n)) as H1.
-  cbn in H1; rewrite Hnth in H1.
-  apply Nat.succ_lt_mono in Hlen.
-  now specialize (H1 (Nat.lt_0_succ _) Hlen Hba).
+intros.
+split. {
+  intros Hnd i j Hi Hj Hij.
+  revert i j Hi Hj Hij.
+  induction l as [| a l]; intros; [ easy | ].
+  cbn in Hnd.
+  apply NoDup_cons_iff in Hnd.
+  destruct Hnd as (Hnin, Hnd).
+  specialize (IHl Hnd).
+  destruct i. {
+    destruct j; [ easy | exfalso ].
+    cbn in Hij, Hj; clear Hi.
+    apply Nat.succ_lt_mono in Hj.
+    rewrite Hij in Hnin; apply Hnin; clear Hnin.
+    now apply in_map, nth_In.
+  }
+  cbn in Hi, Hj.
+  destruct j; [ exfalso | ]. {
+    cbn in Hij, Hj; clear Hj.
+    apply Nat.succ_lt_mono in Hi.
+    rewrite <- Hij in Hnin; apply Hnin; clear Hnin.
+    now apply in_map, nth_In.
+  }
+  apply Nat.succ_lt_mono in Hi.
+  apply Nat.succ_lt_mono in Hj.
+  cbn in Hij.
+  f_equal.
+  now apply IHl.
+} {
+  intros Hinj.
+  induction l as [| a l]; [ constructor | cbn ].
+  apply NoDup_cons. {
+    intros Hcon.
+    apply in_map_iff in Hcon.
+    destruct Hcon as (b & Hba & Hb).
+    symmetry in Hba.
+    apply (In_nth _ _ d) in Hb.
+    destruct Hb as (n & Hlen & Hnth).
+    specialize (Hinj 0 (S n)) as H1.
+    cbn in H1; rewrite Hnth in H1.
+    apply Nat.succ_lt_mono in Hlen.
+    now specialize (H1 (Nat.lt_0_succ _) Hlen Hba).
+  }
+  apply IHl.
+  intros i j Hi Hj Hij.
+  apply Nat.succ_lt_mono in Hi.
+  apply Nat.succ_lt_mono in Hj.
+  specialize (Hinj (S i) (S j) Hi Hj Hij) as H1.
+  now apply Nat.succ_inj in H1.
 }
-apply IHl.
-intros i j Hi Hj Hij.
-apply Nat.succ_lt_mono in Hi.
-apply Nat.succ_lt_mono in Hj.
-specialize (Hinj (S i) (S j) Hi Hj Hij) as H1.
-now apply Nat.succ_inj in H1.
 Qed.
 
 Theorem Permutation_fold_mul : ∀ l1 l2 a,

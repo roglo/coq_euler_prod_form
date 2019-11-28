@@ -5,9 +5,6 @@ Require Import Utf8 Arith SetoidList Permutation.
 Require Import Misc.
 Import List ListNotations.
 
-Notation "x '∈' l" := (List.In x l) (at level 70).
-Notation "x '∉' l" := (¬ List.In x l) (at level 70).
-
 Fixpoint prime_test cnt n d :=
   match cnt with
   | 0 => true
