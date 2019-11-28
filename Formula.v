@@ -2649,11 +2649,9 @@ destruct (Nat.lt_trichotomy i j) as [Hlt| [Heq| Hgt]]; [ | easy | ]. {
   cbn - [ "^" ] in Hij.
   do 2 rewrite Nat.pow_1_r, Nat.pow_0_r in Hij.
   rewrite Nat.mul_1_r, Nat.mul_1_l in Hij.
-  apply Nat.mod_divide in Hij.
-...
-Search (Nat.divide _ (_ * _)).
-Check prime_divide_mul.
-Check Nat.gauss.
+  apply Nat.mod_divide in Hij; [ | easy ].
+  apply prime_divide_mul in Hij; [ | easy ].
+  destruct Hij as [Hij| Hij]. {
 ...
 
 Theorem euler_criterion_quadratic_residue_iff : ∀ p a, prime p →
