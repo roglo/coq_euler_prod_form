@@ -2640,6 +2640,7 @@ rewrite Nat.sub_diag, firstn_O, app_nil_r.
 rewrite List_firstn_map.
 rewrite List_firstn_seq.
 rewrite Nat.min_id.
+Search (NoDup (map _ _)).
 ...
 remember (seq 1 ((p - 1) / 2)) as l eqn:Hl; symmetry in Hl.
 apply FinFun.Injective_map_NoDup; [ | subst l; apply seq_NoDup ].
