@@ -2631,7 +2631,7 @@ rewrite Nat.sub_diag, firstn_O, app_nil_r.
 rewrite List_firstn_map.
 rewrite List_firstn_seq.
 rewrite Nat.min_id.
-apply (NoDup_map 0).
+apply (NoDup_map_iff 0).
 intros i j Hi Hj Hij.
 rewrite Nat_pow_mod_is_pow_mod in Hij; [ | easy ].
 rewrite Nat_pow_mod_is_pow_mod in Hij; [ | easy ].
@@ -2730,7 +2730,8 @@ split; intros Hap. 2: {
     rewrite <- Nat.div_1_r.
     apply Nat.div_le_compat_l; flia.
   }
-Search (NoDup (map _ _)).
+  specialize (proj1 (NoDup_map_iff 0 _ _) H1) as H2.
+  cbn - [ "/" ] in H2.
 ...
 
 Theorem exists_nonresidue : ∀ p,
