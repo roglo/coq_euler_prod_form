@@ -723,6 +723,20 @@ intros i.
 now specialize (Hf (S i)).
 Qed.
 
+Theorem List_firstn_seq : ∀ n start len,
+  firstn n (seq start len) = seq start (min n len).
+Proof.
+intros.
+revert start len.
+induction n; intros; [ easy | cbn ].
+remember (seq start len) as l eqn:Hl; symmetry in Hl.
+destruct l as [| a l]; [ now destruct len | ].
+destruct len; [ easy | cbn in Hl; cbn ].
+injection Hl; clear Hl; intros Hl Ha.
+subst start; f_equal.
+rewrite <- Hl; apply IHn.
+Qed.
+
 Theorem not_equiv_imp_False : ∀ P : Prop, (P → False) ↔ ¬ P.
 Proof. easy. Qed.
 
