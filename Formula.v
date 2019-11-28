@@ -2734,6 +2734,18 @@ split; intros Hap. 2: {
   cbn - [ "/" ] in H2.
   rewrite Nat.mod_1_l in H2; [ | ].
   remember (seq 1 ((p - 1) / 2)) as l eqn:Hl.
+  assert (H3 : ∀ i j,
+    i < length l
+    → j < length l
+    → (nth i l 0 * nth i l 0) mod p =
+       (nth j l 0 * nth j l 0) mod p
+    → i = j). {
+    intros * Hi Hj Hij.
+    specialize (H2 i j Hi Hj).
+    do 2 rewrite Nat.mul_1_r in H2.
+    do 2 rewrite Nat.mul_mod_idemp_r in H2; [ | easy | easy | easy ].
+    now specialize (H2 Hij).
+  }
 ...
 
 Theorem exists_nonresidue : ∀ p,
