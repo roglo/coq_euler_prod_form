@@ -1969,8 +1969,8 @@ rewrite IHa.
 rewrite Nat.add_mod_idemp_l; [ easy | now intros H; rewrite H in Hp ].
 Qed.
 
-(* (a ^ b) mod c for testing, without computing a ^ b but
-   using mod along the way *)
+(* (a ^ b) mod c defined like that so that we can use "Compute"
+   for testing; proved equal to (a ^ b) mod c just below *)
 
 Fixpoint Nat_pow_mod_loop a b c :=
   match b with
@@ -1979,8 +1979,6 @@ Fixpoint Nat_pow_mod_loop a b c :=
   end.
 
 Definition Nat_pow_mod a b c := Nat_pow_mod_loop a b c.
-
-(* but they are the same (if c ≠ 0) *)
 
 Theorem Nat_pow_mod_is_pow_mod : ∀ a b c,
   c ≠ 0 → Nat_pow_mod a b c = (a ^ b) mod c.
