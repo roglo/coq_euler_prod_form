@@ -953,6 +953,27 @@ rewrite <- (Nat.add_0_r (S (S g))) in H1 at 1.
 now apply Nat.add_cancel_l in H1.
 Qed.
 
+Theorem prime_divide_mul : ∀ p, prime p →
+  ∀ a b, Nat.divide p (a * b) → Nat.divide p a ∨ Nat.divide p b.
+Proof.
+intros * Hp * Hab.
+destruct (Nat.eq_dec p 0) as [Hzp| Hzp]; [ now subst p | ].
+destruct (Nat.eq_dec (Nat.gcd p a) 1) as [Hpa| Hpa]. {
+  specialize (Nat.gauss _ _ _ Hab) as H1.
+  right; apply H1, Hpa.
+} {
+  left.
+  apply Nat.mod_divide; [ easy | ].
+  destruct (Nat.eq_dec (a mod p) 0) as [Ha| Ha]; [ easy | exfalso ].
+  apply Hpa; clear Hpa.
+  rewrite <- Nat.gcd_mod; [ | easy ].
+  rewrite Nat.gcd_comm.
+  apply eq_gcd_prime_small_1; [ easy | ].
+  split; [ now apply Nat.neq_0_lt_0 | ].
+  now apply Nat.mod_upper_bound.
+}
+Qed.
+
 Theorem prime_divides_fact_ge : ∀ n m,
   prime n
   → Nat.divide n (fact m)

@@ -2292,38 +2292,29 @@ apply Nat_eq_mod_sub_0 in Hap. 2: {
 }
 apply Nat.mod_divide in Hap; [ | easy ].
 rewrite Nat_sqr_sub_1 in Hap.
-specialize (Nat.gauss _ _ _ Hap) as H1.
-destruct (Nat.eq_dec ((a + 1) mod p) 0) as [Ha1p| Ha1p]. {
+(**)
+apply prime_divide_mul in Hap; [ | easy ].
+destruct Hap as [Hap| Hap]. {
   right.
-  apply Nat.mod_divide in Ha1p; [ | easy ].
-  destruct Ha1p as (d, Hd).
-  destruct d; [ flia Hd | cbn in Hd ].
-  apply Nat.add_sub_eq_r in Hd.
-  rewrite <- Hd, Nat.add_comm.
-  rewrite <- Nat.add_sub_assoc; [ | flia H2p ].
-  rewrite Nat.add_comm.
+  destruct Hap as (c, Hc).
+  apply Nat.add_sub_eq_r in Hc.
+  rewrite <- Hc.
+  destruct c; [ flia Hc Haz | cbn ].
+  rewrite Nat.add_sub_swap; [ | flia Hpz ].
   rewrite Nat.mod_add; [ | easy ].
   apply Nat.mod_small; flia Hpz.
 } {
   left.
-  assert (H : Nat.gcd p (a + 1) = 1). {
-    rewrite <- Nat.gcd_mod; [ | easy ].
-    rewrite Nat.gcd_comm.
-    apply eq_gcd_prime_small_1; [ easy | ].
-    split; [ flia Ha1p | ].
-    now apply Nat.mod_upper_bound.
-  }
-  specialize (H1 H); clear H.
-  destruct H1 as (d, Hd).
-  apply Nat.add_sub_eq_nz in Hd. 2: {
+  destruct Hap as (c, Hc).
+  apply Nat.add_sub_eq_nz in Hc. 2: {
     apply Nat.neq_mul_0.
     split; [ | easy ].
-    intros H; rewrite H, Nat.mul_0_l in Hd.
-    flia Haz Ha1 Hd.
+    intros H; subst c; cbn in Hc.
+    flia Hc Haz Ha1.
   }
-  rewrite <- Hd.
+  rewrite <- Hc.
   rewrite Nat.mod_add; [ | easy ].
-  now apply Nat.mod_1_l.
+  apply Nat.mod_1_l; flia H2p.
 }
 Qed.
 
@@ -2425,9 +2416,9 @@ split. {
   apply Nat.lt_1_r in H1.
   apply Nat.mod_divide in H1; [ | easy ].
   rewrite Nat.pow_2_r in H1.
-  specialize (Nat.gauss _ _ _ H1) as H2.
-  assert (H : Nat.gcd p x = 1) by now apply eq_gcd_prime_small_1.
-  specialize (H2 H); clear H.
+(**)
+  apply prime_divide_mul in H1; [ | easy ].
+  assert (H2 : Nat.divide p x) by tauto; clear H1.
   apply Nat.mod_divide in H2; [ | easy ].
   rewrite Nat.mod_small in H2; [ flia Hx H2 | easy ].
 } {
@@ -2641,20 +2632,28 @@ rewrite List_firstn_map.
 rewrite List_firstn_seq.
 rewrite Nat.min_id.
 apply (NoDup_map 0).
-intros i j Hij.
+intros i j Hi Hj Hij.
 rewrite Nat_pow_mod_is_pow_mod in Hij; [ | easy ].
 rewrite Nat_pow_mod_is_pow_mod in Hij; [ | easy ].
-destruct (lt_dec i ((p - 1) / 2)) as [Hi| Hi]. 2: {
-  apply Nat.nlt_ge in Hi.
-  rewrite nth_overflow in Hij; [ | now rewrite seq_length ].
-  destruct (lt_dec j ((p - 1) / 2)) as [Hj| Hj]. 2: {
-    apply Nat.nlt_ge in Hj.
-    rewrite nth_overflow in Hij; [ | now rewrite seq_length ].
-Check List_firstn_seq.
-Check NoDup_map.
-
+rewrite seq_length in Hi, Hj.
+rewrite seq_nth in Hij; [ | easy ].
+rewrite seq_nth in Hij; [ | easy ].
+destruct (Nat.lt_trichotomy i j) as [Hlt| [Heq| Hgt]]; [ | easy | ]. {
+  symmetry in Hij.
+  assert (H1ij : 1 + i ≤ 1 + j). {
+    apply Nat.add_le_mono_l.
+    now apply Nat.lt_le_incl.
+  }
+  apply Nat_eq_mod_sub_0 in Hij; [ | now apply Nat.pow_le_mono_l ].
+  rewrite Nat_pow_sub_pow in Hij; [ | easy | easy ].
+  cbn - [ "^" ] in Hij.
+  do 2 rewrite Nat.pow_1_r, Nat.pow_0_r in Hij.
+  rewrite Nat.mul_1_r, Nat.mul_1_l in Hij.
+  apply Nat.mod_divide in Hij.
 ...
-rewrite seq_nth in Hij.
+Search (Nat.divide _ (_ * _)).
+Check prime_divide_mul.
+Check Nat.gauss.
 ...
 
 Theorem euler_criterion_quadratic_residue_iff : ∀ p a, prime p →
