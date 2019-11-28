@@ -2479,79 +2479,24 @@ destruct (Nat.eq_dec r 1) as [Hn| Hn]. {
   destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
   unfold quad_res.
   rewrite <- map_rev.
-  replace (n - 1) with ((n - 1) / 2 + (n - 1) / 2). 2: {
-    specialize (Nat.div_mod n 2 (Nat.neq_succ_0 _)) as H1.
-    rewrite Hn in H1.
-    rewrite H1.
-    rewrite Nat.add_sub.
-    rewrite Nat.mul_comm.
-    rewrite Nat.div_mul; [ flia | easy ].
+  apply List_map_fun; [ now rewrite rev_length | ].
+  intros i.
+  rewrite Nat_pow_mod_is_pow_mod; [ | easy ].
+  rewrite Nat_pow_mod_is_pow_mod; [ | easy ].
+  destruct (le_dec (n - 1) i) as [Hni| Hni]. {
+    rewrite nth_overflow; [ | now rewrite seq_length ].
+    rewrite nth_overflow; [ | now rewrite rev_length, seq_length ].
+    easy.
   }
-  remember ((n - 1) / 2) as n2 eqn:Hn2.
-  rewrite seq_app.
-  rewrite map_app.
-  rewrite rev_app_distr.
-  rewrite map_app.
-  assert (H : ∀ n n2,
-             n mod 2 = 1
-             → n ≠ 0
-             → n2 = (n - 1) / 2
-             → map (λ a : nat, Nat_pow_mod a 2 n) (seq 1 n2) =
-               map (λ a : nat, Nat_pow_mod a 2 n) (rev (seq (1 + n2) n2))). {
-    clear.
-    intros * Hn Hnz Hn2.
-    apply List_map_fun. {
-      rewrite seq_length.
-      rewrite rev_length.
-      now rewrite seq_length.
-    }
-    intros i.
-    rewrite Nat_pow_mod_is_pow_mod; [ | easy ].
-    rewrite Nat_pow_mod_is_pow_mod; [ | easy ].
-    destruct (le_dec n2 i) as [Hn2i| Hn2i]. {
-      rewrite nth_overflow; [ | now rewrite seq_length ].
-      rewrite nth_overflow; [ | now rewrite rev_length, seq_length ].
-      easy.
-    }
-    apply Nat.nle_gt in Hn2i.
-    rewrite rev_nth; [ | now rewrite seq_length ].
-    rewrite seq_length.
-    rewrite seq_nth; [ | easy ].
-    rewrite seq_nth; [ | flia Hn2i ].
-    rewrite sqr_mod_sqr_sub_mod. 2: {
-      transitivity n2; [ easy | rewrite Hn2 ].
-      apply (Nat.mul_le_mono_pos_l _ _ 2); [ flia | ].
-      specialize (Nat.div_mod (n - 1) 2 (Nat.neq_succ_0 _)) as H1.
-      replace ((n - 1) mod 2) with 0 in H1. 2: {
-        specialize (Nat.div_mod n 2 (Nat.neq_succ_0 _)) as H2.
-        rewrite Hn in H2.
-        rewrite H2, Nat.add_sub.
-        now rewrite Nat.mul_comm, Nat.mod_mul.
-      }
-      rewrite Nat.add_0_r in H1.
-      rewrite <- H1; flia.
-    }
-    f_equal; f_equal.
-    rewrite Nat.add_sub_assoc; [ | easy ].
-    f_equal.
-    specialize (Nat.div_mod (n - 1) 2 (Nat.neq_succ_0 _)) as H1.
-    rewrite <- Hn2 in H1.
-    replace ((n - 1) mod 2) with 0 in H1. 2: {
-      specialize (Nat.div_mod n 2 (Nat.neq_succ_0 _)) as H2.
-      rewrite Hn in H2.
-      rewrite H2, Nat.add_sub.
-      now rewrite Nat.mul_comm, Nat.mod_mul.
-    }
-    rewrite Nat.add_0_r in H1.
-    flia H1 Hnz.
-  }
-  f_equal; [ now apply H | ].
-  rewrite <- (rev_involutive (_ _ (seq _ _))).
-  rewrite map_rev; f_equal.
-  symmetry.
-  rewrite <- map_rev.
-  now apply H.
+  apply Nat.nle_gt in Hni.
+  rewrite rev_nth; [ | now rewrite seq_length ].
+  rewrite seq_length.
+  rewrite seq_nth; [ | easy ].
+  rewrite seq_nth; [ | flia Hni ].
+  rewrite sqr_mod_sqr_sub_mod; [ | flia Hni ].
+  f_equal; f_equal; flia Hni.
 } {
+...
   destruct (Nat.eq_dec r 0) as [Hzr| Hzr]. 2: {
     destruct r; [ easy | ].
     destruct r; [ easy | ].
