@@ -2495,11 +2495,15 @@ rewrite sqr_mod_sqr_sub_mod; [ | flia Hni ].
 f_equal; f_equal; flia Hni.
 Qed.
 
-...
-
-Theorem glop : ∀ n, length (quad_res n) = n - 1.
+Theorem quad_res_length : ∀ n, length (quad_res n) = n - 1.
 Proof.
-Inspect 1.
+intros.
+unfold quad_res.
+rewrite map_length.
+apply seq_length.
+Qed.
+
+(*
 ...
 
 Theorem glop : ∀ p,
@@ -2562,6 +2566,7 @@ Compute (quad_res 13).
   replace (S (S n)) with (n + 2) in Hn by flia.
   specialize (IHl (n + 2) Hn) as H1.
 ...
+*)
 
 Theorem euler_crit_iff : ∀ p a,
   a ∈ euler_crit p ↔ a < p ∧ a ^ ((p - 1) / 2) mod p = 1.
