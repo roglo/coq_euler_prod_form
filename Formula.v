@@ -2664,13 +2664,26 @@ destruct (Nat.lt_trichotomy i j) as [Hlt| [Heq| Hgt]]; [ | easy | ]. {
     apply Nat.div_le_compat_l; flia.
   } {
     destruct Hij as (k, Hk).
+    assert (Hij : i + j + 2 < p). {
+      apply (le_trans _ ((p - 1) / 2 + j + 2)); [ flia Hi | ].
+      apply (le_trans _ ((p - 1) / 2 + (p - 1) / 2 + 1)); [ flia Hj | ].
+      replace (_ / _ + _ / _) with (2 * ((p - 1) / 2)) by flia.
+      specialize (Nat.div_mod (p - 1) 2 (Nat.neq_succ_0 _)) as H1.
+      replace ((p - 1) mod 2) with 0 in H1. 2: {
+        specialize (odd_prime p Hp Hp2) as H2.
+        specialize (Nat.div_mod p 2 (Nat.neq_succ_0 _)) as H3.
+        rewrite H2 in H3.
+        rewrite H3, Nat.add_sub.
+        now rewrite Nat.mul_comm, Nat.mod_mul.
+      }
+      rewrite Nat.add_0_r in H1.
+      rewrite <- H1, Nat.sub_add; [ easy | flia Hpz ].
+    }
+    replace (i + j + 2) with (k * p) in Hij by flia Hk.
     destruct k; [ easy | ].
-...
-    replace j with (p + k * p - S (S i)) in Hj by flia Hk Hpz.
-    exfalso; apply Nat.nle_gt in Hj; apply Hj.
-    transitivity (p - 1); [ | flia ].
-    rewrite <- Nat.div_1_r.
-    apply Nat.div_le_compat_l; flia.
+    cbn in Hij; flia Hij.
+  }
+} {
 ...
 
 Theorem euler_criterion_quadratic_residue_iff : ∀ p a, prime p →
