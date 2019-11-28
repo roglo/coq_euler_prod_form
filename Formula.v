@@ -2644,6 +2644,17 @@ apply (NoDup_map 0).
 intros i j Hij.
 rewrite Nat_pow_mod_is_pow_mod in Hij; [ | easy ].
 rewrite Nat_pow_mod_is_pow_mod in Hij; [ | easy ].
+destruct (lt_dec i ((p - 1) / 2)) as [Hi| Hi]. 2: {
+  apply Nat.nlt_ge in Hi.
+  rewrite nth_overflow in Hij; [ | now rewrite seq_length ].
+  destruct (lt_dec j ((p - 1) / 2)) as [Hj| Hj]. 2: {
+    apply Nat.nlt_ge in Hj.
+    rewrite nth_overflow in Hij; [ | now rewrite seq_length ].
+Check List_firstn_seq.
+Check NoDup_map.
+
+...
+rewrite seq_nth in Hij.
 ...
 
 Theorem euler_criterion_quadratic_residue_iff : ∀ p a, prime p →

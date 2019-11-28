@@ -868,7 +868,8 @@ now apply IHl.
 Qed.
 
 Theorem NoDup_map {A B} : ∀ d l (f : A → B),
-  (∀ i j, f (nth i l d) = f (nth j l d) → i = j)
+  (∀ i j,
+   i < length l → j < length l → f (nth i l d) = f (nth j l d) → i = j)
   → NoDup (map f l).
 Proof.
 intros * Hinj.
@@ -882,11 +883,14 @@ apply NoDup_cons. {
   destruct Hb as (n & Hlen & Hnth).
   specialize (Hinj 0 (S n)) as H1.
   cbn in H1; rewrite Hnth in H1.
-  now specialize (H1 Hba).
+  apply Nat.succ_lt_mono in Hlen.
+  now specialize (H1 (Nat.lt_0_succ _) Hlen Hba).
 }
 apply IHl.
-intros i j Hij.
-specialize (Hinj (S i) (S j) Hij) as H1.
+intros i j Hi Hj Hij.
+apply Nat.succ_lt_mono in Hi.
+apply Nat.succ_lt_mono in Hj.
+specialize (Hinj (S i) (S j) Hi Hj Hij) as H1.
 now apply Nat.succ_inj in H1.
 Qed.
 
