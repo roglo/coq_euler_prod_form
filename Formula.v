@@ -2636,6 +2636,7 @@ replace (p - 1) with ((p - 1) / 2 + ((p - 1) / 2)) at 2. 2: {
 rewrite seq_app, map_app, firstn_app.
 rewrite map_length, seq_length.
 rewrite Nat.sub_diag, firstn_O, app_nil_r.
+Search firstn.
 ...
 
 Theorem euler_criterion_quadratic_residue_iff : ∀ p a, prime p →

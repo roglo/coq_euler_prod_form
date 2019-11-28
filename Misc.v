@@ -788,6 +788,16 @@ cbn; rewrite IHl.
 now rewrite Nat.mul_shuffle0.
 Qed.
 
+Theorem List_firstn_map {A B} : ∀ n l (f : A → B),
+  firstn n (map f l) = map f (firstn n l).
+Proof.
+intros.
+revert n.
+induction l as [| a l]; intros; [ now cbn; do 2 rewrite firstn_nil | ].
+destruct n; [ easy | cbn ].
+now rewrite IHl.
+Qed.
+
 Theorem NoDup_app_app_swap {A} : ∀ l1 l2 l3 : list A,
   NoDup (l1 ++ l2 ++ l3) → NoDup (l1 ++ l3 ++ l2).
 Proof.
