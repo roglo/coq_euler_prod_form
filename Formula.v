@@ -2475,53 +2475,24 @@ Proof.
 intros.
 remember (n mod 2) as r eqn:Hr; symmetry in Hr.
 destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
-destruct (Nat.eq_dec r 1) as [Hn| Hn]. {
-  subst r.
-  unfold quad_res.
-  rewrite <- map_rev.
-  apply List_map_fun; [ now rewrite rev_length | ].
-  intros i.
-  rewrite Nat_pow_mod_is_pow_mod; [ | easy ].
-  rewrite Nat_pow_mod_is_pow_mod; [ | easy ].
-  destruct (le_dec (n - 1) i) as [Hni| Hni]. {
-    rewrite nth_overflow; [ | now rewrite seq_length ].
-    rewrite nth_overflow; [ | now rewrite rev_length, seq_length ].
-    easy.
-  }
-  apply Nat.nle_gt in Hni.
-  rewrite rev_nth; [ | now rewrite seq_length ].
-  rewrite seq_length.
-  rewrite seq_nth; [ | easy ].
-  rewrite seq_nth; [ | flia Hni ].
-  rewrite sqr_mod_sqr_sub_mod; [ | flia Hni ].
-  f_equal; f_equal; flia Hni.
-} {
-  destruct (Nat.eq_dec r 0) as [Hzr| Hzr]. 2: {
-    destruct r; [ easy | ].
-    destruct r; [ easy | ].
-    specialize (Nat.mod_upper_bound n 2 (Nat.neq_succ_0 _)) as H1.
-    flia Hr H1.
-  }
-  rewrite Hzr in Hr; clear Hn Hzr; rename Hr into Hn.
-  unfold quad_res.
-  rewrite <- map_rev.
-  apply List_map_fun; [ now rewrite rev_length | ].
-  intros i.
-  rewrite Nat_pow_mod_is_pow_mod; [ | easy ].
-  rewrite Nat_pow_mod_is_pow_mod; [ | easy ].
-  destruct (le_dec (n - 1) i) as [Hni| Hni]. {
-    rewrite nth_overflow; [ | now rewrite seq_length ].
-    rewrite nth_overflow; [ | now rewrite rev_length, seq_length ].
-    easy.
-  }
-  apply Nat.nle_gt in Hni.
-  rewrite rev_nth; [ | now rewrite seq_length ].
-  rewrite seq_length.
-  rewrite seq_nth; [ | easy ].
-  rewrite seq_nth; [ | flia Hni ].
-  rewrite sqr_mod_sqr_sub_mod; [ | flia Hni ].
-  f_equal; f_equal; flia Hni.
+unfold quad_res.
+rewrite <- map_rev.
+apply List_map_fun; [ now rewrite rev_length | ].
+intros i.
+rewrite Nat_pow_mod_is_pow_mod; [ | easy ].
+rewrite Nat_pow_mod_is_pow_mod; [ | easy ].
+destruct (le_dec (n - 1) i) as [Hni| Hni]. {
+  rewrite nth_overflow; [ | now rewrite seq_length ].
+  rewrite nth_overflow; [ | now rewrite rev_length, seq_length ].
+  easy.
 }
+apply Nat.nle_gt in Hni.
+rewrite rev_nth; [ | now rewrite seq_length ].
+rewrite seq_length.
+rewrite seq_nth; [ | easy ].
+rewrite seq_nth; [ | flia Hni ].
+rewrite sqr_mod_sqr_sub_mod; [ | flia Hni ].
+f_equal; f_equal; flia Hni.
 Qed.
 
 ...
