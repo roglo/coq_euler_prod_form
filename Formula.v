@@ -2622,9 +2622,20 @@ split. {
 Qed.
 
 Theorem quad_res_all_diff : ∀ p,
-  prime p → NoDup (firstn (p - 1) (quad_res p)).
+  prime p → NoDup (firstn ((p - 1) / 2) (quad_res p)).
 Proof.
 intros * Hp.
+unfold quad_res.
+destruct (Nat.eq_dec p 2) as [Hp2| Hp2]; [ subst p; cbn; constructor | ].
+replace (p - 1) with ((p - 1) / 2 + ((p - 1) / 2)) at 2. 2: {
+  specialize (Nat.div_mod p 2 (Nat.neq_succ_0 _)) as H1.
+  rewrite odd_prime in H1; [ | easy | easy ].
+  rewrite H1, Nat.add_sub.
+  rewrite Nat.mul_comm, Nat.div_mul; [ flia | easy ].
+}
+rewrite seq_app, map_app, firstn_app.
+rewrite map_length, seq_length.
+rewrite Nat.sub_diag, firstn_O, app_nil_r.
 ...
 
 Theorem euler_criterion_quadratic_residue_iff : ∀ p a, prime p →
