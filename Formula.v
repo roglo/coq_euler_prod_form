@@ -2640,8 +2640,11 @@ rewrite Nat.sub_diag, firstn_O, app_nil_r.
 rewrite List_firstn_map.
 rewrite List_firstn_seq.
 rewrite Nat.min_id.
-apply FinFun.Injective_map_NoDup; [ | apply seq_NoDup ].
+...
+remember (seq 1 ((p - 1) / 2)) as l eqn:Hl; symmetry in Hl.
+apply FinFun.Injective_map_NoDup; [ | subst l; apply seq_NoDup ].
 intros a b Hab.
+rewrite Nat_pow_mod_is_pow_mod in Hab; [ | easy ].
 rewrite Nat_pow_mod_is_pow_mod in Hab; [ | easy ].
 ...
 
