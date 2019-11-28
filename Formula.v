@@ -2632,11 +2632,12 @@ apply NoDup_cons. {
   apply in_map_iff in Hcon.
   destruct Hcon as (b & Hba & Hb).
   symmetry in Hba.
-  specialize (Hinj 0) as H1.
   apply (In_nth _ _ d) in Hb.
-...
-  specialize (Hinj a b (or_introl eq_refl) (or_intror Hb) Hba) as H1.
-  subst b.
+  destruct Hb as (n & Hlen & Hnth).
+  specialize (Hinj 0 (S n)) as H1.
+  cbn in H1; rewrite Hnth in H1.
+  now specialize (H1 Hba).
+}
 ...
 
 Theorem quad_res_all_diff : ∀ p,
