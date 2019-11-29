@@ -2351,6 +2351,7 @@ Definition quad_res p :=
 
 Compute (let p := 13 in (euler_crit p, quad_res p)).
 
+(*
 Fixpoint merge l1 l2 :=
   let fix merge_aux l2 :=
   match l1, l2 with
@@ -2396,6 +2397,7 @@ Fixpoint uniq l :=
 
 Compute (let p := 13 in (euler_crit p, uniq (sort (quad_res p)))).
 Compute (let p := 23 in (euler_crit p, uniq (sort (quad_res p)))).
+*)
 
 Theorem quad_res_in_seq : ∀ p, prime p →
   ∀ a, a ∈ quad_res p → a ∈ seq 1 (p - 1).
@@ -2734,8 +2736,7 @@ split; intros Hap. 2: {
   assert (H2 : ∀ i j,
     i < length l
     → j < length l
-    → (nth i l 0 * nth i l 0) mod p =
-       (nth j l 0 * nth j l 0) mod p
+    → nth i l 0 ^ 2 mod p = nth j l 0 ^ 2 mod p
     → i = j). {
     intros * Hi Hj Hij.
     specialize (proj1 (NoDup_map_iff 0 _ _) H1) as H2.
@@ -2744,6 +2745,7 @@ split; intros Hap. 2: {
     specialize (H2 i j Hi Hj).
     do 2 rewrite Nat.mul_1_r in H2.
     do 2 rewrite Nat.mul_mod_idemp_r in H2; [ | easy | easy | easy ].
+    do 2 rewrite <- Nat.pow_2_r in H2.
     now specialize (H2 Hij).
   }
 ...
