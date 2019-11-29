@@ -2724,21 +2724,22 @@ split; intros Hap. 2: {
   apply euler_crit_iff in Hap.
   apply quad_res_iff.
   destruct Hap as (Hap & Happ).
-  specialize (quad_res_all_diff p Hp) as H1.
-  unfold quad_res in H1.
-  rewrite List_firstn_map in H1.
-  rewrite List_firstn_seq in H1.
-  rewrite Nat.min_l in H1. 2: {
-    rewrite <- Nat.div_1_r.
-    apply Nat.div_le_compat_l; flia.
-  }
   remember (seq 1 ((p - 1) / 2)) as l eqn:Hl.
-  assert (H2 : ∀ i j,
+  assert (H1 : ∀ i j,
     i < length l
     → j < length l
     → nth i l 0 ^ 2 mod p = nth j l 0 ^ 2 mod p
     → i = j). {
     intros * Hi Hj Hij.
+    specialize (quad_res_all_diff p Hp) as H1.
+    unfold quad_res in H1.
+    rewrite List_firstn_map in H1.
+    rewrite List_firstn_seq in H1.
+    rewrite Nat.min_l in H1. 2: {
+      rewrite <- Nat.div_1_r.
+      apply Nat.div_le_compat_l; flia.
+    }
+    rewrite <- Hl in H1.
     specialize (proj1 (NoDup_map_iff 0 _ _) H1) as H2.
     cbn - [ "/" ] in H2.
     rewrite Nat.mod_1_l in H2; [ | now apply prime_ge_2 ].
