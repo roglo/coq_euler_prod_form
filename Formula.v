@@ -2655,12 +2655,6 @@ Theorem totient_multiplicative : ∀ m n,
   Nat.gcd m n = 1 → φ (m * n) = φ m * φ n.
 Proof.
 intros * Hmn.
-revert n Hmn.
-induction m; intros; [ easy | ].
-cbn - [ Nat.gcd ].
-rewrite Nat.gcd_1_r.
-destruct (Nat.eq_dec 1 1) as [H| H]; [ clear H | flia H ].
-cbn.
 ...
 
 Fixpoint prim_root_cycle_loop n g gr it :=
