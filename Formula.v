@@ -2635,12 +2635,27 @@ destruct (Nat.lt_trichotomy i j) as [Hlt| [Heq| Hgt]]; [ | easy | ]. {
 }
 Qed.
 
+Fixpoint φ_loop n d it :=
+  match it with
+  | 0 => 0
+  | S it' =>
+      if Nat.gcd n d =? 1 then 1 + φ_loop n (d + 1) it'
+      else φ_loop n (d + 1) it'
+  end.
+
+Definition φ n := φ_loop n 1 n.
+
+Compute (φ 239).
+
+...
+
 Fixpoint prim_root_cycle_loop n g gr it :=
   match it with
   | 0 => []
   | S it' =>
-      if ((g * gr) mod n) =? g then [gr]
-      else gr :: prim_root_cycle_loop n g ((g * gr) mod n) it'
+      let gr' := (g * gr) mod n in
+      if gr' =? g then [gr]
+      else gr :: prim_root_cycle_loop n g gr' it'
   end.
 
 Definition prim_root_cycle n g := prim_root_cycle_loop n g g (n - 1).
@@ -2649,7 +2664,8 @@ Definition is_prim_root n g := length (prim_root_cycle n g) =? n - 1.
 
 Definition prim_roots n := filter (is_prim_root n) (seq 1 (n - 1)).
 
-Compute (prim_roots 37).
+Print prim_root_cycle_loop.
+Compute (prim_roots 101).
 Compute (is_prim_root 31 11).
 Compute (prim_root_cycle 31 23).
 
