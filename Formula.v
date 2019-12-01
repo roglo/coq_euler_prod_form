@@ -2635,13 +2635,13 @@ destruct (Nat.lt_trichotomy i j) as [Hlt| [Heq| Hgt]]; [ | easy | ]. {
 }
 Qed.
 
-((* Euler's totient function *)
+(* Euler's totient function *)
 
 Fixpoint φ_loop n d it :=
   match it with
   | 0 => 0
   | S it' =>
-      if Nat.gcd n d =? 1 then 1 + φ_loop n (d + 1) it'
+      if Nat.eq_dec (Nat.gcd n d) 1 then 1 + φ_loop n (d + 1) it'
       else φ_loop n (d + 1) it'
   end.
 
@@ -2649,6 +2649,18 @@ Definition φ n := φ_loop n 1 n.
 
 Compute (φ 239).
 
+(* totient is multiplicative *)
+
+Theorem totient_multiplicative : ∀ m n,
+  Nat.gcd m n = 1 → φ (m * n) = φ m * φ n.
+Proof.
+intros * Hmn.
+revert n Hmn.
+induction m; intros; [ easy | ].
+cbn - [ Nat.gcd ].
+rewrite Nat.gcd_1_r.
+destruct (Nat.eq_dec 1 1) as [H| H]; [ clear H | flia H ].
+cbn.
 ...
 
 Fixpoint prim_root_cycle_loop n g gr it :=
