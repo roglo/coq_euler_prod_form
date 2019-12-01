@@ -2635,6 +2635,8 @@ destruct (Nat.lt_trichotomy i j) as [Hlt| [Heq| Hgt]]; [ | easy | ]. {
 }
 Qed.
 
+((* Euler's totient function *)
+
 Fixpoint φ_loop n d it :=
   match it with
   | 0 => 0
