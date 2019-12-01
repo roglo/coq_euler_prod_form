@@ -2637,17 +2637,8 @@ Qed.
 
 (* Euler's totient function *)
 
-Fixpoint φ_loop n d it :=
-  match it with
-  | 0 => 0
-  | S it' =>
-      if Nat.eq_dec (Nat.gcd n d) 1 then 1 + φ_loop n (d + 1) it'
-      else φ_loop n (d + 1) it'
-  end.
-
-Definition φ n := φ_loop n 1 n.
-
-Compute (φ 239).
+Definition coprimes n := filter (λ d, Nat.gcd n d =? 1) (seq 1 (n - 1)).
+Definition φ n := length (coprimes n).
 
 (* totient is multiplicative *)
 
@@ -2655,6 +2646,7 @@ Theorem totient_multiplicative : ∀ m n,
   Nat.gcd m n = 1 → φ (m * n) = φ m * φ n.
 Proof.
 intros * Hmn.
+unfold φ.
 ...
 
 Fixpoint prim_root_cycle_loop n g gr it :=
