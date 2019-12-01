@@ -2496,71 +2496,6 @@ rewrite map_length.
 apply seq_length.
 Qed.
 
-(*
-...
-
-Theorem glop : ∀ p,
-  prime p → (p - 1) / 2 ≤ length (uniq (sort (quad_res p))).
-Proof.
-intros p Hp.
-apply Nat.nlt_ge; intros Hcon.
-(* there must be at least one a ∈ quad_res p such that
-   ∃ x y z such that x²=a y²=a z²=a ⇒ contradiction *)
-assert
-  (H : ∃ a x y z,
-   a ∈ quad_res p ∧
-   x ^ 2 mod p = a ∧ y ^ 2 mod p = a ∧ z ^ 2 mod p = a ∧
-   x ≠ y ∧ y ≠ z ∧ z ≠ x). {
-  assert (Hp3 : 3 ≤ p). {
-    destruct p; [ easy | ].
-    destruct p; [ easy | ].
-    destruct p; [ cbn in Hcon; flia Hcon | ].
-    destruct p; [ easy | flia ].
-  }
-  assert (Hq3 : 2 ≤ length (quad_res p)). {
-Compute (quad_res 13).
-...
-  specialize (quad_res_in_seq p Hp) as H1.
-...
-  remember (quad_res p) as l; clear Heql Hp.
-  remember (length l) as len eqn:Hlen; symmetry in Hlen.
-...
-  revert p Hp3 Hlen Hcon H1.
-  induction len as (len, IHlen) using lt_wf_rec; intros.
-  destruct p; [ easy | ].
-  destruct p; [ easy | ].
-  specialize (IHlen (len - 2)).
-  destruct (Nat.eq_dec len 0) as [Hzlen| Hzlen]. {
-    rewrite Hzlen in Hlen.
-    apply length_zero_iff_nil in Hlen.
-    destruct p; [ easy | ].
-...
-    unfold quad_res in Hlen.
-    now apply map_eq_nil in Hlen.
-  }
-  assert (H : len - 2 < len) by flia Hzlen.
-  replace (S (S n)) with (n + 1 * 2) in Hn by flia.
-  rewrite Nat.mod_add in Hn; [ | easy ].
-  specialize (IHlen H n Hn); clear H.
-...
-  remember (quad_res n) as l eqn:Hl; symmetry in Hl.
-  revert n Hn Hl Hcon.
-  induction l as [| a l]; intros. {
-    unfold quad_res in Hl.
-    apply map_eq_nil in Hl.
-    destruct n; [ easy | now destruct n ].
-  }
-  cbn - [ "/" ] in Hcon.
-  destruct n; [ easy | ].
-  rewrite Nat.sub_succ, Nat.sub_0_r in Hcon.
-  destruct n; [ easy | ].
-  destruct l as [| b l]; [ now destruct n | ].
-  cbn - [ "/" ] in Hcon.
-  replace (S (S n)) with (n + 2) in Hn by flia.
-  specialize (IHl (n + 2) Hn) as H1.
-...
-*)
-
 Theorem euler_crit_iff : ∀ p a,
   a ∈ euler_crit p ↔ a < p ∧ a ^ ((p - 1) / 2) mod p = 1.
 Proof.
@@ -2699,6 +2634,26 @@ destruct (Nat.lt_trichotomy i j) as [Hlt| [Heq| Hgt]]; [ | easy | ]. {
   now exfalso; apply Nat.nle_gt in Hgt; apply Hgt, H.
 }
 Qed.
+
+Fixpoint prim_root_cycle_loop n g gr it :=
+  match it with
+  | 0 => []
+  | S it' =>
+      gr :: prim_root_cycle_loop n g ((g * gr) mod n) it'
+  end.
+
+Definition prim_root_cycle n g := prim_root_cycle_loop n g 1 n.
+
+Compute (prim_root_cycle 2 18).
+Compute (prim_root_cycle 13 4).
+
+...
+
+Definition is_prim_root n g := length (prim_root_cycle n g) = n - 1.
+
+Definition prim_root n := filter (is_prim_root n) (seq 1 (n - 1)).
+
+...
 
 Theorem euler_criterion_quadratic_residue_iff : ∀ p a, prime p →
   a ∈ euler_crit p ↔ a ∈ quad_res p.
