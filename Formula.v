@@ -2647,6 +2647,7 @@ Theorem totient_multiplicative : ∀ m n,
 Proof.
 intros * Hmn.
 unfold φ.
+rewrite <- prod_length.
 ...
 
 Fixpoint prim_root_cycle_loop n g gr it :=
