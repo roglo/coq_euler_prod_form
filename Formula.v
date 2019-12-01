@@ -2639,19 +2639,19 @@ Fixpoint prim_root_cycle_loop n g gr it :=
   match it with
   | 0 => []
   | S it' =>
-      gr :: prim_root_cycle_loop n g ((g * gr) mod n) it'
+      if ((g * gr) mod n) =? g then [gr]
+      else gr :: prim_root_cycle_loop n g ((g * gr) mod n) it'
   end.
 
-Definition prim_root_cycle n g := prim_root_cycle_loop n g 1 n.
+Definition prim_root_cycle n g := prim_root_cycle_loop n g g (n - 1).
 
-Compute (prim_root_cycle 2 18).
-Compute (prim_root_cycle 13 4).
+Definition is_prim_root n g := length (prim_root_cycle n g) =? n - 1.
 
-...
+Definition prim_roots n := filter (is_prim_root n) (seq 1 (n - 1)).
 
-Definition is_prim_root n g := length (prim_root_cycle n g) = n - 1.
-
-Definition prim_root n := filter (is_prim_root n) (seq 1 (n - 1)).
+Compute (prim_roots 37).
+Compute (is_prim_root 31 11).
+Compute (prim_root_cycle 31 23).
 
 ...
 
