@@ -2640,12 +2640,27 @@ Qed.
 Definition coprimes n := filter (λ d, Nat.gcd n d =? 1) (seq 1 (n - 1)).
 Definition φ n := length (coprimes n).
 
+Theorem in_coprimes_iff : ∀ n a,
+  a ∈ seq 1 (n - 1) ∧ Nat.gcd n a = 1 ↔ a ∈ coprimes n.
+Proof.
+intros.
+split; intros Ha. {
+  apply filter_In.
+  split; [ easy | ].
+  now apply Nat.eqb_eq.
+} {
+  apply filter_In in Ha.
+  split; [ easy | ].
+  now apply Nat.eqb_eq.
+}
+Qed.
+
 (* totient is multiplicative *)
 
 Theorem totient_multiplicative : ∀ m n,
-  Nat.gcd m n = 1 → φ (m * n) = φ m * φ n.
+  2 ≤ m → 2 ≤ n → Nat.gcd m n = 1 → φ (m * n) = φ m * φ n.
 Proof.
-intros * Hmn.
+intros * H2m H2n Hmn.
 unfold φ.
 rewrite <- prod_length.
 remember (list_prod _ _ ) as l eqn:Hl.
@@ -2663,6 +2678,26 @@ assert (Hll : ∀ a, a ∈ coprimes (m * n) ↔ a ∈ l'). {
     destruct Ha as (Ha, Ha1).
     apply Nat.eqb_eq in Ha1.
     apply in_seq in Ha.
+    exists (1, a); cbn; rewrite Nat.add_0_r.
+    split; [ easy | ].
+    apply in_prod. {
+      apply in_coprimes_iff.
+      split; [ | apply Nat.gcd_1_r ].
+      apply in_seq.
+      split; [ easy | flia H2m ].
+    }
+    apply in_coprimes_iff.
+    split. {
+      apply in_seq.
+      split; [ easy | ].
+      destruct m; [ easy | ].
+      destruct n; [ easy | ].
+      destruct m; [ flia H2m | ].
+      destruct n; [ flia H2n | ].
+      cbn in Ha.
+      rewrite Nat.sub_succ, Nat.sub_0_r.
+remember (m * S (S n)) as p.
+(* ah bin non *)
 ...
 
 Fixpoint prim_root_cycle_loop n g gr it :=
