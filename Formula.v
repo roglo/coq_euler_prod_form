@@ -2648,6 +2648,21 @@ Proof.
 intros * Hmn.
 unfold φ.
 rewrite <- prod_length.
+remember (list_prod _ _ ) as l eqn:Hl.
+remember (map (λ xy, fst xy * snd xy) l) as l' eqn:Hl'.
+transitivity (length l'). 2: {
+  subst l l'.
+  now rewrite map_length.
+}
+assert (Hll : ∀ a, a ∈ coprimes (m * n) ↔ a ∈ l'). {
+  intros .
+  split; intros Ha. {
+    subst l l'.
+    apply in_map_iff.
+    apply filter_In in Ha.
+    destruct Ha as (Ha, Ha1).
+    apply Nat.eqb_eq in Ha1.
+    apply in_seq in Ha.
 ...
 
 Fixpoint prim_root_cycle_loop n g gr it :=
