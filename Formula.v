@@ -2659,7 +2659,9 @@ Qed.
 
 Definition prod_coprimes_of_coprimes_mul m n a := (a mod m, a mod n).
 
-Definition coprimes_mul_of_prod_coprimes (m n : nat) '(x, y) := 42.
+Definition coprimes_mul_of_prod_coprimes (m n : nat) '((x, y) : nat * nat) :=
+  42.
+
 ...
 
 Theorem prod_coprimes_of_coprimes_mul_prod : ∀ m n a (p : a ∈ coprimes (m * n)),
