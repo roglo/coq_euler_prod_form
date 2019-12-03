@@ -2663,6 +2663,82 @@ Proof.
 intros * H2m H2n Hmn.
 unfold φ.
 rewrite <- prod_length.
+Search (_ mod (_ * _)).
+Print Nat.Bezout.
+...
+m=3
+n=7
+cop m = [1; 2]
+cop n = [1; 2; 3; 4; 5; 6]
+cop (m*n) =
+  [1; 2; 4; 5; 8; 10; 11; 13; 16; 17; 19; 20]
+lp (cop m) (cop n) =
+  [(1, 1); (1, 2); (1, 3); (1, 4); (1, 5); (1, 6);
+   (2, 1); (2, 2); (2, 3); (2, 4); (2, 5); (2, 6)]
+...
+si (x, y) ∈ lp (cop m) (cop n)
+...
+  [1; 2; *3;
+   4; 5; *6;
+   *7; 8; *9;
+   10; 11; *12;
+   13; *14; *15;
+   16; 17; *18;
+   19; 20; *21]
+...
+  x=1 → 1e colonne
+  x=2 → 2e colonne
+  et 3e colonne annulée
+...
+  [1; 2; *3; 4; 5; *6; *7;
+   8; *9; 10; 11; *12; 13; *14;
+   *15; 16; 17; *18; 19; 20; *21]
+...
+  y=1 → 1e colonne
+  y=2 → 2e colonne
+  ...
+  y=6 → 6e colonne
+  et 7e colonne annulée
+...
+À a ∈ cop (m*n), j'associe (a mod m, a mod n)
+À (x,y) ∈ lp (cop m) (cop n), j'associe ...
+  le nombre a tel que
+     a mod m = x  (qui ne peut jamais être 0)
+     a mod n = y  (qui ne peut jamais être 0)
+
+C'est là que les chinois interviennent, du reste.
+
+f : a ↦ (a mod m, a mod n)
+g : (x, y) ↦ ?
+
+Bezout m n (gcd m n) → ∃ u v tels que mu = 1 + nv
+a = (myu + nxv) mod (m * n)
+
+a mod m = (myu+nxv) mod mn mod m = (myu+nxv) mod m = nxv mod m
+  = x(nv) mod m = x(mu-1) mod m = x(mu+m-1) mod m = x(m-1) mod m
+
+  bin ça donne pas x ! bon, pas loin, d'accord, c'est x(m-1)mod m
+  mais c'est pas x
+
+Bezout m n (gcd m n) → ∃ u v tels que mu = 1 + nv
+Si myu ≥ nxv, on prend
+  a = (myu - nxv) mod (m * n)
+  a mod m
+    = (myu-nxv) mod mn mod m
+    = ((myu-nxv) mod m + mk) mod m, avec k=((a/m)mod n) cf Nat.mod_mul_r
+    = (myu-nxv) mod m mod m
+    = (myu-nxv) mod m
+    = (myu+uxm-nxv) mod m
+    = x(um-nv) mod m = x mod m = x
+Si myu ≤ nxv, on prend
+  a = (nxv - myu) mod (m * n)
+  a mod m
+    = (nxv-myu) mod mn mod n
+    = ((nxv-myu) mod m + mk) mod m, avec k=... cf Nat.mod_mul_r
+    = ((nxv-myu) mod m mod m
+    = ((nxv-myu) mod m
+    = ((nxv+km-myu) mod m, faut que je trouve mon k pour positiver
+...
 remember (list_prod _ _ ) as l eqn:Hl.
 remember (map (λ xy, fst xy * snd xy) l) as l' eqn:Hl'.
 transitivity (length l'). 2: {
@@ -2686,8 +2762,10 @@ assert (Hll : ∀ a, a ∈ coprimes (m * n) ↔ a ∈ l'). {
       apply in_seq.
       split; [ easy | flia H2m ].
     }
+...
     apply in_coprimes_iff.
     split. {
+...
       apply in_seq.
       split; [ easy | ].
       destruct m; [ easy | ].
@@ -2696,7 +2774,8 @@ assert (Hll : ∀ a, a ∈ coprimes (m * n) ↔ a ∈ l'). {
       destruct n; [ flia H2n | ].
       cbn in Ha.
       rewrite Nat.sub_succ, Nat.sub_0_r.
-remember (m * S (S n)) as p.
+      remember (S (S (n + m * S (S n)))) as p.
+      cbn.
 (* ah bin non *)
 ...
 
