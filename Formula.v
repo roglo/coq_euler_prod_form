@@ -2657,48 +2657,31 @@ Qed.
 
 (* totient is multiplicative *)
 
+Definition prod_coprimes_of_coprimes_mul m n a := (a mod m, a mod n).
+
+Definition coprimes_mul_of_prod_coprimes (m n : nat) '(x, y) := 42.
+...
+
+Theorem prod_coprimes_of_coprimes_mul_prod : ∀ m n a (p : a ∈ coprimes (m * n)),
+  prod_coprimes_of_coprimes_mul m n a ∈ list_prod (coprimes m) (coprimes n).
+Proof.
+intros.
+Search ((_, _) ∈ _).
+
+...
+
 Theorem totient_multiplicative : ∀ m n,
   2 ≤ m → 2 ≤ n → Nat.gcd m n = 1 → φ (m * n) = φ m * φ n.
 Proof.
 intros * H2m H2n Hmn.
 unfold φ.
 rewrite <- prod_length.
+Proof.
+...
+Inspect 1.
+Definition coprimes_mul_of_prod_coprimes m n :=
 Search (_ mod (_ * _)).
 Print Nat.Bezout.
-...
-m=3
-n=7
-cop m = [1; 2]
-cop n = [1; 2; 3; 4; 5; 6]
-cop (m*n) =
-  [1; 2; 4; 5; 8; 10; 11; 13; 16; 17; 19; 20]
-lp (cop m) (cop n) =
-  [(1, 1); (1, 2); (1, 3); (1, 4); (1, 5); (1, 6);
-   (2, 1); (2, 2); (2, 3); (2, 4); (2, 5); (2, 6)]
-...
-si (x, y) ∈ lp (cop m) (cop n)
-...
-  [1; 2; *3;
-   4; 5; *6;
-   *7; 8; *9;
-   10; 11; *12;
-   13; *14; *15;
-   16; 17; *18;
-   19; 20; *21]
-...
-  x=1 → 1e colonne
-  x=2 → 2e colonne
-  et 3e colonne annulée
-...
-  [1; 2; *3; 4; 5; *6; *7;
-   8; *9; 10; 11; *12; 13; *14;
-   *15; 16; 17; *18; 19; 20; *21]
-...
-  y=1 → 1e colonne
-  y=2 → 2e colonne
-  ...
-  y=6 → 6e colonne
-  et 7e colonne annulée
 ...
 À a ∈ cop (m*n), j'associe (a mod m, a mod n)
 À (x,y) ∈ lp (cop m) (cop n), j'associe ...
