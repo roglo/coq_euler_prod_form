@@ -2689,7 +2689,7 @@ Fixpoint gcd_bezout_loop n (a b : nat) : (nat * (bool * (nat * nat))) :=
       end
   end.
 
-Definition gcd_and_bezout a b := gcd_bezout_loop (a + b) a b.
+Definition gcd_and_bezout a b := gcd_bezout_loop (a + b + 1) a b.
 
 Compute (gcd_and_bezout 6 21).
 
@@ -2703,6 +2703,15 @@ cbn.
 destruct b; [ easy | ].
 now rewrite Hgb.
 Qed.
+
+Theorem gcd_bezout_loop_more_iter : ∀ n k a b,
+  a + b + 1 ≤ n
+  → gcd_bezout_loop n a b = gcd_bezout_loop (n + k) a b.
+Proof.
+intros * Hab.
+revert k a b Hab.
+induction n; intros; [ flia Hab | ].
+...
 
 Theorem glop : ∀ a b g neg u v,
   gcd_and_bezout a b = (g, (neg, (u, v)))
