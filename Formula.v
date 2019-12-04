@@ -2691,6 +2691,20 @@ Fixpoint gcd_bezout_loop n (a b : nat) : (nat * (bool * (nat * nat))) :=
 
 Definition gcd_bezout a b := gcd_bezout_loop a a b.
 
+Theorem gcd_bezout_loop_prop : ∀ n a b g neg u v,
+  a ≤ n
+  → b ≠ 0
+  → gcd_bezout_loop n b (a mod b) = (g, (neg, (u, v)))
+  → gcd_bezout_loop (S n) a b = (g, (negb neg, (v, u + a / b * v))).
+Proof.
+intros * Han Hb Hgb.
+cbn.
+destruct b; [ easy | ].
+now rewrite Hgb.
+Qed.
+
+...
+
 Theorem glop : ∀ a b g neg u v,
   gcd_bezout a b = (g, (neg, (u, v)))
   → a * u + Nat.b2n neg * g = b * v + Nat.b2n (negb neg) * g.
@@ -2721,7 +2735,24 @@ destruct gb as (g', (neg', (u', v'))).
 remember Nat.div as f.
 injection Hbez; clear Hbez; intros; subst g' neg u v; subst f.
 rename neg' into neg; rename u' into u; rename v' into v.
-apply IHn.
+destruct a. {
+  cbn in Hgb; cbn.
+  rewrite Nat.sub_diag in Hgb.
+  rewrite Nat.add_0_r.
+  remember (gcd_bezout_loop n (S b) 0) as gb eqn:Hgb'; symmetry in Hgb'.
+  destruct gb as (g', (neg', (u', v'))).
+  injection Hgb; clear Hgb; intros; subst g' neg' u' v'.
+  destruct n. {
+    cbn in Hgb'.
+    injection Hgb'; clear Hgb'; intros; subst g neg u v.
+    now cbn; rewrite Nat.mul_0_r.
+  }
+  cbn in Hgb'.
+  injection Hgb'; clear Hgb'; intros; subst g neg u v.
+  now cbn; rewrite Nat.mul_1_r.
+}
+apply pouet in Hgb; [ | | easy ].
+apply IHn; [ flia Han | ].
 ...
 rewrite Bool.negb_involutive.
 symmetry.
