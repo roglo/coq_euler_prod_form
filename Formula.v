@@ -2682,17 +2682,15 @@ Fixpoint gcd_bezout_loop n (a b : nat) : (nat * (bool * (nat * nat))) :=
       match b with
       | 0 => (a, (false, (1, 0)))
       | S b1 =>
-          let (g, nuv) := gcd_bezout_loop n' b (a mod S b1) in
-          let (u_is_neg, uv) := nuv in
-          let (u, v) := uv in
-          (g, (negb u_is_neg, (v, u + (a / S b1) * v)))
+          let '(g, (u_is_neg, (u, v))) := gcd_bezout_loop n' b (a mod b) in
+          (g, (negb u_is_neg, (v, u + (a / b) * v)))
       end
   end.
 
 Definition gcd_bezout a b := gcd_bezout_loop a a b.
 
 Compute (let (a, b) := (45, 22) in gcd_bezout a b).
-Compute (let (a, b) := (45, 30) in let '(g, (neg, (u, v))) := gcd_bezout a b in (neg, Nat.b2n neg * g + a * u, Nat.b2n (negb neg) * g + b * v)).
+Compute (let (a, b) := (45, 17) in let '(g, (neg, (u, v))) := gcd_bezout a b in (neg, Nat.b2n neg * g + a * u, Nat.b2n (negb neg) * g + b * v)).
 
 ...
 
