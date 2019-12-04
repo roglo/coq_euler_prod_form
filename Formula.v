@@ -2691,6 +2691,8 @@ Fixpoint gcd_bezout_loop n (a b : nat) : (nat * (bool * (nat * nat))) :=
 
 Definition gcd_bezout a b := gcd_bezout_loop (a + b) a b.
 
+Compute (gcd_bezout 6 21).
+
 Theorem gcd_bezout_loop_prop : ∀ n a b g neg u v,
   b ≠ 0
   → gcd_bezout_loop n b (a mod b) = (g, (neg, (u, v)))
@@ -2732,12 +2734,37 @@ remember (gcd_bezout_loop n b (a mod b)) as gb eqn:Hgb; symmetry in Hgb.
 destruct gb as (g', (neg', (u', v'))).
 injection Hbez; clear Hbez; intros; subst g neg u v.
 rename g' into g; rename neg' into neg; rename u' into u; rename v' into v.
+(* pas sûr de ma définition. À moins que ce soit ce théorème qui n'aille pas,
+   genre que la condition a+b≤S n n'irait pas. *)
+...
 destruct (lt_dec a b) as [Hab| Hab]. {
   rewrite Nat.div_small; [ | easy ].
+...
   rewrite Nat.mul_0_l, Nat.add_0_r.
   rewrite Nat.mod_small in Hgb; [ | easy ].
-  apply IHn.
-(* le 2e peut-être ok, mais le 1er non *)
+  symmetry.
+  rewrite Bool.negb_involutive.
+  destruct (Nat.eq_dec (a + b) (S n)) as [Habn| Habn]. {
+    clear Han.
+    destruct n. {
+      apply Nat.eq_add_1 in Habn.
+      destruct Habn; destruct H; subst a b; [ easy | ].
+      cbn in Hgb.
+      now injection Hgb; intros; subst g neg u v.
+    }
+    cbn in Hgb.
+    destruct (Nat.eq_dec a 0) as [Haz| Haz]. {
+      subst a.
+      injection Hgb; intros; subst g neg u v; cbn.
+      now rewrite Nat.mul_1_r.
+    }
+    replace a with (S (a - 1)) in Hgb at 1 by flia Haz.
+    remember (gcd_bezout_loop n a (b mod a)) as gb eqn:Hgb1; symmetry in Hgb1.
+    destruct gb as (g', (neg', (u', v'))).
+    injection Hgb; clear Hgb; intros; subst g neg u v.
+    rename g' into g; rename neg' into neg; rename u' into u; rename v' into v.
+...
+  apply IHn; [ | easy ].
 ...
 assert (H : b + a mod b ≤ n). {
   (* si a < b chuis mort *)
