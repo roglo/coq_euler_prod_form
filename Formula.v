@@ -2732,6 +2732,13 @@ remember (gcd_bezout_loop n b (a mod b)) as gb eqn:Hgb; symmetry in Hgb.
 destruct gb as (g', (neg', (u', v'))).
 injection Hbez; clear Hbez; intros; subst g neg u v.
 rename g' into g; rename neg' into neg; rename u' into u; rename v' into v.
+destruct (lt_dec a b) as [Hab| Hab]. {
+  rewrite Nat.div_small; [ | easy ].
+  rewrite Nat.mul_0_l, Nat.add_0_r.
+  rewrite Nat.mod_small in Hgb; [ | easy ].
+  apply IHn.
+(* le 2e peut-être ok, mais le 1er non *)
+...
 assert (H : b + a mod b ≤ n). {
   (* si a < b chuis mort *)
 ...
