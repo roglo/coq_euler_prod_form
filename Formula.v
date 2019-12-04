@@ -2662,6 +2662,30 @@ Definition prod_coprimes_of_coprimes_mul m n a := (a mod m, a mod n).
 Definition coprimes_mul_of_prod_coprimes (m n : nat) '((x, y) : nat * nat) :=
   42.
 
+Search Nat.Bezout.
+Print Nat.Bezout.
+
+Definition Nat_bezout m n : { u  & { v & u * m = v * n + Nat.gcd m n } }.
+Admitted.
+
+Check Nat.bezout_1_gcd.
+
+...
+
+Print Nat.Bezout.
+
+Check Nat.Bezout.
+
+Theorem Nat_Bezout n m : Nat.Bezout n m (Nat.gcd n m).
+Proof.
+intros.
+specialize (Nat_bezout n m) as (u & v & Huv).
+now exists u, v; rewrite Nat.add_comm.
+Qed.
+
+Check Nat_Bezout.
+Print Nat.Bezout.
+
 ...
 
 Theorem prod_coprimes_of_coprimes_mul_prod : ∀ m n a (p : a ∈ coprimes (m * n)),
