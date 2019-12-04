@@ -2735,7 +2735,7 @@ destruct gb as (g', (neg', (u', v'))).
 injection Hbez; clear Hbez; intros; subst g neg u v.
 rename g' into g; rename neg' into neg; rename u' into u; rename v' into v.
 (* pas sûr de ma définition. À moins que ce soit ce théorème qui n'aille pas,
-   genre que la condition a+b≤S n n'irait pas. *)
+   genre que la condition a+b≤S(n) n'irait pas. *)
 ...
 destruct (lt_dec a b) as [Hab| Hab]. {
   rewrite Nat.div_small; [ | easy ].
