@@ -2673,7 +2673,9 @@ Search Nat.Bezout.
 
 (* gcd_bezout a b returns (g, (neg, u, v)) where
    - g is gcd a b
-   - if neg = true then au = g + bv else bv = g + au *)
+   - if neg = true then bv = au + g else au = bv + g
+   in other words
+      a * u + g * neg = b v + g * ¬neg *)
 
 Fixpoint gcd_bezout_loop n (a b : nat) : (nat * (bool * (nat * nat))) :=
   match n with
@@ -2688,6 +2690,8 @@ Fixpoint gcd_bezout_loop n (a b : nat) : (nat * (bool * (nat * nat))) :=
   end.
 
 Definition gcd_bezout a b := gcd_bezout_loop a a b.
+
+Compute (Nat.b2n false).
 
 Compute (let (a, b) := (45, 22) in gcd_bezout a b).
 Compute (let (a, b) := (45, 17) in let '(g, (neg, (u, v))) := gcd_bezout a b in (neg, Nat.b2n neg * g + a * u, Nat.b2n (negb neg) * g + b * v)).
