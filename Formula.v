@@ -2689,9 +2689,9 @@ Fixpoint gcd_bezout_loop n (a b : nat) : (nat * (bool * (nat * nat))) :=
       end
   end.
 
-Definition gcd_bezout a b := gcd_bezout_loop (a + b) a b.
+Definition gcd_and_bezout a b := gcd_bezout_loop (a + b) a b.
 
-Compute (gcd_bezout 6 21).
+Compute (gcd_and_bezout 6 21).
 
 Theorem gcd_bezout_loop_prop : ∀ n a b g neg u v,
   b ≠ 0
@@ -2705,11 +2705,11 @@ now rewrite Hgb.
 Qed.
 
 Theorem glop : ∀ a b g neg u v,
-  gcd_bezout a b = (g, (neg, (u, v)))
+  gcd_and_bezout a b = (g, (neg, (u, v)))
   → a * u + Nat.b2n neg * g = b * v + Nat.b2n (negb neg) * g.
 Proof.
 intros * Hbez.
-unfold gcd_bezout in Hbez.
+unfold gcd_and_bezout in Hbez.
 Theorem glop : ∀ n a b g neg u v,
   a + b ≤ n
   → gcd_bezout_loop n a b = (g, (neg, (u, v)))
