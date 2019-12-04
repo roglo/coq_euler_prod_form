@@ -2691,7 +2691,42 @@ Fixpoint gcd_bezout_loop n (a b : nat) : (nat * (bool * (nat * nat))) :=
 
 Definition gcd_bezout a b := gcd_bezout_loop a a b.
 
-Compute (Nat.b2n false).
+Theorem glop : ∀ a b g neg u v,
+  gcd_bezout a b = (g, (neg, (u, v)))
+  → a * u + Nat.b2n neg * g = b * v + Nat.b2n (negb neg) * g.
+Proof.
+intros * Hbez.
+unfold gcd_bezout in Hbez.
+Theorem glop : ∀ n a b g neg u v,
+  a ≤ n
+  → gcd_bezout_loop n a b = (g, (neg, (u, v)))
+  → a * u + Nat.b2n neg * g = b * v + Nat.b2n (negb neg) * g.
+Proof.
+intros * Han Hbez.
+revert a b g neg u v Han Hbez.
+induction n; intros. {
+  apply Nat.le_0_r in Han; subst a.
+  cbn in Hbez.
+  injection Hbez; clear Hbez; intros; subst g neg u v; cbn.
+  now rewrite Nat.mul_0_r.
+}
+cbn in Hbez.
+destruct b. {
+  injection Hbez; clear Hbez; intros; subst g neg u v.
+  now cbn; rewrite Nat.mul_1_r.
+}
+remember (gcd_bezout_loop n (S b) (a mod S b)) as gb eqn:Hgb.
+symmetry in Hgb.
+destruct gb as (g', (neg', (u', v'))).
+remember Nat.div as f.
+injection Hbez; clear Hbez; intros; subst g' neg u v; subst f.
+rename neg' into neg; rename u' into u; rename v' into v.
+apply IHn.
+...
+rewrite Bool.negb_involutive.
+symmetry.
+apply IHn.
+...
 
 Compute (let (a, b) := (45, 22) in gcd_bezout a b).
 Compute (let (a, b) := (45, 17) in let '(g, (neg, (u, v))) := gcd_bezout a b in (neg, Nat.b2n neg * g + a * u, Nat.b2n (negb neg) * g + b * v)).
