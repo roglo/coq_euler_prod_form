@@ -2681,7 +2681,7 @@ Fixpoint gcd_bezout_loop n (a b : nat) : (nat * (bool * (nat * nat))) :=
   | S n' =>
       match b with
       | 0 => (a, (false, (1, 0)))
-      | S b1 =>
+      | S _ =>
           let '(g, (u_is_neg, (u, v))) := gcd_bezout_loop n' b (a mod b) in
           (g, (negb u_is_neg, (v, u + (a / b) * v)))
       end
