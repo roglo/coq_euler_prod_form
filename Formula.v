@@ -2698,11 +2698,62 @@ Compute (let (a, b) := (86, 70) in let '(g, (u, v)) := gcd_and_bezout a b in (g,
 Compute (let (a, b) := (70, 86) in let '(g, (u, v)) := gcd_and_bezout a b in (g, u, v, a * u, b * v + g)).
 *)
 
+Lemma gcd_bezout_loop_enough_iter_lt : ∀ m n a b,
+  a + b + 1 ≤ m
+  → a + b + 1 ≤ n
+  → b < a
+  → gcd_bezout_loop m a b = gcd_bezout_loop n a b.
+Proof.
+intros * Habm Habn Hba.
+revert n a b Habm Habn Hba.
+induction m; intros; [ flia Habm | ].
+destruct n; [ flia Habn | cbn ].
+destruct (Nat.eq_dec b 0) as [Hbz| Hbz]; [ now subst b | ].
+replace b with (S (b - 1)) at 1 2 by flia Hbz.
+remember (gcd_bezout_loop m b (a mod b)) as gbm eqn:Hgbm; symmetry in Hgbm.
+remember (gcd_bezout_loop n b (a mod b)) as gbn eqn:Hgbn; symmetry in Hgbn.
+specialize (IHm n b (a mod b)) as H1.
+assert (H : ∀ p, a + b + 1 ≤ S p → b + a mod b + 1 ≤ p). {
+  intros * Habp.
+  transitivity (b + a). {
+    rewrite <- Nat.add_assoc.
+    apply Nat.add_le_mono_l.
+    specialize (Nat.div_mod a b Hbz) as H2.
+    apply (Nat.add_le_mono_l _ _ (b * (a / b))).
+    rewrite Nat.add_assoc, <- H2, Nat.add_comm.
+    apply Nat.add_le_mono_r.
+    remember (a / b) as q eqn:Hq; symmetry in Hq.
+    destruct q. {
+      apply Nat.div_small_iff in Hq; [ flia Hba Hq | easy ].
+    }
+    destruct b; [ easy | ].
+    cbn; remember (b * S q); flia.
+  }
+  flia Habp.
+}
+specialize (H1 (H m Habm) (H n Habn)); clear H.
+assert (H : a mod b < b) by now apply Nat.mod_upper_bound.
+specialize (H1 H); clear H.
+now rewrite <- Hgbm, H1, Hgbn.
+Qed.
+
 Theorem gcd_bezout_loop_enough_iter : ∀ m n a b,
   a + b + 1 ≤ m
   → a + b + 1 ≤ n
   → gcd_bezout_loop m a b = gcd_bezout_loop n a b.
 Proof.
+(**)
+intros * Habm Habn.
+destruct (lt_dec a b) as [Hab| Hab]. {
+  Inspect 1.
+...
+  destruct (Nat.eq_dec m 0) as [Hmz| Hmz]; [ flia Hmz Habm | ].
+  destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ flia Hnz Habn | ].
+  replace m with (S (m - 1)) by flia Hmz.
+  replace n with (S (n - 1)) by flia Hnz.
+  cbn.
+  replace b with (S (b - 1)) at 1 2 by flia Hab.
+...
 intros * Habm Habn.
 revert n a b Habm Habn.
 induction m; intros; [ flia Habm | ].
@@ -2711,6 +2762,7 @@ destruct (Nat.eq_dec b 0) as [Hbz| Hbz]; [ now subst b | ].
 replace b with (S (b - 1)) at 1 2 by flia Hbz.
 remember (gcd_bezout_loop m b (a mod b)) as gbm eqn:Hgbm; symmetry in Hgbm.
 remember (gcd_bezout_loop n b (a mod b)) as gbn eqn:Hgbn; symmetry in Hgbn.
+...
 destruct (lt_dec a b) as [Hab| Hab]. {
   rewrite Nat.mod_small in Hgbm, Hgbn; [ | easy | easy ].
   destruct gbm as (gm, (um, vm)).
@@ -2748,6 +2800,7 @@ destruct gbn as (gn, (negn, (un, vn))).
 rewrite (IHm n) in Hgbm.
 specialize (IHm n b (a mod b)) as H1.
 ...
+*)
 
 Theorem glop : ∀ n a b g u v,
   a ≠ 0
