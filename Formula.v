@@ -2655,21 +2655,6 @@ split; intros Ha. {
 }
 Qed.
 
-(* totient is multiplicative *)
-
-Definition prod_coprimes_of_coprimes_mul m n a := (a mod m, a mod n).
-
-Definition coprimes_mul_of_prod_coprimes (m n : nat) '((x, y) : nat * nat) :=
-  42.
-
-Search Nat.Bezout.
-Print Nat.Bezout.
-
-Check Nat.bezout_1_gcd.
-Search Nat.Bezout.
-
-(**)
-
 Theorem Nat_div_lt_le_mul : ∀ a b c, b ≠ 0 → a / b < c → a ≤ b * c.
 Proof.
 intros * Hbz Habc.
@@ -2683,6 +2668,10 @@ apply Nat.add_le_mono_l.
 now apply Nat.lt_le_incl, Nat.mod_upper_bound.
 Qed.
 
+(* gcd_and_bezout a b returns (g, (u, v)) with the property
+        a * u = b * v + g
+        g = gcd a b *)
+
 Fixpoint gcd_bezout_loop n (a b : nat) : (nat * (nat * nat)) :=
   match n with
   | 0 => (0, (0, 0)) (* should not happen *)
@@ -2691,72 +2680,38 @@ Fixpoint gcd_bezout_loop n (a b : nat) : (nat * (nat * nat)) :=
       | 0 => (a, (1, 0))
       | S _ =>
           let '(g, (u, v)) := gcd_bezout_loop n' b (a mod b) in
-          let k := max (u / b) (v / a) + 1 in
-          (g, (k * a - v + (a / b) * (k * b - u), k * b - u))
-      end
-  end.
-
-Definition gcd_and_bezout a b := gcd_bezout_loop (a + b + 1) a b.
-
-Compute (gcd_and_bezout 15 6).
-Compute (gcd_and_bezout 6 15).
-
-Compute (let (a, b) := (15, 6) in let '(g, (u, v)) := gcd_and_bezout a b in (a * u, b * v + g)).
-Compute (let (a, b) := (6, 15) in let '(g, (u, v)) := gcd_and_bezout a b in (a * u, b * v + g)).
-
-...
-
-y a un truc comme ça. Faut que je trouve la vraie formule.
-
-Fixpoint gcd_bezout_loop n (a b : nat) : (nat * (nat * nat)) :=
-  match n with
-  | 0 => (0, (0, 0))
-  | S n' =>
-      match b with
-      | 0 => (a, (1, 0))
-      | S _ =>
-          let '(g, (u, v)) := gcd_bezout_loop n' b (a mod b) in
-          let k := max (u / b) (v / a) in
-          (g, (k * b + 1 - u + (a / b) * v, k * a + 1 - v))
-      end
-  end.
-
-Definition gcd_and_bezout a b := gcd_bezout_loop (a + b + 1) a b.
-
-Compute (gcd_and_bezout 15 6).
-Compute (gcd_and_bezout 6 15).
-
-...
-
-
-(* gcd_bezout a b returns (g, (neg, u, v)) where
-   - g is gcd a b
-   - if neg = true then bv = au + g else au = bv + g
-   in other words
-      a * u + g * neg = b v + g * ¬neg *)
-
-Fixpoint gcd_bezout_loop n (a b : nat) : (nat * (bool * (nat * nat))) :=
-  match n with
-  | 0 => (0, (false, (0, 0)))
-  | S n' =>
-      match b with
-      | 0 => (a, (false, (1, 0)))
-      | S _ =>
-          let '(g, (u_is_neg, (u, v))) := gcd_bezout_loop n' b (a mod b) in
-          (g, (negb u_is_neg, (v, u + (a / b) * v)))
+          let k := max (v / b) ((u + v * (a / b)) / a) + 1 in
+          (g, (k * b - v, k * a - (u + v * (a / b))))
       end
   end.
 
 Definition gcd_and_bezout a b := gcd_bezout_loop (a + b + 1) a b.
 
 (*
-Compute (gcd_and_bezout 15 0).
-Compute (gcd_and_bezout 0 15).
-0*0+15*1 =? 15*1+15*0
-...
-     = (15, (true, (0, 1)))
-     : nat * (bool * (nat * nat))
+Compute (gcd_and_bezout 15 6).
+Compute (gcd_and_bezout 6 15).
 *)
+
+(*
+Compute (let (a, b) := (86, 70) in let '(g, (u, v)) := gcd_and_bezout a b in (g, u, v, a * u, b * v + g)).
+Compute (let (a, b) := (70, 86) in let '(g, (u, v)) := gcd_and_bezout a b in (g, u, v, a * u, b * v + g)).
+*)
+
+Theorem glop : ∀ a b g u v,
+  gcd_and_bezout a b = (g, (u, v))
+  → a * u = b * v + g.
+Proof.
+intros * Hbez.
+unfold gcd_and_bezout in Hbez.
+Theorem glop : ∀ n a b g u v,
+  a + b + 1 ≤ n
+  → gcd_bezout_loop n a b = (g, (u, v))
+  → a * u = b * v + g.
+Proof.
+intros * Hn Hnab.
+revert a b g u v Hn Hnab.
+induction n; intros; [ flia Hn | ].
+...
 
 Theorem gcd_bezout_loop_prop : ∀ n a b g neg u v,
   b ≠ 0
@@ -2913,6 +2868,17 @@ Check Nat_Bezout.
 Print Nat.Bezout.
 
 ...
+
+(* totient is multiplicative *)
+
+Definition prod_coprimes_of_coprimes_mul m n a := (a mod m, a mod n).
+
+Definition coprimes_mul_of_prod_coprimes (m n : nat) '((x, y) : nat * nat) :=
+  42.
+
+...
+
+(**)
 
 Theorem prod_coprimes_of_coprimes_mul_prod : ∀ m n a (p : a ∈ coprimes (m * n)),
   prod_coprimes_of_coprimes_mul m n a ∈ list_prod (coprimes m) (coprimes n).
