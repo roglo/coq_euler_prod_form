@@ -2803,30 +2803,28 @@ destruct (le_dec a b) as [Hab| Hab]. {
 }
 Qed.
 
-Lemma fst_gcd_bezout_loop_is_gcd_lt : ∀ n a b g u v,
+Lemma fst_gcd_bezout_loop_is_gcd_lt : ∀ n a b,
   a ≠ 0
   → a + b + 1 ≤ n
-  → gcd_bezout_loop n a b = (g, (u, v))
   → b < a
-  → g = Nat.gcd a b.
+  → fst (gcd_bezout_loop n a b) = Nat.gcd a b.
 Proof.
-intros * Haz Hn Hnab Hba.
-revert a b g u v Haz Hn Hnab Hba.
+intros * Haz Hn Hba.
+revert a b Haz Hn Hba.
 induction n; intros; [ flia Hn | ].
-cbn in Hnab.
+cbn.
 destruct (Nat.eq_dec b 0) as [Hbz| Hbz]. {
   subst b.
-  injection Hnab; clear Hnab; intros; subst g u v.
   now rewrite Nat.gcd_0_r.
 }
-replace b with (S (b - 1)) in Hnab at 1 by flia Hbz.
+replace b with (S (b - 1)) at 1 by flia Hbz.
 remember (gcd_bezout_loop n b (a mod b)) as gb eqn:Hgb; symmetry in Hgb.
-destruct gb as (g', (u', v')).
-injection Hnab; clear Hnab; intros; subst g u v.
-rename g' into g; rename u' into u; rename v' into v.
+destruct gb as (g, (u, v)).
 rewrite Nat.gcd_comm, <- Nat.gcd_mod; [ | easy ].
 rewrite Nat.gcd_comm.
-apply (IHn _ _ _ u v); [ easy | | easy | ]. {
+cbn.
+replace g with (fst (gcd_bezout_loop n b (a mod b))) by now rewrite Hgb.
+apply IHn; [ easy | | ]. {
   transitivity (a + b); [ | flia Hn ].
   rewrite <- Nat.add_assoc, Nat.add_comm.
   apply Nat.add_le_mono_r.
@@ -2846,45 +2844,42 @@ apply (IHn _ _ _ u v); [ easy | | easy | ]. {
 }
 Qed.
 
-Theorem fst_gcd_bezout_loop_is_gcd : ∀ n a b g u v,
+Theorem fst_gcd_bezout_loop_is_gcd : ∀ n a b,
   a ≠ 0
   → a + b + 1 ≤ n
-  → gcd_bezout_loop n a b = (g, (u, v))
-  → g = Nat.gcd a b.
+  → fst (gcd_bezout_loop n a b) = Nat.gcd a b.
 Proof.
-intros * Haz Hn Hnab.
-rewrite (gcd_bezout_loop_enough_iter _ (n + 1)) in Hnab; [ | easy | flia Hn ].
-rewrite Nat.add_1_r in Hnab; cbn in Hnab.
+intros * Haz Hn.
+rewrite (gcd_bezout_loop_enough_iter _ (n + 1)); [ | easy | flia Hn ].
+rewrite Nat.add_1_r; cbn.
 destruct (Nat.eq_dec b 0) as [Hbz| Hbz]. {
   subst b.
-  injection Hnab; clear Hnab; intros; subst g u v.
   now rewrite Nat.gcd_0_r.
 }
-replace b with (S (b - 1)) in Hnab at 1 by flia Hbz.
+replace b with (S (b - 1)) at 1 by flia Hbz.
 remember (gcd_bezout_loop n b (a mod b)) as gb eqn:Hgb; symmetry in Hgb.
-destruct gb as (g', (u', v')).
-injection Hnab; clear Hnab; intros; subst g u v.
-rename g' into g; rename u' into u; rename v' into v.
-assert (H : a mod b < b) by now apply Nat.mod_upper_bound.
+destruct gb as (g, (u, v)); cbn.
 rewrite Nat.gcd_comm, <- Nat.gcd_mod; [ | easy ].
 rewrite Nat.gcd_comm.
-remember (a mod b) as c eqn:Hc.
-assert (Hn' : c + b + 1 ≤ n). {
+replace g with (fst (gcd_bezout_loop n b (a mod b))) by now rewrite Hgb.
+apply fst_gcd_bezout_loop_is_gcd_lt; [ easy | | ]. {
+  remember (a mod b) as c eqn:Hc.
   transitivity (a + b + 1); [ | easy ].
+  rewrite (Nat.add_comm b).
   do 2 apply Nat.add_le_mono_r.
   rewrite Hc.
   now apply Nat.mod_le.
+} {
+  now apply Nat.mod_upper_bound.
 }
-move Hn' before Hn.
-clear a Haz Hn Hc.
-rename Hn' into Hn.
-rename b into a; rename c into b.
-rename Hgb into Hnab; rename H into Hba.
-rename Hbz into Haz; move Haz after Hn.
-rewrite (Nat.add_comm b) in Hn.
-eapply fst_gcd_bezout_loop_is_gcd_lt; [ easy | easy | | easy ].
-rewrite (gcd_bezout_loop_enough_iter _ n); [ | easy | easy ].
-apply Hnab.
+Qed.
+
+Theorem fst_gcd_and_bezout_is_gcd : ∀ a b,
+  a ≠ 0
+  → fst (gcd_and_bezout a b) = Nat.gcd a b.
+Proof.
+intros * Haz.
+now apply fst_gcd_bezout_loop_is_gcd.
 Qed.
 
 ...
