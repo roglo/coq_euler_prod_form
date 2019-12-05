@@ -2665,11 +2665,35 @@ Definition coprimes_mul_of_prod_coprimes (m n : nat) '((x, y) : nat * nat) :=
 Search Nat.Bezout.
 Print Nat.Bezout.
 
-Definition Nat_bezout m n : { u  & { v & u * m = v * n + Nat.gcd m n } }.
-Admitted.
-
 Check Nat.bezout_1_gcd.
 Search Nat.Bezout.
+
+(**)
+
+...
+
+y a un truc comme ça. Faut que je trouve la vraie formule.
+
+Fixpoint gcd_bezout_loop n (a b : nat) : (nat * (nat * nat)) :=
+  match n with
+  | 0 => (0, (0, 0))
+  | S n' =>
+      match b with
+      | 0 => (a, (1, 0))
+      | S _ =>
+          let '(g, (u, v)) := gcd_bezout_loop n' b (a mod b) in
+          let k := max (u / b) (v / a) in
+          (g, (k * b + 1 - u + (a / b) * v, k * a + 1 - v))
+      end
+  end.
+
+Definition gcd_and_bezout a b := gcd_bezout_loop (a + b + 1) a b.
+
+Compute (gcd_and_bezout 15 6).
+Compute (gcd_and_bezout 6 15).
+
+...
+
 
 (* gcd_bezout a b returns (g, (neg, u, v)) where
    - g is gcd a b
@@ -2691,8 +2715,14 @@ Fixpoint gcd_bezout_loop n (a b : nat) : (nat * (bool * (nat * nat))) :=
 
 Definition gcd_and_bezout a b := gcd_bezout_loop (a + b + 1) a b.
 
-Compute (gcd_and_bezout 6 15).
-Compute (gcd_and_bezout 15 6).
+(*
+Compute (gcd_and_bezout 15 0).
+Compute (gcd_and_bezout 0 15).
+0*0+15*1 =? 15*1+15*0
+...
+     = (15, (true, (0, 1)))
+     : nat * (bool * (nat * nat))
+*)
 
 Theorem gcd_bezout_loop_prop : ∀ n a b g neg u v,
   b ≠ 0
@@ -2706,17 +2736,23 @@ now rewrite Hgb.
 Qed.
 
 Theorem glop : ∀ n a b g neg u v,
-   a + b + 1 ≤ n
+   a ≠ 0
+   → b ≠ 0
+   → a + b + 1 ≤ n
    → gcd_bezout_loop n a b = (g, (neg, (u, v)))
-   → gcd_bezout_loop n b a = (g, (neg, (v, u))).
+   → gcd_bezout_loop n b a = (g, (negb neg, (v, u))).
 Proof.
-intros * Hn Hab.
+intros * Ha Hb Hn Hab.
 destruct n; [ flia Hn | ].
 cbn in Hab; cbn.
-destruct (Nat.eq_dec a 0) as [Ha| Ha]. {
-  subst a.
-  destruct (Nat.eq_dec b 0) as [Hb| Hb]. {
-    subst b.
+replace a with (S (a - 1)) at 1 by flia Ha.
+replace b with (S (b - 1)) in Hab at 1 by flia Hb.
+remember (gcd_bezout_loop n b (a mod b)) as gb eqn:Hgb; symmetry in Hgb.
+destruct gb as (g', (neg', (u', v'))).
+injection Hab; clear Hab; intros; subst g neg u v.
+rename g' into g; rename neg' into neg; rename u' into u; rename v' into v.
+remember (gcd_bezout_loop n a (b mod a)) as gb eqn:Hgb1; symmetry in Hgb1.
+destruct gb as (g', (neg', (u', v'))).
 ...
 
 Theorem gcd_bezout_loop_enough_iter : ∀ m n a b,
