@@ -2706,10 +2706,18 @@ now rewrite Hgb.
 Qed.
 
 Theorem glop : ∀ n a b g neg u v,
-   gcd_bezout_loop n a b = (g, (neg, (u, v)))
-   → gcd_bezout_loop n b a = (g, (negb neg, (v, u))).
+   a + b + 1 ≤ n
+   → gcd_bezout_loop n a b = (g, (neg, (u, v)))
+   → gcd_bezout_loop n b a = (g, (neg, (v, u))).
 Proof.
-Admitted.
+intros * Hn Hab.
+destruct n; [ flia Hn | ].
+cbn in Hab; cbn.
+destruct (Nat.eq_dec a 0) as [Ha| Ha]. {
+  subst a.
+  destruct (Nat.eq_dec b 0) as [Hb| Hb]. {
+    subst b.
+...
 
 Theorem gcd_bezout_loop_enough_iter : ∀ m n a b,
   a + b + 1 ≤ m
