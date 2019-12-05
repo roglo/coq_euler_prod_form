@@ -2670,6 +2670,40 @@ Search Nat.Bezout.
 
 (**)
 
+Theorem Nat_div_lt_le_mul : ∀ a b c, b ≠ 0 → a / b < c → a ≤ b * c.
+Proof.
+intros * Hbz Habc.
+apply (Nat.mul_le_mono_l _ _ b) in Habc.
+transitivity (b * S (a / b)); [ | easy ].
+specialize (Nat.div_mod a b Hbz) as H1.
+rewrite <- Nat.add_1_r.
+rewrite Nat.mul_add_distr_l, Nat.mul_1_r.
+rewrite H1 at 1.
+apply Nat.add_le_mono_l.
+now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+Qed.
+
+Fixpoint gcd_bezout_loop n (a b : nat) : (nat * (nat * nat)) :=
+  match n with
+  | 0 => (0, (0, 0)) (* should not happen *)
+  | S n' =>
+      match b with
+      | 0 => (a, (1, 0))
+      | S _ =>
+          let '(g, (u, v)) := gcd_bezout_loop n' b (a mod b) in
+          let k := max (u / b) (v / a) + 1 in
+          (g, (k * a - v + (a / b) * (k * b - u), k * b - u))
+      end
+  end.
+
+Definition gcd_and_bezout a b := gcd_bezout_loop (a + b + 1) a b.
+
+Compute (gcd_and_bezout 15 6).
+Compute (gcd_and_bezout 6 15).
+
+Compute (let (a, b) := (15, 6) in let '(g, (u, v)) := gcd_and_bezout a b in (a * u, b * v + g)).
+Compute (let (a, b) := (6, 15) in let '(g, (u, v)) := gcd_and_bezout a b in (a * u, b * v + g)).
+
 ...
 
 y a un truc comme ça. Faut que je trouve la vraie formule.
