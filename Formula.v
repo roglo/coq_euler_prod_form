@@ -2698,6 +2698,18 @@ Compute (let (a, b) := (86, 70) in let '(g, (u, v)) := gcd_and_bezout a b in (g,
 Compute (let (a, b) := (70, 86) in let '(g, (u, v)) := gcd_and_bezout a b in (g, u, v, a * u, b * v + g)).
 *)
 
+Theorem glop : ∀ n a b g u v,
+  a ≠ 0
+  → a + b + 1 ≤ n
+  → gcd_bezout_loop n a b = (g, (u, v))
+  → g = Nat.gcd a b.
+Proof.
+intros * Haz Hn Hnab.
+revert a b g u v Haz Hn Hnab.
+induction n; intros; [ flia Hn | ].
+cbn in Hnab.
+...
+
 Theorem glop : ∀ a b g u v,
   a ≠ 0
   → gcd_and_bezout a b = (g, (u, v))
