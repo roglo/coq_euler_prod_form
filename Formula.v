@@ -2691,7 +2691,8 @@ Fixpoint gcd_bezout_loop n (a b : nat) : (nat * (bool * (nat * nat))) :=
 
 Definition gcd_and_bezout a b := gcd_bezout_loop (a + b + 1) a b.
 
-Compute (gcd_and_bezout 6 21).
+Compute (gcd_and_bezout 6 15).
+Compute (gcd_and_bezout 15 6).
 
 Theorem gcd_bezout_loop_prop : ∀ n a b g neg u v,
   b ≠ 0
@@ -2704,13 +2705,57 @@ destruct b; [ easy | ].
 now rewrite Hgb.
 Qed.
 
-Theorem gcd_bezout_loop_more_iter : ∀ n k a b,
-  a + b + 1 ≤ n
-  → gcd_bezout_loop n a b = gcd_bezout_loop (n + k) a b.
+Theorem glop : ∀ n a b g neg u v,
+   gcd_bezout_loop n a b = (g, (neg, (u, v)))
+   → gcd_bezout_loop n b a = (g, (negb neg, (v, u))).
 Proof.
-intros * Hab.
-revert k a b Hab.
-induction n; intros; [ flia Hab | ].
+Admitted.
+
+Theorem gcd_bezout_loop_enough_iter : ∀ m n a b,
+  a + b + 1 ≤ m
+  → a + b + 1 ≤ n
+  → gcd_bezout_loop m a b = gcd_bezout_loop n a b.
+Proof.
+intros * Habm Habn.
+revert n a b Habm Habn.
+induction m; intros; [ flia Habm | ].
+destruct n; [ flia Habn | cbn ].
+destruct (Nat.eq_dec b 0) as [Hbz| Hbz]; [ now subst b | ].
+replace b with (S (b - 1)) at 1 2 by flia Hbz.
+remember (gcd_bezout_loop m b (a mod b)) as gbm eqn:Hgbm; symmetry in Hgbm.
+remember (gcd_bezout_loop n b (a mod b)) as gbn eqn:Hgbn; symmetry in Hgbn.
+destruct (lt_dec a b) as [Hab| Hab]. {
+  rewrite Nat.mod_small in Hgbm, Hgbn; [ | easy | easy ].
+  destruct gbm as (gm, (negm, (um, vm))).
+  destruct gbn as (gn, (negn, (un, vn))).
+  apply glop in Hgbm.
+  apply glop in Hgbn.
+  rewrite (IHm n) in Hgbm.
+  -rewrite Hgbm in Hgbn; congruence.
+  -idtac.
+... suite ok
+}
+rewrite (IHm n) in Hgbm.
+-now rewrite <- Hgbm, Hgbn.
+-transitivity (a + b); [ | flia Habm ].
+ rewrite <- Nat.add_assoc, Nat.add_comm.
+ apply Nat.add_le_mono_r.
+ apply Nat.nlt_ge in Hab.
+ transitivity b; [ | easy ].
+ rewrite Nat.add_1_r.
+ now apply Nat.mod_upper_bound.
+-transitivity (a + b); [ | flia Habn ].
+ rewrite <- Nat.add_assoc, Nat.add_comm.
+ apply Nat.add_le_mono_r.
+ apply Nat.nlt_ge in Hab.
+ transitivity b; [ | easy ].
+ rewrite Nat.add_1_r.
+ now apply Nat.mod_upper_bound.
+...
+destruct gbm as (gm, (negm, (um, vm))).
+destruct gbn as (gn, (negn, (un, vn))).
+rewrite (IHm n) in Hgbm.
+specialize (IHm n b (a mod b)) as H1.
 ...
 
 Theorem glop : ∀ a b g neg u v,
