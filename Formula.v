@@ -2698,6 +2698,57 @@ Compute (let (a, b) := (86, 70) in let '(g, (u, v)) := gcd_and_bezout a b in (g,
 Compute (let (a, b) := (70, 86) in let '(g, (u, v)) := gcd_and_bezout a b in (g, u, v, a * u, b * v + g)).
 *)
 
+Theorem gcd_bezout_loop_enough_iter : ∀ m n a b,
+  a + b + 1 ≤ m
+  → a + b + 1 ≤ n
+  → gcd_bezout_loop m a b = gcd_bezout_loop n a b.
+Proof.
+intros * Habm Habn.
+revert n a b Habm Habn.
+induction m; intros; [ flia Habm | ].
+destruct n; [ flia Habn | cbn ].
+destruct (Nat.eq_dec b 0) as [Hbz| Hbz]; [ now subst b | ].
+replace b with (S (b - 1)) at 1 2 by flia Hbz.
+remember (gcd_bezout_loop m b (a mod b)) as gbm eqn:Hgbm; symmetry in Hgbm.
+remember (gcd_bezout_loop n b (a mod b)) as gbn eqn:Hgbn; symmetry in Hgbn.
+destruct (lt_dec a b) as [Hab| Hab]. {
+  rewrite Nat.mod_small in Hgbm, Hgbn; [ | easy | easy ].
+  destruct gbm as (gm, (um, vm)).
+  destruct gbn as (gn, (un, vn)).
+  rewrite (Nat.div_small a); [ | easy ].
+  rewrite Nat.mul_0_r, Nat.add_0_r.
+  rewrite Nat.mul_0_r, Nat.add_0_r.
+...
+  apply glop in Hgbm.
+  apply glop in Hgbn.
+  rewrite (IHm n) in Hgbm.
+  -rewrite Hgbm in Hgbn; congruence.
+  -idtac.
+... suite ok
+}
+rewrite (IHm n) in Hgbm.
+-now rewrite <- Hgbm, Hgbn.
+-transitivity (a + b); [ | flia Habm ].
+ rewrite <- Nat.add_assoc, Nat.add_comm.
+ apply Nat.add_le_mono_r.
+ apply Nat.nlt_ge in Hab.
+ transitivity b; [ | easy ].
+ rewrite Nat.add_1_r.
+ now apply Nat.mod_upper_bound.
+-transitivity (a + b); [ | flia Habn ].
+ rewrite <- Nat.add_assoc, Nat.add_comm.
+ apply Nat.add_le_mono_r.
+ apply Nat.nlt_ge in Hab.
+ transitivity b; [ | easy ].
+ rewrite Nat.add_1_r.
+ now apply Nat.mod_upper_bound.
+...
+destruct gbm as (gm, (negm, (um, vm))).
+destruct gbn as (gn, (negn, (un, vn))).
+rewrite (IHm n) in Hgbm.
+specialize (IHm n b (a mod b)) as H1.
+...
+
 Theorem glop : ∀ n a b g u v,
   a ≠ 0
   → a + b + 1 ≤ n
@@ -2708,6 +2759,35 @@ intros * Haz Hn Hnab.
 revert a b g u v Haz Hn Hnab.
 induction n; intros; [ flia Hn | ].
 cbn in Hnab.
+destruct (Nat.eq_dec b 0) as [Hbz| Hbz]. {
+  subst b.
+  injection Hnab; clear Hnab; intros; subst g u v.
+  now rewrite Nat.gcd_0_r.
+}
+replace b with (S (b - 1)) in Hnab at 1 by flia Hbz.
+remember (gcd_bezout_loop n b (a mod b)) as gb eqn:Hgb; symmetry in Hgb.
+destruct gb as (g', (u', v')).
+injection Hnab; clear Hnab; intros; subst g u v.
+rename g' into g; rename u' into u; rename v' into v.
+rewrite Nat.gcd_comm, <- Nat.gcd_mod; [ | easy ].
+rewrite Nat.gcd_comm.
+destruct (Nat.eq_dec (a + b + 1) (S n)) as [Habn| Habn]. {
+...
+apply (IHn _ _ _ u v); [ easy | | easy ].
+...
+
+remember (max (v / b) ((u + v * (a / b)) / a) + 1) as k eqn:Hk.
+do 2 rewrite Nat.mul_sub_distr_l.
+replace (a * (k * b)) with (k * a * b) by flia.
+replace (b * (k * a)) with (k * a * b) by flia.
+rewrite <- Nat_sub_sub_distr. 2: {
+  split. 2: {
+    rewrite Nat.mul_comm.
+    apply Nat.mul_le_mono_r.
+    apply Nat_div_lt_le_mul; [ flia Hk | ].
+    destruct (Nat.lt_trichotomy (v / b) ((u + v * (a / b)) / a)) as [H| H]. {
+      rewrite max_r in Hk; [ | now apply Nat.lt_le_incl ].
+      remember (u + v * (a / b)) as c eqn:Hc.
 ...
 
 Theorem glop : ∀ a b g u v,
@@ -2808,53 +2888,6 @@ injection Hab; clear Hab; intros; subst g neg u v.
 rename g' into g; rename neg' into neg; rename u' into u; rename v' into v.
 remember (gcd_bezout_loop n a (b mod a)) as gb eqn:Hgb1; symmetry in Hgb1.
 destruct gb as (g', (neg', (u', v'))).
-...
-
-Theorem gcd_bezout_loop_enough_iter : ∀ m n a b,
-  a + b + 1 ≤ m
-  → a + b + 1 ≤ n
-  → gcd_bezout_loop m a b = gcd_bezout_loop n a b.
-Proof.
-intros * Habm Habn.
-revert n a b Habm Habn.
-induction m; intros; [ flia Habm | ].
-destruct n; [ flia Habn | cbn ].
-destruct (Nat.eq_dec b 0) as [Hbz| Hbz]; [ now subst b | ].
-replace b with (S (b - 1)) at 1 2 by flia Hbz.
-remember (gcd_bezout_loop m b (a mod b)) as gbm eqn:Hgbm; symmetry in Hgbm.
-remember (gcd_bezout_loop n b (a mod b)) as gbn eqn:Hgbn; symmetry in Hgbn.
-destruct (lt_dec a b) as [Hab| Hab]. {
-  rewrite Nat.mod_small in Hgbm, Hgbn; [ | easy | easy ].
-  destruct gbm as (gm, (negm, (um, vm))).
-  destruct gbn as (gn, (negn, (un, vn))).
-  apply glop in Hgbm.
-  apply glop in Hgbn.
-  rewrite (IHm n) in Hgbm.
-  -rewrite Hgbm in Hgbn; congruence.
-  -idtac.
-... suite ok
-}
-rewrite (IHm n) in Hgbm.
--now rewrite <- Hgbm, Hgbn.
--transitivity (a + b); [ | flia Habm ].
- rewrite <- Nat.add_assoc, Nat.add_comm.
- apply Nat.add_le_mono_r.
- apply Nat.nlt_ge in Hab.
- transitivity b; [ | easy ].
- rewrite Nat.add_1_r.
- now apply Nat.mod_upper_bound.
--transitivity (a + b); [ | flia Habn ].
- rewrite <- Nat.add_assoc, Nat.add_comm.
- apply Nat.add_le_mono_r.
- apply Nat.nlt_ge in Hab.
- transitivity b; [ | easy ].
- rewrite Nat.add_1_r.
- now apply Nat.mod_upper_bound.
-...
-destruct gbm as (gm, (negm, (um, vm))).
-destruct gbn as (gn, (negn, (un, vn))).
-rewrite (IHm n) in Hgbm.
-specialize (IHm n b (a mod b)) as H1.
 ...
 
 Theorem glop : ∀ a b g neg u v,
