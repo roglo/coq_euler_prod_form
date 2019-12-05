@@ -2810,7 +2810,42 @@ Lemma fst_gcd_bezout_loop_is_gcd_lt : ∀ n a b g u v,
   → b < a
   → g = Nat.gcd a b.
 Proof.
-Admitted.
+intros * Haz Hn Hnab Hba.
+revert a b g u v Haz Hn Hnab Hba.
+induction n; intros; [ flia Hn | ].
+...
+destruct (Nat.eq_dec b 0) as [Hbz| Hbz]. {
+  subst b.
+  injection Hnab; clear Hnab; intros; subst g u v.
+  now rewrite Nat.gcd_0_r.
+}
+replace b with (S (b - 1)) in Hnab at 1 by flia Hbz.
+remember (gcd_bezout_loop n b (a mod b)) as gb eqn:Hgb; symmetry in Hgb.
+destruct gb as (g', (u', v')).
+injection Hnab; clear Hnab; intros; subst g u v.
+rename g' into g; rename u' into u; rename v' into v.
+assert (H : a mod b < b) by now apply Nat.mod_upper_bound.
+rewrite Nat.gcd_comm, <- Nat.gcd_mod; [ | easy ].
+rewrite Nat.gcd_comm.
+remember (a mod b) as c eqn:Hc.
+assert (Hn' : c + b + 1 ≤ n). {
+  transitivity (a + b + 1); [ | easy ].
+  do 2 apply Nat.add_le_mono_r.
+  rewrite Hc.
+  now apply Nat.mod_le.
+}
+move Hn' before Hn.
+clear a Haz Hn Hc.
+rename Hn' into Hn.
+rename b into a; rename c into b.
+rename Hgb into Hnab; rename H into Hba.
+rename Hbz into Haz; move Haz after Hn.
+rewrite (Nat.add_comm b) in Hn.
+eapply fst_gcd_bezout_loop_is_gcd_lt; [ easy | easy | | easy ].
+rewrite (gcd_bezout_loop_enough_iter _ n); [ | easy | easy ].
+apply Hnab.
+Qed.
+...
 
 Theorem fst_gcd_bezout_loop_is_gcd : ∀ n a b g u v,
   a ≠ 0
