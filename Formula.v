@@ -2737,6 +2737,32 @@ specialize (H1 H); clear H.
 now rewrite <- Hgbm, H1, Hgbn.
 Qed.
 
+Lemma gcd_bezout_loop_enough_iter_ge : ∀ m n a b,
+  a + b + 1 ≤ m
+  → a + b + 1 ≤ n
+  → a ≤ b
+  → gcd_bezout_loop m a b = gcd_bezout_loop n a b.
+Proof.
+intros * Habm Habn Hab.
+destruct (Nat.eq_dec m 0) as [Hmz| Hmz]; [ flia Hmz Habm | ].
+destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ flia Hnz Habn | ].
+replace m with (S (m - 1)) by flia Hmz.
+replace n with (S (n - 1)) by flia Hnz.
+cbn.
+destruct (Nat.eq_dec b 0) as [Hbz| Hbz]; [ now subst b | ].
+replace b with (S (b - 1)) at 1 2 by flia Hbz.
+...
+rewrite (gcd_bezout_loop_enough_iter_lt _ (n - 1)); [ easy | | | ]. {
+  destruct (Nat.eq_dec a b) as [Habe| Habe]. {
+    subst a.
+    rewrite Nat.mod_same; [ | easy ].
+
+  rewrite Nat.mod_small.
+
+remember (gcd_bezout_loop m b (a mod b)) as gbm eqn:Hgbm; symmetry in Hgbm.
+remember (gcd_bezout_loop n b (a mod b)) as gbn eqn:Hgbn; symmetry in Hgbn.
+...
+
 Theorem gcd_bezout_loop_enough_iter : ∀ m n a b,
   a + b + 1 ≤ m
   → a + b + 1 ≤ n
