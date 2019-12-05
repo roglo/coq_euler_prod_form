@@ -2813,7 +2813,7 @@ Proof.
 intros * Haz Hn Hnab Hba.
 revert a b g u v Haz Hn Hnab Hba.
 induction n; intros; [ flia Hn | ].
-...
+cbn in Hnab.
 destruct (Nat.eq_dec b 0) as [Hbz| Hbz]. {
   subst b.
   injection Hnab; clear Hnab; intros; subst g u v.
@@ -2824,28 +2824,27 @@ remember (gcd_bezout_loop n b (a mod b)) as gb eqn:Hgb; symmetry in Hgb.
 destruct gb as (g', (u', v')).
 injection Hnab; clear Hnab; intros; subst g u v.
 rename g' into g; rename u' into u; rename v' into v.
-assert (H : a mod b < b) by now apply Nat.mod_upper_bound.
 rewrite Nat.gcd_comm, <- Nat.gcd_mod; [ | easy ].
 rewrite Nat.gcd_comm.
-remember (a mod b) as c eqn:Hc.
-assert (Hn' : c + b + 1 ≤ n). {
-  transitivity (a + b + 1); [ | easy ].
-  do 2 apply Nat.add_le_mono_r.
-  rewrite Hc.
-  now apply Nat.mod_le.
+apply (IHn _ _ _ u v); [ easy | | easy | ]. {
+  transitivity (a + b); [ | flia Hn ].
+  rewrite <- Nat.add_assoc, Nat.add_comm.
+  apply Nat.add_le_mono_r.
+  apply (Nat.add_le_mono_l _ _ (b * (a / b))).
+  rewrite Nat.add_assoc.
+  rewrite <- Nat.div_mod; [ | easy ].
+  rewrite Nat.add_comm.
+  apply Nat.add_le_mono_r.
+  remember (a / b) as q eqn:Hq; symmetry in Hq.
+  destruct q. {
+    apply Nat.div_small_iff in Hq; [ flia Hba Hq | easy ].
+  }
+  destruct b; [ easy | ].
+  cbn; remember (b * S q); flia.
+} {
+  now apply Nat.mod_upper_bound.
 }
-move Hn' before Hn.
-clear a Haz Hn Hc.
-rename Hn' into Hn.
-rename b into a; rename c into b.
-rename Hgb into Hnab; rename H into Hba.
-rename Hbz into Haz; move Haz after Hn.
-rewrite (Nat.add_comm b) in Hn.
-eapply fst_gcd_bezout_loop_is_gcd_lt; [ easy | easy | | easy ].
-rewrite (gcd_bezout_loop_enough_iter _ n); [ | easy | easy ].
-apply Hnab.
 Qed.
-...
 
 Theorem fst_gcd_bezout_loop_is_gcd : ∀ n a b g u v,
   a ≠ 0
