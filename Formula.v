@@ -2711,6 +2711,60 @@ Proof.
 intros * Hn Hnab.
 revert a b g u v Hn Hnab.
 induction n; intros; [ flia Hn | ].
+cbn in Hnab.
+destruct (Nat.eq_dec b 0) as [Hbz| Hbz]. {
+  subst b.
+  rewrite Nat.mul_0_l.
+  injection Hnab; clear Hnab; intros; subst g u v.
+  now rewrite Nat.mul_1_r.
+}
+replace b with (S (b - 1)) in Hnab at 1 by flia Hbz.
+remember (gcd_bezout_loop n b (a mod b)) as gb eqn:Hgb; symmetry in Hgb.
+destruct gb as (g', (u', v')).
+injection Hnab; clear Hnab; intros; subst g u v.
+rename g' into g; rename u' into u; rename v' into v.
+remember (max (v / b) ((u + v * (a / b)) / a) + 1) as k eqn:Hk.
+do 2 rewrite Nat.mul_sub_distr_l.
+replace (a * (k * b)) with (k * a * b) by flia.
+replace (b * (k * a)) with (k * a * b) by flia.
+rewrite <- Nat_sub_sub_distr. 2: {
+  split. 2: {
+    rewrite Nat.mul_comm.
+    apply Nat.mul_le_mono_r.
+    apply Nat_div_lt_le_mul; [ flia Hk | ].
+    destruct (Nat.lt_trichotomy (v / b) ((u + v * (a / b)) / a)) as [H| H]. {
+      rewrite max_r in Hk; [ | now apply Nat.lt_le_incl ].
+      remember (u + v * (a / b)) as c eqn:Hc.
+      rewrite Hk.
+      apply Nat.div_lt_upper_bound; [ now rewrite Nat.add_comm | ].
+      rewrite Nat.mul_add_distr_r, Nat.mul_1_l.
+      destruct (Nat.eq_dec a 0) as [Haz| Haz]; [ now subst a | ].
+      rewrite Nat.mul_comm.
+      specialize (Nat.div_mod c a Haz) as H1.
+      apply (Nat.add_lt_mono_r _ _ (c mod a)).
+      rewrite Nat.add_shuffle0.
+      rewrite <- H1.
+      apply Nat.add_lt_mono_l.
+      now apply Nat.mod_upper_bound.
+    } {
+      destruct H as [H| H]. {
+...
+      rewrite max_l in Hk.
+...
+specialize (Nat.div_mul_le c a a Haz) as H1.
+
+eapply lt_le_trans.
+Search (_ * (_ / _)).
+
+      destruct (Nat.eq_dec a 1) as [Ha1| Ha1]. {
+
+        subst a.
+
+Inspect 4.
+...
+    rewrite max_r in Hk.
+}
+f_equal.
 ...
 
 Theorem gcd_bezout_loop_prop : ∀ n a b g neg u v,
