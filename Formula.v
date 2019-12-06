@@ -2681,7 +2681,7 @@ Fixpoint gcd_bezout_loop n (a b : nat) : (nat * (nat * nat)) :=
       | 0 => (a, (1, 0))
       | S _ =>
           let '(g, (u, v)) := gcd_bezout_loop n' b (a mod b) in
-          let k := max (v / b) ((u + v * (a / b)) / a) + 1 in
+          let k := max (v / b) ((u * b + v * a) / (a * b)) + 1 in
           (g, (k * b - v, k * a - (u + v * (a / b))))
       end
   end.
@@ -2694,9 +2694,11 @@ Compute (gcd_and_bezout 6 15).
 *)
 
 (*
-Compute (let (a, b) := (86, 70) in let '(g, (u, v)) := gcd_and_bezout a b in (g, u, v, a * u, b * v + g)).
-Compute (let (a, b) := (70, 86) in let '(g, (u, v)) := gcd_and_bezout a b in (g, u, v, a * u, b * v + g)).
+Compute (let (a, b) := (86, 50) in let '(g, (u, v)) := gcd_and_bezout a b in (g, u, v, a * u, b * v + g)).
+Compute (let (a, b) := (62, 33) in let '(g, (u, v)) := gcd_and_bezout a b in (g, u, v, a * u, b * v + g)).
 *)
+
+...
 
 Lemma gcd_bezout_loop_enough_iter_lt : ∀ m n a b,
   a + b ≤ m
