@@ -3021,16 +3021,17 @@ rewrite Nat.add_assoc; f_equal.
 now rewrite (Nat.mul_comm u), (Nat.mul_comm v).
 Qed.
 
-Theorem gcd_bezout_loop_prop : ∀ a b g u v,
+Theorem gcd_and_bezout_prop : ∀ a b g u v,
   a ≠ 0
   → gcd_and_bezout a b = (g, (u, v))
-  → a * u = b * v + g.
+  → a * u = b * v + g ∧ g = Nat.gcd a b.
 Proof.
 intros * Haz Hbez.
 assert (Hgcd : g = Nat.gcd a b). {
   specialize (fst_gcd_and_bezout_is_gcd a b Haz) as H1.
   now rewrite Hbez in H1.
 }
+split; [ | easy ].
 unfold gcd_and_bezout in Hbez.
 destruct (lt_dec b a) as [Hba| Hba]. {
   now apply (gcd_bezout_loop_prop_lt (a + b + 1)).
@@ -3113,114 +3114,49 @@ destruct (lt_dec b a) as [Hba| Hba]. {
     }
   }
   f_equal.
-...
-
-Theorem gcd_bezout_loop_prop : ∀ n a b g neg u v,
-  b ≠ 0
-  → gcd_bezout_loop n b (a mod b) = (g, (neg, (u, v)))
-  → gcd_bezout_loop (S n) a b = (g, (negb neg, (v, u + a / b * v))).
-Proof.
-intros * Hb Hgb.
-cbn.
-destruct b; [ easy | ].
-now rewrite Hgb.
-Qed.
-
-Theorem glop : ∀ n a b g neg u v,
-   a ≠ 0
-   → b ≠ 0
-   → a + b + 1 ≤ n
-   → gcd_bezout_loop n a b = (g, (neg, (u, v)))
-   → gcd_bezout_loop n b a = (g, (negb neg, (v, u))).
-Proof.
-intros * Ha Hb Hn Hab.
-destruct n; [ flia Hn | ].
-cbn in Hab; cbn.
-replace a with (S (a - 1)) at 1 by flia Ha.
-replace b with (S (b - 1)) in Hab at 1 by flia Hb.
-remember (gcd_bezout_loop n b (a mod b)) as gb eqn:Hgb; symmetry in Hgb.
-destruct gb as (g', (neg', (u', v'))).
-injection Hab; clear Hab; intros; subst g neg u v.
-rename g' into g; rename neg' into neg; rename u' into u; rename v' into v.
-remember (gcd_bezout_loop n a (b mod a)) as gb eqn:Hgb1; symmetry in Hgb1.
-destruct gb as (g', (neg', (u', v'))).
-...
-
-Theorem glop : ∀ a b g neg u v,
-  gcd_and_bezout a b = (g, (neg, (u, v)))
-  → a * u + Nat.b2n neg * g = b * v + Nat.b2n (negb neg) * g.
-Proof.
-intros * Hbez.
-unfold gcd_and_bezout in Hbez.
-Theorem glop : ∀ n a b g neg u v,
-  a + b ≤ n
-  → gcd_bezout_loop n a b = (g, (neg, (u, v)))
-  → a * u + Nat.b2n neg * g = b * v + Nat.b2n (negb neg) * g.
-Proof.
-intros * Han Hbez.
-revert a b g neg u v Han Hbez.
-induction n; intros. {
-  apply Nat.le_0_r in Han.
-  apply Nat.eq_add_0 in Han; destruct Han; subst a b.
-  cbn in Hbez.
-  injection Hbez; intros; subst g.
-  now cbn; do 2 rewrite Nat.mul_0_r.
-}
-cbn in Hbez.
-destruct (Nat.eq_dec b 0) as [Hbz| Hbz]. {
-  subst b; injection Hbez; clear Hbez; intros; subst g neg u v.
-  now cbn; rewrite Nat.mul_1_r.
-}
-replace b with (S (b - 1)) in Hbez at 1 by flia Hbz.
-remember (gcd_bezout_loop n b (a mod b)) as gb eqn:Hgb; symmetry in Hgb.
-destruct gb as (g', (neg', (u', v'))).
-injection Hbez; clear Hbez; intros; subst g neg u v.
-rename g' into g; rename neg' into neg; rename u' into u; rename v' into v.
-(* pas sûr de ma définition. À moins que ce soit ce théorème qui n'aille pas,
-   genre que la condition a+b≤S(n) n'irait pas. *)
-...
-destruct (lt_dec a b) as [Hab| Hab]. {
-  rewrite Nat.div_small; [ | easy ].
-...
-  rewrite Nat.mul_0_l, Nat.add_0_r.
-  rewrite Nat.mod_small in Hgb; [ | easy ].
-  symmetry.
-  rewrite Bool.negb_involutive.
-  destruct (Nat.eq_dec (a + b) (S n)) as [Habn| Habn]. {
-    clear Han.
-    destruct n. {
-      apply Nat.eq_add_1 in Habn.
-      destruct Habn; destruct H; subst a b; [ easy | ].
-      cbn in Hgb.
-      now injection Hgb; intros; subst g neg u v.
+  rewrite <- Hw.
+  rewrite <- Nat.divide_div_mul_exact; [ | easy | ]. 2: {
+    exists (u + v * ((a - a mod b) / b)).
+    rewrite Nat.mul_add_distr_r; f_equal.
+    rewrite <- Nat.mul_assoc; f_equal.
+    rewrite Nat.mul_comm.
+    rewrite <- Nat.divide_div_mul_exact; [ | easy | ]. 2: {
+      exists (a / b).
+      rewrite (Nat.div_mod a b) at 1; [ | easy ].
+      now rewrite Nat.add_sub, Nat.mul_comm.
     }
-    cbn in Hgb.
-    destruct (Nat.eq_dec a 0) as [Haz| Haz]. {
+    now rewrite Nat.mul_comm, Nat.div_mul.
+  }
+  rewrite (Nat.mul_comm b), Nat.div_mul; [ | easy ].
+  rewrite (Nat.mul_comm u), Hgb.
+  rewrite Nat.mul_sub_distr_l.
+  rewrite Nat.add_shuffle0, Nat.add_sub.
+  rewrite Nat.add_sub_assoc. 2: {
+    apply Nat.mul_le_mono_l.
+    destruct (Nat.eq_dec a b) as [Hab| Hab]. {
       subst a.
-      injection Hgb; intros; subst g neg u v; cbn.
-      now rewrite Nat.mul_1_r.
+      rewrite Nat.mod_same; [ apply Nat.le_0_l | easy ].
     }
-    replace a with (S (a - 1)) in Hgb at 1 by flia Haz.
-    remember (gcd_bezout_loop n a (b mod a)) as gb eqn:Hgb1; symmetry in Hgb1.
-    destruct gb as (g', (neg', (u', v'))).
-    injection Hgb; clear Hgb; intros; subst g neg u v.
-    rename g' into g; rename neg' into neg; rename u' into u; rename v' into v.
-...
-  apply IHn; [ | easy ].
-...
-assert (H : b + a mod b ≤ n). {
-  (* si a < b chuis mort *)
-...
-
-Theorem Nat_Bezout n m : Nat.Bezout n m (Nat.gcd n m).
-Proof.
-intros.
-specialize (Nat_bezout n m) as (u & v & Huv).
-now exists u, v; rewrite Nat.add_comm.
+    now apply Nat.mod_le.
+  }
+  rewrite Nat.add_comm, (Nat.mul_comm (a mod b)).
+  now rewrite Nat.add_sub, Nat.mul_comm.
+}
 Qed.
 
-Check Nat_Bezout.
-Print Nat.Bezout.
+(* Nat.gcd_bezout_pos could be implemented like this *)
+Theorem Nat_gcd_bezout_pos n m : 0 < n → Nat.Bezout n m (Nat.gcd n m).
+Proof.
+intros * Hn.
+apply Nat.neq_0_lt_0 in Hn.
+remember (gcd_and_bezout n m) as gb eqn:Hgb; symmetry in Hgb.
+destruct gb as (g, (u, v)).
+apply gcd_and_bezout_prop in Hgb; [ | easy ].
+destruct Hgb as (Hnm, Hg); rewrite <- Hg.
+exists u, v.
+rewrite Nat.mul_comm, Nat.add_comm.
+now rewrite (Nat.mul_comm v).
+Qed.
 
 ...
 
