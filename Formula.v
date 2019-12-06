@@ -2292,7 +2292,6 @@ apply Nat_eq_mod_sub_0 in Hap. 2: {
 }
 apply Nat.mod_divide in Hap; [ | easy ].
 rewrite Nat_sqr_sub_1 in Hap.
-(**)
 apply prime_divide_mul in Hap; [ | easy ].
 destruct Hap as [Hap| Hap]. {
   right.
@@ -2370,7 +2369,6 @@ split. {
   apply Nat.lt_1_r in H1.
   apply Nat.mod_divide in H1; [ | easy ].
   rewrite Nat.pow_2_r in H1.
-(**)
   apply prime_divide_mul in H1; [ | easy ].
   assert (H2 : Nat.divide p x) by tauto; clear H1.
   apply Nat.mod_divide in H2; [ | easy ].
