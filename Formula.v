@@ -2921,11 +2921,16 @@ replace (b * (k * a)) with (k * a * b) by flia.
 remember (u + v * (a / b)) as x eqn:Hx; symmetry in Hx.
 Theorem glop : ∀ n a b g v,
   a ≠ 0
+  → a + b + 1 ≤ n
   → gcd_bezout_loop n a b = (g, (0, v))
   → g = 0.
 Proof.
-intros * Haz Hnab.
-destruct n; [ cbn in Hnab; congruence | ].
+intros * Haz Hn Hnab.
+assert (Hg : Nat.gcd a b = g). {
+  replace g with (fst (gcd_bezout_loop n a b)) by now rewrite Hnab.
+  now rewrite fst_gcd_bezout_loop_is_gcd.
+}
+destruct n; [ flia Hn | ].
 cbn in Hnab.
 destruct (Nat.eq_dec b 0) as [Hbz| Hbz]; [ now subst b | ].
 replace b with (S (b - 1)) in Hnab at 1 by flia Hbz.
@@ -2934,6 +2939,20 @@ destruct gb as (g', (u', v')).
 injection Hnab; clear Hnab; intros H1 Hv H3; subst g v.
 rename g' into g; rename u' into u; rename v' into v.
 apply Nat.sub_0_le in Hv.
+rewrite Nat.mul_add_distr_r, Nat.mul_1_l in Hv.
+rewrite <- Nat.mul_max_distr_r in Hv.
+rewrite <- Nat.add_max_distr_r in Hv.
+apply Nat.max_lub_iff in Hv.
+destruct Hv as (Hvb, Huv).
+...
+apply Nat.nlt_ge in Hvb.
+exfalso; apply Hvb; clear Hvb.
+replace b with (1 * b) at 3 by now rewrite Nat.mul_1_l.
+rewrite <- Nat.mul_add_distr_r, Nat.mul_comm.
+apply Nat_div_lt_le_mul; [ easy | ].
+...
+replace g with (fst (gcd_bezout_loop n b (a mod b))) by now rewrite Hgb.
+...
 destruct (lt_dec (v / b) ((u + v * (a / b)) / a)) as [H1| H1]. {
   rewrite max_r in Hv; [ | flia H1 ].
   apply Nat.nle_gt in H1.
@@ -2948,10 +2967,52 @@ destruct (lt_dec (v / b) ((u + v * (a / b)) / a)) as [H1| H1]. {
 } {
   apply Nat.nlt_ge in H1.
   rewrite max_l in Hv; [ | easy ].
-...
+  apply (Nat.add_le_mono_r _ _ 1) in H1.
+  apply (Nat.mul_le_mono_r _ _ b) in H1.
+  destruct (lt_dec v b) as [Hvb| Hvb]. {
+    rewrite Nat.div_small in Hv; [ | easy ].
+    flia Hv Hvb.
+  }
+  apply Nat.nlt_ge in Hvb.
   apply Nat.nlt_ge in Hv.
   exfalso; apply Hv; clear Hv.
   rewrite Nat.mul_comm.
+  apply Nat_div_lt_le_mul; [ easy | ].
+  apply (Nat.mul_lt_mono_pos_l b); [ flia Hbz | ].
+(**)
+  specialize (Nat.div_mod v b Hbz) as H2.
+  rewrite Nat.mul_add_distr_l, Nat.mul_1_r, Nat.add_comm.
+  apply (Nat.add_lt_mono_r _ _ (v mod b)).
+  rewrite <- Nat.add_assoc, <- H2.
+  rewrite (Nat.add_comm b).
+  apply Nat.add_le_lt_mono; [ | now apply Nat.mod_upper_bound ].
+  specialize (Nat.div_mod (S v) b Hbz) as H3.
+  apply (Nat.add_le_mono_r _ _ (S v mod b)).
+  rewrite <- H3, <- Nat.add_1_r.
+  apply Nat.add_le_mono_l.
+...
+destruct (Nat.eq_dec b 4).
+destruct (Nat.eq_dec v 7).
+subst b v; cbn in H2, H3.
+replace (7 / 4) with 1 in H1 by easy.
+cbn - [ "/" ] in H1.
+destruct n; [ easy | ].
+cbn - [ "/" "mod" ] in Hgb.
+remember (a mod 4) as a4.
+destruct a4; [ easy | ].
+...
+  specialize (Nat.div_mod (S v) b Hbz) as H2.
+  apply (Nat.add_lt_mono_r _ _ (S v mod b)).
+  rewrite <- H2.
+...
+
+  apply (le_lt_trans _ v); [ easy | ].
+  destruct (lt_dec a b) as [Hab| Hab]. {
+    rewrite (Nat.div_small a); [ | easy ].
+    rewrite Nat.mul_0_r, Nat.add_0_r.
+...
+  rewrite Nat.mul_comm.
+
   apply Nat_div_lt_le_mul; [ easy | ].
 Search ((_ + _) / _).
 destruct (Nat.eq_dec b 1) as [Hb1| Hb1]. {
