@@ -2681,8 +2681,9 @@ Fixpoint gcd_bezout_loop n (a b : nat) : (nat * (nat * nat)) :=
       | 0 => (a, (1, 0))
       | S _ =>
           let '(g, (u, v)) := gcd_bezout_loop n' b (a mod b) in
-          let k := max (v / b) ((u * b + v * a) / (a * b)) + 1 in
-          (g, (k * b - v, k * a - (u + v * (a / b))))
+          let w := (u * b + v * (a - a mod b)) / b in
+          let k := max (v / b) (w / a) + 1 in
+          (g, (k * b - v, k * a - w))
       end
   end.
 
@@ -2697,8 +2698,6 @@ Compute (gcd_and_bezout 6 15).
 Compute (let (a, b) := (86, 50) in let '(g, (u, v)) := gcd_and_bezout a b in (g, u, v, a * u, b * v + g)).
 Compute (let (a, b) := (62, 33) in let '(g, (u, v)) := gcd_and_bezout a b in (g, u, v, a * u, b * v + g)).
 *)
-
-...
 
 Lemma gcd_bezout_loop_enough_iter_lt : ∀ m n a b,
   a + b ≤ m
@@ -2948,6 +2947,16 @@ rewrite <- Nat.mul_max_distr_r in Hv.
 rewrite <- Nat.add_max_distr_r in Hv.
 apply Nat.max_lub_iff in Hv.
 destruct Hv as (Hvb, Huv).
+rewrite Nat.div_div in Huv; [ | easy | easy ].
+...
+rewrite (Nat.mul_comm b) in Huv.
+rewrite <- Nat.div_div in Huv; [ | easy | easy ].
+rewrite Nat.mul_sub_distr_l in Huv.
+rewrite (Nat.add_comm (u * b)) in Huv.
+rewrite <- Nat.add_sub_swap in Huv.
+Search (_ + _ - _).
+rewrite <- Nat.add_sub_assoc in Huv.
+...
 specialize (IHn b (a mod b) g v Hbz) as H1.
 assert (H : b + a mod b + 1 ≤ n). {
   apply (le_trans _ (a + b)); [ | flia Hn ].
