@@ -2922,10 +2922,51 @@ remember (u + v * (a / b)) as x eqn:Hx; symmetry in Hx.
 Theorem glop : ∀ n a b g v,
   a ≠ 0
   → a + b + 1 ≤ n
+  → b < a
   → gcd_bezout_loop n a b = (g, (0, v))
   → g = 0.
 Proof.
-intros * Haz Hn Hnab.
+intros * Haz Hn Hba Hnab.
+assert (Hg : Nat.gcd a b = g). {
+  replace g with (fst (gcd_bezout_loop n a b)) by now rewrite Hnab.
+  now rewrite fst_gcd_bezout_loop_is_gcd.
+}
+revert a b g v Haz Hn Hba Hnab Hg.
+induction n; intros; [ flia Hn | ].
+destruct (Nat.eq_dec b 0) as [Hbz| Hbz]; [ now subst b | ].
+cbn in Hnab.
+replace b with (S (b - 1)) in Hnab at 1 by flia Hbz.
+remember (gcd_bezout_loop n b (a mod b)) as gb eqn:Hgb; symmetry in Hgb.
+destruct gb as (g', (u, v')).
+injection Hnab; clear Hnab; intros H1 Hv H2; subst g' v.
+rename v' into v.
+apply Nat.sub_0_le in Hv.
+rewrite Nat.mul_add_distr_r, Nat.mul_1_l in Hv.
+rewrite <- Nat.mul_max_distr_r in Hv.
+rewrite <- Nat.add_max_distr_r in Hv.
+apply Nat.max_lub_iff in Hv.
+destruct Hv as (Hvb, Huv).
+specialize (IHn b (a mod b) g v Hbz) as H1.
+assert (H : b + a mod b + 1 ≤ n). {
+  apply (le_trans _ (a + b)); [ | flia Hn ].
+  rewrite <- Nat.add_assoc, Nat.add_comm.
+  apply Nat.add_le_mono_r.
+  specialize (Nat.div_mod a b Hbz) as H2.
+  apply (Nat.add_le_mono_l _ _ (b * (a / b))).
+  rewrite Nat.add_assoc, <- H2, Nat.add_comm.
+  apply Nat.add_le_mono_r.
+  remember (a / b) as q eqn:Hq; symmetry in Hq.
+  destruct q. {
+    apply Nat.div_small_iff in Hq; [ flia Hba Hq | easy ].
+  }
+  destruct b; [ easy | ].
+  cbn; remember (b * S q); flia.
+}
+specialize (H1 H); clear H.
+assert (H : a mod b < b) by now apply Nat.mod_upper_bound.
+specialize (H1 H); clear H.
+...
+intros * Haz Hn Hba Hnab.
 assert (Hg : Nat.gcd a b = g). {
   replace g with (fst (gcd_bezout_loop n a b)) by now rewrite Hnab.
   now rewrite fst_gcd_bezout_loop_is_gcd.
