@@ -2887,7 +2887,17 @@ Theorem glop : ∀ n a b g u v,
   → gcd_bezout_loop n a b = (g, (u, v))
   → a * u = b * v + g.
 Proof.
-(*2*)
+intros * Haz Hn Hnab.
+assert (Hgcd : g = Nat.gcd a b). {
+  apply fst_gcd_bezout_loop_is_gcd in Hn; [ | easy ].
+  now rewrite Hnab in Hn; cbn in Hn.
+}
+rewrite (gcd_bezout_loop_enough_iter _ (S n)) in Hnab; [ | easy | flia Hn ].
+revert a b g u v Haz Hn Hnab Hgcd.
+induction n; intros; [ flia Hn | ].
+remember (S n) as sn; cbn in Hnab; subst sn.
+(*
+...
 intros * Haz Hn Hnab.
 assert (Hgcd : g = Nat.gcd a b). {
   apply fst_gcd_bezout_loop_is_gcd in Hn; [ | easy ].
@@ -2895,6 +2905,7 @@ assert (Hgcd : g = Nat.gcd a b). {
 }
 rewrite (gcd_bezout_loop_enough_iter _ (S n)) in Hnab; [ | easy | flia Hn ].
 cbn in Hnab.
+*)
 destruct (Nat.eq_dec b 0) as [Hbz| Hbz]. {
   subst b.
   rewrite Nat.mul_0_l.
@@ -2902,7 +2913,7 @@ destruct (Nat.eq_dec b 0) as [Hbz| Hbz]. {
   now rewrite Nat.mul_1_r.
 }
 replace b with (S (b - 1)) in Hnab at 1 by flia Hbz.
-remember (gcd_bezout_loop n b (a mod b)) as gb eqn:Hgb; symmetry in Hgb.
+remember (gcd_bezout_loop (S n) b (a mod b)) as gb eqn:Hgb; symmetry in Hgb.
 destruct gb as (g', (u', v')).
 injection Hnab; clear Hnab; intros; move Hgcd at bottom; subst g u v.
 rename g' into g; rename u' into u; rename v' into v.
@@ -2973,6 +2984,23 @@ rewrite <- Nat_sub_sub_distr. 2: {
   }
 }
 f_equal.
+...
+apply IHn in Hgb; [ | easy | | ]; cycle 1. {
+transitivity (a + b); [ | flia Hn ].
+rewrite <- Nat.add_assoc, Nat.add_comm.
+apply Nat.add_le_mono_r.
+  rewrite Hc.
+  now apply Nat.mod_le.
+} {
+  now apply Nat.mod_upper_bound.
+...
+
+f_equal; symmetry.
+
+apply Nat.add_sub_eq_r; symmetry.
+
+apply IHn.
+Search (_ = _ + _ → _ = _ - _).
 ...
 
 Theorem gcd_bezout_loop_prop : ∀ n a b g neg u v,
