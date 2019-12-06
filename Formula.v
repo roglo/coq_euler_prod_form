@@ -3032,12 +3032,9 @@ destruct (lt_dec b a) as [Hba| Hba]. {
   now apply (gcd_bezout_loop_prop_lt (a + b + 1)).
 } {
   apply Nat.nlt_ge in Hba.
-  rewrite (gcd_bezout_loop_enough_iter _ (S (a + b + 1))) in Hbez; cycle 1. {
-    easy.
-  } {
-    flia.
-  }
-  cbn in Hbez.
+  remember (a + b + 1) as n eqn:Hn.
+  rewrite (gcd_bezout_loop_enough_iter _ (S n)) in Hbez; try flia Hn.
+  subst n; cbn in Hbez.
   replace b with (S (b - 1)) in Hbez at 1 by flia Haz Hba.
   remember (gcd_bezout_loop (a + b + 1) b (a mod b)) as gb eqn:Hgb.
   symmetry in Hgb.
@@ -3047,7 +3044,25 @@ destruct (lt_dec b a) as [Hba| Hba]. {
   remember ((u * b + v * (a - a mod b)) / b) as w eqn:Hw; symmetry in Hw.
   remember (max (v / b) (w / a) + 1) as k eqn:Hk.
   do 2 rewrite Nat.mul_sub_distr_l.
-(* fait chier, j'ai l'impression que je refais le même truc éternellement *)
+  destruct (Nat.eq_dec b 0) as [Hbz| Hbz]. {
+    subst b.
+    cbn in Hgb.
+    rewrite Nat.add_1_r in Hgb; cbn in Hgb.
+    do 2 rewrite Nat.mul_0_r.
+    do 2 rewrite Nat.mul_0_l; cbn.
+    congruence.
+  }
+  apply gcd_bezout_loop_prop_lt in Hgb; [ | easy | | ]; cycle 1. {
+    rewrite (Nat.add_comm b).
+    do 2 apply Nat.add_le_mono_r.
+    destruct (Nat.eq_dec a b) as [Hab| Hab]. {
+      subst b.
+      rewrite Nat.mod_same; [ apply Nat.le_0_l | easy ].
+    }
+    rewrite Nat.mod_small; [ easy | flia Hba Hab ].
+  } {
+    now apply Nat.mod_upper_bound.
+  }
 ...
   apply gcd_bezout_loop_prop_lt in Hgb.
 ...
