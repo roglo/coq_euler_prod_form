@@ -2832,6 +2832,7 @@ Proof.
 intros * Haz.
 now apply fst_gcd_bezout_loop_is_gcd.
 Qed.
+
 Theorem gcd_bezout_loop_fst_0_gcd_0 : ∀ n a b g v,
   a ≠ 0
   → a + b + 1 ≤ n
@@ -2871,6 +2872,7 @@ rewrite Nat.add_comm.
 apply Nat.add_lt_mono_r.
 now apply Nat.mod_upper_bound.
 Qed.
+
 Theorem gcd_bezout_loop_prop_lt : ∀ n a b g u v,
   a ≠ 0
   → a + b + 1 ≤ n
