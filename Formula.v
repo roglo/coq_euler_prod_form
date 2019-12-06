@@ -2351,54 +2351,6 @@ Definition quad_res p :=
 
 Compute (let p := 13 in (euler_crit p, quad_res p)).
 
-(*
-Fixpoint merge l1 l2 :=
-  let fix merge_aux l2 :=
-  match l1, l2 with
-  | [], _ => l2
-  | _, [] => l1
-  | a1::l1', a2::l2' =>
-      if a1 <=? a2 then a1 :: merge l1' l2 else a2 :: merge_aux l2'
-  end
-  in merge_aux l2.
-
-Fixpoint merge_list_to_stack stack l :=
-  match stack with
-  | [] => [Some l]
-  | None :: stack' => Some l :: stack'
-  | Some l' :: stack' => None :: merge_list_to_stack stack' (merge l' l)
-  end.
-
-Fixpoint merge_stack stack :=
-  match stack with
-  | [] => []
-  | None :: stack' => merge_stack stack'
-  | Some l :: stack' => merge l (merge_stack stack')
-  end.
-
-Fixpoint iter_merge stack l :=
-  match l with
-  | [] => merge_stack stack
-  | a::l' => iter_merge (merge_list_to_stack stack [a]) l'
-  end.
-
-Definition sort := iter_merge [].
-
-Fixpoint uniq l :=
-  match l with
-  | [] => []
-  | a :: l' =>
-      match l' with
-      | [] => [a]
-      | b :: _ =>
-          if Nat.eq_dec a b then uniq l' else a :: uniq l'
-      end
-  end.
-
-Compute (let p := 13 in (euler_crit p, uniq (sort (quad_res p)))).
-Compute (let p := 23 in (euler_crit p, uniq (sort (quad_res p)))).
-*)
-
 Theorem quad_res_in_seq : ∀ p, prime p →
   ∀ a, a ∈ quad_res p → a ∈ seq 1 (p - 1).
 Proof.
