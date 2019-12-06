@@ -2873,39 +2873,22 @@ rewrite Nat.add_comm.
 apply Nat.add_lt_mono_r.
 now apply Nat.mod_upper_bound.
 Qed.
-
-Theorem glop : ∀ a b g u v,
-  a ≠ 0
-  → gcd_and_bezout a b = (g, (u, v))
-  → a * u = b * v + g.
-Proof.
-intros * Haz Hbez.
-unfold gcd_and_bezout in Hbez.
-Theorem glop : ∀ n a b g u v,
+Theorem gcd_bezout_loop_prop_lt : ∀ n a b g u v,
   a ≠ 0
   → a + b + 1 ≤ n
+  → b < a
   → gcd_bezout_loop n a b = (g, (u, v))
   → a * u = b * v + g.
 Proof.
-intros * Haz Hn Hnab.
+intros * Haz Hn Hba Hnab.
 assert (Hgcd : g = Nat.gcd a b). {
   apply fst_gcd_bezout_loop_is_gcd in Hn; [ | easy ].
   now rewrite Hnab in Hn; cbn in Hn.
 }
 rewrite (gcd_bezout_loop_enough_iter _ (S n)) in Hnab; [ | easy | flia Hn ].
-revert a b g u v Haz Hn Hnab Hgcd.
+revert a b g u v Haz Hn Hba Hnab Hgcd.
 induction n; intros; [ flia Hn | ].
 remember (S n) as sn; cbn in Hnab; subst sn.
-(*
-...
-intros * Haz Hn Hnab.
-assert (Hgcd : g = Nat.gcd a b). {
-  apply fst_gcd_bezout_loop_is_gcd in Hn; [ | easy ].
-  now rewrite Hnab in Hn; cbn in Hn.
-}
-rewrite (gcd_bezout_loop_enough_iter _ (S n)) in Hnab; [ | easy | flia Hn ].
-cbn in Hnab.
-*)
 destruct (Nat.eq_dec b 0) as [Hbz| Hbz]. {
   subst b.
   rewrite Nat.mul_0_l.
@@ -2984,23 +2967,89 @@ rewrite <- Nat_sub_sub_distr. 2: {
   }
 }
 f_equal.
-...
-apply IHn in Hgb; [ | easy | | ]; cycle 1. {
-transitivity (a + b); [ | flia Hn ].
-rewrite <- Nat.add_assoc, Nat.add_comm.
-apply Nat.add_le_mono_r.
-  rewrite Hc.
-  now apply Nat.mod_le.
+apply IHn in Hgb; [ | easy | | | ]; cycle 1. {
+  transitivity (a + b); [ | flia Hn ].
+  rewrite <- Nat.add_assoc, Nat.add_comm.
+  apply Nat.add_le_mono_r.
+  apply (Nat.add_le_mono_l _ _ (b * (a / b))).
+  rewrite Nat.add_assoc.
+  rewrite <- Nat.div_mod; [ | easy ].
+  rewrite Nat.add_comm.
+  apply Nat.add_le_mono_r.
+  remember (a / b) as q eqn:Hq; symmetry in Hq.
+  destruct q. {
+    apply Nat.div_small_iff in Hq; [ flia Hba Hq | easy ].
+  }
+  destruct b; [ easy | ].
+  cbn; remember (b * S q); flia.
 } {
   now apply Nat.mod_upper_bound.
+} {
+  rewrite Nat.gcd_comm, Nat.gcd_mod; [ | easy ].
+  now rewrite Nat.gcd_comm.
+}
+rewrite <- Hw.
+rewrite <- Nat.divide_div_mul_exact; [ | easy | ]. 2: {
+  exists (u + v * (a - a mod b) / b).
+  rewrite Nat.mul_add_distr_r; f_equal.
+  rewrite Nat.divide_div_mul_exact; [ | easy | ]. 2: {
+    exists (a / b).
+    rewrite (Nat.div_mod a b Hbz) at 1.
+    now rewrite Nat.add_sub, Nat.mul_comm.
+  }
+  rewrite <- Nat.mul_assoc; f_equal.
+  rewrite Nat.mul_comm.
+  rewrite <- Nat.divide_div_mul_exact; [ | easy | ]. 2: {
+    exists (a / b).
+    rewrite (Nat.div_mod a b Hbz) at 1.
+    now rewrite Nat.add_sub, Nat.mul_comm.
+  }
+  rewrite Nat.mul_comm.
+  now rewrite Nat.div_mul.
+}
+rewrite (Nat.mul_comm b).
+rewrite Nat.div_mul; [ | easy ].
+rewrite Nat.mul_sub_distr_l, (Nat.mul_comm v).
+rewrite Nat.add_sub_assoc. 2: {
+  rewrite Nat.mul_comm.
+  apply Nat.mul_le_mono_r.
+  now apply Nat.mod_le.
+}
+symmetry; apply Nat.add_sub_eq_l.
+symmetry; apply Nat.add_sub_eq_l.
+rewrite Nat.add_assoc; f_equal.
+now rewrite (Nat.mul_comm u), (Nat.mul_comm v).
+Qed.
+
+Theorem gcd_bezout_loop_prop : ∀ a b g u v,
+  a ≠ 0
+  → gcd_and_bezout a b = (g, (u, v))
+  → a * u = b * v + g.
+Proof.
+intros * Haz Hbez.
+unfold gcd_and_bezout in Hbez.
+destruct (lt_dec b a) as [Hba| Hba]. {
+  now apply (gcd_bezout_loop_prop_lt (a + b + 1)).
+} {
+  apply Nat.nlt_ge in Hba.
+  rewrite (gcd_bezout_loop_enough_iter _ (S (a + b + 1))) in Hbez; cycle 1. {
+    easy.
+  } {
+    flia.
+  }
+  cbn in Hbez.
+  replace b with (S (b - 1)) in Hbez at 1 by flia Haz Hba.
+  remember (gcd_bezout_loop (a + b + 1) b (a mod b)) as gb eqn:Hgb.
+  symmetry in Hgb.
+  destruct gb as (g', (u', v')).
+  injection Hbez; clear Hbez; intros; subst g u v.
+  rename g' into g; rename u' into u; rename v' into v.
+  remember ((u * b + v * (a - a mod b)) / b) as w eqn:Hw; symmetry in Hw.
+  remember (max (v / b) (w / a) + 1) as k eqn:Hk.
+  do 2 rewrite Nat.mul_sub_distr_l.
+(* fait chier, j'ai l'impression que je refais le même truc éternellement *)
 ...
-
-f_equal; symmetry.
-
-apply Nat.add_sub_eq_r; symmetry.
-
-apply IHn.
-Search (_ = _ + _ → _ = _ - _).
+  apply gcd_bezout_loop_prop_lt in Hgb.
 ...
 
 Theorem gcd_bezout_loop_prop : ∀ n a b g neg u v,
