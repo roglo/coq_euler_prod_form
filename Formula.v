@@ -3275,8 +3275,16 @@ assert
 assert
   (Hg : ∀ a, a ∈ list_prod (coprimes m) (coprimes n) →
    coprimes_mul_of_prod_coprimes m n a ∈ coprimes (m * n)). {
-  intros a Ha.
+  intros (a, b) Hab.
+  apply in_prod_iff in Hab.
+  destruct Hab as (Ha, Hb).
+  apply in_coprimes_iff in Ha.
+  apply in_coprimes_iff in Hb.
+  destruct Ha as (Ha, Hma).
+  destruct Hb as (Hb, Hnb).
+  move Hb before Ha.
   unfold coprimes_mul_of_prod_coprimes.
+  apply in_coprimes_iff.
 ...
 
 Definition coprimes_mul_of_prod_coprimes m n :=
