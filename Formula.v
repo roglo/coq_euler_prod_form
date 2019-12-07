@@ -3216,14 +3216,11 @@ assert
     apply in_coprimes_iff.
     split; [ easy | ].
     apply Nat_gcd_1_mul_l. {
-      apply Nat.bezout_1_gcd.
-...
       remember (gcd_and_bezout m a) as gb eqn:Hgb; symmetry in Hgb.
       destruct gb as (g, (u, v)).
       specialize (gcd_and_bezout_prop m a g u v) as H1.
       assert (H : m ≠ 0) by flia H2m.
       specialize (H1 H Hgb) as (Hb, Hg); clear H.
-      rewrite <- Hg.
 ...
 
 Definition coprimes_mul_of_prod_coprimes m n :=
