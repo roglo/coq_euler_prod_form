@@ -3292,6 +3292,37 @@ assert
   destruct gb as (g & u & v); cbn.
   apply in_coprimes_iff.
   split. {
+    apply in_seq.
+    split. 2: {
+      rewrite Nat.add_comm.
+      rewrite Nat.sub_add. 2: {
+        destruct m; [ flia Hmz | ].
+        destruct n; [ flia Hnz | ].
+        cbn; remember (m * S n); flia.
+      }
+      apply Nat.mod_upper_bound.
+      now apply Nat.neq_mul_0.
+    } {
+      unfold Nat_diff.
+      destruct (le_dec (m * b * u) (n * a * v)) as [Hmbu| Hnav]. {
+        specialize (gcd_and_bezout_prop m n g u v Hmz Hgb) as (Hmng & Hg).
+        rewrite Hmn in Hg; subst g.
+Search gcd_and_bezout.
+Check Nat_bezout_comm.
+assert (Nat.Bezout n m 1). {
+  apply Nat_bezout_comm; [ easy | ].
+  exists u, v.
+  now rewrite (Nat.mul_comm u), (Nat.mul_comm v), Nat.add_comm.
+}
+destruct H as (u' & v' & Huv).
+(* ah oui mais non *)
+...
+        setoid_rewrite Nat.mul_shuffle0.
+        rewrite Hmng.
+        rewrite Nat.mul_add_distr_r, Nat.mul_1_l.
+        rewrite Nat.sub_add_distr.
+        rewrite <- Nat.mul_sub_distr_l.
+        setoid_rewrite Nat.mul_shuffle0 in Hmbu.
 ...
 
 Definition coprimes_mul_of_prod_coprimes m n :=
