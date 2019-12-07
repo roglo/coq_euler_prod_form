@@ -3196,6 +3196,30 @@ assert
    prod_coprimes_of_coprimes_mul m n a ∈
    list_prod (coprimes m) (coprimes n)). {
   intros * Ha.
+  apply in_coprimes_iff in Ha.
+  destruct Ha as (Ha, Hga).
+  apply in_seq in Ha.
+  rewrite Nat.add_comm, Nat.sub_add in Ha by flia Ha.
+  unfold prod_coprimes_of_coprimes_mul.
+  apply in_prod. {
+    apply in_coprimes_iff.
+    split. {
+      apply in_seq.
+      split. {
+        remember (a mod m) as r eqn:Hr; symmetry in Hr.
+        destruct r; [ | flia ].
+        apply Nat.mod_divides in Hr; [ | easy ].
+        destruct Hr as (k, Hk).
+        rewrite Hk in Hga.
+        rewrite Nat.gcd_mul_mono_l in Hga.
+        apply Nat.eq_mul_1 in Hga.
+        flia Hga H2m.
+      } {
+        rewrite Nat.add_comm, Nat.sub_add; [ | flia Hmz ].
+        now apply Nat.mod_upper_bound.
+      }
+    } {
+      rewrite Nat.gcd_comm, Nat.gcd_mod; [ | easy ].
 ...
 assert
   (Hmiff : ∀ a,
