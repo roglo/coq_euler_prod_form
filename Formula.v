@@ -3201,6 +3201,8 @@ assert
   apply in_seq in Ha.
   rewrite Nat.add_comm, Nat.sub_add in Ha by flia Ha.
   unfold prod_coprimes_of_coprimes_mul.
+  assert (H : ∀ b, a mod b ∈ coprimes b). {
+...
   apply in_prod. {
     apply in_coprimes_iff.
     split. {
@@ -3220,6 +3222,22 @@ assert
       }
     } {
       rewrite Nat.gcd_comm, Nat.gcd_mod; [ | easy ].
+      remember (Nat.gcd m a) as g eqn:Hg; symmetry in Hg.
+      destruct g; [ now apply Nat.gcd_eq_0_l in Hg | ].
+      destruct g; [ easy | exfalso ].
+      replace (S (S g)) with (g + 2) in Hg by flia.
+      specialize (Nat.gcd_divide_l m a) as H1.
+      specialize (Nat.gcd_divide_r m a) as H2.
+      rewrite Hg in H1, H2.
+      destruct H1 as (k1, Hk1).
+      destruct H2 as (k2, Hk2).
+      rewrite Hk1, Hk2 in Hga.
+      rewrite Nat.mul_shuffle0 in Hga.
+      rewrite Nat.gcd_mul_mono_r in Hga.
+      apply Nat.eq_mul_1 in Hga.
+      flia Hga.
+    }
+  }
 ...
 assert
   (Hmiff : ∀ a,
