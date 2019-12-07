@@ -3168,8 +3168,11 @@ Qed.
 
 Definition prod_coprimes_of_coprimes_mul m n a := (a mod m, a mod n).
 
+Definition Nat_diff a b := if le_dec a b then b - a else a - b.
+
 Definition coprimes_mul_of_prod_coprimes (m n : nat) '((x, y) : nat * nat) :=
-  42.
+  let '(u, v) := snd (gcd_and_bezout m n) in
+  Nat_diff (m * y * u) (n * x * v) mod (m * n).
 
 (*
 ...
@@ -3284,7 +3287,11 @@ assert
   destruct Hb as (Hb, Hnb).
   move Hb before Ha.
   unfold coprimes_mul_of_prod_coprimes.
+  remember (gcd_and_bezout m n) as gb eqn:Hgb.
+  symmetry in Hgb.
+  destruct gb as (g & u & v); cbn.
   apply in_coprimes_iff.
+  split. {
 ...
 
 Definition coprimes_mul_of_prod_coprimes m n :=
@@ -3303,15 +3310,9 @@ f : a ↦ (a mod m, a mod n)
 g : (x, y) ↦ ?
 
 Bezout m n (gcd m n) → ∃ u v tels que mu = 1 + nv
-a = (myu + nxv) mod (m * n)
 
-a mod m = (myu+nxv) mod mn mod m = (myu+nxv) mod m = nxv mod m
-  = x(nv) mod m = x(mu-1) mod m = x(mu+m-1) mod m = x(m-1) mod m
+-- gcd_and_bezout m n = (g, (u, v)) et j'ai mu = 1 + nv
 
-  bin ça donne pas x ! bon, pas loin, d'accord, c'est x(m-1)mod m
-  mais c'est pas x
-
-Bezout m n (gcd m n) → ∃ u v tels que mu = 1 + nv
 Si myu ≥ nxv, on prend
   a = (myu - nxv) mod (m * n)
   a mod m
