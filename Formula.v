@@ -3189,6 +3189,26 @@ intros * H2m H2n Hmn.
 unfold φ.
 rewrite <- prod_length.
 Inspect 3.
+Print coprimes.
+assert (Hmiff : ∀ a, a ∈ coprimes (m * n) ↔ a mod m ≠ 0 ∧ a mod n ≠ 0). {
+  intros.
+  split; intros Ha. {
+    apply filter_In in Ha.
+    destruct Ha as (Ha & Hgcd).
+    apply Nat.eqb_eq in Hgcd.
+    assert (H : ∀ b c, 2 ≤ b → Nat.gcd (b * c) a = 1 → a mod b ≠ 0). {
+      intros * H2b Hbc Hab.
+      apply Nat.mod_divide in Hab; [ | flia H2b ].
+      destruct Hab as (k, Hk).
+      rewrite Hk, Nat.mul_comm in Hbc.
+      rewrite Nat.gcd_mul_mono_r in Hbc.
+      apply Nat.eq_mul_1 in Hbc.
+      flia Hbc H2b.
+    }
+    split; [ now apply (H _ n) | ].
+    now rewrite Nat.mul_comm in Hgcd; apply (H _ m).
+  } {
+    destruct Ha as (Ham, Han).
 ...
 
 Definition coprimes_mul_of_prod_coprimes m n :=
