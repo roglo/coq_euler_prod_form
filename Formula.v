@@ -3190,12 +3190,16 @@ unfold φ.
 rewrite <- prod_length.
 Inspect 3.
 Print coprimes.
-assert (Hmiff : ∀ a, a ∈ coprimes (m * n) ↔ a mod m ≠ 0 ∧ a mod n ≠ 0). {
+assert
+  (Hmiff : ∀ a,
+   a ∈ coprimes (m * n) ↔
+   a ∈ seq 1 (m * n - 1) ∧ a mod m ≠ 0 ∧ a mod n ≠ 0). {
   intros.
   split; intros Ha. {
     apply filter_In in Ha.
     destruct Ha as (Ha & Hgcd).
     apply Nat.eqb_eq in Hgcd.
+    split; [ easy | ].
     assert (H : ∀ b c, 2 ≤ b → Nat.gcd (b * c) a = 1 → a mod b ≠ 0). {
       intros * H2b Hbc Hab.
       apply Nat.mod_divide in Hab; [ | flia H2b ].
@@ -3208,7 +3212,21 @@ assert (Hmiff : ∀ a, a ∈ coprimes (m * n) ↔ a mod m ≠ 0 ∧ a mod n ≠ 
     split; [ now apply (H _ n) | ].
     now rewrite Nat.mul_comm in Hgcd; apply (H _ m).
   } {
-    destruct Ha as (Ham, Han).
+    destruct Ha as (Hseq & Ham & Han).
+    apply filter_In.
+    split; [ easy | ].
+    apply Nat.eqb_eq.
+    apply Nat_gcd_1_mul_l. {
+(* chinese remainder theorem, perhaps? *)
+...
+      apply Nat.bezout_1_gcd.
+...
+      remember (gcd_and_bezout m a) as gb eqn:Hgb; symmetry in Hgb.
+      destruct gb as (g, (u, v)).
+      specialize (gcd_and_bezout_prop m a g u v) as H1.
+      assert (H : m ≠ 0) by flia H2m.
+      specialize (H1 H Hgb) as (Hb, Hg); clear H.
+      rewrite <- Hg.
 ...
 
 Definition coprimes_mul_of_prod_coprimes m n :=

@@ -543,30 +543,39 @@ destruct c; [ easy | ].
 cbn; remember (c * _); flia.
 Qed.
 
+Theorem Nat_gcd_1_mul_l : ∀ a b c,
+  Nat.gcd a c = 1
+  → Nat.gcd b c = 1
+  → Nat.gcd (a * b) c = 1.
+Proof.
+intros * Hac Hbc.
+destruct (Nat.eq_dec c 0) as [Hcz| Hcz]. {
+  now subst c; rewrite Nat.gcd_comm in Hac, Hbc; cbn in Hac, Hbc; subst a b.
+}
+destruct (Nat.eq_dec a 0) as [Haz| Haz]; [ now subst a | ].
+destruct (Nat.eq_dec b 0) as [Hbz| Hbz]. {
+  now subst b; rewrite Nat.mul_0_r.
+}
+apply Nat.bezout_1_gcd.
+apply Nat_bezout_mul. {
+  rewrite <- Hac.
+  apply Nat.gcd_bezout_pos.
+  flia Haz.
+} {
+  rewrite <- Hbc.
+  apply Nat.gcd_bezout_pos.
+  flia Hbz.
+}
+Qed.
+
 Theorem Nat_gcd_1_mul_r : ∀ a b c,
   Nat.gcd a b = 1
   → Nat.gcd a c = 1
   → Nat.gcd a (b * c) = 1.
 Proof.
 intros * Hab Hac.
-destruct (Nat.eq_dec a 0) as [Haz| Haz]. {
-  now subst a; cbn in Hab, Hac; subst b c.
-}
-destruct (Nat.eq_dec b 0) as [Hbz| Hbz]; [ now subst b | ].
-destruct (Nat.eq_dec c 0) as [Hcz| Hcz]. {
-  now subst c; rewrite Nat.mul_0_r.
-}
-apply Nat.bezout_1_gcd.
-apply Nat_bezout_comm; [ easy | ].
-apply Nat_bezout_mul. {
-  rewrite <- Hab, Nat.gcd_comm.
-  apply Nat.gcd_bezout_pos.
-  flia Hbz.
-} {
-  rewrite <- Hac, Nat.gcd_comm.
-  apply Nat.gcd_bezout_pos.
-  flia Hcz.
-}
+rewrite Nat.gcd_comm.
+now apply Nat_gcd_1_mul_l; rewrite Nat.gcd_comm.
 Qed.
 
 Theorem Nat_pow_sub_pow : ∀ a b n,
