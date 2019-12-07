@@ -3186,10 +3186,11 @@ Theorem totient_multiplicative : ∀ m n,
   2 ≤ m → 2 ≤ n → Nat.gcd m n = 1 → φ (m * n) = φ m * φ n.
 Proof.
 intros * H2m H2n Hmn.
+assert (Hmz : m ≠ 0) by flia H2m.
+assert (Hnz : n ≠ 0) by flia H2n.
+move H2n before n; move H2m before n.
 unfold φ.
 rewrite <- prod_length.
-Inspect 3.
-Print coprimes.
 assert
   (Hmiff : ∀ a,
    a ∈ coprimes (m * n) ↔
@@ -3218,9 +3219,9 @@ assert
     apply Nat_gcd_1_mul_l. {
       remember (gcd_and_bezout m a) as gb eqn:Hgb; symmetry in Hgb.
       destruct gb as (g, (u, v)).
-      specialize (gcd_and_bezout_prop m a g u v) as H1.
-      assert (H : m ≠ 0) by flia H2m.
-      specialize (H1 H Hgb) as (Hb, Hg); clear H.
+      specialize (gcd_and_bezout_prop m a g u v Hmz Hgb) as (Hb, Hg).
+      specialize (Nat.div_mod a m Hmz) as H1.
+      specialize (Nat.div_mod a n Hnz) as H2.
 ...
 
 Definition coprimes_mul_of_prod_coprimes m n :=
