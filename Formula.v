@@ -3216,12 +3216,14 @@ assert
     destruct Ha as (Hseq & Ham & Han).
     apply in_coprimes_iff.
     split; [ easy | ].
+...
     apply Nat_gcd_1_mul_l. {
       remember (gcd_and_bezout m a) as gb eqn:Hgb; symmetry in Hgb.
       destruct gb as (g, (u, v)).
       specialize (gcd_and_bezout_prop m a g u v Hmz Hgb) as (Hb, Hg).
       specialize (Nat.div_mod a m Hmz) as H1.
       specialize (Nat.div_mod a n Hnz) as H2.
+      rewrite H1 in Hb.
 ...
 
 Definition coprimes_mul_of_prod_coprimes m n :=
