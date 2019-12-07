@@ -3164,8 +3164,6 @@ rewrite Nat.mul_comm, Nat.add_comm.
 now rewrite (Nat.mul_comm v).
 Qed.
 
-...
-
 (* totient is multiplicative *)
 
 Definition prod_coprimes_of_coprimes_mul m n a := (a mod m, a mod n).
@@ -3173,17 +3171,16 @@ Definition prod_coprimes_of_coprimes_mul m n a := (a mod m, a mod n).
 Definition coprimes_mul_of_prod_coprimes (m n : nat) '((x, y) : nat * nat) :=
   42.
 
+(*
 ...
-
-(**)
 
 Theorem prod_coprimes_of_coprimes_mul_prod : ∀ m n a (p : a ∈ coprimes (m * n)),
   prod_coprimes_of_coprimes_mul m n a ∈ list_prod (coprimes m) (coprimes n).
 Proof.
 intros.
 Search ((_, _) ∈ _).
-
 ...
+*)
 
 Theorem totient_multiplicative : ∀ m n,
   2 ≤ m → 2 ≤ n → Nat.gcd m n = 1 → φ (m * n) = φ m * φ n.
@@ -3191,9 +3188,9 @@ Proof.
 intros * H2m H2n Hmn.
 unfold φ.
 rewrite <- prod_length.
-Proof.
+Inspect 3.
 ...
-Inspect 1.
+
 Definition coprimes_mul_of_prod_coprimes m n :=
 Search (_ mod (_ * _)).
 Print Nat.Bezout.
