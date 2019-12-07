@@ -3213,12 +3213,9 @@ assert
     now rewrite Nat.mul_comm in Hgcd; apply (H _ m).
   } {
     destruct Ha as (Hseq & Ham & Han).
-    apply filter_In.
+    apply in_coprimes_iff.
     split; [ easy | ].
-    apply Nat.eqb_eq.
     apply Nat_gcd_1_mul_l. {
-(* chinese remainder theorem, perhaps? *)
-...
       apply Nat.bezout_1_gcd.
 ...
       remember (gcd_and_bezout m a) as gb eqn:Hgb; symmetry in Hgb.
