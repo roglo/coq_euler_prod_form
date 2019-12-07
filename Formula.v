@@ -3174,6 +3174,46 @@ Definition coprimes_mul_of_prod_coprimes (m n : nat) '((x, y) : nat * nat) :=
   let '(u, v) := snd (gcd_and_bezout m n) in
   Nat_diff (m * y * u) (n * x * v) mod (m * n).
 
+Theorem coprimes_mul_prod_coprimes : ∀ m n a,
+  m ≠ 0
+  → coprimes_mul_of_prod_coprimes m n (prod_coprimes_of_coprimes_mul m n a) = a.
+Proof.
+intros * Hmz.
+unfold coprimes_mul_of_prod_coprimes.
+unfold prod_coprimes_of_coprimes_mul.
+remember (gcd_and_bezout m n) as gb eqn:Hgb.
+symmetry in Hgb.
+destruct gb as (g & u & v); cbn.
+unfold Nat_diff.
+specialize (gcd_and_bezout_prop m n g u v Hmz Hgb) as (Hmng & Hg).
+destruct (le_dec (m * (a mod n) * u) (n * (a mod m) * v)) as [Hmau| Hnav]. {
+Abort.
+
+Theorem prod_coprimes_coprimes_mul_prod : ∀ m n x y,
+  m ≠ 0
+  → prod_coprimes_of_coprimes_mul m n
+       (coprimes_mul_of_prod_coprimes m n (x, y)) = (x, y).
+Proof.
+intros * Hmz.
+unfold coprimes_mul_of_prod_coprimes.
+unfold prod_coprimes_of_coprimes_mul.
+remember (gcd_and_bezout m n) as gb eqn:Hgb.
+symmetry in Hgb.
+destruct gb as (g & u & v); cbn.
+specialize (gcd_and_bezout_prop m n g u v Hmz Hgb) as (Hmng & Hg).
+f_equal. {
+  unfold Nat_diff.
+  destruct (le_dec (m * y * u) (n * x * v)) as [Hmau| Hnav]. {
+(*
+  a mod m
+    = (nxv-myu) mod mn mod n
+    = ((nxv-myu) mod m + mk) mod m, avec k=... cf Nat.mod_mul_r
+    = ((nxv-myu) mod m mod m
+    = ((nxv-myu) mod m
+    = ((nxv+km-myu) mod m, faut que je trouve mon k pour positiver
+*)
+...
+
 (*
 ...
 
