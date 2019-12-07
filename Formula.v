@@ -3272,6 +3272,11 @@ assert
     }
   }
 }
+assert
+  (Hg : ∀ a, a ∈ list_prod (coprimes m) (coprimes n) →
+   coprimes_mul_of_prod_coprimes m n a ∈ coprimes (m * n)). {
+  intros a Ha.
+  unfold coprimes_mul_of_prod_coprimes.
 ...
 
 Definition coprimes_mul_of_prod_coprimes m n :=
