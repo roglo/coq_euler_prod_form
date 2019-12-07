@@ -3192,6 +3192,12 @@ move H2n before n; move H2m before n.
 unfold φ.
 rewrite <- prod_length.
 assert
+  (Hf : ∀ a, a ∈ coprimes (m * m) →
+   prod_coprimes_of_coprimes_mul m n a ∈
+   list_prod (coprimes m) (coprimes n)). {
+  intros * Ha.
+...
+assert
   (Hmiff : ∀ a,
    a ∈ coprimes (m * n) ↔
    a ∈ seq 1 (m * n - 1) ∧ a mod m ≠ 0 ∧ a mod n ≠ 0). {
