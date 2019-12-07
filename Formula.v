@@ -3187,7 +3187,12 @@ destruct gb as (g & u & v); cbn.
 unfold Nat_diff.
 specialize (gcd_and_bezout_prop m n g u v Hmz Hgb) as (Hmng & Hg).
 destruct (le_dec (m * (a mod n) * u) (n * (a mod m) * v)) as [Hmau| Hnav]. {
-Abort.
+  setoid_rewrite Nat.mul_shuffle0.
+  rewrite Hmng.
+  rewrite Nat.mul_add_distr_r.
+  rewrite Nat.sub_add_distr.
+  rewrite <- Nat.mul_sub_distr_l.
+...
 
 Theorem prod_coprimes_coprimes_mul_prod : ∀ m n x y,
   m ≠ 0
