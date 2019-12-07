@@ -2731,26 +2731,7 @@ destruct (le_dec a b) as [Hab| Hab]. {
   now apply gcd_bezout_loop_enough_iter_ge.
 } {
   apply Nat.nle_gt in Hab.
-  replace m with (S (m - 1)) by flia Habm.
-  replace n with (S (n - 1)) by flia Habn.
-  cbn.
-  destruct (Nat.eq_dec b 0) as [Hbz| Hbz]; [ now subst b | ].
-  replace b with (S (b - 1)) at 1 2 by flia Hbz.
-  rewrite (gcd_bezout_loop_enough_iter_lt _ (n - 1)); [ easy | | | ]. {
-    rewrite Nat.add_comm.
-    specialize (Nat.div_mod a b Hbz) as H1.
-    apply (Nat.add_le_mono_l _ _ (b * (a / b))).
-    rewrite Nat.add_assoc, <- H1.
-    flia Habm.
-  } {
-    rewrite Nat.add_comm.
-    specialize (Nat.div_mod a b Hbz) as H1.
-    apply (Nat.add_le_mono_l _ _ (b * (a / b))).
-    rewrite Nat.add_assoc, <- H1.
-    flia Habn.
-  } {
-    now apply Nat.mod_upper_bound.
-  }
+  apply gcd_bezout_loop_enough_iter_lt; [ flia Habm | flia Habn | easy ].
 }
 Qed.
 
