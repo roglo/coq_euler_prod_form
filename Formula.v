@@ -3201,8 +3201,6 @@ assert
   apply in_seq in Ha.
   rewrite Nat.add_comm, Nat.sub_add in Ha by flia Ha.
   unfold prod_coprimes_of_coprimes_mul.
-  assert (H : ∀ b, a mod b ∈ coprimes b). {
-...
   apply in_prod. {
     apply in_coprimes_iff.
     split. {
@@ -3237,41 +3235,43 @@ assert
       apply Nat.eq_mul_1 in Hga.
       flia Hga.
     }
-  }
-...
-assert
-  (Hmiff : ∀ a,
-   a ∈ coprimes (m * n) ↔
-   a ∈ seq 1 (m * n - 1) ∧ a mod m ≠ 0 ∧ a mod n ≠ 0). {
-  intros.
-  split; intros Ha. {
-    apply filter_In in Ha.
-    destruct Ha as (Ha & Hgcd).
-    apply Nat.eqb_eq in Hgcd.
-    split; [ easy | ].
-    assert (H : ∀ b c, 2 ≤ b → Nat.gcd (b * c) a = 1 → a mod b ≠ 0). {
-      intros * H2b Hbc Hab.
-      apply Nat.mod_divide in Hab; [ | flia H2b ].
-      destruct Hab as (k, Hk).
-      rewrite Hk, Nat.mul_comm in Hbc.
-      rewrite Nat.gcd_mul_mono_r in Hbc.
-      apply Nat.eq_mul_1 in Hbc.
-      flia Hbc H2b.
-    }
-    split; [ now apply (H _ n) | ].
-    now rewrite Nat.mul_comm in Hgcd; apply (H _ m).
   } {
-    destruct Ha as (Hseq & Ham & Han).
     apply in_coprimes_iff.
-    split; [ easy | ].
-...
-    apply Nat_gcd_1_mul_l. {
-      remember (gcd_and_bezout m a) as gb eqn:Hgb; symmetry in Hgb.
-      destruct gb as (g, (u, v)).
-      specialize (gcd_and_bezout_prop m a g u v Hmz Hgb) as (Hb, Hg).
-      specialize (Nat.div_mod a m Hmz) as H1.
-      specialize (Nat.div_mod a n Hnz) as H2.
-      rewrite H1 in Hb.
+    rewrite Nat.mul_comm in Hga.
+    split. {
+      apply in_seq.
+      split. {
+        remember (a mod n) as r eqn:Hr; symmetry in Hr.
+        destruct r; [ | flia ].
+        apply Nat.mod_divides in Hr; [ | easy ].
+        destruct Hr as (k, Hk).
+        rewrite Hk in Hga.
+        rewrite Nat.gcd_mul_mono_l in Hga.
+        apply Nat.eq_mul_1 in Hga.
+        flia Hga H2n.
+      } {
+        rewrite Nat.add_comm, Nat.sub_add; [ | flia Hnz ].
+        now apply Nat.mod_upper_bound.
+      }
+    } {
+      rewrite Nat.gcd_comm, Nat.gcd_mod; [ | easy ].
+      remember (Nat.gcd n a) as g eqn:Hg; symmetry in Hg.
+      destruct g; [ now apply Nat.gcd_eq_0_l in Hg | ].
+      destruct g; [ easy | exfalso ].
+      replace (S (S g)) with (g + 2) in Hg by flia.
+      specialize (Nat.gcd_divide_l n a) as H1.
+      specialize (Nat.gcd_divide_r n a) as H2.
+      rewrite Hg in H1, H2.
+      destruct H1 as (k1, Hk1).
+      destruct H2 as (k2, Hk2).
+      rewrite Hk1, Hk2 in Hga.
+      rewrite Nat.mul_shuffle0 in Hga.
+      rewrite Nat.gcd_mul_mono_r in Hga.
+      apply Nat.eq_mul_1 in Hga.
+      flia Hga.
+    }
+  }
+}
 ...
 
 Definition coprimes_mul_of_prod_coprimes m n :=
