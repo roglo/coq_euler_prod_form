@@ -3246,8 +3246,25 @@ destruct (lt_dec (m * y * u) (n * x * v)) as [Hmxu| Hnxv]. 2: {
     apply Nat.sub_0_le in H.
     now rewrite H, Nat.mul_0_r in Hnvxy.
   }
-(* mux-(nxv-myu) ≥ 0 *)
-(* mux-mxv+myu ≥? 0 *)
+...
+(* mux-(nxv-myu) ≥ 0
+   mux-nxv+myu ≥? 0
+   mux+myu ≥? nxv
+   mu(x+y) ≥? nxv
+   (nv+1)(x+y) ≥? nxv
+   nxv+nyv+(x+y) ≥! nxv *)
+
+(mux-(nxv-myu)) mod m = (mux+myu-nxv) mod m = ((nv+1)x+myu-nxv) mod m
+  = ((nv+1)x-nxv+myu) mod m = x mod m
+
+(mux-(nxv-myu)) mod n = (mux+myu-nxv) mod n =
+  (mux+(nv+1)y-nxv) mod n =
+  (mux+y-nvx+nvy) mod n =
+  (y+mux-nvx) mod n =
+  (y+(nx+1)x-nvx) mod n =
+  (y+x) mod n
+  shit *)
+
 ...
   assert (Huv : v ≤ u). { (* not sure but required *)
 (* enough mv ≤ mu
