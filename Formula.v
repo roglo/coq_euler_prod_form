@@ -3216,6 +3216,39 @@ f_equal. {
     rewrite Hg, Hgmn, Nat.mul_1_l.
     now rewrite Nat.mod_small.
   } {
+    rewrite Nat.mod_mul_r; [ | easy | easy ].
+    remember ((n * x * v - m * y * u)) as p eqn:Hp.
+    rewrite (Nat.mul_comm m); subst p.
+    rewrite Nat.mod_add; [ | easy ].
+    rewrite Nat.mod_mod; [ | easy ].
+(* faut faire disparaître y *)
+...
+    rewrite (Nat.mul_shuffle0 m).
+    rewrite Hmng, Nat.mul_add_distr_r.
+...
+    rewrite <- (Nat.mod_add _ (y * u)); [ | easy ].
+    rewrite (Nat.mul_comm _ m), Nat.mul_assoc.
+    rewrite Nat.sub_add; [ | easy ].
+...
+    rewrite <- (Nat.mod_add _ (u * x)); [ | easy ].
+
+
+    rewrite <- Nat.add_sub_swap; [ | easy ].
+    rewrite Nat.add_comm.
+    rewrite Nat.add_sub_swap. 2: {
+      setoid_rewrite Nat.mul_shuffle0.
+      apply Nat.mul_le_mono_r.
+...
+      rewrite (Nat.mul_comm u), Hmng; flia.
+    }
+    rewrite <- (Nat.mul_assoc m), (Nat.mul_comm m).
+    rewrite Nat.mod_add; [ | easy ].
+    setoid_rewrite Nat.mul_shuffle0.
+    rewrite <- Nat.mul_sub_distr_r.
+    rewrite (Nat.mul_comm u), Hmng.
+    rewrite Nat.add_comm, Nat.add_sub.
+    rewrite Hg, Hgmn, Nat.mul_1_l.
+    now rewrite Nat.mod_small.
 (*
   a mod m
     = (nxv-myu) mod mn mod n
