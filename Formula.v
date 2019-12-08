@@ -3233,22 +3233,6 @@ destruct (lt_dec (m * y * u) (n * x * v)) as [Hmxu| Hnxv]. 2: {
     now rewrite Nat.mod_small.
   }
 } {
-  remember ((n * x * v - m * y * u)) as p eqn:Hp.
-  rewrite Nat.mod_mul_r at 1; [ | easy | easy ].
-  rewrite (Nat.mul_comm m n).
-  rewrite Nat.mod_mul_r; [ | easy | easy ].
-  rewrite (Nat.mul_comm m).
-  rewrite (Nat.mul_comm n).
-  rewrite Nat.mod_add; [ | easy ].
-  rewrite Nat.mod_add; [ | easy ].
-  rewrite Nat.mod_mod; [ | easy ].
-  rewrite Nat.mod_mod; [ | easy ].
-(* nxv mod m = (mu-1)x mod m = (mu+m-1)x mod m = (m-1)x mod m ≠ x *)
-...
-  rewrite <- (Nat.mod_add p (u * x)); [ | easy ].
-  rewrite <- (Nat.mod_add p (x * v)); [ | easy ].
-  subst p.
-...
   assert (Hnvxy : y < n * v * (x - y)). {
     rewrite Nat.mul_shuffle0, Hmng in Hmxu.
     rewrite Nat.mul_add_distr_r, Nat.mul_1_l in Hmxu.
@@ -3262,6 +3246,32 @@ destruct (lt_dec (m * y * u) (n * x * v)) as [Hmxu| Hnxv]. 2: {
     apply Nat.sub_0_le in H.
     now rewrite H, Nat.mul_0_r in Hnvxy.
   }
+  assert (Huv : v ≤ u). { (* not sure but required *)
+(* enough mv ≤ mu
+   enough mv ≤ nv + 1
+*)
+...
+  remember ((n * x * v - m * y * u)) as p eqn:Hp.
+  rewrite Nat.mod_mul_r at 1; [ | easy | easy ].
+  rewrite (Nat.mul_comm m n).
+  rewrite Nat.mod_mul_r; [ | easy | easy ].
+  rewrite (Nat.mul_comm m).
+  rewrite (Nat.mul_comm n).
+  rewrite Nat.mod_add; [ | easy ].
+  rewrite Nat.mod_add; [ | easy ].
+  rewrite Nat.mod_mod; [ | easy ].
+  rewrite Nat.mod_mod; [ | easy ].
+(* nxv mod m = (mu-1)x mod m = (mu+m-1)x mod m = (m-1)x mod m ≠ x *)
+(* (mux-nxv) mod m = (mu-(mu-1))x mod m = x mod m *)
+(* mux-(nxv-myu) *)
+(* mux-mxv+myu ≥? 0 *)
+(* mx(u-v)+myu ≥? 0 *)
+(* est-ce que u ≥ v ? *)
+...
+  rewrite <- (Nat.mod_add p (u * x)); [ | easy ].
+  rewrite <- (Nat.mod_add p (x * v)); [ | easy ].
+  subst p.
+...
 Print coprimes_mul_of_prod_coprimes.
 ...
 (* instead of 42, put the good function f such that
