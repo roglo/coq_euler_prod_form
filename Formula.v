@@ -3170,10 +3170,31 @@ Definition prod_coprimes_of_coprimes_mul m n a := (a mod m, a mod n).
 
 Definition coprimes_mul_of_prod_coprimes (m n : nat) '((x, y) : nat * nat) :=
   let '(u, v) := snd (gcd_and_bezout m n) in
-  if lt_dec (m * y * u) (n * x * v) then
-    (n * x * v - m * y * u) mod (m * n)
-  else
-    (m * y * u - n * x * v) mod (m * n).
+  m * n - (m * n * y * u + n * x * v - m * y * u) mod (m * n).
+
+(*
+Section Halte.
+
+Let m := 17.
+Let n := 12.
+
+Compute (coprimes (m * n)).
+
+Compute
+  (map (λ a,
+  (coprimes_mul_of_prod_coprimes m n
+     (prod_coprimes_of_coprimes_mul m n a))) (coprimes (m * n))).
+
+Compute (list_prod (coprimes m) (coprimes n)).
+
+Compute
+  (map (λ xy,
+    (prod_coprimes_of_coprimes_mul m n
+       (coprimes_mul_of_prod_coprimes m n xy)))
+         (list_prod (coprimes m) (coprimes n))).
+
+End Halte.
+*)
 
 Theorem prod_coprimes_coprimes_mul_prod : ∀ m n,
   n ≠ 0
@@ -3200,6 +3221,7 @@ destruct (lt_dec (m * y * u) (n * x * v)) as [Hmxu| Hnxv]. 2: {
   rewrite Nat.mod_mul_r; [ | easy | easy ].
   rewrite (Nat.mul_comm m).
   rewrite (Nat.mul_comm n).
+...
   rewrite Nat.mod_add; [ | easy ].
   rewrite Nat.mod_add; [ | easy ].
   rewrite Nat.mod_mod; [ | easy ].
