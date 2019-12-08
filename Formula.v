@@ -3246,6 +3246,9 @@ destruct (lt_dec (m * y * u) (n * x * v)) as [Hmxu| Hnxv]. 2: {
     apply Nat.sub_0_le in H.
     now rewrite H, Nat.mul_0_r in Hnvxy.
   }
+(* mux-(nxv-myu) ≥ 0 *)
+(* mux-mxv+myu ≥? 0 *)
+...
   assert (Huv : v ≤ u). { (* not sure but required *)
 (* enough mv ≤ mu
    enough mv ≤ nv + 1
