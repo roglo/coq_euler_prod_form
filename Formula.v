@@ -3251,6 +3251,9 @@ Print coprimes_mul_of_prod_coprimes.
 (* instead of 42, put the good function f such that
       f(m,n,x,y,u,v) mod m = x
       f(m,n,x,y,u,v) mod n = y *)
+
+nxv-myu = nxv-(nv+1)y = nv(x-y)-y
+myu-nxv = (nv+1)y-nxv = nv(y-x)+y
 ...
     apply (Nat.mul_lt_mono_pos_l (n * v)).
 ...
