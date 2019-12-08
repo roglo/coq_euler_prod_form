@@ -3191,6 +3191,7 @@ remember (gcd_and_bezout m n) as gb eqn:Hgb.
 symmetry in Hgb.
 destruct gb as (g & u & v); cbn.
 specialize (gcd_and_bezout_prop m n g u v Hmz Hgb) as (Hmng & Hg).
+rewrite Hgmn in Hg; subst g.
 f_equal. {
   destruct (lt_dec (m * y * u) (n * x * v)) as [Hmxu| Hnxv]. 2: {
     apply Nat.nlt_ge in Hnxv.
@@ -3213,7 +3214,7 @@ f_equal. {
     rewrite <- Nat.mul_sub_distr_r.
     rewrite (Nat.mul_comm u), Hmng.
     rewrite Nat.add_comm, Nat.add_sub.
-    rewrite Hg, Hgmn, Nat.mul_1_l.
+    rewrite Nat.mul_1_l.
     now rewrite Nat.mod_small.
   } {
 ...
