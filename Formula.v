@@ -3178,11 +3178,11 @@ Definition coprimes_mul_of_prod_coprimes (m n : nat) '((x, y) : nat * nat) :=
 Theorem prod_coprimes_coprimes_mul_prod : ∀ m n,
   n ≠ 0
   → Nat.gcd m n = 1
-  → ∀ x y, x < m →
+  → ∀ x y, x < m → y < n →
   prod_coprimes_of_coprimes_mul m n
      (coprimes_mul_of_prod_coprimes m n (x, y)) = (x, y).
 Proof.
-intros * Hnz Hgmn * Hxm.
+intros * Hnz Hgmn * Hxm Hyn.
 assert (Hmz : m ≠ 0) by flia Hxm.
 move Hmz before n.
 unfold coprimes_mul_of_prod_coprimes.
@@ -3192,8 +3192,8 @@ symmetry in Hgb.
 destruct gb as (g & u & v); cbn.
 specialize (gcd_and_bezout_prop m n g u v Hmz Hgb) as (Hmng & Hg).
 rewrite Hgmn in Hg; subst g.
-f_equal. {
-  destruct (lt_dec (m * y * u) (n * x * v)) as [Hmxu| Hnxv]. 2: {
+destruct (lt_dec (m * y * u) (n * x * v)) as [Hmxu| Hnxv]. 2: {
+  f_equal. {
     apply Nat.nlt_ge in Hnxv.
     rewrite Nat.mod_mul_r; [ | easy | easy ].
     remember ((m * y * u - n * x * v)) as p eqn:Hp.
@@ -3217,48 +3217,23 @@ f_equal. {
     rewrite Nat.mul_1_l.
     now rewrite Nat.mod_small.
   } {
-...
+    apply Nat.nlt_ge in Hnxv.
+    rewrite (Nat.mul_comm m n).
     rewrite Nat.mod_mul_r; [ | easy | easy ].
-    remember ((n * x * v - m * y * u)) as p eqn:Hp.
-    rewrite (Nat.mul_comm m); subst p.
+    remember ((m * y * u - n * x * v)) as p eqn:Hp.
+    rewrite (Nat.mul_comm n); subst p.
     rewrite Nat.mod_add; [ | easy ].
     rewrite Nat.mod_mod; [ | easy ].
-(* faut faire disparaître y *)
-...
-    rewrite (Nat.mul_shuffle0 m).
-    rewrite Hmng, Nat.mul_add_distr_r.
-...
-    rewrite <- (Nat.mod_add _ (y * u)); [ | easy ].
-    rewrite (Nat.mul_comm _ m), Nat.mul_assoc.
+    rewrite <- (Nat.mod_add _ (x * v)); [ | easy ].
+    rewrite (Nat.mul_comm _ n), Nat.mul_assoc.
     rewrite Nat.sub_add; [ | easy ].
-...
-    rewrite <- (Nat.mod_add _ (u * x)); [ | easy ].
-
-
-    rewrite <- Nat.add_sub_swap; [ | easy ].
-    rewrite Nat.add_comm.
-    rewrite Nat.add_sub_swap. 2: {
-      setoid_rewrite Nat.mul_shuffle0.
-      apply Nat.mul_le_mono_r.
-...
-      rewrite (Nat.mul_comm u), Hmng; flia.
-    }
-    rewrite <- (Nat.mul_assoc m), (Nat.mul_comm m).
+    rewrite Nat.mul_shuffle0, Hmng.
+    rewrite Nat.mul_add_distr_r, Nat.mul_1_l, Nat.add_comm.
+    rewrite <- Nat.mul_assoc, Nat.mul_comm.
     rewrite Nat.mod_add; [ | easy ].
-    setoid_rewrite Nat.mul_shuffle0.
-    rewrite <- Nat.mul_sub_distr_r.
-    rewrite (Nat.mul_comm u), Hmng.
-    rewrite Nat.add_comm, Nat.add_sub.
-    rewrite Hg, Hgmn, Nat.mul_1_l.
     now rewrite Nat.mod_small.
-(*
-  a mod m
-    = (nxv-myu) mod mn mod n
-    = ((nxv-myu) mod m + mk) mod m, avec k=... cf Nat.mod_mul_r
-    = ((nxv-myu) mod m mod m
-    = ((nxv-myu) mod m
-    = ((nxv+km-myu) mod m, faut que je trouve mon k pour positiver
-*)
+  }
+} {
 ...
 
 Theorem coprimes_mul_prod_coprimes : ∀ m n a,
