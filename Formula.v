@@ -3168,11 +3168,12 @@ Qed.
 
 Definition prod_coprimes_of_coprimes_mul m n a := (a mod m, a mod n).
 
-Definition Nat_diff a b := if le_dec a b then b - a else a - b.
-
 Definition coprimes_mul_of_prod_coprimes (m n : nat) '((x, y) : nat * nat) :=
   let '(u, v) := snd (gcd_and_bezout m n) in
-  Nat_diff (m * y * u) (n * x * v) mod (m * n).
+  if le_dec (m * y * u) (n * x * v) then
+    42
+  else
+    (m * y * u - n * x * v) mod (m * n).
 
 Theorem prod_coprimes_coprimes_mul_prod : ∀ m n,
   n ≠ 0
@@ -3191,7 +3192,6 @@ symmetry in Hgb.
 destruct gb as (g & u & v); cbn.
 specialize (gcd_and_bezout_prop m n g u v Hmz Hgb) as (Hmng & Hg).
 f_equal. {
-  unfold Nat_diff.
   destruct (le_dec (m * y * u) (n * x * v)) as [Hmxu| Hnxv]. 2: {
     apply Nat.nle_gt in Hnxv.
     rewrite Nat.mod_mul_r; [ | easy | easy ].
@@ -3216,6 +3216,7 @@ f_equal. {
     rewrite Hg, Hgmn, Nat.mul_1_l.
     now rewrite Nat.mod_small.
   } {
+...
     rewrite Nat.mod_mul_r; [ | easy | easy ].
     remember ((n * x * v - m * y * u)) as p eqn:Hp.
     rewrite (Nat.mul_comm m); subst p.
