@@ -3246,6 +3246,11 @@ destruct (lt_dec (m * y * u) (n * x * v)) as [Hmxu| Hnxv]. 2: {
     apply Nat.sub_0_le in H.
     now rewrite H, Nat.mul_0_r in Hnvxy.
   }
+Print coprimes_mul_of_prod_coprimes.
+...
+(* instead of 42, put the good function f such that
+      f(m,n,x,y,u,v) mod m = x
+      f(m,n,x,y,u,v) mod n = y *)
 ...
     apply (Nat.mul_lt_mono_pos_l (n * v)).
 ...
