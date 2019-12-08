@@ -3193,13 +3193,19 @@ destruct gb as (g & u & v); cbn.
 specialize (gcd_and_bezout_prop m n g u v Hmz Hgb) as (Hmng & Hg).
 rewrite Hgmn in Hg; subst g.
 destruct (lt_dec (m * y * u) (n * x * v)) as [Hmxu| Hnxv]. 2: {
+  apply Nat.nlt_ge in Hnxv.
+  remember ((m * y * u - n * x * v)) as p eqn:Hp.
+  rewrite Nat.mod_mul_r at 1; [ | easy | easy ].
+  rewrite (Nat.mul_comm m n).
+  rewrite Nat.mod_mul_r; [ | easy | easy ].
+  rewrite (Nat.mul_comm m).
+  rewrite (Nat.mul_comm n).
+  rewrite Nat.mod_add; [ | easy ].
+  rewrite Nat.mod_add; [ | easy ].
+  rewrite Nat.mod_mod; [ | easy ].
+  rewrite Nat.mod_mod; [ | easy ].
+  subst p.
   f_equal. {
-    apply Nat.nlt_ge in Hnxv.
-    rewrite Nat.mod_mul_r; [ | easy | easy ].
-    remember ((m * y * u - n * x * v)) as p eqn:Hp.
-    rewrite (Nat.mul_comm m); subst p.
-    rewrite Nat.mod_add; [ | easy ].
-    rewrite Nat.mod_mod; [ | easy ].
     rewrite <- (Nat.mod_add _ (u * x)); [ | easy ].
     rewrite <- Nat.add_sub_swap; [ | easy ].
     rewrite Nat.add_comm.
@@ -3217,13 +3223,6 @@ destruct (lt_dec (m * y * u) (n * x * v)) as [Hmxu| Hnxv]. 2: {
     rewrite Nat.mul_1_l.
     now rewrite Nat.mod_small.
   } {
-    apply Nat.nlt_ge in Hnxv.
-    rewrite (Nat.mul_comm m n).
-    rewrite Nat.mod_mul_r; [ | easy | easy ].
-    remember ((m * y * u - n * x * v)) as p eqn:Hp.
-    rewrite (Nat.mul_comm n); subst p.
-    rewrite Nat.mod_add; [ | easy ].
-    rewrite Nat.mod_mod; [ | easy ].
     rewrite <- (Nat.mod_add _ (x * v)); [ | easy ].
     rewrite (Nat.mul_comm _ n), Nat.mul_assoc.
     rewrite Nat.sub_add; [ | easy ].
@@ -3234,6 +3233,7 @@ destruct (lt_dec (m * y * u) (n * x * v)) as [Hmxu| Hnxv]. 2: {
     now rewrite Nat.mod_small.
   }
 } {
+Print coprimes_mul_of_prod_coprimes.
 ...
 
 Theorem coprimes_mul_prod_coprimes : ∀ m n a,
