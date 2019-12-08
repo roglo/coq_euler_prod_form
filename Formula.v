@@ -3204,9 +3204,10 @@ destruct (lt_dec (m * y * u) (n * x * v)) as [Hmxu| Hnxv]. 2: {
   rewrite Nat.mod_add; [ | easy ].
   rewrite Nat.mod_mod; [ | easy ].
   rewrite Nat.mod_mod; [ | easy ].
+  rewrite <- (Nat.mod_add p (u * x)); [ | easy ].
+  rewrite <- (Nat.mod_add p (x * v)); [ | easy ].
   subst p.
   f_equal. {
-    rewrite <- (Nat.mod_add _ (u * x)); [ | easy ].
     rewrite <- Nat.add_sub_swap; [ | easy ].
     rewrite Nat.add_comm.
     rewrite Nat.add_sub_swap. 2: {
@@ -3223,7 +3224,6 @@ destruct (lt_dec (m * y * u) (n * x * v)) as [Hmxu| Hnxv]. 2: {
     rewrite Nat.mul_1_l.
     now rewrite Nat.mod_small.
   } {
-    rewrite <- (Nat.mod_add _ (x * v)); [ | easy ].
     rewrite (Nat.mul_comm _ n), Nat.mul_assoc.
     rewrite Nat.sub_add; [ | easy ].
     rewrite Nat.mul_shuffle0, Hmng.
