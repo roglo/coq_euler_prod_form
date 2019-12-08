@@ -3170,7 +3170,7 @@ Definition prod_coprimes_of_coprimes_mul m n a := (a mod m, a mod n).
 
 Definition coprimes_mul_of_prod_coprimes (m n : nat) '((x, y) : nat * nat) :=
   let '(u, v) := snd (gcd_and_bezout m n) in
-  if le_dec (m * y * u) (n * x * v) then
+  if lt_dec (m * y * u) (n * x * v) then
     42
   else
     (m * y * u - n * x * v) mod (m * n).
@@ -3192,15 +3192,15 @@ symmetry in Hgb.
 destruct gb as (g & u & v); cbn.
 specialize (gcd_and_bezout_prop m n g u v Hmz Hgb) as (Hmng & Hg).
 f_equal. {
-  destruct (le_dec (m * y * u) (n * x * v)) as [Hmxu| Hnxv]. 2: {
-    apply Nat.nle_gt in Hnxv.
+  destruct (lt_dec (m * y * u) (n * x * v)) as [Hmxu| Hnxv]. 2: {
+    apply Nat.nlt_ge in Hnxv.
     rewrite Nat.mod_mul_r; [ | easy | easy ].
     remember ((m * y * u - n * x * v)) as p eqn:Hp.
     rewrite (Nat.mul_comm m); subst p.
     rewrite Nat.mod_add; [ | easy ].
     rewrite Nat.mod_mod; [ | easy ].
     rewrite <- (Nat.mod_add _ (u * x)); [ | easy ].
-    rewrite <- Nat.add_sub_swap; [ | now apply Nat.lt_le_incl ].
+    rewrite <- Nat.add_sub_swap; [ | easy ].
     rewrite Nat.add_comm.
     rewrite Nat.add_sub_swap. 2: {
       setoid_rewrite Nat.mul_shuffle0.
