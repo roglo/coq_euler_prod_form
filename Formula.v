@@ -3171,7 +3171,7 @@ Definition prod_coprimes_of_coprimes_mul m n a := (a mod m, a mod n).
 Definition coprimes_mul_of_prod_coprimes (m n : nat) '((x, y) : nat * nat) :=
   let '(u, v) := snd (gcd_and_bezout m n) in
   if lt_dec (m * y * u) (n * x * v) then
-    42
+    (n * x * v - m * y * u) mod (m * n)
   else
     (m * y * u - n * x * v) mod (m * n).
 
@@ -3233,6 +3233,22 @@ destruct (lt_dec (m * y * u) (n * x * v)) as [Hmxu| Hnxv]. 2: {
     now rewrite Nat.mod_small.
   }
 } {
+  remember ((n * x * v - m * y * u)) as p eqn:Hp.
+  rewrite Nat.mod_mul_r at 1; [ | easy | easy ].
+  rewrite (Nat.mul_comm m n).
+  rewrite Nat.mod_mul_r; [ | easy | easy ].
+  rewrite (Nat.mul_comm m).
+  rewrite (Nat.mul_comm n).
+  rewrite Nat.mod_add; [ | easy ].
+  rewrite Nat.mod_add; [ | easy ].
+  rewrite Nat.mod_mod; [ | easy ].
+  rewrite Nat.mod_mod; [ | easy ].
+(* nxv mod m = (mu-1)x mod m = (mu+m-1)x mod m = (m-1)x mod m ≠ x *)
+...
+  rewrite <- (Nat.mod_add p (u * x)); [ | easy ].
+  rewrite <- (Nat.mod_add p (x * v)); [ | easy ].
+  subst p.
+...
   assert (Hnvxy : y < n * v * (x - y)). {
     rewrite Nat.mul_shuffle0, Hmng in Hmxu.
     rewrite Nat.mul_add_distr_r, Nat.mul_1_l in Hmxu.
