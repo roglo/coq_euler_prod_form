@@ -3233,7 +3233,29 @@ destruct (lt_dec (m * y * u) (n * x * v)) as [Hmxu| Hnxv]. 2: {
     now rewrite Nat.mod_small.
   }
 } {
+  assert (Hnvxy : y < n * v * (x - y)). {
+    rewrite Nat.mul_shuffle0, Hmng in Hmxu.
+    rewrite Nat.mul_add_distr_r, Nat.mul_1_l in Hmxu.
+    rewrite Nat.add_comm in Hmxu.
+    apply Nat.lt_add_lt_sub_r in Hmxu.
+    rewrite Nat.mul_shuffle0 in Hmxu.
+    now rewrite <- Nat.mul_sub_distr_l in Hmxu.
+  }
+  assert (Hxy : y < x). {
+    apply Nat.nle_gt; intros H.
+    apply Nat.sub_0_le in H.
+    now rewrite H, Nat.mul_0_r in Hnvxy.
+  }
+...
+    apply (Nat.mul_lt_mono_pos_l (n * v)).
+...
+    apply (Nat.add_lt_mono_l _ _ (n * v * y)).
+    transitivity (n * x * v); [ easy | ].
+...
+    apply Nat.nle_gt; intros H.
+
 Print coprimes_mul_of_prod_coprimes.
+Check Nat.mod_mul_r.
 ...
 
 Theorem coprimes_mul_prod_coprimes : ∀ m n a,
