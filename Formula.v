@@ -3170,13 +3170,13 @@ Definition prod_coprimes_of_coprimes_mul m n a := (a mod m, a mod n).
 
 Definition coprimes_mul_of_prod_coprimes (m n : nat) '((x, y) : nat * nat) :=
   let '(u, v) := snd (gcd_and_bezout m n) in
-  m * n - (m * n * y * u + n * x * v - m * y * u) mod (m * n).
+  m * n - (n * x * v + m * (n - 1) * y * u) mod (m * n).
 
 (*
 Section Halte.
 
-Let m := 17.
-Let n := 12.
+Let m := 10.
+Let n := 21.
 
 Compute (coprimes (m * n)).
 
@@ -3213,6 +3213,38 @@ symmetry in Hgb.
 destruct gb as (g & u & v); cbn.
 specialize (gcd_and_bezout_prop m n g u v Hmz Hgb) as (Hmng & Hg).
 rewrite Hgmn in Hg; subst g.
+remember (n * x * v + m * (n - 1) * y * u) as p eqn:Hp.
+rewrite Nat.mod_mul_r at 1; [ | easy | easy ].
+rewrite (Nat.mul_comm m n).
+rewrite Nat.mod_mul_r; [ | easy | easy ].
+rewrite (Nat.mul_comm n m).
+do 3 rewrite <- Nat.mul_assoc in Hp.
+rewrite (Nat.mul_comm m) in Hp.
+rewrite (Nat.mul_comm n) in Hp.
+rewrite Hp at 1.
+rewrite Nat.mod_add; [ | easy ].
+rewrite Nat.add_comm in Hp.
+rewrite Hp at 2.
+rewrite Nat.mod_add; [ | easy ].
+(* regarder tout le binz sur papier *)
+...
+setoid_rewrite Nat.add_comm.
+do 2 rewrite Nat.sub_add_distr.
+rewrite <- Nat.mul_sub_distr_l.
+...
+rewrite <- (Nat.mod_add _ ((p / m) mod n)); [ | easy ].
+rewrite (Nat.mul_comm _ m).
+rewrite Nat.sub_add.
+...
+remember (n) as mn.
+rewrite (Nat.mul_comm m).
+rewrite (Nat.mul_comm n).
+Check Nat.mod_add.
+  rewrite Nat.mod_add; [ | easy ].
+  rewrite Nat.mod_add; [ | easy ].
+  rewrite Nat.mod_mod; [ | easy ].
+  rewrite Nat.mod_mod; [ | easy ].
+...
 destruct (lt_dec (m * y * u) (n * x * v)) as [Hmxu| Hnxv]. 2: {
   apply Nat.nlt_ge in Hnxv.
   remember ((m * y * u - n * x * v)) as p eqn:Hp.
