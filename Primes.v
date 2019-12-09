@@ -2396,27 +2396,23 @@ rewrite Nat_pow_mod_is_pow_mod; [ | now intros H; subst p ].
 rewrite Nat_pow_mod_is_pow_mod; [ | now intros H; subst p ].
 rewrite Nat_mod_pow_mod.
 rewrite <- Nat.pow_mul_r.
-rewrite Nat.mul_sub_distr_r.
-do 2 rewrite Nat.mul_sub_distr_l.
-rewrite Nat_sub_sub_distr. 2: {
-  split; [ flia Hip | ].
-  rewrite <- Nat.mul_sub_distr_l.
-  rewrite Nat.mul_comm.
-  apply Nat.mul_le_mono_l.
+rewrite <- Nat.pow_2_r.
+rewrite Nat_sqr_sub; [ | flia Hip ].
+rewrite Nat.mul_shuffle0.
+replace (2 ^ 2) with 4 by easy.
+replace (2 * 2) with 4 by easy.
+rewrite Nat.pow_2_r.
+rewrite Nat.add_sub_swap. 2: {
+  apply Nat.mul_le_mono_r.
   flia Hip.
 }
-rewrite (Nat.mul_comm 2).
-rewrite <- Nat.sub_add_distr.
-rewrite <- Nat.mul_add_distr_l.
-replace (2 + 2) with 4 by easy.
-replace (2 * 2) with 4 by easy.
-rewrite <- Nat.mul_sub_distr_l.
+rewrite <- Nat.mul_sub_distr_r.
 rewrite Nat.pow_add_r.
 rewrite Nat.pow_mul_r.
 rewrite <- Nat.mul_mod_idemp_l; [ | easy ].
 rewrite <- Nat_mod_pow_mod.
 rewrite fermat_little_1; [ | easy ].
-rewrite Nat_mod_pow_mod.
+rewrite Nat.mod_mod; [ | easy ].
 rewrite Nat.mul_mod_idemp_l; [ | easy ].
 rewrite <- Nat.pow_add_r.
 rewrite Nat.sub_add; [ | flia Hip ].

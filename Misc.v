@@ -667,6 +667,27 @@ apply (Nat.le_trans _ a); [ easy | ].
 apply Nat.le_add_r.
 Qed.
 
+Theorem Nat_sqr_sub : ∀ a b, b ≤ a → (a - b) ^ 2 = a ^ 2 + b ^ 2 - 2 * a * b.
+Proof.
+intros * Hba.
+do 3 rewrite Nat.pow_2_r.
+rewrite Nat.mul_sub_distr_l.
+do 2 rewrite Nat.mul_sub_distr_r.
+rewrite (Nat.mul_comm b).
+rewrite <- Nat.sub_add_distr.
+rewrite Nat.add_comm.
+rewrite Nat.sub_add_distr.
+rewrite Nat_sub_sub_distr. 2: {
+  split; [ now apply Nat.mul_le_mono_r | now apply Nat.mul_le_mono_l ].
+}
+replace 2 with (1 + 1) by easy.
+rewrite Nat.mul_add_distr_r, Nat.mul_1_l.
+rewrite Nat.mul_add_distr_r.
+rewrite Nat.sub_add_distr; f_equal.
+rewrite Nat.add_sub_swap; [ easy | ].
+now apply Nat.mul_le_mono_l.
+Qed.
+
 Theorem Nat_mod_pow_mod : ∀ a b c, (a mod b) ^ c mod b = a ^ c mod b.
 Proof.
 intros.

@@ -3237,7 +3237,58 @@ f_equal. {
     }
   }
   rewrite Hp.
-Search ((_ + _ * _) mod _).
+  do 2 rewrite <- (Nat.mul_assoc m).
+  rewrite Nat_mod_add_mul_l; [ | easy ].
+  rewrite Nat.mul_shuffle0.
+  replace (n * v) with (m * u - 1) by flia Hmng.
+  rewrite Nat.mul_sub_distr_r, Nat.mul_1_l.
+  rewrite <- (Nat.mod_add (m * u * x - x) x); [ | easy ].
+  rewrite <- Nat.add_sub_swap. 2: {
+    destruct m; [ easy | ].
+    destruct u; [ now rewrite Nat.mul_0_r, Nat.add_1_r in Hmng | ].
+    cbn.
+    apply Nat.le_sub_le_add_l.
+    rewrite Nat.sub_diag.
+    apply Nat.le_0_l.
+  }
+  rewrite <- Nat.add_sub_assoc. 2: {
+    destruct m; [ easy | ].
+    rewrite Nat.mul_succ_r; flia.
+  }
+  replace x with (x * 1) at 3 by flia.
+  rewrite <- Nat.mul_sub_distr_l.
+  rewrite Nat.add_comm, <- Nat.mul_assoc.
+  rewrite Nat_mod_add_mul_l; [ | easy ].
+  rewrite <- (Nat.mod_add _ ((x * (m - 1)) mod m)); [ | easy ].
+  rewrite <- Nat.add_sub_swap. 2: {
+    transitivity (pred m). 2: {
+      destruct n; [ easy | ].
+      rewrite Nat.mul_succ_r; flia.
+    }
+    apply Nat.lt_le_pred.
+    now apply Nat.mod_upper_bound.
+  }
+  remember ((x * (m - 1)) mod m) as a.
+  rewrite <- Nat.add_sub_assoc. 2: {
+    destruct m; [ easy | ].
+    rewrite Nat.mul_succ_r; flia.
+  }
+  replace a with (a * 1) at 2 by flia.
+  rewrite <- Nat.mul_sub_distr_l.
+  rewrite Nat.add_comm.
+  rewrite Nat_mod_add_mul_l; [ | easy ].
+  subst a.
+  rewrite Nat.mul_mod_idemp_l; [ | easy ].
+  rewrite <- Nat.mul_assoc.
+  rewrite <- Nat.pow_2_r.
+Theorem Nat_sqr_sub : ∀ a b, (a - b) ^ 2 = a ^ 2 + b ^ 2 - 2 * a * b.
+Proof.
+intros.
+do 3 rewrite Nat.pow_2_r.
+rewrite Nat.mul_sub_distr_l.
+do 2 rewrite Nat.mul_sub_distr_r.
+rewrite (Nat.mul_comm b).
+rewrite Nat_sub_sub_distr.
 ...
     transitivity p. {
       specialize (Nat.div_mod p m Hmz) as H1.
