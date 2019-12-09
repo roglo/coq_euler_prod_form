@@ -3640,6 +3640,8 @@ assert
   move Hb before Ha.
   apply in_seq in Ha.
   apply in_seq in Hb.
+  replace (1 + (m - 1)) with m in Ha by flia Hmz.
+  replace (1 + (n - 1)) with n in Hb by flia Hnz.
   unfold coprimes_mul_of_prod_coprimes.
   remember (gcd_and_bezout m n) as gb eqn:Hgb.
   symmetry in Hgb.
@@ -3661,6 +3663,15 @@ assert
         apply Nat.mod_upper_bound.
         now apply Nat.neq_mul_0.
       } {
+        apply Nat.neq_0_lt_0.
+        intros H.
+        apply Nat.mod_divides in H. 2: {
+          now apply Nat.neq_mul_0.
+        }
+        destruct H as (k, Hk).
+        rewrite (Nat.mul_shuffle0 (m * (n - 1))) in Hk.
+        rewrite (Nat.mul_shuffle0 m) in Hk.
+        rewrite Hmng in Hk.
 ...
         rewrite (Nat.mul_comm m n).
         rewrite Nat.mod_mul_r; [ | easy | easy ].
