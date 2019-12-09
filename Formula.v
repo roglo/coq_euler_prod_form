@@ -3494,58 +3494,48 @@ clear - Ha Hmn.
 apply in_seq in Ha.
 replace (1 + (mn - 1)) with mn in Ha by flia Hmn.
 rename mn into n.
+(* lemma, perhaps? *)
 enough (H : n - a = (a * (n - 1)) mod n) by flia H Ha.
-specialize (Nat.div_mod (a * (n - 1)) n Hmn) as H1.
-remember (a * (n - 1)) as b.
-replace (b mod n) with (b - n * (b / n)) by flia H1.
-subst b.
-rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
-rewrite Nat_sub_sub_swap; f_equal.
-...
-destruct a; [ easy | ].
-destruct a. {
-  cbn; rewrite Nat.add_0_r.
-  rewrite Nat.mod_small; [ | flia Hmn ].
-  flia Hmn.
+remember (n - a) as b.
+replace a with (n - b) in * by flia Heqb Ha.
+clear a Heqb; rename b into a.
+assert (H : 1 ≤ a < n) by flia Ha.
+clear Ha; rename H into Ha.
+(* or lemma here, perhaps? *)
+rewrite Nat.mul_sub_distr_r.
+do 2 rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
+rewrite Nat_sub_sub_assoc. 2: {
+  split. {
+    destruct n; [ easy | ].
+    rewrite Nat.mul_succ_r; flia.
+  } {
+    replace n with (1 * n) at 4 by flia.
+    rewrite <- Nat.mul_sub_distr_r.
+    transitivity ((n - 1) * n); [ | flia ].
+    apply Nat.mul_le_mono_r; flia Ha.
+  }
 }
-destruct a. {
-  cbn; rewrite Nat.add_0_r.
-  rewrite Nat.add_sub_assoc; [ | flia Hmn ].
-
-...
-remember (a * (m * n - 1)) as b eqn:Hb.
-specialize (Nat.div_mod b (m * n) Hmn) as H1.
-replace (b mod (m * n)) with (b - m * n * (b / (m * n))) by flia H1.
-rewrite Nat_sub_sub_assoc.
-replace (m * n) with (m * n * 1) at 1 by flia.
-rewrite <- Nat.mul_add_distr_l.
-rewrite Hb at 2.
-rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
-rewrite Nat_sub_sub_assoc.
-rewrite Nat.add_sub_swap.
-rewrite Nat.mul_comm.
-rewrite <- Nat.mul_sub_distr_r.
-...
-remember (b / (m * n)) as q.
-Search (_ - (_ - _)).
-remember (m * n) as mn.
-...
-remember (a * (m * n - 1)) as b eqn:Hb.
-specialize (Nat.div_mod b (m * n) Hmn) as H1.
-replace (b mod (m * n)) with (b - m * n * (b / (m * n))) by flia H1.
-rewrite Nat_sub_sub_assoc.
-...
-
-(*
-...
-
-Theorem prod_coprimes_of_coprimes_mul_prod : ∀ m n a (p : a ∈ coprimes (m * n)),
-  prod_coprimes_of_coprimes_mul m n a ∈ list_prod (coprimes m) (coprimes n).
-Proof.
-intros.
-Search ((_, _) ∈ _).
-...
-*)
+rewrite <- (Nat.mod_add _ a); [ | easy ].
+rewrite Nat.sub_add. 2: {
+  replace n with (1 * n) at 4 by flia.
+  rewrite <- Nat.mul_sub_distr_r.
+  transitivity ((n - 1) * n); [ | flia ].
+  apply Nat.mul_le_mono_r; flia Ha.
+}
+rewrite <- Nat.add_sub_swap. 2: {
+  replace n with (1 * n) at 1 by flia.
+  apply Nat.mul_le_mono_r; flia Hmn.
+}
+rewrite <- (Nat.mod_add _ 1); [ | easy ].
+rewrite Nat.mul_1_l.
+rewrite Nat.sub_add. 2: {
+  transitivity (n * n); [ | flia ].
+  replace n with (1 * n) at 1 by flia.
+  apply Nat.mul_le_mono_r; flia Hmn.
+}
+rewrite Nat.add_comm, Nat.mod_add; [ | easy ].
+now rewrite Nat.mod_small.
+Qed.
 
 Theorem totient_multiplicative : ∀ m n,
   2 ≤ m → 2 ≤ n → Nat.gcd m n = 1 → φ (m * n) = φ m * φ n.
@@ -3556,6 +3546,7 @@ assert (Hnz : n ≠ 0) by flia H2n.
 move H2n before n; move H2m before n.
 unfold φ.
 rewrite <- prod_length.
+...
 assert
   (Hf : ∀ a, a ∈ coprimes (m * n) →
    prod_coprimes_of_coprimes_mul m n a ∈
