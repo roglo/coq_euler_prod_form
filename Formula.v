@@ -3382,13 +3382,15 @@ f_equal. {
 }
 Qed.
 
-Theorem coprimes_mul_prod_coprimes : ∀ m n a,
+Theorem coprimes_mul_prod_coprimes : ∀ m n,
   m ≠ 0
   → n ≠ 0
   → Nat.gcd m n = 1
-  → coprimes_mul_of_prod_coprimes m n (prod_coprimes_of_coprimes_mul m n a) = a.
+  → ∀ a, a ∈ seq 1 (m * n - 1) →
+  coprimes_mul_of_prod_coprimes m n (prod_coprimes_of_coprimes_mul m n a) = a.
 Proof.
-intros * Hmz Hnz Hgmn.
+intros * Hmz Hnz Hgmn * Ha.
+Compute (coprimes_mul_of_prod_coprimes 3 7 (prod_coprimes_of_coprimes_mul 3 7 22)).
 unfold coprimes_mul_of_prod_coprimes.
 unfold prod_coprimes_of_coprimes_mul.
 remember (gcd_and_bezout m n) as gb eqn:Hgb.
@@ -3487,6 +3489,23 @@ rewrite <- Nat.mul_sub_distr_l.
 rewrite Nat.add_comm.
 replace (m * a * n * u) with (a * u * (m * n)) by flia.
 rewrite Nat.mod_add; [ | easy ].
+...
+remember (a * (m * n - 1)) as b eqn:Hb.
+specialize (Nat.div_mod b (m * n) Hmn) as H1.
+replace (b mod (m * n)) with (b - m * n * (b / (m * n))) by flia H1.
+rewrite Nat_sub_sub_assoc.
+replace (m * n) with (m * n * 1) at 1 by flia.
+rewrite <- Nat.mul_add_distr_l.
+rewrite Hb at 2.
+rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
+rewrite Nat_sub_sub_assoc.
+rewrite Nat.add_sub_swap.
+rewrite Nat.mul_comm.
+rewrite <- Nat.mul_sub_distr_r.
+...
+remember (b / (m * n)) as q.
+Search (_ - (_ - _)).
+remember (m * n) as mn.
 ...
 remember (a * (m * n - 1)) as b eqn:Hb.
 specialize (Nat.div_mod b (m * n) Hmn) as H1.
