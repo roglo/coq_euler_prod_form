@@ -3281,191 +3281,20 @@ f_equal. {
   rewrite Nat.mul_mod_idemp_l; [ | easy ].
   rewrite <- Nat.mul_assoc.
   rewrite <- Nat.pow_2_r.
-Theorem Nat_sqr_sub : ∀ a b, (a - b) ^ 2 = a ^ 2 + b ^ 2 - 2 * a * b.
-Proof.
-intros.
-do 3 rewrite Nat.pow_2_r.
-rewrite Nat.mul_sub_distr_l.
-do 2 rewrite Nat.mul_sub_distr_r.
-rewrite (Nat.mul_comm b).
-rewrite Nat_sub_sub_distr.
-...
-    transitivity p. {
-      specialize (Nat.div_mod p m Hmz) as H1.
-      rewrite H1 at 3.
-      apply Nat.add_le_mono_r.
-      apply Nat.mul_le_mono_l.
-      now apply Nat.mod_le.
-    }
-    subst p.
-    rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
-    do 2 rewrite Nat.mul_sub_distr_r.
-...
-Check Nat.div_mod.
-    rewrite <- Nat.div_mod.
-...
-remember (n * x * v + m * (n - 1) * y * u) as p eqn:Hp.
-f_equal. {
-  rewrite Nat.mod_mul_r at 1; [ | easy | easy ].
-  do 3 rewrite <- Nat.mul_assoc in Hp.
-  rewrite (Nat.mul_comm m) in Hp.
-  rewrite Hp at 1.
-  rewrite Nat.mod_add; [ | easy ].
-  rewrite Nat.add_comm.
-  rewrite Nat.sub_add_distr.
-  rewrite <- Nat.mul_sub_distr_l.
-  rewrite Nat.mul_assoc.
-...
-  rewrite (Nat.mul_comm m n).
-  rewrite Nat.mod_mul_r; [ | easy | easy ].
-rewrite (Nat.mul_comm n m).
-do 3 rewrite <- Nat.mul_assoc in Hp.
-rewrite (Nat.mul_comm m) in Hp.
-rewrite (Nat.mul_comm n) in Hp.
-rewrite Hp at 1.
-rewrite Nat.mod_add; [ | easy ].
-rewrite Nat.add_comm in Hp.
-rewrite Hp at 2.
-rewrite Nat.mod_add; [ | easy ].
-Search (_ * (_  mod _)).
-(* regarder tout le binz sur papier *)
-...
-setoid_rewrite Nat.add_comm.
-do 2 rewrite Nat.sub_add_distr.
-rewrite <- Nat.mul_sub_distr_l.
-...
-rewrite <- (Nat.mod_add _ ((p / m) mod n)); [ | easy ].
-rewrite (Nat.mul_comm _ m).
-rewrite Nat.sub_add.
-...
-remember (n) as mn.
-rewrite (Nat.mul_comm m).
-rewrite (Nat.mul_comm n).
-Check Nat.mod_add.
-  rewrite Nat.mod_add; [ | easy ].
-  rewrite Nat.mod_add; [ | easy ].
-  rewrite Nat.mod_mod; [ | easy ].
-  rewrite Nat.mod_mod; [ | easy ].
-...
-destruct (lt_dec (m * y * u) (n * x * v)) as [Hmxu| Hnxv]. 2: {
-  apply Nat.nlt_ge in Hnxv.
-  remember ((m * y * u - n * x * v)) as p eqn:Hp.
-  rewrite Nat.mod_mul_r at 1; [ | easy | easy ].
-  rewrite (Nat.mul_comm m n).
-  rewrite Nat.mod_mul_r; [ | easy | easy ].
-  rewrite (Nat.mul_comm m).
-  rewrite (Nat.mul_comm n).
-...
-  rewrite Nat.mod_add; [ | easy ].
-  rewrite Nat.mod_add; [ | easy ].
-  rewrite Nat.mod_mod; [ | easy ].
-  rewrite Nat.mod_mod; [ | easy ].
-  rewrite <- (Nat.mod_add p (u * x)); [ | easy ].
-  rewrite <- (Nat.mod_add p (x * v)); [ | easy ].
-  subst p.
-  f_equal. {
-    rewrite <- Nat.add_sub_swap; [ | easy ].
-    rewrite Nat.add_comm.
-    rewrite Nat.add_sub_swap. 2: {
-      setoid_rewrite Nat.mul_shuffle0.
-      apply Nat.mul_le_mono_r.
-      rewrite (Nat.mul_comm u), Hmng; flia.
-    }
-    rewrite <- (Nat.mul_assoc m), (Nat.mul_comm m).
-    rewrite Nat.mod_add; [ | easy ].
-    setoid_rewrite Nat.mul_shuffle0.
-    rewrite <- Nat.mul_sub_distr_r.
-    rewrite (Nat.mul_comm u), Hmng.
-    rewrite Nat.add_comm, Nat.add_sub.
-    rewrite Nat.mul_1_l.
-    now rewrite Nat.mod_small.
-  } {
-    rewrite (Nat.mul_comm _ n), Nat.mul_assoc.
-    rewrite Nat.sub_add; [ | easy ].
-    rewrite Nat.mul_shuffle0, Hmng.
-    rewrite Nat.mul_add_distr_r, Nat.mul_1_l, Nat.add_comm.
-    rewrite <- Nat.mul_assoc, Nat.mul_comm.
-    rewrite Nat.mod_add; [ | easy ].
-    now rewrite Nat.mod_small.
+  rewrite Nat_sqr_sub; [ | flia Hmz ].
+  rewrite Nat.pow_1_l, Nat.mul_1_r, Nat.pow_2_r.
+  rewrite <- Nat.mul_mod_idemp_r; [ | easy ].
+  rewrite <- (Nat.mod_add (m * m + 1 - 2 * m) 2); [ | easy ].
+  rewrite Nat.sub_add. 2: {
+    destruct m; [ easy | ].
+    destruct m; [ easy | ].
+    cbn; remember (m * (S (S m))); flia.
   }
+  rewrite Nat.add_comm, Nat.mod_add; [ | easy ].
+  rewrite Nat.mul_mod_idemp_r; [ | easy ].
+  rewrite Nat.mul_1_r.
+  now apply Nat.mod_small.
 } {
-  assert (Hnvxy : y < n * v * (x - y)). {
-    rewrite Nat.mul_shuffle0, Hmng in Hmxu.
-    rewrite Nat.mul_add_distr_r, Nat.mul_1_l in Hmxu.
-    rewrite Nat.add_comm in Hmxu.
-    apply Nat.lt_add_lt_sub_r in Hmxu.
-    rewrite Nat.mul_shuffle0 in Hmxu.
-    now rewrite <- Nat.mul_sub_distr_l in Hmxu.
-  }
-  assert (Hxy : y < x). {
-    apply Nat.nle_gt; intros H.
-    apply Nat.sub_0_le in H.
-    now rewrite H, Nat.mul_0_r in Hnvxy.
-  }
-...
-(* mux-(nxv-myu) ≥ 0
-   mux-nxv+myu ≥? 0
-   mux+myu ≥? nxv
-   mu(x+y) ≥? nxv
-   (nv+1)(x+y) ≥? nxv
-   nxv+nyv+(x+y) ≥! nxv *)
-
-(mux-(nxv-myu)) mod m = (mux+myu-nxv) mod m = ((nv+1)x+myu-nxv) mod m
-  = ((nv+1)x-nxv+myu) mod m = x mod m
-
-(mux-(nxv-myu)) mod n = (mux+myu-nxv) mod n =
-  (mux+(nv+1)y-nxv) mod n =
-  (mux+y-nvx+nvy) mod n =
-  (y+mux-nvx) mod n =
-  (y+(nx+1)x-nvx) mod n =
-  (y+x) mod n
-  shit *)
-
-...
-  assert (Huv : v ≤ u). { (* not sure but required *)
-(* enough mv ≤ mu
-   enough mv ≤ nv + 1
-*)
-...
-  remember ((n * x * v - m * y * u)) as p eqn:Hp.
-  rewrite Nat.mod_mul_r at 1; [ | easy | easy ].
-  rewrite (Nat.mul_comm m n).
-  rewrite Nat.mod_mul_r; [ | easy | easy ].
-  rewrite (Nat.mul_comm m).
-  rewrite (Nat.mul_comm n).
-  rewrite Nat.mod_add; [ | easy ].
-  rewrite Nat.mod_add; [ | easy ].
-  rewrite Nat.mod_mod; [ | easy ].
-  rewrite Nat.mod_mod; [ | easy ].
-(* nxv mod m = (mu-1)x mod m = (mu+m-1)x mod m = (m-1)x mod m ≠ x *)
-(* (mux-nxv) mod m = (mu-(mu-1))x mod m = x mod m *)
-(* mux-(nxv-myu) *)
-(* mux-mxv+myu ≥? 0 *)
-(* mx(u-v)+myu ≥? 0 *)
-(* est-ce que u ≥ v ? *)
-...
-  rewrite <- (Nat.mod_add p (u * x)); [ | easy ].
-  rewrite <- (Nat.mod_add p (x * v)); [ | easy ].
-  subst p.
-...
-Print coprimes_mul_of_prod_coprimes.
-...
-(* instead of 42, put the good function f such that
-      f(m,n,x,y,u,v) mod m = x
-      f(m,n,x,y,u,v) mod n = y *)
-
-nxv-myu = nxv-(nv+1)y = nv(x-y)-y
-myu-nxv = (nv+1)y-nxv = nv(y-x)+y
-...
-    apply (Nat.mul_lt_mono_pos_l (n * v)).
-...
-    apply (Nat.add_lt_mono_l _ _ (n * v * y)).
-    transitivity (n * x * v); [ easy | ].
-...
-    apply Nat.nle_gt; intros H.
-
-Print coprimes_mul_of_prod_coprimes.
-Check Nat.mod_mul_r.
 ...
 
 Theorem coprimes_mul_prod_coprimes : ∀ m n a,
