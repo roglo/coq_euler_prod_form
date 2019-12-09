@@ -3669,6 +3669,12 @@ assert
           now apply Nat.neq_mul_0.
         }
         destruct H as (k, Hk).
+...
+        rewrite Nat.mul_sub_distr_l, Nat.mul_1_r in Hk.
+        do 2 rewrite Nat.mul_sub_distr_r in Hk.
+        rewrite Nat.add_sub_assoc in Hk.
+        apply Nat.add_sub_eq_nz in Hk. 2: {
+...
         rewrite (Nat.mul_shuffle0 (m * (n - 1))) in Hk.
         rewrite (Nat.mul_shuffle0 m) in Hk.
         rewrite Hmng in Hk.
