@@ -3663,33 +3663,6 @@ assert
         apply Nat.mod_upper_bound.
         now apply Nat.neq_mul_0.
       } {
-(*
-        apply Nat.neq_0_lt_0.
-        intros H.
-        apply Nat.mod_divides in H. 2: {
-          now apply Nat.neq_mul_0.
-        }
-        destruct H as (k, Hk).
-        rewrite Nat.mul_sub_distr_l, Nat.mul_1_r in Hk.
-        do 2 rewrite Nat.mul_sub_distr_r in Hk.
-        rewrite Nat.add_sub_assoc in Hk.
-        apply Nat.add_sub_eq_nz in Hk. 2: {
-...
-        rewrite (Nat.mul_shuffle0 (m * (n - 1))) in Hk.
-        rewrite (Nat.mul_shuffle0 m) in Hk.
-        rewrite Hmng in Hk.
-...
-*)
-(*
-        rewrite (Nat.mul_comm m n).
-        rewrite Nat.mod_mul_r; [ | easy | easy ].
-        rewrite (Nat.add_comm (n * a * v)).
-        rewrite <- (Nat.mul_assoc n).
-        rewrite Nat_mod_add_mul_l; [ | easy ].
-        remember ((m * (n - 1) * b * u) mod n) as p eqn:Hp.
-        destruct p. {
-...
-*)
         rewrite Nat.mod_mul_r; [ | easy | easy ].
         do 2 rewrite <- (Nat.mul_assoc m).
         rewrite Nat_mod_add_mul_l; [ | easy ].
@@ -3721,10 +3694,85 @@ assert
           rewrite Nat.add_comm in Hk.
           apply Nat.add_cancel_r in Hk.
           rewrite Nat.mul_shuffle0 in Hk; rewrite <- Hk.
+          rewrite Nat.mul_shuffle0 in Hk.
+          replace (n * v) with (m * u - 1) in Hk by flia Hmng.
+          rewrite Nat.mul_sub_distr_r, Nat.mul_1_l in Hk.
+          symmetry in Hk.
+          destruct (le_dec k (u * a)) as [Hku| Hku]. {
+            assert (H : a = m * u * a - m * k). {
+              rewrite <- Hk.
+              rewrite Nat_sub_sub_distr. 2: {
+                split; [ | easy ].
+                destruct m; [ easy | ].
+                destruct u; [ rewrite Nat.mul_0_r in Hmng; flia Hmng | cbn ].
+                remember ((u + m * S u) * a); flia.
+              }
+              now rewrite Nat.sub_diag.
+            }
+            rewrite <- Nat.mul_assoc in H.
+            rewrite <- Nat.mul_sub_distr_l in H.
+            destruct Ha as (Ha1, Ha).
+            rewrite H in Ha.
+            apply Nat.nle_gt in Ha; exfalso; apply Ha.
+            destruct (Nat.eq_dec (u * a) k) as [Huk| Huk]. {
+              subst k.
+              rewrite Nat.sub_diag, Nat.mul_0_r in H; flia H Ha1.
+            }
+            remember (u * a - k) as p eqn:Hp.
+            destruct p. {
+              rewrite Nat.mul_0_r in H; flia H Ha1.
+            }
+            rewrite Nat.mul_succ_r; flia.
+          }
+          apply Nat.nle_gt in Hku.
+          apply (Nat.mul_lt_mono_pos_r m) in Hku; [ | flia Hmz ].
+          rewrite (Nat.mul_comm k) in Hku.
+          rewrite <- Hk in Hku.
+          rewrite Nat.mul_comm, Nat.mul_assoc in Hku.
+          remember (m * u * a).
+          flia Hku.
+        }
+        flia.
+      }
+    }
+    apply Nat.le_add_le_sub_r.
+    apply Nat.mod_upper_bound.
+    now apply Nat.neq_mul_0.
+  }
+Search (Nat.gcd _ (_ - _)).
+...
+          apply Nat.add_sub_eq_nz in Hk. 2: {
+            apply Nat.neq_mul_0.
+            split; [ easy | ].
+            intros H; subst k.
+            rewrite Nat.mul_0_r in Hk.
+            apply Nat.sub_0_le in Hk.
+            apply Nat.nlt_ge in Hk; apply Hk; clear Hk.
+            destruct m; [ easy | ].
+            destruct u; [ rewrite Nat.mul_0_r in Hmng; flia Hmng | ].
+            destruct a; [ flia Ha | ].
+            destruct m; [ flia H2m | cbn ].
+            rewrite Nat.mul_comm; cbn.
+            remember (a * (u + S (u + m * S u))).
+            remember (m * S u).
+            flia.
+          }
+...
           rewrite <- Nat.mul_add_distr_l.
           rewrite Nat.mul_comm.
           rewrite (Nat.mul_comm m).
           rewrite Nat.div_mul; [ | easy ].
+          cbn.
+          apply Nat.neq_0_lt_0.
+          intros H.
+          apply Nat.eq_mul_0 in H.
+          destruct H as [H| H]; [ | easy ].
+          apply Nat.mod_divide in H; [ | easy ].
+          destruct H as (p, Hp).
+          move p before k.
+          apply (Nat.mul_cancel_l _ _ m) in Hp; [ | easy ].
+          rewrite Nat.mul_add_distr_l in Hp.
+          rewrite Hk in Hp.
 ...
       rewrite Nat.add_comm.
       rewrite Nat.sub_add. 2: {
