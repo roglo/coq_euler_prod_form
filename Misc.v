@@ -329,6 +329,14 @@ rewrite Nat.mul_comm.
 now apply Nat.mod_add.
 Qed.
 
+Theorem Nat_sub_sub_swap : ∀ a b c, a - b - c = a - c - b.
+Proof.
+intros.
+rewrite <- Nat.sub_add_distr.
+rewrite Nat.add_comm.
+now rewrite Nat.sub_add_distr.
+Qed.
+
 Theorem Nat_mod_0_mod_div : ∀ a b,
   0 < b ≤ a → a mod b = 0 → a mod (a / b) = 0.
 Proof.

@@ -3494,8 +3494,13 @@ clear - Ha Hmn.
 apply in_seq in Ha.
 replace (1 + (mn - 1)) with mn in Ha by flia Hmn.
 rename mn into n.
-...
 enough (H : n - a = (a * (n - 1)) mod n) by flia H Ha.
+specialize (Nat.div_mod (a * (n - 1)) n Hmn) as H1.
+remember (a * (n - 1)) as b.
+replace (b mod n) with (b - n * (b / n)) by flia H1.
+subst b.
+rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
+rewrite Nat_sub_sub_swap; f_equal.
 ...
 destruct a; [ easy | ].
 destruct a. {
