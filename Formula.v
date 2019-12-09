@@ -3546,7 +3546,6 @@ assert (Hnz : n ≠ 0) by flia H2n.
 move H2n before n; move H2m before n.
 unfold φ.
 rewrite <- prod_length.
-...
 assert
   (Hf : ∀ a, a ∈ coprimes (m * n) →
    prod_coprimes_of_coprimes_mul m n a ∈
@@ -3639,14 +3638,73 @@ assert
   destruct Ha as (Ha, Hma).
   destruct Hb as (Hb, Hnb).
   move Hb before Ha.
+  apply in_seq in Ha.
+  apply in_seq in Hb.
   unfold coprimes_mul_of_prod_coprimes.
   remember (gcd_and_bezout m n) as gb eqn:Hgb.
   symmetry in Hgb.
   destruct gb as (g & u & v); cbn.
+  specialize (gcd_and_bezout_prop m n g u v Hmz Hgb) as (Hmng & Hg).
+  rewrite Hmn in Hg; subst g.
   apply in_coprimes_iff.
   split. {
     apply in_seq.
     split. 2: {
+      rewrite (Nat.add_comm _ (m * n - 1)).
+      rewrite Nat.sub_add. 2: {
+        destruct m; [ flia Hmz | ].
+        destruct n; [ flia Hnz | ].
+        cbn; remember (m * S n); flia.
+      }
+      apply Nat.sub_lt. {
+        apply Nat.lt_le_incl.
+        apply Nat.mod_upper_bound.
+        now apply Nat.neq_mul_0.
+      } {
+...
+        rewrite (Nat.mul_comm m n).
+        rewrite Nat.mod_mul_r; [ | easy | easy ].
+        rewrite (Nat.add_comm (n * a * v)).
+        rewrite <- (Nat.mul_assoc n).
+        rewrite Nat_mod_add_mul_l; [ | easy ].
+...
+        rewrite Nat.mod_mul_r; [ | easy | easy ].
+        do 2 rewrite <- (Nat.mul_assoc m).
+        rewrite Nat_mod_add_mul_l; [ | easy ].
+...
+        remember ((n * a * v) mod m) as p eqn:Hp; symmetry in Hp.
+        destruct p. {
+          apply Nat.mod_divides in Hp; [ | easy ].
+          destruct Hp as (k, Hk).
+          rewrite Nat.mul_shuffle0 in Hk.
+          replace (n * v) with (m * u - 1) in Hk by flia Hmng.
+          rewrite Nat.mul_sub_distr_r, Nat.mul_1_l in Hk.
+          apply Nat.add_sub_eq_nz in Hk. 2: {
+            apply Nat.neq_mul_0.
+            split; [ easy | ].
+            intros H; subst k; rewrite Nat.mul_0_r in Hk.
+            apply Nat.sub_0_le in Hk.
+            apply Nat.nlt_ge in Hk; apply Hk; clear Hk.
+            replace a with (1 * a) at 1 by flia.
+            apply Nat.mul_lt_mono_pos_r; [ easy | ].
+            destruct u. {
+              rewrite Nat.mul_0_r in Hmng; flia Hmng.
+            }
+            rewrite Nat.mul_succ_r.
+            destruct m; [ easy | ].
+            destruct m; [ flia H2m | ].
+            remember (S (S m) * u); flia.
+          }
+          rewrite Hmng in Hk.
+          rewrite Nat.mul_add_distr_r, Nat.mul_1_l in Hk.
+          rewrite Nat.add_comm in Hk.
+          apply Nat.add_cancel_r in Hk.
+          rewrite Nat.mul_shuffle0 in Hk; rewrite <- Hk.
+          rewrite <- Nat.mul_add_distr_l.
+          rewrite Nat.mul_comm.
+          rewrite (Nat.mul_comm m).
+          rewrite Nat.div_mul; [ | easy ].
+...
       rewrite Nat.add_comm.
       rewrite Nat.sub_add. 2: {
         destruct m; [ flia Hmz | ].
