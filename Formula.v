@@ -3396,7 +3396,19 @@ symmetry in Hgb.
 destruct gb as (g & u & v); cbn.
 specialize (gcd_and_bezout_prop m n g u v Hmz Hgb) as (Hmng & Hg).
 rewrite Hgmn in Hg; subst g.
+...
+specialize (Nat.div_mod a m Hmz) as Ham.
+specialize (Nat.div_mod a n Hnz) as Han.
+remember (a / m) as qm eqn:Hqm.
+remember (a / n) as qn eqn:Hqn.
+replace (a mod m) with (a - m * qm) by flia Ham.
+replace (a mod n) with (a - n * qn) by flia Han.
+rewrite Nat.mul_sub_distr_l, Nat.mul_assoc.
+rewrite (Nat.mul_shuffle0 m).
+rewrite (Nat.mul_sub_distr_l _ _ m), Nat.mul_assoc.
+do 3 rewrite Nat.mul_sub_distr_r.
 Check Nat.mod_mul_r.
+Search (_ * (_ mod _)).
 ...
 rewrite Nat.mod_mul_r; [ | easy | easy ].
 do 3 rewrite <- Nat.mul_assoc.
