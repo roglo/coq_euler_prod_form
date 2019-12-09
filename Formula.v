@@ -3495,6 +3495,8 @@ apply in_seq in Ha.
 replace (1 + (mn - 1)) with mn in Ha by flia Hmn.
 rename mn into n.
 ...
+enough (H : n - a = (a * (n - 1)) mod n) by flia H Ha.
+...
 destruct a; [ easy | ].
 destruct a. {
   cbn; rewrite Nat.add_0_r.
