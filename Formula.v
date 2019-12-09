@@ -3396,9 +3396,16 @@ destruct gb as (g & u & v); cbn.
 specialize (gcd_and_bezout_prop m n g u v Hmz Hgb) as (Hmng & Hg).
 rewrite Hgmn in Hg; subst g.
 ...
-remember (n * x * v + m * (n - 1) * y * u) as p eqn:Hp.
-f_equal. {
-  rewrite Nat.mod_mul_r; [ | easy | easy ].
+rewrite (Nat.mul_shuffle0 (m * (n - 1))).
+rewrite (Nat.mul_shuffle0 m).
+rewrite Nat.mul_shuffle0.
+rewrite Hmng.
+rewrite Nat.mul_add_distr_r, Nat.mul_1_l.
+rewrite Nat.mul_add_distr_r.
+rewrite Nat.add_assoc.
+do 3 rewrite <- Nat.mul_assoc.
+do 2 rewrite <- Nat.mul_add_distr_l.
+rewrite Nat.mul_assoc.
 ...
 
 (*
