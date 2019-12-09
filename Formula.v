@@ -3663,13 +3663,13 @@ assert
         apply Nat.mod_upper_bound.
         now apply Nat.neq_mul_0.
       } {
+(*
         apply Nat.neq_0_lt_0.
         intros H.
         apply Nat.mod_divides in H. 2: {
           now apply Nat.neq_mul_0.
         }
         destruct H as (k, Hk).
-...
         rewrite Nat.mul_sub_distr_l, Nat.mul_1_r in Hk.
         do 2 rewrite Nat.mul_sub_distr_r in Hk.
         rewrite Nat.add_sub_assoc in Hk.
@@ -3679,16 +3679,20 @@ assert
         rewrite (Nat.mul_shuffle0 m) in Hk.
         rewrite Hmng in Hk.
 ...
+*)
+(*
         rewrite (Nat.mul_comm m n).
         rewrite Nat.mod_mul_r; [ | easy | easy ].
         rewrite (Nat.add_comm (n * a * v)).
         rewrite <- (Nat.mul_assoc n).
         rewrite Nat_mod_add_mul_l; [ | easy ].
+        remember ((m * (n - 1) * b * u) mod n) as p eqn:Hp.
+        destruct p. {
 ...
+*)
         rewrite Nat.mod_mul_r; [ | easy | easy ].
         do 2 rewrite <- (Nat.mul_assoc m).
         rewrite Nat_mod_add_mul_l; [ | easy ].
-...
         remember ((n * a * v) mod m) as p eqn:Hp; symmetry in Hp.
         destruct p. {
           apply Nat.mod_divides in Hp; [ | easy ].
