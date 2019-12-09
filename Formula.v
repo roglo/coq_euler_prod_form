@@ -3413,9 +3413,8 @@ rewrite Nat.add_sub_assoc. 2: {
   subst qn.
   now apply Nat.mul_div_le.
 }
-rewrite <- (Nat.mod_add _ (qn * (n - 1) * u)). 2: {
-  now apply Nat.neq_mul_0.
-}
+assert (Hmn : m * n ≠ 0) by now apply Nat.neq_mul_0.
+rewrite <- (Nat.mod_add _ (qn * (n - 1) * u)); [ | easy ].
 replace (qn * (n - 1) * u * (m * n)) with (m * n * qn * (n - 1) * u) by flia.
 rewrite Nat.sub_add. 2: {
   ring_simplify.
@@ -3438,9 +3437,7 @@ rewrite <- Nat.add_sub_swap. 2: {
   subst qm.
   now apply Nat.mul_div_le.
 }
-rewrite <- (Nat.mod_add _ (qm * v)). 2: {
-  now apply Nat.neq_mul_0.
-}
+rewrite <- (Nat.mod_add _ (qm * v)); [ | easy ].
 replace (qm * v * (m * n)) with (n * m * qm * v) by flia.
 rewrite Nat.sub_add. 2: {
   transitivity (n * a * v). 2: {
@@ -3468,9 +3465,7 @@ rewrite Nat.add_comm.
 rewrite Nat.sub_add_distr.
 rewrite (Nat.mul_shuffle0 n a v).
 rewrite Nat.add_sub.
-rewrite <- (Nat.mod_add _ a). 2: {
-  now apply Nat.neq_mul_0.
-}
+rewrite <- (Nat.mod_add _ a); [ | easy ].
 rewrite <- Nat.add_sub_swap. 2: {
   destruct m; [ easy | ].
   destruct n; [ easy | ].
@@ -3491,9 +3486,13 @@ replace a with (a * 1) at 3 by flia.
 rewrite <- Nat.mul_sub_distr_l.
 rewrite Nat.add_comm.
 replace (m * a * n * u) with (a * u * (m * n)) by flia.
-rewrite Nat.mod_add. 2: {
-  now apply Nat.neq_mul_0.
-}
+rewrite Nat.mod_add; [ | easy ].
+remember (a * (m * n - 1)) as b eqn:Hb.
+...
+specialize (Nat.div_mod b (m * n) Hmn) as H1.
+specialize (Nat.div_mod b (m * n) Hmn) as H1.
+replace (b mod (m * n)) with (b - m * n * (b / (m * n))) by flia H1.
+rewrite Nat_sub_sub_assoc.
 ...
 
 (*
