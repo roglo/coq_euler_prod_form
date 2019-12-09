@@ -3384,10 +3384,11 @@ Qed.
 
 Theorem coprimes_mul_prod_coprimes : ∀ m n a,
   m ≠ 0
+  → n ≠ 0
   → Nat.gcd m n = 1
   → coprimes_mul_of_prod_coprimes m n (prod_coprimes_of_coprimes_mul m n a) = a.
 Proof.
-intros * Hmz Hgmn.
+intros * Hmz Hnz Hgmn.
 unfold coprimes_mul_of_prod_coprimes.
 unfold prod_coprimes_of_coprimes_mul.
 remember (gcd_and_bezout m n) as gb eqn:Hgb.
@@ -3395,6 +3396,18 @@ symmetry in Hgb.
 destruct gb as (g & u & v); cbn.
 specialize (gcd_and_bezout_prop m n g u v Hmz Hgb) as (Hmng & Hg).
 rewrite Hgmn in Hg; subst g.
+Check Nat.mod_mul_r.
+...
+rewrite Nat.mod_mul_r; [ | easy | easy ].
+do 3 rewrite <- Nat.mul_assoc.
+rewrite Nat_mod_add_mul_l; [ | easy ].
+rewrite (Nat.mul_comm n).
+rewrite <- (Nat.mul_assoc (a mod m)).
+rewrite Nat.mul_mod_idemp_l; [ | easy ].
+...
+rewrite Nat.mul_assoc.
+remember (m * n) as mn.
+rewrite (Nat.mul_comm m); subst mn.
 ...
 rewrite (Nat.mul_shuffle0 (m * (n - 1))).
 rewrite (Nat.mul_shuffle0 m).
