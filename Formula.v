@@ -3396,7 +3396,6 @@ symmetry in Hgb.
 destruct gb as (g & u & v); cbn.
 specialize (gcd_and_bezout_prop m n g u v Hmz Hgb) as (Hmng & Hg).
 rewrite Hgmn in Hg; subst g.
-...
 specialize (Nat.div_mod a m Hmz) as Ham.
 specialize (Nat.div_mod a n Hnz) as Han.
 remember (a / m) as qm eqn:Hqm.
@@ -3407,30 +3406,68 @@ rewrite Nat.mul_sub_distr_l, Nat.mul_assoc.
 rewrite (Nat.mul_shuffle0 m).
 rewrite (Nat.mul_sub_distr_l _ _ m), Nat.mul_assoc.
 do 3 rewrite Nat.mul_sub_distr_r.
-Check Nat.mod_mul_r.
-Search (_ * (_ mod _)).
-...
-rewrite Nat.mod_mul_r; [ | easy | easy ].
-do 3 rewrite <- Nat.mul_assoc.
-rewrite Nat_mod_add_mul_l; [ | easy ].
-rewrite (Nat.mul_comm n).
-rewrite <- (Nat.mul_assoc (a mod m)).
-rewrite Nat.mul_mod_idemp_l; [ | easy ].
-...
-rewrite Nat.mul_assoc.
-remember (m * n) as mn.
-rewrite (Nat.mul_comm m); subst mn.
-...
-rewrite (Nat.mul_shuffle0 (m * (n - 1))).
-rewrite (Nat.mul_shuffle0 m).
-rewrite Nat.mul_shuffle0.
+rewrite Nat.add_sub_assoc. 2: {
+  do 2 apply Nat.mul_le_mono_r.
+  rewrite <- Nat.mul_assoc.
+  apply Nat.mul_le_mono_l.
+  subst qn.
+  now apply Nat.mul_div_le.
+}
+rewrite <- (Nat.mod_add _ (qn * (n - 1) * u)). 2: {
+  now apply Nat.neq_mul_0.
+}
+replace (qn * (n - 1) * u * (m * n)) with (m * n * qn * (n - 1) * u) by flia.
+rewrite Nat.sub_add. 2: {
+  ring_simplify.
+  transitivity (m * (n - 1) * u * a); [ | flia ].
+  rewrite Nat.mul_shuffle0.
+  rewrite (Nat.mul_shuffle0 m (n - 1)).
+  rewrite (Nat.mul_shuffle0 (m * u)).
+  apply Nat.mul_le_mono_r.
+  rewrite (Nat.mul_shuffle0 _ u).
+  apply Nat.mul_le_mono_r.
+  rewrite <- Nat.mul_assoc.
+  apply Nat.mul_le_mono_l.
+  subst qn.
+  now apply Nat.mul_div_le.
+}
+rewrite <- Nat.add_sub_swap. 2: {
+  apply Nat.mul_le_mono_r.
+  rewrite <- Nat.mul_assoc.
+  apply Nat.mul_le_mono_l.
+  subst qm.
+  now apply Nat.mul_div_le.
+}
+rewrite <- (Nat.mod_add _ (qm * v)). 2: {
+  now apply Nat.neq_mul_0.
+}
+replace (qm * v * (m * n)) with (n * m * qm * v) by flia.
+rewrite Nat.sub_add. 2: {
+  transitivity (n * a * v). 2: {
+    remember (m * a * (n - 1) * u); flia.
+  }
+  apply Nat.mul_le_mono_r.
+  rewrite <- Nat.mul_assoc.
+  apply Nat.mul_le_mono_l.
+  subst qm.
+  now apply Nat.mul_div_le.
+}
+rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
+rewrite Nat.mul_sub_distr_r.
+rewrite Nat.add_sub_assoc. 2: {
+  apply Nat.mul_le_mono_r.
+  rewrite <- Nat.mul_assoc.
+  apply Nat.mul_le_mono_l.
+  destruct n; [ easy | ].
+  rewrite Nat.mul_succ_r; flia.
+}
+rewrite (Nat.mul_shuffle0 m a u).
 rewrite Hmng.
 rewrite Nat.mul_add_distr_r, Nat.mul_1_l.
-rewrite Nat.mul_add_distr_r.
-rewrite Nat.add_assoc.
-do 3 rewrite <- Nat.mul_assoc.
-do 2 rewrite <- Nat.mul_add_distr_l.
-rewrite Nat.mul_assoc.
+rewrite Nat.add_comm.
+rewrite Nat.sub_add_distr.
+rewrite (Nat.mul_shuffle0 n a v).
+rewrite Nat.add_sub.
 ...
 
 (*
