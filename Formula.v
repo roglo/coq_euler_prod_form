@@ -3468,6 +3468,32 @@ rewrite Nat.add_comm.
 rewrite Nat.sub_add_distr.
 rewrite (Nat.mul_shuffle0 n a v).
 rewrite Nat.add_sub.
+rewrite <- (Nat.mod_add _ a). 2: {
+  now apply Nat.neq_mul_0.
+}
+rewrite <- Nat.add_sub_swap. 2: {
+  destruct m; [ easy | ].
+  destruct n; [ easy | ].
+  destruct u; [ rewrite Nat.mul_comm in Hmng; cbn in Hmng; flia Hmng | ].
+  rewrite (Nat.mul_shuffle0 (S m)).
+  rewrite Nat.mul_shuffle0.
+  cbn.
+  remember ((u + (n + m * S n) * S u) * a).
+  flia.
+}
+rewrite <- Nat.add_sub_assoc. 2: {
+  destruct m; [ easy | ].
+  destruct n; [ easy | ].
+  rewrite Nat.mul_comm; cbn.
+  remember (n + m * S n); flia.
+}
+replace a with (a * 1) at 3 by flia.
+rewrite <- Nat.mul_sub_distr_l.
+rewrite Nat.add_comm.
+replace (m * a * n * u) with (a * u * (m * n)) by flia.
+rewrite Nat.mod_add. 2: {
+  now apply Nat.neq_mul_0.
+}
 ...
 
 (*
