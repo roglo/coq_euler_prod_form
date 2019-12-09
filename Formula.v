@@ -3489,6 +3489,22 @@ rewrite <- Nat.mul_sub_distr_l.
 rewrite Nat.add_comm.
 replace (m * a * n * u) with (a * u * (m * n)) by flia.
 rewrite Nat.mod_add; [ | easy ].
+remember (m * n) as mn.
+clear - Ha Hmn.
+apply in_seq in Ha.
+replace (1 + (mn - 1)) with mn in Ha by flia Hmn.
+rename mn into n.
+...
+destruct a; [ easy | ].
+destruct a. {
+  cbn; rewrite Nat.add_0_r.
+  rewrite Nat.mod_small; [ | flia Hmn ].
+  flia Hmn.
+}
+destruct a. {
+  cbn; rewrite Nat.add_0_r.
+  rewrite Nat.add_sub_assoc; [ | flia Hmn ].
+
 ...
 remember (a * (m * n - 1)) as b eqn:Hb.
 specialize (Nat.div_mod b (m * n) Hmn) as H1.
