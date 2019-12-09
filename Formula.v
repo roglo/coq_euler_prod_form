@@ -3214,9 +3214,19 @@ destruct gb as (g & u & v); cbn.
 specialize (gcd_and_bezout_prop m n g u v Hmz Hgb) as (Hmng & Hg).
 rewrite Hgmn in Hg; subst g.
 remember (n * x * v + m * (n - 1) * y * u) as p eqn:Hp.
-rewrite Nat.mod_mul_r at 1; [ | easy | easy ].
-rewrite (Nat.mul_comm m n).
-rewrite Nat.mod_mul_r; [ | easy | easy ].
+f_equal. {
+  rewrite Nat.mod_mul_r at 1; [ | easy | easy ].
+  do 3 rewrite <- Nat.mul_assoc in Hp.
+  rewrite (Nat.mul_comm m) in Hp.
+  rewrite Hp at 1.
+  rewrite Nat.mod_add; [ | easy ].
+  rewrite Nat.add_comm.
+  rewrite Nat.sub_add_distr.
+  rewrite <- Nat.mul_sub_distr_l.
+  rewrite Nat.mul_assoc.
+...
+  rewrite (Nat.mul_comm m n).
+  rewrite Nat.mod_mul_r; [ | easy | easy ].
 rewrite (Nat.mul_comm n m).
 do 3 rewrite <- Nat.mul_assoc in Hp.
 rewrite (Nat.mul_comm m) in Hp.
@@ -3226,6 +3236,7 @@ rewrite Nat.mod_add; [ | easy ].
 rewrite Nat.add_comm in Hp.
 rewrite Hp at 2.
 rewrite Nat.mod_add; [ | easy ].
+Search (_ * (_  mod _)).
 (* regarder tout le binz sur papier *)
 ...
 setoid_rewrite Nat.add_comm.
