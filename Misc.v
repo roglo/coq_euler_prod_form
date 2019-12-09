@@ -321,6 +321,14 @@ rewrite <- Nat.mul_sub_distr_l, Nat.mul_comm.
 now apply Nat.mod_mul.
 Qed.
 
+Theorem Nat_mod_add_mul_l : ∀ a b c,
+  b ≠ 0 → (a + b * c) mod b = a mod b.
+Proof.
+intros * Hbz.
+rewrite Nat.mul_comm.
+now apply Nat.mod_add.
+Qed.
+
 Theorem Nat_mod_0_mod_div : ∀ a b,
   0 < b ≤ a → a mod b = 0 → a mod (a / b) = 0.
 Proof.

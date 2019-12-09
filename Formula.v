@@ -3213,6 +3213,46 @@ symmetry in Hgb.
 destruct gb as (g & u & v); cbn.
 specialize (gcd_and_bezout_prop m n g u v Hmz Hgb) as (Hmng & Hg).
 rewrite Hgmn in Hg; subst g.
+f_equal. {
+  remember (n * x * v + m * (n - 1) * y * u) as p eqn:Hp.
+  rewrite Nat.mod_mul_r; [ | easy | easy ].
+  rewrite Nat.sub_add_distr.
+  rewrite <- (Nat.mod_add _ ((p / m) mod n)); [ | easy ].
+  rewrite (Nat.mul_comm _ m).
+  rewrite Nat.sub_add. 2: {
+    apply Nat.le_add_le_sub_r.
+    replace (m * n) with (m * (n - 1) + m). 2: {
+      rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
+      apply Nat.sub_add.
+      destruct n; [ easy | ].
+      rewrite Nat.mul_succ_r; flia.
+    }
+    apply Nat.add_le_mono. {
+      apply Nat.mul_le_mono_l.
+      rewrite Nat.sub_1_r.
+      apply Nat.lt_le_pred.
+      now apply Nat.mod_upper_bound.
+    } {
+      now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+    }
+  }
+  rewrite Hp.
+Search ((_ + _ * _) mod _).
+...
+    transitivity p. {
+      specialize (Nat.div_mod p m Hmz) as H1.
+      rewrite H1 at 3.
+      apply Nat.add_le_mono_r.
+      apply Nat.mul_le_mono_l.
+      now apply Nat.mod_le.
+    }
+    subst p.
+    rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
+    do 2 rewrite Nat.mul_sub_distr_r.
+...
+Check Nat.div_mod.
+    rewrite <- Nat.div_mod.
+...
 remember (n * x * v + m * (n - 1) * y * u) as p eqn:Hp.
 f_equal. {
   rewrite Nat.mod_mul_r at 1; [ | easy | easy ].
