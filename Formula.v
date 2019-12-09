@@ -3487,9 +3487,8 @@ rewrite <- Nat.mul_sub_distr_l.
 rewrite Nat.add_comm.
 replace (m * a * n * u) with (a * u * (m * n)) by flia.
 rewrite Nat.mod_add; [ | easy ].
-remember (a * (m * n - 1)) as b eqn:Hb.
 ...
-specialize (Nat.div_mod b (m * n) Hmn) as H1.
+remember (a * (m * n - 1)) as b eqn:Hb.
 specialize (Nat.div_mod b (m * n) Hmn) as H1.
 replace (b mod (m * n)) with (b - m * n * (b / (m * n))) by flia H1.
 rewrite Nat_sub_sub_assoc.
