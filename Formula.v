@@ -3242,6 +3242,11 @@ rewrite Nat_mod_add_mul_l; [ | easy ].
 rewrite (Nat.mul_comm (n - 1)).
 rewrite Nat_mul_pred_r_mod; [ | easy | easy ].
 rewrite <- Nat.add_sub_swap; [ | flia Hyn ].
+rewrite <- Nat.mul_assoc.
+rewrite (Nat.add_comm (n * _)).
+do 3 rewrite (Nat.mul_comm n _).
+rewrite Nat.div_add; [ | easy ].
+rewrite Nat.add_comm.
 ...
 
 Theorem glop : ∀ m n x y u v,
