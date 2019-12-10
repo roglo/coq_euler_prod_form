@@ -3649,6 +3649,78 @@ assert
   specialize (gcd_and_bezout_prop m n g u v Hmz Hgb) as (Hmng & Hg).
   rewrite Hmn in Hg; subst g.
   apply in_coprimes_iff.
+  assert (Hnmz : (n * a * v + m * (n - 1) * b * u) mod (m * n) ≠ 0). {
+    rewrite Nat.mod_mul_r; [ | easy | easy ].
+    do 2 rewrite <- (Nat.mul_assoc m).
+    rewrite Nat_mod_add_mul_l; [ | easy ].
+    remember ((n * a * v) mod m) as p eqn:Hp; symmetry in Hp.
+    destruct p. {
+      apply Nat.mod_divides in Hp; [ | easy ].
+      destruct Hp as (k, Hk).
+      rewrite Nat.mul_shuffle0 in Hk.
+      replace (n * v) with (m * u - 1) in Hk by flia Hmng.
+      rewrite Nat.mul_sub_distr_r, Nat.mul_1_l in Hk.
+      apply Nat.add_sub_eq_nz in Hk. 2: {
+        apply Nat.neq_mul_0.
+        split; [ easy | ].
+        intros H; subst k; rewrite Nat.mul_0_r in Hk.
+        apply Nat.sub_0_le in Hk.
+        apply Nat.nlt_ge in Hk; apply Hk; clear Hk.
+        replace a with (1 * a) at 1 by flia.
+        apply Nat.mul_lt_mono_pos_r; [ easy | ].
+        destruct u. {
+          rewrite Nat.mul_0_r in Hmng; flia Hmng.
+        }
+        rewrite Nat.mul_succ_r.
+        destruct m; [ easy | ].
+        destruct m; [ flia H2m | ].
+        remember (S (S m) * u); flia.
+      }
+      rewrite Hmng in Hk.
+      rewrite Nat.mul_add_distr_r, Nat.mul_1_l in Hk.
+      rewrite Nat.add_comm in Hk.
+      apply Nat.add_cancel_r in Hk.
+      rewrite Nat.mul_shuffle0 in Hk; rewrite <- Hk.
+      rewrite Nat.mul_shuffle0 in Hk.
+      replace (n * v) with (m * u - 1) in Hk by flia Hmng.
+      rewrite Nat.mul_sub_distr_r, Nat.mul_1_l in Hk.
+      symmetry in Hk.
+      destruct (le_dec k (u * a)) as [Hku| Hku]. {
+        assert (H : a = m * u * a - m * k). {
+          rewrite <- Hk.
+          rewrite Nat_sub_sub_distr. 2: {
+            split; [ | easy ].
+            destruct m; [ easy | ].
+            destruct u; [ rewrite Nat.mul_0_r in Hmng; flia Hmng | cbn ].
+            remember ((u + m * S u) * a); flia.
+          }
+          now rewrite Nat.sub_diag.
+        }
+        rewrite <- Nat.mul_assoc in H.
+        rewrite <- Nat.mul_sub_distr_l in H.
+        destruct Ha as (Ha1, Ha).
+        rewrite H in Ha.
+        apply Nat.nle_gt in Ha; exfalso; apply Ha.
+        destruct (Nat.eq_dec (u * a) k) as [Huk| Huk]. {
+          subst k.
+          rewrite Nat.sub_diag, Nat.mul_0_r in H; flia H Ha1.
+        }
+        remember (u * a - k) as p eqn:Hp.
+        destruct p. {
+          rewrite Nat.mul_0_r in H; flia H Ha1.
+        }
+        rewrite Nat.mul_succ_r; flia.
+      }
+      apply Nat.nle_gt in Hku.
+      apply (Nat.mul_lt_mono_pos_r m) in Hku; [ | flia Hmz ].
+      rewrite (Nat.mul_comm k) in Hku.
+      rewrite <- Hk in Hku.
+      rewrite Nat.mul_comm, Nat.mul_assoc in Hku.
+      remember (m * u * a).
+      flia Hku.
+    }
+    flia.
+  }
   split. {
     apply in_seq.
     split. 2: {
@@ -3658,88 +3730,16 @@ assert
         destruct n; [ flia Hnz | ].
         cbn; remember (m * S n); flia.
       }
-      apply Nat.sub_lt. {
-        apply Nat.lt_le_incl.
-        apply Nat.mod_upper_bound.
-        now apply Nat.neq_mul_0.
-      } {
-        rewrite Nat.mod_mul_r; [ | easy | easy ].
-        do 2 rewrite <- (Nat.mul_assoc m).
-        rewrite Nat_mod_add_mul_l; [ | easy ].
-        remember ((n * a * v) mod m) as p eqn:Hp; symmetry in Hp.
-        destruct p. {
-          apply Nat.mod_divides in Hp; [ | easy ].
-          destruct Hp as (k, Hk).
-          rewrite Nat.mul_shuffle0 in Hk.
-          replace (n * v) with (m * u - 1) in Hk by flia Hmng.
-          rewrite Nat.mul_sub_distr_r, Nat.mul_1_l in Hk.
-          apply Nat.add_sub_eq_nz in Hk. 2: {
-            apply Nat.neq_mul_0.
-            split; [ easy | ].
-            intros H; subst k; rewrite Nat.mul_0_r in Hk.
-            apply Nat.sub_0_le in Hk.
-            apply Nat.nlt_ge in Hk; apply Hk; clear Hk.
-            replace a with (1 * a) at 1 by flia.
-            apply Nat.mul_lt_mono_pos_r; [ easy | ].
-            destruct u. {
-              rewrite Nat.mul_0_r in Hmng; flia Hmng.
-            }
-            rewrite Nat.mul_succ_r.
-            destruct m; [ easy | ].
-            destruct m; [ flia H2m | ].
-            remember (S (S m) * u); flia.
-          }
-          rewrite Hmng in Hk.
-          rewrite Nat.mul_add_distr_r, Nat.mul_1_l in Hk.
-          rewrite Nat.add_comm in Hk.
-          apply Nat.add_cancel_r in Hk.
-          rewrite Nat.mul_shuffle0 in Hk; rewrite <- Hk.
-          rewrite Nat.mul_shuffle0 in Hk.
-          replace (n * v) with (m * u - 1) in Hk by flia Hmng.
-          rewrite Nat.mul_sub_distr_r, Nat.mul_1_l in Hk.
-          symmetry in Hk.
-          destruct (le_dec k (u * a)) as [Hku| Hku]. {
-            assert (H : a = m * u * a - m * k). {
-              rewrite <- Hk.
-              rewrite Nat_sub_sub_distr. 2: {
-                split; [ | easy ].
-                destruct m; [ easy | ].
-                destruct u; [ rewrite Nat.mul_0_r in Hmng; flia Hmng | cbn ].
-                remember ((u + m * S u) * a); flia.
-              }
-              now rewrite Nat.sub_diag.
-            }
-            rewrite <- Nat.mul_assoc in H.
-            rewrite <- Nat.mul_sub_distr_l in H.
-            destruct Ha as (Ha1, Ha).
-            rewrite H in Ha.
-            apply Nat.nle_gt in Ha; exfalso; apply Ha.
-            destruct (Nat.eq_dec (u * a) k) as [Huk| Huk]. {
-              subst k.
-              rewrite Nat.sub_diag, Nat.mul_0_r in H; flia H Ha1.
-            }
-            remember (u * a - k) as p eqn:Hp.
-            destruct p. {
-              rewrite Nat.mul_0_r in H; flia H Ha1.
-            }
-            rewrite Nat.mul_succ_r; flia.
-          }
-          apply Nat.nle_gt in Hku.
-          apply (Nat.mul_lt_mono_pos_r m) in Hku; [ | flia Hmz ].
-          rewrite (Nat.mul_comm k) in Hku.
-          rewrite <- Hk in Hku.
-          rewrite Nat.mul_comm, Nat.mul_assoc in Hku.
-          remember (m * u * a).
-          flia Hku.
-        }
-        flia.
-      }
+      apply Nat.sub_lt; [ | now apply Nat.neq_0_lt_0 ].
+      apply Nat.lt_le_incl.
+      apply Nat.mod_upper_bound.
+      now apply Nat.neq_mul_0.
     }
     apply Nat.le_add_le_sub_r.
     apply Nat.mod_upper_bound.
     now apply Nat.neq_mul_0.
   }
-Search (Nat.gcd _ (_ - _)).
+  remember (n * a * v + m * (n - 1) * b * u) as p eqn:Hp.
 ...
           apply Nat.add_sub_eq_nz in Hk. 2: {
             apply Nat.neq_mul_0.
