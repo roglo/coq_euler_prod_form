@@ -3222,6 +3222,7 @@ Definition coprimes_mul_of_prod_coprimes (m n : nat) '((x, y) : nat * nat) :=
 (*
   m * n - (m * u * (x + (n - 1) * y) - x) mod (m * n).
   m * n - (n * v * (x + (n - 1) * y) + (n - 1) * y) mod (m * n).
+  m * n - (m * u * (x + (n - 1) * y) + (m * n - 1) * x) mod (m * n).
 *)
 
 (**)
