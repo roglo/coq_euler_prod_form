@@ -3226,6 +3226,10 @@ Definition coprimes_mul_of_prod_coprimes (m n : nat) '((x, y) : nat * nat) :=
   m * n - (m * u * (x + (n - 1) * y) + (m * n - 1) * x) mod (m * n).
 *)
 
+Search (_ - _ mod _).
+
+...
+
 (**)
 Section Halte.
 
@@ -3256,7 +3260,9 @@ Compute (list_prod (coprimes m) (coprimes n)).
 Compute
   (map (λ '(x, y),
      (m * u mod (m * n) * (x + (n - 1) * y) - x) mod (m * n))
-       (firstn 8 (list_prod (coprimes m) (coprimes n)))).
+       (list_prod (coprimes m) (coprimes n))).
+
+Compute (70-39).
 
 End Halte.
 (**)
