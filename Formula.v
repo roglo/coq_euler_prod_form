@@ -3243,8 +3243,6 @@ Compute
 End Halte.
 (**)
 
-...
-
 Theorem prod_coprimes_coprimes_mul_prod : ∀ m n,
   n ≠ 0
   → Nat.gcd m n = 1
@@ -3751,10 +3749,29 @@ assert
     now apply Nat.neq_mul_0.
   }
   remember (n * a * v + m * (n - 1) * b * u) as p eqn:Hp.
+  replace (m * (n - 1) * b * u) with (m * u * (n - 1) * b) in Hp by flia.
+(*
 Print coprimes_mul_of_prod_coprimes.
 (* c'est peut-être cette fonction qu'il faut revoir... *)
 ...
-  replace (m * (n - 1) * b * u) with (m * u * (n - 1) * b) in Hp by flia.
+*)
+(*
+  rewrite Nat.mul_shuffle0 in Hp.
+  replace (n * v) with (m * u - 1) in Hp by flia Hmng.
+  rewrite Nat.mul_sub_distr_r, Nat.mul_1_l in Hp.
+  rewrite <- Nat.add_sub_swap in Hp. 2: {
+    destruct m; [ easy | ].
+    destruct u; [ rewrite Nat.mul_0_r in Hmng; flia Hmng | ].
+    cbn; remember ((u + m * S u) * a); flia.
+  }
+  do 3 rewrite <- Nat.mul_assoc in Hp.
+  do 2 rewrite <- Nat.mul_add_distr_l in Hp.
+  rewrite Nat.mul_assoc in Hp.
+(*
+Hp : p = m * u * (a + (n - 1) * b) - a
+*)
+...
+*)
   rewrite Hmng in Hp.
   rewrite Nat.mul_add_distr_r, Nat.mul_1_l in Hp.
   rewrite Nat.mul_add_distr_r in Hp.
@@ -3762,6 +3779,9 @@ Print coprimes_mul_of_prod_coprimes.
   rewrite Nat.mul_shuffle0 in Hp.
   rewrite <- (Nat.mul_assoc (n * v)) in Hp.
   rewrite <- Nat.mul_add_distr_l in Hp.
+(*
+Hp : p = n * v * (a + (n - 1) * b) + (n - 1) * b
+*)
   rewrite Nat.mul_comm.
   rewrite Nat.mod_mul_r; [ | easy | easy ].
   rewrite <- Nat.mul_assoc in Hp.
