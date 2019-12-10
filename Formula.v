@@ -3766,6 +3766,14 @@ assert
   rewrite (Nat.mul_comm _ b).
   rewrite Nat_mul_pred_r_mod; [ | easy | easy ].
   rewrite <- (Nat.add_sub_swap _ _ b); [ | flia Hb ].
+  replace n with (n * 1) at 3 by flia.
+  rewrite <- Nat.mul_add_distr_l.
+  rewrite Nat_sub_sub_distr.
+  rewrite <- Nat.mul_sub_distr_l.
+  apply Nat.bezout_1_gcd.
+  unfold Nat.Bezout.
+...
+Search (Nat.gcd _ (_ + _)).
 ...
   apply Nat.bezout_1_gcd.
   unfold Nat.Bezout.
