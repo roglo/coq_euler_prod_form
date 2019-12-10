@@ -3749,6 +3749,8 @@ assert
     now apply Nat.neq_mul_0.
   }
   remember (n * a * v + m * (n - 1) * b * u) as p eqn:Hp.
+Print coprimes_mul_of_prod_coprimes.
+(* c'est peut-être cette fonction qu'il faut revoir... *)
 ...
   replace (m * (n - 1) * b * u) with (m * u * (n - 1) * b) in Hp by flia.
   rewrite Hmng in Hp.
