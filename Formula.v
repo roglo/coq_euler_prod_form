@@ -3217,7 +3217,12 @@ Definition prod_coprimes_of_coprimes_mul m n a := (a mod m, a mod n).
 
 Definition coprimes_mul_of_prod_coprimes (m n : nat) '((x, y) : nat * nat) :=
   let '(u, v) := snd (gcd_and_bezout m n) in
+(**)
   m * n - (n * x * v + m * (n - 1) * y * u) mod (m * n).
+(*
+  m * n - (m * u * (x + (n - 1) * y) - x) mod (m * n).
+  m * n - (n * v * (x + (n - 1) * y) + (n - 1) * y) mod (m * n).
+*)
 
 (**)
 Section Halte.
@@ -3767,10 +3772,6 @@ Print coprimes_mul_of_prod_coprimes.
   do 3 rewrite <- Nat.mul_assoc in Hp.
   do 2 rewrite <- Nat.mul_add_distr_l in Hp.
   rewrite Nat.mul_assoc in Hp.
-(*
-Hp : p = m * u * (a + (n - 1) * b) - a
-Hp : p = n * v * (a + (n - 1) * b) + (n - 1) * b
-*)
 ...
 *)
   rewrite Hmng in Hp.
