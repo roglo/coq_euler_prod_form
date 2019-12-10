@@ -3253,9 +3253,9 @@ End Halte.
 Theorem prod_coprimes_coprimes_mul_prod : ∀ m n,
   n ≠ 0
   → Nat.gcd m n = 1
-  → ∀ x y, x < m → y < n →
-  prod_coprimes_of_coprimes_mul m n
-     (coprimes_mul_of_prod_coprimes m n (x, y)) = (x, y).
+  → ∀ x y, x < m → y < n
+  → prod_coprimes_of_coprimes_mul m n
+       (coprimes_mul_of_prod_coprimes m n (x, y)) = (x, y).
 Proof.
 intros * Hnz Hgmn * Hxm Hyn.
 assert (Hmz : m ≠ 0) by flia Hxm.
@@ -3440,8 +3440,8 @@ Theorem coprimes_mul_prod_coprimes : ∀ m n,
   m ≠ 0
   → n ≠ 0
   → Nat.gcd m n = 1
-  → ∀ a, a ∈ seq 1 (m * n - 1) →
-  coprimes_mul_of_prod_coprimes m n (prod_coprimes_of_coprimes_mul m n a) = a.
+  → ∀ a, a ∈ seq 1 (m * n - 1)
+  → coprimes_mul_of_prod_coprimes m n (prod_coprimes_of_coprimes_mul m n a) = a.
 Proof.
 intros * Hmz Hnz Hgmn * Ha.
 Compute (coprimes_mul_of_prod_coprimes 3 7 (prod_coprimes_of_coprimes_mul 3 7 22)).
