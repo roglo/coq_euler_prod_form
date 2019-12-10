@@ -3769,6 +3769,7 @@ Print coprimes_mul_of_prod_coprimes.
   rewrite Nat.mul_assoc in Hp.
 (*
 Hp : p = m * u * (a + (n - 1) * b) - a
+Hp : p = n * v * (a + (n - 1) * b) + (n - 1) * b
 *)
 ...
 *)
@@ -3779,9 +3780,6 @@ Hp : p = m * u * (a + (n - 1) * b) - a
   rewrite Nat.mul_shuffle0 in Hp.
   rewrite <- (Nat.mul_assoc (n * v)) in Hp.
   rewrite <- Nat.mul_add_distr_l in Hp.
-(*
-Hp : p = n * v * (a + (n - 1) * b) + (n - 1) * b
-*)
   rewrite Nat.mul_comm.
   rewrite Nat.mod_mul_r; [ | easy | easy ].
   rewrite <- Nat.mul_assoc in Hp.
