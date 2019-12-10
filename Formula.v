@@ -3243,8 +3243,6 @@ Compute
 End Halte.
 (**)
 
-Inspect 3.
-
 ...
 
 Theorem prod_coprimes_coprimes_mul_prod : ∀ m n,
