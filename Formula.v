@@ -3262,6 +3262,7 @@ rewrite <- (Nat.mul_assoc n).
 rewrite (Nat.add_comm (n * (x * v))).
 rewrite Nat_mod_add_mul_l; [ | easy ].
 ...
+
 Theorem glop : ∀ m n x y u v,
   m ≠ 0
   → n ≠ 0
@@ -3275,11 +3276,6 @@ rewrite Nat_mod_add_mul_l; [ | easy ].
 rewrite Nat.sub_add_distr.
 rewrite (Nat.mul_comm m (_ * _ * _)).
 rewrite Nat.div_add; [ | easy ].
-rewrite Nat.mul_add_distr_l.
-...
-rewrite <- (Nat.mul_assoc n).
-rewrite (Nat.add_comm (n * (x * v))).
-rewrite Nat_mod_add_mul_l.
 ...
 
 (**)
