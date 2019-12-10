@@ -2243,6 +2243,7 @@ Compute (let p := 5 in map (λ n, Nat_pow_mod n ((p - 1)/2) p) (seq 2 (p - 3))).
 Compute (let p := 19 in map (λ n, Nat_pow_mod n ((p - 1)/2) p) (seq 2 (p - 3))).
 Compute (let p := 53 in map (λ n, Nat_pow_mod n ((p - 1)/2) p) (seq 2 (p - 3))).
 
+(* 2 is an odd prime because it is the only one which is even *)
 Theorem odd_prime : ∀ p, prime p → p ≠ 2 → p mod 2 = 1.
 Proof.
 intros * Hp Hp2.
