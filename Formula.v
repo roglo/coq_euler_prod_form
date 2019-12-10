@@ -3382,6 +3382,53 @@ f_equal. {
 }
 Qed.
 
+Theorem Nat_mul_pred_r_mod : ∀ a b,
+  a ≠ 0
+  → 1 ≤ b < a
+  → (b * (a - 1)) mod a = a - b.
+Proof.
+intros n a Hmn Ha.
+remember (n - a) as b.
+replace a with (n - b) in * by flia Heqb Ha.
+clear a Heqb; rename b into a.
+assert (H : 1 ≤ a < n) by flia Ha.
+clear Ha; rename H into Ha.
+(* or lemma here, perhaps? *)
+rewrite Nat.mul_sub_distr_r.
+do 2 rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
+rewrite Nat_sub_sub_assoc. 2: {
+  split. {
+    destruct n; [ easy | ].
+    rewrite Nat.mul_succ_r; flia.
+  } {
+    replace n with (1 * n) at 4 by flia.
+    rewrite <- Nat.mul_sub_distr_r.
+    transitivity ((n - 1) * n); [ | flia ].
+    apply Nat.mul_le_mono_r; flia Ha.
+  }
+}
+rewrite <- (Nat.mod_add _ a); [ | easy ].
+rewrite Nat.sub_add. 2: {
+  replace n with (1 * n) at 4 by flia.
+  rewrite <- Nat.mul_sub_distr_r.
+  transitivity ((n - 1) * n); [ | flia ].
+  apply Nat.mul_le_mono_r; flia Ha.
+}
+rewrite <- Nat.add_sub_swap. 2: {
+  replace n with (1 * n) at 1 by flia.
+  apply Nat.mul_le_mono_r; flia Hmn.
+}
+rewrite <- (Nat.mod_add _ 1); [ | easy ].
+rewrite Nat.mul_1_l.
+rewrite Nat.sub_add. 2: {
+  transitivity (n * n); [ | flia ].
+  replace n with (1 * n) at 1 by flia.
+  apply Nat.mul_le_mono_r; flia Hmn.
+}
+rewrite Nat.add_comm, Nat.mod_add; [ | easy ].
+now rewrite Nat.mod_small.
+Qed.
+
 Theorem coprimes_mul_prod_coprimes : ∀ m n,
   m ≠ 0
   → n ≠ 0
@@ -3489,52 +3536,14 @@ rewrite <- Nat.mul_sub_distr_l.
 rewrite Nat.add_comm.
 replace (m * a * n * u) with (a * u * (m * n)) by flia.
 rewrite Nat.mod_add; [ | easy ].
-remember (m * n) as mn.
-clear - Ha Hmn.
 apply in_seq in Ha.
-replace (1 + (mn - 1)) with mn in Ha by flia Hmn.
-rename mn into n.
-(* lemma, perhaps? *)
-enough (H : n - a = (a * (n - 1)) mod n) by flia H Ha.
-remember (n - a) as b.
-replace a with (n - b) in * by flia Heqb Ha.
-clear a Heqb; rename b into a.
-assert (H : 1 ≤ a < n) by flia Ha.
-clear Ha; rename H into Ha.
-(* or lemma here, perhaps? *)
-rewrite Nat.mul_sub_distr_r.
-do 2 rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
-rewrite Nat_sub_sub_assoc. 2: {
-  split. {
-    destruct n; [ easy | ].
-    rewrite Nat.mul_succ_r; flia.
-  } {
-    replace n with (1 * n) at 4 by flia.
-    rewrite <- Nat.mul_sub_distr_r.
-    transitivity ((n - 1) * n); [ | flia ].
-    apply Nat.mul_le_mono_r; flia Ha.
-  }
+replace (1 + (m * n - 1)) with (m * n) in Ha by flia Hmn.
+rewrite Nat_mul_pred_r_mod; [ | easy | easy ].
+rewrite Nat_sub_sub_distr. 2: {
+  split; [ | easy ].
+  now apply Nat.lt_le_incl.
 }
-rewrite <- (Nat.mod_add _ a); [ | easy ].
-rewrite Nat.sub_add. 2: {
-  replace n with (1 * n) at 4 by flia.
-  rewrite <- Nat.mul_sub_distr_r.
-  transitivity ((n - 1) * n); [ | flia ].
-  apply Nat.mul_le_mono_r; flia Ha.
-}
-rewrite <- Nat.add_sub_swap. 2: {
-  replace n with (1 * n) at 1 by flia.
-  apply Nat.mul_le_mono_r; flia Hmn.
-}
-rewrite <- (Nat.mod_add _ 1); [ | easy ].
-rewrite Nat.mul_1_l.
-rewrite Nat.sub_add. 2: {
-  transitivity (n * n); [ | flia ].
-  replace n with (1 * n) at 1 by flia.
-  apply Nat.mul_le_mono_r; flia Hmn.
-}
-rewrite Nat.add_comm, Nat.mod_add; [ | easy ].
-now rewrite Nat.mod_small.
+now rewrite Nat.sub_diag.
 Qed.
 
 Theorem totient_multiplicative : ∀ m n,
@@ -3740,6 +3749,34 @@ assert
     now apply Nat.neq_mul_0.
   }
   remember (n * a * v + m * (n - 1) * b * u) as p eqn:Hp.
+  replace (m * (n - 1) * b * u) with (m * u * (n - 1) * b) in Hp by flia.
+  rewrite Hmng in Hp.
+  rewrite Nat.mul_add_distr_r, Nat.mul_1_l in Hp.
+  rewrite Nat.mul_add_distr_r in Hp.
+  rewrite Nat.add_assoc in Hp.
+  rewrite Nat.mul_shuffle0 in Hp.
+  rewrite <- (Nat.mul_assoc (n * v)) in Hp.
+  rewrite <- Nat.mul_add_distr_l in Hp.
+  rewrite Nat.mul_comm.
+  rewrite Nat.mod_mul_r; [ | easy | easy ].
+  rewrite <- Nat.mul_assoc in Hp.
+  rewrite Nat.add_comm in Hp.
+  rewrite Hp at 1.
+  rewrite Nat_mod_add_mul_l; [ | easy ].
+  rewrite (Nat.mul_comm _ b).
+  rewrite Nat_mul_pred_r_mod; [ | easy | easy ].
+  rewrite <- (Nat.add_sub_swap _ _ b); [ | flia Hb ].
+...
+  apply Nat.bezout_1_gcd.
+  unfold Nat.Bezout.
+Search Nat.gcd.
+Search (Nat.gcd _ (_ + _)).
+rewrite Nat.gcd_comm.
+  rewrite <- Nat.gcd_add_diag_r.
+  rewrite <- (Nat.gcd_add_diag_r (p mod (m * n))).
+
+Search (Nat.gcd _ (_ + _)).
+...
 ...
           apply Nat.add_sub_eq_nz in Hk. 2: {
             apply Nat.neq_mul_0.
