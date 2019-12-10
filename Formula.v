@@ -3226,6 +3226,43 @@ Definition coprimes_mul_of_prod_coprimes (m n : nat) '((x, y) : nat * nat) :=
   m * n - (m * u * (x + (n - 1) * y) + (m * n - 1) * x) mod (m * n).
 *)
 
+(**)
+Section Halte.
+
+Let m := 10.
+Let n := 7.
+
+Compute (coprimes (m * n)).
+
+Compute
+  (map (λ a,
+  (coprimes_mul_of_prod_coprimes m n
+     (prod_coprimes_of_coprimes_mul m n a))) (coprimes (m * n))).
+
+Compute (list_prod (coprimes m) (coprimes n)).
+
+Compute
+  (map (λ xy,
+    (prod_coprimes_of_coprimes_mul m n
+       (coprimes_mul_of_prod_coprimes m n xy)))
+         (list_prod (coprimes m) (coprimes n))).
+
+Let uv := snd (gcd_and_bezout m n).
+Let u := fst uv.
+Let v := snd uv.
+
+Compute (list_prod (coprimes m) (coprimes n)).
+
+Compute
+  (map (λ '(x, y),
+     (m * u mod (m * n) * (x + (n - 1) * y) - x) mod (m * n))
+       (firstn 8 (list_prod (coprimes m) (coprimes n)))).
+
+End Halte.
+(**)
+
+...
+
 Theorem glop : ∀ m n x y u v,
   m ≠ 0
   → n ≠ 0
@@ -3277,30 +3314,6 @@ rewrite Nat.sub_add_distr.
 rewrite (Nat.mul_comm m (_ * _ * _)).
 rewrite Nat.div_add; [ | easy ].
 ...
-
-(**)
-Section Halte.
-
-Let m := 10.
-Let n := 21.
-
-Compute (coprimes (m * n)).
-
-Compute
-  (map (λ a,
-  (coprimes_mul_of_prod_coprimes m n
-     (prod_coprimes_of_coprimes_mul m n a))) (coprimes (m * n))).
-
-Compute (list_prod (coprimes m) (coprimes n)).
-
-Compute
-  (map (λ xy,
-    (prod_coprimes_of_coprimes_mul m n
-       (coprimes_mul_of_prod_coprimes m n xy)))
-         (list_prod (coprimes m) (coprimes n))).
-
-End Halte.
-(**)
 
 Theorem prod_coprimes_coprimes_mul_prod : ∀ m n,
   n ≠ 0
