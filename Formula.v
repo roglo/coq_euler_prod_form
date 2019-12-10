@@ -3230,6 +3230,37 @@ Theorem glop : ∀ m n x y u v,
   m ≠ 0
   → n ≠ 0
   → u * x = v * y + 1
+  → 1 ≤ y < n
+  → m * n - (n * v * (x + (n - 1) * y) + (n - 1) * y) mod (m * n) = 42.
+Proof.
+intros * Hmz Hnz Huv Hyn.
+rewrite (Nat.mul_comm m n).
+rewrite Nat.mod_mul_r; [ | easy | easy ].
+rewrite <- (Nat.mul_assoc n) at 1.
+rewrite (Nat.add_comm _ ((n - 1) * y)).
+rewrite Nat_mod_add_mul_l; [ | easy ].
+rewrite (Nat.mul_comm (n - 1)).
+rewrite Nat_mul_pred_r_mod; [ | easy | easy ].
+rewrite <- Nat.add_sub_swap; [ | flia Hyn ].
+...
+
+Theorem glop : ∀ m n x y u v,
+  m ≠ 0
+  → n ≠ 0
+  → u * x = v * y + 1
+  → m * n - (n * x * v + m * (n - 1) * y * u) mod (m * n) = 42.
+Proof.
+intros * Hmz Hnz Huv.
+rewrite (Nat.mul_comm m n).
+rewrite Nat.mod_mul_r; [ | easy | easy ].
+rewrite <- (Nat.mul_assoc n).
+rewrite (Nat.add_comm (n * (x * v))).
+rewrite Nat_mod_add_mul_l; [ | easy ].
+...
+Theorem glop : ∀ m n x y u v,
+  m ≠ 0
+  → n ≠ 0
+  → u * x = v * y + 1
   → m * n - (n * x * v + m * (n - 1) * y * u) mod (m * n) = 42.
 Proof.
 intros * Hmz Hnz Huv.
@@ -3239,6 +3270,7 @@ rewrite Nat_mod_add_mul_l; [ | easy ].
 rewrite Nat.sub_add_distr.
 rewrite (Nat.mul_comm m (_ * _ * _)).
 rewrite Nat.div_add; [ | easy ].
+rewrite Nat.mul_add_distr_l.
 ...
 rewrite <- (Nat.mul_assoc n).
 rewrite (Nat.add_comm (n * (x * v))).
