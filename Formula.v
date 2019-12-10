@@ -3749,6 +3749,7 @@ assert
     now apply Nat.neq_mul_0.
   }
   remember (n * a * v + m * (n - 1) * b * u) as p eqn:Hp.
+...
   replace (m * (n - 1) * b * u) with (m * u * (n - 1) * b) in Hp by flia.
   rewrite Hmng in Hp.
   rewrite Nat.mul_add_distr_r, Nat.mul_1_l in Hp.
@@ -3768,6 +3769,7 @@ assert
   rewrite <- (Nat.add_sub_swap _ _ b); [ | flia Hb ].
   replace n with (n * 1) at 3 by flia.
   rewrite <- Nat.mul_add_distr_l.
+...
   rewrite Nat_sub_sub_distr.
   rewrite <- Nat.mul_sub_distr_l.
   apply Nat.bezout_1_gcd.
