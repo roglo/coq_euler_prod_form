@@ -2621,22 +2621,18 @@ Definition φ' n :=
 
 Compute (let n := 105 in (φ' n, φ n)).
 
-...
-
-(**)
+(*
 Fixpoint φ'_num n c d :=
   if Nat.eq_dec (n mod d) 0 then c * (d - 1) else c.
 
 Fixpoint φ'_den n c d :=
   if Nat.eq_dec (n mod d) 0 then c * d else c.
 
-...
-
 Definition φ' n :=
   n *
   fold_left (φ'_num n) (filter is_prime (seq 1 n)) 1 /
   fold_left (φ'_den n) (filter is_prime (seq 1 n)) 1.
-(**)
+*)
 
 (*
 Definition bdiv a b :=
@@ -2654,9 +2650,14 @@ Theorem φ_eq_φ' : ∀ n, 2 ≤ n → φ n = φ' n.
 Proof.
 intros * Hn.
 assert (Hnz : n ≠ 0) by flia Hn.
+(*
+unfold φ, φ'.
+...
+*)
 specialize (prime_decomp_prod n Hnz) as H1.
 symmetry in H1.
 apply (f_equal φ) in H1.
+rewrite H1; unfold φ, φ'.
 ...
 
 Theorem in_coprimes_iff : ∀ n a,
