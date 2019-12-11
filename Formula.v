@@ -2591,6 +2591,47 @@ Qed.
 Definition coprimes n := filter (λ d, Nat.gcd n d =? 1) (seq 1 (n - 1)).
 Definition φ n := length (coprimes n).
 
+(**)
+Fixpoint φ'_num n c d :=
+  if is_prime d then
+    if Nat.eq_dec (n mod d) 0 then c * (d - 1) else c
+  else c.
+
+Fixpoint φ'_den n c d :=
+  if is_prime d then
+    if Nat.eq_dec (n mod d) 0 then c * d else c
+  else c.
+
+(*
+Fixpoint φ'_num n c d :=
+  if is_prime d then
+    match n mod d with
+    | 0 => c * (d - 1)
+    | _ => c
+    end
+  else c.
+
+Fixpoint φ'_den n c d :=
+  if is_prime d then
+    match n mod d with
+    | 0 => c * d
+    | _ => c
+    end
+  else c.
+*)
+
+Definition φ' n :=
+  fold_left (φ'_num n) (seq 1 n) n /
+  fold_left (φ'_den n) (seq 1 n) 1.
+
+Compute (let n := 31 in (φ n, φ' n)).
+
+Theorem φ_eq_φ' : ∀ n, 2 ≤ n → φ n = φ' n.
+Proof.
+intros * Hn.
+unfold φ, φ'.
+...
+
 Theorem in_coprimes_iff : ∀ n a,
   a ∈ seq 1 (n - 1) ∧ Nat.gcd n a = 1 ↔ a ∈ coprimes n.
 Proof.
