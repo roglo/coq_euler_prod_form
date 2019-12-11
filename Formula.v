@@ -2608,7 +2608,6 @@ Definition φ' n :=
 *)
 
 Definition rat_mul '(n1, d1) '(n2, d2) := (n1 * n2, d1 * d2).
-Definition rat_sub '(n1, d1) '(n2, d2) := (n1 * d2 - n2 * d1, d1 * d2).
 Definition nat_of_rat '(n, d) := n / d.
 
 Definition φ' n :=
@@ -2618,9 +2617,13 @@ Definition φ' n :=
          (λ c p,
           if is_prime p then
             match n mod p with
-            | 0 => rat_mul c (rat_sub (1, 1) (1, p))
+            | 0 => rat_mul c (p - 1, p)
             | _ => c end
           else c) (seq 1 n) (1, 1))).
+
+Compute (let n := 111 in (φ' n, φ n)).
+
+...
 
 (**)
 Fixpoint φ'_num n c d :=
