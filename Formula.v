@@ -2607,12 +2607,29 @@ Definition φ' n :=
   fold_left (φ'_den n) (seq 1 n) 1.
 *)
 
+Definition rat_mul '(n1, d1) '(n2, d2) := (n1 * n2, d1 * d2).
+Definition rat_sub '(n1, d1) '(n2, d2) := (n1 * d2 - n2 * d1, d1 * d2).
+Definition nat_of_rat '(n, d) := n / d.
+
+Definition φ' n :=
+  nat_of_rat
+    (rat_mul (n, 1)
+      (fold_left
+         (λ c p,
+          if is_prime p then
+            match n mod p with
+            | 0 => rat_mul c (rat_sub (1, 1) (1, p))
+            | _ => c end
+          else c) (seq 1 n) (1, 1))).
+
 (**)
 Fixpoint φ'_num n c d :=
   if Nat.eq_dec (n mod d) 0 then c * (d - 1) else c.
 
 Fixpoint φ'_den n c d :=
   if Nat.eq_dec (n mod d) 0 then c * d else c.
+
+...
 
 Definition φ' n :=
   n *
@@ -2639,7 +2656,7 @@ assert (Hnz : n ≠ 0) by flia Hn.
 specialize (prime_decomp_prod n Hnz) as H1.
 symmetry in H1.
 apply (f_equal φ) in H1.
-Abort.
+...
 
 Theorem in_coprimes_iff : ∀ n a,
   a ∈ seq 1 (n - 1) ∧ Nat.gcd n a = 1 ↔ a ∈ coprimes n.
