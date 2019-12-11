@@ -2639,7 +2639,7 @@ assert (Hnz : n ≠ 0) by flia Hn.
 specialize (prime_decomp_prod n Hnz) as H1.
 symmetry in H1.
 apply (f_equal φ) in H1.
-...
+Abort.
 
 Theorem in_coprimes_iff : ∀ n a,
   a ∈ seq 1 (n - 1) ∧ Nat.gcd n a = 1 ↔ a ∈ coprimes n.
