@@ -2607,21 +2607,19 @@ Definition φ' n :=
   fold_left (φ'_den n) (seq 1 n) 1.
 *)
 
-Definition rat_mul '(n1, d1) '(n2, d2) := (n1 * n2, d1 * d2).
-Definition nat_of_rat '(n, d) := n / d.
-
 Definition φ' n :=
-  nat_of_rat
-    (rat_mul (n, 1)
-      (fold_left
-         (λ c p,
-          if is_prime p then
-            match n mod p with
-            | 0 => rat_mul c (p - 1, p)
-            | _ => c end
-          else c) (seq 1 n) (1, 1))).
+  let '(pn, pd) :=
+    fold_left
+       (λ '(cn, cd) p,
+        if is_prime p then
+          match n mod p with
+          | 0 => (cn * (p - 1), cd * p)
+          | _ => (cn, cd) end
+        else (cn, cd)) (seq 1 n) (1, 1)
+  in
+  n * pn / pd.
 
-Compute (let n := 111 in (φ' n, φ n)).
+Compute (let n := 105 in (φ' n, φ n)).
 
 ...
 
