@@ -2607,7 +2607,7 @@ Definition φ' n :=
   fold_left (φ'_den n) (seq 1 n) 1.
 *)
 
-(*
+(**)
 Fixpoint φ'_num n c d :=
   if Nat.eq_dec (n mod d) 0 then c * (d - 1) else c.
 
@@ -2615,10 +2615,12 @@ Fixpoint φ'_den n c d :=
   if Nat.eq_dec (n mod d) 0 then c * d else c.
 
 Definition φ' n :=
-  fold_left (φ'_num n) (filter is_prime (seq 1 n)) n /
+  n *
+  fold_left (φ'_num n) (filter is_prime (seq 1 n)) 1 /
   fold_left (φ'_den n) (filter is_prime (seq 1 n)) 1.
-*)
+(**)
 
+(*
 Definition bdiv a b :=
   if Nat.eq_dec (a mod b) 0 then true else false.
 
@@ -2626,16 +2628,17 @@ Definition φ' n :=
   n *
   fold_left Nat.mul (map pred (filter (bdiv n) (filter is_prime (seq 1 n)))) 1 /
   fold_left Nat.mul (filter (bdiv n) (filter is_prime (seq 1 n))) 1.
+*)
 
 Compute (let n := 17 in (φ n, φ' n)).
 
 Theorem φ_eq_φ' : ∀ n, 2 ≤ n → φ n = φ' n.
 Proof.
 intros * Hn.
-unfold φ, φ'.
-Require Import Init.Nat.
-Show.
-unfold coprimes.
+assert (Hnz : n ≠ 0) by flia Hn.
+specialize (prime_decomp_prod n Hnz) as H1.
+symmetry in H1.
+apply (f_equal φ) in H1.
 ...
 
 Theorem in_coprimes_iff : ∀ n a,
