@@ -2591,7 +2591,7 @@ Qed.
 Definition coprimes n := filter (λ d, Nat.gcd n d =? 1) (seq 1 (n - 1)).
 Definition φ n := length (coprimes n).
 
-(**)
+(*
 Fixpoint φ'_num n c d :=
   if is_prime d then
     if Nat.eq_dec (n mod d) 0 then c * (d - 1) else c
@@ -2602,34 +2602,40 @@ Fixpoint φ'_den n c d :=
     if Nat.eq_dec (n mod d) 0 then c * d else c
   else c.
 
-(*
-Fixpoint φ'_num n c d :=
-  if is_prime d then
-    match n mod d with
-    | 0 => c * (d - 1)
-    | _ => c
-    end
-  else c.
-
-Fixpoint φ'_den n c d :=
-  if is_prime d then
-    match n mod d with
-    | 0 => c * d
-    | _ => c
-    end
-  else c.
-*)
-
 Definition φ' n :=
   fold_left (φ'_num n) (seq 1 n) n /
   fold_left (φ'_den n) (seq 1 n) 1.
+*)
 
-Compute (let n := 31 in (φ n, φ' n)).
+(*
+Fixpoint φ'_num n c d :=
+  if Nat.eq_dec (n mod d) 0 then c * (d - 1) else c.
+
+Fixpoint φ'_den n c d :=
+  if Nat.eq_dec (n mod d) 0 then c * d else c.
+
+Definition φ' n :=
+  fold_left (φ'_num n) (filter is_prime (seq 1 n)) n /
+  fold_left (φ'_den n) (filter is_prime (seq 1 n)) 1.
+*)
+
+Definition bdiv a b :=
+  if Nat.eq_dec (a mod b) 0 then true else false.
+
+Definition φ' n :=
+  n *
+  fold_left Nat.mul (map pred (filter (bdiv n) (filter is_prime (seq 1 n)))) 1 /
+  fold_left Nat.mul (filter (bdiv n) (filter is_prime (seq 1 n))) 1.
+
+Compute (let n := 17 in (φ n, φ' n)).
 
 Theorem φ_eq_φ' : ∀ n, 2 ≤ n → φ n = φ' n.
 Proof.
 intros * Hn.
 unfold φ, φ'.
+Require Import Init.Nat.
+Show.
+unfold coprimes.
 ...
 
 Theorem in_coprimes_iff : ∀ n a,
