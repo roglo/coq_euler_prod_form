@@ -3228,8 +3228,6 @@ Definition coprimes_mul_of_prod_coprimes (m n : nat) '((x, y) : nat * nat) :=
 
 Search (_ - _ mod _).
 
-...
-
 (**)
 Section Halte.
 
@@ -3267,8 +3265,6 @@ Compute (70-39).
 End Halte.
 (**)
 
-...
-
 Theorem glop : ∀ m n x y u v,
   m ≠ 0
   → n ≠ 0
@@ -3290,7 +3286,7 @@ rewrite (Nat.add_comm (n * _)).
 do 3 rewrite (Nat.mul_comm n _).
 rewrite Nat.div_add; [ | easy ].
 rewrite Nat.add_comm.
-...
+Abort.
 
 Theorem glop : ∀ m n x y u v,
   m ≠ 0
@@ -3304,7 +3300,7 @@ rewrite Nat.mod_mul_r; [ | easy | easy ].
 rewrite <- (Nat.mul_assoc n).
 rewrite (Nat.add_comm (n * (x * v))).
 rewrite Nat_mod_add_mul_l; [ | easy ].
-...
+Abort.
 
 Theorem glop : ∀ m n x y u v,
   m ≠ 0
@@ -3319,7 +3315,7 @@ rewrite Nat_mod_add_mul_l; [ | easy ].
 rewrite Nat.sub_add_distr.
 rewrite (Nat.mul_comm m (_ * _ * _)).
 rewrite Nat.div_add; [ | easy ].
-...
+Abort.
 
 Theorem prod_coprimes_coprimes_mul_prod : ∀ m n,
   n ≠ 0
@@ -3827,12 +3823,8 @@ assert
     now apply Nat.neq_mul_0.
   }
   remember (n * a * v + m * (n - 1) * b * u) as p eqn:Hp.
-  replace (m * (n - 1) * b * u) with (m * u * (n - 1) * b) in Hp by flia.
-(*
-Print coprimes_mul_of_prod_coprimes.
-(* c'est peut-être cette fonction qu'il faut revoir... *)
 ...
-*)
+  replace (m * (n - 1) * b * u) with (m * u * (n - 1) * b) in Hp by flia.
 (*
   rewrite Nat.mul_shuffle0 in Hp.
   replace (n * v) with (m * u - 1) in Hp by flia Hmng.
