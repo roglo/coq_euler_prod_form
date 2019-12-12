@@ -965,9 +965,9 @@ destruct g; [ easy | exfalso ].
 specialize (Nat.gcd_divide_l (p ^ k) n) as H1.
 rewrite Hg in H1.
 destruct H1 as (d, Hd).
-...
 specialize (prime_divisors p Hp (S (S g))) as H1.
 assert (H : Nat.divide (S (S g)) p). {
+...
   rewrite Hd; apply Nat.divide_factor_r.
 }
 specialize (H1 H); clear H.
