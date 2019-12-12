@@ -2646,6 +2646,44 @@ Definition φ' n :=
 
 Compute (let n := 17 in (φ n, φ' n)).
 
+Theorem prime_φ : ∀ p, prime p → φ p = p - 1.
+Proof.
+intros * Hp.
+unfold φ.
+unfold coprimes.
+rewrite (filter_ext_in _ (λ d, true)). 2: {
+  intros a Ha.
+  apply Nat.eqb_eq.
+  apply in_seq in Ha.
+  rewrite Nat.add_comm, Nat.sub_add in Ha. 2: {
+    destruct p; [ easy | flia ].
+  }
+  now apply eq_gcd_prime_small_1.
+}
+clear Hp.
+destruct p; [ easy | ].
+rewrite Nat.sub_succ, Nat.sub_0_r.
+induction p; [ easy | ].
+rewrite <- (Nat.add_1_r p).
+rewrite seq_app.
+rewrite filter_app.
+now rewrite app_length, IHp.
+Qed.
+
+Theorem prime_pow_φ : ∀ p, prime p →
+  ∀ k, k ≠ 0 → φ (p ^ k) = p ^ (k - 1) * (p - 1).
+Proof.
+intros * Hp * Hk.
+destruct k; [ easy | clear Hk ].
+rewrite Nat.sub_succ, Nat.sub_0_r.
+induction k. {
+  rewrite Nat.pow_1_r, Nat.pow_0_r, Nat.mul_1_l.
+  now apply prime_φ.
+}
+remember (S k) as sk.
+cbn - [ φ ]; subst sk.
+...
+
 Theorem φ_eq_φ' : ∀ n, 2 ≤ n → φ n = φ' n.
 Proof.
 intros * Hn.
