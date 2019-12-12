@@ -2710,6 +2710,9 @@ rewrite
     }
     rewrite <- Nat.gcd_mod; [ | now apply Nat.pow_nonzero ].
 ...
+eq_gcd_prime_small_1: ∀ p n : nat, prime p → 0 < n < p → Nat.gcd p n = 1
+Search prime.
+...
     clear Ha.
     revert a Hr.
     induction k; intros; [ easy | ].
