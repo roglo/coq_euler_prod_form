@@ -2699,12 +2699,8 @@ rewrite
     now subst p.
   } {
     apply Nat.eqb_eq.
-About eq_gcd_prime_small_1.
-Theorem eq_gcd_prime_pow_small_1 : ∀ p n k,
-  prime p
-  → 0 < n ≤ p ^ k
-  → n mod p ≠ 0
-  → Nat.gcd (p ^ k) n = 1.
+...
+apply eq_gcd_prime_pow_small_1.
 ...
     destruct k; [ easy | clear Hk ].
     revert a Ha Hr.
