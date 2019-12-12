@@ -2700,7 +2700,22 @@ rewrite
   } {
     apply Nat.eqb_eq.
     destruct k; [ easy | clear Hk ].
-    cbn.
+    revert a Ha Hr.
+    induction k; intros. {
+      rewrite Nat.pow_1_r in Ha |-*.
+      now apply eq_gcd_prime_small_1.
+    }
+    destruct (lt_dec a (p ^ S k)) as [Hak| Hak]. 2: {
+      apply Nat.nlt_ge in Hak.
+      remember (S k) as sk; cbn; subst sk.
+      apply Nat_gcd_1_mul_l. {
+        rewrite <- Nat.gcd_mod; [ | easy ].
+        rewrite Nat.gcd_comm.
+        apply eq_gcd_prime_small_1; [ easy | ].
+        split; [ rewrite Hr; flia | ].
+        now apply Nat.mod_upper_bound.
+      }
+...
     apply Nat_gcd_1_mul_l. {
       rewrite <- Nat.gcd_mod; [ | easy ].
       rewrite Nat.gcd_comm.
@@ -2709,6 +2724,26 @@ rewrite
       now apply Nat.mod_upper_bound.
     }
     rewrite <- Nat.gcd_mod; [ | now apply Nat.pow_nonzero ].
+    induction k; [ easy  | ].
+    destruct (lt_dec a (p ^ S k)) as [Hak| Hak]. 2: {
+      apply Nat.nlt_ge in Hak.
+...
+
+    destruct (lt_dec a (p ^ S k)) as [Hak| Hak]. {
+      cbn.
+      rewrite Nat.mul_comm, Nat.mod_mul_r; [ | | easy ]. 2: {
+        now apply Nat.pow_nonzero.
+      }
+...
+      rewrite Nat.div_small.
+...
+    destruct k. {
+      rewrite Nat.pow_1_r.
+      rewrite Nat.gcd_comm.
+      apply eq_gcd_prime_small_1; [ easy | ].
+      split; [ rewrite Hr; flia | ].
+      now apply Nat.mod_upper_bound.
+    }
 ...
 eq_gcd_prime_small_1: ∀ p n : nat, prime p → 0 < n < p → Nat.gcd p n = 1
 Search prime.
