@@ -973,6 +973,7 @@ destruct (Nat.eq_dec k 0) as [Hkz| Hkz]. {
   cbn in Hd.
   remember (d * S (S g)); flia Hd.
 }
+...
 assert (H : Nat.divide (S (S g)) p). {
   apply (Nat.gauss _ (p ^ (k - 1))). {
     rewrite <- Hg.
@@ -981,7 +982,9 @@ assert (H : Nat.divide (S (S g)) p). {
     rewrite Nat.sub_add; [ | flia Hkz ].
     apply Nat.gcd_divide_l.
   }
-
+Search (Nat.gcd (Nat.gcd _ _)).
+rewrite <- Hg.
+rewrite <- Nat.gcd_assoc.
 ...
   rewrite Hd; apply Nat.divide_factor_r.
 }
