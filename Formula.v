@@ -2699,6 +2699,13 @@ rewrite
     now subst p.
   } {
     apply Nat.eqb_eq.
+About eq_gcd_prime_small_1.
+Theorem eq_gcd_prime_pow_small_1 : ∀ p n k,
+  prime p
+  → 0 < n ≤ p ^ k
+  → n mod p ≠ 0
+  → Nat.gcd (p ^ k) n = 1.
+...
     destruct k; [ easy | clear Hk ].
     revert a Ha Hr.
     induction k; intros. {
@@ -2715,6 +2722,28 @@ rewrite
         split; [ rewrite Hr; flia | ].
         now apply Nat.mod_upper_bound.
       }
+      replace a with (a - p ^ S k + p ^ S k) by flia Hak.
+      rewrite Nat.gcd_add_diag_r.
+...
+      apply IHk. {
+        split. {
+          apply Nat.le_add_le_sub_r.
+          destruct (Nat.eq_dec (p ^ S k) a) as [Hpa| Hpa]. {
+            rewrite <- Hpa in Hr.
+            cbn in Hr.
+            rewrite Nat.mul_mod in Hr; [ | easy ].
+            rewrite Nat.mod_same in Hr; [ | easy ].
+            rewrite Nat.mul_0_l in Hr.
+            now rewrite Nat.mod_0_l in Hr.
+          } {
+            flia Hak Hpa.
+          }
+        } {
+          remember (S k) as sk; cbn in Ha; subst sk.
+          apply (Nat.add_lt_mono_r _ _ (p ^ S k)).
+          rewrite Nat.sub_add; [ | easy ].
+...
+          transitivity (p * p ^ S k); [ easy | ].
 ...
     apply Nat_gcd_1_mul_l. {
       rewrite <- Nat.gcd_mod; [ | easy ].
