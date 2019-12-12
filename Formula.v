@@ -2674,6 +2674,32 @@ Theorem prime_pow_φ : ∀ p, prime p →
   ∀ k, k ≠ 0 → φ (p ^ k) = p ^ (k - 1) * (p - 1).
 Proof.
 intros * Hp * Hk.
+unfold φ.
+unfold coprimes.
+rewrite (filter_ext_in _ (λ d, match d mod p with 0 => false | _ => true end)). 2: {
+  intros a Ha.
+  apply in_seq in Ha.
+  rewrite Nat.add_comm, Nat.sub_add in Ha. 2: {
+    apply Nat.neq_0_lt_0.
+    apply Nat.pow_nonzero.
+    now intros H; subst p.
+  }
+  remember (a mod p) as r eqn:Hr; symmetry in Hr.
+  destruct r. {
+    apply Nat.eqb_neq.
+    apply Nat.mod_divides in Hr; [ | now intros H1; subst p ].
+    destruct Hr as (d, Hd).
+    rewrite Hd.
+    destruct k; [ easy | cbn ].
+    rewrite Nat.gcd_mul_mono_l.
+    intros H.
+    apply Nat.eq_mul_1 in H.
+    destruct H as (H, _).
+    now subst p.
+  } {
+    apply Nat.eqb_eq.
+...
+intros * Hp * Hk.
 destruct k; [ easy | clear Hk ].
 rewrite Nat.sub_succ, Nat.sub_0_r.
 induction k. {
@@ -2682,6 +2708,8 @@ induction k. {
 }
 remember (S k) as sk.
 cbn - [ φ ]; subst sk.
+rewrite Nat.pow_succ_r at 2; [ | flia ].
+rewrite <- Nat.mul_assoc, <- IHk.
 ...
 
 Theorem φ_eq_φ' : ∀ n, 2 ≤ n → φ n = φ' n.
