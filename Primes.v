@@ -966,7 +966,22 @@ specialize (Nat.gcd_divide_l (p ^ k) n) as H1.
 rewrite Hg in H1.
 destruct H1 as (d, Hd).
 specialize (prime_divisors p Hp (S (S g))) as H1.
+destruct (Nat.eq_dec k 0) as [Hkz| Hkz]. {
+  subst k.
+  cbn in Hd.
+  destruct d; [ flia Hd | ].
+  cbn in Hd.
+  remember (d * S (S g)); flia Hd.
+}
 assert (H : Nat.divide (S (S g)) p). {
+  apply (Nat.gauss _ (p ^ (k - 1))). {
+    rewrite <- Hg.
+    replace p with (p ^ 1) at 3 by now rewrite Nat.pow_1_r.
+    rewrite <- Nat.pow_add_r.
+    rewrite Nat.sub_add; [ | flia Hkz ].
+    apply Nat.gcd_divide_l.
+  }
+
 ...
   rewrite Hd; apply Nat.divide_factor_r.
 }
