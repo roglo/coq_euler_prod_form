@@ -2674,20 +2674,21 @@ Theorem prime_pow_φ : ∀ p, prime p →
   ∀ k, k ≠ 0 → φ (p ^ k) = p ^ (k - 1) * (p - 1).
 Proof.
 intros * Hp * Hk.
+destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
 unfold φ.
 unfold coprimes.
-rewrite (filter_ext_in _ (λ d, match d mod p with 0 => false | _ => true end)). 2: {
+rewrite
+  (filter_ext_in _ (λ d, match d mod p with 0 => false | _ => true end)). 2: {
   intros a Ha.
   apply in_seq in Ha.
   rewrite Nat.add_comm, Nat.sub_add in Ha. 2: {
     apply Nat.neq_0_lt_0.
-    apply Nat.pow_nonzero.
-    now intros H; subst p.
+    now apply Nat.pow_nonzero.
   }
   remember (a mod p) as r eqn:Hr; symmetry in Hr.
   destruct r. {
     apply Nat.eqb_neq.
-    apply Nat.mod_divides in Hr; [ | now intros H1; subst p ].
+    apply Nat.mod_divides in Hr; [ | easy ].
     destruct Hr as (d, Hd).
     rewrite Hd.
     destruct k; [ easy | cbn ].
@@ -2698,6 +2699,26 @@ rewrite (filter_ext_in _ (λ d, match d mod p with 0 => false | _ => true end)).
     now subst p.
   } {
     apply Nat.eqb_eq.
+    destruct k; [ easy | clear Hk ].
+    cbn.
+    apply Nat_gcd_1_mul_l. {
+      rewrite <- Nat.gcd_mod; [ | easy ].
+      rewrite Nat.gcd_comm.
+      apply eq_gcd_prime_small_1; [ easy | ].
+      split; [ rewrite Hr; flia | ].
+      now apply Nat.mod_upper_bound.
+    }
+    rewrite <- Nat.gcd_mod; [ | now apply Nat.pow_nonzero ].
+...
+    clear Ha.
+    revert a Hr.
+    induction k; intros; [ easy | ].
+    rewrite Nat.pow_succ_r at 1; [ | flia ].
+    rewrite Nat.mod_mul_r.
+Search (Nat.gcd _ (_ + _)).
+...
+Search (Nat.gcd _ _ = 1).
+Nat_gcd_1_mul_r: ∀ a b c : nat, Nat.gcd a b = 1 → Nat.gcd a c = 1 → Nat.gcd a (b * c) = 1
 ...
 intros * Hp * Hk.
 destruct k; [ easy | clear Hk ].
