@@ -2699,6 +2699,21 @@ rewrite
     now subst p.
   } {
     apply Nat.eqb_eq.
+    assert (Hg : Nat.gcd p a = 1). {
+      rewrite <- Nat.gcd_mod; [ | easy ].
+      rewrite Nat.gcd_comm.
+      apply eq_gcd_prime_small_1; [ easy | ].
+      split; [ rewrite Hr; flia | ].
+      now apply Nat.mod_upper_bound.
+    }
+    induction k; [ easy | clear Hk ].
+    destruct k; [ now rewrite Nat.pow_1_r | ].
+    destruct (lt_dec a (p ^ S k)) as [Hapk| Hapk]. {
+      cbn.
+      apply Nat_gcd_1_mul_l; [ easy | ].
+      now apply IHk.
+    }
+    apply Nat.nlt_ge in Hapk.
 ...
 apply eq_gcd_prime_pow_small_1.
 ...
