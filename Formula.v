@@ -2670,12 +2670,23 @@ rewrite filter_app.
 now rewrite app_length, IHp.
 Qed.
 
+(*
+Theorem divisors_and_coprimes : ∀ n,
+  length (divisors n) + length (coprimes n) = n - 1.
+Proof.
+intros.
+*)
+Compute (let n := 8 in (length (divisors n) + length (coprimes n), n + 1)).
+Compute (let n := 42 in (divisors n, coprimes n)).
+...
+
 Theorem prime_pow_φ : ∀ p, prime p →
   ∀ k, k ≠ 0 → φ (p ^ k) = p ^ (k - 1) * (p - 1).
 Proof.
 intros * Hp * Hk.
 destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
 unfold φ.
+...
 unfold coprimes.
 rewrite
   (filter_ext_in _ (λ d, match d mod p with 0 => false | _ => true end)). 2: {
@@ -2711,6 +2722,9 @@ rewrite
     now apply Nat_gcd_1_mul_l.
   }
 }
+Print divisors.
+...
+p ^ k - 1 - length (divisors (p ^ k - 1))
 ...
       apply IHk. {
         split. {
