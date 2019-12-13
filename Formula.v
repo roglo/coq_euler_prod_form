@@ -2706,18 +2706,11 @@ rewrite
       split; [ rewrite Hr; flia | ].
       now apply Nat.mod_upper_bound.
     }
-    induction k; [ easy | clear Hk ].
-    destruct k; [ now rewrite Nat.pow_1_r | ].
-    destruct (lt_dec a (p ^ S k)) as [Hapk| Hapk]. {
-      cbn.
-      apply Nat_gcd_1_mul_l; [ easy | ].
-      now apply IHk.
-    }
-    apply Nat.nlt_ge in Hapk.
-    remember (S k) as sk; cbn; subst sk.
-    apply Nat_gcd_1_mul_l; [ easy | ].
-    replace a with (a - p ^ S k + p ^ S k) by flia Hapk.
-    rewrite Nat.gcd_add_diag_r.
+    clear - Hg.
+    induction k; [ easy | ].
+    now apply Nat_gcd_1_mul_l.
+  }
+}
 ...
       apply IHk. {
         split. {
@@ -3481,58 +3474,6 @@ Compute (70-39).
 
 End Halte.
 (**)
-
-Theorem glop : ∀ m n x y u v,
-  m ≠ 0
-  → n ≠ 0
-  → u * x = v * y + 1
-  → 1 ≤ y < n
-  → m * n - (n * v * (x + (n - 1) * y) + (n - 1) * y) mod (m * n) = 42.
-Proof.
-intros * Hmz Hnz Huv Hyn.
-rewrite (Nat.mul_comm m n).
-rewrite Nat.mod_mul_r; [ | easy | easy ].
-rewrite <- (Nat.mul_assoc n) at 1.
-rewrite (Nat.add_comm _ ((n - 1) * y)).
-rewrite Nat_mod_add_mul_l; [ | easy ].
-rewrite (Nat.mul_comm (n - 1)).
-rewrite Nat_mul_pred_r_mod; [ | easy | easy ].
-rewrite <- Nat.add_sub_swap; [ | flia Hyn ].
-rewrite <- Nat.mul_assoc.
-rewrite (Nat.add_comm (n * _)).
-do 3 rewrite (Nat.mul_comm n _).
-rewrite Nat.div_add; [ | easy ].
-rewrite Nat.add_comm.
-Abort.
-
-Theorem glop : ∀ m n x y u v,
-  m ≠ 0
-  → n ≠ 0
-  → u * x = v * y + 1
-  → m * n - (n * x * v + m * (n - 1) * y * u) mod (m * n) = 42.
-Proof.
-intros * Hmz Hnz Huv.
-rewrite (Nat.mul_comm m n).
-rewrite Nat.mod_mul_r; [ | easy | easy ].
-rewrite <- (Nat.mul_assoc n).
-rewrite (Nat.add_comm (n * (x * v))).
-rewrite Nat_mod_add_mul_l; [ | easy ].
-Abort.
-
-Theorem glop : ∀ m n x y u v,
-  m ≠ 0
-  → n ≠ 0
-  → u * x = v * y + 1
-  → m * n - (n * x * v + m * (n - 1) * y * u) mod (m * n) = 42.
-Proof.
-intros * Hmz Hnz Huv.
-rewrite Nat.mod_mul_r; [ | easy | easy ].
-do 2 rewrite <- (Nat.mul_assoc m).
-rewrite Nat_mod_add_mul_l; [ | easy ].
-rewrite Nat.sub_add_distr.
-rewrite (Nat.mul_comm m (_ * _ * _)).
-rewrite Nat.div_add; [ | easy ].
-Abort.
 
 Theorem prod_coprimes_coprimes_mul_prod : ∀ m n,
   n ≠ 0
