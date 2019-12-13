@@ -2724,7 +2724,25 @@ rewrite
     now apply Nat_gcd_1_mul_l.
   }
 }
-Print divisors.
+(**)
+Compute (let '(p, k) := (34, 1) in (length (filter (λ d : nat, match d mod p with 0 => false | S _ => true end) (seq 1 (p ^ k - 1))), p ^ (k - 1) * (p - 1))).
+(**)
+clear Hp.
+revert p Hpz.
+induction k; intros; [ easy | clear Hk ].
+rewrite Nat.sub_succ, Nat.sub_0_r.
+destruct k. {
+  rewrite Nat.pow_1_r, Nat.pow_0_r, Nat.mul_1_l.
+  clear IHk.
+  rewrite (filter_ext_in _ (λ d, true)). 2: {
+    intros a Ha.
+    apply in_seq in Ha.
+    replace (1 + (p - 1)) with p in Ha by flia Hpz.
+    rewrite Nat.mod_small; [ | easy ].
+    now destruct a.
+  }
+Search (filter (λ _, true)).
+Search filter.
 ...
       apply IHk. {
         split. {
