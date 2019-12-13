@@ -795,6 +795,13 @@ subst start; f_equal.
 rewrite <- Hl; apply IHn.
 Qed.
 
+Theorem List_filter_all_true {A} : ∀ l : list A, filter (λ _, true) l = l.
+Proof.
+intros.
+induction l as [| a l]; [ easy | ].
+now cbn; rewrite IHl.
+Qed.
+
 Theorem not_equiv_imp_False : ∀ P : Prop, (P → False) ↔ ¬ P.
 Proof. easy. Qed.
 

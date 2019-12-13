@@ -2741,8 +2741,9 @@ destruct k. {
     rewrite Nat.mod_small; [ | easy ].
     now destruct a.
   }
-Search (filter (λ _, true)).
-Search filter.
+  rewrite List_filter_all_true.
+  now rewrite seq_length.
+}
 ...
       apply IHk. {
         split. {
