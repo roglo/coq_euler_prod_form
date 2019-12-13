@@ -950,65 +950,6 @@ rewrite <- (Nat.add_0_r (S (S g))) in H1 at 1.
 now apply Nat.add_cancel_l in H1.
 Qed.
 
-Theorem eq_gcd_prime_pow_small_1 : ∀ p n k,
-  prime p
-  → 0 < n ≤ p ^ k
-  → n mod p ≠ 0
-  → Nat.gcd (p ^ k) n = 1.
-Proof.
-intros * Hp Hnpk Hnp.
-remember (Nat.gcd (p ^ k) n) as g eqn:Hg; symmetry in Hg.
-destruct g. {
-  apply Nat.gcd_eq_0 in Hg; rewrite (proj1 Hg) in Hnpk; flia Hnpk.
-}
-destruct g; [ easy | exfalso ].
-specialize (Nat.gcd_divide_l (p ^ k) n) as H1.
-rewrite Hg in H1.
-destruct H1 as (d, Hd).
-specialize (prime_divisors p Hp (S (S g))) as H1.
-destruct (Nat.eq_dec k 0) as [Hkz| Hkz]. {
-  subst k.
-  cbn in Hd.
-  destruct d; [ flia Hd | ].
-  cbn in Hd.
-  remember (d * S (S g)); flia Hd.
-}
-...
-assert (H : Nat.divide (S (S g)) p). {
-  apply (Nat.gauss _ (p ^ (k - 1))). {
-    rewrite <- Hg.
-    replace p with (p ^ 1) at 3 by now rewrite Nat.pow_1_r.
-    rewrite <- Nat.pow_add_r.
-    rewrite Nat.sub_add; [ | flia Hkz ].
-    apply Nat.gcd_divide_l.
-  }
-Search (Nat.gcd (Nat.gcd _ _)).
-rewrite <- Hg.
-rewrite <- Nat.gcd_assoc.
-...
-  rewrite Hd; apply Nat.divide_factor_r.
-}
-specialize (H1 H); clear H.
-destruct H1 as [H1| H1]; [ easy | ].
-destruct d; [ now rewrite Hd in Hp | ].
-rewrite Hd in H1.
-destruct d. {
-  rewrite Nat.mul_1_l in Hd.
-  rewrite <- Hd in Hg.
-  specialize (Nat.gcd_divide_r p n) as H2.
-  rewrite Hg in H2.
-  destruct H2 as (d2, Hd2).
-  destruct d2; [ rewrite Hd2 in Hnp; flia Hnp | ].
-  rewrite Hd2 in Hnp; cbn in Hnp.
-  remember (d2 * p); flia Hnp.
-}
-replace (S (S d)) with (1 + S d) in H1 by flia.
-rewrite Nat.mul_add_distr_r, Nat.mul_1_l in H1.
-rewrite <- (Nat.add_0_r (S (S g))) in H1 at 1.
-now apply Nat.add_cancel_l in H1.
-Qed.
-...
-
 Theorem prime_divide_mul : ∀ p, prime p →
   ∀ a b, Nat.divide p (a * b) → Nat.divide p a ∨ Nat.divide p b.
 Proof.
