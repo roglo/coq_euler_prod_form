@@ -2714,27 +2714,10 @@ rewrite
       now apply IHk.
     }
     apply Nat.nlt_ge in Hapk.
-...
-apply eq_gcd_prime_pow_small_1.
-...
-    destruct k; [ easy | clear Hk ].
-    revert a Ha Hr.
-    induction k; intros. {
-      rewrite Nat.pow_1_r in Ha |-*.
-      now apply eq_gcd_prime_small_1.
-    }
-    destruct (lt_dec a (p ^ S k)) as [Hak| Hak]. 2: {
-      apply Nat.nlt_ge in Hak.
-      remember (S k) as sk; cbn; subst sk.
-      apply Nat_gcd_1_mul_l. {
-        rewrite <- Nat.gcd_mod; [ | easy ].
-        rewrite Nat.gcd_comm.
-        apply eq_gcd_prime_small_1; [ easy | ].
-        split; [ rewrite Hr; flia | ].
-        now apply Nat.mod_upper_bound.
-      }
-      replace a with (a - p ^ S k + p ^ S k) by flia Hak.
-      rewrite Nat.gcd_add_diag_r.
+    remember (S k) as sk; cbn; subst sk.
+    apply Nat_gcd_1_mul_l; [ easy | ].
+    replace a with (a - p ^ S k + p ^ S k) by flia Hapk.
+    rewrite Nat.gcd_add_diag_r.
 ...
       apply IHk. {
         split. {
