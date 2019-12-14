@@ -2690,7 +2690,6 @@ intros * Hp * Hk.
 destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
 unfold φ.
 unfold coprimes.
-...
 rewrite
   (filter_ext_in _ (λ d, match d mod p with 0 => false | _ => true end)). 2: {
   intros a Ha.
