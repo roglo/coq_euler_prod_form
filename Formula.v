@@ -2882,6 +2882,20 @@ rewrite
     now destruct H as (_, H); subst q.
   }
   apply Nat.eqb_eq.
+  apply Nat_gcd_1_mul_l. {
+    rewrite <- Nat.gcd_mod; [ | easy ].
+    rewrite Nat.gcd_comm.
+    apply eq_gcd_prime_small_1; [ easy | ].
+    split; [ flia Hap | ].
+    now apply Nat.mod_upper_bound.
+  } {
+    rewrite <- Nat.gcd_mod; [ | easy ].
+    rewrite Nat.gcd_comm.
+    apply eq_gcd_prime_small_1; [ easy | ].
+    split; [ flia Haq | ].
+    now apply Nat.mod_upper_bound.
+  }
+}
 ...
 
 Theorem φ_eq_φ' : ∀ n, 2 ≤ n → φ n = φ' n.
