@@ -2732,6 +2732,49 @@ remember (p ^ (k - 1)) as a eqn:Ha.
 Compute (let '(p, a) := (24, 0) in (length (filter (λ d : nat, match d mod p with 0 => false | S _ => true end) (seq 1 (a * p - 1))), a * (p - 1))).
 *)
 clear k Hk Ha Hpz.
+induction a; [ easy | ].
+cbn.
+destruct (Nat.eq_dec p 0) as [Hpz| Hpz]. {
+  subst p; cbn.
+  now rewrite Nat.mul_0_r.
+}
+destruct (Nat.eq_dec a 0) as [Haz| Haz]. {
+  subst a; cbn.
+  do 2 rewrite Nat.add_0_r.
+  rewrite (filter_ext_in _ (λ d, true)). 2: {
+    intros a Ha.
+    apply in_seq in Ha.
+    rewrite Nat.mod_small; [ | flia Ha ].
+    destruct a; [ flia Ha | easy ].
+  }
+  clear.
+  destruct p; [ easy | ].
+  rewrite Nat.sub_succ, Nat.sub_0_r.
+  induction p; [ easy | ].
+  rewrite <- (Nat.add_1_r p).
+  rewrite seq_app, filter_app, app_length.
+  now rewrite IHp.
+}
+rewrite <- Nat.add_sub_assoc. 2: {
+  apply Nat.neq_0_lt_0.
+  now apply Nat.neq_mul_0.
+}
+rewrite Nat.add_comm.
+rewrite seq_app, filter_app, app_length.
+rewrite IHa, Nat.add_comm; f_equal.
+rewrite Nat.add_comm, Nat.sub_add. 2: {
+  apply Nat.neq_0_lt_0.
+  now apply Nat.neq_mul_0.
+}
+rewrite (filter_ext_in _ (λ d, true)). 2: {
+  intros b Hb.
+  apply in_seq in Hb.
+(* ah mais ça marche pas, ça *)
+...
+
+rewrite <- Nat.add_sub_swap; [ | flia Hpz ].
+rewrite <- Nat.add_sub_swap; [ | ].
+
 ...
 assert (Haz : a ≠ 0). {
   intros H; subst a.
