@@ -2690,6 +2690,7 @@ intros * Hp * Hk.
 destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
 unfold φ.
 unfold coprimes.
+...
 rewrite
   (filter_ext_in _ (λ d, match d mod p with 0 => false | _ => true end)). 2: {
   intros a Ha.
@@ -2728,6 +2729,7 @@ rewrite
 Compute (let '(p, k) := (34, 1) in (length (filter (λ d : nat, match d mod p with 0 => false | S _ => true end) (seq 1 (p ^ k - 1))), p ^ (k - 1) * (p - 1))).
 *)
 clear Hp.
+...
 (**)
 replace k with (k - 1 + 1) at 1 by flia Hk.
 rewrite Nat.pow_add_r, Nat.pow_1_r.
@@ -2736,7 +2738,6 @@ assert (Haz : a ≠ 0). {
   intros H; subst a.
   now apply Nat.pow_nonzero in H.
 }
-...
 clear k Hk Ha.
 revert p Hpz.
 induction a; intros; [ easy | ].
