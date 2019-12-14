@@ -2819,6 +2819,8 @@ Theorem prime_mul_φ : ∀ p q, prime p → prime q → p < q
   → φ (p * q) = φ p * φ q.
 Proof.
 intros * Hp Hq Hpq.
+destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
+destruct (Nat.eq_dec q 0) as [Hqz| Hqz]; [ now subst q | ].
 rewrite (prime_φ p); [ | easy ].
 rewrite (prime_φ q); [ | easy ].
 unfold φ, coprimes.
@@ -2851,6 +2853,35 @@ replace ((p - 1) * (q - 1)) with (p * q - 1 - (p - 1) - (q - 1)). 2: {
   destruct p; [ easy | ].
   destruct p; [ easy | flia H ].
 }
+rewrite
+  (filter_ext_in _
+     (λ d,
+      match d mod p with
+      | 0 => false
+      | _ => match d mod q with 0 => false | _ => true end end)). 2: {
+  intros a Ha.
+  remember (a mod p) as ap eqn:Hap; symmetry in Hap.
+  remember (a mod q) as aq eqn:Haq; symmetry in Haq.
+  move aq before ap.
+  destruct ap. {
+    apply Nat.eqb_neq.
+    apply Nat.mod_divide in Hap; [ | easy ].
+    destruct Hap as (c, Hc).
+    rewrite Hc, Nat.mul_comm.
+    rewrite Nat.gcd_mul_mono_r.
+    intros H; apply Nat.eq_mul_1 in H.
+    now destruct H as (_, H); subst p.
+  }
+  destruct aq. {
+    apply Nat.eqb_neq.
+    apply Nat.mod_divide in Haq; [ | easy ].
+    destruct Haq as (c, Hc).
+    rewrite Hc.
+    rewrite Nat.gcd_mul_mono_r.
+    intros H; apply Nat.eq_mul_1 in H.
+    now destruct H as (_, H); subst q.
+  }
+  apply Nat.eqb_eq.
 ...
 
 Theorem φ_eq_φ' : ∀ n, 2 ≤ n → φ n = φ' n.
