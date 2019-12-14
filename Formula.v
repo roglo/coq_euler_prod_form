@@ -2724,10 +2724,48 @@ rewrite
     now apply Nat_gcd_1_mul_l.
   }
 }
-(**)
+(*
 Compute (let '(p, k) := (34, 1) in (length (filter (λ d : nat, match d mod p with 0 => false | S _ => true end) (seq 1 (p ^ k - 1))), p ^ (k - 1) * (p - 1))).
-(**)
+*)
 clear Hp.
+(**)
+replace k with (k - 1 + 1) at 1 by flia Hk.
+rewrite Nat.pow_add_r, Nat.pow_1_r.
+remember (p ^ (k - 1)) as a eqn:Ha.
+assert (Haz : a ≠ 0). {
+  intros H; subst a.
+  now apply Nat.pow_nonzero in H.
+}
+...
+clear k Hk Ha.
+revert p Hpz.
+induction a; intros; [ easy | ].
+cbn.
+destruct a. {
+  do 2 rewrite Nat.mul_0_l, Nat.add_0_r.
+...
+}
+rewrite <- Nat.add_sub_assoc. 2: {
+...
+}
+rewrite Nat.add_comm.
+rewrite seq_app.
+rewrite filter_app.
+rewrite app_length.
+rewrite IHa; [ | easy | easy ].
+rewrite Nat.add_comm; f_equal.
+rewrite Nat.add_comm.
+rewrite Nat.sub_add.
+clear.
+remember (S a * p) as b eqn:Hb.
+clear a Hb.
+revert b.
+induction p; intros; cbn - [ "mod" ]; [ easy | ].
+rewrite Nat.sub_0_r.
+remember (b mod S p) as c eqn:Hc; symmetry in Hc.
+destruct c. {
+  cbn - [ "mod" ].
+...
 revert p Hpz.
 induction k; intros; [ easy | clear Hk ].
 rewrite Nat.sub_succ, Nat.sub_0_r.
@@ -2744,6 +2782,7 @@ destruct k. {
   rewrite List_filter_all_true.
   now rewrite seq_length.
 }
+rewrite Nat.sub_succ, Nat.sub_0_r in IHk.
 ...
       apply IHk. {
         split. {
