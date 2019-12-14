@@ -2724,15 +2724,15 @@ rewrite
     now apply Nat_gcd_1_mul_l.
   }
 }
-(*
-Compute (let '(p, k) := (34, 1) in (length (filter (λ d : nat, match d mod p with 0 => false | S _ => true end) (seq 1 (p ^ k - 1))), p ^ (k - 1) * (p - 1))).
-*)
 clear Hp.
-...
-(**)
 replace k with (k - 1 + 1) at 1 by flia Hk.
 rewrite Nat.pow_add_r, Nat.pow_1_r.
 remember (p ^ (k - 1)) as a eqn:Ha.
+(*
+Compute (let '(p, a) := (24, 0) in (length (filter (λ d : nat, match d mod p with 0 => false | S _ => true end) (seq 1 (a * p - 1))), a * (p - 1))).
+*)
+clear k Hk Ha Hpz.
+...
 assert (Haz : a ≠ 0). {
   intros H; subst a.
   now apply Nat.pow_nonzero in H.
