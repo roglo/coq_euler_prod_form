@@ -2670,23 +2670,11 @@ rewrite filter_app.
 now rewrite app_length, IHp.
 Qed.
 
-(*
-Theorem divisors_and_coprimes : ∀ n,
-  length (divisors n) + length (coprimes n) = n - 1.
-Proof.
-intros.
-Print divisors.
-Print coprimes.
-Compute (let n := 11 in (length (divisors n) + length (coprimes n), n + 1)).
-Compute (let n := 25 in (length (divisors n) + length (coprimes n), n + 1)).
-Compute (let n := 25 in (divisors n, coprimes n)).
-...
-*)
-
 Theorem prime_pow_φ : ∀ p, prime p →
-  ∀ k, k ≠ 0 → φ (p ^ k) = p ^ (k - 1) * (p - 1).
+  ∀ k, k ≠ 0 → φ (p ^ k) = p ^ (k - 1) * φ p.
 Proof.
 intros * Hp * Hk.
+rewrite (prime_φ p); [ | easy ].
 destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
 unfold φ.
 unfold coprimes.
@@ -2827,6 +2815,42 @@ Qed.
 
 Inspect 1.
 
+Theorem prime_mul_φ : ∀ p q, prime p → prime q → p < q
+  → φ (p * q) = φ p * φ q.
+Proof.
+intros * Hp Hq Hpq.
+rewrite (prime_φ p); [ | easy ].
+rewrite (prime_φ q); [ | easy ].
+unfold φ, coprimes.
+replace ((p - 1) * (q - 1)) with (p * q - 1 - (p - 1) - (q - 1)). 2: {
+  rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
+  rewrite Nat.mul_sub_distr_r, Nat.mul_1_l.
+  rewrite Nat_sub_sub_swap; f_equal.
+  rewrite Nat_sub_sub_distr. 2: {
+    split. {
+      apply Nat.neq_0_lt_0.
+      now intros H; subst q.
+    } {
+      destruct p; [ easy | cbn ].
+      rewrite <- Nat.add_sub_assoc. 2: {
+        apply Nat.neq_0_lt_0.
+        apply Nat.neq_mul_0.
+        split; [ now intros H; subst p | now intros H; subst q ].
+      }
+      flia.
+    }
+  }
+  rewrite Nat_sub_sub_swap.
+  apply Nat.sub_add.
+  replace q with (1 * q) at 2 by flia.
+  rewrite <- Nat.mul_sub_distr_r.
+  apply Nat.neq_0_lt_0.
+  apply Nat.neq_mul_0.
+  split; [ | now intros H; subst q ].
+  intros H.
+  destruct p; [ easy | ].
+  destruct p; [ easy | flia H ].
+}
 ...
 
 Theorem φ_eq_φ' : ∀ n, 2 ≤ n → φ n = φ' n.
