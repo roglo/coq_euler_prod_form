@@ -2831,24 +2831,21 @@ unfold φ_p.
 destruct Hpm as (c, Hc).
 subst m.
 rewrite Nat.div_mul; [ | easy ].
-remember 1 as a eqn:Ha.
-clear Ha.
-revert a p Hpz.
 induction c; intros; [ easy | ].
 cbn.
 rewrite Nat.add_comm.
 rewrite seq_app, filter_app, app_length.
-rewrite IHc; [ | easy ].
+rewrite IHc; clear IHc.
 (**)
-destruct c. {
+induction c; intros. {
   cbn.
   replace p with (p - 1 + 1) at 1 by flia Hpz.
   rewrite seq_app, filter_app, app_length.
   rewrite (filter_ext_in _ (λ _, true)). 2: {
-    intros a Ha.
-    apply in_seq in Ha.
-    rewrite Nat.mod_small; [ | flia Ha ].
-    destruct a; [ flia Ha | easy ].
+    intros b Hb.
+    apply in_seq in Hb.
+    rewrite Nat.mod_small; [ | flia Hb ].
+    destruct b; [ flia Hb | easy ].
   }
   cbn.
   replace (S (p - 1)) with p by flia Hpz.
