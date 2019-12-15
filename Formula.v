@@ -2822,7 +2822,45 @@ Theorem glop : ∀ m p,
   → φ_p p m = m - m / p.
 Proof.
 intros * Hpm.
+destruct (Nat.eq_dec p 0) as [Hpz| Hpz]. {
+  subst p.
+  destruct Hpm as (c, Hc).
+  now rewrite Nat.mul_0_r in Hc; subst m.
+}
 unfold φ_p.
+destruct Hpm as (c, Hc).
+subst m.
+rewrite Nat.div_mul; [ | easy ].
+revert p Hpz.
+induction c; intros; [ easy | ].
+cbn.
+rewrite Nat.add_comm.
+rewrite seq_app, filter_app, app_length.
+rewrite IHc; [ clear IHc | easy ].
+(**)
+destruct c. {
+  cbn.
+  replace p with (p - 1 + 1) at 1 by flia Hpz.
+  rewrite seq_app, filter_app, app_length.
+  rewrite (filter_ext_in _ (λ _, true)). 2: {
+    intros a Ha.
+    apply in_seq in Ha.
+    rewrite Nat.mod_small; [ | flia Ha ].
+    destruct a; [ flia Ha | easy ].
+  }
+  cbn.
+  replace (S (p - 1)) with p by flia Hpz.
+  rewrite Nat.mod_same; [ cbn | easy ].
+  rewrite Nat.add_0_r.
+  rewrite List_filter_all_true.
+  apply seq_length.
+}
+...
+rewrite <- Nat.add_sub_swap. 2: {
+  destruct p; [ easy | ].
+  rewrite Nat.mul_succ_r; flia.
+}
+rewrite <- Nat.add_sub_assoc. 2: {
 ...
 
 Theorem prime_mul_φ : ∀ p q, prime p → prime q → p < q
