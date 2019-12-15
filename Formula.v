@@ -2831,12 +2831,14 @@ unfold φ_p.
 destruct Hpm as (c, Hc).
 subst m.
 rewrite Nat.div_mul; [ | easy ].
-revert p Hpz.
+remember 1 as a eqn:Ha.
+clear Ha.
+revert a p Hpz.
 induction c; intros; [ easy | ].
 cbn.
 rewrite Nat.add_comm.
 rewrite seq_app, filter_app, app_length.
-rewrite IHc; [ clear IHc | easy ].
+rewrite IHc; [ | easy ].
 (**)
 destruct c. {
   cbn.
