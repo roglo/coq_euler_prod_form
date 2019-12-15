@@ -2813,7 +2813,17 @@ rewrite seq_app, filter_app, app_length.
 now rewrite IHp.
 Qed.
 
-Inspect 1.
+Definition φ_p p m := length (filter (λ d, match d mod p with 0 => false | _ => true end) (seq 1 m)).
+
+Compute (φ_p 3 12).
+
+Theorem glop : ∀ m p,
+  Nat.divide p m
+  → φ_p p m = m - m / p.
+Proof.
+intros * Hpm.
+unfold φ_p.
+...
 
 Theorem prime_mul_φ : ∀ p q, prime p → prime q → p < q
   → φ (p * q) = φ p * φ q.
