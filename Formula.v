@@ -2896,6 +2896,7 @@ rewrite
     now apply Nat.mod_upper_bound.
   }
 }
+(* http://mathworld.wolfram.com/TotientFunction.html to be read *)
 ...
 
 Theorem φ_eq_φ' : ∀ n, 2 ≤ n → φ n = φ' n.
