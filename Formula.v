@@ -2831,17 +2831,10 @@ unfold φ_p.
 destruct Hpm as (c, Hc).
 subst m.
 rewrite Nat.div_mul; [ | easy ].
-replace 1 with (1 + 0 * p) by flia.
-remember 0 as a eqn:Ha in |-* at 2; clear Ha.
-revert a.
-induction c; intros; [ easy | ].
-remember 1 as one; cbn; subst one.
+induction c; [ easy | cbn ].
 rewrite (Nat.add_comm p).
 rewrite seq_app, filter_app, app_length.
-rewrite IHc.
-rewrite <- Nat.add_assoc.
-rewrite <- Nat.mul_add_distr_r.
-...
+rewrite IHc; clear IHc.
 (**)
 induction c; intros. {
   cbn.
