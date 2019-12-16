@@ -2899,6 +2899,18 @@ destruct Hqm as (kq, Hkq).
 ...
 exists ((kp * kq) / m).
 rewrite Nat.mul_comm.
+rewrite Hkp at 1.
+rewrite Nat.mul_comm.
+rewrite <- Nat.mul_assoc; f_equal.
+rewrite (Nat.mul_comm kp).
+
+
+Search (_ * (_ / _)).
+specialize (Nat.div_exact q m) as H1.
+
+rewrite <- Nat.divide_div_mul_exact.
+
+
 rewrite (Nat.mul_comm p).
 ...
 
