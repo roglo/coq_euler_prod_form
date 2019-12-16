@@ -2897,6 +2897,11 @@ rewrite divisor_φ_p; [ easy | ].
 destruct Hpm as (kp, Hkp).
 destruct Hqm as (kq, Hkq).
 ...
+rewrite Hkq.
+apply Nat.mul_divide_mono_r.
+Search (Nat.divide (_ * _)).
+apply (Nat.mul_divide_cancel_l _ _ kp).
+...
 exists ((kp * kq) / m).
 rewrite Nat.mul_comm.
 rewrite Hkp at 1.
