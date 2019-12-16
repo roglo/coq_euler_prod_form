@@ -2883,19 +2883,24 @@ now rewrite Nat.add_0_r.
 Qed.
 
 Theorem glop : ∀ m p q,
-  p ≠ q
+  prime p
+  → prime q
+  → p ≠ q
   → Nat.divide p m
   → Nat.divide q m
-(*
-  → φ_ (p * q) m - φ_ p m = m / q - m / (p * q).
-*)
   → φ_ (p * q) m - φ_ p m =  m - m / (p * q) - (m - m / p).
 Proof.
-intros * Hpa Hpm Hqm.
+intros * Hp Hq Hpa Hpm Hqm.
 f_equal; [ | now rewrite divisor_φ_p ].
 rewrite divisor_φ_p; [ easy | ].
 destruct Hpm as (kp, Hkp).
 destruct Hqm as (kq, Hkq).
+move kq before kp.
+Search (prime _ → _).
+...
+apply Nat.mod_divide.
+Search (_ mod (_ * _)).
+Search (Nat.divide (_ * _)).
 ...
 rewrite Hkq.
 apply Nat.mul_divide_mono_r.
