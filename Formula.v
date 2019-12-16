@@ -2815,13 +2815,13 @@ Qed.
 
 (* http://mathworld.wolfram.com/TotientFunction.html *)
 
-Definition φ_p p m :=
+Definition φ_ p m :=
   length
     (filter (λ d, match d mod p with 0 => false | _ => true end) (seq 1 m)).
 
 Theorem divisor_φ_p : ∀ m p,
   Nat.divide p m
-  → φ_p p m = m - m / p.
+  → φ_ p m = m - m / p.
 Proof.
 intros * Hpm.
 destruct (Nat.eq_dec p 0) as [Hpz| Hpz]. {
@@ -2829,7 +2829,7 @@ destruct (Nat.eq_dec p 0) as [Hpz| Hpz]. {
   destruct Hpm as (c, Hc).
   now rewrite Nat.mul_0_r in Hc; subst m.
 }
-unfold φ_p.
+unfold φ_.
 destruct Hpm as (c, Hc).
 subst m.
 rewrite Nat.div_mul; [ | easy ].
@@ -2882,6 +2882,15 @@ rewrite Nat.mod_same; [ | easy ].
 now rewrite Nat.add_0_r.
 Qed.
 
+Theorem glop : ∀ m p q,
+  prime p
+  → prime q
+  → p ≠ q
+  → Nat.divide p m
+  → Nat.divide q m
+  → φ_ (p * q) m - φ_ p m = (m / q - m / (p * q)).
+Proof.
+intros * Hp Hq Hpa Hpm Hqm.
 ...
 
 Theorem prime_mul_φ : ∀ p q, prime p → prime q → p < q
