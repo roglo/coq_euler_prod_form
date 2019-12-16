@@ -2888,7 +2888,7 @@ Theorem primes_φ_diff : ∀ m p q,
   → p ≠ q
   → Nat.divide p m
   → Nat.divide q m
-  → φ_ (p * q) m - φ_ p m =  m - m / (p * q) - (m - m / p).
+  → φ_ (p * q) m - φ_ q m =  m - m / (p * q) - (m - m / q).
 Proof.
 intros * Hp Hq Hpa Hpm Hqm.
 destruct (Nat.eq_dec m 0) as [Hmz| Hmz]; [ now subst m | ].
