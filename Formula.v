@@ -2882,7 +2882,7 @@ rewrite Nat.mod_same; [ | easy ].
 now rewrite Nat.add_0_r.
 Qed.
 
-Theorem glop : ∀ m p q,
+Theorem primes_φ_diff : ∀ m p q,
   prime p
   → prime q
   → p ≠ q
@@ -2891,6 +2891,7 @@ Theorem glop : ∀ m p q,
   → φ_ (p * q) m - φ_ p m =  m - m / (p * q) - (m - m / p).
 Proof.
 intros * Hp Hq Hpa Hpm Hqm.
+destruct (Nat.eq_dec m 0) as [Hmz| Hmz]; [ now subst m | ].
 f_equal; [ | now rewrite divisor_φ_p ].
 rewrite divisor_φ_p; [ easy | ].
 destruct Hpm as (kp, Hkp).
@@ -2903,7 +2904,6 @@ rewrite Nat.mul_comm.
 rewrite <- Nat.mul_assoc; f_equal.
 rewrite (Nat.mul_comm kp).
 rewrite Hkq.
-Search ((_ * _) / (_ * _)).
 rewrite Nat.div_mul_cancel_l; cycle 1. {
   intros H; now subst q.
 } {
@@ -2911,10 +2911,23 @@ rewrite Nat.div_mul_cancel_l; cycle 1. {
   rewrite Hkp in Hkq; cbn in Hkq.
   apply Nat.eq_mul_0 in Hkq.
   destruct Hkq as [H| H]; [ | now subst p ].
-  subst kp.
-...
-rewrite <- Nat.divide_div_mul_exact.
-rewrite (Nat.mul_comm p).
+  now subst kp.
+}
+rewrite <- Nat.divide_div_mul_exact; [ | now intros H; subst q | ]. 2: {
+  apply (Nat.gauss _ p). {
+    rewrite Nat.mul_comm, <- Hkp, Hkq.
+    now exists kq.
+  } {
+    apply Nat.neq_sym in Hpa.
+    now apply eq_primes_gcd_1.
+  }
+}
+rewrite Nat.mul_comm, Nat.div_mul; [ easy | ].
+now intros H; subst q.
+Qed.
+
+Inspect 1.
+
 ...
 
 Theorem prime_mul_φ : ∀ p q, prime p → prime q → p < q
