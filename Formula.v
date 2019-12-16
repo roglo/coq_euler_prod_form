@@ -2882,7 +2882,7 @@ rewrite Nat.mod_same; [ | easy ].
 now rewrite Nat.add_0_r.
 Qed.
 
-Theorem primes_φ_diff : ∀ m p q,
+Lemma primes_φ_diff_1 : ∀ m p q,
   prime p
   → prime q
   → p ≠ q
@@ -2924,6 +2924,28 @@ rewrite <- Nat.divide_div_mul_exact; [ | now intros H; subst q | ]. 2: {
 }
 rewrite Nat.mul_comm, Nat.div_mul; [ easy | ].
 now intros H; subst q.
+Qed.
+
+Theorem primes_φ_diff : ∀ m p q,
+  prime p
+  → prime q
+  → p ≠ q
+  → Nat.divide p m
+  → Nat.divide q m
+  → φ_ (p * q) m - φ_ q m = m / q - m / (p * q).
+Proof.
+intros * Hp Hq Hpq Hpm Hqm.
+specialize (primes_φ_diff_1 m p q Hp Hq Hpq Hpm Hqm) as H1.
+rewrite H1.
+rewrite Nat_sub_sub_swap; f_equal.
+rewrite Nat_sub_sub_distr. 2: {
+  split; [ | easy ].
+  replace m with (m / 1) at 2 by apply Nat.div_1_r.
+  apply Nat.div_le_compat_l.
+  split; [ flia | ].
+  destruct q; [ easy | flia ].
+}
+now rewrite Nat.sub_diag.
 Qed.
 
 Inspect 1.
