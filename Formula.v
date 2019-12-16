@@ -2836,6 +2836,14 @@ rewrite (Nat.add_comm p).
 rewrite seq_app, filter_app, app_length.
 rewrite IHc; clear IHc.
 (**)
+rewrite <- Nat.add_sub_swap. 2: {
+  destruct p; [ easy | ].
+  rewrite Nat.mul_succ_r; flia.
+}
+rewrite <- (Nat.add_1_l c).
+rewrite Nat.sub_add_distr; f_equal.
+rewrite <- Nat.add_sub_assoc; [ f_equal | flia Hpz ].
+...
 induction c; intros. {
   cbn.
   replace p with (p - 1 + 1) at 1 by flia Hpz.
@@ -2853,6 +2861,7 @@ induction c; intros. {
   rewrite List_filter_all_true.
   apply seq_length.
 }
+rewrite Nat.mul_succ_l, Nat.add_assoc.
 ...
 rewrite <- Nat.add_sub_swap. 2: {
   destruct p; [ easy | ].
