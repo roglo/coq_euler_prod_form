@@ -2815,9 +2815,7 @@ Qed.
 
 Definition φ_p p m := length (filter (λ d, match d mod p with 0 => false | _ => true end) (seq 1 m)).
 
-Compute (φ_p 3 12).
-
-Theorem glop : ∀ m p,
+Theorem divisor_φ_p : ∀ m p,
   Nat.divide p m
   → φ_p p m = m - m / p.
 Proof.
@@ -2848,63 +2846,38 @@ rewrite seq_app, filter_app, app_length.
 rewrite List_filter_all_true. 2: {
   intros a Ha.
   remember (a mod p) as r eqn:Hr; symmetry in Hr.
-  destruct r; [ | easy ].
+  destruct r; [ exfalso | easy ].
+  apply in_seq in Ha.
+  destruct Ha as (H1, H2).
+  rewrite (Nat.add_comm 1) in H2.
+  rewrite Nat.add_shuffle0 in H2.
+  rewrite Nat.add_sub_assoc in H2; [ | flia Hpz ].
+  rewrite Nat.sub_add in H2; [ | flia Hpz ].
+  replace p with (1 * p) in H2 at 2 by flia.
+  rewrite <- Nat.mul_add_distr_r in H2.
   apply Nat.mod_divide in Hr; [ exfalso | easy ].
   destruct Hr as (k, Hk).
-  apply in_seq in Ha.
   subst a; exfalso.
-  destruct Ha as (H1, H2).
-(**)
-  rewrite <- Nat.add_assoc in H2.
-  apply Nat.succ_le_mono in H2.
-(*
-  replace p with (1 * p) in H2 at 3 by flia.
-  rewrite <- Nat.mul_add_distr_r in H2.
-  apply Nat.mul_le_mono_pos_r in H2; [ | flia Hpz ].
-*)
+  apply Nat.mul_lt_mono_pos_r in H2; [ | flia Hpz ].
   destruct (le_dec k c) as [Hkc| Hkc]. {
     apply Nat.nlt_ge in H1; apply H1.
     apply -> Nat.succ_le_mono.
     now apply Nat.mul_le_mono_r.
   }
-(*
-  apply Nat.nle_gt in Hkc.
-  replace k with (c + 1) in H1 by flia H2 Hkc.
-(* Bon, bin c'est faux *)
-...
-*)
-  apply Hkc; clear Hkc.
-...
-  apply (Nat.mul_le_mono_pos_r _ _ p); [ flia Hpz | ].
-(*
-  apply (Nat.add_le_mono_l _ _ 1).
-*)
-  eapply le_trans; [ apply H2 | ].
-...
-induction c; intros. {
-  cbn.
-  replace p with (p - 1 + 1) at 1 by flia Hpz.
-  rewrite seq_app, filter_app, app_length.
-  rewrite (filter_ext_in _ (λ _, true)). 2: {
-    intros b Hb.
-    apply in_seq in Hb.
-    rewrite Nat.mod_small; [ | flia Hb ].
-    destruct b; [ flia Hb | easy ].
-  }
-  cbn.
-  replace (S (p - 1)) with p by flia Hpz.
-  rewrite Nat.mod_same; [ cbn | easy ].
-  rewrite Nat.add_0_r.
-  rewrite List_filter_all_true.
-  apply seq_length.
+  flia H2 Hkc.
 }
-rewrite Nat.mul_succ_l, Nat.add_assoc.
-...
-rewrite <- Nat.add_sub_swap. 2: {
-  destruct p; [ easy | ].
-  rewrite Nat.mul_succ_r; flia.
-}
-rewrite <- Nat.add_sub_assoc. 2: {
+rewrite seq_length.
+rewrite (Nat.add_comm _ (c * p)).
+rewrite Nat.add_shuffle0.
+rewrite Nat.add_sub_assoc; [ | flia Hpz ].
+rewrite Nat.sub_add; [ | flia Hpz ].
+cbn.
+rewrite (Nat.add_comm _ p).
+rewrite Nat.mod_add; [ | easy ].
+rewrite Nat.mod_same; [ | easy ].
+now rewrite Nat.add_0_r.
+Qed.
+
 ...
 
 Theorem prime_mul_φ : ∀ p q, prime p → prime q → p < q
