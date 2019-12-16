@@ -2896,31 +2896,24 @@ rewrite divisor_φ_p; [ easy | ].
 destruct Hpm as (kp, Hkp).
 destruct Hqm as (kq, Hkq).
 move kq before kp.
-Search (prime _ → _).
-...
-apply Nat.mod_divide.
-Search (_ mod (_ * _)).
-Search (Nat.divide (_ * _)).
-...
-rewrite Hkq.
-apply Nat.mul_divide_mono_r.
-Search (Nat.divide (_ * _)).
-apply (Nat.mul_divide_cancel_l _ _ kp).
-...
 exists ((kp * kq) / m).
 rewrite Nat.mul_comm.
 rewrite Hkp at 1.
 rewrite Nat.mul_comm.
 rewrite <- Nat.mul_assoc; f_equal.
 rewrite (Nat.mul_comm kp).
-
-
-Search (_ * (_ / _)).
-specialize (Nat.div_exact q m) as H1.
-
+rewrite Hkq.
+Search ((_ * _) / (_ * _)).
+rewrite Nat.div_mul_cancel_l; cycle 1. {
+  intros H; now subst q.
+} {
+  intros H; subst kq.
+  rewrite Hkp in Hkq; cbn in Hkq.
+  apply Nat.eq_mul_0 in Hkq.
+  destruct Hkq as [H| H]; [ | now subst p ].
+  subst kp.
+...
 rewrite <- Nat.divide_div_mul_exact.
-
-
 rewrite (Nat.mul_comm p).
 ...
 
