@@ -2813,7 +2813,11 @@ rewrite seq_app, filter_app, app_length.
 now rewrite IHp.
 Qed.
 
-Definition φ_p p m := length (filter (λ d, match d mod p with 0 => false | _ => true end) (seq 1 m)).
+(* http://mathworld.wolfram.com/TotientFunction.html *)
+
+Definition φ_p p m :=
+  length
+    (filter (λ d, match d mod p with 0 => false | _ => true end) (seq 1 m)).
 
 Theorem divisor_φ_p : ∀ m p,
   Nat.divide p m
@@ -2961,7 +2965,6 @@ rewrite
     now apply Nat.mod_upper_bound.
   }
 }
-(* http://mathworld.wolfram.com/TotientFunction.html to be read *)
 ...
 
 Theorem φ_eq_φ' : ∀ n, 2 ≤ n → φ n = φ' n.
