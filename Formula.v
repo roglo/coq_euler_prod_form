@@ -2890,7 +2890,7 @@ Lemma primes_φ_diff_1 : ∀ m p q,
   → Nat.divide q m
   → φ_ (p * q) m - φ_ q m =  m - m / (p * q) - (m - m / q).
 Proof.
-intros * Hp Hq Hpa Hpm Hqm.
+intros * Hp Hq Hpq Hpm Hqm.
 destruct (Nat.eq_dec m 0) as [Hmz| Hmz]; [ now subst m | ].
 f_equal; [ | now rewrite divisor_φ_p ].
 rewrite divisor_φ_p; [ easy | ].
@@ -2918,7 +2918,7 @@ rewrite <- Nat.divide_div_mul_exact; [ | now intros H; subst q | ]. 2: {
     rewrite Nat.mul_comm, <- Hkp, Hkq.
     now exists kq.
   } {
-    apply Nat.neq_sym in Hpa.
+    apply Nat.neq_sym in Hpq.
     now apply eq_primes_gcd_1.
   }
 }
@@ -2948,8 +2948,30 @@ rewrite Nat_sub_sub_distr. 2: {
 now rewrite Nat.sub_diag.
 Qed.
 
-Inspect 1.
-
+Theorem glop : ∀ m p q,
+  prime p
+  → prime q
+  → p ≠ q
+  → Nat.divide p m
+  → Nat.divide q m
+  → φ_ (p * q) m = m * (p - 1) * (q - 1) / (p * q).
+Proof.
+intros * Hp Hq Hpq Hpm Hqm.
+specialize (primes_φ_diff m p q Hp Hq Hpq Hpm Hqm) as H1.
+apply Nat.add_sub_eq_nz in H1. 2: {
+  intros H.
+  apply Nat.sub_0_le in H.
+  apply Nat.nlt_ge in H; apply H; clear H.
+  assert (Hqz : q ≠ 0) by now intros H; subst q.
+  assert (Hpz : p ≠ 0) by now intros H; subst p.
+  apply (Nat.mul_lt_mono_pos_l q); [ now apply Nat.neq_0_lt_0 | ].
+  rewrite <- (proj2 (Nat.div_exact _ _ Hqz)); [ | now apply Nat.mod_divide ].
+  rewrite <- Nat.div_div; [ | easy | easy ].
+  rewrite <- (proj2 (Nat.div_exact _ _ Hqz)). 2: {
+    apply Nat.mod_divide; [ easy | ].
+    destruct Hpm as (kp, Hkp).
+    destruct Hqm as (kq, Hkq).
+(* voir plus haut, peut-être ? *)
 ...
 
 Theorem prime_mul_φ : ∀ p q, prime p → prime q → p < q
