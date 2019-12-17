@@ -2968,13 +2968,18 @@ Theorem glop : ∀ m p q,
   → φ_ (p * q) m = m * (p - 1) * (q - 1) / (p * q).
 Proof.
 intros * Hp Hq Hpq Hpm Hqm.
+assert (Hqz : q ≠ 0) by now intros H; subst q.
+assert (Hpz : p ≠ 0) by now intros H; subst p.
+destruct (Nat.eq_dec m 0) as [Hmz| Hmz]. {
+  subst m; cbn.
+  rewrite Nat.div_0_l; [ easy | ].
+  now apply Nat.neq_mul_0.
+}
 specialize (primes_φ_diff m p q Hp Hq Hpq Hpm Hqm) as H1.
 apply Nat.add_sub_eq_nz in H1. 2: {
   intros H.
   apply Nat.sub_0_le in H.
   apply Nat.nlt_ge in H; apply H; clear H.
-  assert (Hqz : q ≠ 0) by now intros H; subst q.
-  assert (Hpz : p ≠ 0) by now intros H; subst p.
   apply (Nat.mul_lt_mono_pos_l q); [ now apply Nat.neq_0_lt_0 | ].
   rewrite <- (proj2 (Nat.div_exact _ _ Hqz)); [ | now apply Nat.mod_divide ].
   rewrite <- Nat.div_div; [ | easy | easy ].
@@ -2983,26 +2988,48 @@ apply Nat.add_sub_eq_nz in H1. 2: {
     destruct Hpm as (kp, Hkp).
     destruct Hqm as (kq, Hkq).
     exists ((kp * kq) / m).
-...
     rewrite Nat.mul_comm.
     rewrite Hkp at 1.
-    rewrite Nat.mul_comm.
-rewrite <- Nat.mul_assoc; f_equal.
-rewrite (Nat.mul_comm kp).
-rewrite Hkq.
-rewrite Nat.div_mul_cancel_l; cycle 1. {
-  intros H; now subst q.
-} {
-  intros H; subst kq.
-  rewrite Hkp in Hkq; cbn in Hkq.
-  apply Nat.eq_mul_0 in Hkq.
-  destruct Hkq as [H| H]; [ | now subst p ].
-  now subst kp.
+    rewrite Nat.div_mul; [ | easy ].
+    rewrite Hkq.
+    rewrite (Nat.mul_comm kp).
+    rewrite Nat.div_mul_cancel_l; [ | easy | ]. 2: {
+      intros H; subst kq.
+      rewrite Hkp in Hkq; cbn in Hkq.
+      apply Nat.eq_mul_0 in Hkq.
+      destruct Hkq as [H| H]; [ | now subst p ].
+      now subst kp.
+    }
+    now apply (primes_div_mul_exact m p q kp kq).
+  }
+  apply Nat.div_lt. {
+    destruct m; [ easy | flia ].
+  } {
+    destruct p; [ easy | ].
+    destruct p; [ easy | flia ].
+  }
 }
-now apply (primes_div_mul_exact m p q kp kq).
+rewrite <- H1.
+rewrite divisor_φ_p; [ | easy ].
+rewrite Nat.add_sub_assoc. 2: {
+  apply Nat.div_le_compat_l.
+  split; [ flia Hqz | ].
+  destruct p; [ easy | cbn; flia ].
+}
+rewrite Nat.sub_add. 2: {
+  apply Nat.lt_le_incl.
+  apply Nat.div_lt. {
+    destruct m; [ easy | flia ].
+  } {
+    destruct q; [ easy | ].
+    destruct q; [ easy | flia ].
+  }
+}
+rewrite <- Nat.mul_assoc.
+rewrite (Nat.mul_comm m).
 ...
-    apply primes_div_mul_exact.
-(* voir plus haut, peut-être ? *)
+rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
+rewrite (Nat.mul_sub_distr_r p), Nat.mul_1_l.
 ...
 
 Theorem prime_mul_φ : ∀ p q, prime p → prime q → p < q
