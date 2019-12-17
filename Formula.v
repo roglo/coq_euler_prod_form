@@ -2881,6 +2881,27 @@ rewrite Nat.mod_add; [ | easy ].
 rewrite Nat.mod_same; [ | easy ].
 now rewrite Nat.add_0_r.
 Qed.
+Theorem primes_div_mul_exact : ∀ m p q kp kq,
+  prime p
+  → prime q
+  → p ≠ q
+  → m = kp * p
+  → m = kq * q
+  → kp = q * (kp / q).
+Proof.
+intros * Hp Hq Hpq Hkp Hkq.
+rewrite <- Nat.divide_div_mul_exact; [ | now intros H; subst q | ]. 2: {
+  apply (Nat.gauss _ p). {
+    rewrite Nat.mul_comm, <- Hkp, Hkq.
+    now exists kq.
+  } {
+    apply Nat.neq_sym in Hpq.
+    now apply eq_primes_gcd_1.
+  }
+}
+rewrite Nat.mul_comm, Nat.div_mul; [ easy | ].
+now intros H; subst q.
+Qed.
 
 Lemma primes_φ_diff_1 : ∀ m p q,
   prime p
@@ -2913,17 +2934,7 @@ rewrite Nat.div_mul_cancel_l; cycle 1. {
   destruct Hkq as [H| H]; [ | now subst p ].
   now subst kp.
 }
-rewrite <- Nat.divide_div_mul_exact; [ | now intros H; subst q | ]. 2: {
-  apply (Nat.gauss _ p). {
-    rewrite Nat.mul_comm, <- Hkp, Hkq.
-    now exists kq.
-  } {
-    apply Nat.neq_sym in Hpq.
-    now apply eq_primes_gcd_1.
-  }
-}
-rewrite Nat.mul_comm, Nat.div_mul; [ easy | ].
-now intros H; subst q.
+now apply (primes_div_mul_exact m p q kp kq).
 Qed.
 
 Theorem primes_φ_diff : ∀ m p q,
@@ -2971,6 +2982,26 @@ apply Nat.add_sub_eq_nz in H1. 2: {
     apply Nat.mod_divide; [ easy | ].
     destruct Hpm as (kp, Hkp).
     destruct Hqm as (kq, Hkq).
+    exists ((kp * kq) / m).
+...
+    rewrite Nat.mul_comm.
+    rewrite Hkp at 1.
+    rewrite Nat.mul_comm.
+rewrite <- Nat.mul_assoc; f_equal.
+rewrite (Nat.mul_comm kp).
+rewrite Hkq.
+rewrite Nat.div_mul_cancel_l; cycle 1. {
+  intros H; now subst q.
+} {
+  intros H; subst kq.
+  rewrite Hkp in Hkq; cbn in Hkq.
+  apply Nat.eq_mul_0 in Hkq.
+  destruct Hkq as [H| H]; [ | now subst p ].
+  now subst kp.
+}
+now apply (primes_div_mul_exact m p q kp kq).
+...
+    apply primes_div_mul_exact.
 (* voir plus haut, peut-être ? *)
 ...
 
