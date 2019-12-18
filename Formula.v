@@ -3027,6 +3027,15 @@ rewrite Nat.sub_add. 2: {
 }
 rewrite <- Nat.mul_assoc.
 rewrite (Nat.mul_comm m).
+apply (Nat.mul_cancel_r _ _ (p * q)); [ now apply Nat.neq_mul_0 | ].
+rewrite Nat.mul_sub_distr_r.
+rewrite (Nat.mul_comm (m / (p * q))).
+rewrite <- Nat.divide_div_mul_exact; cycle 1. {
+  now apply Nat.neq_mul_0.
+} {
+  destruct Hpm as (kp, Hkp).
+  destruct Hqm as (kq, Hkq).
+Inspect 3.
 ...
 rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
 rewrite (Nat.mul_sub_distr_r p), Nat.mul_1_l.
