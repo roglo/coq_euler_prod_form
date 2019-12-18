@@ -3035,6 +3035,44 @@ rewrite <- Nat.divide_div_mul_exact; cycle 1. {
 } {
   destruct Hpm as (kp, Hkp).
   destruct Hqm as (kq, Hkq).
+  exists (kp * kq / m).
+  rewrite Nat.mul_comm.
+  rewrite Hkp at 2.
+  rewrite Nat.div_mul_cancel_l; [ | easy | ]. 2: {
+    intros H; subst kp.
+    rewrite Hkp in Hkq; cbn in Hkq.
+    symmetry in Hkq.
+    apply Nat.eq_mul_0 in Hkq.
+    destruct Hkq as [H| H]; [ | now subst q ].
+    now subst kq.
+  }
+  rewrite (Nat.mul_comm p), <- Nat.mul_assoc.
+  rewrite <- Nat.divide_div_mul_exact; [ | easy | ]. 2: {
+    exists (kq / p).
+    rewrite Nat.mul_comm.
+    apply Nat.neq_sym in Hpq.
+    now apply (primes_div_mul_exact m q _ _ kp).
+  }
+  rewrite (Nat.mul_comm p).
+  rewrite Nat.div_mul; [ | easy ].
+  now rewrite Nat.mul_comm.
+}
+...
+rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
+rewrite (Nat.mul_sub_distr_r p), Nat.mul_1_l.
+...
+Search (_ * (_ / _)).
+  rewrite Nat.div_mul; [ | easy ].
+    rewrite Hkq.
+    rewrite (Nat.mul_comm kp).
+    rewrite Nat.div_mul_cancel_l; [ | easy | ]. 2: {
+      intros H; subst kq.
+      rewrite Hkp in Hkq; cbn in Hkq.
+      apply Nat.eq_mul_0 in Hkq.
+      destruct Hkq as [H| H]; [ | now subst p ].
+      now subst kp.
+    }
+    now apply (primes_div_mul_exact m p q kp kq).
 Inspect 3.
 ...
 rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
