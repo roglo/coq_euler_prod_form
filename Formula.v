@@ -3057,6 +3057,12 @@ rewrite <- Nat.divide_div_mul_exact; cycle 1. {
   rewrite Nat.div_mul; [ | easy ].
   now rewrite Nat.mul_comm.
 }
+rewrite (Nat.mul_comm _ m).
+rewrite Nat.div_mul; [ | now apply Nat.neq_mul_0 ].
+rewrite Nat.mul_assoc.
+...
+rewrite (Nat.mul_comm _ (p * q)).
+rewrite Nat.mul_assoc.
 ...
 rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
 rewrite (Nat.mul_sub_distr_r p), Nat.mul_1_l.
