@@ -74,9 +74,7 @@ split.
      apply (Nat.lt_le_trans _ (a * b)); [ | easy ].
      destruct a; [ flia Han | ].
      destruct b; [ flia Hbn | ].
-     destruct b; [ flia Hbn | ].
-     rewrite Nat.mul_comm; cbn.
-     remember (b * S a); flia.
+     destruct b; [ flia Hbn | flia ].
    }
    specialize (H1 H).
    exfalso; apply H1; rewrite Hnab, Nat.mul_comm.
@@ -120,8 +118,7 @@ split; [ easy | ].
 rewrite Hab, Nat.mul_comm.
 destruct a; [ flia Ha | ].
 destruct b; [ flia Hb | ].
-destruct b; [ flia Hb | ].
-cbn; remember (b * S a); flia.
+destruct b; [ flia Hb | flia ].
 Qed.
 
 Theorem prime_divisor : ∀ n, 2 ≤ n →
@@ -254,9 +251,7 @@ destruct a; [ easy | ].
 destruct a; [ easy | exfalso ].
 specialize (H1 (S (S k))) as H2.
 assert (H : 2 ≤ S (S k) < S (S p)). {
-  split; [ flia Hp2 | ].
-  rewrite <- Hk; cbn.
-  remember (a * _); flia.
+  split; [ flia Hp2 | flia Hk ].
 }
 specialize (H2 H); clear H.
 apply H2; rewrite <- Hk.
@@ -581,8 +576,7 @@ destruct b1. {
     split; [ flia | ].
     rewrite Hb1; remember (S (S b1)) as b.
     destruct d; [ flia H2d | cbn ].
-    destruct d; [ flia H2d | cbn ].
-    remember (d * b); flia Heqb.
+    destruct d; [ flia H2d | flia Heqb ].
   }
   specialize (H1 H).
   exfalso; apply H1; clear H1.
@@ -752,7 +746,7 @@ destruct b1. {
     destruct p; [ flia H2p | ].
     destruct p; [ flia H2p | ].
     rewrite Nat.mul_comm; cbn.
-    destruct n; [ easy | remember (p * S n); flia ].
+    destruct n; [ easy | flia ].
   }
   rewrite Nat.add_comm in Hl.
   now rewrite (prime_decomp_aux_more_iter cb).
@@ -941,8 +935,7 @@ destruct d. {
   rewrite Hg in H2.
   destruct H2 as (d2, Hd2).
   destruct d2; [ rewrite Hd2 in Hnp; flia Hnp | ].
-  rewrite Hd2 in Hnp; cbn in Hnp.
-  remember (d2 * p); flia Hnp.
+  rewrite Hd2 in Hnp; flia Hnp.
 }
 replace (S (S d)) with (1 + S d) in H1 by flia.
 rewrite Nat.mul_add_distr_r, Nat.mul_1_l in H1.
@@ -1014,8 +1007,7 @@ split.
    destruct b; [ easy | ].
    destruct a; [ flia Ha | ].
    destruct b; [ flia Hb | ].
-   rewrite Nat.mul_comm; cbn.
-   remember (b * S (S a)); flia.
+   rewrite Nat.mul_comm; flia.
  }
  destruct (Nat.eq_dec a b) as [Haeb| Haeb]. {
    subst b; clear Hb.
@@ -1038,8 +1030,7 @@ split.
      split. {
        destruct a; [ easy | ].
        rewrite Nat.sub_succ, Nat.sub_0_r.
-       destruct a; [ flia Ha | ].
-       cbn; remember (a * S a); flia.
+       destruct a; [ flia Ha | flia ].
      }
      rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
      apply Nat.sub_le_mono_l; flia Ha.
@@ -1060,8 +1051,7 @@ split.
    split; [ flia | ].
    destruct a; [ easy | ].
    destruct b; [ flia Hb | ].
-   destruct a; [ flia Ha | ].
-   cbn; remember (a * S (S b)); flia.
+   destruct a; [ flia Ha | flia ].
  }
  destruct (lt_dec a b) as [Halb| Halb].
  +now apply Nat_divide_mul_fact.
@@ -2076,8 +2066,7 @@ split. {
   apply Nat_eq_mod_sub_0 in H1. 2: {
     destruct i; [ flia Hip | ].
     destruct p; [ flia Hip | ].
-    destruct p; [ flia Hip | ].
-    cbn; remember (i * S p); flia.
+    destruct p; [ flia Hip | cbn; flia ].
   }
   apply Nat.mod_divide in H1; [ | easy ].
   destruct H1 as (c, Hc).
@@ -2091,8 +2080,7 @@ split. {
       destruct p; [ easy | ].
       rewrite Nat.mul_succ_r.
       destruct i; [ easy | ].
-      destruct p; [ easy | ].
-      cbn; remember (i * S p); flia.
+      destruct p; [ easy | flia ].
     }
     now rewrite Nat.sub_diag, Nat.add_0_l.
   }

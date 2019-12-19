@@ -555,8 +555,7 @@ Proof.
 intros * Hbz.
 specialize (Nat.gcd_divide_r a b) as H1.
 destruct H1 as (c, Hc); rewrite Hc at 2.
-destruct c; [ easy | ].
-cbn; remember (c * _); flia.
+destruct c; [ easy | flia ].
 Qed.
 
 Theorem Nat_gcd_1_mul_l : ∀ a b c,
@@ -642,8 +641,7 @@ rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
 rewrite Nat.add_sub_assoc; [ | flia Haz ].
 rewrite Nat.pow_2_r.
 rewrite Nat.sub_add; [ easy | ].
-destruct a; [ easy | ].
-cbn; remember (_ * _); flia.
+destruct a; [ easy | flia ].
 Qed.
 
 Theorem Nat_sub_sub_assoc : ∀ a b c,
