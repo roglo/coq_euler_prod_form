@@ -3084,36 +3084,13 @@ do 2 rewrite Nat.mul_assoc.
 rewrite Nat.div_mul; [ | now subst pq; apply Nat.neq_mul_0 ].
 rewrite Nat.div_mul; [ | now subst pq; apply Nat.neq_mul_0 ].
 subst pq.
-...
-rewrite (Nat.mul_comm _ m).
-rewrite Nat.div_mul; [ | now apply Nat.neq_mul_0 ].
-rewrite Nat.mul_assoc.
-rewrite <- Nat.divide_div_mul_exact; [ | | ]. 2: {
-...
-rewrite <- (Nat.mul_assoc ((p - 1) * (q - 1))).
-...
-rewrite (Nat.mul_comm _ (p * q)).
-rewrite Nat.mul_assoc.
-...
-rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
-rewrite (Nat.mul_sub_distr_r p), Nat.mul_1_l.
-...
-Search (_ * (_ / _)).
-  rewrite Nat.div_mul; [ | easy ].
-    rewrite Hkq.
-    rewrite (Nat.mul_comm kp).
-    rewrite Nat.div_mul_cancel_l; [ | easy | ]. 2: {
-      intros H; subst kq.
-      rewrite Hkp in Hkq; cbn in Hkq.
-      apply Nat.eq_mul_0 in Hkq.
-      destruct Hkq as [H| H]; [ | now subst p ].
-      now subst kp.
-    }
-    now apply (primes_div_mul_exact m p q kp kq).
-Inspect 3.
-...
-rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
-rewrite (Nat.mul_sub_distr_r p), Nat.mul_1_l.
+rewrite <- Hk.
+replace (p * q * k) with m by flia Hk.
+rewrite <- Nat.mul_assoc.
+replace (k * (p * q)) with m by flia Hk.
+replace m with (m * 1) at 2 by flia.
+rewrite <- Nat.mul_sub_distr_l, Nat.mul_comm; f_equal.
+(* ah bin non *)
 ...
 
 Theorem prime_mul_φ : ∀ p q, prime p → prime q → p < q
