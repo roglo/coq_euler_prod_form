@@ -2814,13 +2814,17 @@ Qed.
 
 (* http://mathworld.wolfram.com/TotientFunction.html *)
 
-Definition φ_ p m :=
+Definition φ_ pl m :=
   length
-    (filter (λ d, match d mod p with 0 => false | _ => true end) (seq 1 m)).
+    (filter
+       (λ d,
+        fold_left
+          (λ b p, match d mod p with 0 => false | _ => b end)
+          pl true) (seq 1 m)).
 
 Theorem divisor_φ_p : ∀ m p,
   Nat.divide p m
-  → φ_ p m = m - m / p.
+  → φ_ [p] m = m - m / p.
 Proof.
 intros * Hpm.
 destruct (Nat.eq_dec p 0) as [Hpz| Hpz]. {
@@ -2835,8 +2839,8 @@ rewrite Nat.div_mul; [ | easy ].
 induction c; [ easy | cbn ].
 rewrite (Nat.add_comm p).
 rewrite seq_app, filter_app, app_length.
+cbn in IHc.
 rewrite IHc; clear IHc.
-(**)
 rewrite <- Nat.add_sub_swap. 2: {
   destruct p; [ easy | ].
   rewrite Nat.mul_succ_r; flia.
@@ -2902,6 +2906,7 @@ rewrite Nat.mul_comm, Nat.div_mul; [ easy | ].
 now intros H; subst q.
 Qed.
 
+(*
 Lemma primes_φ_diff_1 : ∀ m p q,
   prime p
   → prime q
@@ -2957,6 +2962,7 @@ rewrite Nat_sub_sub_distr. 2: {
 }
 now rewrite Nat.sub_diag.
 Qed.
+*)
 
 Theorem Nat_divide_prime_mul_dividing : ∀ m p q,
   prime p
@@ -2999,7 +3005,7 @@ rewrite Nat.div_mul; [ | easy ].
 now rewrite Nat.mul_comm.
 Qed.
 
-(* aucun intérêt : n'est qu'un cas particulier de divisor_φ_p *)
+(* aucun intérêt : n'est qu'un cas particulier de divisor_φ_p
 Theorem φ_div_mul : ∀ m p q,
   prime p
   → prime q
@@ -3012,6 +3018,7 @@ intros * Hp Hq Hpq Hpm Hqm.
 apply divisor_φ_p.
 now apply Nat_divide_prime_mul_dividing.
 Qed.
+ *)
 
 Theorem glop : ∀ m p q,
   prime p
@@ -3019,10 +3026,9 @@ Theorem glop : ∀ m p q,
   → p ≠ q
   → Nat.divide p m
   → Nat.divide q m
-  → φ m = m * (p - 1) * (q - 1) / (p * q).
+  → φ_ [p; q] m = m * (p - 1) * (q - 1) / (p * q).
 Proof.
 intros * Hp Hq Hpq Hpm Hqm.
-(* chais pas, faut voir *)
 ...
 
 (*
