@@ -2884,6 +2884,7 @@ rewrite Nat.mod_add; [ | easy ].
 rewrite Nat.mod_same; [ | easy ].
 now rewrite Nat.add_0_r.
 Qed.
+
 Theorem primes_div_mul_exact : ∀ m p q kp kq,
   prime p
   → prime q
@@ -3026,9 +3027,25 @@ Theorem glop : ∀ m p q,
   → p ≠ q
   → Nat.divide p m
   → Nat.divide q m
+  → φ_ [p; q] m = φ_ [p] m - m * (p - 1) / (p * q).
+Proof.
+intros * Hp Hq Hpq Hpm Hqm.
+unfold φ_; cbn.
+...
+
+Theorem glop : ∀ m p q,
+  prime p
+  → prime q
+  → p ≠ q
+  → Nat.divide p m
+  → Nat.divide q m
   → φ_ [p; q] m = m * (p - 1) * (q - 1) / (p * q).
 Proof.
 intros * Hp Hq Hpq Hpm Hqm.
+unfold φ_; cbn.
+Search (filter _ (filter _ _)).
+...
+rewrite (filter_ext_in _ (λ d, true)). 2: {
 ...
 
 (*
