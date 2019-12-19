@@ -2999,6 +2999,7 @@ rewrite Nat.div_mul; [ | easy ].
 now rewrite Nat.mul_comm.
 Qed.
 
+(* aucun intérêt : n'est qu'un cas particulier de divisor_φ_p *)
 Theorem φ_div_mul : ∀ m p q,
   prime p
   → prime q
@@ -3008,60 +3009,64 @@ Theorem φ_div_mul : ∀ m p q,
   → φ_ (p * q) m = m - m / (p * q).
 Proof.
 intros * Hp Hq Hpq Hpm Hqm.
-assert (Hpz : p ≠ 0) by now intros H; subst p.
-assert (Hqz : q ≠ 0) by now intros H; subst q.
-destruct (Nat.eq_dec m 0) as [Hmz| Hmz]; [ now subst m | ].
-specialize (primes_φ_diff m p q Hp Hq Hpq Hpm Hqm) as H1.
-apply Nat.add_sub_eq_nz in H1. 2: {
-  intros H.
-  apply Nat.sub_0_le in H.
-  apply Nat.nlt_ge in H; apply H; clear H.
-  apply (Nat.mul_lt_mono_pos_l q); [ now apply Nat.neq_0_lt_0 | ].
-  rewrite <- (proj2 (Nat.div_exact _ _ Hqz)); [ | now apply Nat.mod_divide ].
-  rewrite <- Nat.div_div; [ | easy | easy ].
-  rewrite <- (proj2 (Nat.div_exact _ _ Hqz)). 2: {
-    apply Nat.mod_divide; [ easy | ].
-    destruct Hpm as (kp, Hkp).
-    destruct Hqm as (kq, Hkq).
-    exists ((kp * kq) / m).
-    rewrite Nat.mul_comm.
-    rewrite Hkp at 1.
-    rewrite Nat.div_mul; [ | easy ].
-    rewrite Hkq.
-    rewrite (Nat.mul_comm kp).
-    rewrite Nat.div_mul_cancel_l; [ | easy | ]. 2: {
-      intros H; subst kq.
-      rewrite Hkp in Hkq; cbn in Hkq.
-      apply Nat.eq_mul_0 in Hkq.
-      destruct Hkq as [H| H]; [ | now subst p ].
-      now subst kp.
-    }
-    now apply (primes_div_mul_exact m p q kp kq).
-  }
-  apply Nat.div_lt. {
-    destruct m; [ easy | flia ].
-  } {
-    destruct p; [ easy | ].
-    destruct p; [ easy | flia ].
-  }
-}
-rewrite <- H1.
-rewrite divisor_φ_p; [ | easy ].
-rewrite Nat.add_sub_assoc. 2: {
-  apply Nat.div_le_compat_l.
-  split; [ flia Hqz | ].
-  destruct p; [ easy | cbn; flia ].
-}
-rewrite Nat.sub_add; [ easy | ].
-apply Nat.lt_le_incl.
-apply Nat.div_lt. {
-  destruct m; [ easy | flia ].
-} {
-  destruct q; [ easy | ].
-  destruct q; [ easy | flia ].
-}
+apply divisor_φ_p.
+now apply Nat_divide_prime_mul_dividing.
 Qed.
 
+Theorem glop : ∀ m p q,
+  prime p
+  → prime q
+  → p ≠ q
+  → Nat.divide p m
+  → Nat.divide q m
+  → φ m = m * (p - 1) * (q - 1) / (p * q).
+Proof.
+intros * Hp Hq Hpq Hpm Hqm.
+(* chais pas, faut voir *)
+...
+
+(*
+Theorem glop : ∀ m,
+  φ m = φ_ m (m - 1).
+Proof.
+intros.
+unfold φ, φ_.
+unfold coprimes.
+f_equal.
+destruct (Nat.eq_dec m 0) as [Hmz| Hmz]; [ now subst m | ].
+apply filter_ext_in.
+intros a Ha.
+remember (a mod m) as r eqn:Hr; symmetry in Hr.
+destruct r. {
+  apply Nat.eqb_neq.
+  intros H.
+  apply Nat.mod_divides in Hr; [ | easy ].
+  destruct Hr as (k, Hk).
+  rewrite <- (Nat.mul_1_r m) in H.
+  rewrite Hk in H.
+  rewrite Nat.gcd_mul_mono_l in H.
+  apply Nat.eq_mul_1 in H.
+  destruct H as (Hm, Hg).
+  now subst m.
+}
+apply Nat.eqb_eq.
+apply in_seq in Ha.
+replace (1 + (m - 1)) with m in Ha by flia Hmz.
+rewrite Nat.mod_small in Hr; [ subst a | easy ].
+...
+*)
+
+Theorem glop : ∀ m p q,
+  prime p
+  → prime q
+  → p ≠ q
+  → Nat.divide p m
+  → Nat.divide q m
+  → φ m = m - m / (p * q).
+Proof.
+intros * Hp Hq Hpq Hpm Hqm.
+Inspect 1.
+Search φ_.
 ...
 
 Theorem prime_mul_φ : ∀ p q, prime p → prime q → p < q
