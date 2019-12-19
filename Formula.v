@@ -2288,8 +2288,7 @@ destruct (Nat.eq_dec a 1) as [Ha1| Ha1]. {
 replace 1 with (1 mod p) in Hap at 2 by now rewrite Nat.mod_1_l.
 apply Nat_eq_mod_sub_0 in Hap. 2: {
   destruct a; [ easy | ].
-  cbn; rewrite Nat.mul_1_r.
-  remember (a * S a); flia.
+  cbn; rewrite Nat.mul_1_r; flia.
 }
 apply Nat.mod_divide in Hap; [ | easy ].
 rewrite Nat_sqr_sub_1 in Hap.
@@ -2776,7 +2775,7 @@ rewrite (filter_ext_in _ (λ d, true)). 2: {
     cbn in Hb1, Hb2.
     destruct p; [ flia Hb1 | ].
     rewrite Nat.sub_succ, Nat.sub_0_r in Hb2.
-    remember (c * S p); flia Hb2.
+    flia Hb2.
   }
   destruct (Nat.eq_dec p 0) as [Hpz| Hpz]. {
     subst p; flia Hb1.
