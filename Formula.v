@@ -2999,22 +2999,18 @@ rewrite Nat.div_mul; [ | easy ].
 now rewrite Nat.mul_comm.
 Qed.
 
-Theorem glop : ∀ m p q,
+Theorem φ_div_mul : ∀ m p q,
   prime p
   → prime q
   → p ≠ q
   → Nat.divide p m
   → Nat.divide q m
-  → φ_ (p * q) m = m * (p - 1) * (q - 1) / (p * q).
+  → φ_ (p * q) m = m - m / (p * q).
 Proof.
 intros * Hp Hq Hpq Hpm Hqm.
 assert (Hpz : p ≠ 0) by now intros H; subst p.
 assert (Hqz : q ≠ 0) by now intros H; subst q.
-destruct (Nat.eq_dec m 0) as [Hmz| Hmz]. {
-  subst m; cbn.
-  rewrite Nat.div_0_l; [ easy | ].
-  now apply Nat.neq_mul_0.
-}
+destruct (Nat.eq_dec m 0) as [Hmz| Hmz]; [ now subst m | ].
 specialize (primes_φ_diff m p q Hp Hq Hpq Hpm Hqm) as H1.
 apply Nat.add_sub_eq_nz in H1. 2: {
   intros H.
@@ -3056,40 +3052,16 @@ rewrite Nat.add_sub_assoc. 2: {
   split; [ flia Hqz | ].
   destruct p; [ easy | cbn; flia ].
 }
-rewrite Nat.sub_add. 2: {
-  apply Nat.lt_le_incl.
-  apply Nat.div_lt. {
-    destruct m; [ easy | flia ].
-  } {
-    destruct q; [ easy | ].
-    destruct q; [ easy | flia ].
-  }
-}
-rewrite <- Nat.mul_assoc.
-rewrite (Nat.mul_comm m).
-apply (Nat.mul_cancel_r _ _ (p * q)); [ now apply Nat.neq_mul_0 | ].
-rewrite Nat.mul_sub_distr_r.
-rewrite (Nat.mul_comm (m / (p * q))).
-rewrite <- Nat.divide_div_mul_exact; cycle 1. {
-  now apply Nat.neq_mul_0.
+rewrite Nat.sub_add; [ easy | ].
+apply Nat.lt_le_incl.
+apply Nat.div_lt. {
+  destruct m; [ easy | flia ].
 } {
-  now apply Nat_divide_prime_mul_dividing.
+  destruct q; [ easy | ].
+  destruct q; [ easy | flia ].
 }
-specialize (Nat_divide_prime_mul_dividing _ _ _ Hp Hq Hpq Hpm Hqm) as H2.
-destruct H2 as (k, Hk).
-rewrite Hk.
-remember (p * q) as pq.
-do 2 rewrite Nat.mul_assoc.
-rewrite Nat.div_mul; [ | now subst pq; apply Nat.neq_mul_0 ].
-rewrite Nat.div_mul; [ | now subst pq; apply Nat.neq_mul_0 ].
-subst pq.
-rewrite <- Hk.
-replace (p * q * k) with m by flia Hk.
-rewrite <- Nat.mul_assoc.
-replace (k * (p * q)) with m by flia Hk.
-replace m with (m * 1) at 2 by flia.
-rewrite <- Nat.mul_sub_distr_l, Nat.mul_comm; f_equal.
-(* ah bin non *)
+Qed.
+
 ...
 
 Theorem prime_mul_φ : ∀ p q, prime p → prime q → p < q
