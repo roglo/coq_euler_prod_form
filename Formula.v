@@ -3037,7 +3037,6 @@ Proof.
 intros * Hp Hq Hpq Hpm Hqm.
 unfold φ_ldiv; cbn.
 rewrite List_filter_filter_comm.
-Search (length (filter _ _)).
 ...
 
 Theorem glop : ∀ m p q,
