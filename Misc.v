@@ -805,6 +805,26 @@ apply Hf.
 now right.
 Qed.
 
+Theorem List_filter_filter_comm {A} : ∀ (f : A → _) g l,
+  filter f (filter g l) = filter g (filter f l).
+Proof.
+intros.
+induction l as [| a l]; [ easy | cbn ].
+remember (g a) as bg eqn:Hbg; symmetry in Hbg.
+remember (f a) as bf eqn:Hbf; symmetry in Hbf.
+move bf before bg.
+destruct bg, bf; cbn. {
+  rewrite Hbg, Hbf.
+  now rewrite IHl.
+} {
+  now rewrite Hbf, IHl.
+} {
+  now rewrite Hbg, IHl.
+} {
+  apply IHl.
+}
+Qed.
+
 Theorem not_equiv_imp_False : ∀ P : Prop, (P → False) ↔ ¬ P.
 Proof. easy. Qed.
 
