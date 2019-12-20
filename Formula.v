@@ -2814,17 +2814,7 @@ Qed.
 
 (* http://mathworld.wolfram.com/TotientFunction.html *)
 
-(*
-Definition φ_ pl m :=
-  length
-    (filter
-       (λ d,
-        fold_left
-          (λ b p, match d mod p with 0 => false | _ => b end)
-          pl true) (seq 1 m)).
-*)
-
-Definition φ_ pl m :=
+Definition φ_ldiv pl m :=
   length
     (fold_left
        (λ l p, filter (λ d, match d mod p with 0 => false | _ => true end) l)
@@ -2832,7 +2822,7 @@ Definition φ_ pl m :=
 
 Theorem divisor_φ_p : ∀ m p,
   Nat.divide p m
-  → φ_ [p] m = m - m / p.
+  → φ_ldiv [p] m = m - m / p.
 Proof.
 intros * Hpm.
 destruct (Nat.eq_dec p 0) as [Hpz| Hpz]. {
@@ -2840,7 +2830,7 @@ destruct (Nat.eq_dec p 0) as [Hpz| Hpz]. {
   destruct Hpm as (c, Hc).
   now rewrite Nat.mul_0_r in Hc; subst m.
 }
-unfold φ_.
+unfold φ_ldiv.
 destruct Hpm as (c, Hc).
 subst m.
 rewrite Nat.div_mul; [ | easy ].
@@ -3029,10 +3019,10 @@ now apply Nat_divide_prime_mul_dividing.
 Qed.
  *)
 
-Theorem φ__comm : ∀ m p q, φ_ [p; q] m = φ_ [q; p] m.
+Theorem φ_ldiv_comm : ∀ m p q, φ_ldiv [p; q] m = φ_ldiv [q; p] m.
 Proof.
 intros.
-unfold φ_; cbn.
+unfold φ_ldiv; cbn.
 now rewrite List_filter_filter_comm.
 Qed.
 
@@ -3042,10 +3032,10 @@ Theorem glop : ∀ m p q,
   → p ≠ q
   → Nat.divide p m
   → Nat.divide q m
-  → φ_ [p; q] m = φ_ [p] m - m * (p - 1) / (p * q).
+  → φ_ldiv [p; q] m = φ_ldiv [p] m - m * (p - 1) / (p * q).
 Proof.
 intros * Hp Hq Hpq Hpm Hqm.
-unfold φ_; cbn.
+unfold φ_ldiv; cbn.
 rewrite List_filter_filter_comm.
 Search (length (filter _ _)).
 ...
