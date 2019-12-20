@@ -3029,6 +3029,17 @@ now apply Nat_divide_prime_mul_dividing.
 Qed.
  *)
 
+Theorem glop {A} : ∀ (f : A → _) g l, filter f (filter g l) = filter g (filter f l).
+Proof.
+intros.
+...
+
+Theorem glop : ∀ m p q, φ_ [p; q] m = φ_ [q; p] m.
+Proof.
+intros.
+unfold φ_; cbn.
+...
+
 Theorem glop : ∀ m p q,
   prime p
   → prime q
@@ -3039,6 +3050,7 @@ Theorem glop : ∀ m p q,
 Proof.
 intros * Hp Hq Hpq Hpm Hqm.
 unfold φ_; cbn.
+Search (length (filter _ _)).
 ...
 
 Theorem glop : ∀ m p q,
