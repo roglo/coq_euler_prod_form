@@ -3037,6 +3037,18 @@ Proof.
 intros * Hp Hq Hpq Hpm Hqm.
 unfold φ_ldiv; cbn.
 rewrite List_filter_filter_comm.
+destruct Hpm as (kp, Hkp).
+destruct Hqm as (kq, Hkq).
+move kq before kp.
+rewrite Hkp at 2.
+remember (filter _ (seq 1 (kp * p))) as l eqn:Hl; symmetry in Hl.
+replace (length l) with (m - kp). 2: {
+induction l as [| a l]. {
+  cbn.
+  apply Nat.sub_0_le.
+  specialize (proj2 (List_filter_all_false _ _) Hl) as H1.
+  cbn in H1.
+  apply Nat.nlt_ge; intros Hcon.
 ...
 
 Theorem glop : ∀ m p q,

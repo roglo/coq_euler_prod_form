@@ -805,6 +805,27 @@ apply Hf.
 now right.
 Qed.
 
+Theorem List_filter_all_false {A} : ∀ f (l : list A),
+  (∀ a, a ∈ l → f a = false) ↔ filter f l = [].
+Proof.
+intros.
+split. {
+  intros Hf.
+  induction l as [| a l]; [ easy | ].
+  cbn; rewrite Hf; [ | now left ].
+  apply IHl; intros b Hb.
+  now apply Hf; right.
+} {
+  intros Hf a Ha.
+  induction l as [| b l]; [ easy | ].
+  cbn in Hf.
+  remember (f b) as c eqn:Hc; symmetry in Hc.
+  destruct c; [ easy | ].
+  destruct Ha as [Ha| Ha]; [ now subst b | ].
+  now apply IHl.
+}
+Qed.
+
 Theorem List_filter_filter_comm {A} : ∀ (f : A → _) g l,
   filter f (filter g l) = filter g (filter f l).
 Proof.
