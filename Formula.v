@@ -2814,6 +2814,7 @@ Qed.
 
 (* http://mathworld.wolfram.com/TotientFunction.html *)
 
+(*
 Definition φ_ pl m :=
   length
     (filter
@@ -2821,6 +2822,13 @@ Definition φ_ pl m :=
         fold_left
           (λ b p, match d mod p with 0 => false | _ => b end)
           pl true) (seq 1 m)).
+*)
+
+Definition φ_ pl m :=
+  length
+    (fold_left
+       (λ l p, filter (λ d, match d mod p with 0 => false | _ => true end) l)
+       pl (seq 1 m)).
 
 Theorem divisor_φ_p : ∀ m p,
   Nat.divide p m
