@@ -2940,6 +2940,12 @@ rewrite List_filter_all_true. 2: {
   apply Nat.nlt_ge in Hc1; apply Hc1; clear Hc1.
   rewrite Nat.add_1_r.
   apply -> Nat.succ_le_mono.
+  replace b with (b * 1) at 3 by flia.
+  rewrite <- Nat.mul_add_distr_l.
+  apply Nat.mul_le_mono_l.
+  replace b with (b * 1) in Hc2 at 3 by flia.
+  rewrite <- Nat.mul_add_distr_l in Hc2.
+  apply Nat.nlt_ge; intros Hc1.
 ...
   apply (le_trans _ (b * q + r)). {
 ...
