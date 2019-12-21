@@ -2846,6 +2846,117 @@ rewrite <- Nat.add_sub_swap. 2: {
 rewrite <- (Nat.add_1_l c).
 rewrite Nat.sub_add_distr; f_equal.
 rewrite <- Nat.add_sub_assoc; [ f_equal | flia Hpz ].
+Theorem glop : ∀ a b,
+  a mod b = 1
+  → length
+       (filter (λ d, match d mod b with 0 => false | _ => true end) (seq a b)) =
+     b - 1.
+Proof.
+intros a b Hab1.
+destruct (Nat.eq_dec b 0) as [Hbz| Hbz]; [ now subst b | ].
+(*
+specialize (Nat.div_mod a b Hbz) as H1.
+rewrite Hab1 in H1.
+remember (a / b) as q eqn:Hq.
+*)
+replace b with (b - 1 + 1) at 1 by flia Hbz.
+rewrite seq_app, filter_app, app_length.
+rewrite List_filter_all_true. 2: {
+  intros c Hc.
+  remember (c mod b) as r eqn:Hr; symmetry in Hr.
+  destruct r; [ exfalso | easy ].
+  apply in_seq in Hc.
+  destruct Hc as (H1, H2).
+...
+  rewrite (Nat.add_comm 1) in H2.
+  rewrite Nat.add_shuffle0 in H2.
+  rewrite Nat.add_sub_assoc in H2; [ | flia Hpz ].
+  rewrite Nat.sub_add in H2; [ | flia Hpz ].
+  replace p with (1 * p) in H2 at 2 by flia.
+  rewrite <- Nat.mul_add_distr_r in H2.
+  apply Nat.mod_divide in Hr; [ exfalso | easy ].
+  destruct Hr as (k, Hk).
+  subst a; exfalso.
+  apply Nat.mul_lt_mono_pos_r in H2; [ | flia Hpz ].
+  destruct (le_dec k c) as [Hkc| Hkc]. {
+    apply Nat.nlt_ge in H1; apply H1.
+    apply -> Nat.succ_le_mono.
+    now apply Nat.mul_le_mono_r.
+  }
+  flia H2 Hkc.
+}
+
+...
+bq+b-bq-1
+bq+1..bq+b-1
+...
+a = bq+1
+bq+1..b(q+1)-1
+
+a ...
+bq
+bq+1 ... a+b-1
+
+kb+1 ≤ a+b-1
+...
+
+
+destruct (lt_dec b a) as [Hba| Hab]. {
+  rewrite List_filter_all_true.
+
+replace b with (b - a + a). 2: {
+  rewrite Nat.sub_add; [ easy | ].
+a+len=b
+
+
+a a+1 ... b b+1 ... (a+b-1)
+a ≤ b < a+b
+0 < a
+0 < a ≤ b
+...
+∀ d, a ≤ d < a + b → d mod b ≠ 0 ...
+destruct (Nat.eq_dec b 0) as [Hbz| Hbz]; [ now subst b | ].
+destruct (Nat.eq_dec a 0) as [Haz| Haz]. {
+  subst a.
+  now rewrite Nat.mod_0_l in Habz.
+}
+...
+ 2: {
+    intros c Hc.
+    apply in_seq in Hc.
+    cbn in Hc; destruct Hc as (_, Hc).
+    rewrite Nat.mod_small; [ | easy ].
+...
+    remember (c mod b) as d eqn:Hd; symmetry in Hd.
+    destruct d; [ exfalso | easy ].
+    apply Nat.mod_divide in Hd.
+    destruct Hd as (d, Hd).
+    subst c.
+    destruct d.
+
+...
+a a+1 ... b b+1 ... (a+b-1)
+a ≤ b < a+b
+0 < a
+0 < a ≤ b
+...
+(*
+destruct (lt_dec b a) as [Hba| Hab]. {
+  rewrite List_filter_all_true. 2: {
+    intros c Hc.
+    apply in_seq in Hc.
+*)
+replace b with (b - a + a) at 1. 2: {
+  rewrite Nat.sub_add; [ easy | ].
+  admit.
+}
+rewrite seq_app, filter_app, app_length.
+rewrite List_filter_all_true. 2: {
+  intros c Hc.
+  apply in_seq in Hc.
+...
+destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
+*)
 replace p with (p - 1 + 1) at 2 by flia Hpz.
 rewrite seq_app, filter_app, app_length.
 rewrite List_filter_all_true. 2: {
@@ -3056,7 +3167,18 @@ replace (length l) with (m - kp). 2: {
   rewrite Nat.add_comm.
   rewrite seq_app, filter_app, app_length.
   rewrite IHkp; [ | easy ].
+  rewrite (Nat.add_comm 1).
+  replace p with (p - 1 + 1) at 3 by flia Hpz.
+  rewrite seq_app, filter_app, app_length.
+  rewrite List_filter_all_true. 2: {
+    intros a Ha.
+    apply in_seq in Ha.
+    remember (a mod p) as b eqn:Hb; symmetry in Hb.
+    destruct b; [ | easy ].
+...
   remember (1 + kp * p) as a eqn:Ha.
+Search (seq _ _ ++ seq _ _).
+replace a with (
   clear IHkp Ha.
   rewrite <- Nat.add_1_r.
   rewrite Nat.sub_add_distr.
@@ -3067,6 +3189,7 @@ replace (length l) with (m - kp). 2: {
   rewrite <- Nat.add_sub_assoc; [ | flia Hpz ].
   f_equal.
   clear Hpz kp.
+
 ...
   induction l as [| a l]. {
     cbn.
