@@ -3044,31 +3044,33 @@ move kq before kp.
 rewrite Hkp at 2.
 remember (filter _ (seq 1 (kp * p))) as l eqn:Hl; symmetry in Hl.
 replace (length l) with (m - kp). 2: {
-induction l as [| a l]. {
-  cbn.
-  apply Nat.sub_0_le.
-  specialize (proj2 (List_filter_all_false _ _) Hl) as H1.
-  cbn in H1.
-  specialize (H1 (p - 1)).
-  assert (H : p - 1 ∈ seq 1 (kp * p)). {
-    apply in_seq.
-    split. {
-      destruct p; [ easy | ].
-      rewrite Nat.sub_succ, Nat.sub_0_r.
-      destruct p; [ easy | flia ].
-    } {
-      destruct kp; [ easy | cbn; flia ].
+  subst l; symmetry.
+...
+  induction l as [| a l]. {
+    cbn.
+    apply Nat.sub_0_le.
+    specialize (proj2 (List_filter_all_false _ _) Hl) as H1.
+    cbn in H1.
+    specialize (H1 (p - 1)).
+    assert (H : p - 1 ∈ seq 1 (kp * p)). {
+      apply in_seq.
+      split. {
+        destruct p; [ easy | ].
+        rewrite Nat.sub_succ, Nat.sub_0_r.
+        destruct p; [ easy | flia ].
+      } {
+        destruct kp; [ easy | cbn; flia ].
+      }
     }
+    specialize (H1 H).
+    rewrite Nat.mod_small in H1. 2: {
+      destruct p; [ easy | flia ].
+    }
+    destruct p; [ easy | ].
+    rewrite Nat.sub_succ, Nat.sub_0_r in H1.
+    now destruct p.
   }
-  specialize (H1 H).
-  rewrite Nat.mod_small in H1. 2: {
-    destruct p; [ easy | flia ].
-  }
-  destruct p; [ easy | ].
-  rewrite Nat.sub_succ, Nat.sub_0_r in H1.
-  now destruct p.
-}
-cbn.
+  cbn.
 ...
 
 Theorem glop : ∀ m p q,
