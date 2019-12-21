@@ -3045,6 +3045,28 @@ rewrite Hkp at 2.
 remember (filter _ (seq 1 (kp * p))) as l eqn:Hl; symmetry in Hl.
 replace (length l) with (m - kp). 2: {
   subst l; symmetry.
+  clear q kq Hq Hpq Hkq Hp Hmz.
+  subst m.
+  destruct (Nat.eq_dec p 0) as [Hpz| Hpz]. {
+    subst p; cbn.
+    now rewrite Nat.mul_0_r; cbn.
+  }
+  revert p Hpz.
+  induction kp; intros; [ easy | cbn ].
+  rewrite Nat.add_comm.
+  rewrite seq_app, filter_app, app_length.
+  rewrite IHkp; [ | easy ].
+  remember (1 + kp * p) as a eqn:Ha.
+  clear IHkp Ha.
+  rewrite <- Nat.add_1_r.
+  rewrite Nat.sub_add_distr.
+  rewrite Nat.add_sub_swap. 2: {
+    rewrite Nat.mul_comm.
+    destruct p; [ easy | flia ].
+  }
+  rewrite <- Nat.add_sub_assoc; [ | flia Hpz ].
+  f_equal.
+  clear Hpz kp.
 ...
   induction l as [| a l]. {
     cbn.
