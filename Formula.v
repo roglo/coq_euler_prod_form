@@ -2815,10 +2815,15 @@ Qed.
 (* http://mathworld.wolfram.com/TotientFunction.html *)
 
 Definition φ_ldiv pl m :=
+  length (fold_left (λ l p, filter (λ d, negb (d mod p =? 0)) l) pl (seq 1 m)).
+
+(*
+Definition φ_ldiv pl m :=
   length
     (fold_left
        (λ l p, filter (λ d, match d mod p with 0 => false | _ => true end) l)
        pl (seq 1 m)).
+*)
 
 Theorem divisor_φ_p : ∀ m p,
   Nat.divide p m
@@ -2847,19 +2852,135 @@ rewrite <- (Nat.add_1_l c).
 rewrite Nat.sub_add_distr; f_equal.
 rewrite <- Nat.add_sub_assoc; [ f_equal | flia Hpz ].
 Theorem glop : ∀ a b,
-  a mod b = 1
-  → length
-       (filter (λ d, match d mod b with 0 => false | _ => true end) (seq a b)) =
-     b - 1.
+  a mod b ≠ 0
+  → length (filter (λ d, negb (d mod b =? 0)) (seq a b)) = b - 1.
 Proof.
 intros a b Hab1.
 destruct (Nat.eq_dec b 0) as [Hbz| Hbz]; [ now subst b | ].
-(*
 specialize (Nat.div_mod a b Hbz) as H1.
-rewrite Hab1 in H1.
 remember (a / b) as q eqn:Hq.
+remember (a mod b) as r eqn:Hr.
+move q after r; move Hq after Hr.
+replace b with (b - r + r) at 1. 2: {
+  apply Nat.sub_add.
+  now rewrite Hr; apply Nat.lt_le_incl, Nat.mod_upper_bound.
+}
+rewrite seq_app, filter_app, app_length.
+rewrite List_filter_all_true. 2: {
+  intros c Hc.
+  apply Bool.negb_true_iff, Nat.eqb_neq.
+  apply in_seq in Hc.
+  intros Hcon.
+  specialize (Nat.div_mod c b Hbz) as H2.
+  rewrite Hcon, Nat.add_0_r in H2.
+  remember (c / b) as s eqn:Hs.
+  subst a c.
+  clear Hcon.
+  destruct Hc as (Hc1, Hc2).
+  rewrite Nat.add_sub_assoc in Hc2. 2: {
+    rewrite Hr.
+    now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+  }
+  rewrite Nat.add_sub_swap in Hc2; [ | flia ].
+  rewrite Nat.add_sub in Hc2.
+  replace b with (b * 1) in Hc2 at 3 by flia.
+  rewrite <- Nat.mul_add_distr_l in Hc2.
+  apply Nat.mul_lt_mono_pos_l in Hc2; [ | flia Hbz ].
+  rewrite Nat.add_1_r in Hc2.
+  apply Nat.succ_le_mono in Hc2.
+  apply Nat.nlt_ge in Hc1.
+  apply Hc1; clear Hc1.
+  apply (le_lt_trans _ (b * q)); [ | flia Hab1 ].
+  now apply Nat.mul_le_mono_l.
+}
+rewrite seq_length.
+replace r with (1 + (r - 1)) at 3 by flia Hab1.
+rewrite seq_app, filter_app, app_length; cbn.
+rewrite H1 at 1.
+rewrite Nat.add_sub_assoc. 2: {
+  rewrite Hr.
+  now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+}
+rewrite Nat.add_sub_swap; [ | flia ].
+rewrite Nat.add_sub.
+rewrite Nat_mod_add_l_mul_l; [ | easy ].
+rewrite Nat.mod_same; [ cbn | easy ].
+rewrite List_filter_all_true. 2: {
+  intros c Hc.
+  apply Bool.negb_true_iff, Nat.eqb_neq.
+  apply in_seq in Hc.
+  intros Hcon.
+  specialize (Nat.div_mod c b Hbz) as H2.
+  rewrite Hcon, Nat.add_0_r in H2.
+  remember (c / b) as s eqn:Hs.
+  subst a c.
+  clear Hcon.
+  destruct Hc as (Hc1, Hc2).
+  rewrite Nat.add_sub_assoc in Hc2. 2: {
+    rewrite Hr.
+    rewrite Nat_mod_add_l_mul_l; [ | easy ].
+    rewrite Nat.mod_small; [ flia Hab1 | ].
+    rewrite Hr.
+    now apply Nat.mod_upper_bound.
+  }
+  rewrite Nat.add_sub_swap in Hc2; [ | flia ].
+  rewrite Nat.add_sub in Hc2.
+  rewrite Nat.add_sub_assoc in Hc2. 2: {
+    rewrite Hr.
+    now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+  }
+  rewrite Nat.sub_add in Hc2; [ | flia ].
+  rewrite Nat.add_sub_assoc in Hc1. 2: {
+    rewrite Hr.
+    now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+  }
+  rewrite Nat.add_sub_swap in Hc1; [ | flia ].
+  rewrite Nat.add_sub in Hc1.
+  rewrite Nat.add_shuffle0 in Hc2.
+  apply Nat.nlt_ge in Hc1; apply Hc1; clear Hc1.
+  rewrite Nat.add_1_r.
+  apply -> Nat.succ_le_mono.
+  apply (le_trans _ (b * q + r)).
+...
+  apply Nat.nle_gt in Hc2; apply Hc2; clear Hc2.
+...
+  replace b with (b * 1) in Hc2 at 3 by flia.
+  rewrite <- Nat.mul_add_distr_l in Hc2.
+  apply Nat.mul_lt_mono_pos_l in Hc2; [ | flia Hbz ].
+  rewrite Nat.add_1_r in Hc2.
+  apply Nat.succ_le_mono in Hc2.
+  apply Nat.nlt_ge in Hc1.
+  apply Hc1; clear Hc1.
+  apply (le_lt_trans _ (b * q)); [ | flia Hab1 ].
+  now apply Nat.mul_le_mono_l.
+}
+...
+(*
+...
+bq+r ≤ bs
+bq+b ≤ bs
+  transitivity (b * q + r); [ | easy ].
+...
 *)
-replace b with (b - 1 + 1) at 1 by flia Hbz.
+  rewrite <- Nat.mul_add_distr_l.
+  apply Nat.mul_le_mono_pos_l; [ flia Hbz | ].
+...
+bq+r ≤ bs ⇒ q+1 ≤ s
+
+...
+  rewrite Nat.add_sub_assoc in Hc2. 2: {
+    rewrite Hr.
+    now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+  }
+  rewrite Nat.add_sub_swap in Hc2; [ | flia ].
+  rewrite Nat.add_sub in Hc2.
+  replace b with (b * 1) in Hc2 at 3 by flia.
+  rewrite <- Nat.mul_add_distr_l in Hc2.
+  apply Nat.mul_lt_mono_pos_l in Hc2; [ | flia Hbz ].
+...
+  subst a.
+...
+replace b with (c + (b - a))
 rewrite seq_app, filter_app, app_length.
 rewrite List_filter_all_true. 2: {
   intros c Hc.

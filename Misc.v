@@ -10,10 +10,17 @@ Tactic Notation "flia" hyp_list(Hs) := clear - Hs; lia.
 Notation "x '∈' l" := (List.In x l) (at level 70).
 Notation "x '∉' l" := (¬ List.In x l) (at level 70).
 
-Notation "x ≤ y ≤ z" := (x <= y ∧ y <= z)%nat (at level 70, y at next level).
-Notation "x < y ≤ z" := (x < y ∧ y <= z)%nat (at level 70, y at next level).
-Notation "x ≤ y < z" := (x ≤ y ∧ y < z)%nat (at level 70, y at next level).
-Notation "x < y < z" := (x < y ∧ y < z)%nat (at level 70, y at next level).
+Notation "x ≤ y ≤ z" := (x <= y ∧ y <= z)%nat (at level 70, y at next level) :
+                          nat_scope.
+Notation "x < y ≤ z" := (x < y ∧ y <= z)%nat (at level 70, y at next level) :
+                          nat_scope.
+Notation "x ≤ y < z" := (x ≤ y ∧ y < z)%nat (at level 70, y at next level) :
+                          nat_scope.
+(*
+Notation "x < y < z" := (x < y ∧ y < z)%nat (at level 70, y at next level) :
+                          nat_scope.
+*)
+
 Notation "∃! x .. y , p" :=
   (ex (unique (λ x, .. (ex (unique (λ y, p))) ..)))
     (at level 200, x binder, right associativity)
@@ -321,11 +328,27 @@ rewrite <- Nat.mul_sub_distr_l, Nat.mul_comm.
 now apply Nat.mod_mul.
 Qed.
 
-Theorem Nat_mod_add_mul_l : ∀ a b c,
+Theorem Nat_mod_add_r_mul_l : ∀ a b c,
   b ≠ 0 → (a + b * c) mod b = a mod b.
 Proof.
 intros * Hbz.
 rewrite Nat.mul_comm.
+now apply Nat.mod_add.
+Qed.
+
+Theorem Nat_mod_add_l_mul_l : ∀ a b c,
+  b ≠ 0 → (b * c + a) mod b = a mod b.
+Proof.
+intros * Hbz.
+rewrite Nat.add_comm, Nat.mul_comm.
+now apply Nat.mod_add.
+Qed.
+
+Theorem Nat_mod_add_l_mul_r : ∀ a b c,
+  b ≠ 0 → (c * b + a) mod b = a mod b.
+Proof.
+intros * Hbz.
+rewrite Nat.add_comm.
 now apply Nat.mod_add.
 Qed.
 
