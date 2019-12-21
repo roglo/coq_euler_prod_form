@@ -2940,7 +2940,8 @@ rewrite List_filter_all_true. 2: {
   apply Nat.nlt_ge in Hc1; apply Hc1; clear Hc1.
   rewrite Nat.add_1_r.
   apply -> Nat.succ_le_mono.
-  apply (le_trans _ (b * q + r)).
+...
+  apply (le_trans _ (b * q + r)). {
 ...
   apply Nat.nle_gt in Hc2; apply Hc2; clear Hc2.
 ...
