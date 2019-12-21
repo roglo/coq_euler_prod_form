@@ -2825,33 +2825,7 @@ Definition φ_ldiv pl m :=
        pl (seq 1 m)).
 *)
 
-Theorem divisor_φ_p : ∀ m p,
-  Nat.divide p m
-  → φ_ldiv [p] m = m - m / p.
-Proof.
-intros * Hpm.
-destruct (Nat.eq_dec p 0) as [Hpz| Hpz]. {
-  subst p.
-  destruct Hpm as (c, Hc).
-  now rewrite Nat.mul_0_r in Hc; subst m.
-}
-unfold φ_ldiv.
-destruct Hpm as (c, Hc).
-subst m.
-rewrite Nat.div_mul; [ | easy ].
-induction c; [ easy | cbn ].
-rewrite (Nat.add_comm p).
-rewrite seq_app, filter_app, app_length.
-cbn in IHc.
-rewrite IHc; clear IHc.
-rewrite <- Nat.add_sub_swap. 2: {
-  destruct p; [ easy | ].
-  rewrite Nat.mul_succ_r; flia.
-}
-rewrite <- (Nat.add_1_l c).
-rewrite Nat.sub_add_distr; f_equal.
-rewrite <- Nat.add_sub_assoc; [ f_equal | flia Hpz ].
-Theorem glop : ∀ a b,
+Theorem length_filter_mod_seq : ∀ a b,
   a mod b ≠ 0
   → length (filter (λ d, negb (d mod b =? 0)) (seq a b)) = b - 1.
 Proof.
@@ -2946,180 +2920,56 @@ rewrite List_filter_all_true. 2: {
   replace b with (b * 1) in Hc2 at 3 by flia.
   rewrite <- Nat.mul_add_distr_l in Hc2.
   apply Nat.nlt_ge; intros Hc1.
-...
-  apply (le_trans _ (b * q + r)). {
-...
+  replace s with ((q + 1) + S (s - (q + 2))) in Hc2 by flia Hc1.
+  rewrite Nat.mul_add_distr_l in Hc2.
+  apply Nat.add_lt_mono_l in Hc2.
   apply Nat.nle_gt in Hc2; apply Hc2; clear Hc2.
-...
-  replace b with (b * 1) in Hc2 at 3 by flia.
-  rewrite <- Nat.mul_add_distr_l in Hc2.
-  apply Nat.mul_lt_mono_pos_l in Hc2; [ | flia Hbz ].
-  rewrite Nat.add_1_r in Hc2.
-  apply Nat.succ_le_mono in Hc2.
-  apply Nat.nlt_ge in Hc1.
-  apply Hc1; clear Hc1.
-  apply (le_lt_trans _ (b * q)); [ | flia Hab1 ].
-  now apply Nat.mul_le_mono_l.
-}
-...
-(*
-...
-bq+r ≤ bs
-bq+b ≤ bs
-  transitivity (b * q + r); [ | easy ].
-...
-*)
-  rewrite <- Nat.mul_add_distr_l.
-  apply Nat.mul_le_mono_pos_l; [ flia Hbz | ].
-...
-bq+r ≤ bs ⇒ q+1 ≤ s
-
-...
-  rewrite Nat.add_sub_assoc in Hc2. 2: {
-    rewrite Hr.
-    now apply Nat.lt_le_incl, Nat.mod_upper_bound.
-  }
-  rewrite Nat.add_sub_swap in Hc2; [ | flia ].
-  rewrite Nat.add_sub in Hc2.
-  replace b with (b * 1) in Hc2 at 3 by flia.
-  rewrite <- Nat.mul_add_distr_l in Hc2.
-  apply Nat.mul_lt_mono_pos_l in Hc2; [ | flia Hbz ].
-...
-  subst a.
-...
-replace b with (c + (b - a))
-rewrite seq_app, filter_app, app_length.
-rewrite List_filter_all_true. 2: {
-  intros c Hc.
-  remember (c mod b) as r eqn:Hr; symmetry in Hr.
-  destruct r; [ exfalso | easy ].
-  apply in_seq in Hc.
-  destruct Hc as (H1, H2).
-...
-  rewrite (Nat.add_comm 1) in H2.
-  rewrite Nat.add_shuffle0 in H2.
-  rewrite Nat.add_sub_assoc in H2; [ | flia Hpz ].
-  rewrite Nat.sub_add in H2; [ | flia Hpz ].
-  replace p with (1 * p) in H2 at 2 by flia.
-  rewrite <- Nat.mul_add_distr_r in H2.
-  apply Nat.mod_divide in Hr; [ exfalso | easy ].
-  destruct Hr as (k, Hk).
-  subst a; exfalso.
-  apply Nat.mul_lt_mono_pos_r in H2; [ | flia Hpz ].
-  destruct (le_dec k c) as [Hkc| Hkc]. {
-    apply Nat.nlt_ge in H1; apply H1.
-    apply -> Nat.succ_le_mono.
-    now apply Nat.mul_le_mono_r.
-  }
-  flia H2 Hkc.
-}
-
-...
-bq+b-bq-1
-bq+1..bq+b-1
-...
-a = bq+1
-bq+1..b(q+1)-1
-
-a ...
-bq
-bq+1 ... a+b-1
-
-kb+1 ≤ a+b-1
-...
-
-
-destruct (lt_dec b a) as [Hba| Hab]. {
-  rewrite List_filter_all_true.
-
-replace b with (b - a + a). 2: {
-  rewrite Nat.sub_add; [ easy | ].
-a+len=b
-
-
-a a+1 ... b b+1 ... (a+b-1)
-a ≤ b < a+b
-0 < a
-0 < a ≤ b
-...
-∀ d, a ≤ d < a + b → d mod b ≠ 0 ...
-destruct (Nat.eq_dec b 0) as [Hbz| Hbz]; [ now subst b | ].
-destruct (Nat.eq_dec a 0) as [Haz| Haz]. {
-  subst a.
-  now rewrite Nat.mod_0_l in Habz.
-}
-...
- 2: {
-    intros c Hc.
-    apply in_seq in Hc.
-    cbn in Hc; destruct Hc as (_, Hc).
-    rewrite Nat.mod_small; [ | easy ].
-...
-    remember (c mod b) as d eqn:Hd; symmetry in Hd.
-    destruct d; [ exfalso | easy ].
-    apply Nat.mod_divide in Hd.
-    destruct Hd as (d, Hd).
-    subst c.
-    destruct d.
-
-...
-a a+1 ... b b+1 ... (a+b-1)
-a ≤ b < a+b
-0 < a
-0 < a ≤ b
-...
-(*
-destruct (lt_dec b a) as [Hba| Hab]. {
-  rewrite List_filter_all_true. 2: {
-    intros c Hc.
-    apply in_seq in Hc.
-*)
-replace b with (b - a + a) at 1. 2: {
-  rewrite Nat.sub_add; [ easy | ].
-  admit.
-}
-rewrite seq_app, filter_app, app_length.
-rewrite List_filter_all_true. 2: {
-  intros c Hc.
-  apply in_seq in Hc.
-...
-destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
-*)
-replace p with (p - 1 + 1) at 2 by flia Hpz.
-rewrite seq_app, filter_app, app_length.
-rewrite List_filter_all_true. 2: {
-  intros a Ha.
-  remember (a mod p) as r eqn:Hr; symmetry in Hr.
-  destruct r; [ exfalso | easy ].
-  apply in_seq in Ha.
-  destruct Ha as (H1, H2).
-  rewrite (Nat.add_comm 1) in H2.
-  rewrite Nat.add_shuffle0 in H2.
-  rewrite Nat.add_sub_assoc in H2; [ | flia Hpz ].
-  rewrite Nat.sub_add in H2; [ | flia Hpz ].
-  replace p with (1 * p) in H2 at 2 by flia.
-  rewrite <- Nat.mul_add_distr_r in H2.
-  apply Nat.mod_divide in Hr; [ exfalso | easy ].
-  destruct Hr as (k, Hk).
-  subst a; exfalso.
-  apply Nat.mul_lt_mono_pos_r in H2; [ | flia Hpz ].
-  destruct (le_dec k c) as [Hkc| Hkc]. {
-    apply Nat.nlt_ge in H1; apply H1.
-    apply -> Nat.succ_le_mono.
-    now apply Nat.mul_le_mono_r.
-  }
-  flia H2 Hkc.
+  rewrite Nat.mul_comm; cbn.
+  transitivity b; [ | flia Hc1 ].
+  rewrite Hr.
+  now apply Nat.lt_le_incl, Nat.mod_upper_bound.
 }
 rewrite seq_length.
-rewrite (Nat.add_comm _ (c * p)).
-rewrite Nat.add_shuffle0.
-rewrite Nat.add_sub_assoc; [ | flia Hpz ].
-rewrite Nat.sub_add; [ | flia Hpz ].
-cbn.
-rewrite (Nat.add_comm _ p).
+rewrite Nat.add_sub_assoc; [ | flia Hab1 ].
+rewrite Nat.sub_add; [ easy | ].
+rewrite Hr.
+now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+Qed.
+
+Theorem divisor_φ_p : ∀ m p,
+  Nat.divide p m
+  → φ_ldiv [p] m = m - m / p.
+Proof.
+intros * Hpm.
+destruct (Nat.eq_dec p 0) as [Hpz| Hpz]. {
+  subst p.
+  destruct Hpm as (c, Hc).
+  now rewrite Nat.mul_0_r in Hc; subst m.
+}
+destruct (Nat.eq_dec p 1) as [Hp1| Hp1]. {
+  subst p; cbn - [ "/" ].
+  rewrite Nat.div_1_r, Nat.sub_diag.
+  now rewrite List_filter_all_false.
+}
+unfold φ_ldiv.
+destruct Hpm as (c, Hc).
+subst m.
+rewrite Nat.div_mul; [ | easy ].
+induction c; [ easy | cbn ].
+rewrite (Nat.add_comm p).
+rewrite seq_app, filter_app, app_length.
+cbn in IHc.
+rewrite IHc; clear IHc.
+rewrite <- Nat.add_sub_swap. 2: {
+  destruct p; [ easy | ].
+  rewrite Nat.mul_succ_r; flia.
+}
+rewrite <- (Nat.add_1_l c).
+rewrite Nat.sub_add_distr; f_equal.
+rewrite <- Nat.add_sub_assoc; [ f_equal | flia Hpz ].
+apply length_filter_mod_seq.
 rewrite Nat.mod_add; [ | easy ].
-rewrite Nat.mod_same; [ | easy ].
-now rewrite Nat.add_0_r.
+rewrite Nat.mod_1_l; flia Hpz Hp1.
 Qed.
 
 Theorem primes_div_mul_exact : ∀ m p q kp kq,
@@ -3284,66 +3134,24 @@ rewrite Hkp at 2.
 remember (filter _ (seq 1 (kp * p))) as l eqn:Hl; symmetry in Hl.
 replace (length l) with (m - kp). 2: {
   subst l; symmetry.
-  clear q kq Hq Hpq Hkq Hp Hmz.
+  clear q kq Hq Hpq Hkq Hmz.
   subst m.
   destruct (Nat.eq_dec p 0) as [Hpz| Hpz]. {
     subst p; cbn.
     now rewrite Nat.mul_0_r; cbn.
   }
-  revert p Hpz.
   induction kp; intros; [ easy | cbn ].
   rewrite Nat.add_comm.
   rewrite seq_app, filter_app, app_length.
-  rewrite IHkp; [ | easy ].
+  rewrite IHkp.
   rewrite (Nat.add_comm 1).
-  replace p with (p - 1 + 1) at 3 by flia Hpz.
-  rewrite seq_app, filter_app, app_length.
-  rewrite List_filter_all_true. 2: {
-    intros a Ha.
-    apply in_seq in Ha.
-    remember (a mod p) as b eqn:Hb; symmetry in Hb.
-    destruct b; [ | easy ].
-...
-  remember (1 + kp * p) as a eqn:Ha.
-Search (seq _ _ ++ seq _ _).
-replace a with (
-  clear IHkp Ha.
-  rewrite <- Nat.add_1_r.
-  rewrite Nat.sub_add_distr.
-  rewrite Nat.add_sub_swap. 2: {
-    rewrite Nat.mul_comm.
-    destruct p; [ easy | flia ].
+  rewrite length_filter_mod_seq. 2: {
+    rewrite Nat_mod_add_l_mul_r; [ | easy ].
+    rewrite Nat.mod_1_l; [ easy | ].
+    now apply prime_ge_2.
   }
-  rewrite <- Nat.add_sub_assoc; [ | flia Hpz ].
-  f_equal.
-  clear Hpz kp.
-
-...
-  induction l as [| a l]. {
-    cbn.
-    apply Nat.sub_0_le.
-    specialize (proj2 (List_filter_all_false _ _) Hl) as H1.
-    cbn in H1.
-    specialize (H1 (p - 1)).
-    assert (H : p - 1 ∈ seq 1 (kp * p)). {
-      apply in_seq.
-      split. {
-        destruct p; [ easy | ].
-        rewrite Nat.sub_succ, Nat.sub_0_r.
-        destruct p; [ easy | flia ].
-      } {
-        destruct kp; [ easy | cbn; flia ].
-      }
-    }
-    specialize (H1 H).
-    rewrite Nat.mod_small in H1. 2: {
-      destruct p; [ easy | flia ].
-    }
-    destruct p; [ easy | ].
-    rewrite Nat.sub_succ, Nat.sub_0_r in H1.
-    now destruct p.
-  }
-  cbn.
+  flia Hpz.
+}
 ...
 
 Theorem glop : ∀ m p q,
