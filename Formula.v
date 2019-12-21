@@ -3035,6 +3035,7 @@ Theorem glop : ∀ m p q,
   → φ_ldiv [p; q] m = φ_ldiv [p] m - m * (p - 1) / (p * q).
 Proof.
 intros * Hp Hq Hpq Hpm Hqm.
+destruct (Nat.eq_dec m 0) as [Hmz| Hmz]; [ now subst m | ].
 unfold φ_ldiv; cbn.
 rewrite List_filter_filter_comm.
 destruct Hpm as (kp, Hkp).
@@ -3048,7 +3049,26 @@ induction l as [| a l]. {
   apply Nat.sub_0_le.
   specialize (proj2 (List_filter_all_false _ _) Hl) as H1.
   cbn in H1.
-  apply Nat.nlt_ge; intros Hcon.
+  specialize (H1 (p - 1)).
+  assert (H : p - 1 ∈ seq 1 (kp * p)). {
+    apply in_seq.
+    split. {
+      destruct p; [ easy | ].
+      rewrite Nat.sub_succ, Nat.sub_0_r.
+      destruct p; [ easy | flia ].
+    } {
+      destruct kp; [ easy | cbn; flia ].
+    }
+  }
+  specialize (H1 H).
+  rewrite Nat.mod_small in H1. 2: {
+    destruct p; [ easy | flia ].
+  }
+  destruct p; [ easy | ].
+  rewrite Nat.sub_succ, Nat.sub_0_r in H1.
+  now destruct p.
+}
+cbn.
 ...
 
 Theorem glop : ∀ m p q,
