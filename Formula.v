@@ -3177,6 +3177,8 @@ Theorem glop : ∀ m p q,
 Proof.
 intros * Hp Hq Hpq Hpm Hqm.
 destruct (Nat.eq_dec m 0) as [Hmz| Hmz]; [ now subst m | ].
+destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
+destruct (Nat.eq_dec q 0) as [Hqz| Hqz]; [ now subst q | ].
 unfold φ_ldiv; cbn.
 rewrite List_filter_filter_comm.
 destruct Hpm as (kp, Hkp).
@@ -3186,12 +3188,8 @@ rewrite Hkp at 2.
 remember (filter _ (seq 1 (kp * p))) as l eqn:Hl; symmetry in Hl.
 replace (length l) with (m - kp). 2: {
   subst l; symmetry.
-  clear q kq Hq Hpq Hkq Hmz.
+  clear q kq Hq Hpq Hkq Hqz Hmz.
   subst m.
-  destruct (Nat.eq_dec p 0) as [Hpz| Hpz]. {
-    subst p; cbn.
-    now rewrite Nat.mul_0_r; cbn.
-  }
   induction kp; intros; [ easy | cbn ].
   rewrite Nat.add_comm.
   rewrite seq_app, filter_app, app_length.
@@ -3204,6 +3202,21 @@ replace (length l) with (m - kp). 2: {
   }
   flia Hpz.
 }
+rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
+Search ((_ - _) / _).
+replace ((m * p - m) / (p * q)) with (m / q - m / (p * q)). 2: {
+  rewrite <- (Nat.div_mul_cancel_l m q p); [ | easy | easy ].
+Search (_ / _ - _ / _).
+...
+Theorem Nat_sub_div_same: ∀ a b c, Nat.divide c a → a / c - b / c = (a - b) / c.
+Nat.add_carry_div2:
+  ∀ (a b : nat) (c0 : bool),
+    (a + b + Nat.b2n c0) / 2 =
+    a / 2 + b / 2 +
+    Nat.b2n
+      (Nat.testbit a 0 && Nat.testbit b 0
+       || c0 && (Nat.testbit a 0 || Nat.testbit b 0))
+
 ...
 rewrite List_filter_filter.
 Inspect 1.

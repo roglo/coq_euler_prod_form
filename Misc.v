@@ -299,6 +299,24 @@ Qed.
 
 (* *)
 
+Theorem Nat_div_sub_l : ∀ a b c, b ≠ 0 → (a * b - c) / b = a - c / b.
+Proof.
+intros * Hbz.
+destruct (le_dec a (c / b)) as [Hacb| Hacb]. {
+  rewrite (proj2 (Nat.sub_0_le a (c / b))); [ | easy ].
+  apply Nat.div_small.
+  rewrite (proj2 (Nat.sub_0_le (a * b) c)); [ flia Hbz | ].
+  apply (Nat.mul_le_mono_r _ _ b) in Hacb.
+  etransitivity; [ apply Hacb | ].
+  rewrite Nat.mul_comm.
+  now apply Nat.mul_div_le.
+}
+apply Nat.nle_gt in Hacb.
+apply (Nat.add_cancel_r _ _ (c / b)).
+rewrite Nat.sub_add; [ | flia Hacb ].
+rewrite <- Nat.div_add_l; [ | easy ].
+...
+
 Theorem Nat_add_div_same : ∀ a b c,
   Nat.divide c a
   → a / c + b / c = (a + b) / c.
@@ -307,9 +325,25 @@ intros * Hca.
 destruct (Nat.eq_dec c 0) as [Hcz| Hcz]; [ now subst c | ].
 destruct Hca as (d, Hd).
 rewrite Hd, Nat.div_mul; [ | easy ].
+now rewrite Nat.div_add_l.
+Qed.
+
+Theorem Nat_sub_div_same: ∀ a b c,
+  Nat.divide c a
+  → a / c - b / c = (a - b) / c.
+Proof.
+intros * Hca.
+destruct (Nat.eq_dec c 0) as [Hcz| Hcz]; [ now subst c | ].
+destruct Hca as (d, Hd).
+rewrite Hd, Nat.div_mul; [ | easy ].
+Search ((_ + _) / _).
+About Nat.div_add_l.
+...
+Search ((_ - _) / _).
 rewrite Nat.add_comm, (Nat.add_comm _ b).
 now rewrite Nat.div_add.
 Qed.
+...
 
 Theorem Nat_sub_succ_1 : ∀ n, S n - 1 = n.
 Proof. now intros; rewrite Nat.sub_succ, Nat.sub_0_r. Qed.
