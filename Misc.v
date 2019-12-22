@@ -307,65 +307,6 @@ rewrite Nat.add_comm.
 now rewrite Nat.sub_add_distr.
 Qed.
 
-Theorem Nat_div_sub_l : ∀ a b c, b ≠ 0 → (a * b - c) / b = a - c / b.
-Proof.
-intros * Hbz.
-destruct (le_dec a (c / b)) as [Hacb| Hacb]. {
-  rewrite (proj2 (Nat.sub_0_le a (c / b))); [ | easy ].
-  apply Nat.div_small.
-  rewrite (proj2 (Nat.sub_0_le (a * b) c)); [ flia Hbz | ].
-  apply (Nat.mul_le_mono_r _ _ b) in Hacb.
-  etransitivity; [ apply Hacb | ].
-  rewrite Nat.mul_comm.
-  now apply Nat.mul_div_le.
-}
-apply Nat.nle_gt in Hacb.
-specialize (Nat.div_mod c b Hbz) as H1.
-Compute (let '(a, (b, c)) := (12, (42, 15)) in ((a * b - c) / b, a - c / b)).
-Compute (let '(a, (b, c)) := (4, (3, 4)) in ((a * b - c) / b, a - c / b)).
-Compute (let '(a, (b, c)) := (1, (2, 1)) in ((a * b - c) / b, a - c / b)).
-Check Nat.div_add_l.
-...
-(ab-c)/b = (ab-c+kb)/b-k = (ab+(kb-c))/b-k = a+(kb-c)/b-k
-k=(c+b-1)/b=(b+(c-1))/b=1+(c-1)/b
-(c+b-1)/b=(c+(b-1))/b
-1+c/b=(b+c)/b
-c≤(1+c/b)b
-(c/b)b≤c
-(b/c)c≤b
-c=c(b/c)+(c mod b)
-...
-apply (Nat.mul_cancel_r _ _ b); [ easy | ].
-specialize (Nat.div_mod (a * b - c) b Hbz) as H1.
-rewrite Nat.mul_comm.
-symmetry in H1.
-apply Nat.add_sub_eq_r in H1.
-rewrite <- H1.
-rewrite Nat.mul_sub_distr_r.
-rewrite <- Nat.sub_add_distr.
-f_equal.
-specialize (Nat.div_mod c b Hbz) as H2.
-rewrite (Nat.mul_comm (c / b)).
-symmetry in H2.
-apply Nat.add_sub_eq_r in H2.
-rewrite <- H2.
-...
-rewrite Nat_sub_sub_swap.
-rewrite Nat.sub_add.
-specialize (Nat.div_mod c b Hbz) as H1.
-...
-apply (Nat.add_cancel_r _ _ (c / b)).
-rewrite Nat.sub_add; [ | flia Hacb ].
-rewrite <- Nat.div_add_l; [ | easy ].
-specialize (Nat.div_mod (a * b - c) b Hbz) as H1.
-rewrite Nat.mul_comm.
-symmetry in H1.
-apply Nat.add_sub_eq_r in H1.
-rewrite <- H1.
-rewrite Nat_sub_sub_swap.
-rewrite Nat.sub_add.
-...
-
 Theorem Nat_add_div_same : ∀ a b c,
   Nat.divide c a
   → a / c + b / c = (a + b) / c.
@@ -376,23 +317,6 @@ destruct Hca as (d, Hd).
 rewrite Hd, Nat.div_mul; [ | easy ].
 now rewrite Nat.div_add_l.
 Qed.
-
-Theorem Nat_sub_div_same: ∀ a b c,
-  Nat.divide c a
-  → a / c - b / c = (a - b) / c.
-Proof.
-intros * Hca.
-destruct (Nat.eq_dec c 0) as [Hcz| Hcz]; [ now subst c | ].
-destruct Hca as (d, Hd).
-rewrite Hd, Nat.div_mul; [ | easy ].
-Search ((_ + _) / _).
-About Nat.div_add_l.
-...
-Search ((_ - _) / _).
-rewrite Nat.add_comm, (Nat.add_comm _ b).
-now rewrite Nat.div_add.
-Qed.
-...
 
 Theorem Nat_sub_succ_1 : ∀ n, S n - 1 = n.
 Proof. now intros; rewrite Nat.sub_succ, Nat.sub_0_r. Qed.
