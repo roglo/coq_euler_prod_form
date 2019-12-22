@@ -3115,6 +3115,16 @@ unfold φ_ldiv; cbn.
 now rewrite List_filter_filter_comm.
 Qed.
 
+Search partition.
+
+Theorem List_partition_filter_length {A} : ∀ (l l1 l2 : list A) f g,
+  partition g l = (l1, l2)
+  → length (filter f l) = length (filter f l1) + length (filter f l2).
+Proof.
+intros * Hp.
+Admitted.
+
+(*
 Theorem List_length_filter_sub_seq : ∀ m l f,
   NoDup l
   → incl l (seq 1 m)
@@ -3155,6 +3165,7 @@ destruct b. {
     now apply NoDup_incl_length.
   } {
 ...
+*)
 
 Theorem glop : ∀ m p q,
   prime p
@@ -3193,6 +3204,10 @@ replace (length l) with (m - kp). 2: {
   }
   flia Hpz.
 }
+...
+rewrite List_filter_filter.
+Inspect 1.
+erewrite List_partition_filter_length.
 ...
 rewrite (List_length_filter_sub_seq m).
 ...
