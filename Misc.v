@@ -299,6 +299,14 @@ Qed.
 
 (* *)
 
+Theorem Nat_sub_sub_swap : ∀ a b c, a - b - c = a - c - b.
+Proof.
+intros.
+rewrite <- Nat.sub_add_distr.
+rewrite Nat.add_comm.
+now rewrite Nat.sub_add_distr.
+Qed.
+
 Theorem Nat_div_sub_l : ∀ a b c, b ≠ 0 → (a * b - c) / b = a - c / b.
 Proof.
 intros * Hbz.
@@ -312,9 +320,35 @@ destruct (le_dec a (c / b)) as [Hacb| Hacb]. {
   now apply Nat.mul_div_le.
 }
 apply Nat.nle_gt in Hacb.
+apply (Nat.mul_cancel_r _ _ b); [ easy | ].
+specialize (Nat.div_mod (a * b - c) b Hbz) as H1.
+rewrite Nat.mul_comm.
+symmetry in H1.
+apply Nat.add_sub_eq_r in H1.
+rewrite <- H1.
+rewrite Nat.mul_sub_distr_r.
+rewrite <- Nat.sub_add_distr.
+f_equal.
+specialize (Nat.div_mod c b Hbz) as H2.
+rewrite (Nat.mul_comm (c / b)).
+symmetry in H2.
+apply Nat.add_sub_eq_r in H2.
+rewrite <- H2.
+...
+rewrite Nat_sub_sub_swap.
+rewrite Nat.sub_add.
+specialize (Nat.div_mod c b Hbz) as H1.
+...
 apply (Nat.add_cancel_r _ _ (c / b)).
 rewrite Nat.sub_add; [ | flia Hacb ].
 rewrite <- Nat.div_add_l; [ | easy ].
+specialize (Nat.div_mod (a * b - c) b Hbz) as H1.
+rewrite Nat.mul_comm.
+symmetry in H1.
+apply Nat.add_sub_eq_r in H1.
+rewrite <- H1.
+rewrite Nat_sub_sub_swap.
+rewrite Nat.sub_add.
 ...
 
 Theorem Nat_add_div_same : ∀ a b c,
@@ -384,14 +418,6 @@ Proof.
 intros * Hbz.
 rewrite Nat.add_comm.
 now apply Nat.mod_add.
-Qed.
-
-Theorem Nat_sub_sub_swap : ∀ a b c, a - b - c = a - c - b.
-Proof.
-intros.
-rewrite <- Nat.sub_add_distr.
-rewrite Nat.add_comm.
-now rewrite Nat.sub_add_distr.
 Qed.
 
 Theorem Nat_mod_0_mod_div : ∀ a b,
