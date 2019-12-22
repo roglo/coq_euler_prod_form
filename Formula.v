@@ -3115,6 +3115,44 @@ unfold φ_ldiv; cbn.
 now rewrite List_filter_filter_comm.
 Qed.
 
+Theorem List_length_filter_sub_seq : ∀ m l f,
+  NoDup l
+  → incl l (seq 1 m)
+  → length (filter f l) = length (filter f (seq 1 m)) - (m - length l).
+Proof.
+intros * Hnd Hl.
+induction l as [| a l]; intros. {
+  cbn.
+  rewrite Nat.sub_0_r.
+  symmetry.
+  apply Nat.sub_0_le.
+  rewrite <- (seq_length m 1) at 2.
+  apply NoDup_incl_length; [ apply NoDup_filter, seq_NoDup | ].
+  intros a Ha.
+  now apply filter_In in Ha.
+}
+cbn.
+remember (f a) as b eqn:Hb; symmetry in Hb.
+destruct b. {
+  cbn.
+  rewrite IHl; cycle 1. {
+    now apply NoDup_cons_iff in Hnd.
+  } {
+    intros c Hc.
+    now apply Hl; right.
+  }
+  rewrite <- (Nat.add_1_r (length _)).
+  rewrite <- Nat.add_1_r.
+  rewrite Nat.sub_add_distr.
+  rewrite (Nat_sub_sub_distr _ _ 1); [ easy | ].
+  split. {
+    apply Nat.le_add_le_sub_r.
+    replace (1 + length l) with (length (a :: l)) by easy.
+    replace m with (length (seq 1 m)) by now rewrite seq_length.
+    now apply NoDup_incl_length.
+  } {
+...
+
 Theorem glop : ∀ m p q,
   prime p
   → prime q
@@ -3152,6 +3190,9 @@ replace (length l) with (m - kp). 2: {
   }
   flia Hpz.
 }
+...
+rewrite (List_length_filter_sub_seq m).
+...
 rewrite List_filter_filter.
 Search (andb (negb _)).
 ...
