@@ -3121,6 +3121,9 @@ Theorem List_length_filter_sub_seq : ∀ m l f,
   → length (filter f l) = length (filter f (seq 1 m)) - (m - length l).
 Proof.
 intros * Hnd Hl.
+...
+(* oui, mais non, c'est faux, c'est pas m - length l *)
+...
 induction l as [| a l]; intros. {
   cbn.
   rewrite Nat.sub_0_r.
