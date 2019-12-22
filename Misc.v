@@ -850,6 +850,31 @@ destruct Ha as [Ha| Ha]; [ now subst b | ].
 now apply IHl.
 Qed.
 
+Theorem List_filter_filter {A} : ∀ (f g : A → _) l,
+  filter f (filter g l) = filter (λ a, andb (f a) (g a)) l.
+Proof.
+intros.
+induction l as [| a l]; [ easy | cbn ].
+remember (andb (f a) (g a)) as b eqn:Hb; symmetry in Hb.
+destruct b. {
+  apply Bool.andb_true_iff in Hb.
+  rewrite (proj2 Hb); cbn.
+  rewrite (proj1 Hb); cbn.
+  now rewrite IHl.
+} {
+  apply Bool.andb_false_iff in Hb.
+  destruct Hb as [Hb| Hb]. {
+    remember (g a) as c eqn:Hc; symmetry in Hc.
+    destruct c; [ | apply IHl ].
+    cbn; rewrite Hb.
+    apply IHl.
+  } {
+    rewrite Hb; cbn.
+    apply IHl.
+  }
+}
+Qed.
+
 Theorem List_filter_filter_comm {A} : ∀ (f : A → _) g l,
   filter f (filter g l) = filter g (filter f l).
 Proof.

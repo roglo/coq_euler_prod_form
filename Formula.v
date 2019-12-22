@@ -2820,9 +2820,8 @@ Definition φ_ldiv pl m :=
 (*
 Definition φ_ldiv pl m :=
   length
-    (fold_left
-       (λ l p, filter (λ d, match d mod p with 0 => false | _ => true end) l)
-       pl (seq 1 m)).
+    (filter (λ d, fold_left (λ b p, andb b (negb (d mod p =? 0))) pl true)
+       (seq 1 m)).
 *)
 
 Theorem length_filter_mod_seq : ∀ a b,
@@ -2949,6 +2948,7 @@ destruct (Nat.eq_dec p 0) as [Hpz| Hpz]. {
 destruct (Nat.eq_dec p 1) as [Hp1| Hp1]. {
   subst p; cbn - [ "/" ].
   rewrite Nat.div_1_r, Nat.sub_diag.
+  unfold φ_ldiv; cbn.
   now rewrite List_filter_all_false.
 }
 unfold φ_ldiv.
@@ -3152,6 +3152,8 @@ replace (length l) with (m - kp). 2: {
   }
   flia Hpz.
 }
+rewrite List_filter_filter.
+Search (andb (negb _)).
 ...
 
 Theorem glop : ∀ m p q,
