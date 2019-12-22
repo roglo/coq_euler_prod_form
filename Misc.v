@@ -320,6 +320,21 @@ destruct (le_dec a (c / b)) as [Hacb| Hacb]. {
   now apply Nat.mul_div_le.
 }
 apply Nat.nle_gt in Hacb.
+specialize (Nat.div_mod c b Hbz) as H1.
+Compute (let '(a, (b, c)) := (12, (42, 15)) in ((a * b - c) / b, a - c / b)).
+Compute (let '(a, (b, c)) := (4, (3, 4)) in ((a * b - c) / b, a - c / b)).
+Compute (let '(a, (b, c)) := (1, (2, 1)) in ((a * b - c) / b, a - c / b)).
+Check Nat.div_add_l.
+...
+(ab-c)/b = (ab-c+kb)/b-k = (ab+(kb-c))/b-k = a+(kb-c)/b-k
+k=(c+b-1)/b=(b+(c-1))/b=1+(c-1)/b
+(c+b-1)/b=(c+(b-1))/b
+1+c/b=(b+c)/b
+c≤(1+c/b)b
+(c/b)b≤c
+(b/c)c≤b
+c=c(b/c)+(c mod b)
+...
 apply (Nat.mul_cancel_r _ _ b); [ easy | ].
 specialize (Nat.div_mod (a * b - c) b Hbz) as H1.
 rewrite Nat.mul_comm.
