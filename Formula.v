@@ -3251,6 +3251,11 @@ rewrite Nat_sub_sub_distr. 2: {
   }
 }
 rewrite List_filter_filter.
+Theorem List_length_filter_negb {A} : ∀ f (l : list A),
+  NoDup l
+  → length (filter f l) = length l - length (filter (λ x, negb (f x)) l).
+...
+rewrite List_length_filter_negb.
 ...
 
 Theorem glop : ∀ m p q,
