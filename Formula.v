@@ -3227,20 +3227,29 @@ rewrite Nat_sub_sub_distr. 2: {
   } {
     rewrite Hkq at 1.
     rewrite Nat.div_mul; [ | easy ].
-...
-    rewrite Hkp, Nat.mul_comm.
-    apply Nat.mul_divide_mono_r.
-    rewrite Hkq.
-    apply Nat.mul_divide_mono_r.
-...
-rewrite List_filter_filter.
-Inspect 1.
-erewrite List_partition_filter_length.
-...
-rewrite (List_length_filter_sub_seq m).
-...
-rewrite List_filter_filter.
-Search (andb (negb _)).
+    assert (Hpqm : Nat.divide (p * q) m). {
+      apply Nat_divide_prime_mul_dividing; [ easy | easy | easy | | ]. {
+        now exists kp.
+      } {
+        now exists kq.
+      }
+    }
+    destruct Hpqm as (kpq, Hkpq).
+    replace kp with (kpq * q). 2: {
+      rewrite <- (Nat.mul_cancel_l (kpq * q) kp p); [ | easy ].
+      flia Hkp Hkpq.
+    }
+    replace kq with (kpq * p). 2: {
+      rewrite <- (Nat.mul_cancel_l (kpq * p) kq q); [ | easy ].
+      flia Hkq Hkpq.
+    }
+    apply Nat.le_add_le_sub_r.
+    rewrite <- Nat.mul_add_distr_l.
+    rewrite Hkpq.
+    apply Nat.mul_le_mono_l.
+    apply Nat.add_le_mul; now apply prime_ge_2.
+  }
+}
 ...
 
 Theorem glop : ∀ m p q,
