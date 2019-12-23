@@ -318,6 +318,22 @@ rewrite Hd, Nat.div_mul; [ | easy ].
 now rewrite Nat.div_add_l.
 Qed.
 
+Theorem Nat_sub_div_same: ∀ a b c,
+  Nat.divide c a
+  → Nat.divide c b
+  → a / c - b / c = (a - b) / c.
+Proof.
+intros * Hca Hcb.
+destruct (Nat.eq_dec c 0) as [Hcz| Hcz]; [ now subst c | ].
+destruct Hca as (ka, Hka).
+destruct Hcb as (kb, Hkb).
+subst a b.
+rewrite Nat.div_mul; [ | easy ].
+rewrite Nat.div_mul; [ | easy ].
+rewrite <- Nat.mul_sub_distr_r.
+now rewrite Nat.div_mul.
+Qed.
+
 Theorem Nat_sub_succ_1 : ∀ n, S n - 1 = n.
 Proof. now intros; rewrite Nat.sub_succ, Nat.sub_0_r. Qed.
 

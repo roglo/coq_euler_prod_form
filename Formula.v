@@ -3208,7 +3208,8 @@ replace ((m * p - m) / (p * q)) with (m / q - m / (p * q)). 2: {
   rewrite <- (Nat.div_mul_cancel_l m q p); [ | easy | easy ].
 Search (_ / _ - _ / _).
 ...
-Theorem Nat_sub_div_same: ∀ a b c, Nat.divide c a → a / c - b / c = (a - b) / c.
+rewrite Nat_sub_div_same.
+...
 Nat.add_carry_div2:
   ∀ (a b : nat) (c0 : bool),
     (a + b + Nat.b2n c0) / 2 =
