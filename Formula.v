@@ -3250,6 +3250,7 @@ rewrite Nat_sub_sub_distr. 2: {
     apply Nat.add_le_mul; now apply prime_ge_2.
   }
 }
+rewrite List_filter_filter.
 ...
 
 Theorem glop : ∀ m p q,
