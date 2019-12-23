@@ -3202,6 +3202,18 @@ replace (length l) with (m - kp). 2: {
   }
   flia Hpz.
 }
+(**)
+rewrite <- Nat.sub_add_distr.
+rewrite List_filter_filter.
+rewrite List_length_filter_negb; [ | apply seq_NoDup ].
+rewrite (filter_ext_in _ (λ d, orb (d mod p =? 0) (d mod q =? 0))). 2: {
+  intros a Ha.
+  rewrite <- Bool.negb_orb.
+  apply Bool.negb_involutive.
+}
+rewrite seq_length.
+f_equal.
+...
 rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
 replace ((m * p - m) / (p * q)) with (m / q - m / (p * q)). 2: {
   rewrite <- (Nat.div_mul_cancel_l m q p); [ | easy | easy ].
