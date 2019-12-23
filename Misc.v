@@ -910,6 +910,31 @@ destruct bg, bf; cbn. {
 }
 Qed.
 
+Theorem List_length_filter_negb {A} : ∀ f (l : list A),
+  NoDup l
+  → length (filter f l) = length l - length (filter (λ x, negb (f x)) l).
+Proof.
+intros * Hl.
+induction l as [| a l]; [ easy | ].
+cbn - [ "-" ].
+remember (f a) as b eqn:Hb; symmetry in Hb.
+destruct b; cbn - [ "-" ]. {
+  rewrite IHl; [ | now apply NoDup_cons_iff in Hl ].
+  rewrite Nat.sub_succ_l; [ easy | ].
+  clear.
+  induction l as [| a l]; [ easy | cbn ].
+  destruct (negb (f a)); cbn. {
+    now apply Nat.succ_le_mono in IHl.
+  } {
+    transitivity (length l); [ easy | flia ].
+  }
+} {
+  rewrite Nat.sub_succ.
+  apply IHl.
+  now apply NoDup_cons_iff in Hl.
+}
+Qed.
+
 Theorem not_equiv_imp_False : ∀ P : Prop, (P → False) ↔ ¬ P.
 Proof. easy. Qed.
 

@@ -3251,11 +3251,13 @@ rewrite Nat_sub_sub_distr. 2: {
   }
 }
 rewrite List_filter_filter.
-Theorem List_length_filter_negb {A} : ∀ f (l : list A),
-  NoDup l
-  → length (filter f l) = length l - length (filter (λ x, negb (f x)) l).
-...
-rewrite List_length_filter_negb.
+rewrite List_length_filter_negb; [ | apply seq_NoDup ].
+rewrite (filter_ext_in _ (λ d, orb (d mod p =? 0) (d mod q =? 0))). 2: {
+  intros a Ha.
+  rewrite <- Bool.negb_orb.
+  apply Bool.negb_involutive.
+}
+rewrite seq_length.
 ...
 
 Theorem glop : ∀ m p q,
