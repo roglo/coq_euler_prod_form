@@ -3203,21 +3203,35 @@ replace (length l) with (m - kp). 2: {
   flia Hpz.
 }
 rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
-Search ((_ - _) / _).
 replace ((m * p - m) / (p * q)) with (m / q - m / (p * q)). 2: {
   rewrite <- (Nat.div_mul_cancel_l m q p); [ | easy | easy ].
-Search (_ / _ - _ / _).
+  rewrite (Nat.mul_comm m).
+  rewrite Nat_sub_div_same; [ easy | | ]. {
+    rewrite Hkq.
+    apply Nat.mul_divide_mono_l.
+    apply Nat.divide_factor_r.
+  } {
+    apply Nat_divide_prime_mul_dividing; [ easy | easy | easy | | ]. {
+      now exists kp.
+    } {
+      now exists kq.
+    }
+  }
+}
+rewrite Nat_sub_sub_distr. 2: {
+  split. {
+    rewrite <- Nat.div_div; [ | easy | easy ].
+    apply Nat.div_le_mono; [ easy | ].
+    apply Nat.div_le_upper_bound; [ easy | ].
+    destruct p; [ easy | flia ].
+  } {
+    rewrite Hkq at 1.
+    rewrite Nat.div_mul; [ | easy ].
 ...
-rewrite Nat_sub_div_same.
-...
-Nat.add_carry_div2:
-  ∀ (a b : nat) (c0 : bool),
-    (a + b + Nat.b2n c0) / 2 =
-    a / 2 + b / 2 +
-    Nat.b2n
-      (Nat.testbit a 0 && Nat.testbit b 0
-       || c0 && (Nat.testbit a 0 || Nat.testbit b 0))
-
+    rewrite Hkp, Nat.mul_comm.
+    apply Nat.mul_divide_mono_r.
+    rewrite Hkq.
+    apply Nat.mul_divide_mono_r.
 ...
 rewrite List_filter_filter.
 Inspect 1.
