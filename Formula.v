@@ -3213,7 +3213,6 @@ rewrite (filter_ext_in _ (λ d, orb (d mod p =? 0) (d mod q =? 0))). 2: {
 }
 rewrite seq_length.
 f_equal.
-...
 rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
 replace ((m * p - m) / (p * q)) with (m / q - m / (p * q)). 2: {
   rewrite <- (Nat.div_mul_cancel_l m q p); [ | easy | easy ].
@@ -3230,46 +3229,13 @@ replace ((m * p - m) / (p * q)) with (m / q - m / (p * q)). 2: {
     }
   }
 }
-rewrite Nat_sub_sub_distr. 2: {
-  split. {
-    rewrite <- Nat.div_div; [ | easy | easy ].
-    apply Nat.div_le_mono; [ easy | ].
-    apply Nat.div_le_upper_bound; [ easy | ].
-    destruct p; [ easy | flia ].
-  } {
-    rewrite Hkq at 1.
-    rewrite Nat.div_mul; [ | easy ].
-    assert (Hpqm : Nat.divide (p * q) m). {
-      apply Nat_divide_prime_mul_dividing; [ easy | easy | easy | | ]. {
-        now exists kp.
-      } {
-        now exists kq.
-      }
-    }
-    destruct Hpqm as (kpq, Hkpq).
-    replace kp with (kpq * q). 2: {
-      rewrite <- (Nat.mul_cancel_l (kpq * q) kp p); [ | easy ].
-      flia Hkp Hkpq.
-    }
-    replace kq with (kpq * p). 2: {
-      rewrite <- (Nat.mul_cancel_l (kpq * p) kq q); [ | easy ].
-      flia Hkq Hkpq.
-    }
-    apply Nat.le_add_le_sub_r.
-    rewrite <- Nat.mul_add_distr_l.
-    rewrite Hkpq.
-    apply Nat.mul_le_mono_l.
-    apply Nat.add_le_mul; now apply prime_ge_2.
-  }
+rewrite Nat.add_sub_assoc. 2: {
+  rewrite <- Nat.div_div; [ | easy | easy ].
+  apply Nat.div_le_mono; [ easy | ].
+  apply Nat.div_le_upper_bound; [ easy | ].
+  destruct p; [ easy | flia ].
 }
-rewrite List_filter_filter.
-rewrite List_length_filter_negb; [ | apply seq_NoDup ].
-rewrite (filter_ext_in _ (λ d, orb (d mod p =? 0) (d mod q =? 0))). 2: {
-  intros a Ha.
-  rewrite <- Bool.negb_orb.
-  apply Bool.negb_involutive.
-}
-rewrite seq_length.
+replace kp with (m / p) by now rewrite Hkp, Nat.div_mul.
 ...
 
 Theorem glop : ∀ m p q,
