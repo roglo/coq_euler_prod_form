@@ -3230,20 +3230,6 @@ replace ((m * p - m) / (p * q)) with (m / q - m / (p * q)). 2: {
     }
   }
 }
-rewrite Nat.add_sub_assoc. 2: {
-  rewrite <- Nat.div_div; [ | easy | easy ].
-  apply Nat.div_le_mono; [ easy | ].
-  apply Nat.div_le_upper_bound; [ easy | ].
-  destruct p; [ easy | flia ].
-}
-(**)
-revert m Hkp Hkq Hmz.
-induction kp; intros; [ now cbn in Hkp; subst m | ].
-specialize (IHkp (m - p)) as H1.
-assert (H : m - p = kp * p) by flia Hkp.
-specialize (H1 H); clear H.
-...
-
 replace kp with (m / p) by now rewrite Hkp, Nat.div_mul.
 Search (filter _ _).
 ...
