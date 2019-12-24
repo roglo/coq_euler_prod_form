@@ -3202,7 +3202,7 @@ replace (length l) with (m - kp). 2: {
   }
   flia Hpz.
 }
-(**)
+clear l Hl.
 rewrite <- Nat.sub_add_distr.
 rewrite List_filter_filter.
 rewrite List_length_filter_negb; [ | apply seq_NoDup ].
@@ -3236,6 +3236,7 @@ rewrite Nat.add_sub_assoc. 2: {
   destruct p; [ easy | flia ].
 }
 replace kp with (m / p) by now rewrite Hkp, Nat.div_mul.
+Search (filter _ _).
 ...
 
 Theorem glop : ∀ m p q,
