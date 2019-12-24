@@ -3115,6 +3115,7 @@ unfold φ_ldiv; cbn.
 now rewrite List_filter_filter_comm.
 Qed.
 
+(*
 Search partition.
 
 Theorem List_partition_filter_length {A} : ∀ (l l1 l2 : list A) f g,
@@ -3122,7 +3123,7 @@ Theorem List_partition_filter_length {A} : ∀ (l l1 l2 : list A) f g,
   → length (filter f l) = length (filter f l1) + length (filter f l2).
 Proof.
 intros * Hp.
-Admitted.
+*)
 
 (*
 Theorem List_length_filter_sub_seq : ∀ m l f,
@@ -3235,6 +3236,11 @@ rewrite Nat.add_sub_assoc. 2: {
   apply Nat.div_le_upper_bound; [ easy | ].
   destruct p; [ easy | flia ].
 }
+(**)
+revert m Hkp Hkq Hmz.
+induction kp; intros; [ now cbn in Hkp; subst m | ].
+...
+
 replace kp with (m / p) by now rewrite Hkp, Nat.div_mul.
 Search (filter _ _).
 ...
