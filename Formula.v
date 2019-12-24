@@ -2935,10 +2935,74 @@ rewrite Hr.
 now apply Nat.lt_le_incl, Nat.mod_upper_bound.
 Qed.
 
+Theorem divisor_φ_p : ∀ m p,
+  Nat.divide p m
+  → φ_ldiv [p] m = m - m / p.
+Proof.
+intros * Hpm.
+destruct (Nat.eq_dec p 0) as [Hpz| Hpz]. {
+  subst p.
+  destruct Hpm as (c, Hc).
+  now rewrite Nat.mul_0_r in Hc; subst m.
+}
+destruct (Nat.eq_dec p 1) as [Hp1| Hp1]. {
+  subst p; cbn - [ "/" ].
+  rewrite Nat.div_1_r, Nat.sub_diag.
+  unfold φ_ldiv; cbn.
+  now rewrite List_filter_all_false.
+}
+unfold φ_ldiv.
+destruct Hpm as (c, Hc).
+subst m.
+rewrite Nat.div_mul; [ | easy ].
+induction c; [ easy | cbn ].
+rewrite (Nat.add_comm p).
+rewrite seq_app, filter_app, app_length.
+cbn in IHc.
+rewrite IHc; clear IHc.
+rewrite <- Nat.add_sub_swap. 2: {
+  destruct p; [ easy | ].
+  rewrite Nat.mul_succ_r; flia.
+}
+rewrite <- (Nat.add_1_l c).
+rewrite Nat.sub_add_distr; f_equal.
+rewrite <- Nat.add_sub_assoc; [ f_equal | flia Hpz ].
+apply length_filter_mod_seq.
+rewrite Nat.mod_add; [ | easy ].
+rewrite Nat.mod_1_l; flia Hpz Hp1.
+Qed.
+
+Theorem glop : ∀ m p,
+  p ≠ 0
+  → φ_ldiv [p] m = φ_ldiv [p] (p * (m / p)).
+Proof.
+intros * Hpz.
+Compute (let (p, m) := (9, 10) in (φ_ldiv [p] m, m - m / p)).
+Compute (let (p, m) := (9, 10) in (φ_ldiv [p] m, φ_ldiv [p] (p * (m / p)))).
+Inspect 1.
+...
+unfold φ_ldiv; cbn.
+specialize (Nat.div_mod m p Hpz) as H1.
+rewrite H1 at 1.
+rewrite seq_app, filter_app, app_length.
+rewrite <- Nat.add_0_r; f_equal.
+rewrite List_filter_all_false; [ easy | ].
+intros a Ha.
+apply Bool.negb_false_iff.
+apply Nat.eqb_eq.
+...
+
 Theorem φ_ldiv_single : ∀ m p,
   p ≠ 0
   → φ_ldiv [p] m = m - m / p.
 Proof.
+intros * Hpz.
+unfold φ_ldiv; cbn.
+specialize (Nat.div_mod m p Hpz) as H1.
+rewrite H1 at 1.
+rewrite seq_app, filter_app, app_length.
+
+...
 intros * Hpz.
 destruct (Nat.eq_dec p 1) as [Hp1| Hp1]. {
   subst p; cbn - [ "/" ].
@@ -3030,43 +3094,6 @@ rewrite Nat.mod_add; [ | easy ].
 rewrite Nat.mod_1_l; flia Hpz Hp1.
 Qed.
 ...
-
-Theorem divisor_φ_p : ∀ m p,
-  Nat.divide p m
-  → φ_ldiv [p] m = m - m / p.
-Proof.
-intros * Hpm.
-destruct (Nat.eq_dec p 0) as [Hpz| Hpz]. {
-  subst p.
-  destruct Hpm as (c, Hc).
-  now rewrite Nat.mul_0_r in Hc; subst m.
-}
-destruct (Nat.eq_dec p 1) as [Hp1| Hp1]. {
-  subst p; cbn - [ "/" ].
-  rewrite Nat.div_1_r, Nat.sub_diag.
-  unfold φ_ldiv; cbn.
-  now rewrite List_filter_all_false.
-}
-unfold φ_ldiv.
-destruct Hpm as (c, Hc).
-subst m.
-rewrite Nat.div_mul; [ | easy ].
-induction c; [ easy | cbn ].
-rewrite (Nat.add_comm p).
-rewrite seq_app, filter_app, app_length.
-cbn in IHc.
-rewrite IHc; clear IHc.
-rewrite <- Nat.add_sub_swap. 2: {
-  destruct p; [ easy | ].
-  rewrite Nat.mul_succ_r; flia.
-}
-rewrite <- (Nat.add_1_l c).
-rewrite Nat.sub_add_distr; f_equal.
-rewrite <- Nat.add_sub_assoc; [ f_equal | flia Hpz ].
-apply length_filter_mod_seq.
-rewrite Nat.mod_add; [ | easy ].
-rewrite Nat.mod_1_l; flia Hpz Hp1.
-Qed.
 
 Theorem primes_div_mul_exact : ∀ m p q kp kq,
   prime p
