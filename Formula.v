@@ -3239,6 +3239,9 @@ rewrite Nat.add_sub_assoc. 2: {
 (**)
 revert m Hkp Hkq Hmz.
 induction kp; intros; [ now cbn in Hkp; subst m | ].
+specialize (IHkp (m - p)) as H1.
+assert (H : m - p = kp * p) by flia Hkp.
+specialize (H1 H); clear H.
 ...
 
 replace kp with (m / p) by now rewrite Hkp, Nat.div_mul.
