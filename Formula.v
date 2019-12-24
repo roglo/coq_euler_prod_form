@@ -2964,9 +2964,54 @@ induction c. {
     now apply Nat.mod_upper_bound.
   }
 }
-
+rewrite Nat.mul_succ_r.
+rewrite Nat.add_shuffle0.
+rewrite seq_app, filter_app, app_length.
+rewrite IHc.
+(*
+destruct (Nat.eq_dec c 0) as [Hcz| Hcz]. {
+  subst c; cbn.
+  rewrite Nat.mul_0_r; cbn.
+  rewrite Nat.sub_0_r.
+  rewrite <- Nat.add_sub_assoc; [ | flia Hpz Hp1 ].
+  f_equal.
+  apply length_filter_mod_seq.
+  rewrite <- Nat.add_1_r.
+  rewrite Nat.add_mod_idemp_l; [ | easy ].
+  rewrite Nat.mul_0_r, Nat.sub_0_r in IHc.
+  cbn in IHc.
+Compute (seq 1 9).
 ...
-
+rewrite (Nat.add_sub_swap _ p). 2: {
+  destruct p; [ easy | ].
+  destruct p; [ easy | ].
+  cbn - [ "mod" ].
+  destruct c.
+*)
+rewrite <- Nat.add_sub_swap. 2: {
+  destruct p; [ easy | cbn; flia ].
+}
+rewrite length_filter_mod_seq. 2: {
+  rewrite Nat.add_assoc.
+  rewrite Nat.add_mod_idemp_r; [ | easy ].
+  rewrite Nat.add_shuffle0.
+  rewrite Nat_mod_add_r_mul_l; [ | easy ].
+  intros Hm.
+  assert (H : m mod p = p - 1). {
+    apply Nat.mod_divide in Hm; [ | easy ].
+    destruct Hm as (k, Hk).
+    replace m with (k * p - 1) by flia Hk.
+    rewrite <- (Nat.mod_add _ 1); [ | easy ].
+    rewrite Nat.mul_1_l.
+    rewrite <- Nat.add_sub_swap; [ | flia Hk ].
+    rewrite <- Nat.add_sub_assoc; [ | flia Hpz Hp1 ].
+    rewrite Nat_mod_add_l_mul_r; [ | easy ].
+    apply Nat.mod_small; flia Hpz.
+  }
+  rewrite H in IHc.
+...
+Compute (let (p, m) := (9, 10) in (φ_ldiv [p] m, m - m / p)).
+...
 rewrite Nat.div_mul; [ | easy ].
 induction c; [ easy | cbn ].
 rewrite (Nat.add_comm p).
