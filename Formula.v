@@ -2987,6 +2987,16 @@ intros a Ha.
 apply Bool.negb_true_iff.
 apply Nat.eqb_neq.
 apply in_seq in Ha.
+remember (m / p) as q eqn:Hq.
+intros Hap.
+specialize (Nat.div_mod a p Hpz) as H2.
+rewrite Hap, Nat.add_0_r in H2.
+rewrite H2 in Ha.
+remember (a / p) as k eqn:Hk.
+destruct Ha as (Ha, Hb).
+apply Nat.nlt_ge in Ha.
+apply Ha; clear Ha.
+apply -> Nat.succ_le_mono.
 ...
 
 Theorem φ_ldiv_single : ∀ m p,
