@@ -2974,22 +2974,19 @@ Qed.
 
 Theorem glop : ∀ m p,
   p ≠ 0
-  → φ_ldiv [p] m = φ_ldiv [p] (p * (m / p)).
+  → φ_ldiv [p] m = φ_ldiv [p] (p * (m / p)) + m mod p.
 Proof.
 intros * Hpz.
-Compute (let (p, m) := (9, 10) in (φ_ldiv [p] m, m - m / p)).
-Compute (let (p, m) := (9, 10) in (φ_ldiv [p] m, φ_ldiv [p] (p * (m / p)))).
-Inspect 1.
-...
 unfold φ_ldiv; cbn.
 specialize (Nat.div_mod m p Hpz) as H1.
 rewrite H1 at 1.
 rewrite seq_app, filter_app, app_length.
-rewrite <- Nat.add_0_r; f_equal.
-rewrite List_filter_all_false; [ easy | ].
+f_equal.
+rewrite List_filter_all_true; [ apply seq_length | ].
 intros a Ha.
-apply Bool.negb_false_iff.
-apply Nat.eqb_eq.
+apply Bool.negb_true_iff.
+apply Nat.eqb_neq.
+apply in_seq in Ha.
 ...
 
 Theorem φ_ldiv_single : ∀ m p,
@@ -3001,7 +2998,6 @@ unfold φ_ldiv; cbn.
 specialize (Nat.div_mod m p Hpz) as H1.
 rewrite H1 at 1.
 rewrite seq_app, filter_app, app_length.
-
 ...
 intros * Hpz.
 destruct (Nat.eq_dec p 1) as [Hp1| Hp1]. {
