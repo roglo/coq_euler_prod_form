@@ -2935,6 +2935,7 @@ rewrite Hr.
 now apply Nat.lt_le_incl, Nat.mod_upper_bound.
 Qed.
 
+(*
 Theorem divisor_φ_p : ∀ m p,
   Nat.divide p m
   → φ_ldiv [p] m = m - m / p.
@@ -2971,8 +2972,9 @@ apply length_filter_mod_seq.
 rewrite Nat.mod_add; [ | easy ].
 rewrite Nat.mod_1_l; flia Hpz Hp1.
 Qed.
+*)
 
-Theorem glop : ∀ m p,
+Theorem φ_ldiv_single_div_mod : ∀ m p,
   p ≠ 0
   → φ_ldiv [p] m = φ_ldiv [p] (p * (m / p)) + m mod p.
 Proof.
@@ -2997,109 +2999,76 @@ destruct Ha as (Ha, Hb).
 apply Nat.nlt_ge in Ha.
 apply Ha; clear Ha.
 apply -> Nat.succ_le_mono.
-...
+assert (Hpk : p * k < p * (q + 1)). {
+  apply (lt_le_trans _ (1 + p * q + m mod p)); [ easy | ].
+  rewrite <- Nat.add_assoc, Nat.add_comm.
+  rewrite Nat.mul_add_distr_l, Nat.mul_1_r.
+  rewrite <- Nat.add_assoc.
+  apply Nat.add_le_mono_l.
+  rewrite Nat.add_comm.
+  now apply Nat.mod_upper_bound.
+}
+apply Nat.mul_lt_mono_pos_l in Hpk; [ | flia Hpz ].
+apply Nat.mul_le_mono_l.
+flia Hpk.
+Qed.
 
 Theorem φ_ldiv_single : ∀ m p,
   p ≠ 0
   → φ_ldiv [p] m = m - m / p.
 Proof.
 intros * Hpz.
-unfold φ_ldiv; cbn.
-specialize (Nat.div_mod m p Hpz) as H1.
-rewrite H1 at 1.
-rewrite seq_app, filter_app, app_length.
-...
-intros * Hpz.
-destruct (Nat.eq_dec p 1) as [Hp1| Hp1]. {
-  subst p; cbn - [ "/" ].
-  rewrite Nat.div_1_r, Nat.sub_diag.
-  unfold φ_ldiv; cbn.
-  now rewrite List_filter_all_false.
-}
-unfold φ_ldiv.
-specialize (Nat.div_mod m p Hpz) as H1.
-remember (m / p) as c eqn:Hc; clear Hc.
-rewrite H1; clear H1.
-cbn.
-induction c. {
-  rewrite Nat.sub_0_r.
-  rewrite Nat.mul_0_r, Nat.add_0_l.
-  rewrite List_filter_all_true; [ apply seq_length | ].
-  intros a Ha.
-  apply in_seq in Ha.
-  rewrite Nat.mod_small. {
-    destruct a; [ flia Ha | easy ].
-  } {
-    apply (lt_le_trans _ (1 + m mod p)); [ easy | ].
-    now apply Nat.mod_upper_bound.
+rewrite φ_ldiv_single_div_mod; [ | easy ].
+assert (divisor_φ_p : ∀ m p,
+  Nat.divide p m
+  → φ_ldiv [p] m = m - m / p). {
+  clear m p Hpz.
+  intros * Hpm.
+  destruct (Nat.eq_dec p 0) as [Hpz| Hpz]. {
+    subst p.
+    destruct Hpm as (c, Hc).
+    now rewrite Nat.mul_0_r in Hc; subst m.
   }
-}
-rewrite Nat.mul_succ_r.
-rewrite Nat.add_shuffle0.
-rewrite seq_app, filter_app, app_length.
-rewrite IHc.
-(*
-destruct (Nat.eq_dec c 0) as [Hcz| Hcz]. {
-  subst c; cbn.
-  rewrite Nat.mul_0_r; cbn.
-  rewrite Nat.sub_0_r.
-  rewrite <- Nat.add_sub_assoc; [ | flia Hpz Hp1 ].
-  f_equal.
-  apply length_filter_mod_seq.
-  rewrite <- Nat.add_1_r.
-  rewrite Nat.add_mod_idemp_l; [ | easy ].
-  rewrite Nat.mul_0_r, Nat.sub_0_r in IHc.
+  destruct (Nat.eq_dec p 1) as [Hp1| Hp1]. {
+    subst p; cbn - [ "/" ].
+    rewrite Nat.div_1_r, Nat.sub_diag.
+    unfold φ_ldiv; cbn.
+    now rewrite List_filter_all_false.
+  }
+  unfold φ_ldiv.
+  destruct Hpm as (c, Hc).
+  subst m.
+  rewrite Nat.div_mul; [ | easy ].
+  induction c; [ easy | cbn ].
+  rewrite (Nat.add_comm p).
+  rewrite seq_app, filter_app, app_length.
   cbn in IHc.
-Compute (seq 1 9).
-...
-rewrite (Nat.add_sub_swap _ p). 2: {
-  destruct p; [ easy | ].
-  destruct p; [ easy | ].
-  cbn - [ "mod" ].
-  destruct c.
-*)
-rewrite <- Nat.add_sub_swap. 2: {
-  destruct p; [ easy | cbn; flia ].
-}
-rewrite length_filter_mod_seq. 2: {
-  rewrite Nat.add_assoc.
-  rewrite Nat.add_mod_idemp_r; [ | easy ].
-  rewrite Nat.add_shuffle0.
-  rewrite Nat_mod_add_r_mul_l; [ | easy ].
-  intros Hm.
-  assert (H : m mod p = p - 1). {
-    apply Nat.mod_divide in Hm; [ | easy ].
-    destruct Hm as (k, Hk).
-    replace m with (k * p - 1) by flia Hk.
-    rewrite <- (Nat.mod_add _ 1); [ | easy ].
-    rewrite Nat.mul_1_l.
-    rewrite <- Nat.add_sub_swap; [ | flia Hk ].
-    rewrite <- Nat.add_sub_assoc; [ | flia Hpz Hp1 ].
-    rewrite Nat_mod_add_l_mul_r; [ | easy ].
-    apply Nat.mod_small; flia Hpz.
+  rewrite IHc; clear IHc.
+  rewrite <- Nat.add_sub_swap. 2: {
+    destruct p; [ easy | ].
+    rewrite Nat.mul_succ_r; flia.
   }
-  rewrite H in IHc.
-...
-Compute (let (p, m) := (9, 10) in (φ_ldiv [p] m, m - m / p)).
-...
+  rewrite <- (Nat.add_1_l c).
+  rewrite Nat.sub_add_distr; f_equal.
+  rewrite <- Nat.add_sub_assoc; [ f_equal | flia Hpz ].
+  apply length_filter_mod_seq.
+  rewrite Nat.mod_add; [ | easy ].
+  rewrite Nat.mod_1_l; flia Hpz Hp1.
+}
+rewrite divisor_φ_p. 2: {
+  exists (m / p).
+  apply Nat.mul_comm.
+}
+rewrite Nat.mul_comm at 2.
 rewrite Nat.div_mul; [ | easy ].
-induction c; [ easy | cbn ].
-rewrite (Nat.add_comm p).
-rewrite seq_app, filter_app, app_length.
-cbn in IHc.
-rewrite IHc; clear IHc.
 rewrite <- Nat.add_sub_swap. 2: {
   destruct p; [ easy | ].
-  rewrite Nat.mul_succ_r; flia.
+  cbn - [ "/" ]; flia.
 }
-rewrite <- (Nat.add_1_l c).
-rewrite Nat.sub_add_distr; f_equal.
-rewrite <- Nat.add_sub_assoc; [ f_equal | flia Hpz ].
-apply length_filter_mod_seq.
-rewrite Nat.mod_add; [ | easy ].
-rewrite Nat.mod_1_l; flia Hpz Hp1.
+f_equal.
+symmetry.
+now apply Nat.div_mod.
 Qed.
-...
 
 Theorem primes_div_mul_exact : ∀ m p q kp kq,
   prime p
@@ -3124,47 +3093,13 @@ now intros H; subst q.
 Qed.
 
 (*
-Lemma primes_φ_diff_1 : ∀ m p q,
-  prime p
-  → prime q
-  → p ≠ q
-  → Nat.divide p m
-  → Nat.divide q m
-  → φ_ (p * q) m - φ_ q m =  m - m / (p * q) - (m - m / q).
-Proof.
-intros * Hp Hq Hpq Hpm Hqm.
-destruct (Nat.eq_dec m 0) as [Hmz| Hmz]; [ now subst m | ].
-f_equal; [ | now rewrite divisor_φ_p ].
-rewrite divisor_φ_p; [ easy | ].
-destruct Hpm as (kp, Hkp).
-destruct Hqm as (kq, Hkq).
-move kq before kp.
-exists ((kp * kq) / m).
-rewrite Nat.mul_comm.
-rewrite Hkp at 1.
-rewrite Nat.mul_comm.
-rewrite <- Nat.mul_assoc; f_equal.
-rewrite (Nat.mul_comm kp).
-rewrite Hkq.
-rewrite Nat.div_mul_cancel_l; cycle 1. {
-  intros H; now subst q.
-} {
-  intros H; subst kq.
-  rewrite Hkp in Hkq; cbn in Hkq.
-  apply Nat.eq_mul_0 in Hkq.
-  destruct Hkq as [H| H]; [ | now subst p ].
-  now subst kp.
-}
-now apply (primes_div_mul_exact m p q kp kq).
-Qed.
-
 Theorem primes_φ_diff : ∀ m p q,
   prime p
   → prime q
   → p ≠ q
   → Nat.divide p m
   → Nat.divide q m
-  → φ_ (p * q) m - φ_ q m = m / q - m / (p * q).
+  → φ_ldiv (p * q) m - φ_ldiv q m = m / q - m / (p * q).
 Proof.
 intros * Hp Hq Hpq Hpm Hqm.
 specialize (primes_φ_diff_1 m p q Hp Hq Hpq Hpm Hqm) as H1.
@@ -3221,21 +3156,6 @@ rewrite (Nat.mul_comm p).
 rewrite Nat.div_mul; [ | easy ].
 now rewrite Nat.mul_comm.
 Qed.
-
-(* aucun intérêt : n'est qu'un cas particulier de divisor_φ_p
-Theorem φ_div_mul : ∀ m p q,
-  prime p
-  → prime q
-  → p ≠ q
-  → Nat.divide p m
-  → Nat.divide q m
-  → φ_ (p * q) m = m - m / (p * q).
-Proof.
-intros * Hp Hq Hpq Hpm Hqm.
-apply divisor_φ_p.
-now apply Nat_divide_prime_mul_dividing.
-Qed.
- *)
 
 Theorem φ_ldiv_comm : ∀ m p q, φ_ldiv [p; q] m = φ_ldiv [q; p] m.
 Proof.
@@ -3305,6 +3225,45 @@ Theorem glop : ∀ m p q,
   → Nat.divide q m
   → φ_ldiv [p; q] m = φ_ldiv [p] m - m * (p - 1) / (p * q).
 Proof.
+intros * Hp Hq Hpq Hpm Hqm.
+destruct (Nat.eq_dec m 0) as [Hmz| Hmz]; [ now subst m | ].
+destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
+destruct (Nat.eq_dec q 0) as [Hqz| Hqz]; [ now subst q | ].
+rewrite φ_ldiv_single; [ | easy ].
+unfold φ_ldiv; cbn.
+destruct Hpm as (kp, Hkp).
+destruct Hqm as (kq, Hkq).
+rewrite List_filter_filter_comm.
+rewrite List_filter_filter.
+rewrite List_length_filter_negb; [ | apply seq_NoDup ].
+rewrite (filter_ext_in _ (λ d, orb (d mod p =? 0) (d mod q =? 0))). 2: {
+  intros a Ha.
+  rewrite <- Bool.negb_orb.
+  apply Bool.negb_involutive.
+}
+rewrite seq_length.
+rewrite <- Nat.sub_add_distr.
+f_equal.
+rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
+replace ((m * p - m) / (p * q)) with (m / q - m / (p * q)). 2: {
+  rewrite <- (Nat.div_mul_cancel_l m q p); [ | easy | easy ].
+  rewrite (Nat.mul_comm m).
+  rewrite Nat_sub_div_same; [ easy | | ]. {
+    rewrite Hkq.
+    apply Nat.mul_divide_mono_l.
+    apply Nat.divide_factor_r.
+  } {
+    apply Nat_divide_prime_mul_dividing; [ easy | easy | easy | | ]. {
+      now exists kp.
+    } {
+      now exists kq.
+    }
+  }
+}
+...
+replace kp with (m / p) by now rewrite Hkp, Nat.div_mul.
+...
+
 intros * Hp Hq Hpq Hpm Hqm.
 destruct (Nat.eq_dec m 0) as [Hmz| Hmz]; [ now subst m | ].
 destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
@@ -5054,3 +5013,4 @@ Theorem smaller_than_prime_all_different_powers : ∀ p,
   → ∀ a, 2 ≤ a ≤ p - 2
   → ∀ i j, i < j < p → a ^ i mod p ≠ a ^ j mod p.
 *)
+j
