@@ -2817,13 +2817,6 @@ Qed.
 Definition φ_ldiv pl m :=
   length (fold_left (λ l p, filter (λ d, negb (d mod p =? 0)) l) pl (seq 1 m)).
 
-(*
-Definition φ_ldiv pl m :=
-  length
-    (filter (λ d, fold_left (λ b p, andb b (negb (d mod p =? 0))) pl true)
-       (seq 1 m)).
-*)
-
 Theorem length_filter_mod_seq : ∀ a b,
   a mod b ≠ 0
   → length (filter (λ d, negb (d mod b =? 0)) (seq a b)) = b - 1.
