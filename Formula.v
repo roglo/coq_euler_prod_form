@@ -3243,6 +3243,7 @@ rewrite (filter_ext_in _ (λ d, orb (d mod p =? 0) (d mod q =? 0))). 2: {
 }
 rewrite seq_length.
 rewrite <- Nat.sub_add_distr.
+...
 f_equal.
 rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
 replace ((m * p - m) / (p * q)) with (m / q - m / (p * q)). 2: {
