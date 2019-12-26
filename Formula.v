@@ -3169,8 +3169,6 @@ Search (filter _ (map _ _)).
 ...
 (* lemma perhaps? *)
 unfold φ_ldiv; cbn.
-destruct Hpm as (kp, Hkp).
-destruct Hqm as (kq, Hkq).
 rewrite List_filter_filter_comm.
 rewrite List_filter_filter.
 rewrite List_length_filter_negb; [ | apply seq_NoDup ].
@@ -3190,6 +3188,8 @@ rewrite <- Nat_sub_sub_distr. 2: {
 }
 f_equal.
 ...
+destruct Hpm as (kp, Hkp).
+destruct Hqm as (kq, Hkq).
 replace kp with (m / p) by now rewrite Hkp, Nat.div_mul.
 ...
 
