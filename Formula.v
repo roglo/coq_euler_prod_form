@@ -2935,45 +2935,6 @@ rewrite Hr.
 now apply Nat.lt_le_incl, Nat.mod_upper_bound.
 Qed.
 
-(*
-Theorem divisor_φ_p : ∀ m p,
-  Nat.divide p m
-  → φ_ldiv [p] m = m - m / p.
-Proof.
-intros * Hpm.
-destruct (Nat.eq_dec p 0) as [Hpz| Hpz]. {
-  subst p.
-  destruct Hpm as (c, Hc).
-  now rewrite Nat.mul_0_r in Hc; subst m.
-}
-destruct (Nat.eq_dec p 1) as [Hp1| Hp1]. {
-  subst p; cbn - [ "/" ].
-  rewrite Nat.div_1_r, Nat.sub_diag.
-  unfold φ_ldiv; cbn.
-  now rewrite List_filter_all_false.
-}
-unfold φ_ldiv.
-destruct Hpm as (c, Hc).
-subst m.
-rewrite Nat.div_mul; [ | easy ].
-induction c; [ easy | cbn ].
-rewrite (Nat.add_comm p).
-rewrite seq_app, filter_app, app_length.
-cbn in IHc.
-rewrite IHc; clear IHc.
-rewrite <- Nat.add_sub_swap. 2: {
-  destruct p; [ easy | ].
-  rewrite Nat.mul_succ_r; flia.
-}
-rewrite <- (Nat.add_1_l c).
-rewrite Nat.sub_add_distr; f_equal.
-rewrite <- Nat.add_sub_assoc; [ f_equal | flia Hpz ].
-apply length_filter_mod_seq.
-rewrite Nat.mod_add; [ | easy ].
-rewrite Nat.mod_1_l; flia Hpz Hp1.
-Qed.
-*)
-
 Theorem φ_ldiv_single_div_mod : ∀ m p,
   p ≠ 0
   → φ_ldiv [p] m = φ_ldiv [p] (p * (m / p)) + m mod p.
@@ -3092,30 +3053,6 @@ rewrite Nat.mul_comm, Nat.div_mul; [ easy | ].
 now intros H; subst q.
 Qed.
 
-(*
-Theorem primes_φ_diff : ∀ m p q,
-  prime p
-  → prime q
-  → p ≠ q
-  → Nat.divide p m
-  → Nat.divide q m
-  → φ_ldiv (p * q) m - φ_ldiv q m = m / q - m / (p * q).
-Proof.
-intros * Hp Hq Hpq Hpm Hqm.
-specialize (primes_φ_diff_1 m p q Hp Hq Hpq Hpm Hqm) as H1.
-rewrite H1.
-rewrite Nat_sub_sub_swap; f_equal.
-rewrite Nat_sub_sub_distr. 2: {
-  split; [ | easy ].
-  replace m with (m / 1) at 2 by apply Nat.div_1_r.
-  apply Nat.div_le_compat_l.
-  split; [ flia | ].
-  destruct q; [ easy | flia ].
-}
-now rewrite Nat.sub_diag.
-Qed.
-*)
-
 Theorem Nat_divide_prime_mul_dividing : ∀ m p q,
   prime p
   → prime q
@@ -3163,59 +3100,6 @@ intros.
 unfold φ_ldiv; cbn.
 now rewrite List_filter_filter_comm.
 Qed.
-
-(*
-Search partition.
-
-Theorem List_partition_filter_length {A} : ∀ (l l1 l2 : list A) f g,
-  partition g l = (l1, l2)
-  → length (filter f l) = length (filter f l1) + length (filter f l2).
-Proof.
-intros * Hp.
-*)
-
-(*
-Theorem List_length_filter_sub_seq : ∀ m l f,
-  NoDup l
-  → incl l (seq 1 m)
-  → length (filter f l) = length (filter f (seq 1 m)) - (m - length l).
-Proof.
-intros * Hnd Hl.
-...
-(* oui, mais non, c'est faux, c'est pas m - length l *)
-...
-induction l as [| a l]; intros. {
-  cbn.
-  rewrite Nat.sub_0_r.
-  symmetry.
-  apply Nat.sub_0_le.
-  rewrite <- (seq_length m 1) at 2.
-  apply NoDup_incl_length; [ apply NoDup_filter, seq_NoDup | ].
-  intros a Ha.
-  now apply filter_In in Ha.
-}
-cbn.
-remember (f a) as b eqn:Hb; symmetry in Hb.
-destruct b. {
-  cbn.
-  rewrite IHl; cycle 1. {
-    now apply NoDup_cons_iff in Hnd.
-  } {
-    intros c Hc.
-    now apply Hl; right.
-  }
-  rewrite <- (Nat.add_1_r (length _)).
-  rewrite <- Nat.add_1_r.
-  rewrite Nat.sub_add_distr.
-  rewrite (Nat_sub_sub_distr _ _ 1); [ easy | ].
-  split. {
-    apply Nat.le_add_le_sub_r.
-    replace (1 + length l) with (length (a :: l)) by easy.
-    replace m with (length (seq 1 m)) by now rewrite seq_length.
-    now apply NoDup_incl_length.
-  } {
-...
-*)
 
 Theorem glop : ∀ m p q,
   prime p
@@ -3288,6 +3172,7 @@ rewrite Nat_sub_sub_distr. 2: {
 Compute (let '(m,p,q):=(41,7,5) in (φ_ldiv[p;q]m,m-m/p-m/q+m/(p*q))).
 Compute (let '(m,p,q):=(41,7,5) in map(λ d,(d mod p) * (d mod q))(seq 1 m)).
 Compute (let '(m,p,q):=(41,7,5) in length(filter(λ d,negb(d=?0))(map(λ d,(d mod p)*(d mod q))(seq 1 m)))).
+Search (filter _ (map _ _)).
 ...
 (* lemma perhaps? *)
 unfold φ_ldiv; cbn.
