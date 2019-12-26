@@ -3230,6 +3230,62 @@ destruct (Nat.eq_dec m 0) as [Hmz| Hmz]; [ now subst m | ].
 destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
 destruct (Nat.eq_dec q 0) as [Hqz| Hqz]; [ now subst q | ].
 rewrite φ_ldiv_single; [ | easy ].
+rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
+replace ((m * p - m) / (p * q)) with (m / q - m / (p * q)). 2: {
+  rewrite <- (Nat.div_mul_cancel_l m q p); [ | easy | easy ].
+  rewrite (Nat.mul_comm m).
+  destruct Hpm as (kp, Hkp).
+  destruct Hqm as (kq, Hkq).
+  rewrite Nat_sub_div_same; [ easy | | ]. {
+    rewrite Hkq.
+    apply Nat.mul_divide_mono_l.
+    apply Nat.divide_factor_r.
+  } {
+    apply Nat_divide_prime_mul_dividing; [ easy | easy | easy | | ]. {
+      now exists kp.
+    } {
+      now exists kq.
+    }
+  }
+}
+assert (Hmpq : m / p + m / q ≤ m). {
+  destruct Hpm as (kp, Hkp).
+  destruct Hqm as (kq, Hkq).
+  rewrite Hkq at 2.
+  rewrite Nat.div_mul; [ | easy ].
+  rewrite Hkp at 1.
+  rewrite Nat.div_mul; [ | easy ].
+  apply (Nat.mul_le_mono_pos_r _ _ (p * q)). {
+    destruct p; [ easy | ].
+    destruct q; [ easy | cbn; flia ].
+  }
+  rewrite Nat.mul_add_distr_r.
+  rewrite Nat.mul_assoc, <- Hkp.
+  rewrite Nat.mul_assoc, Nat.mul_shuffle0, <- Hkq.
+  rewrite <- Nat.mul_add_distr_l.
+  apply Nat.mul_le_mono_l.
+  rewrite Nat.add_comm.
+  apply Nat.add_le_mul. {
+    destruct p; [ easy | ].
+    destruct p; [ easy | flia ].
+  } {
+    destruct q; [ easy | ].
+    destruct q; [ easy | flia ].
+  }
+}
+rewrite Nat_sub_sub_distr. 2: {
+  split. {
+    rewrite Nat.mul_comm.
+    rewrite <- Nat.div_div; [ | easy | easy ].
+    apply Nat.div_le_upper_bound; [ easy | ].
+    rewrite <- (Nat.mul_1_l (m / q)) at 1.
+    apply Nat.mul_le_mono_r; flia Hpz.
+  } {
+    apply Nat.le_add_le_sub_r.
+    now rewrite Nat.add_comm.
+  }
+}
+(* lemma perhaps? *)
 unfold φ_ldiv; cbn.
 destruct Hpm as (kp, Hkp).
 destruct Hqm as (kq, Hkq).
@@ -3243,23 +3299,14 @@ rewrite (filter_ext_in _ (λ d, orb (d mod p =? 0) (d mod q =? 0))). 2: {
 }
 rewrite seq_length.
 rewrite <- Nat.sub_add_distr.
-f_equal.
-rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
-replace ((m * p - m) / (p * q)) with (m / q - m / (p * q)). 2: {
-  rewrite <- (Nat.div_mul_cancel_l m q p); [ | easy | easy ].
-  rewrite (Nat.mul_comm m).
-  rewrite Nat_sub_div_same; [ easy | | ]. {
-    rewrite Hkq.
-    apply Nat.mul_divide_mono_l.
-    apply Nat.divide_factor_r.
-  } {
-    apply Nat_divide_prime_mul_dividing; [ easy | easy | easy | | ]. {
-      now exists kp.
-    } {
-      now exists kq.
-    }
-  }
+rewrite <- Nat_sub_sub_distr. 2: {
+  split; [ | easy ].
+  transitivity (m / p); [ | flia ].
+  apply Nat.div_le_compat_l; split; [ flia Hpz | ].
+  rewrite <- (Nat.mul_1_r p) at 1.
+  apply Nat.mul_le_mono_l; flia Hqz.
 }
+f_equal.
 ...
 replace kp with (m / p) by now rewrite Hkp, Nat.div_mul.
 ...
