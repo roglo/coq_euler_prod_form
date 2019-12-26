@@ -3285,6 +3285,10 @@ rewrite Nat_sub_sub_distr. 2: {
     now rewrite Nat.add_comm.
   }
 }
+Compute (let '(m,p,q):=(41,7,5) in (φ_ldiv[p;q]m,m-m/p-m/q+m/(p*q))).
+Compute (let '(m,p,q):=(41,7,5) in map(λ d,(d mod p) * (d mod q))(seq 1 m)).
+Compute (let '(m,p,q):=(41,7,5) in length(filter(λ d,negb(d=?0))(map(λ d,(d mod p)*(d mod q))(seq 1 m)))).
+...
 (* lemma perhaps? *)
 unfold φ_ldiv; cbn.
 destruct Hpm as (kp, Hkp).
