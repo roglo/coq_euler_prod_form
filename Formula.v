@@ -3187,8 +3187,11 @@ rewrite <- Nat_sub_sub_distr. 2: {
   apply Nat.mul_le_mono_l; flia Hqz.
 }
 f_equal.
-...
 rewrite (List_length_filter_or p q (seq 1 m) (λ d n, n mod d =? 0)).
+specialize (φ_ldiv_single m p Hpz) as H1.
+unfold φ_ldiv in H1; cbn in H1.
+rewrite List_length_filter_negb in H1; [ | apply seq_NoDup ].
+rewrite seq_length in H1.
 ...
 destruct Hpm as (kp, Hkp).
 destruct Hqm as (kq, Hkq).
