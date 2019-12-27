@@ -935,6 +935,37 @@ destruct b; cbn - [ "-" ]. {
 }
 Qed.
 
+Theorem List_length_filter_or {A B} : ∀ (p q : A) (l : list B) f,
+  length (filter (λ a, (f p a || f q a)%bool) l) =
+  length (filter (f p) l) + length (filter (f q) l) - length (filter (λ a, (f p a && f q a)%bool) l).
+Proof.
+intros.
+induction l as [| a l]; [ easy | cbn ].
+remember (f p a) as b eqn:Hb; symmetry in Hb.
+remember (f q a) as c eqn:Hc; symmetry in Hc.
+assert (Hpq :
+  length (filter (λ a, (f p a && f q a)%bool) l) ≤
+  length (filter (f p) l) + length (filter (f q) l)). {
+  clear.
+  induction l as [| a l]; [ easy | cbn ].
+  remember (f p a) as b eqn:Hb; symmetry in Hb.
+  remember (f q a) as c eqn:Hc; symmetry in Hc.
+  destruct b, c; cbn; [ flia IHl | flia IHl | flia IHl | easy ].
+}
+destruct b, c; cbn - [ "-" ]. {
+  rewrite IHl.
+  rewrite <- Nat.sub_succ_l; [ flia | easy ].
+} {
+  rewrite IHl.
+  now rewrite <- Nat.sub_succ_l.
+} {
+  rewrite IHl.
+  rewrite <- Nat.sub_succ_l; [ flia | easy ].
+} {
+  apply IHl.
+}
+Qed.
+
 Theorem not_equiv_imp_False : ∀ P : Prop, (P → False) ↔ ¬ P.
 Proof. easy. Qed.
 

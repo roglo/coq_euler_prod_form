@@ -3167,7 +3167,6 @@ Compute (let '(m,p,q):=(41,7,5) in map(λ d,(d mod p) * (d mod q))(seq 1 m)).
 Compute (let '(m,p,q):=(41,7,5) in length(filter(λ d,negb(d=?0))(map(λ d,(d mod p)*(d mod q))(seq 1 m)))).
 Compute (let '(m,p,q):=(411,14,21) in (φ_ldiv[p;q]m,m-m/p-m/q+m/Nat.lcm p q)).
 Search (filter _ (map _ _)).
-...
 (* lemma perhaps? *)
 unfold φ_ldiv; cbn.
 rewrite List_filter_filter_comm.
@@ -3188,6 +3187,8 @@ rewrite <- Nat_sub_sub_distr. 2: {
   apply Nat.mul_le_mono_l; flia Hqz.
 }
 f_equal.
+...
+rewrite (List_length_filter_or p q (seq 1 m) (λ d n, n mod d =? 0)).
 ...
 destruct Hpm as (kp, Hkp).
 destruct Hqm as (kq, Hkq).
