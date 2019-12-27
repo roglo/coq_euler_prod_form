@@ -3325,10 +3325,18 @@ rewrite <- Nat_sub_div_same; [ | apply Nat.divide_factor_r | easy ].
 now rewrite Nat.div_mul.
 Qed.
 
-Inspect 1.
+Definition prime_divisors n :=
+  filter (λ d, (is_prime d && (n mod d =? 0))%bool) (seq 1 n).
 
-Compute (prime_decomp 96).
-
+Theorem glop : ∀ m, φ m = φ_ldiv (prime_divisors m) m.
+Proof.
+intros.
+remember (prime_divisors m) as l eqn:Hl; symmetry in Hl.
+induction l as [| a l]. {
+  cbn.
+...
+unfold φ, φ_ldiv.
+unfold prime_divisors, coprimes.
 ...
 
 (*
