@@ -3327,6 +3327,8 @@ Qed.
 
 Inspect 1.
 
+Compute (prime_decomp 96).
+
 ...
 
 (*
