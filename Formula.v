@@ -3094,7 +3094,7 @@ unfold φ_ldiv; cbn.
 now rewrite List_filter_filter_comm.
 Qed.
 
-Theorem glop : ∀ m p q,
+Theorem φ_ldiv_two_from_fst : ∀ m p q,
   prime p
   → prime q
   → p ≠ q
@@ -3256,88 +3256,77 @@ rewrite Nat.add_sub_assoc in H1. 2: {
 }
 apply Nat.add_sub_eq_nz in H1; [ | easy ].
 apply Nat.add_cancel_r in H1.
-rewrite (filter_ext_in _ (λ d, d mod (p * q) =? 0)) in H1. 2: {
+rewrite (filter_ext_in _ (λ d, (d mod p =? 0) && (d mod q =? 0))%bool) in H1. 2: {
   intros a Ha.
-  apply Bool.negb_involutive.
-}
-(**)
-...
-destruct Hpm as (kp, Hkp).
-destruct Hqm as (kq, Hkq).
-replace kp with (m / p) by now rewrite Hkp, Nat.div_mul.
-...
-
-intros * Hp Hq Hpq Hpm Hqm.
-destruct (Nat.eq_dec m 0) as [Hmz| Hmz]; [ now subst m | ].
-destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
-destruct (Nat.eq_dec q 0) as [Hqz| Hqz]; [ now subst q | ].
-unfold φ_ldiv; cbn.
-rewrite List_filter_filter_comm.
-destruct Hpm as (kp, Hkp).
-destruct Hqm as (kq, Hkq).
-move kq before kp.
-rewrite Hkp at 2.
-remember (filter _ (seq 1 (kp * p))) as l eqn:Hl; symmetry in Hl.
-replace (length l) with (m - kp). 2: {
-  subst l; symmetry.
-  clear q kq Hq Hpq Hkq Hqz Hmz.
-  subst m.
-  induction kp; intros; [ easy | cbn ].
-  rewrite Nat.add_comm.
-  rewrite seq_app, filter_app, app_length.
-  rewrite IHkp.
-  rewrite (Nat.add_comm 1).
-  rewrite length_filter_mod_seq. 2: {
-    rewrite Nat_mod_add_l_mul_r; [ | easy ].
-    rewrite Nat.mod_1_l; [ easy | ].
-    now apply prime_ge_2.
-  }
-  flia Hpz.
-}
-clear l Hl.
-rewrite <- Nat.sub_add_distr.
-rewrite List_filter_filter.
-rewrite List_length_filter_negb; [ | apply seq_NoDup ].
-rewrite (filter_ext_in _ (λ d, orb (d mod p =? 0) (d mod q =? 0))). 2: {
-  intros a Ha.
-  rewrite <- Bool.negb_orb.
-  apply Bool.negb_involutive.
-}
-rewrite seq_length.
-f_equal.
-rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
-replace ((m * p - m) / (p * q)) with (m / q - m / (p * q)). 2: {
-  rewrite <- (Nat.div_mul_cancel_l m q p); [ | easy | easy ].
-  rewrite (Nat.mul_comm m).
-  rewrite Nat_sub_div_same; [ easy | | ]. {
-    rewrite Hkq.
-    apply Nat.mul_divide_mono_l.
-    apply Nat.divide_factor_r.
-  } {
-    apply Nat_divide_prime_mul_dividing; [ easy | easy | easy | | ]. {
-      now exists kp.
+  rewrite Bool.negb_involutive.
+  remember (a mod p) as b eqn:Hb; symmetry in Hb.
+  remember (a mod q) as c eqn:Hc; symmetry in Hc.
+  destruct b. {
+    cbn.
+    destruct c. {
+      cbn.
+      apply Nat.eqb_eq.
+      apply Nat.mod_divide in Hb; [ | easy ].
+      apply Nat.mod_divide in Hc; [ | easy ].
+      specialize (Nat_divide_prime_mul_dividing a p q Hp Hq Hpq Hb Hc) as H2.
+      now apply Nat.mod_divide.
     } {
-      now exists kq.
+      cbn.
+      apply Nat.eqb_neq.
+      rewrite Nat.mul_comm.
+      rewrite Nat.mod_mul_r; [ | easy | easy ].
+      now rewrite Hc.
     }
+  } {
+    cbn.
+    apply Nat.eqb_neq.
+    rewrite Nat.mod_mul_r; [ | easy | easy ].
+    now rewrite Hb.
   }
 }
-replace kp with (m / p) by now rewrite Hkp, Nat.div_mul.
-Search (filter _ _).
-...
+easy.
+Qed.
 
-Theorem glop : ∀ m p q,
+Theorem φ_ldiv_two : ∀ m p q,
   prime p
   → prime q
   → p ≠ q
   → Nat.divide p m
   → Nat.divide q m
-  → φ_ [p; q] m = m * (p - 1) * (q - 1) / (p * q).
+  → φ_ldiv [p; q] m = m * (p - 1) * (q - 1) / (p * q).
 Proof.
 intros * Hp Hq Hpq Hpm Hqm.
-unfold φ_; cbn.
-Search (filter _ (filter _ _)).
-...
-rewrite (filter_ext_in _ (λ d, true)). 2: {
+destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
+destruct (Nat.eq_dec q 0) as [Hqz| Hqz]; [ now subst q | ].
+rewrite φ_ldiv_two_from_fst; [ | easy | easy | easy | easy | easy ].
+rewrite φ_ldiv_single; [ | easy ].
+rewrite <- Nat.mul_assoc.
+rewrite (Nat.mul_sub_distr_l q), Nat.mul_1_r.
+rewrite (Nat.mul_sub_distr_l _ (p - 1)).
+rewrite <- Nat_sub_div_same; cycle 1. {
+  rewrite Nat.mul_assoc.
+  apply Nat.mul_divide_mono_r.
+  specialize (Nat_divide_prime_mul_dividing m p q Hp Hq Hpq Hpm Hqm) as H2.
+  destruct H2 as (k, Hk).
+  rewrite Nat.mul_comm in Hk.
+  rewrite Hk.
+  do 2 rewrite <- Nat.mul_assoc.
+  apply Nat.divide_factor_l.
+} {
+  specialize (Nat_divide_prime_mul_dividing m p q Hp Hq Hpq Hpm Hqm) as H2.
+  apply (Nat.divide_trans _ m); [ easy | ].
+  apply Nat.divide_factor_l.
+}
+f_equal.
+rewrite Nat.mul_assoc.
+rewrite Nat.div_mul_cancel_r; [ | easy | easy ].
+rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
+rewrite <- Nat_sub_div_same; [ | apply Nat.divide_factor_r | easy ].
+now rewrite Nat.div_mul.
+Qed.
+
+Inspect 1.
+
 ...
 
 (*
