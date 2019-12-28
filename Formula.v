@@ -3405,6 +3405,27 @@ Search prime_decomp_aux.
 ......
 *)
 
+Lemma glop : ∀ cnt n d p,
+  2 ≤ n
+  → d ≤ p
+  → n + 2 ≤ cnt + d
+  → prime p
+  → Nat.divide p n
+  → p ∈ prime_decomp_aux cnt n d.
+Proof.
+intros * H2n Hdp Hcnt Hp Hpn.
+revert n d p H2n Hdp Hcnt Hp Hpn.
+induction cnt; intros. {
+  cbn in Hcnt; cbn.
+  destruct Hpn as (k, Hk); subst n.
+  apply Nat.nlt_ge in Hcnt; apply Hcnt; clear Hcnt.
+  destruct k; [ flia H2n | flia Hdp ].
+}
+cbn.
+remember (n mod d) as b eqn:Hb; symmetry in Hb.
+destruct b. {
+...
+
 Theorem glop : ∀ n d,
   2 ≤ n
   → prime d
