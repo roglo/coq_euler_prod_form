@@ -943,6 +943,108 @@ rewrite <- (Nat.add_0_r (S (S g))) in H1 at 1.
 now apply Nat.add_cancel_l in H1.
 Qed.
 
+Theorem prime_divisor_in_decomp : ∀ n d,
+  2 ≤ n
+  → prime d
+  → Nat.divide d n
+  → d ∈ prime_decomp n.
+Proof.
+intros * H2n Hd Hdn.
+unfold prime_decomp.
+replace n with (S (S (n - 2))) at 1 by flia H2n.
+assert (prime_divisor_in_decomp_aux : ∀ cnt n d p,
+  2 ≤ n
+  → 2 ≤ d
+  → d ≤ p
+  → n + 2 ≤ cnt + d
+  → prime p
+  → Nat.divide p n
+  → p ∈ prime_decomp_aux cnt n d). {
+  clear.
+  intros * H2n H2d Hdp Hcnt Hp Hpn.
+  revert n d p H2n H2d Hdp Hcnt Hp Hpn.
+  induction cnt; intros. {
+    cbn in Hcnt; cbn.
+    destruct Hpn as (k, Hk); subst n.
+    apply Nat.nlt_ge in Hcnt; apply Hcnt; clear Hcnt.
+    destruct k; [ flia H2n | flia Hdp ].
+  }
+  cbn.
+  remember (n mod d) as b eqn:Hb; symmetry in Hb.
+  assert (Hdz : d ≠ 0) by flia H2d.
+  destruct b. 2: {
+    apply IHcnt; [ easy | flia H2d | | flia Hcnt | easy | easy ].
+    destruct (Nat.eq_dec p d) as [Hpd| Hpd]; [ | flia Hdp Hpd ].
+    subst d; exfalso.
+    apply Nat.mod_divide in Hpn; [ | easy ].
+    now rewrite Hpn in Hb.
+  }
+  destruct (Nat.eq_dec p d) as [Hpd| Hpd]; [ now left | right ].
+  apply IHcnt; [ | easy | easy | | easy | ]. {
+    apply Nat.mod_divide in Hb; [ | easy ].
+    destruct Hb as (k, Hk).
+    rewrite Hk, Nat.div_mul; [ | easy ].
+    destruct k; [ flia H2n Hk | ].
+    destruct k; [ exfalso | flia ].
+    rewrite Nat.mul_1_l in Hk; subst n.
+    destruct Hpn as (k, Hk).
+    destruct k; [ easy | ].
+    destruct k; [ rewrite Nat.mul_1_l in Hk; flia Hk Hpd | ].
+    apply Nat.nlt_ge in Hdp; apply Hdp; clear Hdp.
+    rewrite Hk; cbn.
+    destruct p; [ now rewrite Nat.mul_0_r in Hk | flia ].
+  } {
+    transitivity (n + 1); [ | flia Hcnt ].
+    apply Nat.mod_divide in Hb; [ | easy ].
+    destruct Hb as (k, Hk).
+    rewrite Hk.
+    rewrite Nat.div_mul; [ | easy ].
+    destruct d; [ easy | ].
+    destruct d; [ flia H2d | ].
+    destruct k; [ flia H2n Hk | flia ].
+  }
+  apply Nat.mod_divide in Hb; [ | easy ].
+  destruct Hpn as (k, Hk).
+  rewrite Hk in Hb.
+  rewrite Nat.mul_comm in Hb.
+  apply Nat.gauss in Hb. {
+    destruct Hb as (k', Hk').
+    subst n k.
+    rewrite Nat.mul_shuffle0.
+    rewrite Nat.div_mul; [ | easy ].
+    apply Nat.divide_factor_r.
+  }
+  rewrite Nat.gcd_comm.
+  apply eq_gcd_prime_small_1; [ easy | ].
+  flia Hdz Hdp Hpd.
+}
+apply prime_divisor_in_decomp_aux; [ easy | easy | | easy | easy | easy ].
+now apply prime_ge_2.
+Qed.
+
+Theorem prime_decomp_in_iff : ∀ n d,
+  d ∈ prime_decomp n ↔ n ≠ 0 ∧ prime d ∧ Nat.divide d n.
+Proof.
+intros.
+split; intros Hd. {
+  split; [ now intros H; subst n | ].
+  split; [ now apply in_prime_decomp_is_prime in Hd | ].
+  now apply in_prime_decomp_divide in Hd.
+} {
+  destruct Hd as (Hn & Hd & Hdn).
+  destruct (lt_dec n 2) as [Hn2| Hn2]. {
+    destruct n; [ easy | ].
+    destruct n; [ | flia Hn2 ].
+    destruct Hdn as (k, Hk).
+    symmetry in Hk.
+    apply Nat.eq_mul_1 in Hk.
+    now destruct Hk; subst d.
+  }
+  apply Nat.nlt_ge in Hn2.
+  now apply prime_divisor_in_decomp.
+}
+Qed.
+
 Theorem prime_divide_mul : ∀ p, prime p →
   ∀ a b, Nat.divide p (a * b) → Nat.divide p a ∨ Nat.divide p b.
 Proof.

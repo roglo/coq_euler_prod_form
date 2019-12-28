@@ -3328,192 +3328,8 @@ Qed.
 Definition prime_divisors_of n :=
   filter (λ d, (is_prime d && (n mod d =? 0))%bool) (seq 1 n).
 
-(*
-Theorem prime_decomp_aux_in_iff : ∀ cnt n d,
-  2 ≤ n
-  → 2 ≤ d
-  → n + 2 ≤ cnt + d
-  → ∀ a, d ≤ a
-  → a ∈ prime_decomp_aux cnt n d ↔ Nat.divide a n.
-Proof.
-intros * H2n H2d Hcnt * Hda.
-split; intros Ha. {
-  apply in_prime_decomp_aux_divide in Ha; [ easy | flia H2d ].
-} {
-  revert n d a H2n H2d Hcnt Hda Ha.
-  induction cnt; intros. {
-    cbn in Hcnt; cbn.
-    destruct Ha as (k, Hk); subst n.
-    apply Nat.nlt_ge in Hda; apply Hda; clear Hda.
-    apply (lt_le_trans _ (k * a + 2)); [ | easy ].
-    destruct k; [ flia H2n | flia ].
-  }
-  cbn.
-  assert (Hdz : d ≠ 0) by flia H2d.
-  remember (n mod d) as b eqn:Hb; symmetry in Hb.
-  destruct b. {
-    destruct (Nat.eq_dec d a) as [Hdea| Hdea]; [ now left | right ].
-    remember ((n / d) mod a) as c eqn:Hc; symmetry in Hc.
-    destruct c.
-    apply Nat.mod_divide in Hc; [ | flia Hda Hdz ].
-    apply IHcnt; [ | easy | | easy | easy ]. {
-      apply Nat.mod_divide in Hb; [ | easy ].
-      destruct Hb as (k, Hk).
-      rewrite Hk, Nat.div_mul; [ | easy ].
-      destruct k; [ flia H2n Hk | ].
-      destruct k; [ exfalso | flia ].
-      rewrite Nat.mul_1_l in Hk; subst n.
-      destruct Ha as (k, Hk).
-      destruct k; [ flia H2d Hk | ].
-      destruct k; [ now rewrite Nat.mul_1_l in Hk | ].
-      apply Nat.nlt_ge in Hda; apply Hda; clear Hda.
-      rewrite Hk; cbn.
-      destruct a; [ now rewrite Nat.mul_0_r in Hk | flia ].
-    } {
-      transitivity (n + 1); [ | flia Hcnt ].
-      apply Nat.mod_divide in Hb; [ | easy ].
-      destruct Hb as (k, Hk).
-      rewrite Hk.
-      rewrite Nat.div_mul; [ | easy ].
-      destruct d; [ easy | ].
-      destruct d; [ flia H2d | ].
-      destruct k; [ flia H2n Hk | flia ].
-    }
-...
-Nat_divide_prime_mul_dividing :
-∀ m p q : nat,
-  prime p
-  → prime q → p ≠ q → Nat.divide p m → Nat.divide q m → Nat.divide (p * q) m
-...
-      apply Nat.div_le_lower_bound; [ flia H2d | ].
-...
-
-    apply IHcnt; try easy.
-    destruct Ha as (k, Hk).
-    apply Nat.mod_divide in Hb; [ | flia H2d ].
-    destruct Hb as (k', Hk').
-Search prime_decomp_aux.
-...
-  cbn in Ha.
-  remember (n mod d) as b eqn:Hb; symmetry in Hb.
-  destruct b. {
-    destruct Ha as [Ha| Ha]. {
-      subst a.
-      now apply Nat.mod_divide.
-    } {
-      apply IHcnt in Ha; [ | easy ].
-......
-*)
-
-Lemma glop : ∀ cnt n d p,
-  2 ≤ n
-  → 2 ≤ d
-  → d ≤ p
-  → n + 2 ≤ cnt + d
-  → prime p
-  → Nat.divide p n
-  → p ∈ prime_decomp_aux cnt n d.
-Proof.
-intros * H2n H2d Hdp Hcnt Hp Hpn.
-revert n d p H2n H2d Hdp Hcnt Hp Hpn.
-induction cnt; intros. {
-  cbn in Hcnt; cbn.
-  destruct Hpn as (k, Hk); subst n.
-  apply Nat.nlt_ge in Hcnt; apply Hcnt; clear Hcnt.
-  destruct k; [ flia H2n | flia Hdp ].
-}
-cbn.
-remember (n mod d) as b eqn:Hb; symmetry in Hb.
-assert (Hdz : d ≠ 0) by flia H2d.
-destruct b. 2: {
-  apply IHcnt; [ easy | flia H2d | | flia Hcnt | easy | easy ].
-  destruct (Nat.eq_dec p d) as [Hpd| Hpd]; [ | flia Hdp Hpd ].
-  subst d; exfalso.
-  apply Nat.mod_divide in Hpn; [ | easy ].
-  now rewrite Hpn in Hb.
-}
-destruct (Nat.eq_dec p d) as [Hpd| Hpd]; [ now left | right ].
-apply IHcnt; [ | easy | easy | | easy | ]. {
-  apply Nat.mod_divide in Hb; [ | easy ].
-  destruct Hb as (k, Hk).
-  rewrite Hk, Nat.div_mul; [ | easy ].
-  destruct k; [ flia H2n Hk | ].
-  destruct k; [ exfalso | flia ].
-  rewrite Nat.mul_1_l in Hk; subst n.
-  destruct Hpn as (k, Hk).
-  destruct k; [ easy | ].
-  destruct k; [ rewrite Nat.mul_1_l in Hk; flia Hk Hpd | ].
-  apply Nat.nlt_ge in Hdp; apply Hdp; clear Hdp.
-  rewrite Hk; cbn.
-  destruct p; [ now rewrite Nat.mul_0_r in Hk | flia ].
-} {
-  transitivity (n + 1); [ | flia Hcnt ].
-  apply Nat.mod_divide in Hb; [ | easy ].
-  destruct Hb as (k, Hk).
-  rewrite Hk.
-  rewrite Nat.div_mul; [ | easy ].
-  destruct d; [ easy | ].
-  destruct d; [ flia H2d | ].
-  destruct k; [ flia H2n Hk | flia ].
-}
-apply Nat.mod_divide in Hb; [ | easy ].
-...
-destruct Hpn as (k, Hk).
-rewrite Hk in Hb.
-apply Nat.gauss in Hb. {
-  destruct Hb as (k', Hk').
-  subst n p.
-  destruct k'; [ easy | ].
-  destruct k'. 2: {
-    move Hp at bottom; exfalso.
-    specialize (prime_divisors _ Hp d) as H1.
-    assert (H : Nat.divide d (S (S k') * d)) by apply Nat.divide_factor_r.
-    specialize (H1 H); clear H.
-    destruct H1 as [H1| H1]; [ flia H2d H1 | flia H1 Hdz ].
-  }
-  now rewrite Nat.mul_1_l in Hpd.
-}
-...
-
-Theorem glop : ∀ n d,
-  2 ≤ n
-  → prime d
-  → Nat.divide d n
-  → d ∈ prime_decomp n.
-Proof.
-intros * H2n Hd Hdn.
-unfold prime_decomp.
-replace n with (S (S (n - 2))) at 1 by flia H2n.
-...
-
-Theorem prime_decomp_in_iff : ∀ n d,
-  d ∈ prime_decomp n ↔ n ≠ 0 ∧ prime d ∧ Nat.divide d n.
-Proof.
-intros.
-split; intros Hd. {
-  split; [ now intros H; subst n | ].
-  split; [ now apply in_prime_decomp_is_prime in Hd | ].
-  now apply in_prime_decomp_divide in Hd.
-} {
-  destruct Hd as (Hn & Hd & Hdn).
-  destruct (lt_dec n 2) as [Hn2| Hn2]. {
-    destruct n; [ easy | ].
-    destruct n; [ | flia Hn2 ].
-    destruct Hdn as (k, Hk).
-    symmetry in Hk.
-    apply Nat.eq_mul_1 in Hk.
-    now destruct Hk; subst d.
-  }
-  apply Nat.nlt_ge in Hn2.
-Search prime_decomp.
-...
-  unfold prime_decomp.
-  replace n with (S (S (n - 2))) at 1 by flia Hn2.
-Print prime_decomp_aux.
-...
-
 Theorem prime_divisors_decomp : ∀ n a,
-  a ∈ prime_divisors n ↔ a ∈ prime_decomp n.
+  a ∈ prime_divisors_of n ↔ a ∈ prime_decomp n.
 Proof.
 intros.
 split; intros Ha. {
@@ -3522,28 +3338,17 @@ split; intros Ha. {
   apply Bool.andb_true_iff in H.
   destruct H as (Hpa, Hna).
   apply Nat.eqb_eq in Hna.
-  unfold prime_decomp.
+  apply in_seq in Ha.
+  apply Nat.mod_divide in Hna; [ | flia Ha ].
   destruct (lt_dec n 2) as [Hn2| Hn2]. {
-    destruct n; [ easy | ].
+    destruct n; [ flia Ha | ].
     destruct n; [ | flia Hn2 ].
-    cbn in Ha.
-    destruct Ha as [Ha| Ha]; [ | easy ].
-    now subst a.
+    now replace a with 1 in Hpa by flia Ha.
   }
   apply Nat.nlt_ge in Hn2.
-  replace n with (S (S (n - 2))) at 1 by flia Hn2.
-Print prime_decomp_aux.
-Search prime_decomp.
-...
-  cbn - [ "mod" "/" ].
-...
-Search (_ ∈ prime_decomp _).
-
-  destruct n; [ easy | ].
-  cbn in Ha; cbn - [ "mod" "/" ].
-Search (_ ∈ filter _ _).
-
-  destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
+  now apply prime_divisor_in_decomp.
+} {
+  apply filter_In.
 ...
 
 (*
@@ -5267,4 +5072,4 @@ Theorem smaller_than_prime_all_different_powers : ∀ p,
   → ∀ a, 2 ≤ a ≤ p - 2
   → ∀ i j, i < j < p → a ^ i mod p ≠ a ^ j mod p.
 *)
-j
+
