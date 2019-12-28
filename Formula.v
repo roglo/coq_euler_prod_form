@@ -3407,14 +3407,15 @@ Search prime_decomp_aux.
 
 Lemma glop : ∀ cnt n d p,
   2 ≤ n
+  → 2 ≤ d
   → d ≤ p
   → n + 2 ≤ cnt + d
   → prime p
   → Nat.divide p n
   → p ∈ prime_decomp_aux cnt n d.
 Proof.
-intros * H2n Hdp Hcnt Hp Hpn.
-revert n d p H2n Hdp Hcnt Hp Hpn.
+intros * H2n H2d Hdp Hcnt Hp Hpn.
+revert n d p H2n H2d Hdp Hcnt Hp Hpn.
 induction cnt; intros. {
   cbn in Hcnt; cbn.
   destruct Hpn as (k, Hk); subst n.
@@ -3423,12 +3424,49 @@ induction cnt; intros. {
 }
 cbn.
 remember (n mod d) as b eqn:Hb; symmetry in Hb.
+assert (Hdz : d ≠ 0) by flia H2d.
 destruct b. 2: {
-  apply IHcnt; [ easy | | flia Hcnt | easy | easy ].
-  destruct (Nat.eq_dec d p) as [Hpd| Hpd]; [ subst d | flia Hdp Hpd ].
-  apply Nat.mod_divide in Hpn; [ | now intros H1; subst p ].
+  apply IHcnt; [ easy | flia H2d | | flia Hcnt | easy | easy ].
+  destruct (Nat.eq_dec p d) as [Hpd| Hpd]; [ | flia Hdp Hpd ].
+  subst d; exfalso.
+  apply Nat.mod_divide in Hpn; [ | easy ].
   now rewrite Hpn in Hb.
 }
+destruct (Nat.eq_dec p d) as [Hpd| Hpd]; [ now left | right ].
+apply IHcnt; [ | easy | easy | | easy | ]. {
+  apply Nat.mod_divide in Hb; [ | easy ].
+  destruct Hb as (k, Hk).
+  rewrite Hk, Nat.div_mul; [ | easy ].
+  destruct k; [ flia H2n Hk | ].
+  destruct k; [ exfalso | flia ].
+  rewrite Nat.mul_1_l in Hk; subst n.
+  destruct Hpn as (k, Hk).
+  destruct k; [ easy | ].
+  destruct k; [ rewrite Nat.mul_1_l in Hk; flia Hk Hpd | ].
+  apply Nat.nlt_ge in Hdp; apply Hdp; clear Hdp.
+  rewrite Hk; cbn.
+  destruct p; [ now rewrite Nat.mul_0_r in Hk | flia ].
+} {
+  transitivity (n + 1); [ | flia Hcnt ].
+  apply Nat.mod_divide in Hb; [ | easy ].
+  destruct Hb as (k, Hk).
+  rewrite Hk.
+  rewrite Nat.div_mul; [ | easy ].
+  destruct d; [ easy | ].
+  destruct d; [ flia H2d | ].
+  destruct k; [ flia H2n Hk | flia ].
+}
+destruct Hpn as (k, Hk).
+apply Nat.mod_divide in Hb; [ | easy ].
+rewrite Hk in Hb.
+apply Nat.gauss in Hb. {
+  destruct Hb as (k', Hk').
+  subst n p.
+  destruct k'; [ easy | ].
+  destruct k'. 2: {
+    move Hp at bottom; exfalso.
+    unfold prime in Hp.
+    unfold is_prime in Hp.
 ...
 
 Theorem glop : ∀ n d,
