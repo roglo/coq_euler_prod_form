@@ -3340,60 +3340,57 @@ split; intros Ha. {
   apply Nat.eqb_eq in Hna.
   apply in_seq in Ha.
   apply Nat.mod_divide in Hna; [ | flia Ha ].
-  destruct (lt_dec n 2) as [Hn2| Hn2]. {
-    destruct n; [ flia Ha | ].
-    destruct n; [ | flia Hn2 ].
-    now replace a with 1 in Hpa by flia Ha.
-  }
-  apply Nat.nlt_ge in Hn2.
-  now apply prime_divisor_in_decomp.
+  apply prime_decomp_in_iff.
+  split; [ | split ]; [ flia Ha | easy | easy ].
 } {
   apply filter_In.
-...
+  apply prime_decomp_in_iff in Ha.
+  destruct Ha as (Hnz & Ha & Han).
+  split. {
+    apply in_seq.
+    split. {
+      transitivity 2; [ flia | ].
+      now apply prime_ge_2.
+    } {
+      destruct Han as (k, Hk); subst n.
+      destruct k; [ easy | flia ].
+    }
+  }
+  apply Bool.andb_true_iff.
+  split; [ easy | ].
+  apply Nat.eqb_eq.
+  apply Nat.mod_divide in Han; [ easy | ].
+  now intros H1; subst a.
+}
+Qed.
 
-(*
-Theorem prime_divisors_nil_iff: ∀ n, prime_divisors n = [] ↔ n = 0 ∨ n = 1.
+Theorem prime_divisors_nil_iff: ∀ n, prime_divisors_of n = [] ↔ n = 0 ∨ n = 1.
 Proof.
 intros.
 split; intros Hn. {
-  destruct n; [ now left | ].
-  destruct n; [ now right | ].
-  cbn - [ "mod" ] in Hn.
-...
-*)
+  apply prime_decomp_nil_iff.
+  remember (prime_decomp n) as l eqn:Hl; symmetry in Hl.
+  destruct l as [| a l]; [ easy | ].
+  specialize (proj2 (prime_divisors_decomp n a)) as H1.
+  rewrite Hl, Hn in H1.
+  now exfalso; apply H1; left.
+} {
+  now destruct Hn; subst n.
+}
+Qed.
 
-Theorem glop : ∀ m, 2 ≤ m → φ m = φ_ldiv (prime_divisors m) m.
+Theorem glop : ∀ m, 2 ≤ m → φ m = φ_ldiv (prime_divisors_of m) m.
 Proof.
 intros * Hm.
-remember (prime_divisors m) as l eqn:Hl; symmetry in Hl.
-induction l as [| a l]. {
+remember (prime_divisors_of m) as l eqn:Hl; symmetry in Hl.
+revert m Hm Hl.
+induction l as [| a l]; intros. {
+  apply prime_divisors_nil_iff in Hl.
+  destruct Hl; subst m; flia Hm.
+}
+Search (φ_ldiv (_ :: _)).
 ...
-  destruct m; [ easy | ].
-  destruct m; [ flia Hm | clear Hm ].
-  cbn - [ "mod" ] in Hl.
-  cbn - [ "mod" ].
-  rewrite Nat.mod_1_l; [ | flia ].
-  rewrite Nat.gcd_1_l; cbn - [ "mod" ].
-  f_equal.
-  rewrite seq_length.
-  remember (S (S m) mod 2) as b eqn:Hb; symmetry in Hb.
-  destruct b; [ easy | ].
-  cbn in Hl.
-  specialize (List_filter_nil _ _ Hl) as H1.
-  cbn in H1.
-  destruct m; [ easy | ].
-  specialize (H1 3).
-  assert (H : 3 ∈ seq 3 (S m)); [ apply in_seq; flia | ].
-  specialize (H1 H); clear H.
-  apply Bool.andb_false_iff in H1.
-  destruct H1 as [H1| H1]; [ easy | ].
 Compute (map (λ m, (φ m, φ_ldiv (prime_divisors m) m)) (seq 1 40)).
-...
-Search prime_decomp.
-Compute (prime_divisors 2).
-...
-unfold φ, φ_ldiv.
-unfold prime_divisors, coprimes.
 ...
 
 (*
