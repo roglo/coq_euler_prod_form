@@ -3456,8 +3456,9 @@ apply IHcnt; [ | easy | easy | | easy | ]. {
   destruct d; [ flia H2d | ].
   destruct k; [ flia H2n Hk | flia ].
 }
-destruct Hpn as (k, Hk).
 apply Nat.mod_divide in Hb; [ | easy ].
+...
+destruct Hpn as (k, Hk).
 rewrite Hk in Hb.
 apply Nat.gauss in Hb. {
   destruct Hb as (k', Hk').
