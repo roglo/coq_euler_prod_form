@@ -3328,18 +3328,69 @@ Qed.
 Definition prime_divisors n :=
   filter (λ d, (is_prime d && (n mod d =? 0))%bool) (seq 1 n).
 
-Theorem prime_decomp_aux_in_iff : ∀ cnt n d a,
-  n + 2 ≤ cnt + d
-  → d ≠ 0
+Theorem prime_decomp_aux_in_iff : ∀ cnt n d,
+  2 ≤ n
+  → 2 ≤ d
+  → n + 2 ≤ cnt + d
+  → ∀ a, d ≤ a
   → a ∈ prime_decomp_aux cnt n d ↔ Nat.divide a n.
 Proof.
-intros * Hcnt Hd.
+intros * H2n H2d Hcnt * Hda.
 split; intros Ha. {
-  now apply in_prime_decomp_aux_divide in Ha.
+  apply in_prime_decomp_aux_divide in Ha; [ easy | flia H2d ].
 } {
-  revert n d a Hd Ha Hcnt.
+  revert n d a H2n H2d Hcnt Hda Ha.
   induction cnt; intros. {
-    cbn.
+    cbn in Hcnt; cbn.
+    destruct Ha as (k, Hk); subst n.
+    apply Nat.nlt_ge in Hda; apply Hda; clear Hda.
+    apply (lt_le_trans _ (k * a + 2)); [ | easy ].
+    destruct k; [ flia H2n | flia ].
+  }
+  cbn.
+  assert (Hdz : d ≠ 0) by flia H2d.
+  remember (n mod d) as b eqn:Hb; symmetry in Hb.
+  destruct b. {
+    destruct (Nat.eq_dec d a) as [Hdea| Hdea]; [ now left | right ].
+    apply IHcnt; [ | easy | | easy | ]. {
+      apply Nat.mod_divide in Hb; [ | easy ].
+      destruct Hb as (k, Hk).
+      rewrite Hk, Nat.div_mul; [ | easy ].
+      destruct k; [ flia H2n Hk | ].
+      destruct k; [ exfalso | flia ].
+      rewrite Nat.mul_1_l in Hk; subst n.
+      destruct Ha as (k, Hk).
+      destruct k; [ flia H2d Hk | ].
+      destruct k; [ now rewrite Nat.mul_1_l in Hk | ].
+      apply Nat.nlt_ge in Hda; apply Hda; clear Hda.
+      rewrite Hk; cbn.
+      destruct a; [ now rewrite Nat.mul_0_r in Hk | flia ].
+    } {
+      transitivity (n + 1); [ | flia Hcnt ].
+      apply Nat.mod_divide in Hb; [ | easy ].
+      destruct Hb as (k, Hk).
+      rewrite Hk.
+      rewrite Nat.div_mul; [ | easy ].
+      destruct d; [ easy | ].
+      destruct d; [ flia H2d | ].
+      destruct k; [ flia H2n Hk | flia ].
+    } {
+      apply Nat.mod_divide in Hb; [ | easy ].
+      destruct Ha as (k, Hk).
+      destruct Hb as (k', Hk').
+...
+Nat_divide_prime_mul_dividing :
+∀ m p q : nat,
+  prime p
+  → prime q → p ≠ q → Nat.divide p m → Nat.divide q m → Nat.divide (p * q) m
+...
+      apply Nat.div_le_lower_bound; [ flia H2d | ].
+...
+
+    apply IHcnt; try easy.
+    destruct Ha as (k, Hk).
+    apply Nat.mod_divide in Hb; [ | flia H2d ].
+    destruct Hb as (k', Hk').
 Search prime_decomp_aux.
 ...
   cbn in Ha.
