@@ -3325,7 +3325,7 @@ rewrite <- Nat_sub_div_same; [ | apply Nat.divide_factor_r | easy ].
 now rewrite Nat.div_mul.
 Qed.
 
-Definition prime_divisors n :=
+Definition prime_divisors_of n :=
   filter (λ d, (is_prime d && (n mod d =? 0))%bool) (seq 1 n).
 
 (*
@@ -3465,8 +3465,13 @@ apply Nat.gauss in Hb. {
   destruct k'; [ easy | ].
   destruct k'. 2: {
     move Hp at bottom; exfalso.
-    unfold prime in Hp.
-    unfold is_prime in Hp.
+    specialize (prime_divisors _ Hp d) as H1.
+    assert (H : Nat.divide d (S (S k') * d)) by apply Nat.divide_factor_r.
+    specialize (H1 H); clear H.
+    destruct H1 as [H1| H1]; [ flia H2d H1 | flia H1 Hdz ].
+  }
+  now rewrite Nat.mul_1_l in Hpd.
+}
 ...
 
 Theorem glop : ∀ n d,
