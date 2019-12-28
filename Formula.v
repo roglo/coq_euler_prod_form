@@ -3328,12 +3328,129 @@ Qed.
 Definition prime_divisors n :=
   filter (λ d, (is_prime d && (n mod d =? 0))%bool) (seq 1 n).
 
-Theorem glop : ∀ m, φ m = φ_ldiv (prime_divisors m) m.
+Theorem prime_decomp_aux_in_iff : ∀ cnt n d a,
+  n + 2 ≤ cnt + d
+  → d ≠ 0
+  → a ∈ prime_decomp_aux cnt n d ↔ Nat.divide a n.
+Proof.
+intros * Hcnt Hd.
+split; intros Ha. {
+  now apply in_prime_decomp_aux_divide in Ha.
+} {
+  revert n d a Hd Ha Hcnt.
+  induction cnt; intros. {
+    cbn.
+Search prime_decomp_aux.
+...
+  cbn in Ha.
+  remember (n mod d) as b eqn:Hb; symmetry in Hb.
+  destruct b. {
+    destruct Ha as [Ha| Ha]. {
+      subst a.
+      now apply Nat.mod_divide.
+    } {
+      apply IHcnt in Ha; [ | easy ].
+......
+
+Theorem prime_decomp_in_iff : ∀ n d,
+  d ∈ prime_decomp n ↔ n ≠ 0 ∧ prime d ∧ Nat.divide d n.
 Proof.
 intros.
+split; intros Hd. {
+  split; [ now intros H; subst n | ].
+  split; [ now apply in_prime_decomp_is_prime in Hd | ].
+  now apply in_prime_decomp_divide in Hd.
+} {
+  destruct Hd as (Hn & Hd & Hdn).
+  destruct (lt_dec n 2) as [Hn2| Hn2]. {
+    destruct n; [ easy | ].
+    destruct n; [ | flia Hn2 ].
+    destruct Hdn as (k, Hk).
+    symmetry in Hk.
+    apply Nat.eq_mul_1 in Hk.
+    now destruct Hk; subst d.
+  }
+  apply Nat.nlt_ge in Hn2.
+  unfold prime_decomp.
+  replace n with (S (S (n - 2))) at 1 by flia Hn2.
+Print prime_decomp_aux.
+...
+
+
+Theorem prime_divisors_decomp : ∀ n a,
+  a ∈ prime_divisors n ↔ a ∈ prime_decomp n.
+Proof.
+intros.
+split; intros Ha. {
+  apply filter_In in Ha.
+  destruct Ha as (Ha, H).
+  apply Bool.andb_true_iff in H.
+  destruct H as (Hpa, Hna).
+  apply Nat.eqb_eq in Hna.
+  unfold prime_decomp.
+  destruct (lt_dec n 2) as [Hn2| Hn2]. {
+    destruct n; [ easy | ].
+    destruct n; [ | flia Hn2 ].
+    cbn in Ha.
+    destruct Ha as [Ha| Ha]; [ | easy ].
+    now subst a.
+  }
+  apply Nat.nlt_ge in Hn2.
+  replace n with (S (S (n - 2))) at 1 by flia Hn2.
+Print prime_decomp_aux.
+Search prime_decomp.
+...
+  cbn - [ "mod" "/" ].
+...
+Search (_ ∈ prime_decomp _).
+
+  destruct n; [ easy | ].
+  cbn in Ha; cbn - [ "mod" "/" ].
+Search (_ ∈ filter _ _).
+
+  destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
+...
+
+(*
+Theorem prime_divisors_nil_iff: ∀ n, prime_divisors n = [] ↔ n = 0 ∨ n = 1.
+Proof.
+intros.
+split; intros Hn. {
+  destruct n; [ now left | ].
+  destruct n; [ now right | ].
+  cbn - [ "mod" ] in Hn.
+...
+*)
+
+Theorem glop : ∀ m, 2 ≤ m → φ m = φ_ldiv (prime_divisors m) m.
+Proof.
+intros * Hm.
 remember (prime_divisors m) as l eqn:Hl; symmetry in Hl.
 induction l as [| a l]. {
-  cbn.
+...
+  destruct m; [ easy | ].
+  destruct m; [ flia Hm | clear Hm ].
+  cbn - [ "mod" ] in Hl.
+  cbn - [ "mod" ].
+  rewrite Nat.mod_1_l; [ | flia ].
+  rewrite Nat.gcd_1_l; cbn - [ "mod" ].
+  f_equal.
+  rewrite seq_length.
+  remember (S (S m) mod 2) as b eqn:Hb; symmetry in Hb.
+  destruct b; [ easy | ].
+  cbn in Hl.
+  specialize (List_filter_nil _ _ Hl) as H1.
+  cbn in H1.
+  destruct m; [ easy | ].
+  specialize (H1 3).
+  assert (H : 3 ∈ seq 3 (S m)); [ apply in_seq; flia | ].
+  specialize (H1 H); clear H.
+  apply Bool.andb_false_iff in H1.
+  destruct H1 as [H1| H1]; [ easy | ].
+Compute (map (λ m, (φ m, φ_ldiv (prime_divisors m) m)) (seq 1 40)).
+...
+Search prime_decomp.
+Compute (prime_divisors 2).
 ...
 unfold φ, φ_ldiv.
 unfold prime_divisors, coprimes.
