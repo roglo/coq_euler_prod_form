@@ -3412,6 +3412,8 @@ Theorem glop : ∀ n d,
   → d ∈ prime_decomp n.
 Proof.
 intros * H2n Hd Hdn.
+unfold prime_decomp.
+replace n with (S (S (n - 2))) at 1 by flia H2n.
 ...
 
 Theorem prime_decomp_in_iff : ∀ n d,
