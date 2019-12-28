@@ -3423,7 +3423,12 @@ induction cnt; intros. {
 }
 cbn.
 remember (n mod d) as b eqn:Hb; symmetry in Hb.
-destruct b. {
+destruct b. 2: {
+  apply IHcnt; [ easy | | flia Hcnt | easy | easy ].
+  destruct (Nat.eq_dec d p) as [Hpd| Hpd]; [ subst d | flia Hdp Hpd ].
+  apply Nat.mod_divide in Hpn; [ | now intros H1; subst p ].
+  now rewrite Hpn in Hb.
+}
 ...
 
 Theorem glop : ∀ n d,
