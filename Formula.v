@@ -3328,6 +3328,7 @@ Qed.
 Definition prime_divisors n :=
   filter (λ d, (is_prime d && (n mod d =? 0))%bool) (seq 1 n).
 
+(*
 Theorem prime_decomp_aux_in_iff : ∀ cnt n d,
   2 ≤ n
   → 2 ≤ d
@@ -3352,7 +3353,10 @@ split; intros Ha. {
   remember (n mod d) as b eqn:Hb; symmetry in Hb.
   destruct b. {
     destruct (Nat.eq_dec d a) as [Hdea| Hdea]; [ now left | right ].
-    apply IHcnt; [ | easy | | easy | ]. {
+    remember ((n / d) mod a) as c eqn:Hc; symmetry in Hc.
+    destruct c.
+    apply Nat.mod_divide in Hc; [ | flia Hda Hdz ].
+    apply IHcnt; [ | easy | | easy | easy ]. {
       apply Nat.mod_divide in Hb; [ | easy ].
       destruct Hb as (k, Hk).
       rewrite Hk, Nat.div_mul; [ | easy ].
@@ -3374,10 +3378,7 @@ split; intros Ha. {
       destruct d; [ easy | ].
       destruct d; [ flia H2d | ].
       destruct k; [ flia H2n Hk | flia ].
-    } {
-      apply Nat.mod_divide in Hb; [ | easy ].
-      destruct Ha as (k, Hk).
-      destruct Hb as (k', Hk').
+    }
 ...
 Nat_divide_prime_mul_dividing :
 ∀ m p q : nat,
@@ -3402,6 +3403,16 @@ Search prime_decomp_aux.
     } {
       apply IHcnt in Ha; [ | easy ].
 ......
+*)
+
+Theorem glop : ∀ n d,
+  2 ≤ n
+  → prime d
+  → Nat.divide d n
+  → d ∈ prime_decomp n.
+Proof.
+intros * H2n Hd Hdn.
+...
 
 Theorem prime_decomp_in_iff : ∀ n d,
   d ∈ prime_decomp n ↔ n ≠ 0 ∧ prime d ∧ Nat.divide d n.
@@ -3422,11 +3433,12 @@ split; intros Hd. {
     now destruct Hk; subst d.
   }
   apply Nat.nlt_ge in Hn2.
+Search prime_decomp.
+...
   unfold prime_decomp.
   replace n with (S (S (n - 2))) at 1 by flia Hn2.
 Print prime_decomp_aux.
 ...
-
 
 Theorem prime_divisors_decomp : ∀ n a,
   a ∈ prime_divisors n ↔ a ∈ prime_decomp n.
