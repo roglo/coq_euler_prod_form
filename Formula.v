@@ -3325,6 +3325,41 @@ Qed.
 *)
 
 Theorem φ_ldiv_two : ∀ m p q,
+  2 ≤ p
+  → 2 ≤ q
+  → Nat.gcd p q = 1
+  → Nat.divide p m
+  → Nat.divide q m
+  → φ_ldiv [p; q] m = m * (p - 1) * (q - 1) / (p * q).
+Proof.
+intros * Hp Hq Hpq Hpm Hqm.
+destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
+destruct (Nat.eq_dec q 0) as [Hqz| Hqz]; [ now subst q | ].
+rewrite φ_ldiv_two_from_fst; [ | easy | easy | easy | easy | easy ].
+rewrite φ_ldiv_single; [ | easy ].
+rewrite <- Nat.mul_assoc.
+rewrite (Nat.mul_sub_distr_l q), Nat.mul_1_r.
+rewrite (Nat.mul_sub_distr_l _ (p - 1)).
+rewrite <- Nat_sub_div_same; cycle 1. {
+  rewrite Nat.mul_assoc.
+  apply Nat.mul_divide_mono_r.
+  now apply Nat.divide_mul_l.
+} {
+  apply Nat_gcd_1_mul_divide; [ easy | | ]. {
+    now apply Nat.divide_mul_l.
+  } {
+    now apply Nat.divide_mul_l.
+  }
+}
+f_equal.
+rewrite Nat.mul_assoc.
+rewrite Nat.div_mul_cancel_r; [ | easy | easy ].
+rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
+rewrite <- Nat_sub_div_same; [ | apply Nat.divide_factor_r | easy ].
+now rewrite Nat.div_mul.
+Qed.
+
+Theorem φ_ldiv_two' : ∀ m p q,
   prime p
   → prime q
   → p ≠ q
@@ -3333,6 +3368,7 @@ Theorem φ_ldiv_two : ∀ m p q,
   → φ_ldiv [p; q] m = m * (p - 1) * (q - 1) / (p * q).
 Proof.
 intros * Hp Hq Hpq Hpm Hqm.
+...
 destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
 destruct (Nat.eq_dec q 0) as [Hqz| Hqz]; [ now subst q | ].
 rewrite φ_ldiv_two_from_fst; [ | | | | easy | easy ]; cycle 1. {
