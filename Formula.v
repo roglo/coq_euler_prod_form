@@ -3121,6 +3121,34 @@ Theorem add_le_φ_ldiv_two : ∀ m p q,
   → φ_ldiv [p; q] m = m - m / p - m / q + m / (p * q).
 Proof.
 intros * H2p H2q Hg Hmpq.
+...
+clear Hmpq.
+assert (Hmpq : m / p + m / q ≤ m). {
+  destruct Hpm as (kp, Hkp).
+  destruct Hqm as (kq, Hkq).
+  rewrite Hkq at 2.
+  rewrite Nat.div_mul; [ | easy ].
+  rewrite Hkp at 1.
+  rewrite Nat.div_mul; [ | easy ].
+  apply (Nat.mul_le_mono_pos_r _ _ (p * q)). {
+    destruct p; [ easy | ].
+    destruct q; [ easy | cbn; flia ].
+  }
+  rewrite Nat.mul_add_distr_r.
+  rewrite Nat.mul_assoc, <- Hkp.
+  rewrite Nat.mul_assoc, Nat.mul_shuffle0, <- Hkq.
+  rewrite <- Nat.mul_add_distr_l.
+  apply Nat.mul_le_mono_l.
+  rewrite Nat.add_comm.
+  apply Nat.add_le_mul. {
+    destruct p; [ easy | ].
+    destruct p; [ easy | flia ].
+  } {
+    destruct q; [ easy | ].
+    destruct q; [ easy | flia ].
+  }
+}
+...
 assert (Hpz : p ≠ 0) by flia H2p.
 assert (Hqz : q ≠ 0) by flia H2q.
 destruct (Nat.eq_dec m 0) as [Hmz| Hmz]. {
@@ -3442,6 +3470,9 @@ induction pl as [| q pl]. {
 destruct pl as [| r pl]. {
   specialize (Hplm q (or_intror (or_introl (eq_refl _)))) as Hq.
   specialize (Hpl 0 1 (Nat.neq_0_succ _)) as Hpq; cbn in Hpq.
+(**)
+  rewrite add_le_φ_ldiv_two; [ | easy | easy | easy | ]. 2: {
+...
   rewrite φ_ldiv_two; [ | easy | easy | easy | easy | easy ].
   rewrite φ_ldiv_single; [ | flia Hq ].
   rewrite <- Nat.mul_assoc.
