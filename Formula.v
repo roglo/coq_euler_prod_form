@@ -3458,7 +3458,11 @@ destruct pl as [| r pl]. {
   specialize (Hplm q (or_intror (or_introl (eq_refl _)))) as Hq.
   specialize (Hpl 0 1 (Nat.neq_0_succ _)) as Hpq; cbn in Hpq.
 (**)
+Inspect 6.
+Check φ_ldiv_two_from_fst.
+...
   rewrite φ_ldiv_two; [ | easy | easy | easy | easy | easy ].
+  rewrite φ_ldiv_single; [ | flia Hq ].
 ...
   rewrite add_le_φ_ldiv_two; [ | easy | easy | easy | ]. 2: {
 ...
