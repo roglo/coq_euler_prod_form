@@ -2073,7 +2073,7 @@ Theorem series_but_mul_primes_upto {F : field} : ∀ n i r, 1 < i < n →
   (fold_right series_but_mul_of r (primes_upto n))~{i} = 0%F.
 Proof.
 intros * (H1i, Hin).
-specialize (prime_divisor i H1i) as H1.
+specialize (exist_prime_divisor i H1i) as H1.
 destruct H1 as (d & Hd & Hdi).
 assert (Hdn : d ∈ primes_upto n). {
   apply filter_In.
@@ -3388,7 +3388,18 @@ induction l as [| a l]; intros. {
   apply prime_divisors_nil_iff in Hl.
   destruct Hl; subst m; flia Hm.
 }
+...
+cbn.
+unfold φ.
+unfold coprimes.
 Search (φ_ldiv (_ :: _)).
+Compute (
+  let (a, m) := (2, 3) in
+  let l := tl (prime_divisors_of m) in
+ (filter (λ d : nat, Nat.gcd m d =? 1) (seq 1 (m - 1)),
+  fold_left
+       (λ (l0 : list nat) (p : nat), filter (λ d : nat, negb (d mod p =? 0)) l0)
+       l (filter (λ d : nat, negb (d mod a =? 0)) (seq 1 m)))).
 ...
 Compute (map (λ m, (φ m, φ_ldiv (prime_divisors m) m)) (seq 1 40)).
 ...

@@ -121,7 +121,7 @@ destruct b; [ flia Hb | ].
 destruct b; [ flia Hb | flia ].
 Qed.
 
-Theorem prime_divisor : ∀ n, 2 ≤ n →
+Theorem exist_prime_divisor : ∀ n, 2 ≤ n →
   ∃ d, prime d ∧ Nat.divide d n.
 Proof.
 intros * Hn.
@@ -164,7 +164,7 @@ Qed.
 Lemma next_prime_bounded : ∀ n, ∃ m, n < m ≤ fact n + 1 ∧ prime m.
 Proof.
 intros.
-specialize (prime_divisor (fact n + 1)) as H1.
+specialize (exist_prime_divisor (fact n + 1)) as H1.
 assert (H : 2 ≤ fact n + 1). {
   clear.
   induction n; [ easy | ].
