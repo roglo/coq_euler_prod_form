@@ -3113,80 +3113,21 @@ unfold φ_ldiv; cbn.
 now rewrite List_filter_filter_comm.
 Qed.
 
-Theorem φ_ldiv_two_from_fst : ∀ m p q,
+Theorem add_le_φ_ldiv_two : ∀ m p q,
   2 ≤ p
   → 2 ≤ q
   → Nat.gcd p q = 1
-  → Nat.divide p m
-  → Nat.divide q m
-  → φ_ldiv [p; q] m = φ_ldiv [p] m - m * (p - 1) / (p * q).
+  → m / p + m / q ≤ m
+  → φ_ldiv [p; q] m = m - m / p - m / q + m / (p * q).
 Proof.
-intros * H2p H2q Hg Hpm Hqm.
-destruct (Nat.eq_dec m 0) as [Hmz| Hmz]; [ now subst m | ].
-destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ flia Hpz H2p | ].
-destruct (Nat.eq_dec q 0) as [Hqz| Hqz]; [ flia Hqz H2q | ].
-rewrite φ_ldiv_single; [ | easy ].
-rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
-replace ((m * p - m) / (p * q)) with (m / q - m / (p * q)). 2: {
-  rewrite <- (Nat.div_mul_cancel_l m q p); [ | easy | easy ].
-  rewrite (Nat.mul_comm m).
-  destruct Hpm as (kp, Hkp).
-  destruct Hqm as (kq, Hkq).
-  rewrite Nat_sub_div_same; [ easy | | ]. {
-    rewrite Hkq.
-    apply Nat.mul_divide_mono_l.
-    apply Nat.divide_factor_r.
-  } {
-    apply Nat_gcd_1_mul_divide; [ easy | | ]. {
-      now exists kp.
-    } {
-      now exists kq.
-    }
-  }
+intros * H2p H2q Hg Hmpq.
+assert (Hpz : p ≠ 0) by flia H2p.
+assert (Hqz : q ≠ 0) by flia H2q.
+destruct (Nat.eq_dec m 0) as [Hmz| Hmz]. {
+  subst m; cbn.
+  rewrite Nat.div_0_l; [ easy | ].
+  now apply Nat.neq_mul_0.
 }
-assert (Hmpq : m / p + m / q ≤ m). {
-  destruct Hpm as (kp, Hkp).
-  destruct Hqm as (kq, Hkq).
-  rewrite Hkq at 2.
-  rewrite Nat.div_mul; [ | easy ].
-  rewrite Hkp at 1.
-  rewrite Nat.div_mul; [ | easy ].
-  apply (Nat.mul_le_mono_pos_r _ _ (p * q)). {
-    destruct p; [ easy | ].
-    destruct q; [ easy | cbn; flia ].
-  }
-  rewrite Nat.mul_add_distr_r.
-  rewrite Nat.mul_assoc, <- Hkp.
-  rewrite Nat.mul_assoc, Nat.mul_shuffle0, <- Hkq.
-  rewrite <- Nat.mul_add_distr_l.
-  apply Nat.mul_le_mono_l.
-  rewrite Nat.add_comm.
-  apply Nat.add_le_mul. {
-    destruct p; [ easy | ].
-    destruct p; [ easy | flia ].
-  } {
-    destruct q; [ easy | ].
-    destruct q; [ easy | flia ].
-  }
-}
-rewrite Nat_sub_sub_distr. 2: {
-  split. {
-    rewrite Nat.mul_comm.
-    rewrite <- Nat.div_div; [ | easy | easy ].
-    apply Nat.div_le_upper_bound; [ easy | ].
-    rewrite <- (Nat.mul_1_l (m / q)) at 1.
-    apply Nat.mul_le_mono_r; flia Hpz.
-  } {
-    apply Nat.le_add_le_sub_r.
-    now rewrite Nat.add_comm.
-  }
-}
-Compute (let '(m,p,q):=(41,7,5) in (φ_ldiv[p;q]m,m-m/p-m/q+m/(p*q))).
-Compute (let '(m,p,q):=(41,7,5) in map(λ d,(d mod p) * (d mod q))(seq 1 m)).
-Compute (let '(m,p,q):=(41,7,5) in length(filter(λ d,negb(d=?0))(map(λ d,(d mod p)*(d mod q))(seq 1 m)))).
-Compute (let '(m,p,q):=(411,14,21) in (φ_ldiv[p;q]m,m-m/p-m/q+m/Nat.lcm p q)).
-Search (filter _ (map _ _)).
-(* lemma perhaps? *)
 unfold φ_ldiv; cbn.
 rewrite List_filter_filter_comm.
 rewrite List_filter_filter.
@@ -3305,24 +3246,82 @@ rewrite (filter_ext_in _ (λ d, (d mod p =? 0) && (d mod q =? 0))%bool) in H1. 2
 easy.
 Qed.
 
-(* rather use φ_ldiv_two_from_fst
-Theorem φ_ldiv_two_from_fst' : ∀ m p q,
-  prime p
-  → prime q
-  → p ≠ q
+Theorem φ_ldiv_two_from_fst : ∀ m p q,
+  2 ≤ p
+  → 2 ≤ q
+  → Nat.gcd p q = 1
   → Nat.divide p m
   → Nat.divide q m
   → φ_ldiv [p; q] m = φ_ldiv [p] m - m * (p - 1) / (p * q).
 Proof.
-intros * Hp Hq Hpq Hpm Hqm.
-apply φ_ldiv_two_from_fst; [ | | | easy | easy ]. {
-  now apply prime_ge_2.
-} {
-  now apply prime_ge_2.
+intros * H2p H2q Hg Hpm Hqm.
+destruct (Nat.eq_dec m 0) as [Hmz| Hmz]; [ now subst m | ].
+destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ flia Hpz H2p | ].
+destruct (Nat.eq_dec q 0) as [Hqz| Hqz]; [ flia Hqz H2q | ].
+rewrite φ_ldiv_single; [ | easy ].
+rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
+replace ((m * p - m) / (p * q)) with (m / q - m / (p * q)). 2: {
+  rewrite <- (Nat.div_mul_cancel_l m q p); [ | easy | easy ].
+  rewrite (Nat.mul_comm m).
+  destruct Hpm as (kp, Hkp).
+  destruct Hqm as (kq, Hkq).
+  rewrite Nat_sub_div_same; [ easy | | ]. {
+    rewrite Hkq.
+    apply Nat.mul_divide_mono_l.
+    apply Nat.divide_factor_r.
+  } {
+    apply Nat_gcd_1_mul_divide; [ easy | | ]. {
+      now exists kp.
+    } {
+      now exists kq.
+    }
+  }
 }
-now apply eq_primes_gcd_1.
-Qed.
+assert (Hmpq : m / p + m / q ≤ m). {
+  destruct Hpm as (kp, Hkp).
+  destruct Hqm as (kq, Hkq).
+  rewrite Hkq at 2.
+  rewrite Nat.div_mul; [ | easy ].
+  rewrite Hkp at 1.
+  rewrite Nat.div_mul; [ | easy ].
+  apply (Nat.mul_le_mono_pos_r _ _ (p * q)). {
+    destruct p; [ easy | ].
+    destruct q; [ easy | cbn; flia ].
+  }
+  rewrite Nat.mul_add_distr_r.
+  rewrite Nat.mul_assoc, <- Hkp.
+  rewrite Nat.mul_assoc, Nat.mul_shuffle0, <- Hkq.
+  rewrite <- Nat.mul_add_distr_l.
+  apply Nat.mul_le_mono_l.
+  rewrite Nat.add_comm.
+  apply Nat.add_le_mul. {
+    destruct p; [ easy | ].
+    destruct p; [ easy | flia ].
+  } {
+    destruct q; [ easy | ].
+    destruct q; [ easy | flia ].
+  }
+}
+rewrite Nat_sub_sub_distr. 2: {
+  split. {
+    rewrite Nat.mul_comm.
+    rewrite <- Nat.div_div; [ | easy | easy ].
+    apply Nat.div_le_upper_bound; [ easy | ].
+    rewrite <- (Nat.mul_1_l (m / q)) at 1.
+    apply Nat.mul_le_mono_r; flia Hpz.
+  } {
+    apply Nat.le_add_le_sub_r.
+    now rewrite Nat.add_comm.
+  }
+}
+(*
+Compute (let '(m,p,q):=(41,7,5) in (φ_ldiv[p;q]m,m-m/p-m/q+m/(p*q))).
+Compute (let '(m,p,q):=(41,7,5) in map(λ d,(d mod p) * (d mod q))(seq 1 m)).
+Compute (let '(m,p,q):=(41,7,5) in length(filter(λ d,negb(d=?0))(map(λ d,(d mod p)*(d mod q))(seq 1 m)))).
+Compute (let '(m,p,q):=(411,14,21) in (φ_ldiv[p;q]m,m-m/p-m/q+m/Nat.lcm p q)).
 *)
+now apply add_le_φ_ldiv_two.
+Qed.
 
 Theorem φ_ldiv_two : ∀ m p q,
   2 ≤ p
@@ -3358,25 +3357,6 @@ rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
 rewrite <- Nat_sub_div_same; [ | apply Nat.divide_factor_r | easy ].
 now rewrite Nat.div_mul.
 Qed.
-
-(* rather use φ_ldiv_two
-Theorem φ_ldiv_two' : ∀ m p q,
-  prime p
-  → prime q
-  → p ≠ q
-  → Nat.divide p m
-  → Nat.divide q m
-  → φ_ldiv [p; q] m = m * (p - 1) * (q - 1) / (p * q).
-Proof.
-intros * Hp Hq Hpq Hpm Hqm.
-apply φ_ldiv_two; [ | | | easy | easy ]. {
-  now apply prime_ge_2.
-} {
-  now apply prime_ge_2.
-}
-now apply eq_primes_gcd_1.
-Qed.
-*)
 
 Definition prime_divisors n :=
   filter (λ d, (is_prime d && (n mod d =? 0))%bool) (seq 1 n).
