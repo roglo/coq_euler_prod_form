@@ -3024,6 +3024,28 @@ symmetry.
 now apply Nat.div_mod.
 Qed.
 
+Check Nat.divide_div_mul_exact.
+
+Theorem gcd_1_div_mul_exact : ∀ m p q kp kq,
+  q ≠ 0
+  → Nat.gcd p q = 1
+  → m = kp * p
+  → m = kq * q
+  → kp = q * (kp / q).
+Proof.
+intros * Hqz Hg Hkp Hkq.
+rewrite <- Nat.divide_div_mul_exact; [ | easy | ]. 2: {
+  apply (Nat.gauss _ p). {
+    rewrite Nat.mul_comm, <- Hkp, Hkq.
+    now exists kq.
+  } {
+    now rewrite Nat.gcd_comm.
+  }
+}
+now rewrite Nat.mul_comm, Nat.div_mul.
+Qed.
+
+(* ok, but directly use gcd_1_div_mul_exact instead
 Theorem primes_div_mul_exact : ∀ m p q kp kq,
   prime p
   → prime q
@@ -3033,37 +3055,34 @@ Theorem primes_div_mul_exact : ∀ m p q kp kq,
   → kp = q * (kp / q).
 Proof.
 intros * Hp Hq Hpq Hkp Hkq.
-rewrite <- Nat.divide_div_mul_exact; [ | now intros H; subst q | ]. 2: {
-  apply (Nat.gauss _ p). {
-    rewrite Nat.mul_comm, <- Hkp, Hkq.
-    now exists kq.
-  } {
-    apply Nat.neq_sym in Hpq.
-    now apply eq_primes_gcd_1.
-  }
+apply (gcd_1_div_mul_exact m p q _ kq); [ | | easy | easy ]. {
+  now intros H; subst q.
 }
-rewrite Nat.mul_comm, Nat.div_mul; [ easy | ].
-now intros H; subst q.
+now apply eq_primes_gcd_1.
 Qed.
+*)
 
-Theorem Nat_divide_prime_mul_dividing : ∀ m p q,
-  prime p
-  → prime q
-  → p ≠ q
+Theorem Nat_gcd_1_mul_divide : ∀ m p q,
+  Nat.gcd p q = 1
   → Nat.divide p m
   → Nat.divide q m
   → Nat.divide (p * q) m.
 Proof.
-intros * Hp Hq Hpq Hpm Hqm.
-assert (Hpz : p ≠ 0) by now intros H; subst p.
-assert (Hqz : q ≠ 0) by now intros H; subst q.
-destruct Hpm as (kp, Hkp).
-destruct Hqm as (kq, Hkq).
+intros * Hg Hpm Hqm.
 destruct (Nat.eq_dec m 0) as [Hmz| Hmz]. {
   subst m; cbn.
-  rewrite Hmz.
   now exists 0.
 }
+assert (Hpz : p ≠ 0). {
+  destruct Hpm as (k, Hk).
+  now intros H; rewrite H, Nat.mul_0_r in Hk.
+}
+assert (Hqz : q ≠ 0). {
+  destruct Hqm as (k, Hk).
+  now intros H; rewrite H, Nat.mul_0_r in Hk.
+}
+destruct Hpm as (kp, Hkp).
+destruct Hqm as (kq, Hkq).
 exists (kp * kq / m).
 rewrite Nat.mul_comm.
 rewrite Hkp at 2.
@@ -3079,8 +3098,8 @@ rewrite (Nat.mul_comm p), <- Nat.mul_assoc.
 rewrite <- Nat.divide_div_mul_exact; [ | easy | ]. 2: {
   exists (kq / p).
   rewrite Nat.mul_comm.
-  apply Nat.neq_sym in Hpq.
-  now apply (primes_div_mul_exact m q _ _ kp).
+  rewrite Nat.gcd_comm in Hg.
+  now apply (gcd_1_div_mul_exact m q p kq kp).
 }
 rewrite (Nat.mul_comm p).
 rewrite Nat.div_mul; [ | easy ].
@@ -3095,17 +3114,17 @@ now rewrite List_filter_filter_comm.
 Qed.
 
 Theorem φ_ldiv_two_from_fst : ∀ m p q,
-  prime p
-  → prime q
-  → p ≠ q
+  2 ≤ p
+  → 2 ≤ q
+  → Nat.gcd p q = 1
   → Nat.divide p m
   → Nat.divide q m
   → φ_ldiv [p; q] m = φ_ldiv [p] m - m * (p - 1) / (p * q).
 Proof.
-intros * Hp Hq Hpq Hpm Hqm.
+intros * H2p H2q Hg Hpm Hqm.
 destruct (Nat.eq_dec m 0) as [Hmz| Hmz]; [ now subst m | ].
-destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
-destruct (Nat.eq_dec q 0) as [Hqz| Hqz]; [ now subst q | ].
+destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ flia Hpz H2p | ].
+destruct (Nat.eq_dec q 0) as [Hqz| Hqz]; [ flia Hqz H2q | ].
 rewrite φ_ldiv_single; [ | easy ].
 rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
 replace ((m * p - m) / (p * q)) with (m / q - m / (p * q)). 2: {
@@ -3118,7 +3137,7 @@ replace ((m * p - m) / (p * q)) with (m / q - m / (p * q)). 2: {
     apply Nat.mul_divide_mono_l.
     apply Nat.divide_factor_r.
   } {
-    apply Nat_divide_prime_mul_dividing; [ easy | easy | easy | | ]. {
+    apply Nat_gcd_1_mul_divide; [ easy | | ]. {
       now exists kp.
     } {
       now exists kq.
@@ -3233,7 +3252,6 @@ rewrite (filter_ext_in _ (λ d, d mod q =? 0)) in H1. 2: {
   apply Bool.negb_involutive.
 }
 rewrite <- H1.
-(**)
 clear H1.
 f_equal.
 assert (Hpqz : p * q ≠ 0) by now apply Nat.neq_mul_0.
@@ -3245,9 +3263,9 @@ apply Nat.add_sub_eq_nz in H1. 2: {
   apply Nat.sub_gt.
   apply Nat.div_lt; [ flia Hmz | ].
   destruct p; [ easy | ].
-  destruct p; [ easy | ].
+  destruct p; [ flia H2p | ].
   destruct q; [ easy | ].
-  destruct q; [ easy | flia ].
+  destruct q; [ flia H2q | flia ].
 }
 rewrite Nat.add_sub_assoc in H1. 2: {
   apply Nat.div_le_upper_bound; [ easy | ].
@@ -3268,8 +3286,8 @@ rewrite (filter_ext_in _ (λ d, (d mod p =? 0) && (d mod q =? 0))%bool) in H1. 2
       apply Nat.eqb_eq.
       apply Nat.mod_divide in Hb; [ | easy ].
       apply Nat.mod_divide in Hc; [ | easy ].
-      specialize (Nat_divide_prime_mul_dividing a p q Hp Hq Hpq Hb Hc) as H2.
-      now apply Nat.mod_divide.
+      apply Nat.mod_divide; [ easy | ].
+      now apply Nat_gcd_1_mul_divide.
     } {
       cbn.
       apply Nat.eqb_neq.
@@ -3287,6 +3305,25 @@ rewrite (filter_ext_in _ (λ d, (d mod p =? 0) && (d mod q =? 0))%bool) in H1. 2
 easy.
 Qed.
 
+(* rather use φ_ldiv_two_from_fst
+Theorem φ_ldiv_two_from_fst' : ∀ m p q,
+  prime p
+  → prime q
+  → p ≠ q
+  → Nat.divide p m
+  → Nat.divide q m
+  → φ_ldiv [p; q] m = φ_ldiv [p] m - m * (p - 1) / (p * q).
+Proof.
+intros * Hp Hq Hpq Hpm Hqm.
+apply φ_ldiv_two_from_fst; [ | | | easy | easy ]. {
+  now apply prime_ge_2.
+} {
+  now apply prime_ge_2.
+}
+now apply eq_primes_gcd_1.
+Qed.
+*)
+
 Theorem φ_ldiv_two : ∀ m p q,
   prime p
   → prime q
@@ -3298,6 +3335,7 @@ Proof.
 intros * Hp Hq Hpq Hpm Hqm.
 destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
 destruct (Nat.eq_dec q 0) as [Hqz| Hqz]; [ now subst q | ].
+...
 rewrite φ_ldiv_two_from_fst; [ | easy | easy | easy | easy | easy ].
 rewrite φ_ldiv_single; [ | easy ].
 rewrite <- Nat.mul_assoc.
@@ -3379,15 +3417,30 @@ split; intros Hn. {
 }
 Qed.
 
+Theorem glop : ∀ m pl,
+  (∀ p, p ∈ pl → prime p ∧ Nat.divide p m)
+  → NoDup pl
+  → φ_ldiv pl m =
+     m * fold_left (λ a p, a * (p - 1)) pl 1 / fold_left Nat.mul pl 1.
+Proof.
+intros * Hplm Hpl.
+Compute (let (m, pl) := (24, [12]) in
+  (φ_ldiv pl m,
+   m * fold_left (λ a p : nat, a * (p - 1)) pl 1 / fold_left Nat.mul pl 1)).
+Inspect 4.
+...
+
 Theorem glop : ∀ m, 2 ≤ m → φ m = φ_ldiv (prime_divisors m) m.
 Proof.
 intros * Hm.
+...
 remember (prime_divisors m) as l eqn:Hl; symmetry in Hl.
 revert m Hm Hl.
 induction l as [| a l]; intros. {
   apply prime_divisors_nil_iff in Hl.
   destruct Hl; subst m; flia Hm.
 }
+Inspect 4.
 ...
 cbn.
 unfold φ.
