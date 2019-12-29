@@ -3349,17 +3349,14 @@ rewrite (Nat.mul_sub_distr_l _ (p - 1)).
 rewrite <- Nat_sub_div_same; cycle 1. {
   rewrite Nat.mul_assoc.
   apply Nat.mul_divide_mono_r.
-...
-  specialize (Nat_divide_prime_mul_dividing m p q Hp Hq Hpq Hpm Hqm) as H2.
-  destruct H2 as (k, Hk).
-  rewrite Nat.mul_comm in Hk.
-  rewrite Hk.
-  do 2 rewrite <- Nat.mul_assoc.
-  apply Nat.divide_factor_l.
+  now apply Nat.divide_mul_l.
 } {
-  specialize (Nat_divide_prime_mul_dividing m p q Hp Hq Hpq Hpm Hqm) as H2.
-  apply (Nat.divide_trans _ m); [ easy | ].
-  apply Nat.divide_factor_l.
+  apply Nat_gcd_1_mul_divide; cycle 1. {
+    now apply Nat.divide_mul_l.
+  } {
+    now apply Nat.divide_mul_l.
+  }
+  now apply eq_primes_gcd_1.
 }
 f_equal.
 rewrite Nat.mul_assoc.
