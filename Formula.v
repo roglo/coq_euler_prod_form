@@ -3359,6 +3359,7 @@ rewrite <- Nat_sub_div_same; [ | apply Nat.divide_factor_r | easy ].
 now rewrite Nat.div_mul.
 Qed.
 
+(* rather use φ_ldiv_two
 Theorem φ_ldiv_two' : ∀ m p q,
   prime p
   → prime q
@@ -3368,41 +3369,14 @@ Theorem φ_ldiv_two' : ∀ m p q,
   → φ_ldiv [p; q] m = m * (p - 1) * (q - 1) / (p * q).
 Proof.
 intros * Hp Hq Hpq Hpm Hqm.
-...
-destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
-destruct (Nat.eq_dec q 0) as [Hqz| Hqz]; [ now subst q | ].
-rewrite φ_ldiv_two_from_fst; [ | | | | easy | easy ]; cycle 1. {
+apply φ_ldiv_two; [ | | | easy | easy ]. {
   now apply prime_ge_2.
 } {
   now apply prime_ge_2.
-} {
-  now apply eq_primes_gcd_1.
 }
-rewrite φ_ldiv_single; [ | easy ].
-rewrite <- Nat.mul_assoc.
-rewrite (Nat.mul_sub_distr_l q), Nat.mul_1_r.
-rewrite (Nat.mul_sub_distr_l _ (p - 1)).
-rewrite <- Nat_sub_div_same; cycle 1. {
-  rewrite Nat.mul_assoc.
-  apply Nat.mul_divide_mono_r.
-  now apply Nat.divide_mul_l.
-} {
-  apply Nat_gcd_1_mul_divide; cycle 1. {
-    now apply Nat.divide_mul_l.
-  } {
-    now apply Nat.divide_mul_l.
-  }
-  now apply eq_primes_gcd_1.
-}
-f_equal.
-rewrite Nat.mul_assoc.
-rewrite Nat.div_mul_cancel_r; [ | easy | easy ].
-rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
-rewrite <- Nat_sub_div_same; [ | apply Nat.divide_factor_r | easy ].
-now rewrite Nat.div_mul.
+now apply eq_primes_gcd_1.
 Qed.
-
-...
+*)
 
 Definition prime_divisors n :=
   filter (λ d, (is_prime d && (n mod d =? 0))%bool) (seq 1 n).
@@ -3458,6 +3432,21 @@ split; intros Hn. {
 }
 Qed.
 
+Theorem glop : ∀ m p pl,
+  (∀ p, p ∈ p :: pl → 2 ≤ p ∧ Nat.divide p m)
+  → (∀ i j, i ≠ j → Nat.gcd (nth i (p :: pl) 1) (nth j (p :: pl) 1) = 1)
+  → φ_ldiv (p :: pl) m = φ_ldiv pl m * (p - 1) / p.
+Proof.
+intros * Hplm Hpl.
+Compute (let '(m, p, pl) := (24, 2, [4]) in
+  (φ_ldiv (p :: pl) m, φ_ldiv pl m * (p - 1) / p)).
+Inspect 4.
+cbn.
+unfold φ_ldiv.
+...
+unfold φ_ldiv.
+...
+
 Theorem glop : ∀ m pl,
   (∀ p, p ∈ pl → prime p ∧ Nat.divide p m)
   → NoDup pl
@@ -3465,6 +3454,13 @@ Theorem glop : ∀ m pl,
      m * fold_left (λ a p, a * (p - 1)) pl 1 / fold_left Nat.mul pl 1.
 Proof.
 intros * Hplm Hpl.
+induction pl as [| p pl]. {
+  cbn - [ "/" ].
+  rewrite Nat.mul_1_r, Nat.div_1_r.
+  apply seq_length.
+}
+cbn.
+...
 Compute (let (m, pl) := (24, [12]) in
   (φ_ldiv pl m,
    m * fold_left (λ a p : nat, a * (p - 1)) pl 1 / fold_left Nat.mul pl 1)).
