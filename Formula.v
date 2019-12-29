@@ -3335,8 +3335,13 @@ Proof.
 intros * Hp Hq Hpq Hpm Hqm.
 destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
 destruct (Nat.eq_dec q 0) as [Hqz| Hqz]; [ now subst q | ].
-...
-rewrite φ_ldiv_two_from_fst; [ | easy | easy | easy | easy | easy ].
+rewrite φ_ldiv_two_from_fst; [ | | | | easy | easy ]; cycle 1. {
+  now apply prime_ge_2.
+} {
+  now apply prime_ge_2.
+} {
+  now apply eq_primes_gcd_1.
+}
 rewrite φ_ldiv_single; [ | easy ].
 rewrite <- Nat.mul_assoc.
 rewrite (Nat.mul_sub_distr_l q), Nat.mul_1_r.
@@ -3344,6 +3349,7 @@ rewrite (Nat.mul_sub_distr_l _ (p - 1)).
 rewrite <- Nat_sub_div_same; cycle 1. {
   rewrite Nat.mul_assoc.
   apply Nat.mul_divide_mono_r.
+...
   specialize (Nat_divide_prime_mul_dividing m p q Hp Hq Hpq Hpm Hqm) as H2.
   destruct H2 as (k, Hk).
   rewrite Nat.mul_comm in Hk.
@@ -3362,6 +3368,8 @@ rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
 rewrite <- Nat_sub_div_same; [ | apply Nat.divide_factor_r | easy ].
 now rewrite Nat.div_mul.
 Qed.
+
+...
 
 Definition prime_divisors n :=
   filter (λ d, (is_prime d && (n mod d =? 0))%bool) (seq 1 n).
