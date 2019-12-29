@@ -3113,6 +3113,41 @@ unfold φ_ldiv; cbn.
 now rewrite List_filter_filter_comm.
 Qed.
 
+Theorem divide_add_div_le : ∀ m p q,
+  2 ≤ p
+  → 2 ≤ q
+  → Nat.divide p m
+  → Nat.divide q m
+  → m / p + m / q ≤ m.
+Proof.
+intros * H2p H2q Hpm Hqm.
+destruct Hpm as (kp, Hkp).
+destruct Hqm as (kq, Hkq).
+destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ flia Hpz H2p | ].
+destruct (Nat.eq_dec q 0) as [Hqz| Hqz]; [ flia Hqz H2q | ].
+rewrite Hkq at 2.
+rewrite Nat.div_mul; [ | easy ].
+rewrite Hkp at 1.
+rewrite Nat.div_mul; [ | easy ].
+apply (Nat.mul_le_mono_pos_r _ _ (p * q)). {
+  destruct p; [ easy | ].
+  destruct q; [ easy | cbn; flia ].
+}
+rewrite Nat.mul_add_distr_r.
+rewrite Nat.mul_assoc, <- Hkp.
+rewrite Nat.mul_assoc, Nat.mul_shuffle0, <- Hkq.
+rewrite <- Nat.mul_add_distr_l.
+apply Nat.mul_le_mono_l.
+rewrite Nat.add_comm.
+apply Nat.add_le_mul. {
+  destruct p; [ easy | ].
+  destruct p; [ easy | flia ].
+} {
+  destruct q; [ easy | ].
+  destruct q; [ easy | flia ].
+}
+Qed.
+
 Theorem φ_ldiv_two : ∀ m p q,
   2 ≤ p
   → 2 ≤ q
@@ -3124,31 +3159,7 @@ Proof.
 intros * H2p H2q Hg (*Hmpq*)Hpm Hqm.
 assert (Hpz : p ≠ 0) by flia H2p.
 assert (Hqz : q ≠ 0) by flia H2q.
-assert (Hmpq : m / p + m / q ≤ m). {
-  destruct Hpm as (kp, Hkp).
-  destruct Hqm as (kq, Hkq).
-  rewrite Hkq at 2.
-  rewrite Nat.div_mul; [ | easy ].
-  rewrite Hkp at 1.
-  rewrite Nat.div_mul; [ | easy ].
-  apply (Nat.mul_le_mono_pos_r _ _ (p * q)). {
-    destruct p; [ easy | ].
-    destruct q; [ easy | cbn; flia ].
-  }
-  rewrite Nat.mul_add_distr_r.
-  rewrite Nat.mul_assoc, <- Hkp.
-  rewrite Nat.mul_assoc, Nat.mul_shuffle0, <- Hkq.
-  rewrite <- Nat.mul_add_distr_l.
-  apply Nat.mul_le_mono_l.
-  rewrite Nat.add_comm.
-  apply Nat.add_le_mul. {
-    destruct p; [ easy | ].
-    destruct p; [ easy | flia ].
-  } {
-    destruct q; [ easy | ].
-    destruct q; [ easy | flia ].
-  }
-}
+specialize (divide_add_div_le _ _ _ H2p H2q Hpm Hqm) as Hmpq.
 destruct (Nat.eq_dec m 0) as [Hmz| Hmz]. {
   subst m; cbn.
   rewrite Nat.div_0_l; [ easy | ].
@@ -3303,33 +3314,7 @@ replace ((m * p - m) / (p * q)) with (m / q - m / (p * q)). 2: {
     }
   }
 }
-Check φ_ldiv_two.
-...
-assert (Hmpq : m / p + m / q ≤ m). {
-  destruct Hpm as (kp, Hkp).
-  destruct Hqm as (kq, Hkq).
-  rewrite Hkq at 2.
-  rewrite Nat.div_mul; [ | easy ].
-  rewrite Hkp at 1.
-  rewrite Nat.div_mul; [ | easy ].
-  apply (Nat.mul_le_mono_pos_r _ _ (p * q)). {
-    destruct p; [ easy | ].
-    destruct q; [ easy | cbn; flia ].
-  }
-  rewrite Nat.mul_add_distr_r.
-  rewrite Nat.mul_assoc, <- Hkp.
-  rewrite Nat.mul_assoc, Nat.mul_shuffle0, <- Hkq.
-  rewrite <- Nat.mul_add_distr_l.
-  apply Nat.mul_le_mono_l.
-  rewrite Nat.add_comm.
-  apply Nat.add_le_mul. {
-    destruct p; [ easy | ].
-    destruct p; [ easy | flia ].
-  } {
-    destruct q; [ easy | ].
-    destruct q; [ easy | flia ].
-  }
-}
+rewrite φ_ldiv_two; [ | easy | easy | easy | easy | easy ].
 rewrite Nat_sub_sub_distr. 2: {
   split. {
     rewrite Nat.mul_comm.
@@ -3339,7 +3324,7 @@ rewrite Nat_sub_sub_distr. 2: {
     apply Nat.mul_le_mono_r; flia Hpz.
   } {
     apply Nat.le_add_le_sub_r.
-    now rewrite Nat.add_comm.
+    now apply divide_add_div_le.
   }
 }
 (*
@@ -3348,10 +3333,11 @@ Compute (let '(m,p,q):=(41,7,5) in map(λ d,(d mod p) * (d mod q))(seq 1 m)).
 Compute (let '(m,p,q):=(41,7,5) in length(filter(λ d,negb(d=?0))(map(λ d,(d mod p)*(d mod q))(seq 1 m)))).
 Compute (let '(m,p,q):=(411,14,21) in (φ_ldiv[p;q]m,m-m/p-m/q+m/Nat.lcm p q)).
 *)
-now apply add_le_φ_ldiv_two.
+easy.
 Qed.
 
-Theorem φ_ldiv_two : ∀ m p q,
+(* rather φ_ldiv_two
+Theorem φ_ldiv_two' : ∀ m p q,
   2 ≤ p
   → 2 ≤ q
   → Nat.gcd p q = 1
@@ -3385,6 +3371,7 @@ rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
 rewrite <- Nat_sub_div_same; [ | apply Nat.divide_factor_r | easy ].
 now rewrite Nat.div_mul.
 Qed.
+*)
 
 Definition prime_divisors n :=
   filter (λ d, (is_prime d && (n mod d =? 0))%bool) (seq 1 n).
@@ -3471,6 +3458,8 @@ destruct pl as [| r pl]. {
   specialize (Hplm q (or_intror (or_introl (eq_refl _)))) as Hq.
   specialize (Hpl 0 1 (Nat.neq_0_succ _)) as Hpq; cbn in Hpq.
 (**)
+  rewrite φ_ldiv_two; [ | easy | easy | easy | easy | easy ].
+...
   rewrite add_le_φ_ldiv_two; [ | easy | easy | easy | ]. 2: {
 ...
   rewrite φ_ldiv_two; [ | easy | easy | easy | easy | easy ].
