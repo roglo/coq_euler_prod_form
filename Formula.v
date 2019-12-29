@@ -3113,16 +3113,17 @@ unfold φ_ldiv; cbn.
 now rewrite List_filter_filter_comm.
 Qed.
 
-Theorem add_le_φ_ldiv_two : ∀ m p q,
+Theorem φ_ldiv_two : ∀ m p q,
   2 ≤ p
   → 2 ≤ q
   → Nat.gcd p q = 1
-  → m / p + m / q ≤ m
+  → Nat.divide p m
+  → Nat.divide q m
   → φ_ldiv [p; q] m = m - m / p - m / q + m / (p * q).
 Proof.
-intros * H2p H2q Hg Hmpq.
-...
-clear Hmpq.
+intros * H2p H2q Hg (*Hmpq*)Hpm Hqm.
+assert (Hpz : p ≠ 0) by flia H2p.
+assert (Hqz : q ≠ 0) by flia H2q.
 assert (Hmpq : m / p + m / q ≤ m). {
   destruct Hpm as (kp, Hkp).
   destruct Hqm as (kq, Hkq).
@@ -3148,9 +3149,6 @@ assert (Hmpq : m / p + m / q ≤ m). {
     destruct q; [ easy | flia ].
   }
 }
-...
-assert (Hpz : p ≠ 0) by flia H2p.
-assert (Hqz : q ≠ 0) by flia H2q.
 destruct (Nat.eq_dec m 0) as [Hmz| Hmz]. {
   subst m; cbn.
   rewrite Nat.div_0_l; [ easy | ].
@@ -3305,6 +3303,8 @@ replace ((m * p - m) / (p * q)) with (m / q - m / (p * q)). 2: {
     }
   }
 }
+Check φ_ldiv_two.
+...
 assert (Hmpq : m / p + m / q ≤ m). {
   destruct Hpm as (kp, Hkp).
   destruct Hqm as (kq, Hkq).
