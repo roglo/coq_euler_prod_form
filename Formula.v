@@ -3438,8 +3438,57 @@ Theorem glop : ∀ m p pl,
   → φ_ldiv (p :: pl) m = φ_ldiv pl m * (p - 1) / p.
 Proof.
 intros * Hplm Hpl.
+assert (Hpz : p ≠ 0). {
+  specialize (Hplm p (or_introl (eq_refl _))) as H1.
+  flia H1.
+}
+assert (Hpm : Nat.divide p m). {
+  now specialize (Hplm p (or_introl (eq_refl _))).
+}
+assert (H2p : 2 ≤ p). {
+  now specialize (Hplm p (or_introl (eq_refl _))).
+}
 Compute (let '(m, p, pl) := (30, 5, [6]) in
   (φ_ldiv (p :: pl) m, φ_ldiv pl m * (p - 1) / p)).
+induction pl as [| q pl]. {
+  rewrite φ_ldiv_single; [ cbn | easy ].
+  rewrite seq_length.
+  rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
+  rewrite <- Nat_sub_div_same; [ | | easy ]. 2: {
+    apply Nat.divide_factor_r.
+  }
+  now rewrite Nat.div_mul.
+}
+destruct pl as [| r pl]. {
+  specialize (Hplm q (or_intror (or_introl (eq_refl _)))) as Hq.
+  specialize (Hpl 0 1 (Nat.neq_0_succ _)) as Hpq; cbn in Hpq.
+  rewrite φ_ldiv_two; [ | easy | easy | easy | easy | easy ].
+  rewrite φ_ldiv_single; [ | flia Hq ].
+  rewrite <- Nat.mul_assoc.
+  rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
+  rewrite Nat.mul_sub_distr_l.
+  rewrite Nat.mul_assoc.
+  rewrite <- Nat_sub_div_same; cycle 1. {
+    apply Nat.mul_divide_mono_r.
+    transitivity m; [ easy | ].
+    apply Nat.divide_factor_l.
+  } {
+    transitivity m; [ | apply Nat.divide_factor_l ].
+    now apply Nat_gcd_1_mul_divide.
+  }
+  rewrite Nat.div_mul_cancel_r; [ | easy | flia Hq ].
+  rewrite (Nat.mul_comm p q), <- Nat.div_div; [ | flia Hq | easy ].
+  rewrite Nat.mul_comm at 2.
+  rewrite (Nat.divide_div_mul_exact m); [ | flia Hq | easy ].
+  rewrite (Nat.mul_comm (p - 1)).
+  rewrite Nat_sub_div_same; cycle 1. {
+    transitivity m; [ easy | ].
+    apply Nat.divide_factor_l.
+  } {
+    transitivity (m / q); [ | apply Nat.divide_factor_l ].
+(* on n'a pas déjà été confronté à ça ? *)
+Search (Nat.divide _ (_ / _)).
+...
 Inspect 4.
 Search φ_ldiv.
 cbn.
