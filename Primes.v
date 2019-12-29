@@ -222,7 +222,7 @@ destruct (Nat.eq_dec k d) as [Hkd| Hkd]. {
 apply (IHcnt (S n) (k + 1)); [ easy | flia Hcnt | easy | flia Hd Hkd ].
 Qed.
 
-Theorem prime_divisors : ∀ p,
+Theorem prime_only_divisors : ∀ p,
   prime p → ∀ a, Nat.divide a p → a = 1 ∨ a = p.
 Proof.
 intros * Hp a * Hap.
@@ -261,7 +261,7 @@ Qed.
 Theorem prime_prop : ∀ p, prime p → ∀ i, 2 ≤ i ≤ p - 1 → ¬ Nat.divide i p.
 Proof.
 intros * Hp i Hi Hdiv.
-specialize (prime_divisors p Hp i Hdiv) as H1.
+specialize (prime_only_divisors p Hp i Hdiv) as H1.
 flia Hi H1.
 Qed.
 
@@ -269,8 +269,8 @@ Theorem eq_primes_gcd_1 : ∀ a b,
   prime a → prime b → a ≠ b → Nat.gcd a b = 1.
 Proof.
 intros p q Hp Hq Hpq.
-specialize (prime_divisors _ Hp) as Hpp.
-specialize (prime_divisors _ Hq) as Hqp.
+specialize (prime_only_divisors _ Hp) as Hpp.
+specialize (prime_only_divisors _ Hq) as Hqp.
 specialize (Hpp (Nat.gcd p q) (Nat.gcd_divide_l _ _)) as H1.
 specialize (Hqp (Nat.gcd p q) (Nat.gcd_divide_r _ _)) as H2.
 destruct H1 as [H1| H1]; [ easy | ].
@@ -920,7 +920,7 @@ destruct g; [ easy | exfalso ].
 specialize (Nat.gcd_divide_l p n) as H1.
 rewrite Hg in H1.
 destruct H1 as (d, Hd).
-specialize (prime_divisors p Hp (S (S g))) as H1.
+specialize (prime_only_divisors p Hp (S (S g))) as H1.
 assert (H : Nat.divide (S (S g)) p). {
   rewrite Hd; apply Nat.divide_factor_r.
 }

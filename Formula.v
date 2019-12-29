@@ -3325,11 +3325,11 @@ rewrite <- Nat_sub_div_same; [ | apply Nat.divide_factor_r | easy ].
 now rewrite Nat.div_mul.
 Qed.
 
-Definition prime_divisors_of n :=
+Definition prime_divisors n :=
   filter (λ d, (is_prime d && (n mod d =? 0))%bool) (seq 1 n).
 
 Theorem prime_divisors_decomp : ∀ n a,
-  a ∈ prime_divisors_of n ↔ a ∈ prime_decomp n.
+  a ∈ prime_divisors n ↔ a ∈ prime_decomp n.
 Proof.
 intros.
 split; intros Ha. {
@@ -3364,7 +3364,7 @@ split; intros Ha. {
 }
 Qed.
 
-Theorem prime_divisors_nil_iff: ∀ n, prime_divisors_of n = [] ↔ n = 0 ∨ n = 1.
+Theorem prime_divisors_nil_iff: ∀ n, prime_divisors n = [] ↔ n = 0 ∨ n = 1.
 Proof.
 intros.
 split; intros Hn. {
@@ -3379,10 +3379,10 @@ split; intros Hn. {
 }
 Qed.
 
-Theorem glop : ∀ m, 2 ≤ m → φ m = φ_ldiv (prime_divisors_of m) m.
+Theorem glop : ∀ m, 2 ≤ m → φ m = φ_ldiv (prime_divisors m) m.
 Proof.
 intros * Hm.
-remember (prime_divisors_of m) as l eqn:Hl; symmetry in Hl.
+remember (prime_divisors m) as l eqn:Hl; symmetry in Hl.
 revert m Hm Hl.
 induction l as [| a l]; intros. {
   apply prime_divisors_nil_iff in Hl.
@@ -3395,7 +3395,7 @@ unfold coprimes.
 Search (φ_ldiv (_ :: _)).
 Compute (
   let (a, m) := (2, 3) in
-  let l := tl (prime_divisors_of m) in
+  let l := tl (prime_divisors m) in
  (filter (λ d : nat, Nat.gcd m d =? 1) (seq 1 (m - 1)),
   fold_left
        (λ (l0 : list nat) (p : nat), filter (λ d : nat, negb (d mod p =? 0)) l0)
