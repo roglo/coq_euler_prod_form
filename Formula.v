@@ -3438,9 +3438,10 @@ Theorem glop : ∀ m p pl,
   → φ_ldiv (p :: pl) m = φ_ldiv pl m * (p - 1) / p.
 Proof.
 intros * Hplm Hpl.
-Compute (let '(m, p, pl) := (24, 2, [4]) in
+Compute (let '(m, p, pl) := (30, 5, [6]) in
   (φ_ldiv (p :: pl) m, φ_ldiv pl m * (p - 1) / p)).
 Inspect 4.
+Search φ_ldiv.
 cbn.
 unfold φ_ldiv.
 ...
