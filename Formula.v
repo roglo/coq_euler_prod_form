@@ -3460,6 +3460,9 @@ destruct pl as [| r pl]. {
 (**)
 Inspect 6.
 Check φ_ldiv_two_from_fst.
+rewrite φ_ldiv_comm.
+rewrite φ_ldiv_two_from_fst.
+rewrite φ_ldiv_single.
 ...
   rewrite φ_ldiv_two; [ | easy | easy | easy | easy | easy ].
   rewrite φ_ldiv_single; [ | flia Hq ].
