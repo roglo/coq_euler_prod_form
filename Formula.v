@@ -3481,6 +3481,7 @@ induction pl as [| q pl]. {
 specialize (Hplm q (or_intror (or_introl (eq_refl _)))) as Hq.
 assert (Hqz : q ≠ 0) by flia Hq.
 specialize (Hpl 0 1 (Nat.neq_0_succ _)) as Hpq; cbn in Hpq.
+specialize (Nat_gcd_1_mul_divide _ _ _ Hpq Hpm (proj2 Hq)) as Hpqm.
 destruct pl as [| r pl]. {
   rewrite φ_ldiv_comm.
   rewrite Nat.gcd_comm in Hpq.
@@ -3490,54 +3491,35 @@ destruct pl as [| r pl]. {
   rewrite <- Nat_sub_div_same; cycle 1. {
     apply Nat.divide_factor_r.
   } {
-...
+    apply Nat.divide_sub_r; [ easy | ].
+    rewrite Nat.gcd_comm in Hpq.
+    destruct Hpqm as (k, Hk).
+    rewrite Hk, Nat.mul_assoc.
+    rewrite Nat.div_mul; [ | easy ].
+    apply Nat.divide_factor_r.
+  }
   rewrite Nat.div_mul; [ | easy ].
   f_equal.
   rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
-  rewrite <- Nat_sub_div_same.
-  rewrite <- Nat.div_div; [ | | easy ].
-  rewrite Nat.div_mul.
-  rewrite <- Nat_sub_div_same.
-  now rewrite Nat.div_div.
-...
-  rewrite φ_ldiv_two; [ | easy | easy | easy | easy | easy ].
-  rewrite φ_ldiv_single; [ | flia Hq ].
-...
-  rewrite add_le_φ_ldiv_two; [ | easy | easy | easy | ]. 2: {
-...
-  rewrite φ_ldiv_two; [ | easy | easy | easy | easy | easy ].
-  rewrite φ_ldiv_single; [ | flia Hq ].
-  rewrite <- Nat.mul_assoc.
-  rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
-  rewrite Nat.mul_sub_distr_l.
-  rewrite Nat.mul_assoc.
-  rewrite <- Nat_sub_div_same; cycle 1. {
-    apply Nat.mul_divide_mono_r.
-    transitivity m; [ easy | ].
-    apply Nat.divide_factor_l.
-  } {
-    transitivity m; [ | apply Nat.divide_factor_l ].
-    now apply Nat_gcd_1_mul_divide.
+  rewrite (Nat.mul_comm q).
+  rewrite <- Nat_sub_div_same; [ | | easy ]. 2: {
+    now apply Nat.mul_divide_mono_r.
   }
-  rewrite Nat.div_mul_cancel_r; [ | easy | flia Hq ].
-  rewrite (Nat.mul_comm p q), <- Nat.div_div; [ | flia Hq | easy ].
-  rewrite Nat.mul_comm at 2.
-  rewrite (Nat.divide_div_mul_exact m); [ | flia Hq | easy ].
-  rewrite (Nat.mul_comm (p - 1)).
-  rewrite Nat_sub_div_same; cycle 1. {
-    transitivity m; [ easy | ].
-    apply Nat.divide_factor_l.
-  } {
-    transitivity (m / q); [ | apply Nat.divide_factor_l ].
-(* on n'a pas déjà été confronté à ça ? *)
-Search (Nat.divide _ (_ / _)).
-...
+  rewrite (Nat.mul_comm p).
+  rewrite <- Nat.div_div; [ | easy | easy ].
+  rewrite Nat.div_mul; [ | easy ].
+  rewrite <- Nat_sub_div_same; [ | easy | ]. 2: {
+    destruct Hpqm as (k, Hk).
+    rewrite Hk, Nat.mul_assoc.
+    rewrite Nat.div_mul; [ | easy ].
+    apply Nat.divide_factor_r.
+  }
+  now rewrite Nat.div_div.
+}
 Inspect 4.
-Search φ_ldiv.
-cbn.
-unfold φ_ldiv.
-...
-unfold φ_ldiv.
+(* très bien : maintenant, il faut que je recommence tout, que
+   je refasse φ_ldiv_two_from_fst mais pour p :: pl, au lieu de
+   [p; q] *)
 ...
 
 Theorem glop : ∀ m pl,
