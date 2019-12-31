@@ -3478,16 +3478,27 @@ induction pl as [| q pl]. {
   }
   now rewrite Nat.div_mul.
 }
+specialize (Hplm q (or_intror (or_introl (eq_refl _)))) as Hq.
+assert (Hqz : q ≠ 0) by flia Hq.
+specialize (Hpl 0 1 (Nat.neq_0_succ _)) as Hpq; cbn in Hpq.
 destruct pl as [| r pl]. {
-  specialize (Hplm q (or_intror (or_introl (eq_refl _)))) as Hq.
-  specialize (Hpl 0 1 (Nat.neq_0_succ _)) as Hpq; cbn in Hpq.
   rewrite φ_ldiv_comm.
-  rewrite φ_ldiv_two_from_fst.
-  rewrite φ_ldiv_single.
+  rewrite Nat.gcd_comm in Hpq.
+  rewrite φ_ldiv_two_from_fst; [ | easy | easy | easy | easy | easy ].
+  rewrite φ_ldiv_single; [ | easy ].
   rewrite (Nat.mul_sub_distr_l p), Nat.mul_1_r.
-  rewrite <- Nat_sub_div_same.
+  rewrite <- Nat_sub_div_same; cycle 1. {
+    apply Nat.divide_factor_r.
+  } {
+...
   rewrite Nat.div_mul; [ | easy ].
   f_equal.
+  rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
+  rewrite <- Nat_sub_div_same.
+  rewrite <- Nat.div_div; [ | | easy ].
+  rewrite Nat.div_mul.
+  rewrite <- Nat_sub_div_same.
+  now rewrite Nat.div_div.
 ...
   rewrite φ_ldiv_two; [ | easy | easy | easy | easy | easy ].
   rewrite φ_ldiv_single; [ | flia Hq ].
