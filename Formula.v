@@ -3467,8 +3467,25 @@ assert (Hpm : Nat.divide p m). {
 assert (H2p : 2 ≤ p). {
   now specialize (Hplm p (or_introl (eq_refl _))).
 }
-Compute (let '(m, p, pl) := (30, 5, [6]) in
-  (φ_ldiv (p :: pl) m, φ_ldiv pl m * (p - 1) / p)).
+unfold φ_ldiv.
+cbn.
+Print φ_ldiv.
+Theorem glop : ∀ m p pl,
+  φ_ldiv (p :: pl) m =
+  length
+    (filter (λ d, negb (d mod p =? 0))
+       (fold_left (λ l p, filter (λ d, negb (d mod p =? 0)) l)
+        pl (seq 1 m))).
+Proof.
+intros.
+cbn.
+(* 1/ redefine φ_ldiv with a new function f such that
+         φ_ldiv pl m = length (f pl m)
+   2/ make a lemma proving that
+        length (f (p :: pl) m) = length (filter (... p ...) (f pl m))
+   (something like that.)
+ *)
+...
 induction pl as [| q pl]. {
   rewrite φ_ldiv_single; [ cbn | easy ].
   rewrite seq_length.
