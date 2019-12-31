@@ -2585,6 +2585,30 @@ destruct (Nat.lt_trichotomy i j) as [Hlt| [Heq| Hgt]]; [ | easy | ]. {
 }
 Qed.
 
+(* primitive roots *)
+
+Fixpoint prim_root_cycle_loop n g gr it :=
+  match it with
+  | 0 => []
+  | S it' =>
+      let gr' := (g * gr) mod n in
+      if gr' =? g then [gr]
+      else gr :: prim_root_cycle_loop n g gr' it'
+  end.
+
+Definition prim_root_cycle n g := prim_root_cycle_loop n g g (n - 1).
+
+Definition is_prim_root n g := length (prim_root_cycle n g) =? n - 1.
+
+Definition prim_roots n := filter (is_prim_root n) (seq 1 (n - 1)).
+
+(*
+Print prim_root_cycle_loop.
+Compute (prim_roots 101).
+Compute (is_prim_root 31 11).
+Compute (prim_root_cycle 31 23).
+*)
+
 (* Euler's totient function *)
 
 Definition coprimes n := filter (λ d, Nat.gcd n d =? 1) (seq 1 (n - 1)).
@@ -5066,27 +5090,6 @@ assert (Hll : ∀ a, a ∈ coprimes (m * n) ↔ a ∈ l'). {
 (* ah bin non *)
 ...
 
-Fixpoint prim_root_cycle_loop n g gr it :=
-  match it with
-  | 0 => []
-  | S it' =>
-      let gr' := (g * gr) mod n in
-      if gr' =? g then [gr]
-      else gr :: prim_root_cycle_loop n g gr' it'
-  end.
-
-Definition prim_root_cycle n g := prim_root_cycle_loop n g g (n - 1).
-
-Definition is_prim_root n g := length (prim_root_cycle n g) =? n - 1.
-
-Definition prim_roots n := filter (is_prim_root n) (seq 1 (n - 1)).
-
-Print prim_root_cycle_loop.
-Compute (prim_roots 101).
-Compute (is_prim_root 31 11).
-Compute (prim_root_cycle 31 23).
-
-...
 
 Theorem euler_criterion_quadratic_residue_iff : ∀ p a, prime p →
   a ∈ euler_crit p ↔ a ∈ quad_res p.
