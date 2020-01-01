@@ -3419,20 +3419,20 @@ Theorem φ_ldiv_cons : ∀ m p pl,
   → φ_ldiv (p :: pl) m = φ_ldiv pl m * (p - 1) / p.
 Proof.
 intros * Hplm Hpl.
-assert (Hpz : p ≠ 0). {
-  specialize (Hplm p (or_introl (eq_refl _))) as H1.
-  flia H1.
-}
-assert (Hpm : Nat.divide p m). {
-  now specialize (Hplm p (or_introl (eq_refl _))).
-}
-assert (H2p : 2 ≤ p). {
-  now specialize (Hplm p (or_introl (eq_refl _))).
-}
-unfold φ_ldiv.
-rewrite not_div_cons.
-revert p Hpl Hpz Hpm H2p.
+revert p Hpl.
 induction pl as [| q pl]; intros. {
+  assert (Hpz : p ≠ 0). {
+    specialize (Hplm p (or_introl (eq_refl _))) as H1.
+    flia H1.
+  }
+  assert (Hpm : Nat.divide p m). {
+    now specialize (Hplm p (or_introl (eq_refl _))).
+  }
+  assert (H2p : 2 ≤ p). {
+    now specialize (Hplm p (or_introl (eq_refl _))).
+  }
+  unfold φ_ldiv.
+  rewrite not_div_cons.
   cbn.
   rewrite seq_length.
   rewrite fold_φ_ldiv_single.
@@ -3442,12 +3442,25 @@ induction pl as [| q pl]; intros. {
   now rewrite Nat.div_mul.
 }
 cbn.
-rewrite List_fold_filter_comm.
+remember (q :: pl) as ql; cbn; subst ql.
+do 3 rewrite List_fold_filter_comm.
+rewrite fold_not_div.
+...
+Search (φ_ldiv (_ :: _)).
+...
+rewrite fold_φ_ldiv_single.
+...
 (*
 rewrite List_filter_filter_comm.
 *)
 rewrite fold_not_div.
+Search (
+...
 rewrite IHpl.
+
+rewrite fold_φ_ldiv_single.
+
+rewrite <- IHpl.
 Search (filter _ (not_div _ _)).
 do 2 rewrite <- not_div_cons.
 ...
