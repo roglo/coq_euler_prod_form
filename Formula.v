@@ -3413,6 +3413,7 @@ Theorem fold_φ_ldiv_single : ∀ p m,
   length (filter (λ d, negb (d mod p =? 0)) (seq 1 m)) = φ_ldiv [p] m.
 Proof. easy. Qed.
 
+(*
 Theorem φ_ldiv_cons : ∀ m p pl,
   (∀ p, p ∈ p :: pl → 2 ≤ p ∧ Nat.divide p m)
   → (∀ i j, i ≠ j → Nat.gcd (nth i (p :: pl) 1) (nth j (p :: pl) 1) = 1)
@@ -3516,6 +3517,7 @@ Inspect 4.
    je refasse φ_ldiv_two_from_fst mais pour p :: pl, au lieu de
    [p; q] *)
 ...
+*)
 
 Theorem glop : ∀ m pl,
   (∀ p, p ∈ pl → prime p ∧ Nat.divide p m)
@@ -3530,6 +3532,8 @@ induction pl as [| p pl]. {
   apply seq_length.
 }
 cbn.
+do 2 rewrite Nat.add_0_r.
+rewrite fold_not_div.
 ...
 Compute (let (m, pl) := (24, [12]) in
   (φ_ldiv pl m,
