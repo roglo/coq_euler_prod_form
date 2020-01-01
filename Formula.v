@@ -3413,7 +3413,6 @@ Theorem fold_φ_ldiv_single : ∀ p m,
   length (filter (λ d, negb (d mod p =? 0)) (seq 1 m)) = φ_ldiv [p] m.
 Proof. easy. Qed.
 
-(*
 Theorem φ_ldiv_cons : ∀ m p pl,
   (∀ p, p ∈ p :: pl → 2 ≤ p ∧ Nat.divide p m)
   → (∀ i j, i ≠ j → Nat.gcd (nth i (p :: pl) 1) (nth j (p :: pl) 1) = 1)
@@ -3533,7 +3532,32 @@ induction pl as [| p pl]. {
 }
 cbn.
 do 2 rewrite Nat.add_0_r.
+Search (fold_left _ _ (filter _ _)).
+rewrite List_fold_filter_comm.
 rewrite fold_not_div.
+Search (fold_left _ _ _ = _ * _).
+rewrite fold_left_mul_fun_from_1.
+rewrite fold_left_mul_from_1.
+rewrite (Nat.mul_comm p).
+rewrite <- Nat.div_div.
+rewrite Nat.mul_comm.
+rewrite Nat.mul_shuffle0.
+rewrite <- Nat.mul_assoc.
+Search (_ * (_ / _)).
+rewrite Nat.divide_div_mul_exact.
+rewrite <- IHpl.
+Search (filter _ (not_div _ _)).
+rewrite <- not_div_cons.
+Theorem fold_φ_ldiv : ∀ pl m,
+  length (not_div pl (seq 1 m)) = φ_ldiv pl m.
+Proof. easy. Qed.
+rewrite fold_φ_ldiv, Nat.mul_comm.
+...
+unfold φ_ldiv, not_div.
+rewrite Nat.mul_comm.
+...
+Print φ_ldiv.
+rewrite fold_φ_ldiv.
 ...
 Compute (let (m, pl) := (24, [12]) in
   (φ_ldiv pl m,
