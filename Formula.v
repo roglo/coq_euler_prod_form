@@ -3450,7 +3450,6 @@ rewrite fold_not_div.
 rewrite IHpl.
 Search (filter _ (not_div _ _)).
 do 2 rewrite <- not_div_cons.
-Search (not_div (_ :: _)).
 ...
 induction pl as [| q pl]. {
   rewrite φ_ldiv_single; [ cbn | easy ].
