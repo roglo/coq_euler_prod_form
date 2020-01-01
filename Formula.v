@@ -3419,6 +3419,12 @@ Theorem φ_ldiv_cons : ∀ m p pl,
   → φ_ldiv (p :: pl) m = φ_ldiv pl m * (p - 1) / p.
 Proof.
 intros * Hplm Hpl.
+cbn.
+rewrite List_fold_filter_comm.
+rewrite fold_not_div.
+unfold φ_ldiv.
+...
+intros * Hplm Hpl.
 revert p Hpl.
 induction pl as [| q pl]; intros. {
   assert (Hpz : p ≠ 0). {
