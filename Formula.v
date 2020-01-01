@@ -3467,6 +3467,10 @@ remember (a mod p =? 0) as b eqn:Hb; symmetry in Hb.
 destruct b; cbn. {
   apply Nat.eqb_eq in Hb.
   rewrite IHl.
+  clear - Hb.
+  induction l as [| b l]. {
+    unfold not_div.
+    cbn.
 ...
 
 Theorem φ_ldiv_cons : ∀ m p pl,
