@@ -3460,6 +3460,11 @@ intros; cbn.
 now rewrite List_fold_filter_comm.
 Qed.
 
+Theorem fold_not_div : ∀ pl l,
+  fold_left (λ al p, filter (λ d, negb (d mod p =? 0)) al) pl l =
+  not_div pl l.
+Proof. easy. Qed.
+
 Theorem fold_φ_ldiv_single : ∀ p m,
   length (filter (λ d, negb (d mod p =? 0)) (seq 1 m)) = φ_ldiv [p] m.
 Proof. easy. Qed.
@@ -3482,7 +3487,8 @@ assert (H2p : 2 ≤ p). {
 }
 unfold φ_ldiv.
 rewrite not_div_cons.
-induction pl as [| q pl]. {
+revert p Hpl Hpz Hpm H2p.
+induction pl as [| q pl]; intros. {
   cbn.
   rewrite seq_length.
   rewrite fold_φ_ldiv_single.
@@ -3494,6 +3500,10 @@ induction pl as [| q pl]. {
 cbn.
 rewrite List_fold_filter_comm.
 rewrite List_filter_filter_comm.
+rewrite fold_not_div.
+rewrite IHpl.
+Search (filter _ (not_div _ _)).
+do 2 rewrite <- not_div_cons.
 ...
 induction pl as [| q pl]. {
   rewrite φ_ldiv_single; [ cbn | easy ].
