@@ -3456,29 +3456,9 @@ Qed.
 Theorem not_div_cons : ∀ l p pl,
   not_div (p :: pl) l = filter (λ d, negb (d mod p =? 0)) (not_div pl l).
 Proof.
-intros.
-cbn.
-Print filter.
-...
-revert p pl.
-induction l as [| a l]; intros; cbn. {
-  unfold not_div; cbn.
-  induction pl as [| q pl]; [ easy | apply IHpl ].
-}
-remember (a mod p =? 0) as b eqn:Hb; symmetry in Hb.
-destruct b; cbn. {
-  apply Nat.eqb_eq in Hb.
-  rewrite IHl.
-  clear - Hb.
-  revert l.
-  induction pl as [| q pl]; intros. {
-    now cbn; rewrite Hb; cbn.
-  }
-  cbn.
-  remember (a mod q) as c eqn:Hc; symmetry in Hc.
-  destruct c; [ easy | ].
-  cbn.
-...
+intros; cbn.
+now rewrite List_fold_filter_comm.
+Qed.
 
 Theorem φ_ldiv_cons : ∀ m p pl,
   (∀ p, p ∈ p :: pl → 2 ≤ p ∧ Nat.divide p m)
@@ -3497,7 +3477,7 @@ assert (H2p : 2 ≤ p). {
   now specialize (Hplm p (or_introl (eq_refl _))).
 }
 unfold φ_ldiv.
-cbn.
+rewrite not_div_cons.
 ...
 induction pl as [| q pl]. {
   rewrite φ_ldiv_single; [ cbn | easy ].

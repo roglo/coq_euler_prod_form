@@ -910,7 +910,7 @@ destruct bg, bf; cbn. {
 }
 Qed.
 
-Theorem List_filter_fold_comm {A B} : ∀ f g (al : list A) (l : list B),
+Theorem List_fold_filter_comm {A B} : ∀ f g (al : list A) (l : list B),
   fold_left (λ l a, filter (f a) l) al (filter g l) =
   filter g (fold_left (λ l a, filter (f a) l) al l).
 Proof.
