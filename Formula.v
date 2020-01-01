@@ -3460,6 +3460,10 @@ intros; cbn.
 now rewrite List_fold_filter_comm.
 Qed.
 
+Theorem fold_φ_ldiv_single : ∀ p m,
+  length (filter (λ d, negb (d mod p =? 0)) (seq 1 m)) = φ_ldiv [p] m.
+Proof. easy. Qed.
+
 Theorem φ_ldiv_cons : ∀ m p pl,
   (∀ p, p ∈ p :: pl → 2 ≤ p ∧ Nat.divide p m)
   → (∀ i j, i ≠ j → Nat.gcd (nth i (p :: pl) 1) (nth j (p :: pl) 1) = 1)
@@ -3478,6 +3482,15 @@ assert (H2p : 2 ≤ p). {
 }
 unfold φ_ldiv.
 rewrite not_div_cons.
+induction pl as [| q pl]. {
+  cbn.
+  rewrite seq_length.
+  rewrite fold_φ_ldiv_single.
+  rewrite φ_ldiv_single; [ | easy ].
+  rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
+  rewrite <- Nat_sub_div_same; [ | apply Nat.divide_factor_r | easy ].
+  now rewrite Nat.div_mul.
+}
 ...
 induction pl as [| q pl]. {
   rewrite φ_ldiv_single; [ cbn | easy ].
