@@ -3050,8 +3050,6 @@ symmetry.
 now apply Nat.div_mod.
 Qed.
 
-Check Nat.divide_div_mul_exact.
-
 Theorem gcd_1_div_mul_exact : ∀ m p q kp kq,
   q ≠ 0
   → Nat.gcd p q = 1
@@ -3070,23 +3068,6 @@ rewrite <- Nat.divide_div_mul_exact; [ | easy | ]. 2: {
 }
 now rewrite Nat.mul_comm, Nat.div_mul.
 Qed.
-
-(* ok, but directly use gcd_1_div_mul_exact instead
-Theorem primes_div_mul_exact : ∀ m p q kp kq,
-  prime p
-  → prime q
-  → p ≠ q
-  → m = kp * p
-  → m = kq * q
-  → kp = q * (kp / q).
-Proof.
-intros * Hp Hq Hpq Hkp Hkq.
-apply (gcd_1_div_mul_exact m p q _ kq); [ | | easy | easy ]. {
-  now intros H; subst q.
-}
-now apply eq_primes_gcd_1.
-Qed.
-*)
 
 Theorem Nat_gcd_1_mul_divide : ∀ m p q,
   Nat.gcd p q = 1
@@ -3362,43 +3343,6 @@ Compute (let '(m,p,q):=(411,14,21) in (φ_ldiv[p;q]m,m-m/p-m/q+m/Nat.lcm p q)).
 easy.
 Qed.
 
-(* rather φ_ldiv_two
-Theorem φ_ldiv_two' : ∀ m p q,
-  2 ≤ p
-  → 2 ≤ q
-  → Nat.gcd p q = 1
-  → Nat.divide p m
-  → Nat.divide q m
-  → φ_ldiv [p; q] m = m * (p - 1) * (q - 1) / (p * q).
-Proof.
-intros * Hp Hq Hpq Hpm Hqm.
-destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
-destruct (Nat.eq_dec q 0) as [Hqz| Hqz]; [ now subst q | ].
-rewrite φ_ldiv_two_from_fst; [ | easy | easy | easy | easy | easy ].
-rewrite φ_ldiv_single; [ | easy ].
-rewrite <- Nat.mul_assoc.
-rewrite (Nat.mul_sub_distr_l q), Nat.mul_1_r.
-rewrite (Nat.mul_sub_distr_l _ (p - 1)).
-rewrite <- Nat_sub_div_same; cycle 1. {
-  rewrite Nat.mul_assoc.
-  apply Nat.mul_divide_mono_r.
-  now apply Nat.divide_mul_l.
-} {
-  apply Nat_gcd_1_mul_divide; [ easy | | ]. {
-    now apply Nat.divide_mul_l.
-  } {
-    now apply Nat.divide_mul_l.
-  }
-}
-f_equal.
-rewrite Nat.mul_assoc.
-rewrite Nat.div_mul_cancel_r; [ | easy | easy ].
-rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
-rewrite <- Nat_sub_div_same; [ | apply Nat.divide_factor_r | easy ].
-now rewrite Nat.div_mul.
-Qed.
-*)
-
 Definition prime_divisors n :=
   filter (λ d, (is_prime d && (n mod d =? 0))%bool) (seq 1 n).
 
@@ -3499,11 +3443,14 @@ induction pl as [| q pl]; intros. {
 }
 cbn.
 rewrite List_fold_filter_comm.
+(*
 rewrite List_filter_filter_comm.
+*)
 rewrite fold_not_div.
 rewrite IHpl.
 Search (filter _ (not_div _ _)).
 do 2 rewrite <- not_div_cons.
+Search (not_div (_ :: _)).
 ...
 induction pl as [| q pl]. {
   rewrite φ_ldiv_single; [ cbn | easy ].
