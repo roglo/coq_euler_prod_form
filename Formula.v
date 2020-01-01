@@ -3491,6 +3491,9 @@ induction pl as [| q pl]. {
   rewrite <- Nat_sub_div_same; [ | apply Nat.divide_factor_r | easy ].
   now rewrite Nat.div_mul.
 }
+cbn.
+rewrite List_fold_filter_comm.
+rewrite List_filter_filter_comm.
 ...
 induction pl as [| q pl]. {
   rewrite φ_ldiv_single; [ cbn | easy ].
