@@ -2838,8 +2838,10 @@ Qed.
 
 (* http://mathworld.wolfram.com/TotientFunction.html *)
 
-Definition φ_ldiv pl m :=
-  length (fold_left (λ l p, filter (λ d, negb (d mod p =? 0)) l) pl (seq 1 m)).
+Definition not_div pl l :=
+  fold_left (λ l p, filter (λ d, negb (d mod p =? 0)) l) pl l.
+
+Definition φ_ldiv pl m := length (not_div pl (seq 1 m)).
 
 Theorem length_filter_mod_seq : ∀ a b,
   a mod b ≠ 0
@@ -3451,7 +3453,23 @@ split; intros Hn. {
 }
 Qed.
 
-Theorem glop : ∀ m p pl,
+Theorem not_div_cons : ∀ l p pl,
+  not_div (p :: pl) l = filter (λ d, negb (d mod p =? 0)) (not_div pl l).
+Proof.
+intros.
+cbn.
+revert p pl.
+induction l as [| a l]; intros; cbn. {
+  unfold not_div; cbn.
+  induction pl as [| q pl]; [ easy | apply IHpl ].
+}
+remember (a mod p =? 0) as b eqn:Hb; symmetry in Hb.
+destruct b; cbn. {
+  apply Nat.eqb_eq in Hb.
+  rewrite IHl.
+...
+
+Theorem φ_ldiv_cons : ∀ m p pl,
   (∀ p, p ∈ p :: pl → 2 ≤ p ∧ Nat.divide p m)
   → (∀ i j, i ≠ j → Nat.gcd (nth i (p :: pl) 1) (nth j (p :: pl) 1) = 1)
   → φ_ldiv (p :: pl) m = φ_ldiv pl m * (p - 1) / p.
@@ -3469,22 +3487,6 @@ assert (H2p : 2 ≤ p). {
 }
 unfold φ_ldiv.
 cbn.
-Print φ_ldiv.
-Theorem glop : ∀ m p pl,
-  φ_ldiv (p :: pl) m =
-  length
-    (filter (λ d, negb (d mod p =? 0))
-       (fold_left (λ l p, filter (λ d, negb (d mod p =? 0)) l)
-        pl (seq 1 m))).
-Proof.
-intros.
-cbn.
-(* 1/ redefine φ_ldiv with a new function f such that
-         φ_ldiv pl m = length (f pl m)
-   2/ make a lemma proving that
-        length (f (p :: pl) m) = length (filter (... p ...) (f pl m))
-   (something like that.)
- *)
 ...
 induction pl as [| q pl]. {
   rewrite φ_ldiv_single; [ cbn | easy ].
