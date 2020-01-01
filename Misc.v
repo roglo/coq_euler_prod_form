@@ -910,6 +910,18 @@ destruct bg, bf; cbn. {
 }
 Qed.
 
+Theorem List_filter_fold_comm {A B} : ∀ f g (al : list A) (l : list B),
+  fold_left (λ l a, filter (f a) l) al (filter g l) =
+  filter g (fold_left (λ l a, filter (f a) l) al l).
+Proof.
+intros.
+revert l.
+induction al as [| a al]; intros; [ easy | ].
+cbn.
+rewrite <- IHal.
+now rewrite List_filter_filter_comm.
+Qed.
+
 Theorem List_length_filter_negb {A} : ∀ f (l : list A),
   NoDup l
   → length (filter f l) = length l - length (filter (λ x, negb (f x)) l).

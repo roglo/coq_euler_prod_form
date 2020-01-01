@@ -3458,6 +3458,8 @@ Theorem not_div_cons : ∀ l p pl,
 Proof.
 intros.
 cbn.
+Print filter.
+...
 revert p pl.
 induction l as [| a l]; intros; cbn. {
   unfold not_div; cbn.
