@@ -3362,9 +3362,24 @@ Theorem length_not_div_cons : ∀ m p pl,
      length (not_div pl (seq 1 m)) * (p - 1) / p.
 Proof.
 intros * Hplm Hpl.
-cbn.
-rewrite fold_not_div.
-Print not_div.
+destruct (Nat.eq_dec p 0) as [Hpz| Hpz]. {
+  subst p; cbn.
+  rewrite List_filter_all_false; [ | easy ].
+  apply length_zero_iff_nil.
+  induction pl as [| q pl]; [ easy | cbn ].
+  rewrite IHpl; [ easy | | ]. {
+    intros p Hp.
+    now apply Hplm; left.
+  } {
+    intros * Hij.
+    specialize (Hpl i j Hij) as H1.
+...
+cbn; rewrite fold_not_div.
+induction pl as [| q pl]. {
+  cbn.
+  induction m. {
+    cbn.
+    rewrite Nat.div_0_l.
 ...
 
 Theorem partial_φ_cons : ∀ m p pl,
