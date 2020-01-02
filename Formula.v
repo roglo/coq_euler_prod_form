@@ -3388,7 +3388,6 @@ destruct (Nat.eq_dec p 0) as [Hpz| Hpz]. {
   }
 }
 cbn; rewrite fold_not_div.
-...
 induction pl as [| q pl]. {
   cbn.
   rewrite seq_length.
@@ -3400,6 +3399,16 @@ induction pl as [| q pl]. {
   now rewrite Nat.div_mul.
 }
 cbn.
+...
+rewrite List_fold_filter_comm.
+rewrite fold_not_div.
+Search (fold_left _ _ (filter _ _ )).
+
+Search (length (filter _ _)).
+
+rewrite List_fold_filter_comm.
+...
+
 do 3 rewrite List_fold_filter_comm.
 rewrite fold_not_div.
 ...
