@@ -3425,7 +3425,7 @@ destruct (Nat.eq_dec p 0) as [Hpz| Hpz]. {
   }
 }
 cbn; rewrite fold_not_div.
-(**)
+...
 remember (seq 1 m) as l eqn:Hl.
 clear Hl.
 revert pl Hplm Hpl.
@@ -3436,10 +3436,16 @@ induction l as [| a l]; intros. {
 cbn.
 remember (negb (a mod p =? 0)) as b eqn:Hb; symmetry in Hb.
 destruct b. {
+  apply Bool.negb_true_iff in Hb.
+  apply Nat.eqb_neq in Hb.
   rewrite not_div_cons_r.
   rewrite app_length; symmetry.
   rewrite not_div_cons_r; symmetry.
   rewrite app_length.
+  remember (length (not_div pl [a])) as len eqn:Hlen; symmetry in Hlen.
+  destruct len; [ now apply IHl | ].
+  destruct len. {
+...
   rewrite IHl.
   remember (length (not_div pl [a])) as len eqn:Hlen; symmetry in Hlen.
   destruct len; [ easy | ].
