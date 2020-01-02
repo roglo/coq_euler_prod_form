@@ -2614,61 +2614,6 @@ Compute (prim_root_cycle 31 23).
 Definition coprimes n := filter (λ d, Nat.gcd n d =? 1) (seq 1 (n - 1)).
 Definition φ n := length (coprimes n).
 
-(*
-Fixpoint φ'_num n c d :=
-  if is_prime d then
-    if Nat.eq_dec (n mod d) 0 then c * (d - 1) else c
-  else c.
-
-Fixpoint φ'_den n c d :=
-  if is_prime d then
-    if Nat.eq_dec (n mod d) 0 then c * d else c
-  else c.
-
-Definition φ' n :=
-  fold_left (φ'_num n) (seq 1 n) n /
-  fold_left (φ'_den n) (seq 1 n) 1.
-*)
-
-Definition φ' n :=
-  let '(pn, pd) :=
-    fold_left
-       (λ '(cn, cd) p,
-        if is_prime p then
-          match n mod p with
-          | 0 => (cn * (p - 1), cd * p)
-          | _ => (cn, cd) end
-        else (cn, cd)) (seq 1 n) (1, 1)
-  in
-  n * pn / pd.
-
-Compute (let n := 105 in (φ' n, φ n)).
-
-(*
-Fixpoint φ'_num n c d :=
-  if Nat.eq_dec (n mod d) 0 then c * (d - 1) else c.
-
-Fixpoint φ'_den n c d :=
-  if Nat.eq_dec (n mod d) 0 then c * d else c.
-
-Definition φ' n :=
-  n *
-  fold_left (φ'_num n) (filter is_prime (seq 1 n)) 1 /
-  fold_left (φ'_den n) (filter is_prime (seq 1 n)) 1.
-*)
-
-(*
-Definition bdiv a b :=
-  if Nat.eq_dec (a mod b) 0 then true else false.
-
-Definition φ' n :=
-  n *
-  fold_left Nat.mul (map pred (filter (bdiv n) (filter is_prime (seq 1 n)))) 1 /
-  fold_left Nat.mul (filter (bdiv n) (filter is_prime (seq 1 n))) 1.
-*)
-
-Compute (let n := 17 in (φ n, φ' n)).
-
 Theorem prime_φ : ∀ p, prime p → φ p = p - 1.
 Proof.
 intros * Hp.
@@ -2739,9 +2684,6 @@ clear Hp.
 replace k with (k - 1 + 1) at 1 by flia Hk.
 rewrite Nat.pow_add_r, Nat.pow_1_r.
 remember (p ^ (k - 1)) as a eqn:Ha.
-(*
-Compute (let '(p, a) := (24, 0) in (length (filter (λ d : nat, match d mod p with 0 => false | S _ => true end) (seq 1 (a * p - 1))), a * (p - 1))).
-*)
 clear k Hk Ha Hpz.
 induction a; [ easy | ].
 cbn.
@@ -2841,7 +2783,7 @@ Qed.
 Definition not_div pl l :=
   fold_left (λ l p, filter (λ d, negb (d mod p =? 0)) l) pl l.
 
-Definition φ_ldiv pl m := length (not_div pl (seq 1 m)).
+Definition partial_φ pl m := length (not_div pl (seq 1 m)).
 
 Theorem length_filter_mod_seq : ∀ a b,
   a mod b ≠ 0
@@ -2954,12 +2896,12 @@ rewrite Hr.
 now apply Nat.lt_le_incl, Nat.mod_upper_bound.
 Qed.
 
-Theorem φ_ldiv_single_div_mod : ∀ m p,
+Theorem partial_φ_single_div_mod : ∀ m p,
   p ≠ 0
-  → φ_ldiv [p] m = φ_ldiv [p] (p * (m / p)) + m mod p.
+  → partial_φ [p] m = partial_φ [p] (p * (m / p)) + m mod p.
 Proof.
 intros * Hpz.
-unfold φ_ldiv; cbn.
+unfold partial_φ; cbn.
 specialize (Nat.div_mod m p Hpz) as H1.
 rewrite H1 at 1.
 rewrite seq_app, filter_app, app_length.
@@ -2993,15 +2935,15 @@ apply Nat.mul_le_mono_l.
 flia Hpk.
 Qed.
 
-Theorem φ_ldiv_single : ∀ m p,
+Theorem partial_φ_single : ∀ m p,
   p ≠ 0
-  → φ_ldiv [p] m = m - m / p.
+  → partial_φ [p] m = m - m / p.
 Proof.
 intros * Hpz.
-rewrite φ_ldiv_single_div_mod; [ | easy ].
+rewrite partial_φ_single_div_mod; [ | easy ].
 assert (divisor_φ_p : ∀ m p,
   Nat.divide p m
-  → φ_ldiv [p] m = m - m / p). {
+  → partial_φ [p] m = m - m / p). {
   clear m p Hpz.
   intros * Hpm.
   destruct (Nat.eq_dec p 0) as [Hpz| Hpz]. {
@@ -3012,10 +2954,10 @@ assert (divisor_φ_p : ∀ m p,
   destruct (Nat.eq_dec p 1) as [Hp1| Hp1]. {
     subst p; cbn - [ "/" ].
     rewrite Nat.div_1_r, Nat.sub_diag.
-    unfold φ_ldiv; cbn.
+    unfold partial_φ; cbn.
     now rewrite List_filter_all_false.
   }
-  unfold φ_ldiv.
+  unfold partial_φ.
   destruct Hpm as (c, Hc).
   subst m.
   rewrite Nat.div_mul; [ | easy ].
@@ -3113,10 +3055,10 @@ rewrite Nat.div_mul; [ | easy ].
 now rewrite Nat.mul_comm.
 Qed.
 
-Theorem φ_ldiv_comm : ∀ m p q, φ_ldiv [p; q] m = φ_ldiv [q; p] m.
+Theorem partial_φ_comm : ∀ m p q, partial_φ [p; q] m = partial_φ [q; p] m.
 Proof.
 intros.
-unfold φ_ldiv; cbn.
+unfold partial_φ; cbn.
 now rewrite List_filter_filter_comm.
 Qed.
 
@@ -3155,13 +3097,13 @@ apply Nat.add_le_mul. {
 }
 Qed.
 
-Theorem φ_ldiv_two : ∀ m p q,
+Theorem partial_φ_two : ∀ m p q,
   2 ≤ p
   → 2 ≤ q
   → Nat.gcd p q = 1
   → Nat.divide p m
   → Nat.divide q m
-  → φ_ldiv [p; q] m = m - m / p - m / q + m / (p * q).
+  → partial_φ [p; q] m = m - m / p - m / q + m / (p * q).
 Proof.
 intros * H2p H2q Hg (*Hmpq*)Hpm Hqm.
 assert (Hpz : p ≠ 0) by flia H2p.
@@ -3172,7 +3114,7 @@ destruct (Nat.eq_dec m 0) as [Hmz| Hmz]. {
   rewrite Nat.div_0_l; [ easy | ].
   now apply Nat.neq_mul_0.
 }
-unfold φ_ldiv; cbn.
+unfold partial_φ; cbn.
 rewrite List_filter_filter_comm.
 rewrite List_filter_filter.
 rewrite List_length_filter_negb; [ | apply seq_NoDup ].
@@ -3193,8 +3135,8 @@ rewrite <- Nat_sub_sub_distr. 2: {
 f_equal.
 rewrite (List_length_filter_or p q (seq 1 m) (λ d n, n mod d =? 0)).
 (* lemma to do for p and q and perhaps p*q *)
-specialize (φ_ldiv_single m p Hpz) as H1.
-unfold φ_ldiv in H1; cbn in H1.
+specialize (partial_φ_single m p Hpz) as H1.
+unfold partial_φ in H1; cbn in H1.
 rewrite List_length_filter_negb in H1; [ | apply seq_NoDup ].
 rewrite seq_length in H1.
 apply Nat.add_sub_eq_nz in H1. 2: {
@@ -3216,8 +3158,8 @@ rewrite (filter_ext_in _ (λ d, d mod p =? 0)) in H1. 2: {
 rewrite <- H1.
 (**)
 clear H1.
-specialize (φ_ldiv_single m q Hqz) as H1.
-unfold φ_ldiv in H1; cbn in H1.
+specialize (partial_φ_single m q Hqz) as H1.
+unfold partial_φ in H1; cbn in H1.
 rewrite List_length_filter_negb in H1; [ | apply seq_NoDup ].
 rewrite seq_length in H1.
 apply Nat.add_sub_eq_nz in H1. 2: {
@@ -3240,8 +3182,8 @@ rewrite <- H1.
 clear H1.
 f_equal.
 assert (Hpqz : p * q ≠ 0) by now apply Nat.neq_mul_0.
-specialize (φ_ldiv_single m (p * q) Hpqz) as H1.
-unfold φ_ldiv in H1; cbn in H1.
+specialize (partial_φ_single m (p * q) Hpqz) as H1.
+unfold partial_φ in H1; cbn in H1.
 rewrite List_length_filter_negb in H1; [ | apply seq_NoDup ].
 rewrite seq_length in H1.
 apply Nat.add_sub_eq_nz in H1. 2: {
@@ -3290,19 +3232,19 @@ rewrite (filter_ext_in _ (λ d, (d mod p =? 0) && (d mod q =? 0))%bool) in H1. 2
 easy.
 Qed.
 
-Theorem φ_ldiv_two_from_fst : ∀ m p q,
+Theorem partial_φ_two_from_fst : ∀ m p q,
   2 ≤ p
   → 2 ≤ q
   → Nat.gcd p q = 1
   → Nat.divide p m
   → Nat.divide q m
-  → φ_ldiv [p; q] m = φ_ldiv [p] m - m * (p - 1) / (p * q).
+  → partial_φ [p; q] m = partial_φ [p] m - m * (p - 1) / (p * q).
 Proof.
 intros * H2p H2q Hg Hpm Hqm.
 destruct (Nat.eq_dec m 0) as [Hmz| Hmz]; [ now subst m | ].
 destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ flia Hpz H2p | ].
 destruct (Nat.eq_dec q 0) as [Hqz| Hqz]; [ flia Hqz H2q | ].
-rewrite φ_ldiv_single; [ | easy ].
+rewrite partial_φ_single; [ | easy ].
 rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
 replace ((m * p - m) / (p * q)) with (m / q - m / (p * q)). 2: {
   rewrite <- (Nat.div_mul_cancel_l m q p); [ | easy | easy ].
@@ -3321,7 +3263,7 @@ replace ((m * p - m) / (p * q)) with (m / q - m / (p * q)). 2: {
     }
   }
 }
-rewrite φ_ldiv_two; [ | easy | easy | easy | easy | easy ].
+rewrite partial_φ_two; [ | easy | easy | easy | easy | easy ].
 rewrite Nat_sub_sub_distr. 2: {
   split. {
     rewrite Nat.mul_comm.
@@ -3335,10 +3277,10 @@ rewrite Nat_sub_sub_distr. 2: {
   }
 }
 (*
-Compute (let '(m,p,q):=(41,7,5) in (φ_ldiv[p;q]m,m-m/p-m/q+m/(p*q))).
+Compute (let '(m,p,q):=(41,7,5) in (partial_φ[p;q]m,m-m/p-m/q+m/(p*q))).
 Compute (let '(m,p,q):=(41,7,5) in map(λ d,(d mod p) * (d mod q))(seq 1 m)).
 Compute (let '(m,p,q):=(41,7,5) in length(filter(λ d,negb(d=?0))(map(λ d,(d mod p)*(d mod q))(seq 1 m)))).
-Compute (let '(m,p,q):=(411,14,21) in (φ_ldiv[p;q]m,m-m/p-m/q+m/Nat.lcm p q)).
+Compute (let '(m,p,q):=(411,14,21) in (partial_φ[p;q]m,m-m/p-m/q+m/Nat.lcm p q)).
 *)
 easy.
 Qed.
@@ -3409,20 +3351,20 @@ Theorem fold_not_div : ∀ pl l,
   not_div pl l.
 Proof. easy. Qed.
 
-Theorem fold_φ_ldiv_single : ∀ p m,
-  length (filter (λ d, negb (d mod p =? 0)) (seq 1 m)) = φ_ldiv [p] m.
+Theorem fold_partial_φ_single : ∀ p m,
+  length (filter (λ d, negb (d mod p =? 0)) (seq 1 m)) = partial_φ [p] m.
 Proof. easy. Qed.
 
-Theorem φ_ldiv_cons : ∀ m p pl,
+Theorem partial_φ_cons : ∀ m p pl,
   (∀ p, p ∈ p :: pl → 2 ≤ p ∧ Nat.divide p m)
   → (∀ i j, i ≠ j → Nat.gcd (nth i (p :: pl) 1) (nth j (p :: pl) 1) = 1)
-  → φ_ldiv (p :: pl) m = φ_ldiv pl m * (p - 1) / p.
+  → partial_φ (p :: pl) m = partial_φ pl m * (p - 1) / p.
 Proof.
 intros * Hplm Hpl.
 cbn.
 rewrite List_fold_filter_comm.
 rewrite fold_not_div.
-unfold φ_ldiv.
+unfold partial_φ.
 ...
 intros * Hplm Hpl.
 revert p Hpl.
@@ -3437,12 +3379,12 @@ induction pl as [| q pl]; intros. {
   assert (H2p : 2 ≤ p). {
     now specialize (Hplm p (or_introl (eq_refl _))).
   }
-  unfold φ_ldiv.
+  unfold partial_φ.
   rewrite not_div_cons.
   cbn.
   rewrite seq_length.
-  rewrite fold_φ_ldiv_single.
-  rewrite φ_ldiv_single; [ | easy ].
+  rewrite fold_partial_φ_single.
+  rewrite partial_φ_single; [ | easy ].
   rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
   rewrite <- Nat_sub_div_same; [ | apply Nat.divide_factor_r | easy ].
   now rewrite Nat.div_mul.
@@ -3452,9 +3394,9 @@ remember (q :: pl) as ql; cbn; subst ql.
 do 3 rewrite List_fold_filter_comm.
 rewrite fold_not_div.
 ...
-Search (φ_ldiv (_ :: _)).
+Search (partial_φ (_ :: _)).
 ...
-rewrite fold_φ_ldiv_single.
+rewrite fold_partial_φ_single.
 ...
 (*
 rewrite List_filter_filter_comm.
@@ -3464,14 +3406,14 @@ Search (
 ...
 rewrite IHpl.
 
-rewrite fold_φ_ldiv_single.
+rewrite fold_partial_φ_single.
 
 rewrite <- IHpl.
 Search (filter _ (not_div _ _)).
 do 2 rewrite <- not_div_cons.
 ...
 induction pl as [| q pl]. {
-  rewrite φ_ldiv_single; [ cbn | easy ].
+  rewrite partial_φ_single; [ cbn | easy ].
   rewrite seq_length.
   rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
   rewrite <- Nat_sub_div_same; [ | | easy ]. 2: {
@@ -3484,10 +3426,10 @@ assert (Hqz : q ≠ 0) by flia Hq.
 specialize (Hpl 0 1 (Nat.neq_0_succ _)) as Hpq; cbn in Hpq.
 specialize (Nat_gcd_1_mul_divide _ _ _ Hpq Hpm (proj2 Hq)) as Hpqm.
 destruct pl as [| r pl]. {
-  rewrite φ_ldiv_comm.
+  rewrite partial_φ_comm.
   rewrite Nat.gcd_comm in Hpq.
-  rewrite φ_ldiv_two_from_fst; [ | easy | easy | easy | easy | easy ].
-  rewrite φ_ldiv_single; [ | easy ].
+  rewrite partial_φ_two_from_fst; [ | easy | easy | easy | easy | easy ].
+  rewrite partial_φ_single; [ | easy ].
   rewrite (Nat.mul_sub_distr_l p), Nat.mul_1_r.
   rewrite <- Nat_sub_div_same; cycle 1. {
     apply Nat.divide_factor_r.
@@ -3519,7 +3461,7 @@ destruct pl as [| r pl]. {
 }
 Inspect 4.
 (* très bien : maintenant, il faut que je recommence tout, que
-   je refasse φ_ldiv_two_from_fst mais pour p :: pl, au lieu de
+   je refasse partial_φ_two_from_fst mais pour p :: pl, au lieu de
    [p; q] *)
 ...
 *)
@@ -3527,7 +3469,7 @@ Inspect 4.
 Theorem glop : ∀ m pl,
   (∀ p, p ∈ pl → prime p ∧ Nat.divide p m)
   → NoDup pl
-  → φ_ldiv pl m =
+  → partial_φ pl m =
      m * fold_left (λ a p, a * (p - 1)) pl 1 / fold_left Nat.mul pl 1.
 Proof.
 intros * Hplm Hpl.
@@ -3554,24 +3496,24 @@ rewrite Nat.divide_div_mul_exact.
 rewrite <- IHpl.
 Search (filter _ (not_div _ _)).
 rewrite <- not_div_cons.
-Theorem fold_φ_ldiv : ∀ pl m,
-  length (not_div pl (seq 1 m)) = φ_ldiv pl m.
+Theorem fold_partial_φ : ∀ pl m,
+  length (not_div pl (seq 1 m)) = partial_φ pl m.
 Proof. easy. Qed.
-rewrite fold_φ_ldiv, Nat.mul_comm.
+rewrite fold_partial_φ, Nat.mul_comm.
 ...
-unfold φ_ldiv, not_div.
+unfold partial_φ, not_div.
 rewrite Nat.mul_comm.
 ...
-Print φ_ldiv.
-rewrite fold_φ_ldiv.
+Print partial_φ.
+rewrite fold_partial_φ.
 ...
 Compute (let (m, pl) := (24, [12]) in
-  (φ_ldiv pl m,
+  (partial_φ pl m,
    m * fold_left (λ a p : nat, a * (p - 1)) pl 1 / fold_left Nat.mul pl 1)).
 Inspect 4.
 ...
 
-Theorem glop : ∀ m, 2 ≤ m → φ m = φ_ldiv (prime_divisors m) m.
+Theorem glop : ∀ m, 2 ≤ m → φ m = partial_φ (prime_divisors m) m.
 Proof.
 intros * Hm.
 ...
@@ -3586,7 +3528,7 @@ Inspect 4.
 cbn.
 unfold φ.
 unfold coprimes.
-Search (φ_ldiv (_ :: _)).
+Search (partial_φ (_ :: _)).
 Compute (
   let (a, m) := (2, 3) in
   let l := tl (prime_divisors m) in
@@ -3595,7 +3537,7 @@ Compute (
        (λ (l0 : list nat) (p : nat), filter (λ d : nat, negb (d mod p =? 0)) l0)
        l (filter (λ d : nat, negb (d mod a =? 0)) (seq 1 m)))).
 ...
-Compute (map (λ m, (φ m, φ_ldiv (prime_divisors m) m)) (seq 1 40)).
+Compute (map (λ m, (φ m, partial_φ (prime_divisors m) m)) (seq 1 40)).
 ...
 
 (*
