@@ -3355,6 +3355,43 @@ Theorem fold_partial_φ_single : ∀ p m,
   length (filter (λ d, negb (d mod p =? 0)) (seq 1 m)) = partial_φ [p] m.
 Proof. easy. Qed.
 
+Theorem not_div_nil_r : ∀ pl, not_div pl [] = [].
+Proof.
+intros.
+unfold not_div.
+now induction pl.
+Qed.
+
+Theorem List_fold_left_filtering_nil_r {A B} :
+  ∀ pl (f : A → B → _),
+  fold_left (λ l p, filter (f p) l) pl [] = [].
+Proof.
+intros.
+now induction pl.
+Qed.
+
+Theorem not_div_filter_comm : ∀ pl l f,
+  not_div pl (filter f l) = filter f (not_div pl l).
+Proof.
+intros.
+unfold not_div.
+apply List_fold_filter_comm.
+Qed.
+
+Theorem not_div_cons_r : ∀ pl a l,
+  not_div pl (a :: l) = not_div pl [a] ++ not_div pl l.
+Proof.
+intros.
+revert a l.
+induction pl as [| p pl]; intros; [ easy | cbn ].
+rewrite fold_not_div.
+remember (negb (a mod p =? 0)) as b eqn:Hb; symmetry in Hb.
+destruct b; [ apply IHpl | ].
+rewrite List_fold_left_filtering_nil_r, app_nil_l.
+rewrite List_fold_filter_comm.
+now rewrite not_div_filter_comm.
+Qed.
+
 Theorem length_not_div_cons : ∀ m p pl,
   (∀ p, p ∈ p :: pl → 2 ≤ p ∧ Nat.divide p m)
   → (∀ i j, i ≠ j → Nat.gcd (nth i (p :: pl) 1) (nth j (p :: pl) 1) = 1)
@@ -3388,29 +3425,19 @@ destruct (Nat.eq_dec p 0) as [Hpz| Hpz]. {
   }
 }
 cbn; rewrite fold_not_div.
-induction pl as [| q pl]. {
-  cbn.
-  rewrite seq_length.
-  rewrite fold_partial_φ_single.
-  rewrite partial_φ_single; [ | easy ].
-  rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
-  specialize (Hplm p (or_introl eq_refl)) as H1.
-  rewrite <- Nat_sub_div_same; [ | apply Nat.divide_factor_r | easy ].
-  now rewrite Nat.div_mul.
+(**)
+remember (seq 1 m) as l eqn:Hl.
+clear Hl.
+revert pl Hplm Hpl.
+induction l as [| a l]; intros. {
+  do 2 rewrite not_div_nil_r; cbn.
+  now rewrite Nat.div_0_l.
 }
 cbn.
-...
-rewrite List_fold_filter_comm.
-rewrite fold_not_div.
-Search (fold_left _ _ (filter _ _ )).
-
-Search (length (filter _ _)).
-
-rewrite List_fold_filter_comm.
-...
-
-do 3 rewrite List_fold_filter_comm.
-rewrite fold_not_div.
+remember (negb (a mod p =? 0)) as b eqn:Hb; symmetry in Hb.
+destruct b. {
+  rewrite not_div_cons_r.
+  rewrite app_length.
 ...
 
 Theorem partial_φ_cons : ∀ m p pl,
