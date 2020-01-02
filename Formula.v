@@ -3425,6 +3425,19 @@ destruct (Nat.eq_dec p 0) as [Hpz| Hpz]. {
   }
 }
 cbn; rewrite fold_not_div.
+(**)
+induction pl as [| q pl]. {
+  cbn; rewrite seq_length.
+  rewrite fold_partial_φ_single.
+  rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
+  rewrite <- Nat_sub_div_same; [ | apply Nat.divide_factor_r | ]. 2: {
+    now apply Hplm; left.
+  }
+  rewrite Nat.div_mul; [ | easy ].
+  now apply partial_φ_single.
+}
+do 2 rewrite not_div_cons.
+rewrite not_div_filter_comm.
 ...
 remember (seq 1 m) as l eqn:Hl.
 clear Hl.
