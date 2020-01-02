@@ -3391,15 +3391,16 @@ cbn; rewrite fold_not_div.
 induction pl as [| q pl]. {
   cbn.
   rewrite seq_length.
-  induction m; [ now rewrite Nat.div_0_l | ].
-  rewrite <- (Nat.add_1_r m).
-  rewrite seq_app, filter_app, app_length; cbn.
-  rewrite IHm.
-  remember (S m mod p =? 0) as b eqn:Hb; symmetry in Hb.
-  destruct b; cbn. {
-    rewrite Nat.add_0_r.
-(* ouh la la, ça déconne, ça. *)
-f_equal; f_equal.
+  rewrite fold_partial_φ_single.
+  rewrite partial_φ_single; [ | easy ].
+  rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
+  specialize (Hplm p (or_introl eq_refl)) as H1.
+  rewrite <- Nat_sub_div_same; [ | apply Nat.divide_factor_r | easy ].
+  now rewrite Nat.div_mul.
+}
+cbn.
+do 3 rewrite List_fold_filter_comm.
+rewrite fold_not_div.
 ...
 
 Theorem partial_φ_cons : ∀ m p pl,
