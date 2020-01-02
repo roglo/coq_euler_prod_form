@@ -3355,16 +3355,32 @@ Theorem fold_partial_φ_single : ∀ p m,
   length (filter (λ d, negb (d mod p =? 0)) (seq 1 m)) = partial_φ [p] m.
 Proof. easy. Qed.
 
+Theorem length_not_div_cons : ∀ m p pl,
+  (∀ p, p ∈ p :: pl → 2 ≤ p ∧ Nat.divide p m)
+  → (∀ i j, i ≠ j → Nat.gcd (nth i (p :: pl) 1) (nth j (p :: pl) 1) = 1)
+  → length (not_div (p :: pl) (seq 1 m)) =
+     length (not_div pl (seq 1 m)) * (p - 1) / p.
+Proof.
+intros * Hplm Hpl.
+cbn.
+rewrite fold_not_div.
+Print not_div.
+...
+
 Theorem partial_φ_cons : ∀ m p pl,
   (∀ p, p ∈ p :: pl → 2 ≤ p ∧ Nat.divide p m)
   → (∀ i j, i ≠ j → Nat.gcd (nth i (p :: pl) 1) (nth j (p :: pl) 1) = 1)
   → partial_φ (p :: pl) m = partial_φ pl m * (p - 1) / p.
 Proof.
 intros * Hplm Hpl.
+unfold partial_φ.
+...
 cbn.
 rewrite List_fold_filter_comm.
 rewrite fold_not_div.
 unfold partial_φ.
+Search (filter _ (not_div _ _)).
+rewrite <- not_div_cons.
 ...
 intros * Hplm Hpl.
 revert p Hpl.
