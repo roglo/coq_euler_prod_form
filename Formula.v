@@ -3390,9 +3390,16 @@ destruct (Nat.eq_dec p 0) as [Hpz| Hpz]. {
 cbn; rewrite fold_not_div.
 induction pl as [| q pl]. {
   cbn.
+  rewrite seq_length.
   induction m; [ now rewrite Nat.div_0_l | ].
   rewrite <- (Nat.add_1_r m).
-  rewrite seq_app, filter_app, app_length.
+  rewrite seq_app, filter_app, app_length; cbn.
+  rewrite IHm.
+  remember (S m mod p =? 0) as b eqn:Hb; symmetry in Hb.
+  destruct b; cbn. {
+    rewrite Nat.add_0_r.
+(* ouh la la, ça déconne, ça. *)
+f_equal; f_equal.
 ...
 
 Theorem partial_φ_cons : ∀ m p pl,
