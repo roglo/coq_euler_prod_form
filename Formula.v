@@ -3372,14 +3372,27 @@ destruct (Nat.eq_dec p 0) as [Hpz| Hpz]. {
     now apply Hplm; left.
   } {
     intros * Hij.
-    specialize (Hpl i j Hij) as H1.
-...
+    destruct i. {
+      unfold nth at 1.
+      specialize (Hpl 0 (S j) (Nat.neq_0_succ _)) as H1.
+      now destruct j.
+    }
+    remember (nth j) as f; cbn; subst f.
+    destruct j. {
+      cbn.
+      now specialize (Hpl (S (S i)) 0 (Nat.neq_succ_0 _)) as H1.
+    }
+    cbn.
+    apply Nat.succ_inj_wd_neg in Hij.
+    now specialize (Hpl (S (S i)) (S (S j)) Hij) as H1.
+  }
+}
 cbn; rewrite fold_not_div.
 induction pl as [| q pl]. {
   cbn.
-  induction m. {
-    cbn.
-    rewrite Nat.div_0_l.
+  induction m; [ now rewrite Nat.div_0_l | ].
+  rewrite <- (Nat.add_1_r m).
+  rewrite seq_app, filter_app, app_length.
 ...
 
 Theorem partial_φ_cons : ∀ m p pl,
