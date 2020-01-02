@@ -2646,8 +2646,8 @@ rewrite (prime_φ p); [ | easy ].
 destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
 unfold φ.
 unfold coprimes.
-rewrite
-  (filter_ext_in _ (λ d, match d mod p with 0 => false | _ => true end)). 2: {
+(**)
+rewrite (filter_ext_in _ (λ d, negb (d mod p =? 0))). 2: {
   intros a Ha.
   apply in_seq in Ha.
   rewrite Nat.add_comm, Nat.sub_add in Ha. 2: {
