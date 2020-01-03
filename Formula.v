@@ -3133,7 +3133,8 @@ rewrite <- Nat_sub_sub_distr. 2: {
   apply Nat.mul_le_mono_l; flia Hqz.
 }
 f_equal.
-rewrite (List_length_filter_or p q (seq 1 m) (λ d n, n mod d =? 0)).
+rewrite
+  (List_length_filter_or p q _ (λ d n, n mod d =? 0) (λ d n, n mod d =? 0)).
 (* lemma to do for p and q and perhaps p*q *)
 specialize (partial_φ_single m p Hpz) as H1.
 unfold partial_φ in H1; cbn in H1.
@@ -3425,8 +3426,6 @@ destruct (Nat.eq_dec p 0) as [Hpz| Hpz]. {
   }
 }
 cbn; rewrite fold_not_div.
-(**)
-...
 induction pl as [| q pl]. {
   cbn; rewrite seq_length.
   rewrite fold_partial_φ_single.
@@ -3439,6 +3438,22 @@ induction pl as [| q pl]. {
 }
 do 2 rewrite not_div_cons.
 rewrite not_div_filter_comm.
+rewrite List_filter_filter_comm.
+rewrite List_filter_filter.
+rewrite List_length_filter_negb; [ | ].
+rewrite (filter_ext_in _ (λ d, orb (d mod p =? 0) (d mod q =? 0))). 2: {
+  intros a Ha.
+  rewrite <- Bool.negb_orb.
+  apply Bool.negb_involutive.
+}
+rewrite
+  (List_length_filter_or p q _ (λ d n, n mod d =? 0) (λ d n, n mod d =? 0)).
+...
+rewrite seq_length.
+rewrite <- Nat.sub_add_distr.
+rewrite <- Nat_sub_sub_distr. 2: {
+Check @List_length_filter_or.
+(**)
 ...
 Compute (let (pl, a) := ([2; 3; 4; 5], 30) in (not_div pl [a])).
 ...
