@@ -3426,6 +3426,7 @@ destruct (Nat.eq_dec p 0) as [Hpz| Hpz]. {
 }
 cbn; rewrite fold_not_div.
 (**)
+...
 induction pl as [| q pl]. {
   cbn; rewrite seq_length.
   rewrite fold_partial_φ_single.
