@@ -3448,6 +3448,7 @@ rewrite (filter_ext_in _ (λ d, orb (d mod p =? 0) (d mod q =? 0))). 2: {
 }
 rewrite
   (List_length_filter_or p q _ (λ d n, n mod d =? 0) (λ d n, n mod d =? 0)).
+Search (length (filter _ _)).
 ...
 rewrite seq_length.
 rewrite <- Nat.sub_add_distr.
