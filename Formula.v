@@ -2851,24 +2851,79 @@ apply Nat_gcd_1_mul_l. {
 }
 Qed.
 
-Theorem prime_mul_φ : ∀ p q, prime p → prime q → φ (p * q) = φ p * φ q.
+Theorem divide_add_div_le : ∀ m p q,
+  2 ≤ p
+  → 2 ≤ q
+  → Nat.divide p m
+  → Nat.divide q m
+  → m / p + m / q ≤ m.
 Proof.
-(**)
-intros * Hp Hq.
-rewrite φ_primes_partial; [ | easy | easy ].
-...
-intros * Hp Hq.
-rewrite (prime_φ _ Hp).
-rewrite (prime_φ _ Hq).
-unfold φ, coprimes.
-...
+intros * H2p H2q Hpm Hqm.
+destruct Hpm as (kp, Hkp).
+destruct Hqm as (kq, Hkq).
+destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ flia Hpz H2p | ].
+destruct (Nat.eq_dec q 0) as [Hqz| Hqz]; [ flia Hqz H2q | ].
+rewrite Hkq at 2.
+rewrite Nat.div_mul; [ | easy ].
+rewrite Hkp at 1.
+rewrite Nat.div_mul; [ | easy ].
+apply (Nat.mul_le_mono_pos_r _ _ (p * q)). {
+  destruct p; [ easy | ].
+  destruct q; [ easy | cbn; flia ].
+}
+rewrite Nat.mul_add_distr_r.
+rewrite Nat.mul_assoc, <- Hkp.
+rewrite Nat.mul_assoc, Nat.mul_shuffle0, <- Hkq.
+rewrite <- Nat.mul_add_distr_l.
+apply Nat.mul_le_mono_l.
+rewrite Nat.add_comm.
+apply Nat.add_le_mul. {
+  destruct p; [ easy | ].
+  destruct p; [ easy | flia ].
+} {
+  destruct q; [ easy | ].
+  destruct q; [ easy | flia ].
+}
+Qed.
 
-(* http://mathworld.wolfram.com/TotientFunction.html *)
-
-Definition not_div pl l :=
-  fold_left (λ l p, filter (λ d, negb (d mod p =? 0)) l) pl l.
-
-Definition partial_φ pl m := length (not_div pl (seq 1 m)).
+Theorem partial_φ_single_div_mod : ∀ m p,
+  p ≠ 0
+  → partial_φ [p] m = partial_φ [p] (p * (m / p)) + m mod p.
+Proof.
+intros * Hpz.
+unfold partial_φ; cbn.
+specialize (Nat.div_mod m p Hpz) as H1.
+rewrite H1 at 1.
+rewrite seq_app, filter_app, app_length.
+f_equal.
+rewrite List_filter_all_true; [ apply seq_length | ].
+intros a Ha.
+apply Bool.negb_true_iff.
+apply Nat.eqb_neq.
+apply in_seq in Ha.
+remember (m / p) as q eqn:Hq.
+intros Hap.
+specialize (Nat.div_mod a p Hpz) as H2.
+rewrite Hap, Nat.add_0_r in H2.
+rewrite H2 in Ha.
+remember (a / p) as k eqn:Hk.
+destruct Ha as (Ha, Hb).
+apply Nat.nlt_ge in Ha.
+apply Ha; clear Ha.
+apply -> Nat.succ_le_mono.
+assert (Hpk : p * k < p * (q + 1)). {
+  apply (lt_le_trans _ (1 + p * q + m mod p)); [ easy | ].
+  rewrite <- Nat.add_assoc, Nat.add_comm.
+  rewrite Nat.mul_add_distr_l, Nat.mul_1_r.
+  rewrite <- Nat.add_assoc.
+  apply Nat.add_le_mono_l.
+  rewrite Nat.add_comm.
+  now apply Nat.mod_upper_bound.
+}
+apply Nat.mul_lt_mono_pos_l in Hpk; [ | flia Hpz ].
+apply Nat.mul_le_mono_l.
+flia Hpk.
+Qed.
 
 Theorem length_filter_mod_seq : ∀ a b,
   a mod b ≠ 0
@@ -2979,45 +3034,6 @@ rewrite Nat.add_sub_assoc; [ | flia Hab1 ].
 rewrite Nat.sub_add; [ easy | ].
 rewrite Hr.
 now apply Nat.lt_le_incl, Nat.mod_upper_bound.
-Qed.
-
-Theorem partial_φ_single_div_mod : ∀ m p,
-  p ≠ 0
-  → partial_φ [p] m = partial_φ [p] (p * (m / p)) + m mod p.
-Proof.
-intros * Hpz.
-unfold partial_φ; cbn.
-specialize (Nat.div_mod m p Hpz) as H1.
-rewrite H1 at 1.
-rewrite seq_app, filter_app, app_length.
-f_equal.
-rewrite List_filter_all_true; [ apply seq_length | ].
-intros a Ha.
-apply Bool.negb_true_iff.
-apply Nat.eqb_neq.
-apply in_seq in Ha.
-remember (m / p) as q eqn:Hq.
-intros Hap.
-specialize (Nat.div_mod a p Hpz) as H2.
-rewrite Hap, Nat.add_0_r in H2.
-rewrite H2 in Ha.
-remember (a / p) as k eqn:Hk.
-destruct Ha as (Ha, Hb).
-apply Nat.nlt_ge in Ha.
-apply Ha; clear Ha.
-apply -> Nat.succ_le_mono.
-assert (Hpk : p * k < p * (q + 1)). {
-  apply (lt_le_trans _ (1 + p * q + m mod p)); [ easy | ].
-  rewrite <- Nat.add_assoc, Nat.add_comm.
-  rewrite Nat.mul_add_distr_l, Nat.mul_1_r.
-  rewrite <- Nat.add_assoc.
-  apply Nat.add_le_mono_l.
-  rewrite Nat.add_comm.
-  now apply Nat.mod_upper_bound.
-}
-apply Nat.mul_lt_mono_pos_l in Hpk; [ | flia Hpz ].
-apply Nat.mul_le_mono_l.
-flia Hpk.
 Qed.
 
 Theorem partial_φ_single : ∀ m p,
@@ -3138,48 +3154,6 @@ rewrite <- Nat.divide_div_mul_exact; [ | easy | ]. 2: {
 rewrite (Nat.mul_comm p).
 rewrite Nat.div_mul; [ | easy ].
 now rewrite Nat.mul_comm.
-Qed.
-
-Theorem partial_φ_comm : ∀ m p q, partial_φ [p; q] m = partial_φ [q; p] m.
-Proof.
-intros.
-unfold partial_φ; cbn.
-now rewrite List_filter_filter_comm.
-Qed.
-
-Theorem divide_add_div_le : ∀ m p q,
-  2 ≤ p
-  → 2 ≤ q
-  → Nat.divide p m
-  → Nat.divide q m
-  → m / p + m / q ≤ m.
-Proof.
-intros * H2p H2q Hpm Hqm.
-destruct Hpm as (kp, Hkp).
-destruct Hqm as (kq, Hkq).
-destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ flia Hpz H2p | ].
-destruct (Nat.eq_dec q 0) as [Hqz| Hqz]; [ flia Hqz H2q | ].
-rewrite Hkq at 2.
-rewrite Nat.div_mul; [ | easy ].
-rewrite Hkp at 1.
-rewrite Nat.div_mul; [ | easy ].
-apply (Nat.mul_le_mono_pos_r _ _ (p * q)). {
-  destruct p; [ easy | ].
-  destruct q; [ easy | cbn; flia ].
-}
-rewrite Nat.mul_add_distr_r.
-rewrite Nat.mul_assoc, <- Hkp.
-rewrite Nat.mul_assoc, Nat.mul_shuffle0, <- Hkq.
-rewrite <- Nat.mul_add_distr_l.
-apply Nat.mul_le_mono_l.
-rewrite Nat.add_comm.
-apply Nat.add_le_mul. {
-  destruct p; [ easy | ].
-  destruct p; [ easy | flia ].
-} {
-  destruct q; [ easy | ].
-  destruct q; [ easy | flia ].
-}
 Qed.
 
 Theorem partial_φ_two : ∀ m p q,
@@ -3316,6 +3290,46 @@ rewrite (filter_ext_in _ (λ d, (d mod p =? 0) && (d mod q =? 0))%bool) in H1. 2
   }
 }
 easy.
+Qed.
+
+Theorem prime_mul_φ : ∀ p q,
+  prime p → prime q → p ≠ q → φ (p * q) = φ p * φ q.
+Proof.
+intros * Hp Hq Hpq.
+assert (H2p : 2 ≤ p) by now apply prime_ge_2.
+assert (H2q : 2 ≤ q) by now apply prime_ge_2.
+rewrite φ_primes_partial; [ | easy | easy ].
+rewrite partial_φ_two; [ | easy | easy | | | ]; cycle 1. {
+  now apply eq_primes_gcd_1.
+} {
+  apply Nat.divide_factor_l.
+} {
+  apply Nat.divide_factor_r.
+}
+rewrite Nat.mul_comm, Nat.div_mul; [ | flia H2p ].
+rewrite Nat.mul_comm, Nat.div_mul; [ | flia H2q ].
+rewrite Nat.div_same; [ | apply Nat.neq_mul_0; flia H2p H2q ].
+rewrite prime_φ; [ | easy ].
+rewrite prime_φ; [ | easy ].
+rewrite Nat.mul_sub_distr_r, Nat.mul_1_l.
+rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
+rewrite Nat_sub_sub_swap.
+symmetry; apply Nat_sub_sub_distr.
+split; [ flia H2q | ].
+apply Nat.le_add_le_sub_r.
+rewrite Nat.add_comm.
+now apply Nat.add_le_mul.
+Qed.
+
+...
+
+(* http://mathworld.wolfram.com/TotientFunction.html *)
+
+Theorem partial_φ_comm : ∀ m p q, partial_φ [p; q] m = partial_φ [q; p] m.
+Proof.
+intros.
+unfold partial_φ; cbn.
+now rewrite List_filter_filter_comm.
 Qed.
 
 Theorem partial_φ_two_from_fst : ∀ m p q,
