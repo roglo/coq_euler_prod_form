@@ -2778,6 +2778,11 @@ rewrite seq_app, filter_app, app_length.
 now rewrite IHp.
 Qed.
 
+Theorem prime_mul_φ : ∀ p q, prime p → prime q → φ (p * q) = φ p * φ q.
+Proof.
+intros * Hp Hq.
+...
+
 (* http://mathworld.wolfram.com/TotientFunction.html *)
 
 Definition not_div pl l :=
@@ -3449,6 +3454,7 @@ rewrite (filter_ext_in _ (λ d, orb (d mod p =? 0) (d mod q =? 0))). 2: {
 rewrite
   (List_length_filter_or p q _ (λ d n, n mod d =? 0) (λ d n, n mod d =? 0)).
 Search (length (filter _ _)).
+Search φ.
 ...
 rewrite seq_length.
 rewrite <- Nat.sub_add_distr.
