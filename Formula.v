@@ -2778,9 +2778,26 @@ rewrite seq_app, filter_app, app_length.
 now rewrite IHp.
 Qed.
 
+Definition not_div pl l :=
+  fold_left (λ l p, filter (λ d, negb (d mod p =? 0)) l) pl l.
+
+Definition partial_φ pl m := length (not_div pl (seq 1 m)).
+
+Theorem glop : ∀ p q, prime p → prime q → φ (p * q) = partial_φ [p; q] (p * q).
+Proof.
+intros * Hp Hq.
+unfold φ, partial_φ.
+f_equal; cbn.
+unfold coprimes.
+rewrite List_filter_filter.
+...
+
 Theorem prime_mul_φ : ∀ p q, prime p → prime q → φ (p * q) = φ p * φ q.
 Proof.
 intros * Hp Hq.
+rewrite (prime_φ _ Hp).
+rewrite (prime_φ _ Hq).
+unfold φ, coprimes.
 ...
 
 (* http://mathworld.wolfram.com/TotientFunction.html *)
