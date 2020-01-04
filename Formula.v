@@ -2783,13 +2783,58 @@ Definition not_div pl l :=
 
 Definition partial_φ pl m := length (not_div pl (seq 1 m)).
 
-Theorem glop : ∀ p q, prime p → prime q → φ (p * q) = partial_φ [p; q] (p * q).
+Theorem φ_primes_partial : ∀ p q,
+  prime p → prime q → φ (p * q) = partial_φ [p; q] (p * q).
 Proof.
 intros * Hp Hq.
 unfold φ, partial_φ.
 f_equal; cbn.
 unfold coprimes.
 rewrite List_filter_filter.
+replace (p * q) with (p * q - 1 + 1) at 2. 2: {
+  apply Nat.sub_add.
+  destruct p; [ easy | ].
+  destruct q; [ easy | flia ].
+}
+rewrite seq_app.
+rewrite Nat.add_sub_assoc. 2: {
+  destruct p; [ easy | ].
+  destruct q; [ easy | flia ].
+}
+rewrite Nat.add_comm, Nat.add_sub; cbn.
+rewrite filter_app; cbn.
+rewrite Nat.mod_mul; [ cbn | now intros H; subst q ].
+rewrite app_nil_r.
+apply filter_ext_in; intros a Ha.
+rewrite <- Bool.negb_orb.
+remember (a mod p =? 0) as b eqn:Hb; symmetry in Hb.
+remember (a mod q =? 0) as c eqn:Hc; symmetry in Hc.
+destruct b. {
+  apply Nat.eqb_eq in Hb.
+  rewrite Bool.orb_true_r; cbn.
+  apply Nat.eqb_neq.
+  apply Nat.mod_divide in Hb; [ | now intros H1; subst p ].
+  destruct Hb as (k, Hk); rewrite Hk, Nat.mul_comm.
+  rewrite Nat.gcd_mul_mono_r.
+  intros H.
+  apply Nat.eq_mul_1 in H.
+  now rewrite (proj2 H) in Hp.
+}
+destruct c. {
+  apply Nat.eqb_eq in Hc.
+  rewrite Bool.orb_true_l; cbn.
+  apply Nat.eqb_neq.
+  apply Nat.mod_divide in Hc; [ | now intros H1; subst q ].
+  destruct Hc as (k, Hk); rewrite Hk.
+  rewrite Nat.gcd_mul_mono_r.
+  intros H.
+  apply Nat.eq_mul_1 in H.
+  now rewrite (proj2 H) in Hq.
+}
+cbn.
+apply Nat.eqb_eq.
+apply Nat.eqb_neq in Hb.
+apply Nat.eqb_neq in Hc.
 ...
 
 Theorem prime_mul_φ : ∀ p q, prime p → prime q → φ (p * q) = φ p * φ q.
