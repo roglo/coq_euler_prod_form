@@ -2835,10 +2835,28 @@ cbn.
 apply Nat.eqb_eq.
 apply Nat.eqb_neq in Hb.
 apply Nat.eqb_neq in Hc.
-...
+apply in_seq in Ha.
+apply Nat_gcd_1_mul_l. {
+  rewrite <- Nat.gcd_mod; [ | now intros H; subst p ].
+  rewrite Nat.gcd_comm.
+  apply eq_gcd_prime_small_1; [ easy | ].
+  split; [ | now apply Nat.mod_upper_bound; intros H; subst p ].
+  flia Hb.
+} {
+  rewrite <- Nat.gcd_mod; [ | now intros H; subst q ].
+  rewrite Nat.gcd_comm.
+  apply eq_gcd_prime_small_1; [ easy | ].
+  split; [ | now apply Nat.mod_upper_bound; intros H; subst q ].
+  flia Hc.
+}
+Qed.
 
 Theorem prime_mul_φ : ∀ p q, prime p → prime q → φ (p * q) = φ p * φ q.
 Proof.
+(**)
+intros * Hp Hq.
+rewrite φ_primes_partial; [ | easy | easy ].
+...
 intros * Hp Hq.
 rewrite (prime_φ _ Hp).
 rewrite (prime_φ _ Hq).
