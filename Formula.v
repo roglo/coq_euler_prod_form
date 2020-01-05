@@ -3556,6 +3556,8 @@ split; intros Ha. {
 }
 Qed.
 
+Inspect 1.
+
 ...
 
 (* http://mathworld.wolfram.com/TotientFunction.html *)
