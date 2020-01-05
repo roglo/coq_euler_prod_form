@@ -3506,7 +3506,36 @@ split; intros Ha. {
   apply prime_divisors_decomp in Hp.
   now apply in_prime_decomp_is_prime in Hp.
 } {
-  apply not_div_prop in Ha.
+  apply filter_In.
+  split. {
+    apply not_div_prop in Ha; [ easy | ].
+    intros p Hp Hcon; subst p.
+    apply prime_divisors_decomp in Hp.
+    now apply in_prime_decomp_is_prime in Hp.
+  } {
+    apply Nat.eqb_eq.
+    apply not_div_prop in Ha. 2: {
+      intros p Hp Hcon; subst p.
+      apply prime_divisors_decomp in Hp.
+      now apply in_prime_decomp_is_prime in Hp.
+    }
+    destruct Ha as (Ha, Hap).
+Search prime_divisors.
+Search prime_decomp.
+...
+Search (Nat.gcd _ _ = 1).
+Search Nat.gcd.
+...
+    apply Nat.gcd_unique_alt; [ flia | ].
+    intros q.
+    split; intros Hq. {
+      destruct Hq as (k, Hk).
+      symmetry in Hk.
+      apply Nat.eq_mul_1 in Hk.
+      destruct Hk; subst k q.
+      split; apply Nat.divide_1_l.
+    } {
+      destruct Hq as (Hqm, Hqa).
 ...
 
 (* http://mathworld.wolfram.com/TotientFunction.html *)
