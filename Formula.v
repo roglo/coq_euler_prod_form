@@ -3520,8 +3520,13 @@ split; intros Ha. {
       now apply in_prime_decomp_is_prime in Hp.
     }
     destruct Ha as (Ha, Hap).
-Search prime_divisors.
-Search prime_decomp.
+    specialize (prime_decomp_prod m) as H1.
+    assert (H : m ≠ 0) by flia Hm.
+    specialize (H1 H); clear H.
+    rewrite <- H1; clear H1.
+    remember (prime_decomp m) as pl eqn:Hpl; symmetry in Hpl.
+    induction pl as [| q pl]; [ easy | ].
+    cbn; rewrite Nat.add_0_r.
 ...
 Search (Nat.gcd _ _ = 1).
 Search Nat.gcd.
