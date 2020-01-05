@@ -3399,43 +3399,58 @@ now rewrite List_fold_filter_comm.
 Qed.
 
 Theorem not_div_prop : ∀ pl l a,
-  a ∈ not_div pl l ↔ a ∈ l ∧ ∀ p, p ≠ 0 → p ∈ pl → a mod p ≠ 0.
+  (∀ p, p ∈ pl → p ≠ 0)
+  → a ∈ not_div pl l ↔ a ∈ l ∧ ∀ p, p ∈ pl → a mod p ≠ 0.
 Proof.
-intros.
+intros * Hpz.
 split; intros Ha. {
   assert (Hal : a ∈ l). {
     induction pl as [| p pl]; intros; [ easy | ].
     rewrite not_div_cons in Ha.
     apply filter_In in Ha.
-    now apply IHpl.
+    apply IHpl; [ | easy ].
+    intros q Hq.
+    now apply Hpz; right.
   }
   split; [ easy | ].
-  intros p Hpz Hp Hcon.
-  apply Nat.mod_divide in Hcon; [ | easy ].
+  intros p Hp Hcon.
+  apply Nat.mod_divide in Hcon; [ | now apply Hpz ].
   destruct Hcon as (k, Hk).
   induction pl as [| q pl]; [ easy | ].
   rewrite not_div_cons in Ha.
   apply filter_In in Ha.
-  destruct Hp as [Hp| Hp]; [ | now apply IHpl ].
-  subst q.
-  destruct Ha as (_, Ha).
-  apply Bool.negb_true_iff in Ha.
-  apply Nat.eqb_neq in Ha; apply Ha.
-  rewrite Hk.
-  now apply Nat.mod_mul.
+  destruct Hp as [Hp| Hp]. {
+    subst q.
+    destruct Ha as (_, Ha).
+    apply Bool.negb_true_iff in Ha.
+    apply Nat.eqb_neq in Ha; apply Ha.
+    rewrite Hk.
+    now apply Nat.mod_mul, Hpz; left.
+  } {
+    apply IHpl; [ | easy | easy ].
+    intros r Hr.
+    now apply Hpz; right.
+  }
 } {
   destruct Ha as (Hal, Hap).
   induction pl as [| q pl]; [ easy | ].
   rewrite not_div_cons.
   apply filter_In.
   split. {
-    apply IHpl; intros p Hpz Hp.
-    apply Hap; [ easy | now right ].
+    apply IHpl. {
+      intros p Hp.
+      now apply Hpz; right.
+    } {
+      intros p Hp.
+      now apply Hap; right.
+    }
   } {
     apply Bool.negb_true_iff.
     apply Nat.eqb_neq.
-    apply Hap; [ | now left ].
-...
+    now apply Hap; left.
+  }
+}
+Qed.
 
 Theorem φ_from_partial_φ : ∀ m, 2 ≤ m → φ m = partial_φ (prime_divisors m) m.
 Proof.
@@ -3467,10 +3482,10 @@ intros a.
 split; intros Ha. {
   apply filter_In in Ha.
   destruct Ha as (Ha, Hg).
-  apply in_seq in Ha.
   apply Nat.eqb_eq in Hg.
-Search not_div.
-Print not_div.
+  apply not_div_prop. 2: {
+    split; [ easy | ].
+    intros p Hp.
 ...
 
 (* http://mathworld.wolfram.com/TotientFunction.html *)
