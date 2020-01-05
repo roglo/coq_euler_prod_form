@@ -3375,7 +3375,23 @@ split; intros Hn. {
 }
 Qed.
 
-Theorem glop : ∀ m, 2 ≤ m → φ m = partial_φ (prime_divisors m) m.
+Theorem fold_not_div : ∀ pl l,
+  fold_left (λ al p, filter (λ d, negb (d mod p =? 0)) al) pl l =
+  not_div pl l.
+Proof. easy. Qed.
+
+Theorem sorted_not_div : ∀ pl l, Sorted lt l → Sorted lt (not_div pl l).
+Proof.
+intros * Hs.
+revert l Hs.
+induction pl as [| p pl]; intros; [ easy | cbn ].
+rewrite fold_not_div.
+apply IHpl.
+apply (SetoidList.filter_sort eq_equivalence Nat.lt_strorder); [ | easy ].
+apply Nat.lt_wd.
+Qed.
+
+Theorem φ_from_partial_φ : ∀ m, 2 ≤ m → φ m = partial_φ (prime_divisors m) m.
 Proof.
 intros * Hm.
 unfold φ, partial_φ.
@@ -3391,7 +3407,6 @@ transitivity (filter (λ d, Nat.gcd m d =? 1) (seq 1 m)). {
   destruct b; [ | now rewrite app_nil_r ].
   apply Nat.eqb_eq in Hb; flia Hb Hm.
 }
-unfold not_div.
 apply sorted_equiv_nat_lists. {
   apply (SetoidList.filter_sort eq_equivalence Nat.lt_strorder). {
     apply Nat.lt_wd.
@@ -3399,24 +3414,16 @@ apply sorted_equiv_nat_lists. {
     apply Sorted_Sorted_seq.
   }
 } {
-Search (Sorted _ (fold_left _ _ _)).
-...
-remember (seq 1 m) as l eqn:Hl; clear Hl.
-induction l as [| a l]. {
-  cbn.
-  remember (prime_divisors m) as l eqn:Hl; clear Hl.
-  now induction l.
+  apply sorted_not_div.
+  apply Sorted_Sorted_seq.
 }
-cbn.
-remember (Nat.gcd m a =? 1) as b eqn:Hb; symmetry in Hb.
-destruct b. {
-  apply Nat.eqb_eq in Hb.
-  remember (prime_divisors m) as l' eqn:Hl'; symmetry in Hl'.
-  destruct l' as [| a' l']. {
-    apply prime_divisors_nil_iff in Hl'.
-    flia Hm Hl'.
-  }
-  cbn.
+intros a.
+split; intros Ha. {
+  apply filter_In in Ha.
+  destruct Ha as (Ha, Hg).
+  apply in_seq in Ha.
+  apply Nat.eqb_eq in Hg.
+Search (_ ∈ not_div _ _).
 ...
 
 (* http://mathworld.wolfram.com/TotientFunction.html *)
@@ -3487,11 +3494,6 @@ Proof.
 intros; cbn.
 now rewrite List_fold_filter_comm.
 Qed.
-
-Theorem fold_not_div : ∀ pl l,
-  fold_left (λ al p, filter (λ d, negb (d mod p =? 0)) al) pl l =
-  not_div pl l.
-Proof. easy. Qed.
 
 Theorem fold_partial_φ_single : ∀ p m,
   length (filter (λ d, negb (d mod p =? 0)) (seq 1 m)) = partial_φ [p] m.
