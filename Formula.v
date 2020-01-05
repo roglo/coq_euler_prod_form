@@ -3392,6 +3392,7 @@ transitivity (filter (λ d, Nat.gcd m d =? 1) (seq 1 m)). {
   apply Nat.eqb_eq in Hb; flia Hb Hm.
 }
 unfold not_div.
+...
 remember (seq 1 m) as l eqn:Hl; clear Hl.
 induction l as [| a l]. {
   cbn.
