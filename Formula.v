@@ -3399,7 +3399,7 @@ now rewrite List_fold_filter_comm.
 Qed.
 
 Theorem not_div_prop : ∀ pl l a,
-  a ∈ not_div pl l ↔ a ∈ l ∧ ∀ p, p ≠ 0 → p ∈ l → a mod p ≠ 0.
+  a ∈ not_div pl l ↔ a ∈ l ∧ ∀ p, p ≠ 0 → p ∈ pl → a mod p ≠ 0.
 Proof.
 intros.
 split; intros Ha. {
@@ -3412,6 +3412,9 @@ split; intros Ha. {
   split; [ easy | ].
   intros p Hpz Hp Hcon.
   apply Nat.mod_divide in Hcon; [ | easy ].
+  destruct Hcon as (k, Hk).
+  induction pl as [| q pl]; [ easy | ].
+  rewrite not_div_cons in Ha.
 ...
 
 Theorem φ_from_partial_φ : ∀ m, 2 ≤ m → φ m = partial_φ (prime_divisors m) m.
