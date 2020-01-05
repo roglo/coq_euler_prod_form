@@ -3524,23 +3524,38 @@ split; intros Ha. {
     assert (H : m ≠ 0) by flia Hm.
     specialize (H1 H); clear H.
     rewrite <- H1; clear H1.
+    assert (Had : ∀ p, p ∈ prime_decomp m → Nat.gcd a p = 1). {
+      intros p Hp.
+      apply prime_divisors_decomp in Hp.
+      specialize (Hap _ Hp) as H1.
+      assert (Hpz : p ≠ 0) by now intros H; subst p.
+      rewrite Nat.gcd_comm.
+      rewrite <- Nat.gcd_mod; [ | easy ].
+      rewrite Nat.gcd_comm.
+      apply eq_gcd_prime_small_1. {
+        apply prime_divisors_decomp in Hp.
+        now apply in_prime_decomp_is_prime in Hp.
+      }
+      split; [ flia H1 | ].
+      now apply Nat.mod_upper_bound.
+    }
+    clear Hap.
     remember (prime_decomp m) as pl eqn:Hpl; symmetry in Hpl.
+    clear m Hm Ha Hpl.
     induction pl as [| q pl]; [ easy | ].
     cbn; rewrite Nat.add_0_r.
-...
-Search (Nat.gcd _ _ = 1).
-Search Nat.gcd.
-...
-    apply Nat.gcd_unique_alt; [ flia | ].
-    intros q.
-    split; intros Hq. {
-      destruct Hq as (k, Hk).
-      symmetry in Hk.
-      apply Nat.eq_mul_1 in Hk.
-      destruct Hk; subst k q.
-      split; apply Nat.divide_1_l.
-    } {
-      destruct Hq as (Hqm, Hqa).
+    rewrite fold_left_mul_from_1.
+    apply Nat_gcd_1_mul_l. {
+      rewrite Nat.gcd_comm.
+      now apply Had; left.
+    }
+    apply IHpl.
+    intros r Hr.
+    now apply Had; right.
+  }
+}
+Qed.
+
 ...
 
 (* http://mathworld.wolfram.com/TotientFunction.html *)
