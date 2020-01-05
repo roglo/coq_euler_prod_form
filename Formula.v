@@ -3378,6 +3378,21 @@ Qed.
 Theorem glop : ∀ m, 2 ≤ m → φ m = partial_φ (prime_divisors m) m.
 Proof.
 intros * Hm.
+unfold φ, partial_φ.
+f_equal.
+unfold coprimes.
+transitivity (filter (λ d, Nat.gcd m d =? 1) (seq 1 m)). {
+  replace m with (m - 1 + 1) at 2 by flia Hm.
+  rewrite seq_app, filter_app; cbn.
+  rewrite <- Nat.sub_succ_l; [ | flia Hm ].
+  rewrite Nat.sub_succ, Nat.sub_0_r.
+  rewrite Nat.gcd_diag.
+  remember (m =? 1) as b eqn:Hb; symmetry in Hb.
+  destruct b; [ | now rewrite app_nil_r ].
+  apply Nat.eqb_eq in Hb; flia Hb Hm.
+}
+unfold not_div.
+Search (fold_left _ _ (_ ++ _)).
 ...
 
 (* http://mathworld.wolfram.com/TotientFunction.html *)
