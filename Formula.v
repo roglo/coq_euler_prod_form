@@ -3399,19 +3399,15 @@ now rewrite List_fold_filter_comm.
 Qed.
 
 Theorem not_div_prop : ∀ pl l a,
-  (∀ i j, i ≠ j → Nat.gcd (nth i pl 0) (nth j pl 0) = 1)
-  → a ∈ not_div pl l ↔ a ∈ l ∧ ∀ p, p ≠ 0 → p ∈ l → a mod p ≠ 0.
+  a ∈ not_div pl l ↔ a ∈ l ∧ ∀ p, p ≠ 0 → p ∈ l → a mod p ≠ 0.
 Proof.
-intros * Hg.
+intros.
 split; intros Ha. {
   assert (Hal : a ∈ l). {
     induction pl as [| p pl]; intros; [ easy | ].
     rewrite not_div_cons in Ha.
     apply filter_In in Ha.
-    apply IHpl; [ | easy ].
-    intros * Hij.
-    apply Nat.succ_inj_wd_neg in Hij.
-    apply (Hg (S i) (S j) Hij).
+    now apply IHpl.
   }
   split; [ easy | ].
   intros p Hpz Hp Hcon.
