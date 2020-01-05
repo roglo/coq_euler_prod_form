@@ -3392,7 +3392,22 @@ transitivity (filter (λ d, Nat.gcd m d =? 1) (seq 1 m)). {
   apply Nat.eqb_eq in Hb; flia Hb Hm.
 }
 unfold not_div.
-Search (fold_left _ _ (_ ++ _)).
+remember (seq 1 m) as l eqn:Hl; clear Hl.
+induction l as [| a l]. {
+  cbn.
+  remember (prime_divisors m) as l eqn:Hl; clear Hl.
+  now induction l.
+}
+cbn.
+remember (Nat.gcd m a =? 1) as b eqn:Hb; symmetry in Hb.
+destruct b. {
+  apply Nat.eqb_eq in Hb.
+  remember (prime_divisors m) as l' eqn:Hl'; symmetry in Hl'.
+  destruct l' as [| a' l']. {
+    apply prime_divisors_nil_iff in Hl'.
+    flia Hm Hl'.
+  }
+  cbn.
 ...
 
 (* http://mathworld.wolfram.com/TotientFunction.html *)
