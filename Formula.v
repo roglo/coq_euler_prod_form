@@ -3321,6 +3321,63 @@ rewrite Nat.add_comm.
 now apply Nat.add_le_mul.
 Qed.
 
+Definition prime_divisors n :=
+  filter (λ d, (is_prime d && (n mod d =? 0))%bool) (seq 1 n).
+
+Theorem prime_divisors_decomp : ∀ n a,
+  a ∈ prime_divisors n ↔ a ∈ prime_decomp n.
+Proof.
+intros.
+split; intros Ha. {
+  apply filter_In in Ha.
+  destruct Ha as (Ha, H).
+  apply Bool.andb_true_iff in H.
+  destruct H as (Hpa, Hna).
+  apply Nat.eqb_eq in Hna.
+  apply in_seq in Ha.
+  apply Nat.mod_divide in Hna; [ | flia Ha ].
+  apply prime_decomp_in_iff.
+  split; [ | split ]; [ flia Ha | easy | easy ].
+} {
+  apply filter_In.
+  apply prime_decomp_in_iff in Ha.
+  destruct Ha as (Hnz & Ha & Han).
+  split. {
+    apply in_seq.
+    split. {
+      transitivity 2; [ flia | ].
+      now apply prime_ge_2.
+    } {
+      destruct Han as (k, Hk); subst n.
+      destruct k; [ easy | flia ].
+    }
+  }
+  apply Bool.andb_true_iff.
+  split; [ easy | ].
+  apply Nat.eqb_eq.
+  apply Nat.mod_divide in Han; [ easy | ].
+  now intros H1; subst a.
+}
+Qed.
+
+Theorem prime_divisors_nil_iff: ∀ n, prime_divisors n = [] ↔ n = 0 ∨ n = 1.
+Proof.
+intros.
+split; intros Hn. {
+  apply prime_decomp_nil_iff.
+  remember (prime_decomp n) as l eqn:Hl; symmetry in Hl.
+  destruct l as [| a l]; [ easy | ].
+  specialize (proj2 (prime_divisors_decomp n a)) as H1.
+  rewrite Hl, Hn in H1.
+  now exfalso; apply H1; left.
+} {
+  now destruct Hn; subst n.
+}
+Qed.
+
+Theorem glop : ∀ m, 2 ≤ m → φ m = partial_φ (prime_divisors m) m.
+Proof.
+intros * Hm.
 ...
 
 (* http://mathworld.wolfram.com/TotientFunction.html *)
@@ -3383,60 +3440,6 @@ Compute (let '(m,p,q):=(41,7,5) in length(filter(λ d,negb(d=?0))(map(λ d,(d mo
 Compute (let '(m,p,q):=(411,14,21) in (partial_φ[p;q]m,m-m/p-m/q+m/Nat.lcm p q)).
 *)
 easy.
-Qed.
-
-Definition prime_divisors n :=
-  filter (λ d, (is_prime d && (n mod d =? 0))%bool) (seq 1 n).
-
-Theorem prime_divisors_decomp : ∀ n a,
-  a ∈ prime_divisors n ↔ a ∈ prime_decomp n.
-Proof.
-intros.
-split; intros Ha. {
-  apply filter_In in Ha.
-  destruct Ha as (Ha, H).
-  apply Bool.andb_true_iff in H.
-  destruct H as (Hpa, Hna).
-  apply Nat.eqb_eq in Hna.
-  apply in_seq in Ha.
-  apply Nat.mod_divide in Hna; [ | flia Ha ].
-  apply prime_decomp_in_iff.
-  split; [ | split ]; [ flia Ha | easy | easy ].
-} {
-  apply filter_In.
-  apply prime_decomp_in_iff in Ha.
-  destruct Ha as (Hnz & Ha & Han).
-  split. {
-    apply in_seq.
-    split. {
-      transitivity 2; [ flia | ].
-      now apply prime_ge_2.
-    } {
-      destruct Han as (k, Hk); subst n.
-      destruct k; [ easy | flia ].
-    }
-  }
-  apply Bool.andb_true_iff.
-  split; [ easy | ].
-  apply Nat.eqb_eq.
-  apply Nat.mod_divide in Han; [ easy | ].
-  now intros H1; subst a.
-}
-Qed.
-
-Theorem prime_divisors_nil_iff: ∀ n, prime_divisors n = [] ↔ n = 0 ∨ n = 1.
-Proof.
-intros.
-split; intros Hn. {
-  apply prime_decomp_nil_iff.
-  remember (prime_decomp n) as l eqn:Hl; symmetry in Hl.
-  destruct l as [| a l]; [ easy | ].
-  specialize (proj2 (prime_divisors_decomp n a)) as H1.
-  rewrite Hl, Hn in H1.
-  now exfalso; apply H1; left.
-} {
-  now destruct Hn; subst n.
-}
 Qed.
 
 Theorem not_div_cons : ∀ l p pl,
