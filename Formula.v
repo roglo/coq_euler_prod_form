@@ -3556,6 +3556,15 @@ split; intros Ha. {
 }
 Qed.
 
+Theorem partial_φ_cons : ∀ m p pl,
+  (∀ p, p ∈ p :: pl → 2 ≤ p ∧ Nat.divide p m)
+  → (∀ i j, i ≠ j → Nat.gcd (nth i (p :: pl) 1) (nth j (p :: pl) 1) = 1)
+  → partial_φ (p :: pl) m = partial_φ pl m * (p - 1) / p.
+Proof.
+intros * Hplm Hpl.
+unfold partial_φ.
+...
+
 Theorem glop : ∀ m pl,
   (∀ p, p ∈ pl → prime p ∧ Nat.divide p m)
   → NoDup pl
@@ -3774,14 +3783,6 @@ Check @List_length_filter_or.
 ...
 Compute (let (pl, a) := ([2; 3; 4; 5], 30) in (not_div pl [a])).
 ...
-
-Theorem partial_φ_cons : ∀ m p pl,
-  (∀ p, p ∈ p :: pl → 2 ≤ p ∧ Nat.divide p m)
-  → (∀ i j, i ≠ j → Nat.gcd (nth i (p :: pl) 1) (nth j (p :: pl) 1) = 1)
-  → partial_φ (p :: pl) m = partial_φ pl m * (p - 1) / p.
-Proof.
-intros * Hplm Hpl.
-unfold partial_φ.
 ...
 cbn.
 rewrite List_fold_filter_comm.
