@@ -3415,8 +3415,16 @@ split; intros Ha. {
   destruct Hcon as (k, Hk).
   induction pl as [| q pl]; [ easy | ].
   rewrite not_div_cons in Ha.
-  destruct Hp as [Hp| Hp]. {
-    subst q.
+  apply filter_In in Ha.
+  destruct Hp as [Hp| Hp]; [ | now apply IHpl ].
+  subst q.
+  destruct Ha as (_, Ha).
+  apply Bool.negb_true_iff in Ha.
+  apply Nat.eqb_neq in Ha; apply Ha.
+  rewrite Hk.
+  now apply Nat.mod_mul.
+} {
+  destruct Ha as (Hal, Hap).
 ...
 
 Theorem φ_from_partial_φ : ∀ m, 2 ≤ m → φ m = partial_φ (prime_divisors m) m.
