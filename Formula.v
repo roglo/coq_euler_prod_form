@@ -3556,8 +3556,53 @@ split; intros Ha. {
 }
 Qed.
 
-Inspect 1.
-
+Theorem glop : ∀ m pl,
+  (∀ p, p ∈ pl → prime p ∧ Nat.divide p m)
+  → NoDup pl
+  → partial_φ pl m =
+     m * fold_left (λ a p, a * (p - 1)) pl 1 / fold_left Nat.mul pl 1.
+Proof.
+intros * Hplm Hpl.
+...
+intros * Hplm Hpl.
+induction pl as [| p pl]. {
+  cbn - [ "/" ].
+  rewrite Nat.mul_1_r, Nat.div_1_r.
+  apply seq_length.
+}
+cbn.
+do 2 rewrite Nat.add_0_r.
+Search (fold_left _ _ (filter _ _)).
+rewrite List_fold_filter_comm.
+rewrite fold_not_div.
+Search (fold_left _ _ _ = _ * _).
+rewrite fold_left_mul_fun_from_1.
+rewrite fold_left_mul_from_1.
+rewrite (Nat.mul_comm p).
+rewrite <- Nat.div_div.
+rewrite Nat.mul_comm.
+rewrite Nat.mul_shuffle0.
+rewrite <- Nat.mul_assoc.
+Search (_ * (_ / _)).
+rewrite Nat.divide_div_mul_exact.
+rewrite <- IHpl.
+Search (filter _ (not_div _ _)).
+rewrite <- not_div_cons.
+Theorem fold_partial_φ : ∀ pl m,
+  length (not_div pl (seq 1 m)) = partial_φ pl m.
+Proof. easy. Qed.
+rewrite fold_partial_φ, Nat.mul_comm.
+...
+unfold partial_φ, not_div.
+rewrite Nat.mul_comm.
+...
+Print partial_φ.
+rewrite fold_partial_φ.
+...
+Compute (let (m, pl) := (24, [12]) in
+  (partial_φ pl m,
+   m * fold_left (λ a p : nat, a * (p - 1)) pl 1 / fold_left Nat.mul pl 1)).
+Inspect 4.
 ...
 
 (* http://mathworld.wolfram.com/TotientFunction.html *)
@@ -3844,53 +3889,6 @@ Inspect 4.
    [p; q] *)
 ...
 *)
-
-Theorem glop : ∀ m pl,
-  (∀ p, p ∈ pl → prime p ∧ Nat.divide p m)
-  → NoDup pl
-  → partial_φ pl m =
-     m * fold_left (λ a p, a * (p - 1)) pl 1 / fold_left Nat.mul pl 1.
-Proof.
-intros * Hplm Hpl.
-induction pl as [| p pl]. {
-  cbn - [ "/" ].
-  rewrite Nat.mul_1_r, Nat.div_1_r.
-  apply seq_length.
-}
-cbn.
-do 2 rewrite Nat.add_0_r.
-Search (fold_left _ _ (filter _ _)).
-rewrite List_fold_filter_comm.
-rewrite fold_not_div.
-Search (fold_left _ _ _ = _ * _).
-rewrite fold_left_mul_fun_from_1.
-rewrite fold_left_mul_from_1.
-rewrite (Nat.mul_comm p).
-rewrite <- Nat.div_div.
-rewrite Nat.mul_comm.
-rewrite Nat.mul_shuffle0.
-rewrite <- Nat.mul_assoc.
-Search (_ * (_ / _)).
-rewrite Nat.divide_div_mul_exact.
-rewrite <- IHpl.
-Search (filter _ (not_div _ _)).
-rewrite <- not_div_cons.
-Theorem fold_partial_φ : ∀ pl m,
-  length (not_div pl (seq 1 m)) = partial_φ pl m.
-Proof. easy. Qed.
-rewrite fold_partial_φ, Nat.mul_comm.
-...
-unfold partial_φ, not_div.
-rewrite Nat.mul_comm.
-...
-Print partial_φ.
-rewrite fold_partial_φ.
-...
-Compute (let (m, pl) := (24, [12]) in
-  (partial_φ pl m,
-   m * fold_left (λ a p : nat, a * (p - 1)) pl 1 / fold_left Nat.mul pl 1)).
-Inspect 4.
-...
 
 Theorem glop : ∀ m, 2 ≤ m → φ m = partial_φ (prime_divisors m) m.
 Proof.
