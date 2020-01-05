@@ -3392,6 +3392,14 @@ transitivity (filter (λ d, Nat.gcd m d =? 1) (seq 1 m)). {
   apply Nat.eqb_eq in Hb; flia Hb Hm.
 }
 unfold not_div.
+apply sorted_equiv_nat_lists. {
+  apply (SetoidList.filter_sort eq_equivalence Nat.lt_strorder). {
+    apply Nat.lt_wd.
+  } {
+    apply Sorted_Sorted_seq.
+  }
+} {
+Search (Sorted _ (fold_left _ _ _)).
 ...
 remember (seq 1 m) as l eqn:Hl; clear Hl.
 induction l as [| a l]. {
