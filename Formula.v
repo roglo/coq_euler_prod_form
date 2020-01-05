@@ -3485,7 +3485,28 @@ split; intros Ha. {
   apply Nat.eqb_eq in Hg.
   apply not_div_prop. 2: {
     split; [ easy | ].
-    intros p Hp.
+    intros p Hp Hcon.
+    apply prime_divisors_decomp in Hp.
+    destruct (Nat.eq_dec p 0) as [Hpz| Hpz]. {
+      subst p.
+      now apply in_prime_decomp_is_prime in Hp.
+    }
+    apply Nat.mod_divide in Hcon; [ | easy ].
+    destruct Hcon as (k, Hk).
+    generalize Hp; intros Hp1.
+    apply in_prime_decomp_divide in Hp.
+    destruct Hp as (k', Hk').
+    rewrite Hk', Hk in Hg.
+    rewrite Nat.gcd_mul_mono_r in Hg.
+    apply Nat.eq_mul_1 in Hg.
+    destruct Hg as (Hg, Hp); subst p; clear Hpz.
+    now apply in_prime_decomp_is_prime in Hp1.
+  }
+  intros p Hp Hcon; subst p.
+  apply prime_divisors_decomp in Hp.
+  now apply in_prime_decomp_is_prime in Hp.
+} {
+  apply not_div_prop in Ha.
 ...
 
 (* http://mathworld.wolfram.com/TotientFunction.html *)
