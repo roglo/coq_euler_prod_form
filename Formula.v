@@ -3391,6 +3391,24 @@ apply (SetoidList.filter_sort eq_equivalence Nat.lt_strorder); [ | easy ].
 apply Nat.lt_wd.
 Qed.
 
+Theorem not_div_cons : ∀ l p pl,
+  not_div (p :: pl) l = filter (λ d, negb (d mod p =? 0)) (not_div pl l).
+Proof.
+intros; cbn.
+now rewrite List_fold_filter_comm.
+Qed.
+
+Theorem not_div_prop : ∀ pl l a,
+  a ∈ not_div pl l ↔ a ∈ l ∧ ∀ p, p ∈ l → a mod p ≠ 0.
+Proof.
+intros.
+split; intros Ha. {
+  split. {
+    revert l Ha.
+    induction pl as [| p pl]; intros; [ easy | ].
+    rewrite not_div_cons in Ha.
+...
+
 Theorem φ_from_partial_φ : ∀ m, 2 ≤ m → φ m = partial_φ (prime_divisors m) m.
 Proof.
 intros * Hm.
@@ -3423,7 +3441,8 @@ split; intros Ha. {
   destruct Ha as (Ha, Hg).
   apply in_seq in Ha.
   apply Nat.eqb_eq in Hg.
-Search (_ ∈ not_div _ _).
+Search not_div.
+Print not_div.
 ...
 
 (* http://mathworld.wolfram.com/TotientFunction.html *)
@@ -3486,13 +3505,6 @@ Compute (let '(m,p,q):=(41,7,5) in length(filter(λ d,negb(d=?0))(map(λ d,(d mo
 Compute (let '(m,p,q):=(411,14,21) in (partial_φ[p;q]m,m-m/p-m/q+m/Nat.lcm p q)).
 *)
 easy.
-Qed.
-
-Theorem not_div_cons : ∀ l p pl,
-  not_div (p :: pl) l = filter (λ d, negb (d mod p =? 0)) (not_div pl l).
-Proof.
-intros; cbn.
-now rewrite List_fold_filter_comm.
 Qed.
 
 Theorem fold_partial_φ_single : ∀ p m,
