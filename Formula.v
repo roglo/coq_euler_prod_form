@@ -3556,7 +3556,7 @@ Qed.
 
 (* https://exploringnumbertheory.wordpress.com/2015/11/13/eulers-phi-function-is-multiplicative/ *)
 
-Theorem glop {A B} : ∀ (l : list A) (l' : list B) f g,
+Theorem bijection_same_length {A B} : ∀ (l : list A) (l' : list B) f g,
   NoDup l
   → NoDup l'
   → (∀ a, a ∈ l → f a ∈ l')
@@ -3575,59 +3575,66 @@ destruct l' as [| y l']. {
   exfalso.
   now specialize (Hf x (or_introl eq_refl)).
 }
+specialize (in_split (f x) (y :: l') (Hf x (or_introl eq_refl))) as H.
+destruct H as (l1 & l2 & Hll).
+rewrite Hll.
+transitivity (length (f x :: l1 ++ l2)). 2: {
+  cbn; do 2 rewrite app_length; cbn; flia.
+}
 cbn; f_equal.
-specialize (Hf x (or_introl eq_refl)) as Hfx.
-specialize (Hg y (or_introl eq_refl)) as Hgy.
-destruct Hfx as [Hfx| Hfx]. {
-  subst y.
-  clear Hgy.
-  apply IHl. {
-    now apply NoDup_cons_iff in Hnl.
-  } {
-    intros a Ha.
-    now apply Hgf; right.
-  } {
-    intros a Ha.
-    specialize (Hf a (or_intror Ha)) as H1.
-    destruct H1 as [H1| H1]; [ | easy ].
-    apply (f_equal g) in H1.
-    rewrite Hgf in H1; [ | now left ].
-    rewrite Hgf in H1; [ | now right ].
-    subst a.
-    now apply NoDup_cons_iff in Hnl.
-  } {
-    intros b Hb.
-    specialize (Hg b (or_intror Hb)) as H1.
-    destruct H1 as [H1| H1]; [ | easy ].
-    apply (f_equal f) in H1.
-    rewrite Hfg in H1; [ | now right ].
-    subst b.
-    now apply NoDup_cons_iff in Hnl'.
-  } {
-    intros b Hb.
-    now apply Hfg; right.
-  } {
-    now apply NoDup_cons_iff in Hnl'.
-  }
-}
-destruct Hgy as [Hgy| Hgy]. {
-  subst x.
-  rewrite Hfg in Hfx; [ | now left ].
-  now apply NoDup_cons_iff in Hnl'.
-}
-...
 apply IHl. {
-  now apply NoDup_cons_iff in Hnl.
+    now apply NoDup_cons_iff in Hnl.
 } {
   intros a Ha.
   now apply Hgf; right.
 } {
   intros a Ha.
   specialize (Hf a (or_intror Ha)) as H1.
+  rewrite Hll in H1.
+  apply in_app_or in H1.
+  apply in_or_app.
+  destruct H1 as [H1| H1]; [ now left | ].
+  destruct H1 as [H1| H1]; [ | now right ].
+  apply (f_equal g) in H1.
+  rewrite Hgf in H1; [ | now left ].
+  rewrite Hgf in H1; [ | now right ].
+  subst a.
+  now apply NoDup_cons_iff in Hnl.
+} {
+  intros b Hb.
+  rewrite Hll in Hg.
+  specialize (Hg b) as H1.
+  assert (H : b ∈ l1 ++ f x :: l2). {
+    apply in_app_or in Hb.
+    apply in_or_app.
+    destruct Hb as [Hb| Hb]; [ now left | ].
+    now right; right.
+  }
+  specialize (H1 H); clear H.
   destruct H1 as [H1| H1]; [ | easy ].
-  subst y.
-  clear Hgy.
-...
+  subst x.
+  rewrite Hfg in Hll. 2: {
+    rewrite Hll.
+    apply in_app_or in Hb.
+    apply in_or_app.
+    destruct Hb as [Hb| Hb]; [ now left | ].
+    now right; right.
+  }
+  rewrite Hll in Hnl'.
+  now apply NoDup_remove_2 in Hnl'.
+} {
+  intros b Hb.
+  apply Hfg.
+  rewrite Hll.
+  apply in_app_or in Hb.
+  apply in_or_app.
+  destruct Hb as [Hb| Hb]; [ now left | ].
+  now right; right.
+} {
+  rewrite Hll in Hnl'.
+  now apply NoDup_remove_1 in Hnl'.
+}
+Qed.
 
 Theorem φ_multiplicative : ∀ m n,
   2 ≤ m
@@ -3638,10 +3645,7 @@ Proof.
 intros * H2m H2n Hg.
 unfold φ.
 rewrite <- prod_length.
-Search (_ ∈ _ ↔ _ ∈ _).
-Search (_ → length _ = length _).
-...
-apply Permutation_length.
+eapply bijection_same_length.
 ...
 
 Theorem partial_φ_cons : ∀ m p pl,
