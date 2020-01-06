@@ -2348,8 +2348,6 @@ Definition euler_crit p :=
 Definition quad_res p :=
   map (λ a, Nat_pow_mod a 2 p) (seq 1 (p - 1)).
 
-Compute (let p := 13 in (euler_crit p, quad_res p)).
-
 Theorem quad_res_in_seq : ∀ p, prime p →
   ∀ a, a ∈ quad_res p → a ∈ seq 1 (p - 1).
 Proof.
@@ -3556,7 +3554,25 @@ split; intros Ha. {
 }
 Qed.
 
-(*
+Theorem φ_multiplicative : ∀ m n,
+  2 ≤ m
+  → 2 ≤ n
+  → Nat.gcd m n = 1
+  → φ (m * n) = φ m * φ n.
+Proof.
+intros * H2m H2n Hg.
+unfold φ.
+rewrite <- prod_length.
+Search (_ ∈ _ ↔ _ ∈ _).
+Search (_ → length _ = length _).
+Theorem glop {A B} : ∀ (l : list A) (l' : list B) f g,
+  (∀ a, a ∈ l → f a ∈ l')
+  → (∀ b, b ∈ l' → g b ∈ l)
+  → length l = length l'.
+...
+apply Permutation_length.
+...
+
 Theorem partial_φ_cons : ∀ m p pl,
   (∀ p, p ∈ p :: pl → 2 ≤ p ∧ Nat.divide p m)
   → (∀ i j, i ≠ j → Nat.gcd (nth i (p :: pl) 1) (nth j (p :: pl) 1) = 1)
@@ -3564,8 +3580,8 @@ Theorem partial_φ_cons : ∀ m p pl,
 Proof.
 intros * Hplm Hpl.
 unfold partial_φ.
+rewrite not_div_cons.
 ...
-*)
 
 Theorem φ_multiplicative : ∀ m n,
   2 ≤ m
