@@ -3557,14 +3557,16 @@ Qed.
 (* https://exploringnumbertheory.wordpress.com/2015/11/13/eulers-phi-function-is-multiplicative/ *)
 
 Theorem glop {A B} : ∀ (l : list A) (l' : list B) f g,
-  (∀ a, a ∈ l → f a ∈ l')
+  NoDup l
+  → NoDup l'
+  → (∀ a, a ∈ l → f a ∈ l')
   → (∀ b, b ∈ l' → g b ∈ l)
   → (∀ a, a ∈ l → g (f a) = a)
   → (∀ b, b ∈ l' → f (g b) = b)
   → length l = length l'.
 Proof.
-intros * Hf Hg Hgf Hfg.
-revert l' Hf Hg Hfg.
+intros * Hnl Hnl' Hf Hg Hgf Hfg.
+revert l' Hf Hg Hfg Hnl'.
 induction l as [| x l]; intros. {
   destruct l' as [| y l']; [ easy | exfalso ].
   now specialize (Hg y (or_introl eq_refl)).
@@ -3574,7 +3576,49 @@ destruct l' as [| y l']. {
   now specialize (Hf x (or_introl eq_refl)).
 }
 cbn; f_equal.
+specialize (Hf x (or_introl eq_refl)) as Hfx.
+specialize (Hg y (or_introl eq_refl)) as Hgy.
+destruct Hfx as [Hfx| Hfx]. {
+  subst y.
+  clear Hgy.
+  apply IHl. {
+    now apply NoDup_cons_iff in Hnl.
+  } {
+    intros a Ha.
+    now apply Hgf; right.
+  } {
+    intros a Ha.
+    specialize (Hf a (or_intror Ha)) as H1.
+    destruct H1 as [H1| H1]; [ | easy ].
+    apply (f_equal g) in H1.
+    rewrite Hgf in H1; [ | now left ].
+    rewrite Hgf in H1; [ | now right ].
+    subst a.
+    now apply NoDup_cons_iff in Hnl.
+  } {
+    intros b Hb.
+    specialize (Hg b (or_intror Hb)) as H1.
+    destruct H1 as [H1| H1]; [ | easy ].
+    apply (f_equal f) in H1.
+    rewrite Hfg in H1; [ | now right ].
+    subst b.
+    now apply NoDup_cons_iff in Hnl'.
+  } {
+    intros b Hb.
+    now apply Hfg; right.
+  } {
+    now apply NoDup_cons_iff in Hnl'.
+  }
+}
+destruct Hgy as [Hgy| Hgy]. {
+  subst x.
+  rewrite Hfg in Hfx; [ | now left ].
+  now apply NoDup_cons_iff in Hnl'.
+}
+...
 apply IHl. {
+  now apply NoDup_cons_iff in Hnl.
+} {
   intros a Ha.
   now apply Hgf; right.
 } {
@@ -3582,7 +3626,7 @@ apply IHl. {
   specialize (Hf a (or_intror Ha)) as H1.
   destruct H1 as [H1| H1]; [ | easy ].
   subst y.
-  rename a into a1.
+  clear Hgy.
 ...
 
 Theorem φ_multiplicative : ∀ m n,
