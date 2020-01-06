@@ -3556,6 +3556,15 @@ split; intros Ha. {
 }
 Qed.
 
+Theorem partial_φ_cons : ∀ m p pl,
+  (∀ p, p ∈ p :: pl → 2 ≤ p ∧ Nat.divide p m)
+  → (∀ i j, i ≠ j → Nat.gcd (nth i (p :: pl) 1) (nth j (p :: pl) 1) = 1)
+  → partial_φ (p :: pl) m = partial_φ pl m * (p - 1) / p.
+Proof.
+intros * Hplm Hpl.
+unfold partial_φ.
+...
+
 Theorem φ_multiplicative : ∀ m n,
   2 ≤ m
   → 2 ≤ n
@@ -3571,15 +3580,6 @@ rewrite φ_from_partial_φ. 2: {
 rewrite φ_from_partial_φ; [ | easy ].
 rewrite φ_from_partial_φ; [ | easy ].
 Search (prime_divisors (_ * _)).
-...
-
-Theorem partial_φ_cons : ∀ m p pl,
-  (∀ p, p ∈ p :: pl → 2 ≤ p ∧ Nat.divide p m)
-  → (∀ i j, i ≠ j → Nat.gcd (nth i (p :: pl) 1) (nth j (p :: pl) 1) = 1)
-  → partial_φ (p :: pl) m = partial_φ pl m * (p - 1) / p.
-Proof.
-intros * Hplm Hpl.
-unfold partial_φ.
 ...
 
 Theorem glop : ∀ m pl,
