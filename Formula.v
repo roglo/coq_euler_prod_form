@@ -3554,6 +3554,37 @@ split; intros Ha. {
 }
 Qed.
 
+(* https://exploringnumbertheory.wordpress.com/2015/11/13/eulers-phi-function-is-multiplicative/ *)
+
+Theorem glop {A B} : ∀ (l : list A) (l' : list B) f g,
+  (∀ a, a ∈ l → f a ∈ l')
+  → (∀ b, b ∈ l' → g b ∈ l)
+  → (∀ a, a ∈ l → g (f a) = a)
+  → (∀ b, b ∈ l' → f (g b) = b)
+  → length l = length l'.
+Proof.
+intros * Hf Hg Hgf Hfg.
+revert l' Hf Hg Hfg.
+induction l as [| x l]; intros. {
+  destruct l' as [| y l']; [ easy | exfalso ].
+  now specialize (Hg y (or_introl eq_refl)).
+}
+destruct l' as [| y l']. {
+  exfalso.
+  now specialize (Hf x (or_introl eq_refl)).
+}
+cbn; f_equal.
+apply IHl. {
+  intros a Ha.
+  now apply Hgf; right.
+} {
+  intros a Ha.
+  specialize (Hf a (or_intror Ha)) as H1.
+  destruct H1 as [H1| H1]; [ | easy ].
+  subst y.
+  rename a into a1.
+...
+
 Theorem φ_multiplicative : ∀ m n,
   2 ≤ m
   → 2 ≤ n
@@ -3565,10 +3596,6 @@ unfold φ.
 rewrite <- prod_length.
 Search (_ ∈ _ ↔ _ ∈ _).
 Search (_ → length _ = length _).
-Theorem glop {A B} : ∀ (l : list A) (l' : list B) f g,
-  (∀ a, a ∈ l → f a ∈ l')
-  → (∀ b, b ∈ l' → g b ∈ l)
-  → length l = length l'.
 ...
 apply Permutation_length.
 ...
