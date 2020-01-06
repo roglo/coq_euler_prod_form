@@ -3556,6 +3556,23 @@ split; intros Ha. {
 }
 Qed.
 
+Theorem φ_multiplicative : ∀ m n,
+  2 ≤ m
+  → 2 ≤ n
+  → Nat.gcd m n = 1
+  → φ (m * n) = φ m * φ n.
+Proof.
+intros * H2m H2n Hg.
+rewrite φ_from_partial_φ. 2: {
+  destruct m; [ easy | ].
+  destruct m; [ flia H2m | ].
+  destruct n; [ easy | flia ].
+}
+rewrite φ_from_partial_φ; [ | easy ].
+rewrite φ_from_partial_φ; [ | easy ].
+Search (prime_divisors (_ * _)).
+...
+
 Theorem partial_φ_cons : ∀ m p pl,
   (∀ p, p ∈ p :: pl → 2 ≤ p ∧ Nat.divide p m)
   → (∀ i j, i ≠ j → Nat.gcd (nth i (p :: pl) 1) (nth j (p :: pl) 1) = 1)
@@ -3890,33 +3907,6 @@ Inspect 4.
    [p; q] *)
 ...
 *)
-
-Theorem glop : ∀ m, 2 ≤ m → φ m = partial_φ (prime_divisors m) m.
-Proof.
-intros * Hm.
-...
-remember (prime_divisors m) as l eqn:Hl; symmetry in Hl.
-revert m Hm Hl.
-induction l as [| a l]; intros. {
-  apply prime_divisors_nil_iff in Hl.
-  destruct Hl; subst m; flia Hm.
-}
-Inspect 4.
-...
-cbn.
-unfold φ.
-unfold coprimes.
-Search (partial_φ (_ :: _)).
-Compute (
-  let (a, m) := (2, 3) in
-  let l := tl (prime_divisors m) in
- (filter (λ d : nat, Nat.gcd m d =? 1) (seq 1 (m - 1)),
-  fold_left
-       (λ (l0 : list nat) (p : nat), filter (λ d : nat, negb (d mod p =? 0)) l0)
-       l (filter (λ d : nat, negb (d mod a =? 0)) (seq 1 m)))).
-...
-Compute (map (λ m, (φ m, partial_φ (prime_divisors m) m)) (seq 1 40)).
-...
 
 (*
 Theorem glop : ∀ m,
