@@ -4350,6 +4350,7 @@ f_equal. {
 }
 Qed.
 
+(*
 Theorem glop {A} {B} : ∀ (l : list A) (l' : list B),
   Permutation (list_prod l l') (map (λ '(a, b), (b, a)) (list_prod l' l)).
 Proof.
@@ -4369,10 +4370,12 @@ induction l' as [| b l']. {
 cbn.
 constructor.
 Search (map _ (map _ _)).
-rewrite map_map.
-
+rewrite map_app, map_map.
+...
+eapply Permutation_trans; [ apply IHl' | ].
 Search (Permutation (_ :: _)).
 ...
+*)
 
 (*
 Theorem NoDup_prod_comm {A} {B} : ∀ (l : list A) (l' : list B),
@@ -4389,9 +4392,25 @@ Print count_occ.
 ...
 *)
 
+Fixpoint list_prod' {A B} (l : list A) (l' : list B) :=
+  match l with
+  | [] => []
+  | x :: t => (x, l') :: list_prod' t l'
+  end.
+
+Theorem list_prod_prod' {A B} (l : list A) (l' : list B) :
+  list_prod l l' =
+  concat (map (λ '(a, l), map (λ b, (a, b)) l) (list_prod' l l')).
+Proof.
+intros.
+induction l as [| a l]; [ easy | ].
+cbn.
+...
+
 Theorem NoDup_prod {A} {B} : ∀ (l : list A) (l' : list B),
   NoDup l → NoDup l' → NoDup (list_prod l l').
 Proof.
+(*
 intros * Hnl Hnl'.
 revert l Hnl.
 induction l' as [| b l']; intros. {
@@ -4400,6 +4419,7 @@ induction l' as [| b l']; intros. {
 specialize (glop l (b :: l')) as H1.
 apply Permutation_NoDup.
 ...
+*)
 intros * Hnl Hnl'.
 revert l' Hnl'.
 induction l as [| a l]; intros; [ constructor | cbn ].
@@ -4424,6 +4444,11 @@ apply NoDup_cons. {
     now apply NoDup_cons_iff in Hnl.
   }
 } {
+Print list_prod.
+...
+
+  list_prod l l' = concat (map (λ '(a, l), map (λ b, (a, b)) l) l').
+
 Search list_prod.
 ...
 Theorem List_list_prod_cons_r {A B} : ∀ (l : list A) (l' : list B) b,
