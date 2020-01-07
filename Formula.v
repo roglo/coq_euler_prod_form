@@ -5,7 +5,7 @@ Set Nested Proofs Allowed.
 Require Import Utf8 Arith Psatz Setoid Morphisms.
 Require Import Sorting.Permutation SetoidList.
 Import List List.ListNotations.
-Require Import Misc Primes.
+Require Import Misc Primes NumTheory.
 
 (* ζ(s) = Σ (n ∈ ℕ* ) 1/n^s = Π (p ∈ Primes) 1/(1-1/p^s) *)
 
@@ -2606,11 +2606,6 @@ Compute (prim_roots 101).
 Compute (is_prim_root 31 11).
 Compute (prim_root_cycle 31 23).
 *)
-
-(* Euler's totient function *)
-
-Definition coprimes n := filter (λ d, Nat.gcd n d =? 1) (seq 1 (n - 1)).
-Definition φ n := length (coprimes n).
 
 Theorem prime_φ : ∀ p, prime p → φ p = p - 1.
 Proof.
