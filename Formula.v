@@ -4158,9 +4158,9 @@ destruct (lt_dec b a) as [Hba| Hba]. {
 }
 Qed.
 
-Definition prod_coprimes_of_coprimes_mul m n a := (a mod m, a mod n).
+Definition prod_copr_of_copr_mul m n a := (a mod m, a mod n).
 
-Definition coprimes_mul_of_prod_coprimes (m n : nat) '((x, y) : nat * nat) :=
+Definition copr_mul_of_prod_copr (m n : nat) '((x, y) : nat * nat) :=
   let '(u, v) := snd (gcd_and_bezout m n) in
   m * n - (n * x * v + m * (n - 1) * y * u) mod (m * n).
 
@@ -4168,14 +4168,14 @@ Theorem prod_coprimes_coprimes_mul_prod : ∀ m n,
   n ≠ 0
   → Nat.gcd m n = 1
   → ∀ x y, x < m → y < n
-  → prod_coprimes_of_coprimes_mul m n
-       (coprimes_mul_of_prod_coprimes m n (x, y)) = (x, y).
+  → prod_copr_of_copr_mul m n
+       (copr_mul_of_prod_copr m n (x, y)) = (x, y).
 Proof.
 intros * Hnz Hgmn * Hxm Hyn.
 assert (Hmz : m ≠ 0) by flia Hxm.
 move Hmz before n.
-unfold coprimes_mul_of_prod_coprimes.
-unfold prod_coprimes_of_coprimes_mul.
+unfold copr_mul_of_prod_copr.
+unfold prod_copr_of_copr_mul.
 remember (gcd_and_bezout m n) as gb eqn:Hgb.
 symmetry in Hgb.
 destruct gb as (g & u & v); cbn.
@@ -4365,11 +4365,11 @@ split; intros Ha. {
 }
 Qed.
 
-Theorem prod_coprimes_of_coprimes_mul_in_prod : ∀ m n a,
+Theorem prod_copr_of_copr_mul_in_prod : ∀ m n a,
   2 ≤ m
   → 2 ≤ n
   → a ∈ coprimes (m * n)
-  → prod_coprimes_of_coprimes_mul m n a ∈
+  → prod_copr_of_copr_mul m n a ∈
        list_prod (coprimes m) (coprimes n).
 Proof.
 intros * H2m H2n Ha.
@@ -4381,7 +4381,7 @@ apply in_coprimes_iff in Ha.
 destruct Ha as (Ha, Hga).
 apply in_seq in Ha.
 rewrite Nat.add_comm, Nat.sub_add in Ha by flia Ha.
-unfold prod_coprimes_of_coprimes_mul.
+unfold prod_copr_of_copr_mul.
 apply in_prod. {
   apply in_coprimes_iff.
   split. {
@@ -4454,11 +4454,11 @@ apply in_prod. {
 }
 Qed.
 
-Theorem coprimes_mul_of_prod_coprimes_in_coprimes : ∀ m n,
+Theorem copr_mul_of_prod_copr_in_coprimes : ∀ m n,
   2 ≤ m
   → Nat.gcd m n = 1
   → ∀ a, a ∈ list_prod (coprimes m) (coprimes n)
-  → coprimes_mul_of_prod_coprimes m n a ∈ coprimes (m * n).
+  → copr_mul_of_prod_copr m n a ∈ coprimes (m * n).
 Proof.
 intros m n H2m Hmn (a, b) Hab.
 destruct (Nat.eq_dec m 0) as [Hmz| Hmz]; [ now subst m | ].
@@ -4477,7 +4477,7 @@ apply in_seq in Ha.
 apply in_seq in Hb.
 replace (1 + (m - 1)) with m in Ha by flia Hmz.
 replace (1 + (n - 1)) with n in Hb by flia Hnz.
-unfold coprimes_mul_of_prod_coprimes.
+unfold copr_mul_of_prod_copr.
 remember (gcd_and_bezout m n) as gb eqn:Hgb.
 symmetry in Hgb.
 destruct gb as (g & u & v); cbn.
@@ -4627,18 +4627,18 @@ intros * H2m H2n Hg.
 unfold φ.
 rewrite <- prod_length.
 apply
-  (bijection_same_length (prod_coprimes_of_coprimes_mul m n)
-     (coprimes_mul_of_prod_coprimes m n)). {
+  (bijection_same_length (prod_copr_of_copr_mul m n)
+     (copr_mul_of_prod_copr m n)). {
   unfold coprimes.
   apply NoDup_filter, seq_NoDup.
 } {
   apply NoDup_prod; apply NoDup_filter, seq_NoDup.
 } {
   intros a Ha.
-  now apply prod_coprimes_of_coprimes_mul_in_prod.
+  now apply prod_copr_of_copr_mul_in_prod.
 } {
   intros b Hb.
-  now apply coprimes_mul_of_prod_coprimes_in_coprimes.
+  now apply copr_mul_of_prod_copr_in_coprimes.
 } {
   intros a Ha.
 ...
@@ -5219,15 +5219,15 @@ Compute (coprimes (m * n)).
 
 Compute
   (map (λ a,
-  (coprimes_mul_of_prod_coprimes m n
-     (prod_coprimes_of_coprimes_mul m n a))) (coprimes (m * n))).
+  (copr_mul_of_prod_copr m n
+     (prod_copr_of_copr_mul m n a))) (coprimes (m * n))).
 
 Compute (list_prod (coprimes m) (coprimes n)).
 
 Compute
   (map (λ xy,
-    (prod_coprimes_of_coprimes_mul m n
-       (coprimes_mul_of_prod_coprimes m n xy)))
+    (prod_copr_of_copr_mul m n
+       (copr_mul_of_prod_copr m n xy)))
          (list_prod (coprimes m) (coprimes n))).
 
 Let uv := snd (gcd_and_bezout m n).
@@ -5251,12 +5251,12 @@ Theorem coprimes_mul_prod_coprimes : ∀ m n,
   → n ≠ 0
   → Nat.gcd m n = 1
   → ∀ a, a ∈ seq 1 (m * n - 1)
-  → coprimes_mul_of_prod_coprimes m n (prod_coprimes_of_coprimes_mul m n a) = a.
+  → copr_mul_of_prod_copr m n (prod_copr_of_copr_mul m n a) = a.
 Proof.
 intros * Hmz Hnz Hgmn * Ha.
-Compute (coprimes_mul_of_prod_coprimes 3 7 (prod_coprimes_of_coprimes_mul 3 7 22)).
-unfold coprimes_mul_of_prod_coprimes.
-unfold prod_coprimes_of_coprimes_mul.
+Compute (copr_mul_of_prod_copr 3 7 (prod_copr_of_copr_mul 3 7 22)).
+unfold copr_mul_of_prod_copr.
+unfold prod_copr_of_copr_mul.
 remember (gcd_and_bezout m n) as gb eqn:Hgb.
 symmetry in Hgb.
 destruct gb as (g & u & v); cbn.
@@ -5374,14 +5374,14 @@ unfold φ.
 rewrite <- prod_length.
 assert
   (Hf : ∀ a, a ∈ coprimes (m * n) →
-   prod_coprimes_of_coprimes_mul m n a ∈
+   prod_copr_of_copr_mul m n a ∈
    list_prod (coprimes m) (coprimes n)). {
   intros * Ha.
   apply in_coprimes_iff in Ha.
   destruct Ha as (Ha, Hga).
   apply in_seq in Ha.
   rewrite Nat.add_comm, Nat.sub_add in Ha by flia Ha.
-  unfold prod_coprimes_of_coprimes_mul.
+  unfold prod_copr_of_copr_mul.
   apply in_prod. {
     apply in_coprimes_iff.
     split. {
@@ -5455,7 +5455,7 @@ assert
 }
 assert
   (Hg : ∀ a, a ∈ list_prod (coprimes m) (coprimes n) →
-   coprimes_mul_of_prod_coprimes m n a ∈ coprimes (m * n)). {
+   copr_mul_of_prod_copr m n a ∈ coprimes (m * n)). {
   intros (a, b) Hab.
   apply in_prod_iff in Hab.
   destruct Hab as (Ha, Hb).
@@ -5468,7 +5468,7 @@ assert
   apply in_seq in Hb.
   replace (1 + (m - 1)) with m in Ha by flia Hmz.
   replace (1 + (n - 1)) with n in Hb by flia Hnz.
-  unfold coprimes_mul_of_prod_coprimes.
+  unfold copr_mul_of_prod_copr.
   remember (gcd_and_bezout m n) as gb eqn:Hgb.
   symmetry in Hgb.
   destruct gb as (g & u & v); cbn.
@@ -5683,7 +5683,7 @@ destruct H as (u' & v' & Huv).
         setoid_rewrite Nat.mul_shuffle0 in Hmbu.
 ...
 
-Definition coprimes_mul_of_prod_coprimes m n :=
+Definition copr_mul_of_prod_copr m n :=
 Search (_ mod (_ * _)).
 Print Nat.Bezout.
 ...
