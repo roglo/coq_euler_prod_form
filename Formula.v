@@ -3636,6 +3636,720 @@ apply IHl. {
 }
 Qed.
 
+(* gcd_and_bezout a b returns (g, (u, v)) with the property
+        a * u = b * v + g
+        g = gcd a b;
+   requires a ≠ 0 *)
+
+Fixpoint gcd_bezout_loop n (a b : nat) : (nat * (nat * nat)) :=
+  match n with
+  | 0 => (0, (0, 0)) (* should not happen *)
+  | S n' =>
+      match b with
+      | 0 => (a, (1, 0))
+      | S _ =>
+          let '(g, (u, v)) := gcd_bezout_loop n' b (a mod b) in
+          let w := (u * b + v * (a - a mod b)) / b in
+          let k := max (v / b) (w / a) + 1 in
+          (g, (k * b - v, k * a - w))
+      end
+  end.
+
+Definition gcd_and_bezout a b := gcd_bezout_loop (a + b + 1) a b.
+
+Lemma gcd_bezout_loop_enough_iter_lt : ∀ m n a b,
+  a + b ≤ m
+  → a + b ≤ n
+  → b < a
+  → gcd_bezout_loop m a b = gcd_bezout_loop n a b.
+Proof.
+intros * Habm Habn Hba.
+revert n a b Habm Habn Hba.
+induction m; intros; [ flia Habm Hba | ].
+destruct n; [ flia Habn Hba | cbn ].
+destruct (Nat.eq_dec b 0) as [Hbz| Hbz]; [ now subst b | ].
+replace b with (S (b - 1)) at 1 2 by flia Hbz.
+remember (gcd_bezout_loop m b (a mod b)) as gbm eqn:Hgbm; symmetry in Hgbm.
+remember (gcd_bezout_loop n b (a mod b)) as gbn eqn:Hgbn; symmetry in Hgbn.
+specialize (IHm n b (a mod b)) as H1.
+assert (H : ∀ p, a + b ≤ S p → b + a mod b ≤ p). {
+  intros * Habp.
+  transitivity (b + (a - 1)). {
+    apply Nat.add_le_mono_l.
+    specialize (Nat.div_mod a b Hbz) as H2.
+    apply (Nat.add_le_mono_l _ _ (b * (a / b))).
+    rewrite <- H2, Nat.add_comm.
+    remember (a / b) as q eqn:Hq; symmetry in Hq.
+    destruct q. {
+      apply Nat.div_small_iff in Hq; [ flia Hba Hq | easy ].
+    }
+    destruct b; [ easy | ].
+    cbn; remember (b * S q); flia.
+  }
+  flia Habp Hba.
+}
+specialize (H1 (H m Habm) (H n Habn)); clear H.
+assert (H : a mod b < b) by now apply Nat.mod_upper_bound.
+specialize (H1 H); clear H.
+now rewrite <- Hgbm, H1, Hgbn.
+Qed.
+
+Lemma gcd_bezout_loop_enough_iter_ge : ∀ m n a b,
+  a + b + 1 ≤ m
+  → a + b + 1 ≤ n
+  → a ≤ b
+  → gcd_bezout_loop m a b = gcd_bezout_loop n a b.
+Proof.
+intros * Habm Habn Hab.
+destruct (Nat.eq_dec m 0) as [Hmz| Hmz]; [ flia Hmz Habm | ].
+destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ flia Hnz Habn | ].
+replace m with (S (m - 1)) by flia Hmz.
+replace n with (S (n - 1)) by flia Hnz.
+cbn.
+destruct (Nat.eq_dec b 0) as [Hbz| Hbz]; [ now subst b | ].
+replace b with (S (b - 1)) at 1 2 by flia Hbz.
+rewrite (gcd_bezout_loop_enough_iter_lt _ (n - 1)); [ easy | | | ]. {
+  destruct (Nat.eq_dec a b) as [Habe| Habe]. {
+    subst a.
+    rewrite Nat.mod_same; [ | easy ].
+    flia Habm.
+  }
+  rewrite Nat.mod_small; [ | flia Hab Habe ].
+  flia Habm.
+} {
+  destruct (Nat.eq_dec a b) as [Habe| Habe]. {
+    subst a.
+    rewrite Nat.mod_same; [ | easy ].
+    flia Habn.
+  }
+  rewrite Nat.mod_small; [ | flia Hab Habe ].
+  flia Habn.
+} {
+  now apply Nat.mod_upper_bound.
+}
+Qed.
+
+Lemma fst_gcd_bezout_loop_is_gcd_lt : ∀ n a b,
+  a ≠ 0
+  → a + b + 1 ≤ n
+  → b < a
+  → fst (gcd_bezout_loop n a b) = Nat.gcd a b.
+Proof.
+intros * Haz Hn Hba.
+revert a b Haz Hn Hba.
+induction n; intros; [ flia Hn | cbn ].
+destruct (Nat.eq_dec b 0) as [Hbz| Hbz]. {
+  subst b.
+  now rewrite Nat.gcd_0_r.
+}
+replace b with (S (b - 1)) at 1 by flia Hbz.
+remember (gcd_bezout_loop n b (a mod b)) as gb eqn:Hgb; symmetry in Hgb.
+destruct gb as (g, (u, v)).
+rewrite Nat.gcd_comm, <- Nat.gcd_mod; [ | easy ].
+rewrite Nat.gcd_comm.
+cbn.
+replace g with (fst (gcd_bezout_loop n b (a mod b))) by now rewrite Hgb.
+apply IHn; [ easy | | ]. {
+  transitivity (a + b); [ | flia Hn ].
+  rewrite <- Nat.add_assoc, Nat.add_comm.
+  apply Nat.add_le_mono_r.
+  apply (Nat.add_le_mono_l _ _ (b * (a / b))).
+  rewrite Nat.add_assoc.
+  rewrite <- Nat.div_mod; [ | easy ].
+  rewrite Nat.add_comm.
+  apply Nat.add_le_mono_r.
+  remember (a / b) as q eqn:Hq; symmetry in Hq.
+  destruct q. {
+    apply Nat.div_small_iff in Hq; [ flia Hba Hq | easy ].
+  }
+  destruct b; [ easy | ].
+  cbn; remember (b * S q); flia.
+} {
+  now apply Nat.mod_upper_bound.
+}
+Qed.
+
+Lemma fst_gcd_bezout_loop_is_gcd_ge : ∀ n a b,
+  a ≠ 0
+  → a + b + 1 ≤ n
+  → a ≤ b
+  → fst (gcd_bezout_loop n a b) = Nat.gcd a b.
+Proof.
+intros * Haz Hn Hba.
+rewrite (gcd_bezout_loop_enough_iter_ge _ (S n)); [ | easy | flia Hn | easy ].
+destruct (Nat.eq_dec b 0) as [Hbz| Hbz]; [ subst b; flia Haz Hba | ].
+cbn.
+replace b with (S (b - 1)) at 1 by flia Hbz.
+remember (gcd_bezout_loop n b (a mod b)) as gb eqn:Hgb; symmetry in Hgb.
+destruct gb as (g, (u, v)); cbn.
+replace g with (fst (gcd_bezout_loop n b (a mod b))) by now rewrite Hgb.
+rewrite Nat.gcd_comm.
+rewrite <- Nat.gcd_mod; [ | easy ].
+rewrite Nat.gcd_comm.
+apply fst_gcd_bezout_loop_is_gcd_lt; [ easy | | ]. {
+  destruct (Nat.eq_dec a b) as [Habe| Habe]. {
+    subst a.
+    rewrite Nat.mod_same; [ | easy ].
+    flia Hn.
+  }
+  rewrite Nat.mod_small; [ | flia Hba Habe ].
+  flia Hn.
+} {
+  now apply Nat.mod_upper_bound.
+}
+Qed.
+
+Lemma fst_gcd_bezout_loop_is_gcd : ∀ n a b,
+  a ≠ 0
+  → a + b + 1 ≤ n
+  → fst (gcd_bezout_loop n a b) = Nat.gcd a b.
+Proof.
+intros * Haz Hn.
+destruct (le_dec a b) as [Hab| Hab]. {
+  now apply fst_gcd_bezout_loop_is_gcd_ge.
+} {
+  apply Nat.nle_gt in Hab.
+  now apply fst_gcd_bezout_loop_is_gcd_lt.
+}
+Qed.
+
+Theorem fst_gcd_and_bezout_is_gcd : ∀ a b,
+  a ≠ 0
+  → fst (gcd_and_bezout a b) = Nat.gcd a b.
+Proof.
+intros * Haz.
+now apply fst_gcd_bezout_loop_is_gcd.
+Qed.
+
+Theorem gcd_bezout_loop_enough_iter : ∀ m n a b,
+  a + b + 1 ≤ m
+  → a + b + 1 ≤ n
+  → gcd_bezout_loop m a b = gcd_bezout_loop n a b.
+Proof.
+intros * Habm Habn.
+destruct (le_dec a b) as [Hab| Hab]. {
+  now apply gcd_bezout_loop_enough_iter_ge.
+} {
+  apply Nat.nle_gt in Hab.
+  apply gcd_bezout_loop_enough_iter_lt; [ flia Habm | flia Habn | easy ].
+}
+Qed.
+
+Theorem gcd_bezout_loop_fst_0_gcd_0 : ∀ n a b g v,
+  a ≠ 0
+  → a + b + 1 ≤ n
+  → b < a
+  → gcd_bezout_loop n a b = (g, (0, v))
+  → g = 0.
+Proof.
+intros * Haz Hn Hba Hnab.
+assert (Hg : Nat.gcd a b = g). {
+  replace g with (fst (gcd_bezout_loop n a b)) by now rewrite Hnab.
+  now rewrite fst_gcd_bezout_loop_is_gcd.
+}
+revert a b g v Haz Hn Hba Hnab Hg.
+induction n; intros; [ flia Hn | ].
+destruct (Nat.eq_dec b 0) as [Hbz| Hbz]; [ now subst b | ].
+cbn in Hnab.
+replace b with (S (b - 1)) in Hnab at 1 by flia Hbz.
+remember (gcd_bezout_loop n b (a mod b)) as gb eqn:Hgb; symmetry in Hgb.
+destruct gb as (g', (u, v')).
+injection Hnab; clear Hnab; intros H1 Hv H2; subst g' v.
+rename v' into v.
+apply Nat.sub_0_le in Hv.
+rewrite Nat.mul_add_distr_r, Nat.mul_1_l in Hv.
+rewrite <- Nat.mul_max_distr_r in Hv.
+rewrite <- Nat.add_max_distr_r in Hv.
+apply Nat.max_lub_iff in Hv.
+destruct Hv as (Hvb, Huv).
+rewrite Nat.div_div in Huv; [ | easy | easy ].
+apply Nat.nlt_ge in Hvb.
+exfalso; apply Hvb; clear Hvb.
+rewrite Nat.mul_comm.
+specialize (Nat.div_mod v b Hbz) as H1.
+rewrite Nat.add_comm.
+apply (Nat.add_lt_mono_r _ _ (v mod b)).
+rewrite <- Nat.add_assoc, <- H1.
+rewrite Nat.add_comm.
+apply Nat.add_lt_mono_r.
+now apply Nat.mod_upper_bound.
+Qed.
+
+Theorem gcd_bezout_loop_prop_lt : ∀ n a b g u v,
+  a ≠ 0
+  → a + b + 1 ≤ n
+  → b < a
+  → gcd_bezout_loop n a b = (g, (u, v))
+  → a * u = b * v + g.
+Proof.
+intros * Haz Hn Hba Hnab.
+assert (Hgcd : g = Nat.gcd a b). {
+  apply fst_gcd_bezout_loop_is_gcd in Hn; [ | easy ].
+  now rewrite Hnab in Hn; cbn in Hn.
+}
+rewrite (gcd_bezout_loop_enough_iter _ (S n)) in Hnab; [ | easy | flia Hn ].
+revert a b g u v Haz Hn Hba Hnab Hgcd.
+induction n; intros; [ flia Hn | ].
+remember (S n) as sn; cbn in Hnab; subst sn.
+destruct (Nat.eq_dec b 0) as [Hbz| Hbz]. {
+  subst b.
+  rewrite Nat.mul_0_l.
+  injection Hnab; clear Hnab; intros; subst g u v.
+  now rewrite Nat.mul_1_r.
+}
+replace b with (S (b - 1)) in Hnab at 1 by flia Hbz.
+remember (gcd_bezout_loop (S n) b (a mod b)) as gb eqn:Hgb; symmetry in Hgb.
+destruct gb as (g', (u', v')).
+injection Hnab; clear Hnab; intros; move Hgcd at bottom; subst g u v.
+rename g' into g; rename u' into u; rename v' into v.
+remember ((u * b + v * (a - a mod b)) / b) as w eqn:Hw; symmetry in Hw.
+remember (max (v / b) (w / a) + 1) as k eqn:Hk.
+do 2 rewrite Nat.mul_sub_distr_l.
+replace (a * (k * b)) with (k * a * b) by flia.
+replace (b * (k * a)) with (k * a * b) by flia.
+rewrite <- Nat_sub_sub_distr. 2: {
+  split. 2: {
+    rewrite Nat.mul_comm.
+    apply Nat.mul_le_mono_r.
+    apply Nat_div_lt_le_mul; [ flia Hk | ].
+    destruct (Nat.lt_trichotomy (v / b) (w / a)) as [H| H]. {
+      rewrite max_r in Hk; [ | now apply Nat.lt_le_incl ].
+      rewrite Hk.
+      apply Nat.div_lt_upper_bound; [ now rewrite Nat.add_comm | ].
+      rewrite Nat.mul_add_distr_r, Nat.mul_1_l, Nat.mul_comm.
+      specialize (Nat.div_mod w a Haz) as H1.
+      apply (Nat.add_lt_mono_r _ _ (w mod a)).
+      rewrite Nat.add_shuffle0.
+      rewrite <- H1.
+      apply Nat.add_lt_mono_l.
+      now apply Nat.mod_upper_bound.
+    } {
+      assert (Huv : w / a ≤ v / b) by flia H; clear H.
+      rewrite max_l in Hk; [ | easy ].
+      rewrite Hk.
+      apply (le_lt_trans _ (w / (w / a + 1))). {
+        apply Nat.div_le_compat_l.
+        split; [ flia | ].
+        now apply Nat.add_le_mono_r.
+      }
+      apply Nat.div_lt_upper_bound; [ now rewrite Nat.add_comm | ].
+      rewrite Nat.mul_add_distr_r, Nat.mul_1_l, Nat.mul_comm.
+      specialize (Nat.div_mod w a Haz) as H1.
+      rewrite H1 at 1.
+      apply Nat.add_lt_mono_l.
+      now apply Nat.mod_upper_bound.
+    }
+  } {
+    clear k Hk.
+    rewrite Nat.add_comm, Nat.div_add in Hw; [ | easy ].
+    rewrite Nat.add_comm in Hw.
+    destruct u. {
+      apply gcd_bezout_loop_fst_0_gcd_0 in Hgb; [ | easy | | ]; cycle 1. {
+        destruct (lt_dec a b) as [Hab| Hab]. {
+          rewrite Nat.mod_small in Hgb; [ | easy ].
+          rewrite Nat.mod_small; [ | easy ].
+          now rewrite (Nat.add_comm b).
+        } {
+          apply Nat.nlt_ge in Hab.
+          transitivity (a + b + 1); [ | easy ].
+          rewrite (Nat.add_comm b).
+          do 2 apply Nat.add_le_mono_r.
+          now apply Nat.mod_le.
+        }
+      } {
+        now apply Nat.mod_upper_bound.
+      }
+      subst g; apply Nat.le_0_l.
+    }
+    rewrite <- Hw.
+    rewrite Nat.mul_comm; cbn.
+    transitivity b; [ | remember (_ * b); flia ].
+    rewrite Hgcd.
+    now apply Nat_gcd_le_r.
+  }
+}
+f_equal.
+apply IHn in Hgb; [ | easy | | | ]; cycle 1. {
+  transitivity (a + b); [ | flia Hn ].
+  rewrite <- Nat.add_assoc, Nat.add_comm.
+  apply Nat.add_le_mono_r.
+  apply (Nat.add_le_mono_l _ _ (b * (a / b))).
+  rewrite Nat.add_assoc.
+  rewrite <- Nat.div_mod; [ | easy ].
+  rewrite Nat.add_comm.
+  apply Nat.add_le_mono_r.
+  remember (a / b) as q eqn:Hq; symmetry in Hq.
+  destruct q. {
+    apply Nat.div_small_iff in Hq; [ flia Hba Hq | easy ].
+  }
+  destruct b; [ easy | ].
+  cbn; remember (b * S q); flia.
+} {
+  now apply Nat.mod_upper_bound.
+} {
+  rewrite Nat.gcd_comm, Nat.gcd_mod; [ | easy ].
+  now rewrite Nat.gcd_comm.
+}
+rewrite <- Hw.
+rewrite <- Nat.divide_div_mul_exact; [ | easy | ]. 2: {
+  exists (u + v * (a - a mod b) / b).
+  rewrite Nat.mul_add_distr_r; f_equal.
+  rewrite Nat.divide_div_mul_exact; [ | easy | ]. 2: {
+    exists (a / b).
+    rewrite (Nat.div_mod a b Hbz) at 1.
+    now rewrite Nat.add_sub, Nat.mul_comm.
+  }
+  rewrite <- Nat.mul_assoc; f_equal.
+  rewrite Nat.mul_comm.
+  rewrite <- Nat.divide_div_mul_exact; [ | easy | ]. 2: {
+    exists (a / b).
+    rewrite (Nat.div_mod a b Hbz) at 1.
+    now rewrite Nat.add_sub, Nat.mul_comm.
+  }
+  rewrite Nat.mul_comm.
+  now rewrite Nat.div_mul.
+}
+rewrite (Nat.mul_comm b).
+rewrite Nat.div_mul; [ | easy ].
+rewrite Nat.mul_sub_distr_l, (Nat.mul_comm v).
+rewrite Nat.add_sub_assoc. 2: {
+  rewrite Nat.mul_comm.
+  apply Nat.mul_le_mono_r.
+  now apply Nat.mod_le.
+}
+symmetry; apply Nat.add_sub_eq_l.
+symmetry; apply Nat.add_sub_eq_l.
+rewrite Nat.add_assoc; f_equal.
+now rewrite (Nat.mul_comm u), (Nat.mul_comm v).
+Qed.
+
+Theorem gcd_bezout_loop_prop_ge : ∀ n a b g u v,
+  a ≠ 0
+  → a + b + 1 ≤ n
+  → a ≤ b
+  → gcd_bezout_loop n a b = (g, (u, v))
+  → a * u = b * v + g.
+Proof.
+intros * Haz Hn Hba Hbez.
+assert (Hgcd : g = Nat.gcd a b). {
+  specialize (fst_gcd_bezout_loop_is_gcd n a b Haz Hn) as H1.
+  now rewrite Hbez in H1.
+}
+destruct (Nat.eq_dec b 0) as [Hbz| Hbz]; [ subst b; flia Haz Hba | ].
+rewrite (gcd_bezout_loop_enough_iter _ (S n)) in Hbez; try flia Hn.
+cbn - [ "/" "mod" ] in Hbez.
+replace b with (S (b - 1)) in Hbez at 1 by flia Haz Hba.
+remember (gcd_bezout_loop n b (a mod b)) as gb eqn:Hgb.
+symmetry in Hgb.
+destruct gb as (g', (u', v')).
+apply gcd_bezout_loop_prop_lt in Hgb; [ | easy | | ]; cycle 1. {
+  destruct (Nat.eq_dec a b) as [Hab| Hab]. {
+    subst b.
+    rewrite Nat.mod_same; [ flia Hn | easy ].
+  }
+  rewrite (Nat.add_comm b).
+  rewrite Nat.mod_small; [ easy | flia Hba Hab ].
+} {
+  now apply Nat.mod_upper_bound.
+}
+injection Hbez; clear Hbez; intros; move Hgcd at bottom; subst g u v.
+rename g' into g; rename u' into u; rename v' into v.
+remember ((u * b + v * (a - a mod b)) / b) as w eqn:Hw; symmetry in Hw.
+remember (max (v / b) (w / a) + 1) as k eqn:Hk.
+do 2 rewrite Nat.mul_sub_distr_l.
+replace (a * (k * b)) with (k * a * b) by flia.
+replace (b * (k * a)) with (k * a * b) by flia.
+rewrite <- Nat_sub_sub_distr. 2: {
+  split. 2: {
+    rewrite Nat.mul_comm.
+    apply Nat.mul_le_mono_r.
+    apply Nat_div_lt_le_mul; [ flia Hk | ].
+    destruct (Nat.lt_trichotomy (v / b) (w / a)) as [H| H]. {
+      rewrite max_r in Hk; [ | now apply Nat.lt_le_incl ].
+      rewrite Hk.
+      apply Nat.div_lt_upper_bound; [ now rewrite Nat.add_comm | ].
+      rewrite Nat.mul_add_distr_r, Nat.mul_1_l, Nat.mul_comm.
+      specialize (Nat.div_mod w a Haz) as H1.
+      apply (Nat.add_lt_mono_r _ _ (w mod a)).
+      rewrite Nat.add_shuffle0.
+      rewrite <- H1.
+      apply Nat.add_lt_mono_l.
+      now apply Nat.mod_upper_bound.
+    } {
+      assert (Huv : w / a ≤ v / b) by flia H; clear H.
+      rewrite max_l in Hk; [ | easy ].
+      rewrite Hk.
+      apply (le_lt_trans _ (w / (w / a + 1))). {
+        apply Nat.div_le_compat_l.
+        split; [ flia | ].
+        now apply Nat.add_le_mono_r.
+      }
+      apply Nat.div_lt_upper_bound; [ now rewrite Nat.add_comm | ].
+      rewrite Nat.mul_add_distr_r, Nat.mul_1_l, Nat.mul_comm.
+      specialize (Nat.div_mod w a Haz) as H1.
+      rewrite H1 at 1.
+      apply Nat.add_lt_mono_l.
+      now apply Nat.mod_upper_bound.
+    }
+  } {
+    clear k Hk.
+    rewrite Nat.add_comm, Nat.div_add in Hw; [ | easy ].
+    rewrite Nat.add_comm in Hw.
+    destruct u. {
+      rewrite Nat.mul_0_r in Hgb.
+      symmetry in Hgb.
+      apply Nat.eq_add_0 in Hgb.
+      rewrite (proj2 Hgb).
+      apply Nat.le_0_l.
+    }
+    rewrite <- Hw.
+    rewrite Nat.mul_comm; cbn.
+    transitivity b; [ | remember (_ * b); flia ].
+    rewrite Hgcd.
+    now apply Nat_gcd_le_r.
+  }
+}
+f_equal.
+rewrite <- Hw.
+rewrite <- Nat.divide_div_mul_exact; [ | easy | ]. 2: {
+  exists (u + v * ((a - a mod b) / b)).
+  rewrite Nat.mul_add_distr_r; f_equal.
+  rewrite <- Nat.mul_assoc; f_equal.
+  rewrite Nat.mul_comm.
+    rewrite <- Nat.divide_div_mul_exact; [ | easy | ]. 2: {
+      exists (a / b).
+      rewrite (Nat.div_mod a b) at 1; [ | easy ].
+      now rewrite Nat.add_sub, Nat.mul_comm.
+    }
+    now rewrite Nat.mul_comm, Nat.div_mul.
+  }
+  rewrite (Nat.mul_comm b), Nat.div_mul; [ | easy ].
+  rewrite (Nat.mul_comm u), Hgb.
+  rewrite Nat.mul_sub_distr_l.
+  rewrite Nat.add_shuffle0, Nat.add_sub.
+  rewrite Nat.add_sub_assoc. 2: {
+    apply Nat.mul_le_mono_l.
+    destruct (Nat.eq_dec a b) as [Hab| Hab]. {
+      subst a.
+      rewrite Nat.mod_same; [ apply Nat.le_0_l | easy ].
+    }
+    now apply Nat.mod_le.
+  }
+  rewrite Nat.add_comm, (Nat.mul_comm (a mod b)).
+  now rewrite Nat.add_sub, Nat.mul_comm.
+Qed.
+
+Theorem gcd_and_bezout_prop : ∀ a b g u v,
+  a ≠ 0
+  → gcd_and_bezout a b = (g, (u, v))
+  → a * u = b * v + g ∧ g = Nat.gcd a b.
+Proof.
+intros * Haz Hbez.
+assert (Hgcd : g = Nat.gcd a b). {
+  specialize (fst_gcd_and_bezout_is_gcd a b Haz) as H1.
+  now rewrite Hbez in H1.
+}
+split; [ | easy ].
+destruct (lt_dec b a) as [Hba| Hba]. {
+  now apply (gcd_bezout_loop_prop_lt (a + b + 1)).
+} {
+  apply Nat.nlt_ge in Hba.
+  now apply (gcd_bezout_loop_prop_ge (a + b + 1)).
+}
+Qed.
+
+Definition prod_coprimes_of_coprimes_mul m n a := (a mod m, a mod n).
+
+Definition coprimes_mul_of_prod_coprimes (m n : nat) '((x, y) : nat * nat) :=
+  let '(u, v) := snd (gcd_and_bezout m n) in
+  m * n - (n * x * v + m * (n - 1) * y * u) mod (m * n).
+
+Theorem prod_coprimes_coprimes_mul_prod : ∀ m n,
+  n ≠ 0
+  → Nat.gcd m n = 1
+  → ∀ x y, x < m → y < n
+  → prod_coprimes_of_coprimes_mul m n
+       (coprimes_mul_of_prod_coprimes m n (x, y)) = (x, y).
+Proof.
+intros * Hnz Hgmn * Hxm Hyn.
+assert (Hmz : m ≠ 0) by flia Hxm.
+move Hmz before n.
+unfold coprimes_mul_of_prod_coprimes.
+unfold prod_coprimes_of_coprimes_mul.
+remember (gcd_and_bezout m n) as gb eqn:Hgb.
+symmetry in Hgb.
+destruct gb as (g & u & v); cbn.
+specialize (gcd_and_bezout_prop m n g u v Hmz Hgb) as (Hmng & Hg).
+rewrite Hgmn in Hg; subst g.
+remember (n * x * v + m * (n - 1) * y * u) as p eqn:Hp.
+f_equal. {
+  rewrite Nat.mod_mul_r; [ | easy | easy ].
+  rewrite Nat.sub_add_distr.
+  rewrite <- (Nat.mod_add _ ((p / m) mod n)); [ | easy ].
+  rewrite (Nat.mul_comm _ m).
+  rewrite Nat.sub_add. 2: {
+    apply Nat.le_add_le_sub_r.
+    replace (m * n) with (m * (n - 1) + m). 2: {
+      rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
+      apply Nat.sub_add.
+      destruct n; [ easy | ].
+      rewrite Nat.mul_succ_r; flia.
+    }
+    apply Nat.add_le_mono. {
+      apply Nat.mul_le_mono_l.
+      rewrite Nat.sub_1_r.
+      apply Nat.lt_le_pred.
+      now apply Nat.mod_upper_bound.
+    } {
+      now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+    }
+  }
+  rewrite Hp.
+  do 2 rewrite <- (Nat.mul_assoc m).
+  rewrite Nat_mod_add_r_mul_l; [ | easy ].
+  rewrite Nat.mul_shuffle0.
+  replace (n * v) with (m * u - 1) by flia Hmng.
+  rewrite Nat.mul_sub_distr_r, Nat.mul_1_l.
+  rewrite <- (Nat.mod_add (m * u * x - x) x); [ | easy ].
+  rewrite <- Nat.add_sub_swap. 2: {
+    destruct m; [ easy | ].
+    destruct u; [ now rewrite Nat.mul_0_r, Nat.add_1_r in Hmng | ].
+    cbn.
+    apply Nat.le_sub_le_add_l.
+    rewrite Nat.sub_diag.
+    apply Nat.le_0_l.
+  }
+  rewrite <- Nat.add_sub_assoc. 2: {
+    destruct m; [ easy | ].
+    rewrite Nat.mul_succ_r; flia.
+  }
+  replace x with (x * 1) at 3 by flia.
+  rewrite <- Nat.mul_sub_distr_l.
+  rewrite Nat.add_comm, <- Nat.mul_assoc.
+  rewrite Nat_mod_add_r_mul_l; [ | easy ].
+  rewrite <- (Nat.mod_add _ ((x * (m - 1)) mod m)); [ | easy ].
+  rewrite <- Nat.add_sub_swap. 2: {
+    transitivity (pred m). 2: {
+      destruct n; [ easy | ].
+      rewrite Nat.mul_succ_r; flia.
+    }
+    apply Nat.lt_le_pred.
+    now apply Nat.mod_upper_bound.
+  }
+  remember ((x * (m - 1)) mod m) as a.
+  rewrite <- Nat.add_sub_assoc. 2: {
+    destruct m; [ easy | ].
+    rewrite Nat.mul_succ_r; flia.
+  }
+  replace a with (a * 1) at 2 by flia.
+  rewrite <- Nat.mul_sub_distr_l.
+  rewrite Nat.add_comm.
+  rewrite Nat_mod_add_r_mul_l; [ | easy ].
+  subst a.
+  rewrite Nat.mul_mod_idemp_l; [ | easy ].
+  rewrite <- Nat.mul_assoc.
+  rewrite <- Nat.pow_2_r.
+  rewrite Nat_sqr_sub; [ | flia Hmz ].
+  rewrite Nat.pow_1_l, Nat.mul_1_r, Nat.pow_2_r.
+  rewrite <- Nat.mul_mod_idemp_r; [ | easy ].
+  rewrite <- (Nat.mod_add (m * m + 1 - 2 * m) 2); [ | easy ].
+  rewrite Nat.sub_add. 2: {
+    destruct m; [ easy | ].
+    destruct m; [ easy | ].
+    cbn; remember (m * (S (S m))); flia.
+  }
+  rewrite Nat.add_comm, Nat.mod_add; [ | easy ].
+  rewrite Nat.mul_mod_idemp_r; [ | easy ].
+  rewrite Nat.mul_1_r.
+  now apply Nat.mod_small.
+} {
+  rewrite Nat.mul_comm at 2.
+  rewrite Nat.mod_mul_r; [ | easy | easy ].
+  rewrite Nat.sub_add_distr.
+  rewrite <- (Nat.mod_add _ ((p / n) mod m)); [ | easy ].
+  rewrite (Nat.mul_comm n).
+  rewrite Nat.sub_add. 2: {
+    apply Nat.le_add_le_sub_r.
+    replace (m * n) with (n * (m - 1) + n). 2: {
+      rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
+      rewrite Nat.mul_comm.
+      apply Nat.sub_add.
+      destruct m; [ easy | ].
+      rewrite Nat.mul_succ_l; flia.
+    }
+    apply Nat.add_le_mono. {
+      rewrite Nat.mul_comm.
+      apply Nat.mul_le_mono_l.
+      rewrite Nat.sub_1_r.
+      apply Nat.lt_le_pred.
+      now apply Nat.mod_upper_bound.
+    } {
+      now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+    }
+  }
+  rewrite Hp.
+  rewrite Nat.add_comm.
+  rewrite <- (Nat.mul_assoc n).
+  rewrite Nat_mod_add_r_mul_l; [ | easy ].
+  rewrite Nat.mul_shuffle0.
+  rewrite (Nat.mul_shuffle0 m).
+  rewrite Hmng.
+  rewrite Nat.mul_add_distr_r, Nat.mul_1_l.
+  rewrite Nat.mul_add_distr_r.
+  do 2 rewrite <- Nat.mul_assoc.
+  rewrite Nat.add_comm.
+  rewrite Nat_mod_add_r_mul_l; [ | easy ].
+  rewrite Nat.mul_sub_distr_r, Nat.mul_1_l.
+  rewrite <- (Nat.mod_add (n * y - y) y); [ | easy ].
+  rewrite <- Nat.add_sub_swap. 2: {
+    destruct n; [ easy | cbn; flia ].
+  }
+  rewrite <- Nat.add_sub_assoc. 2: {
+    rewrite Nat.mul_comm.
+    destruct n; [ easy | cbn; flia ].
+  }
+  rewrite Nat.add_comm.
+  rewrite Nat_mod_add_r_mul_l; [ | easy ].
+  replace y with (y * 1) at 2 by flia.
+  rewrite <- Nat.mul_sub_distr_l.
+  rewrite <- (Nat.mod_add _ ((y * (n - 1)) mod n)); [ | easy ].
+  rewrite <- Nat.add_sub_swap. 2: {
+    transitivity (pred n). 2: {
+      destruct m; [ easy | ].
+      rewrite Nat.mul_succ_l; flia.
+    }
+    apply Nat.lt_le_pred.
+    now apply Nat.mod_upper_bound.
+  }
+  remember ((y * (n - 1)) mod n) as a.
+  rewrite <- Nat.add_sub_assoc. 2: {
+    destruct n; [ easy | ].
+    rewrite Nat.mul_succ_r; flia.
+  }
+  replace a with (a * 1) at 2 by flia.
+  rewrite <- Nat.mul_sub_distr_l.
+  rewrite Nat.add_comm.
+  rewrite Nat.mod_add; [ | easy ].
+  subst a.
+  rewrite Nat.mul_mod_idemp_l; [ | easy ].
+  rewrite <- Nat.mul_assoc.
+  rewrite <- Nat.pow_2_r.
+  rewrite Nat_sqr_sub; [ | flia Hnz ].
+  rewrite Nat.pow_1_l, Nat.mul_1_r, Nat.pow_2_r.
+  rewrite <- Nat.mul_mod_idemp_r; [ | easy ].
+  rewrite <- (Nat.mod_add (n * n + 1 - 2 * n) 2); [ | easy ].
+  rewrite Nat.sub_add. 2: {
+    destruct n; [ easy | ].
+    destruct n; [ easy | ].
+    cbn; remember (n * (S (S n))); flia.
+  }
+  rewrite Nat.add_comm, Nat.mod_add; [ | easy ].
+  rewrite Nat.mul_mod_idemp_r; [ | easy ].
+  rewrite Nat.mul_1_r.
+  now apply Nat.mod_small.
+}
+Qed.
+
 Theorem φ_multiplicative : ∀ m n,
   2 ≤ m
   → 2 ≤ n
@@ -3646,6 +4360,7 @@ intros * H2m H2n Hg.
 unfold φ.
 rewrite <- prod_length.
 eapply bijection_same_length.
+Inspect 1.
 ...
 
 Theorem partial_φ_cons : ∀ m p pl,
@@ -4156,40 +4871,6 @@ split; intros Ha. {
 }
 Qed.
 
-Theorem Nat_div_lt_le_mul : ∀ a b c, b ≠ 0 → a / b < c → a ≤ b * c.
-Proof.
-intros * Hbz Habc.
-apply (Nat.mul_le_mono_l _ _ b) in Habc.
-transitivity (b * S (a / b)); [ | easy ].
-specialize (Nat.div_mod a b Hbz) as H1.
-rewrite <- Nat.add_1_r.
-rewrite Nat.mul_add_distr_l, Nat.mul_1_r.
-rewrite H1 at 1.
-apply Nat.add_le_mono_l.
-now apply Nat.lt_le_incl, Nat.mod_upper_bound.
-Qed.
-
-(* gcd_and_bezout a b returns (g, (u, v)) with the property
-        a * u = b * v + g
-        g = gcd a b;
-   requires a ≠ 0 *)
-
-Fixpoint gcd_bezout_loop n (a b : nat) : (nat * (nat * nat)) :=
-  match n with
-  | 0 => (0, (0, 0)) (* should not happen *)
-  | S n' =>
-      match b with
-      | 0 => (a, (1, 0))
-      | S _ =>
-          let '(g, (u, v)) := gcd_bezout_loop n' b (a mod b) in
-          let w := (u * b + v * (a - a mod b)) / b in
-          let k := max (v / b) (w / a) + 1 in
-          (g, (k * b - v, k * a - w))
-      end
-  end.
-
-Definition gcd_and_bezout a b := gcd_bezout_loop (a + b + 1) a b.
-
 (*
 Compute (gcd_and_bezout 15 6).
 Compute (gcd_and_bezout 6 15).
@@ -4199,507 +4880,6 @@ Compute (gcd_and_bezout 6 15).
 Compute (let (a, b) := (86, 50) in let '(g, (u, v)) := gcd_and_bezout a b in (g, u, v, a * u, b * v + g)).
 Compute (let (a, b) := (62, 33) in let '(g, (u, v)) := gcd_and_bezout a b in (g, u, v, a * u, b * v + g)).
 *)
-
-Lemma gcd_bezout_loop_enough_iter_lt : ∀ m n a b,
-  a + b ≤ m
-  → a + b ≤ n
-  → b < a
-  → gcd_bezout_loop m a b = gcd_bezout_loop n a b.
-Proof.
-intros * Habm Habn Hba.
-revert n a b Habm Habn Hba.
-induction m; intros; [ flia Habm Hba | ].
-destruct n; [ flia Habn Hba | cbn ].
-destruct (Nat.eq_dec b 0) as [Hbz| Hbz]; [ now subst b | ].
-replace b with (S (b - 1)) at 1 2 by flia Hbz.
-remember (gcd_bezout_loop m b (a mod b)) as gbm eqn:Hgbm; symmetry in Hgbm.
-remember (gcd_bezout_loop n b (a mod b)) as gbn eqn:Hgbn; symmetry in Hgbn.
-specialize (IHm n b (a mod b)) as H1.
-assert (H : ∀ p, a + b ≤ S p → b + a mod b ≤ p). {
-  intros * Habp.
-  transitivity (b + (a - 1)). {
-    apply Nat.add_le_mono_l.
-    specialize (Nat.div_mod a b Hbz) as H2.
-    apply (Nat.add_le_mono_l _ _ (b * (a / b))).
-    rewrite <- H2, Nat.add_comm.
-    remember (a / b) as q eqn:Hq; symmetry in Hq.
-    destruct q. {
-      apply Nat.div_small_iff in Hq; [ flia Hba Hq | easy ].
-    }
-    destruct b; [ easy | ].
-    cbn; remember (b * S q); flia.
-  }
-  flia Habp Hba.
-}
-specialize (H1 (H m Habm) (H n Habn)); clear H.
-assert (H : a mod b < b) by now apply Nat.mod_upper_bound.
-specialize (H1 H); clear H.
-now rewrite <- Hgbm, H1, Hgbn.
-Qed.
-
-Lemma gcd_bezout_loop_enough_iter_ge : ∀ m n a b,
-  a + b + 1 ≤ m
-  → a + b + 1 ≤ n
-  → a ≤ b
-  → gcd_bezout_loop m a b = gcd_bezout_loop n a b.
-Proof.
-intros * Habm Habn Hab.
-destruct (Nat.eq_dec m 0) as [Hmz| Hmz]; [ flia Hmz Habm | ].
-destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ flia Hnz Habn | ].
-replace m with (S (m - 1)) by flia Hmz.
-replace n with (S (n - 1)) by flia Hnz.
-cbn.
-destruct (Nat.eq_dec b 0) as [Hbz| Hbz]; [ now subst b | ].
-replace b with (S (b - 1)) at 1 2 by flia Hbz.
-rewrite (gcd_bezout_loop_enough_iter_lt _ (n - 1)); [ easy | | | ]. {
-  destruct (Nat.eq_dec a b) as [Habe| Habe]. {
-    subst a.
-    rewrite Nat.mod_same; [ | easy ].
-    flia Habm.
-  }
-  rewrite Nat.mod_small; [ | flia Hab Habe ].
-  flia Habm.
-} {
-  destruct (Nat.eq_dec a b) as [Habe| Habe]. {
-    subst a.
-    rewrite Nat.mod_same; [ | easy ].
-    flia Habn.
-  }
-  rewrite Nat.mod_small; [ | flia Hab Habe ].
-  flia Habn.
-} {
-  now apply Nat.mod_upper_bound.
-}
-Qed.
-
-Theorem gcd_bezout_loop_enough_iter : ∀ m n a b,
-  a + b + 1 ≤ m
-  → a + b + 1 ≤ n
-  → gcd_bezout_loop m a b = gcd_bezout_loop n a b.
-Proof.
-intros * Habm Habn.
-destruct (le_dec a b) as [Hab| Hab]. {
-  now apply gcd_bezout_loop_enough_iter_ge.
-} {
-  apply Nat.nle_gt in Hab.
-  apply gcd_bezout_loop_enough_iter_lt; [ flia Habm | flia Habn | easy ].
-}
-Qed.
-
-Lemma fst_gcd_bezout_loop_is_gcd_lt : ∀ n a b,
-  a ≠ 0
-  → a + b + 1 ≤ n
-  → b < a
-  → fst (gcd_bezout_loop n a b) = Nat.gcd a b.
-Proof.
-intros * Haz Hn Hba.
-revert a b Haz Hn Hba.
-induction n; intros; [ flia Hn | cbn ].
-destruct (Nat.eq_dec b 0) as [Hbz| Hbz]. {
-  subst b.
-  now rewrite Nat.gcd_0_r.
-}
-replace b with (S (b - 1)) at 1 by flia Hbz.
-remember (gcd_bezout_loop n b (a mod b)) as gb eqn:Hgb; symmetry in Hgb.
-destruct gb as (g, (u, v)).
-rewrite Nat.gcd_comm, <- Nat.gcd_mod; [ | easy ].
-rewrite Nat.gcd_comm.
-cbn.
-replace g with (fst (gcd_bezout_loop n b (a mod b))) by now rewrite Hgb.
-apply IHn; [ easy | | ]. {
-  transitivity (a + b); [ | flia Hn ].
-  rewrite <- Nat.add_assoc, Nat.add_comm.
-  apply Nat.add_le_mono_r.
-  apply (Nat.add_le_mono_l _ _ (b * (a / b))).
-  rewrite Nat.add_assoc.
-  rewrite <- Nat.div_mod; [ | easy ].
-  rewrite Nat.add_comm.
-  apply Nat.add_le_mono_r.
-  remember (a / b) as q eqn:Hq; symmetry in Hq.
-  destruct q. {
-    apply Nat.div_small_iff in Hq; [ flia Hba Hq | easy ].
-  }
-  destruct b; [ easy | ].
-  cbn; remember (b * S q); flia.
-} {
-  now apply Nat.mod_upper_bound.
-}
-Qed.
-
-Lemma fst_gcd_bezout_loop_is_gcd_ge : ∀ n a b,
-  a ≠ 0
-  → a + b + 1 ≤ n
-  → a ≤ b
-  → fst (gcd_bezout_loop n a b) = Nat.gcd a b.
-Proof.
-intros * Haz Hn Hba.
-rewrite (gcd_bezout_loop_enough_iter_ge _ (S n)); [ | easy | flia Hn | easy ].
-destruct (Nat.eq_dec b 0) as [Hbz| Hbz]; [ subst b; flia Haz Hba | ].
-cbn.
-replace b with (S (b - 1)) at 1 by flia Hbz.
-remember (gcd_bezout_loop n b (a mod b)) as gb eqn:Hgb; symmetry in Hgb.
-destruct gb as (g, (u, v)); cbn.
-replace g with (fst (gcd_bezout_loop n b (a mod b))) by now rewrite Hgb.
-rewrite Nat.gcd_comm.
-rewrite <- Nat.gcd_mod; [ | easy ].
-rewrite Nat.gcd_comm.
-apply fst_gcd_bezout_loop_is_gcd_lt; [ easy | | ]. {
-  destruct (Nat.eq_dec a b) as [Habe| Habe]. {
-    subst a.
-    rewrite Nat.mod_same; [ | easy ].
-    flia Hn.
-  }
-  rewrite Nat.mod_small; [ | flia Hba Habe ].
-  flia Hn.
-} {
-  now apply Nat.mod_upper_bound.
-}
-Qed.
-
-Lemma fst_gcd_bezout_loop_is_gcd : ∀ n a b,
-  a ≠ 0
-  → a + b + 1 ≤ n
-  → fst (gcd_bezout_loop n a b) = Nat.gcd a b.
-Proof.
-intros * Haz Hn.
-destruct (le_dec a b) as [Hab| Hab]. {
-  now apply fst_gcd_bezout_loop_is_gcd_ge.
-} {
-  apply Nat.nle_gt in Hab.
-  now apply fst_gcd_bezout_loop_is_gcd_lt.
-}
-Qed.
-
-Theorem fst_gcd_and_bezout_is_gcd : ∀ a b,
-  a ≠ 0
-  → fst (gcd_and_bezout a b) = Nat.gcd a b.
-Proof.
-intros * Haz.
-now apply fst_gcd_bezout_loop_is_gcd.
-Qed.
-
-Theorem gcd_bezout_loop_fst_0_gcd_0 : ∀ n a b g v,
-  a ≠ 0
-  → a + b + 1 ≤ n
-  → b < a
-  → gcd_bezout_loop n a b = (g, (0, v))
-  → g = 0.
-Proof.
-intros * Haz Hn Hba Hnab.
-assert (Hg : Nat.gcd a b = g). {
-  replace g with (fst (gcd_bezout_loop n a b)) by now rewrite Hnab.
-  now rewrite fst_gcd_bezout_loop_is_gcd.
-}
-revert a b g v Haz Hn Hba Hnab Hg.
-induction n; intros; [ flia Hn | ].
-destruct (Nat.eq_dec b 0) as [Hbz| Hbz]; [ now subst b | ].
-cbn in Hnab.
-replace b with (S (b - 1)) in Hnab at 1 by flia Hbz.
-remember (gcd_bezout_loop n b (a mod b)) as gb eqn:Hgb; symmetry in Hgb.
-destruct gb as (g', (u, v')).
-injection Hnab; clear Hnab; intros H1 Hv H2; subst g' v.
-rename v' into v.
-apply Nat.sub_0_le in Hv.
-rewrite Nat.mul_add_distr_r, Nat.mul_1_l in Hv.
-rewrite <- Nat.mul_max_distr_r in Hv.
-rewrite <- Nat.add_max_distr_r in Hv.
-apply Nat.max_lub_iff in Hv.
-destruct Hv as (Hvb, Huv).
-rewrite Nat.div_div in Huv; [ | easy | easy ].
-apply Nat.nlt_ge in Hvb.
-exfalso; apply Hvb; clear Hvb.
-rewrite Nat.mul_comm.
-specialize (Nat.div_mod v b Hbz) as H1.
-rewrite Nat.add_comm.
-apply (Nat.add_lt_mono_r _ _ (v mod b)).
-rewrite <- Nat.add_assoc, <- H1.
-rewrite Nat.add_comm.
-apply Nat.add_lt_mono_r.
-now apply Nat.mod_upper_bound.
-Qed.
-
-Theorem gcd_bezout_loop_prop_lt : ∀ n a b g u v,
-  a ≠ 0
-  → a + b + 1 ≤ n
-  → b < a
-  → gcd_bezout_loop n a b = (g, (u, v))
-  → a * u = b * v + g.
-Proof.
-intros * Haz Hn Hba Hnab.
-assert (Hgcd : g = Nat.gcd a b). {
-  apply fst_gcd_bezout_loop_is_gcd in Hn; [ | easy ].
-  now rewrite Hnab in Hn; cbn in Hn.
-}
-rewrite (gcd_bezout_loop_enough_iter _ (S n)) in Hnab; [ | easy | flia Hn ].
-revert a b g u v Haz Hn Hba Hnab Hgcd.
-induction n; intros; [ flia Hn | ].
-remember (S n) as sn; cbn in Hnab; subst sn.
-destruct (Nat.eq_dec b 0) as [Hbz| Hbz]. {
-  subst b.
-  rewrite Nat.mul_0_l.
-  injection Hnab; clear Hnab; intros; subst g u v.
-  now rewrite Nat.mul_1_r.
-}
-replace b with (S (b - 1)) in Hnab at 1 by flia Hbz.
-remember (gcd_bezout_loop (S n) b (a mod b)) as gb eqn:Hgb; symmetry in Hgb.
-destruct gb as (g', (u', v')).
-injection Hnab; clear Hnab; intros; move Hgcd at bottom; subst g u v.
-rename g' into g; rename u' into u; rename v' into v.
-remember ((u * b + v * (a - a mod b)) / b) as w eqn:Hw; symmetry in Hw.
-remember (max (v / b) (w / a) + 1) as k eqn:Hk.
-do 2 rewrite Nat.mul_sub_distr_l.
-replace (a * (k * b)) with (k * a * b) by flia.
-replace (b * (k * a)) with (k * a * b) by flia.
-rewrite <- Nat_sub_sub_distr. 2: {
-  split. 2: {
-    rewrite Nat.mul_comm.
-    apply Nat.mul_le_mono_r.
-    apply Nat_div_lt_le_mul; [ flia Hk | ].
-    destruct (Nat.lt_trichotomy (v / b) (w / a)) as [H| H]. {
-      rewrite max_r in Hk; [ | now apply Nat.lt_le_incl ].
-      rewrite Hk.
-      apply Nat.div_lt_upper_bound; [ now rewrite Nat.add_comm | ].
-      rewrite Nat.mul_add_distr_r, Nat.mul_1_l, Nat.mul_comm.
-      specialize (Nat.div_mod w a Haz) as H1.
-      apply (Nat.add_lt_mono_r _ _ (w mod a)).
-      rewrite Nat.add_shuffle0.
-      rewrite <- H1.
-      apply Nat.add_lt_mono_l.
-      now apply Nat.mod_upper_bound.
-    } {
-      assert (Huv : w / a ≤ v / b) by flia H; clear H.
-      rewrite max_l in Hk; [ | easy ].
-      rewrite Hk.
-      apply (le_lt_trans _ (w / (w / a + 1))). {
-        apply Nat.div_le_compat_l.
-        split; [ flia | ].
-        now apply Nat.add_le_mono_r.
-      }
-      apply Nat.div_lt_upper_bound; [ now rewrite Nat.add_comm | ].
-      rewrite Nat.mul_add_distr_r, Nat.mul_1_l, Nat.mul_comm.
-      specialize (Nat.div_mod w a Haz) as H1.
-      rewrite H1 at 1.
-      apply Nat.add_lt_mono_l.
-      now apply Nat.mod_upper_bound.
-    }
-  } {
-    clear k Hk.
-    rewrite Nat.add_comm, Nat.div_add in Hw; [ | easy ].
-    rewrite Nat.add_comm in Hw.
-    destruct u. {
-      apply gcd_bezout_loop_fst_0_gcd_0 in Hgb; [ | easy | | ]; cycle 1. {
-        destruct (lt_dec a b) as [Hab| Hab]. {
-          rewrite Nat.mod_small in Hgb; [ | easy ].
-          rewrite Nat.mod_small; [ | easy ].
-          now rewrite (Nat.add_comm b).
-        } {
-          apply Nat.nlt_ge in Hab.
-          transitivity (a + b + 1); [ | easy ].
-          rewrite (Nat.add_comm b).
-          do 2 apply Nat.add_le_mono_r.
-          now apply Nat.mod_le.
-        }
-      } {
-        now apply Nat.mod_upper_bound.
-      }
-      subst g; apply Nat.le_0_l.
-    }
-    rewrite <- Hw.
-    rewrite Nat.mul_comm; cbn.
-    transitivity b; [ | remember (_ * b); flia ].
-    rewrite Hgcd.
-    now apply Nat_gcd_le_r.
-  }
-}
-f_equal.
-apply IHn in Hgb; [ | easy | | | ]; cycle 1. {
-  transitivity (a + b); [ | flia Hn ].
-  rewrite <- Nat.add_assoc, Nat.add_comm.
-  apply Nat.add_le_mono_r.
-  apply (Nat.add_le_mono_l _ _ (b * (a / b))).
-  rewrite Nat.add_assoc.
-  rewrite <- Nat.div_mod; [ | easy ].
-  rewrite Nat.add_comm.
-  apply Nat.add_le_mono_r.
-  remember (a / b) as q eqn:Hq; symmetry in Hq.
-  destruct q. {
-    apply Nat.div_small_iff in Hq; [ flia Hba Hq | easy ].
-  }
-  destruct b; [ easy | ].
-  cbn; remember (b * S q); flia.
-} {
-  now apply Nat.mod_upper_bound.
-} {
-  rewrite Nat.gcd_comm, Nat.gcd_mod; [ | easy ].
-  now rewrite Nat.gcd_comm.
-}
-rewrite <- Hw.
-rewrite <- Nat.divide_div_mul_exact; [ | easy | ]. 2: {
-  exists (u + v * (a - a mod b) / b).
-  rewrite Nat.mul_add_distr_r; f_equal.
-  rewrite Nat.divide_div_mul_exact; [ | easy | ]. 2: {
-    exists (a / b).
-    rewrite (Nat.div_mod a b Hbz) at 1.
-    now rewrite Nat.add_sub, Nat.mul_comm.
-  }
-  rewrite <- Nat.mul_assoc; f_equal.
-  rewrite Nat.mul_comm.
-  rewrite <- Nat.divide_div_mul_exact; [ | easy | ]. 2: {
-    exists (a / b).
-    rewrite (Nat.div_mod a b Hbz) at 1.
-    now rewrite Nat.add_sub, Nat.mul_comm.
-  }
-  rewrite Nat.mul_comm.
-  now rewrite Nat.div_mul.
-}
-rewrite (Nat.mul_comm b).
-rewrite Nat.div_mul; [ | easy ].
-rewrite Nat.mul_sub_distr_l, (Nat.mul_comm v).
-rewrite Nat.add_sub_assoc. 2: {
-  rewrite Nat.mul_comm.
-  apply Nat.mul_le_mono_r.
-  now apply Nat.mod_le.
-}
-symmetry; apply Nat.add_sub_eq_l.
-symmetry; apply Nat.add_sub_eq_l.
-rewrite Nat.add_assoc; f_equal.
-now rewrite (Nat.mul_comm u), (Nat.mul_comm v).
-Qed.
-
-Theorem gcd_bezout_loop_prop_ge : ∀ n a b g u v,
-  a ≠ 0
-  → a + b + 1 ≤ n
-  → a ≤ b
-  → gcd_bezout_loop n a b = (g, (u, v))
-  → a * u = b * v + g.
-Proof.
-intros * Haz Hn Hba Hbez.
-assert (Hgcd : g = Nat.gcd a b). {
-  specialize (fst_gcd_bezout_loop_is_gcd n a b Haz Hn) as H1.
-  now rewrite Hbez in H1.
-}
-destruct (Nat.eq_dec b 0) as [Hbz| Hbz]; [ subst b; flia Haz Hba | ].
-rewrite (gcd_bezout_loop_enough_iter _ (S n)) in Hbez; try flia Hn.
-cbn - [ "/" "mod" ] in Hbez.
-replace b with (S (b - 1)) in Hbez at 1 by flia Haz Hba.
-remember (gcd_bezout_loop n b (a mod b)) as gb eqn:Hgb.
-symmetry in Hgb.
-destruct gb as (g', (u', v')).
-apply gcd_bezout_loop_prop_lt in Hgb; [ | easy | | ]; cycle 1. {
-  destruct (Nat.eq_dec a b) as [Hab| Hab]. {
-    subst b.
-    rewrite Nat.mod_same; [ flia Hn | easy ].
-  }
-  rewrite (Nat.add_comm b).
-  rewrite Nat.mod_small; [ easy | flia Hba Hab ].
-} {
-  now apply Nat.mod_upper_bound.
-}
-injection Hbez; clear Hbez; intros; move Hgcd at bottom; subst g u v.
-rename g' into g; rename u' into u; rename v' into v.
-remember ((u * b + v * (a - a mod b)) / b) as w eqn:Hw; symmetry in Hw.
-remember (max (v / b) (w / a) + 1) as k eqn:Hk.
-do 2 rewrite Nat.mul_sub_distr_l.
-replace (a * (k * b)) with (k * a * b) by flia.
-replace (b * (k * a)) with (k * a * b) by flia.
-rewrite <- Nat_sub_sub_distr. 2: {
-  split. 2: {
-    rewrite Nat.mul_comm.
-    apply Nat.mul_le_mono_r.
-    apply Nat_div_lt_le_mul; [ flia Hk | ].
-    destruct (Nat.lt_trichotomy (v / b) (w / a)) as [H| H]. {
-      rewrite max_r in Hk; [ | now apply Nat.lt_le_incl ].
-      rewrite Hk.
-      apply Nat.div_lt_upper_bound; [ now rewrite Nat.add_comm | ].
-      rewrite Nat.mul_add_distr_r, Nat.mul_1_l, Nat.mul_comm.
-      specialize (Nat.div_mod w a Haz) as H1.
-      apply (Nat.add_lt_mono_r _ _ (w mod a)).
-      rewrite Nat.add_shuffle0.
-      rewrite <- H1.
-      apply Nat.add_lt_mono_l.
-      now apply Nat.mod_upper_bound.
-    } {
-      assert (Huv : w / a ≤ v / b) by flia H; clear H.
-      rewrite max_l in Hk; [ | easy ].
-      rewrite Hk.
-      apply (le_lt_trans _ (w / (w / a + 1))). {
-        apply Nat.div_le_compat_l.
-        split; [ flia | ].
-        now apply Nat.add_le_mono_r.
-      }
-      apply Nat.div_lt_upper_bound; [ now rewrite Nat.add_comm | ].
-      rewrite Nat.mul_add_distr_r, Nat.mul_1_l, Nat.mul_comm.
-      specialize (Nat.div_mod w a Haz) as H1.
-      rewrite H1 at 1.
-      apply Nat.add_lt_mono_l.
-      now apply Nat.mod_upper_bound.
-    }
-  } {
-    clear k Hk.
-    rewrite Nat.add_comm, Nat.div_add in Hw; [ | easy ].
-    rewrite Nat.add_comm in Hw.
-    destruct u. {
-      rewrite Nat.mul_0_r in Hgb.
-      symmetry in Hgb.
-      apply Nat.eq_add_0 in Hgb.
-      rewrite (proj2 Hgb).
-      apply Nat.le_0_l.
-    }
-    rewrite <- Hw.
-    rewrite Nat.mul_comm; cbn.
-    transitivity b; [ | remember (_ * b); flia ].
-    rewrite Hgcd.
-    now apply Nat_gcd_le_r.
-  }
-}
-f_equal.
-rewrite <- Hw.
-rewrite <- Nat.divide_div_mul_exact; [ | easy | ]. 2: {
-  exists (u + v * ((a - a mod b) / b)).
-  rewrite Nat.mul_add_distr_r; f_equal.
-  rewrite <- Nat.mul_assoc; f_equal.
-  rewrite Nat.mul_comm.
-    rewrite <- Nat.divide_div_mul_exact; [ | easy | ]. 2: {
-      exists (a / b).
-      rewrite (Nat.div_mod a b) at 1; [ | easy ].
-      now rewrite Nat.add_sub, Nat.mul_comm.
-    }
-    now rewrite Nat.mul_comm, Nat.div_mul.
-  }
-  rewrite (Nat.mul_comm b), Nat.div_mul; [ | easy ].
-  rewrite (Nat.mul_comm u), Hgb.
-  rewrite Nat.mul_sub_distr_l.
-  rewrite Nat.add_shuffle0, Nat.add_sub.
-  rewrite Nat.add_sub_assoc. 2: {
-    apply Nat.mul_le_mono_l.
-    destruct (Nat.eq_dec a b) as [Hab| Hab]. {
-      subst a.
-      rewrite Nat.mod_same; [ apply Nat.le_0_l | easy ].
-    }
-    now apply Nat.mod_le.
-  }
-  rewrite Nat.add_comm, (Nat.mul_comm (a mod b)).
-  now rewrite Nat.add_sub, Nat.mul_comm.
-Qed.
-
-Theorem gcd_and_bezout_prop : ∀ a b g u v,
-  a ≠ 0
-  → gcd_and_bezout a b = (g, (u, v))
-  → a * u = b * v + g ∧ g = Nat.gcd a b.
-Proof.
-intros * Haz Hbez.
-assert (Hgcd : g = Nat.gcd a b). {
-  specialize (fst_gcd_and_bezout_is_gcd a b Haz) as H1.
-  now rewrite Hbez in H1.
-}
-split; [ | easy ].
-destruct (lt_dec b a) as [Hba| Hba]. {
-  now apply (gcd_bezout_loop_prop_lt (a + b + 1)).
-} {
-  apply Nat.nlt_ge in Hba.
-  now apply (gcd_bezout_loop_prop_ge (a + b + 1)).
-}
-Qed.
 
 (* Nat.gcd_bezout_pos could be implemented like this *)
 Theorem Nat_gcd_bezout_pos n m : 0 < n → Nat.Bezout n m (Nat.gcd n m).
@@ -4764,20 +4944,6 @@ Qed.
 
 (* totient is multiplicative *)
 
-Definition prod_coprimes_of_coprimes_mul m n a := (a mod m, a mod n).
-
-Definition coprimes_mul_of_prod_coprimes (m n : nat) '((x, y) : nat * nat) :=
-  let '(u, v) := snd (gcd_and_bezout m n) in
-(**)
-  m * n - (n * x * v + m * (n - 1) * y * u) mod (m * n).
-(*
-  m * n - (m * u * (x + (n - 1) * y) - x) mod (m * n).
-  m * n - (n * v * (x + (n - 1) * y) + (n - 1) * y) mod (m * n).
-  m * n - (m * u * (x + (n - 1) * y) + (m * n - 1) * x) mod (m * n).
-*)
-
-Search (_ - _ mod _).
-
 (**)
 Section Halte.
 
@@ -4814,192 +4980,6 @@ Compute (70-39).
 
 End Halte.
 (**)
-
-Theorem prod_coprimes_coprimes_mul_prod : ∀ m n,
-  n ≠ 0
-  → Nat.gcd m n = 1
-  → ∀ x y, x < m → y < n
-  → prod_coprimes_of_coprimes_mul m n
-       (coprimes_mul_of_prod_coprimes m n (x, y)) = (x, y).
-Proof.
-intros * Hnz Hgmn * Hxm Hyn.
-assert (Hmz : m ≠ 0) by flia Hxm.
-move Hmz before n.
-unfold coprimes_mul_of_prod_coprimes.
-unfold prod_coprimes_of_coprimes_mul.
-remember (gcd_and_bezout m n) as gb eqn:Hgb.
-symmetry in Hgb.
-destruct gb as (g & u & v); cbn.
-specialize (gcd_and_bezout_prop m n g u v Hmz Hgb) as (Hmng & Hg).
-rewrite Hgmn in Hg; subst g.
-remember (n * x * v + m * (n - 1) * y * u) as p eqn:Hp.
-f_equal. {
-  rewrite Nat.mod_mul_r; [ | easy | easy ].
-  rewrite Nat.sub_add_distr.
-  rewrite <- (Nat.mod_add _ ((p / m) mod n)); [ | easy ].
-  rewrite (Nat.mul_comm _ m).
-  rewrite Nat.sub_add. 2: {
-    apply Nat.le_add_le_sub_r.
-    replace (m * n) with (m * (n - 1) + m). 2: {
-      rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
-      apply Nat.sub_add.
-      destruct n; [ easy | ].
-      rewrite Nat.mul_succ_r; flia.
-    }
-    apply Nat.add_le_mono. {
-      apply Nat.mul_le_mono_l.
-      rewrite Nat.sub_1_r.
-      apply Nat.lt_le_pred.
-      now apply Nat.mod_upper_bound.
-    } {
-      now apply Nat.lt_le_incl, Nat.mod_upper_bound.
-    }
-  }
-  rewrite Hp.
-  do 2 rewrite <- (Nat.mul_assoc m).
-  rewrite Nat_mod_add_mul_l; [ | easy ].
-  rewrite Nat.mul_shuffle0.
-  replace (n * v) with (m * u - 1) by flia Hmng.
-  rewrite Nat.mul_sub_distr_r, Nat.mul_1_l.
-  rewrite <- (Nat.mod_add (m * u * x - x) x); [ | easy ].
-  rewrite <- Nat.add_sub_swap. 2: {
-    destruct m; [ easy | ].
-    destruct u; [ now rewrite Nat.mul_0_r, Nat.add_1_r in Hmng | ].
-    cbn.
-    apply Nat.le_sub_le_add_l.
-    rewrite Nat.sub_diag.
-    apply Nat.le_0_l.
-  }
-  rewrite <- Nat.add_sub_assoc. 2: {
-    destruct m; [ easy | ].
-    rewrite Nat.mul_succ_r; flia.
-  }
-  replace x with (x * 1) at 3 by flia.
-  rewrite <- Nat.mul_sub_distr_l.
-  rewrite Nat.add_comm, <- Nat.mul_assoc.
-  rewrite Nat_mod_add_mul_l; [ | easy ].
-  rewrite <- (Nat.mod_add _ ((x * (m - 1)) mod m)); [ | easy ].
-  rewrite <- Nat.add_sub_swap. 2: {
-    transitivity (pred m). 2: {
-      destruct n; [ easy | ].
-      rewrite Nat.mul_succ_r; flia.
-    }
-    apply Nat.lt_le_pred.
-    now apply Nat.mod_upper_bound.
-  }
-  remember ((x * (m - 1)) mod m) as a.
-  rewrite <- Nat.add_sub_assoc. 2: {
-    destruct m; [ easy | ].
-    rewrite Nat.mul_succ_r; flia.
-  }
-  replace a with (a * 1) at 2 by flia.
-  rewrite <- Nat.mul_sub_distr_l.
-  rewrite Nat.add_comm.
-  rewrite Nat_mod_add_mul_l; [ | easy ].
-  subst a.
-  rewrite Nat.mul_mod_idemp_l; [ | easy ].
-  rewrite <- Nat.mul_assoc.
-  rewrite <- Nat.pow_2_r.
-  rewrite Nat_sqr_sub; [ | flia Hmz ].
-  rewrite Nat.pow_1_l, Nat.mul_1_r, Nat.pow_2_r.
-  rewrite <- Nat.mul_mod_idemp_r; [ | easy ].
-  rewrite <- (Nat.mod_add (m * m + 1 - 2 * m) 2); [ | easy ].
-  rewrite Nat.sub_add. 2: {
-    destruct m; [ easy | ].
-    destruct m; [ easy | ].
-    cbn; remember (m * (S (S m))); flia.
-  }
-  rewrite Nat.add_comm, Nat.mod_add; [ | easy ].
-  rewrite Nat.mul_mod_idemp_r; [ | easy ].
-  rewrite Nat.mul_1_r.
-  now apply Nat.mod_small.
-} {
-  rewrite Nat.mul_comm at 2.
-  rewrite Nat.mod_mul_r; [ | easy | easy ].
-  rewrite Nat.sub_add_distr.
-  rewrite <- (Nat.mod_add _ ((p / n) mod m)); [ | easy ].
-  rewrite (Nat.mul_comm n).
-  rewrite Nat.sub_add. 2: {
-    apply Nat.le_add_le_sub_r.
-    replace (m * n) with (n * (m - 1) + n). 2: {
-      rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
-      rewrite Nat.mul_comm.
-      apply Nat.sub_add.
-      destruct m; [ easy | ].
-      rewrite Nat.mul_succ_l; flia.
-    }
-    apply Nat.add_le_mono. {
-      rewrite Nat.mul_comm.
-      apply Nat.mul_le_mono_l.
-      rewrite Nat.sub_1_r.
-      apply Nat.lt_le_pred.
-      now apply Nat.mod_upper_bound.
-    } {
-      now apply Nat.lt_le_incl, Nat.mod_upper_bound.
-    }
-  }
-  rewrite Hp.
-  rewrite Nat.add_comm.
-  rewrite <- (Nat.mul_assoc n).
-  rewrite Nat_mod_add_mul_l; [ | easy ].
-  rewrite Nat.mul_shuffle0.
-  rewrite (Nat.mul_shuffle0 m).
-  rewrite Hmng.
-  rewrite Nat.mul_add_distr_r, Nat.mul_1_l.
-  rewrite Nat.mul_add_distr_r.
-  do 2 rewrite <- Nat.mul_assoc.
-  rewrite Nat.add_comm.
-  rewrite Nat_mod_add_mul_l; [ | easy ].
-  rewrite Nat.mul_sub_distr_r, Nat.mul_1_l.
-  rewrite <- (Nat.mod_add (n * y - y) y); [ | easy ].
-  rewrite <- Nat.add_sub_swap. 2: {
-    destruct n; [ easy | cbn; flia ].
-  }
-  rewrite <- Nat.add_sub_assoc. 2: {
-    rewrite Nat.mul_comm.
-    destruct n; [ easy | cbn; flia ].
-  }
-  rewrite Nat.add_comm.
-  rewrite Nat_mod_add_mul_l; [ | easy ].
-  replace y with (y * 1) at 2 by flia.
-  rewrite <- Nat.mul_sub_distr_l.
-  rewrite <- (Nat.mod_add _ ((y * (n - 1)) mod n)); [ | easy ].
-  rewrite <- Nat.add_sub_swap. 2: {
-    transitivity (pred n). 2: {
-      destruct m; [ easy | ].
-      rewrite Nat.mul_succ_l; flia.
-    }
-    apply Nat.lt_le_pred.
-    now apply Nat.mod_upper_bound.
-  }
-  remember ((y * (n - 1)) mod n) as a.
-  rewrite <- Nat.add_sub_assoc. 2: {
-    destruct n; [ easy | ].
-    rewrite Nat.mul_succ_r; flia.
-  }
-  replace a with (a * 1) at 2 by flia.
-  rewrite <- Nat.mul_sub_distr_l.
-  rewrite Nat.add_comm.
-  rewrite Nat.mod_add; [ | easy ].
-  subst a.
-  rewrite Nat.mul_mod_idemp_l; [ | easy ].
-  rewrite <- Nat.mul_assoc.
-  rewrite <- Nat.pow_2_r.
-  rewrite Nat_sqr_sub; [ | flia Hnz ].
-  rewrite Nat.pow_1_l, Nat.mul_1_r, Nat.pow_2_r.
-  rewrite <- Nat.mul_mod_idemp_r; [ | easy ].
-  rewrite <- (Nat.mod_add (n * n + 1 - 2 * n) 2); [ | easy ].
-  rewrite Nat.sub_add. 2: {
-    destruct n; [ easy | ].
-    destruct n; [ easy | ].
-    cbn; remember (n * (S (S n))); flia.
-  }
-  rewrite Nat.add_comm, Nat.mod_add; [ | easy ].
-  rewrite Nat.mul_mod_idemp_r; [ | easy ].
-  rewrite Nat.mul_1_r.
-  now apply Nat.mod_small.
-}
-Qed.
 
 Theorem coprimes_mul_prod_coprimes : ∀ m n,
   m ≠ 0
