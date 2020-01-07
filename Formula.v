@@ -3556,7 +3556,7 @@ Qed.
 
 (* https://exploringnumbertheory.wordpress.com/2015/11/13/eulers-phi-function-is-multiplicative/ *)
 
-Theorem bijection_same_length {A B} : ∀ (l : list A) (l' : list B) f g,
+Theorem bijection_same_length {A B} : ∀ f g (l : list A) (l' : list B),
   NoDup l
   → NoDup l'
   → (∀ a, a ∈ l → f a ∈ l')
@@ -4359,8 +4359,13 @@ Proof.
 intros * H2m H2n Hg.
 unfold φ.
 rewrite <- prod_length.
-eapply bijection_same_length.
-Inspect 1.
+apply
+  (bijection_same_length (prod_coprimes_of_coprimes_mul m n)
+     (coprimes_mul_of_prod_coprimes m n)). {
+  unfold coprimes.
+  apply NoDup_filter, seq_NoDup.
+} {
+Search (NoDup (list_prod _ _)).
 ...
 
 Theorem partial_φ_cons : ∀ m p pl,
