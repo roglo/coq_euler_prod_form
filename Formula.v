@@ -4385,14 +4385,10 @@ apply NoDup_cons. {
     now apply NoDup_cons_iff in Hnl.
   }
 } {
-Theorem NoDup_app {A} : ∀ l l' : list A,
-  NoDup l
-  → NoDup l'
-...
-  → NoDup (l ++ l').
+Search list_prod.
 ...
 Theorem List_list_prod_cons_r {A B} : ∀ (l : list A) (l' : list B) b,
-  list_prod l (b :: l') = list_prod l l'.
+  list_prod l (b :: l') = map (λ a, list_prod l l'.
 Search (NoDup (_ ++ _)).
   apply NoDup_app.
 ...
