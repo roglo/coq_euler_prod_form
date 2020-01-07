@@ -1,10 +1,10 @@
 Erdos.vio: Erdos.v 
 Erdos.vo Erdos.glob Erdos.v.beautified Erdos.required_vo: Erdos.v 
-Formula.vio: Formula.v Misc.vio Primes.vio NumTheory.vio
-Formula.vo Formula.glob Formula.v.beautified Formula.required_vo: Formula.v Misc.vo Primes.vo NumTheory.vo
+Formula.vio: Formula.v Misc.vio Primes.vio Totient.vio
+Formula.vo Formula.glob Formula.v.beautified Formula.required_vo: Formula.v Misc.vo Primes.vo Totient.vo
 Misc.vio: Misc.v 
 Misc.vo Misc.glob Misc.v.beautified Misc.required_vo: Misc.v 
-NumTheory.vio: NumTheory.v Misc.vio
-NumTheory.vo NumTheory.glob NumTheory.v.beautified NumTheory.required_vo: NumTheory.v Misc.vo
 Primes.vio: Primes.v Misc.vio
 Primes.vo Primes.glob Primes.v.beautified Primes.required_vo: Primes.v Misc.vo
+Totient.vio: Totient.v Misc.vio
+Totient.vo Totient.glob Totient.v.beautified Totient.required_vo: Totient.v Misc.vo

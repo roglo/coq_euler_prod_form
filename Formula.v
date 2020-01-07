@@ -5,7 +5,7 @@ Set Nested Proofs Allowed.
 Require Import Utf8 Arith Psatz Setoid Morphisms.
 Require Import Sorting.Permutation SetoidList.
 Import List List.ListNotations.
-Require Import Misc Primes NumTheory.
+Require Import Misc Primes Totient.
 
 (* ζ(s) = Σ (n ∈ ℕ* ) 1/n^s = Π (p ∈ Primes) 1/(1-1/p^s) *)
 
