@@ -4454,7 +4454,17 @@ apply in_prod. {
 }
 Qed.
 
-Inspect 1.
+Theorem Nat_gcd_sub_diag_l : ∀ m n, Nat.gcd m (m - n) = Nat.gcd m n.
+Proof.
+intros.
+Search (Nat.gcd _ (_ + _)).
+...
+Search (Nat.gcd _ (_ + _)).
+Search (Nat.gcd _ (_ - _)).
+replace m with (n + (m - n)) at 1.
+rewrite Nat.gcd_comm.
+rewrite <- Nat.gcd_add_diag_r.
+...
 
 Theorem coprimes_mul_of_prod_coprimes_in_coprimes : ∀ m n,
   2 ≤ m
@@ -4577,6 +4587,12 @@ destruct (Nat.eq_dec n 0) as [Hnz| Hnz]. {
     now apply Nat.neq_mul_0.
   }
   remember (n * a * v + m * (n - 1) * b * u) as p eqn:Hp.
+...
+rewrite Nat_gcd_sub_diag_l.
+
+...
+
+Nat.gcd a (a - b) = gcd (a - b + b) (a - b) = gcd b (a - b) = gcd a b.
 ...
   replace (m * (n - 1) * b * u) with (m * u * (n - 1) * b) in Hp by flia.
 (*
