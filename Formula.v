@@ -4392,20 +4392,20 @@ Print count_occ.
 ...
 *)
 
+Print list_prod.
 Fixpoint list_prod' {A B} (l : list A) (l' : list B) :=
   match l with
   | [] => []
-  | x :: t => (x, l') :: list_prod' t l'
+  | x :: t => map (λ y, (x, y)) l' :: list_prod' t l'
   end.
 
 Theorem list_prod_prod' {A B} (l : list A) (l' : list B) :
-  list_prod l l' =
-  concat (map (λ '(a, l), map (λ b, (a, b)) l) (list_prod' l l')).
+  list_prod l l' = concat (list_prod' l l').
 Proof.
 intros.
 induction l as [| a l]; [ easy | ].
-cbn.
-...
+now cbn; rewrite IHl.
+Qed.
 
 Theorem NoDup_prod {A} {B} : ∀ (l : list A) (l' : list B),
   NoDup l → NoDup l' → NoDup (list_prod l l').
@@ -4444,13 +4444,8 @@ apply NoDup_cons. {
     now apply NoDup_cons_iff in Hnl.
   }
 } {
-Print list_prod.
 ...
 
-  list_prod l l' = concat (map (λ '(a, l), map (λ b, (a, b)) l) l').
-
-Search list_prod.
-...
 Theorem List_list_prod_cons_r {A B} : ∀ (l : list A) (l' : list B) b,
   list_prod l (b :: l') = map (λ a, list_prod l l'.
 Search (NoDup (_ ++ _)).
