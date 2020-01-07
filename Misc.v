@@ -641,6 +641,17 @@ rewrite Nat.gcd_comm.
 now apply Nat_gcd_1_mul_l; rewrite Nat.gcd_comm.
 Qed.
 
+Theorem Nat_gcd_sub_diag_l : ∀ m n, n ≤ m → Nat.gcd m (m - n) = Nat.gcd m n.
+Proof.
+intros * Hnm.
+replace m with (n + (m - n)) at 1 by flia Hnm.
+rewrite Nat.gcd_comm.
+rewrite Nat.gcd_add_diag_r.
+rewrite Nat.gcd_comm.
+rewrite Nat.gcd_sub_diag_r; [ | easy ].
+apply Nat.gcd_comm.
+Qed.
+
 Theorem Nat_pow_sub_pow : ∀ a b n,
   n ≠ 0
   → b ≤ a
