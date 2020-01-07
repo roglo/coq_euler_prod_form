@@ -1064,6 +1064,13 @@ destruct n; [ easy | cbn ].
 now rewrite IHl.
 Qed.
 
+Theorem List_list_prod_nil_r {A B} : ∀ l : list A,
+  list_prod l ([] : list B) = [].
+Proof.
+intros.
+now induction l.
+Qed.
+
 Theorem NoDup_app_app_swap {A} : ∀ l1 l2 l3 : list A,
   NoDup (l1 ++ l2 ++ l3) → NoDup (l1 ++ l3 ++ l2).
 Proof.

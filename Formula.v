@@ -4350,6 +4350,53 @@ f_equal. {
 }
 Qed.
 
+Theorem NoDup_prod {A} {B} : ∀ (l : list A) (l' : list B),
+  NoDup l → NoDup l' → NoDup (list_prod l l').
+Proof.
+(*
+intros * Hnl Hnl'.
+revert l Hnl.
+induction l' as [| b l']; intros. {
+  rewrite List_list_prod_nil_r; constructor.
+}
+...
+*)
+intros * Hnl Hnl'.
+revert l' Hnl'.
+induction l as [| a l]; intros; [ constructor | cbn ].
+induction l' as [| b l']. {
+  cbn.
+  rewrite List_list_prod_nil_r.
+  constructor.
+}
+cbn.
+apply NoDup_cons. {
+  intros Hab.
+  apply in_app_or in Hab.
+  destruct Hab as [Hab| Hab]. {
+    apply in_map_iff in Hab.
+    destruct Hab as (b', Hab).
+    destruct Hab as (Hab, Hb).
+    injection Hab; clear Hab; intros; subst b'.
+    now apply NoDup_cons_iff in Hnl'.
+  } {
+    apply in_prod_iff in Hab.
+    destruct Hab as (Ha, Hb).
+    now apply NoDup_cons_iff in Hnl.
+  }
+} {
+Theorem NoDup_app {A} : ∀ l l' : list A,
+  NoDup l
+  → NoDup l'
+...
+  → NoDup (l ++ l').
+...
+Theorem List_list_prod_cons_r {A B} : ∀ (l : list A) (l' : list B) b,
+  list_prod l (b :: l') = list_prod l l'.
+Search (NoDup (_ ++ _)).
+  apply NoDup_app.
+...
+
 Theorem φ_multiplicative : ∀ m n,
   2 ≤ m
   → 2 ≤ n
