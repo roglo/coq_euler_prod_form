@@ -1,5 +1,3 @@
-Erdos.vio: Erdos.v 
-Erdos.vo Erdos.glob Erdos.v.beautified Erdos.required_vo: Erdos.v 
 Formula.vio: Formula.v Misc.vio Primes.vio Totient.vio
 Formula.vo Formula.glob Formula.v.beautified Formula.required_vo: Formula.v Misc.vo Primes.vo Totient.vo
 Misc.vio: Misc.v 
