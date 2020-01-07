@@ -1183,6 +1183,77 @@ split. {
 }
 Qed.
 
+Theorem NoDup_app {A} : ∀ (l l' : list A),
+  NoDup l
+  → NoDup l'
+  → (∀ a, a ∈ l → a ∉ l')
+  → NoDup (l ++ l').
+Proof.
+intros * Hnl Hnl' Hll.
+revert l' Hnl' Hll.
+induction l as [| b l]; intros; [ easy | ].
+cbn.
+constructor. {
+  intros Hb.
+  apply in_app_or in Hb.
+  destruct Hb as [Hb| Hb]. {
+    now apply NoDup_cons_iff in Hnl.
+  } {
+    now specialize (Hll b (or_introl eq_refl)) as H1.
+  }
+} {
+  apply NoDup_cons_iff in Hnl.
+  apply IHl; [ easy | easy | ].
+  intros a Ha.
+  now apply Hll; right.
+}
+Qed.
+
+Theorem NoDup_prod {A} {B} : ∀ (l : list A) (l' : list B),
+  NoDup l → NoDup l' → NoDup (list_prod l l').
+Proof.
+intros * Hnl Hnl'.
+revert l' Hnl'.
+induction l as [| a l]; intros; [ constructor | ].
+cbn.
+apply NoDup_app. {
+  induction l' as [| b l']; [ constructor | ].
+  cbn.
+  apply NoDup_cons. {
+    intros Hab.
+    apply NoDup_cons_iff in Hnl'; apply Hnl'.
+    clear - Hab.
+    induction l' as [| c l']; [ easy | ].
+    cbn in Hab.
+    destruct Hab as [Hab| Hab]. {
+      injection Hab; clear Hab; intros; subst c.
+      now left.
+    } {
+      now right; apply IHl'.
+    }
+  } {
+    apply IHl'.
+    now apply NoDup_cons_iff in Hnl'.
+  }
+} {
+  apply IHl; [ | easy ].
+  now apply NoDup_cons_iff in Hnl.
+} {
+  intros (a', b) Hab.
+  assert (H : a = a'). {
+    clear - Hab.
+    induction l' as [| b' l']; [ easy | ].
+    cbn in Hab.
+    destruct Hab as [Hab| Hab]; [ congruence | ].
+    now apply IHl'.
+  }
+  subst a'.
+  intros H.
+  apply in_prod_iff in H.
+  now apply NoDup_cons_iff in Hnl.
+}
+Qed.
+
 Theorem Permutation_fold_mul : ∀ l1 l2 a,
   Permutation l1 l2 → fold_left Nat.mul l1 a = fold_left Nat.mul l2 a.
 Proof.
