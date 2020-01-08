@@ -3057,15 +3057,27 @@ split; intros Hap. 2: {
   apply euler_crit_iff in Hap.
   apply quad_res_iff.
 (**)
-  apply (not_forall_in_interv_imp_exist 1 (p - 1)). 3: {
-    intros H.
-    assert (Hnres : ∀ n, 1 ≤ n ≤ p - 1 → ¬ (n ^ 2 mod p = a)). {
-      intros n Hn.
-      specialize (H n Hn).
-      intros H1; apply H.
-      split; [ flia Hn | easy ].
+  apply (not_forall_in_interv_imp_exist 1 (p - 1)). {
+    intros n.
+    apply Decidable.dec_and. {
+      apply Decidable.dec_and; [ apply dec_le | apply dec_lt ].
+    } {
+      apply Nat.eq_decidable.
     }
-    clear H.
+  } {
+    destruct p; [ easy | cbn ].
+    destruct p; [ | flia ].
+    destruct Hap as (Ha, Hap).
+    now replace a with 0 in Hap by flia Ha.
+  }
+  intros H.
+  assert (Hnres : ∀ n, 1 ≤ n ≤ p - 1 → n ^ 2 mod p ≠ a). {
+    intros n Hn.
+    specialize (H n Hn).
+    intros H1; apply H.
+    split; [ flia Hn | easy ].
+  }
+  clear H.
 ...
   destruct Hap as (Hap & Happ).
   remember (seq 1 ((p - 1) / 2)) as l eqn:Hl.
