@@ -3106,7 +3106,8 @@ induction n; [ flia Han | ].
 destruct (Nat.eq_dec a n) as [Haen| Haen]. {
   subst a; clear Han IHn.
 (* mmm... *)
-Search NoDup.
+destruct n.
+(* bin non *)
 ...
 specialize (all_different_exist (λ b', (b' * b) mod p)) as H3.
 cbn in H3.
