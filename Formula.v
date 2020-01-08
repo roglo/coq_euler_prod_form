@@ -3083,8 +3083,9 @@ split; intros Hap. 2: {
     specialize (smaller_than_prime_all_different_multiples p Hp b Hb) as H1.
     assert (Hb' : ¬ (∀ b', (b * b') mod p ≠ a)). {
       intros H.
-      admit.
+...
     }
+... suite ok
     specialize (not_forall_in_interv_imp_exist 1 (p - 1)) as H2.
     specialize (H2 (λ b', (b * b') mod p = a)).
     cbn in H2.
@@ -3108,6 +3109,17 @@ split; intros Hap. 2: {
       }
       rewrite <- Nat.mul_mod_idemp_r; [ | easy ].
       apply H.
+      split; [ flia Hb'z | ].
+      rewrite Nat.sub_1_r.
+      apply Nat.lt_le_pred.
+      now apply Nat.mod_upper_bound.
+    }
+    specialize (H2 H); clear H.
+    destruct H2 as (b', H2).
+    exists b'.
+    split; [ easy | ].
+(* bon, c'est pas gagné, faut voir mais d'abord, faut que je résolve
+   mon "admit" ci-dessus *)
 ...
   destruct Hap as (Hap & Happ).
   remember (seq 1 ((p - 1) / 2)) as l eqn:Hl.
