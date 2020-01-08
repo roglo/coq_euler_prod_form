@@ -3123,28 +3123,16 @@ destruct (Nat.eq_dec a n) as [Haen| Haen]. {
     specialize (Hn 0 (Nat.lt_0_succ _)).
     flia Hn.
   }
-...
-  specialize (IHn n (λ x, S (f x)) (Nat.lt_succ_diag_r _)).
-  cbn in IHn.
-  assert (H : ∀ i, i < S n → S (f i) < S n). {
+  specialize (IHn n (λ x, (f x + n) mod S n) (Nat.lt_succ_diag_r _)).
+  cbn - [ "mod" ] in IHn.
+  assert (H : ∀ i, i < S n → (f i + n) mod S n < S n). {
     intros i Hi.
-    apply -> Nat.succ_lt_mono.
-    specialize (Hn i) as H1.
-    apply Nat.succ_lt_mono in Hi.
-...
-    specialize (H1 Hi).
-...
-  specialize (IHn n (λ x, f x - 1) (Nat.lt_succ_diag_r _)).
-  cbn in IHn.
-  assert (H : ∀ i, i < S n → f i - 1 < S n). {
-    intros i Hi.
-    assert (H : i < S (S n)) by flia Hi.
-    specialize (Hn _ H); clear H.
-    flia Hn.
+    now apply Nat.mod_upper_bound.
   }
   specialize (IHn H); clear H.
-  assert (H : ∀ i j, i < j < S n → f i - 1 ≠ f j - 1). {
+  assert (H : ∀ i j, i < j < S n → (f i + n) mod S n ≠ (f j + n) mod S n). {
     intros * Hij.
+...
     assert (H : i < j < S (S n)) by flia Hij.
     specialize (Hf _ _ H) as H1; clear H.
     intros H; apply H1; clear H1.
