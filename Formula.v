@@ -3059,6 +3059,13 @@ split; intros Hap. 2: {
 (**)
   apply (not_forall_in_interv_imp_exist 1 (p - 1)). 3: {
     intros H.
+    assert (Hnres : ∀ n, 1 ≤ n ≤ p - 1 → ¬ (n ^ 2 mod p = a)). {
+      intros n Hn.
+      specialize (H n Hn).
+      intros H1; apply H.
+      split; [ flia Hn | easy ].
+    }
+    clear H.
 ...
   destruct Hap as (Hap & Happ).
   remember (seq 1 ((p - 1) / 2)) as l eqn:Hl.
