@@ -3057,6 +3057,7 @@ split; intros Hap. 2: {
   apply euler_crit_iff in Hap.
   apply quad_res_iff.
 (**)
+  destruct Hap as (Ha, Hap).
   apply (not_forall_in_interv_imp_exist 1 (p - 1)). {
     intros n.
     apply Decidable.dec_and. {
@@ -3067,7 +3068,6 @@ split; intros Hap. 2: {
   } {
     destruct p; [ easy | cbn ].
     destruct p; [ | flia ].
-    destruct Hap as (Ha, Hap).
     now replace a with 0 in Hap by flia Ha.
   }
   intros H.
