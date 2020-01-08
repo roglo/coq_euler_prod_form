@@ -3123,6 +3123,7 @@ destruct (Nat.eq_dec a n) as [Haen| Haen]. {
     specialize (Hn 0 (Nat.lt_0_succ _)).
     flia Hn.
   }
+...
   specialize (IHn n (λ x, f x - 1) (Nat.lt_succ_diag_r _)).
   cbn in IHn.
   assert (H : ∀ i, i < S n → f i - 1 < S n). {
