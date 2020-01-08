@@ -3097,6 +3097,18 @@ split; intros Hap. 2: {
     assert (Hb' : ¬ (∀ b', (b * b') mod p ≠ a)). {
       move H1 at bottom.
       intros H.
+Theorem all_different_exist : ∀ f n,
+  (∀ i j, i < j < n → f i ≠ f j)
+  → ∀ a, a < n → ∃ x, f x = a.
+Proof.
+intros * Hf * Han.
+...
+specialize (all_different_exist (λ b', (b' * b) mod p)) as H3.
+cbn in H3.
+specialize (H3 p H1 a Ha).
+destruct H3 as (b', Hb').
+specialize (H b').
+now rewrite Nat.mul_comm in H.
 ...
     }
 ... suite ok
