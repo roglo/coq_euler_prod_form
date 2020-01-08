@@ -3098,16 +3098,20 @@ split; intros Hap. 2: {
       move H1 at bottom.
       intros H.
 Theorem all_different_exist : ∀ f n,
-  (∀ i j, i < j < n → f i ≠ f j)
+  (∀ i, i < n → f i < n)
+  → (∀ i j, i < j < n → f i ≠ f j)
   → ∀ a, a < n → ∃ x, f x = a.
 Proof.
-intros * Hf * Han.
-induction n; [ flia Han | ].
+intros * Hn Hf * Han.
+revert a f Han Hn Hf.
+induction n; intros; [ flia Han | ].
 destruct (Nat.eq_dec a n) as [Haen| Haen]. {
   subst a; clear Han IHn.
-(* mmm... *)
-destruct n.
-(* bin non *)
+  induction n. {
+    exists 0.
+    specialize (Hn 0 (Nat.lt_0_succ _)).
+    flia Hn.
+  }
 ...
 specialize (all_different_exist (λ b', (b' * b) mod p)) as H3.
 cbn in H3.
