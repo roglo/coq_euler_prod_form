@@ -3056,6 +3056,10 @@ split; intros Hap. 2: {
 } {
   apply euler_crit_iff in Hap.
   apply quad_res_iff.
+(**)
+  apply (not_forall_in_interv_imp_exist 1 (p - 1)). 3: {
+    intros H.
+...
   destruct Hap as (Hap & Happ).
   remember (seq 1 ((p - 1) / 2)) as l eqn:Hl.
   assert (H1 : ∀ i j,
