@@ -3033,10 +3033,10 @@ split; intros Hn. {
 }
 Qed.
 
-Theorem euler_criterion_quadratic_residue_iff : ∀ p a, prime p →
+Theorem euler_criterion_quadratic_residue_iff : ∀ p a, prime p → a ≠ 0 →
   a ∈ euler_crit p ↔ a ∈ quad_res p.
 Proof.
-intros * Hp.
+intros * Hp Haz.
 destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
 split; intros Hap. 2: {
   apply quad_res_iff in Hap.
@@ -3056,7 +3056,6 @@ split; intros Hap. 2: {
 } {
   apply euler_crit_iff in Hap.
   apply quad_res_iff.
-(**)
   destruct Hap as (Ha, Hap).
   apply (not_forall_in_interv_imp_exist 1 (p - 1)). {
     intros n.
@@ -3068,7 +3067,7 @@ split; intros Hap. 2: {
   } {
     destruct p; [ easy | cbn ].
     destruct p; [ | flia ].
-    now replace a with 0 in Hap by flia Ha.
+    flia Haz Ha.
   }
   intros H.
   assert (Hnres : ∀ n, 1 ≤ n ≤ p - 1 → n ^ 2 mod p ≠ a). {
@@ -3079,6 +3078,36 @@ split; intros Hap. 2: {
   }
   clear H.
   (* https://proofwiki.org/wiki/Euler%27s_Criterion *)
+  assert (H : ∀ b, 1 ≤ b < p → ∃! b', (b * b') mod p = a). {
+    intros b Hb.
+    specialize (smaller_than_prime_all_different_multiples p Hp b Hb) as H1.
+    assert (Hb' : ¬ (∀ b', (b * b') mod p ≠ a)). {
+      intros H.
+      admit.
+    }
+    specialize (not_forall_in_interv_imp_exist 1 (p - 1)) as H2.
+    specialize (H2 (λ b', (b * b') mod p = a)).
+    cbn in H2.
+    assert (H : ∀ n, Decidable.decidable ((b * n) mod p = a)). {
+      intros n.
+      apply Nat.eq_decidable.
+    }
+    specialize (H2 H); clear H.
+    assert (H : 1 ≤ p - 1). {
+      destruct p; [ easy | ].
+      destruct p; [ easy | flia ].
+    }
+    specialize (H2 H); clear H.
+    assert (H : ¬ (∀ n : nat, 1 ≤ n ≤ p - 1 → (b * n) mod p ≠ a)). {
+      intros H; apply Hb'; intros b'.
+      destruct (Nat.eq_dec (b' mod p) 0) as [Hb'z| Hb'z]. {
+        rewrite <- Nat.mul_mod_idemp_r; [ | easy ].
+        rewrite Hb'z, Nat.mul_0_r; cbn.
+        rewrite Nat.mod_0_l; [ | easy ].
+        now apply Nat.neq_sym.
+      }
+      rewrite <- Nat.mul_mod_idemp_r; [ | easy ].
+      apply H.
 ...
   destruct Hap as (Hap & Happ).
   remember (seq 1 ((p - 1) / 2)) as l eqn:Hl.
@@ -3188,12 +3217,3 @@ assert (H : 2 ≤ p - 1) by flia H3p.
 specialize (H1 H); clear H.
 rewrite Nat.sub_add in H1; [ easy | flia H3p ].
 Qed.
-
-(* this is false: counter example
-Compute (map (λ n, Nat_pow_mod 2 n 5) (seq 2 6)).
-Theorem smaller_than_prime_all_different_powers : ∀ p,
-  prime p
-  → ∀ a, 2 ≤ a ≤ p - 2
-  → ∀ i j, i < j < p → a ^ i mod p ≠ a ^ j mod p.
-*)
-
