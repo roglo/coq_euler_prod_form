@@ -3118,33 +3118,29 @@ revert a f Han Hn Hf.
 induction n; intros; [ flia Han | ].
 destruct (Nat.eq_dec a n) as [Haen| Haen]. {
   subst a; clear Han.
-...
   destruct n. {
     exists 0.
     specialize (Hn 0 (Nat.lt_0_succ _)).
     flia Hn.
   }
-  destruct n. {
-    specialize (Hf 0 1).
-    assert (H : 0 < 1 < 2) by flia.
-    specialize (Hf H); clear H.
-    specialize (Hn 0 (Nat.lt_0_succ _)) as H1.
-    specialize (Hn 1 (Nat.lt_succ_diag_r _)) as H2.
-    remember (f 0) as x eqn:Hx; symmetry in Hx.
-    destruct x. {
-      exists 1.
-      flia Hf H2.
-    }
-    destruct x; [ | flia H1 ].
-    now exists 0.
-  }
+  specialize (IHn n (λ x, f x - 1) (Nat.lt_succ_diag_r _)).
+  cbn in IHn.
 ...
-  subst a; clear Han IHn.
-  induction n. {
-    exists 0.
-    specialize (Hn 0 (Nat.lt_0_succ _)).
+  assert (H : ∀ i, i < S n → f i - 1 < S n). {
+    intros i Hi.
+    assert (H : i < S (S n)) by flia Hi.
+    specialize (Hn _ H); clear H.
     flia Hn.
   }
+  specialize (IHn H); clear H.
+  assert (H : ∀ i j, i < j < S n → f i - 1 ≠ f j - 1). {
+    intros * Hij.
+    assert (H : i < j < S (S n)) by flia Hij.
+    specialize (Hf _ _ H) as H1; clear H.
+    intros H; apply H1; clear H1.
+    remember (f i) as a eqn:Ha; symmetry in Ha.
+    destruct a. {
+      cbn in H.
 ...
 ... suite ok
 specialize (all_different_exist (λ b', (b' * b) mod p)) as H4.
