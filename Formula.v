@@ -3081,11 +3081,6 @@ split; intros Hap. 2: {
   assert (H : ∀ b, 1 ≤ b < p → ∃! b', (b * b') mod p = a). {
     intros b Hb.
     specialize (smaller_than_prime_all_different_multiples p Hp b Hb) as H1.
-    assert (Hb' : ¬ (∀ b', (b * b') mod p ≠ a)). {
-      intros H.
-...
-    }
-... suite ok
     specialize (not_forall_in_interv_imp_exist 1 (p - 1)) as H2.
     specialize (H2 (λ b', (b * b') mod p = a)).
     cbn in H2.
@@ -3099,6 +3094,12 @@ split; intros Hap. 2: {
       destruct p; [ easy | flia ].
     }
     specialize (H2 H); clear H.
+    assert (Hb' : ¬ (∀ b', (b * b') mod p ≠ a)). {
+      move H1 at bottom.
+      intros H.
+...
+    }
+... suite ok
     assert (H : ¬ (∀ n : nat, 1 ≤ n ≤ p - 1 → (b * n) mod p ≠ a)). {
       intros H; apply Hb'; intros b'.
       destruct (Nat.eq_dec (b' mod p) 0) as [Hb'z| Hb'z]. {
