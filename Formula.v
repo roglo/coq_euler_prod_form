@@ -3096,16 +3096,48 @@ split; intros Hap. 2: {
     specialize (H2 H); clear H.
     assert (Hb' : ¬ (∀ b', (b * b') mod p ≠ a)). {
       move H1 at bottom.
-      intros H.
+      intros H3.
 Theorem all_different_exist : ∀ f n,
   (∀ i, i < n → f i < n)
   → (∀ i j, i < j < n → f i ≠ f j)
   → ∀ a, a < n → ∃ x, f x = a.
 Proof.
 intros * Hn Hf * Han.
+destruct n; [ flia Han | ].
+destruct n. {
+  exists 0.
+  specialize (Hn 0 (Nat.lt_0_succ _)).
+  flia Hn Han.
+}
+destruct n. {
+...
+(*
+...
+intros * Hn Hf * Han.
 revert a f Han Hn Hf.
 induction n; intros; [ flia Han | ].
 destruct (Nat.eq_dec a n) as [Haen| Haen]. {
+  subst a; clear Han.
+  destruct n. {
+    exists 0.
+    specialize (Hn 0 (Nat.lt_0_succ _)).
+    flia Hn.
+  }
+  destruct n. {
+    specialize (Hf 0 1).
+    assert (H : 0 < 1 < 2) by flia.
+    specialize (Hf H); clear H.
+    specialize (Hn 0 (Nat.lt_0_succ _)) as H1.
+    specialize (Hn 1 (Nat.lt_succ_diag_r _)) as H2.
+    remember (f 0) as x eqn:Hx; symmetry in Hx.
+    destruct x. {
+      exists 1.
+      flia Hf H2.
+    }
+    destruct x; [ | flia H1 ].
+    now exists 0.
+  }
+...
   subst a; clear Han IHn.
   induction n. {
     exists 0.
@@ -3113,12 +3145,18 @@ destruct (Nat.eq_dec a n) as [Haen| Haen]. {
     flia Hn.
   }
 ...
-specialize (all_different_exist (λ b', (b' * b) mod p)) as H3.
-cbn in H3.
-specialize (H3 p H1 a Ha).
-destruct H3 as (b', Hb').
-specialize (H b').
-now rewrite Nat.mul_comm in H.
+... suite ok
+specialize (all_different_exist (λ b', (b' * b) mod p)) as H4.
+cbn in H4.
+specialize (H4 p).
+assert (H : ∀ i, i < p → (i * b) mod p < p). {
+  intros.
+  now apply Nat.mod_upper_bound.
+}
+specialize (H4 H H1 a Ha); clear H.
+destruct H4 as (b', Hb').
+specialize (H3 b').
+now rewrite Nat.mul_comm in H3.
 ...
     }
 ... suite ok
