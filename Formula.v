@@ -3078,6 +3078,7 @@ split; intros Hap. 2: {
     split; [ flia Hn | easy ].
   }
   clear H.
+  (* https://proofwiki.org/wiki/Euler%27s_Criterion *)
 ...
   destruct Hap as (Hap & Happ).
   remember (seq 1 ((p - 1) / 2)) as l eqn:Hl.
