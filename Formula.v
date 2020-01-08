@@ -3102,8 +3102,9 @@ Theorem all_different_exist : ∀ f n,
   → (∀ i j, i < j < n → f i ≠ f j)
   → ∀ a, a < n → ∃ x, f x = a.
 Proof.
+(*
 intros * Hn Hf * Han.
-destruct n; [ flia Han | ].
+induction n; [ flia Han | ].
 destruct n. {
   exists 0.
   specialize (Hn 0 (Nat.lt_0_succ _)).
@@ -3111,13 +3112,13 @@ destruct n. {
 }
 destruct n. {
 ...
-(*
-...
+*)
 intros * Hn Hf * Han.
 revert a f Han Hn Hf.
 induction n; intros; [ flia Han | ].
 destruct (Nat.eq_dec a n) as [Haen| Haen]. {
   subst a; clear Han.
+...
   destruct n. {
     exists 0.
     specialize (Hn 0 (Nat.lt_0_succ _)).
