@@ -3124,6 +3124,16 @@ destruct (Nat.eq_dec a n) as [Haen| Haen]. {
     flia Hn.
   }
 ...
+  specialize (IHn n (λ x, S (f x)) (Nat.lt_succ_diag_r _)).
+  cbn in IHn.
+  assert (H : ∀ i, i < S n → S (f i) < S n). {
+    intros i Hi.
+    apply -> Nat.succ_lt_mono.
+    specialize (Hn i) as H1.
+    apply Nat.succ_lt_mono in Hi.
+...
+    specialize (H1 Hi).
+...
   specialize (IHn n (λ x, f x - 1) (Nat.lt_succ_diag_r _)).
   cbn in IHn.
   assert (H : ∀ i, i < S n → f i - 1 < S n). {
