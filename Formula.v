@@ -3129,7 +3129,7 @@ split; intros Hap. 2: {
   }
   clear H.
   (* https://proofwiki.org/wiki/Euler%27s_Criterion *)
-  assert (H : ∀ b, 1 ≤ b < p → ∃! b', (b * b') mod p = a). {
+  assert (H : ∀ b, 1 ≤ b < p → ∃! b', b' < p ∧ (b * b') mod p = a). {
     intros b Hb.
     specialize (smaller_than_prime_all_different_multiples p Hp b Hb) as H1.
     specialize (not_forall_in_interv_imp_exist 1 (p - 1)) as H2.
@@ -3177,9 +3177,12 @@ split; intros Hap. 2: {
     }
     specialize (H2 H); clear H.
     destruct H2 as (b', H2).
-    exists b'.
-    split; [ easy | ].
-    intros x Hx.
+    exists (b' mod p).
+    split. {
+      split; [ now apply Nat.mod_upper_bound | ].
+      now rewrite Nat.mul_mod_idemp_r.
+    } {
+      intros x (Hxp & Hxa).
 ...
   destruct Hap as (Hap & Happ).
   remember (seq 1 ((p - 1) / 2)) as l eqn:Hl.
