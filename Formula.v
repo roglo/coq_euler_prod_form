@@ -3247,6 +3247,44 @@ split; intros Hap. 2: {
        ∃j, j ∈ l ∧ i ≠ j ∧ (i * j) mod p = a ∧
         ∀ k, k ∈ l → k ≠ i → (k * j) mod p ≠ a). {
       intros i Hi.
+      specialize (Hbb i) as H1.
+      assert (H : 1 ≤ i < p). {
+        subst l.
+        apply in_seq in Hi; flia Hi.
+      }
+      specialize (H1 H); clear H.
+      destruct H1 as (j & (Hj1 & Hj2 & Hj3) & Hj4).
+      exists j.
+      split. {
+        subst l; apply in_seq.
+        split; [ | flia Hj1 ].
+        destruct j; [ | flia ].
+        symmetry in Hj2.
+        now rewrite Nat.mul_0_r, Nat.mod_0_l in Hj2.
+      }
+      split; [ easy | ].
+      split; [ easy | ].
+      intros k Hk Hki.
+      specialize (Hj4 k) as H1.
+      destruct (Nat.eq_dec ((i * k) mod p) a) as [Hka| Hka]. {
+        assert (H : k < p ∧ (i * k) mod p = a ∧ i ≠ k). {
+          apply Nat.neq_sym in Hki.
+          split; [ | easy ].
+          rewrite Hl in Hk.
+          apply in_seq in Hk.
+          flia Hk.
+        }
+        specialize (H1 H); clear H.
+        subst k.
+        rewrite <- Nat.pow_2_r.
+        apply Hnres.
+        split; [ | flia Hj1 ].
+        destruct j; [ | flia ].
+        symmetry in Hj2.
+        now rewrite Nat.mul_0_r, Nat.mod_0_l in Hj2.
+      } {
+        intros Hkj.
+        move Hj2 at bottom.
 ...
   }
 ... suite ok
