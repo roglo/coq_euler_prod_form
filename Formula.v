@@ -3129,7 +3129,7 @@ split; intros Hap. 2: {
   }
   clear H.
   (* https://proofwiki.org/wiki/Euler%27s_Criterion *)
-  assert (H : ∀ b, 1 ≤ b < p → ∃! b', b' < p ∧ (b * b') mod p = a). {
+  assert (Hbb : ∀ b, 1 ≤ b < p → ∃! b', b' < p ∧ (b * b') mod p = a). {
     intros b Hb.
     specialize (smaller_than_prime_all_different_multiples p Hp b Hb) as H1.
     specialize (not_forall_in_interv_imp_exist 1 (p - 1)) as H2.
@@ -3183,6 +3183,36 @@ split; intros Hap. 2: {
       now rewrite Nat.mul_mod_idemp_r.
     } {
       intros x (Hxp & Hxa).
+      rewrite <- Nat.mul_mod_idemp_r in H2; [ | easy ].
+      rewrite <- H2 in Hxa.
+      destruct (le_dec (b' mod p) x) as [Hbx| Hbx]. {
+        apply Nat_eq_mod_sub_0 in Hxa. 2: {
+          now apply Nat.mul_le_mono_l.
+        }
+        rewrite <- Nat.mul_sub_distr_l in Hxa.
+        apply Nat.mod_divide in Hxa; [ | easy ].
+        apply Nat.gauss in Hxa; [ | now apply eq_gcd_prime_small_1 ].
+        destruct (Nat.eq_dec (b' mod p) x) as [Hb'x| Hb'x]; [ easy | ].
+        apply Nat.divide_pos_le in Hxa; [ flia Hxp Hxa | flia Hbx Hb'x ].
+      } {
+        apply Nat.nle_gt in Hbx.
+        symmetry in Hxa.
+        apply Nat_eq_mod_sub_0 in Hxa. 2: {
+          now apply Nat.mul_le_mono_l, Nat.lt_le_incl.
+        }
+        rewrite <- Nat.mul_sub_distr_l in Hxa.
+        apply Nat.mod_divide in Hxa; [ | easy ].
+        apply Nat.gauss in Hxa; [ | now apply eq_gcd_prime_small_1 ].
+        destruct (Nat.eq_dec (b' mod p) x) as [Hb'x| Hb'x]; [ easy | ].
+        apply Nat.divide_pos_le in Hxa; [ | flia Hbx Hb'x ].
+        apply Nat.nlt_ge in Hxa.
+        exfalso; apply Hxa.
+        apply (le_lt_trans _ (b' mod p)); [ flia | ].
+        now apply Nat.mod_upper_bound.
+      }
+    }
+  }
+  (* https://proofwiki.org/wiki/Euler%27s_Criterion *)
 ...
   destruct Hap as (Hap & Happ).
   remember (seq 1 ((p - 1) / 2)) as l eqn:Hl.
