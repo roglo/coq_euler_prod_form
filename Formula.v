@@ -3240,7 +3240,13 @@ split; intros Hap. 2: {
      (𝑝−1)/2 pairs 𝑏,𝑏′ such that 𝑏𝑏′≡𝑎(mod𝑝). *)
   assert (H : fact (p - 1) mod p = a ^ ((p - 1) / 2) mod p). {
     rewrite fact_eq_fold_left.
-(* s'inspirer de eq_fold_left_mul_seq_2_prime_sub_3_1 *)
+    (* s'inspirer de eq_fold_left_mul_seq_2_prime_sub_3_1 *)
+    remember (seq 1 (p - 1)) as l eqn:Hl.
+    assert
+      (Hij : ∀ i, i ∈ l →
+       ∃j, j ∈ l ∧ i ≠ j ∧ (i * j) mod p = a ∧
+        ∀ k, k ∈ l → k ≠ i → (k * j) mod p ≠ a). {
+      intros i Hi.
 ...
   }
 ... suite ok
