@@ -3238,6 +3238,27 @@ split; intros Hap. 2: {
   (* https://proofwiki.org/wiki/Euler%27s_Criterion *)
   (* It follows that the residue classes {1,2,…,𝑝−1} modulo 𝑝 fall into
      (𝑝−1)/2 pairs 𝑏,𝑏′ such that 𝑏𝑏′≡𝑎(mod𝑝). *)
+  assert (H : fact (p - 1) mod p = a ^ ((p - 1) / 2) mod p). {
+    rewrite fact_eq_fold_left.
+(* s'inspirer de eq_fold_left_mul_seq_2_prime_sub_3_1 *)
+...
+  }
+... suite ok
+  specialize (proj1 (Wilson p (prime_ge_2 p Hp)) Hp) as HW.
+  rewrite Hap, HW in H.
+...
+  assert (H : ∃ l, ∀ b, 1 ≤ b < p → (b * nth b l 0) mod p = a). {
+    (* j'ai déjà fait un truc dans ce style. Là, il s'agit d'une liste
+       de paires, mais dont les éléments se rencontrent deux fois, une
+       fois sous la forme (a, b) et une fois sous la forme (b, a). Il
+       faut prouver qu'à cette permutation près, il n'y a que (p-1)/2
+       paires, en fait. On pourrait par exemple ne sélectionner que
+       celles dont a < b.
+         Mais quand ai-je été confronté à un truc du même style ? Et
+       cet autre truc serait-il utile ici ? Je crois me souvenir que
+       j'avais eu du mal à trouver la solution.
+         Mmmm... wilson, peut-être... mais, justement, on l'utilise
+       juste après. *)
  ...
   destruct Hap as (Hap & Happ).
   remember (seq 1 ((p - 1) / 2)) as l eqn:Hl.
