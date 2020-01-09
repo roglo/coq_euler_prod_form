@@ -2347,7 +2347,6 @@ rewrite Hai2p, Nat.mul_1_l.
 rewrite Nat.mul_comm.
 rewrite List_fold_left_mul_assoc, Nat.mul_1_l.
 rewrite <- fold_left_app.
-(**)
 apply (IHlen (len - 1)); [ flia | | | ]. 3: {
   cbn in Hlen.
   apply Nat.succ_inj in Hlen.
