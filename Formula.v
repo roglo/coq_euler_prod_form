@@ -3236,6 +3236,8 @@ split; intros Hap. 2: {
   }
   clear Hbb; rename H into Hbb.
   (* https://proofwiki.org/wiki/Euler%27s_Criterion *)
+  (* It follows that the residue classes {1,2,…,𝑝−1} modulo 𝑝 fall into
+     (𝑝−1)/2 pairs 𝑏,𝑏′ such that 𝑏𝑏′≡𝑎(mod𝑝). *)
  ...
   destruct Hap as (Hap & Happ).
   remember (seq 1 ((p - 1) / 2)) as l eqn:Hl.
