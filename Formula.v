@@ -3285,6 +3285,54 @@ split; intros Hap. 2: {
       } {
         intros Hkj.
         move Hj2 at bottom.
+        rewrite <- Hkj in Hj2.
+        destruct (le_dec k i) as [Hik| Hik]. {
+          apply Nat_eq_mod_sub_0 in Hj2. 2: {
+            now apply Nat.mul_le_mono_r.
+          }
+          rewrite <- Nat.mul_sub_distr_r, Nat.mul_comm in Hj2.
+          apply Nat.mod_divide in Hj2; [ | easy ].
+          apply Nat.gauss in Hj2. 2: {
+            apply eq_gcd_prime_small_1; [ easy | ].
+            split; [ | easy ].
+            destruct j; [ | flia ].
+            rewrite Nat.mul_0_r, Nat.mod_0_l in Hkj; [ | easy ].
+            now symmetry in Hkj.
+          }
+          destruct (Nat.eq_dec k i) as [Hki'| Hki']; [ easy | ].
+          rewrite Hl in Hi; apply in_seq in Hi.
+          apply Nat.divide_pos_le in Hj2; [ flia Hi Hj2 | flia Hik Hki' ].
+        } {
+          apply Nat.nle_gt in Hik.
+          symmetry in Hj2.
+          apply Nat_eq_mod_sub_0 in Hj2. 2: {
+            now apply Nat.mul_le_mono_r, Nat.lt_le_incl.
+          }
+          rewrite <- Nat.mul_sub_distr_r in Hj2.
+          apply Nat.mod_divide in Hj2; [ | easy ].
+          apply Nat.gauss in Hj2. 2: {
+            apply eq_gcd_prime_small_1; [ easy | ].
+            split; [ flia Hik | ].
+            rewrite Hl in Hk; apply in_seq in Hk.
+            flia Hk.
+          }
+          apply Nat.divide_pos_le in Hj2; [ flia Hj1 Hj2 | ].
+          destruct j; [ | flia ].
+          rewrite Nat.mul_0_r, Nat.mod_0_l in Hkj; [ | easy ].
+          now symmetry in Hkj.
+        }
+      }
+    }
+    clear Hl.
+    remember (length l) as len eqn:Hlen; symmetry in Hlen.
+    revert l Hij Hlen.
+    induction len as (len, IHlen) using lt_wf_rec; intros.
+    destruct len. {
+      apply length_zero_iff_nil in Hlen.
+      subst l; cbn - [ "/" ]; rewrite Nat.mod_1_l; [ easy | ].
+      destruct p; [ easy | ].
+      destruct p; [ easy | flia ].
+    }
 ...
   }
 ... suite ok
