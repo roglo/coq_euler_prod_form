@@ -3129,6 +3129,8 @@ split; intros Hap. 2: {
   }
   clear H.
   (* https://proofwiki.org/wiki/Euler%27s_Criterion *)
+  (* The congruence 𝑏𝑥≡𝑎(mod𝑝) has (modulo 𝑝) a unique solution 𝑏′ by Solution
+     of Linear Congruence. *)
   assert (Hbb : ∀ b, 1 ≤ b < p → ∃! b', b' < p ∧ (b * b') mod p = a). {
     intros b Hb.
     specialize (smaller_than_prime_all_different_multiples p Hp b Hb) as H1.
@@ -3213,7 +3215,28 @@ split; intros Hap. 2: {
     }
   }
   (* https://proofwiki.org/wiki/Euler%27s_Criterion *)
-...
+  (* Note that 𝑏′≢𝑏, because otherwise we would have 𝑏2≡𝑎(mod𝑝) and 𝑎 would be
+     a quadratic residue of 𝑝. *)
+  assert (H : ∀ b, 1 ≤ b < p → ∃! b', b' < p ∧ (b * b') mod p = a ∧ b ≠ b'). {
+    intros b Hbp.
+    specialize (Hbb b Hbp).
+    destruct Hbb as (b' & (H1 & H2) & H3).
+    exists b'.
+    split. {
+      split; [ easy | ].
+      split; [ easy | ].
+      intros H; subst b'.
+      revert H2.
+      rewrite <- Nat.pow_2_r.
+      apply Hnres; flia Hbp.
+    } {
+      intros x' (Hx1 & Hx2 & Hx3).
+      now apply H3.
+    }
+  }
+  clear Hbb; rename H into Hbb.
+  (* https://proofwiki.org/wiki/Euler%27s_Criterion *)
+ ...
   destruct Hap as (Hap & Happ).
   remember (seq 1 ((p - 1) / 2)) as l eqn:Hl.
   assert (H1 : ∀ i j,
