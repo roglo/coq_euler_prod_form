@@ -3033,6 +3033,57 @@ split; intros Hn. {
 }
 Qed.
 
+Theorem all_different_exist : ∀ f n,
+  (∀ i, i < n → f i < n)
+  → (∀ i j, i < j < n → f i ≠ f j)
+  → ∀ a, a < n → ∃ x, f x = a.
+Proof.
+intros * Hn Hf * Han.
+remember (seq 0 n) as l eqn:Hl.
+set (g := λ i, if lt_dec i n then f i else i).
+assert (Hperm : Permutation l (map g l)). {
+  apply Permutation_sym.
+  subst l.
+  apply nat_bijection_Permutation. {
+    intros i Hi; subst g; cbn.
+    destruct (lt_dec i n) as [Hin| Hin]; [ | easy ].
+    now apply Hn.
+  } {
+    intros i j Hfij; subst g; cbn in Hfij.
+    destruct (lt_dec i n) as [Hin| Hin]. {
+      destruct (lt_dec j n) as [Hjn| Hjn]. {
+        destruct (lt_dec i j) as [Hij| Hij]. {
+          now specialize (Hf i j (conj Hij Hjn)).
+        } {
+          apply Nat.nlt_ge in Hij.
+          destruct (Nat.eq_dec i j) as [Heij| Heij]; [ easy | ].
+          assert (H : j < i) by flia Hij Heij.
+          specialize (Hf j i (conj H Hin)).
+          now symmetry in Hfij.
+        }
+      } {
+        subst j.
+        now specialize (Hn _ Hin).
+      }
+    } {
+      destruct (lt_dec j n) as [Hjn| Hjn]; [ | easy ].
+      subst i.
+      now specialize (Hn _ Hjn).
+    }
+  }
+}
+specialize (Permutation_in a Hperm) as H1.
+assert (H : a ∈ l). {
+  subst l.
+  apply in_seq; flia Han.
+}
+specialize (H1 H); clear H.
+subst g; cbn in H1.
+apply in_map_iff in H1.
+destruct H1 as (x & Hax & Hx).
+destruct (lt_dec x n) as [Hxn| Hxn]; [ now exists x | now subst x ].
+Qed.
+
 Theorem euler_criterion_quadratic_residue_iff : ∀ p a, prime p → a ≠ 0 →
   a ∈ euler_crit p ↔ a ∈ quad_res p.
 Proof.
@@ -3097,64 +3148,18 @@ split; intros Hap. 2: {
     assert (Hb' : ¬ (∀ b', (b * b') mod p ≠ a)). {
       move H1 at bottom.
       intros H3.
-Theorem all_different_exist : ∀ f n,
-  (∀ i, i < n → f i < n)
-  → (∀ i j, i < j < n → f i ≠ f j)
-  → ∀ a, a < n → ∃ x, f x = a.
-Proof.
-(*
-intros * Hn Hf * Han.
-induction n; [ flia Han | ].
-destruct n. {
-  exists 0.
-  specialize (Hn 0 (Nat.lt_0_succ _)).
-  flia Hn Han.
-}
-destruct n. {
-...
-*)
-intros * Hn Hf * Han.
-revert a f Han Hn Hf.
-induction n; intros; [ flia Han | ].
-destruct (Nat.eq_dec a n) as [Haen| Haen]. {
-  subst a; clear Han.
-  destruct n. {
-    exists 0.
-    specialize (Hn 0 (Nat.lt_0_succ _)).
-    flia Hn.
-  }
-  specialize (IHn n (λ x, (f x + n) mod S n) (Nat.lt_succ_diag_r _)).
-  cbn - [ "mod" ] in IHn.
-  assert (H : ∀ i, i < S n → (f i + n) mod S n < S n). {
-    intros i Hi.
-    now apply Nat.mod_upper_bound.
-  }
-  specialize (IHn H); clear H.
-  assert (H : ∀ i j, i < j < S n → (f i + n) mod S n ≠ (f j + n) mod S n). {
-    intros * Hij.
-...
-    assert (H : i < j < S (S n)) by flia Hij.
-    specialize (Hf _ _ H) as H1; clear H.
-    intros H; apply H1; clear H1.
-    remember (f i) as a eqn:Ha; symmetry in Ha.
-    destruct a. {
-      cbn in H.
-...
-... suite ok
-specialize (all_different_exist (λ b', (b' * b) mod p)) as H4.
-cbn in H4.
-specialize (H4 p).
-assert (H : ∀ i, i < p → (i * b) mod p < p). {
-  intros.
-  now apply Nat.mod_upper_bound.
-}
-specialize (H4 H H1 a Ha); clear H.
-destruct H4 as (b', Hb').
-specialize (H3 b').
-now rewrite Nat.mul_comm in H3.
-...
+      specialize (all_different_exist (λ b', (b' * b) mod p)) as H4.
+      cbn in H4.
+      specialize (H4 p).
+      assert (H : ∀ i, i < p → (i * b) mod p < p). {
+        intros.
+        now apply Nat.mod_upper_bound.
+      }
+      specialize (H4 H H1 a Ha); clear H.
+      destruct H4 as (b', Hb').
+      specialize (H3 b').
+      now rewrite Nat.mul_comm in H3.
     }
-... suite ok
     assert (H : ¬ (∀ n : nat, 1 ≤ n ≤ p - 1 → (b * n) mod p ≠ a)). {
       intros H; apply Hb'; intros b'.
       destruct (Nat.eq_dec (b' mod p) 0) as [Hb'z| Hb'z]. {
@@ -3174,8 +3179,7 @@ now rewrite Nat.mul_comm in H3.
     destruct H2 as (b', H2).
     exists b'.
     split; [ easy | ].
-(* bon, c'est pas gagné, faut voir mais d'abord, faut que je résolve
-   mon "admit" ci-dessus *)
+    intros x Hx.
 ...
   destruct Hap as (Hap & Happ).
   remember (seq 1 ((p - 1) / 2)) as l eqn:Hl.
