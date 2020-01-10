@@ -3084,10 +3084,13 @@ destruct H1 as (x & Hax & Hx).
 destruct (lt_dec x n) as [Hxn| Hxn]; [ now exists x | now subst x ].
 Qed.
 
-Theorem euler_criterion_quadratic_residue_iff : ∀ p a, prime p → a ≠ 0 →
-  a ∈ euler_crit p ↔ a ∈ quad_res p.
+Theorem euler_criterion_quadratic_residue_iff : ∀ p a,
+  prime p
+  → p ≠ 2
+  → a ≠ 0
+  → a ∈ euler_crit p ↔ a ∈ quad_res p.
 Proof.
-intros * Hp Haz.
+intros * Hp Hp2 Haz.
 destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
 split; intros Hap. 2: {
   apply quad_res_iff in Hap.
@@ -3097,7 +3100,6 @@ split; intros Hap. 2: {
   split; [ now apply Nat.mod_upper_bound | ].
   rewrite Nat_mod_pow_mod.
   rewrite <- Nat.pow_mul_r.
-  destruct (Nat.eq_dec p 2) as [Hp2| Hp2]; [ now subst p | ].
   rewrite <- (proj2 (Nat.div_exact _ _ (Nat.neq_succ_0 _))). 2: {
     specialize (odd_prime p Hp Hp2) as H1.
     specialize (Nat.div_mod p 2 (Nat.neq_succ_0 _)) as H2.
@@ -3217,7 +3219,8 @@ split; intros Hap. 2: {
   (* https://proofwiki.org/wiki/Euler%27s_Criterion *)
   (* Note that 𝑏′≢𝑏, because otherwise we would have 𝑏2≡𝑎(mod𝑝) and 𝑎 would be
      a quadratic residue of 𝑝. *)
-  assert (H : ∀ b, 1 ≤ b < p → ∃! b', b' < p ∧ (b * b') mod p = a ∧ b ≠ b'). {
+  assert
+    (H : ∀ b, 1 ≤ b < p → ∃! b', b' < p ∧ (b * b') mod p = a ∧ b ≠ b'). {
     intros b Hbp.
     specialize (Hbb b Hbp).
     destruct Hbb as (b' & (H1 & H2) & H3).
@@ -3240,8 +3243,9 @@ split; intros Hap. 2: {
      (𝑝−1)/2 pairs 𝑏,𝑏′ such that 𝑏𝑏′≡𝑎(mod𝑝). *)
   assert (H : fact (p - 1) mod p = a ^ ((p - 1) / 2) mod p). {
     rewrite fact_eq_fold_left.
-    (* s'inspirer de eq_fold_left_mul_seq_2_prime_sub_3_1 *)
-...
+    (* very similar with eq_fold_left_mul_seq_2_prime_sub_3_1;
+       perhaps a common lemma could be useful *)
+    specialize (seq_NoDup (p - 1) 1) as Hnd.
     remember (seq 1 (p - 1)) as l eqn:Hl.
     assert
       (Hij : ∀ i, i ∈ l →
@@ -3324,20 +3328,18 @@ split; intros Hap. 2: {
         }
       }
     }
-clear Hap.
+    clear Hbb Hnres.
+    replace (p - 1) with (length l). 2: {
+      now subst l; rewrite seq_length.
+    }
+    clear Hap.
     clear Hl.
     remember (length l) as len eqn:Hlen; symmetry in Hlen.
-    revert l Hij Hlen.
+    revert l Hnd Hij Hlen.
     induction len as (len, IHlen) using lt_wf_rec; intros.
     destruct len. {
       apply length_zero_iff_nil in Hlen.
-      subst l; cbn - [ "/" ].
-...
-      subst l; cbn - [ "/" ]; rewrite Nat.mod_1_l.
-...
-      subst l; cbn - [ "/" ]; rewrite Nat.mod_1_l; [ easy | ].
-      destruct p; [ easy | ].
-      destruct p; [ easy | flia ].
+      now rewrite Hlen.
     }
     destruct l as [| b l]; [ easy | ].
     specialize (Hij b (or_introl (eq_refl _))) as H1.
@@ -3356,131 +3358,101 @@ clear Hap.
     rewrite <- Nat.mul_mod_idemp_l; [ | easy ].
     rewrite (Nat.mul_comm i2).
     rewrite Hai2p.
-(*
+    replace (S len) with (len - 1 + 1 * 2). 2: {
+      destruct len; [ | flia ].
+      cbn in Hlen.
+      apply Nat.succ_inj in Hlen.
+      rewrite Hll in Hlen.
+      rewrite app_length in Hlen; cbn in Hlen.
+      now rewrite Nat.add_comm in Hlen.
+    }
+    rewrite Nat.div_add; [ | easy ].
+    rewrite Nat.add_comm, Nat.pow_add_r, Nat.pow_1_r.
+    rewrite <- Nat.mul_mod_idemp_r; [ | easy ].
+    rewrite <- (Nat.mul_mod_idemp_r _ (a ^ _)); [ | easy ].
+    f_equal; f_equal.
     rewrite Nat.mul_comm.
-*)
     rewrite List_fold_left_mul_assoc, Nat.mul_1_l.
     rewrite <- fold_left_app.
-    rewrite <- Nat.mul_mod_idemp_r; [ | easy ].
-    rewrite (IHlen (len - 1)).
-rewrite Hap.
-...
-apply (IHlen (len - 1)); [ flia | | | ]. 3: {
-apply (IHlen (len - 1)); [ flia | | | ]. 3: {
-  cbn in Hlen.
-  apply Nat.succ_inj in Hlen.
-  rewrite <- Hlen, Hll.
-  do 2 rewrite app_length.
-  cbn; flia.
-} {
-  apply NoDup_cons_iff in Hnd.
-  destruct Hnd as (_, Hnd).
-  rewrite Hll in Hnd.
-  now apply NoDup_remove_1 in Hnd.
-}
-intros i Hi.
-specialize (Hij i) as H1.
-assert (H : i ∈ a :: l). {
-  right; rewrite Hll.
-  apply in_app_or in Hi.
-  apply in_or_app.
-  destruct Hi as [Hi| Hi]; [ now left | now right; right ].
-}
-specialize (H1 H); clear H.
-destruct H1 as (j & Hjall & Hinj & Hijp & Hk').
-exists j.
-split. {
-  destruct Hjall as [Hjall| Hjall]. {
-    subst j; exfalso.
-    specialize (Hk' i2) as H1.
-    assert (H : i2 ∈ a :: l). {
-      now rewrite Hll; right; apply in_or_app; right; left.
-    }
-    specialize (H1 H); clear H.
-    assert (H : i2 ≠ i). {
-      intros H; subst i2.
-      move Hnd at bottom; move Hi at bottom.
+    apply (IHlen (len - 1)); [ flia | | | ]. 3: {
+      cbn in Hlen.
+      apply Nat.succ_inj in Hlen.
+      rewrite <- Hlen, Hll.
+      do 2 rewrite app_length.
+      cbn; flia.
+    } {
       apply NoDup_cons_iff in Hnd.
       destruct Hnd as (_, Hnd).
       rewrite Hll in Hnd.
-      now apply NoDup_remove_2 in Hnd.
+      now apply NoDup_remove_1 in Hnd.
     }
-    specialize (H1 H).
-    now rewrite Nat.mul_comm in H1.
-  }
-  rewrite Hll in Hjall.
-  apply in_app_or in Hjall.
-  apply in_or_app.
-  destruct Hjall as [Hjall| Hjall]; [ now left | ].
-  destruct Hjall as [Hjall| Hjall]; [ | now right ].
-  subst j.
-  destruct (Nat.eq_dec a i) as [Hai| Hai]. {
-    subst i.
-    move Hnd at bottom.
-    apply NoDup_cons_iff in Hnd.
-    destruct Hnd as (Hnd, _).
-    exfalso; apply Hnd; clear Hnd.
+    intros i Hi.
+    specialize (Hij i) as H1.
+    assert (H : i ∈ b :: l). {
+      right; rewrite Hll.
+      apply in_app_or in Hi.
+      apply in_or_app.
+      destruct Hi as [Hi| Hi]; [ now left | now right; right ].
+    }
+    specialize (H1 H); clear H.
+    destruct H1 as (j & Hjall & Hinj & Hijp & Hk').
+    exists j.
+    split. {
+      destruct Hjall as [Hjall| Hjall]. {
+        subst j; exfalso.
+        specialize (Hk' i2) as H1.
+        assert (H : i2 ∈ b :: l). {
+          now rewrite Hll; right; apply in_or_app; right; left.
+        }
+        specialize (H1 H); clear H.
+        assert (H : i2 ≠ i). {
+          intros H; subst i2.
+          move Hnd at bottom; move Hi at bottom.
+          apply NoDup_cons_iff in Hnd.
+          destruct Hnd as (_, Hnd).
+          rewrite Hll in Hnd.
+          now apply NoDup_remove_2 in Hnd.
+        }
+        specialize (H1 H).
+        now rewrite Nat.mul_comm in H1.
+      }
+      rewrite Hll in Hjall.
+      apply in_app_or in Hjall.
+      apply in_or_app.
+      destruct Hjall as [Hjall| Hjall]; [ now left | ].
+      destruct Hjall as [Hjall| Hjall]; [ | now right ].
+      subst j.
+      destruct (Nat.eq_dec b i) as [Hbi| Hbi]. {
+        subst i.
+        move Hnd at bottom.
+        apply NoDup_cons_iff in Hnd.
+        destruct Hnd as (Hnd, _).
+        exfalso; apply Hnd; clear Hnd.
+        rewrite Hll.
+        apply in_app_or in Hi.
+        apply in_or_app.
+        destruct Hi as [Hi| Hi]; [ now left | now right; right ].
+      }
+      now specialize (Hk' b (or_introl eq_refl) Hbi) as H2.
+    }
+    split; [ easy | ].
+    split; [ easy | ].
+    intros k Hkll Hki.
+    apply Hk'; [ | easy ].
+    right.
     rewrite Hll.
-    apply in_app_or in Hi.
+    apply in_app_or in Hkll.
     apply in_or_app.
-    destruct Hi as [Hi| Hi]; [ now left | now right; right ].
+    destruct Hkll as [Hkll| Hkll]; [ now left | now right; right ].
   }
-  now specialize (Hk' a (or_introl eq_refl) Hai) as H2.
-}
-split; [ easy | ].
-split; [ easy | ].
-intros k Hkll Hki.
-apply Hk'; [ | easy ].
-right.
-rewrite Hll.
-apply in_app_or in Hkll.
-apply in_or_app.
-destruct Hkll as [Hkll| Hkll]; [ now left | now right; right ].
-...
-  }
-... suite ok
   specialize (proj1 (Wilson p (prime_ge_2 p Hp)) Hp) as HW.
   rewrite Hap, HW in H.
-...
-  assert (H : ∃ l, ∀ b, 1 ≤ b < p → (b * nth b l 0) mod p = a). {
-    (* j'ai déjà fait un truc dans ce style. Là, il s'agit d'une liste
-       de paires, mais dont les éléments se rencontrent deux fois, une
-       fois sous la forme (a, b) et une fois sous la forme (b, a). Il
-       faut prouver qu'à cette permutation près, il n'y a que (p-1)/2
-       paires, en fait. On pourrait par exemple ne sélectionner que
-       celles dont a < b.
-         Mais quand ai-je été confronté à un truc du même style ? Et
-       cet autre truc serait-il utile ici ? Je crois me souvenir que
-       j'avais eu du mal à trouver la solution.
-         Mmmm... wilson, peut-être... mais, justement, on l'utilise
-       juste après. *)
- ...
-  destruct Hap as (Hap & Happ).
-  remember (seq 1 ((p - 1) / 2)) as l eqn:Hl.
-  assert (H1 : ∀ i j,
-    i < length l
-    → j < length l
-    → nth i l 0 ^ 2 mod p = nth j l 0 ^ 2 mod p
-    → i = j). {
-    intros * Hi Hj Hij.
-    specialize (quad_res_all_diff p Hp) as H1.
-    unfold quad_res in H1.
-    rewrite List_firstn_map in H1.
-    rewrite List_firstn_seq in H1.
-    rewrite Nat.min_l in H1. 2: {
-      rewrite <- Nat.div_1_r.
-      apply Nat.div_le_compat_l; flia.
-    }
-    rewrite <- Hl in H1.
-    specialize (proj1 (NoDup_map_iff 0 _ _) H1) as H2.
-    cbn - [ "/" ] in H2.
-    rewrite Nat.mod_1_l in H2; [ | now apply prime_ge_2 ].
-    specialize (H2 i j Hi Hj).
-    do 2 rewrite Nat.mul_1_r in H2.
-    do 2 rewrite Nat.mul_mod_idemp_r in H2; [ | easy | easy | easy ].
-    do 2 rewrite <- Nat.pow_2_r in H2.
-    now specialize (H2 Hij).
-  }
+  flia Hp2 H.
+}
+Qed.
+
+Inspect 1.
+
 ...
 
 Theorem exists_nonresidue : ∀ p,
