@@ -2240,11 +2240,7 @@ Theorem ζ_Euler_product_eq : ...
 
 Require Import Totient QuadRes.
 
-Compute (let p := 5 in (Nat_pow_mod 3 ((p - 1)/2) p, p)).
-Compute (let p := 5 in map (λ n, Nat_pow_mod n ((p - 1)/2) p) (seq 2 (p - 3))).
-Compute (let p := 19 in map (λ n, Nat_pow_mod n ((p - 1)/2) p) (seq 2 (p - 3))).
-Compute (let p := 53 in map (λ n, Nat_pow_mod n ((p - 1)/2) p) (seq 2 (p - 3))).
-
+(*
 Theorem sqr_mod_prime_is_1 : ∀ p a,
   prime p → a ^ 2 mod p = 1 → a mod p = 1 ∨ a mod p = p - 1.
 Proof.
@@ -2315,6 +2311,7 @@ replace (p - 1) with ((p - 1) / 2 * 2) in H1. 2: {
 apply sqr_mod_prime_is_1; [ easy | ].
 now rewrite Nat.pow_mul_r in H1.
 Qed.
+*)
 
 Theorem prime_φ : ∀ p, prime p → φ p = p - 1.
 Proof.
@@ -2772,12 +2769,14 @@ Compute (let p := 13 in (prime_roots p, sort Nat.leb (quad_res p))).
 Compute (let (p, n) := (13, 5) in (is_prime_root p n, is_quad_res p n)).
 Compute (let (p, n) := (13, 5) in map (λ i, Nat_pow_mod n i p) (seq 1 (p - 1))).
 
-...
-
 Theorem exists_nonresidue : ∀ p,
   prime p → 3 ≤ p → ∃ a, ∀ b, b ^ 2 mod p ≠ a mod p.
 Proof.
 intros * Hp H3p.
+eapply (not_forall_in_interv_imp_exist 1 (p - 1)); [ | flia H3p | ]. {
+  intros.
+  unfold Decidable.decidable.
+...
 assert (H : ¬ ∀ a, ∃ b, b ^ 2 mod p = a mod p). {
   intros Hcon.
 ...
