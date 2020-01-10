@@ -1331,3 +1331,35 @@ intros n Hn.
 destruct (Nat.eq_dec n (S b)) as [H2| H2]; [ now rewrite H2 | ].
 apply H; flia Hn H2.
 Qed.
+
+Fixpoint merge {A} (le : A → A → bool) l1 l2 :=
+  let fix merge_aux l2 :=
+  match l1, l2 with
+  | [], _ => l2
+  | _, [] => l1
+  | a1::l1', a2::l2' =>
+      if le a1 a2 then a1 :: merge le l1' l2 else a2 :: merge_aux l2'
+  end
+  in merge_aux l2.
+
+Fixpoint merge_list_to_stack {A} (le : A → A → bool) stack l :=
+  match stack with
+  | [] => [Some l]
+  | None :: stack' => Some l :: stack'
+  | Some l' :: stack' => None :: merge_list_to_stack le stack' (merge le l' l)
+  end.
+
+Fixpoint merge_stack {A} (le : A → A → bool) stack :=
+  match stack with
+  | [] => []
+  | None :: stack' => merge_stack le stack'
+  | Some l :: stack' => merge le l (merge_stack le stack')
+  end.
+
+Fixpoint iter_merge {A} (le : A → A → bool) stack l :=
+  match l with
+  | [] => merge_stack le stack
+  | a::l' => iter_merge le (merge_list_to_stack le stack [a]) l'
+  end.
+
+Definition sort {A} (le : A → A → bool) := iter_merge le [].
