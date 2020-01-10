@@ -2844,15 +2844,45 @@ induction it; intros; [ flia Hn2 Hnit | ].
 cbn.
 destruct (Nat.eq_dec ai 1) as [Hai1| Hai1]. {
   rewrite Nat.pow_1_r.
-...
+Abort.
 
 Theorem order_mod_prop : ∀ n a,
-  Nat.gcd a n = 1
+  2 ≤ n
+  → Nat.gcd a n = 1
   → (a ^ order_mod n a) mod n = 1 ∧
      ∀ m, 0 < m < order_mod n a → (a ^ m) mod n ≠ 1.
 Proof.
-intros * Hg.
+intros * H2n Hg.
 split. {
+  unfold order_mod.
+  replace n with (S (n - 1)) at 1 by flia H2n.
+  cbn - [ "mod" ].
+  destruct (Nat.eq_dec a 1) as [Ha1| Ha1]. {
+    subst a.
+    rewrite Nat.pow_1_l.
+    rewrite Nat.mod_1_l; [ easy | flia H2n ].
+  }
+  cbn - [ "mod" ].
+  rewrite <- Nat.mul_mod_idemp_r; [ | flia H2n ].
+  replace (n - 1) with (S (n - 2)) by flia H2n.
+  cbn.
+  destruct (Nat.eq_dec ((a * a) mod n) 1) as [Ha21| Ha21]. {
+    rewrite Nat.pow_1_r.
+    rewrite Nat.mul_mod_idemp_r; [ easy | flia H2n ].
+  }
+  cbn.
+  rewrite Nat.mul_mod_idemp_r; [ | flia H2n ].
+  rewrite Nat.mul_assoc.
+  rewrite Nat.mul_mod_idemp_r; [ | flia H2n ].
+  rewrite Nat.mul_assoc.
+  destruct (Nat.eq_dec n 3) as [Hn3| Hn3]. {
+    subst n.
+...
+    cbn - [ "mod" ].
+    replace (if Nat.eq_dec _ _ then 1 else 1) with 1. 2: {
+      now destruct (Nat.eq_dec _ _).
+    }
+    rewrite Nat.pow_1_r.
 ...
 
 Theorem order_multiplicative : ∀ n a b r s,
