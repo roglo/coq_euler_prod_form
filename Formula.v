@@ -2833,6 +2833,19 @@ Fixpoint order_aux it n a ai :=
 
 Definition order_mod n a := order_aux n n a a.
 
+Lemma glop : ∀ n a it ai,
+  2 ≤ n ≤ it
+  → Nat.gcd a n = 1
+  → (a ^ order_aux it n a ai) mod n = 1.
+Proof.
+intros * (Hn2, Hnit) Hg.
+revert ai Hg.
+induction it; intros; [ flia Hn2 Hnit | ].
+cbn.
+destruct (Nat.eq_dec ai 1) as [Hai1| Hai1]. {
+  rewrite Nat.pow_1_r.
+...
+
 Theorem order_mod_prop : ∀ n a,
   Nat.gcd a n = 1
   → (a ^ order_mod n a) mod n = 1 ∧
