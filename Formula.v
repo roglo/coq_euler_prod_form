@@ -2769,6 +2769,7 @@ Compute (let p := 13 in (prime_roots p, sort Nat.leb (quad_res p))).
 Compute (let (p, n) := (13, 5) in (is_prime_root p n, is_quad_res p n)).
 Compute (let (p, n) := (13, 5) in map (λ i, Nat_pow_mod n i p) (seq 1 (p - 1))).
 
+(*
 Theorem exists_nonresidue : ∀ p,
   prime p → 3 ≤ p → ∃ a, ∀ b, b ^ 2 mod p ≠ a mod p.
 Proof.
@@ -2808,6 +2809,7 @@ intros * Hp H3p.
 apply (not_forall_in_interv_imp_exist 1 (p - 1)); [ | flia H3p | ]. {
   intros.
 ...
+*)
 
 (*
 Theorem not_all_div_2_mod_add_1_eq_1 : ∀ a,
@@ -2818,6 +2820,27 @@ Proof.
 intros * H3a Hcon.
 ...
 *)
+
+(* https://wstein.org/edu/2007/spring/ent/ent-html/node29.html *)
+
+Fixpoint order_aux it n a ai :=
+  match it with
+  | 0 => 0
+  | S it' =>
+      if Nat.eq_dec ai 1 then 1
+      else 1 + order_aux it' n a ((a * ai) mod n)
+  end.
+
+Definition order_mod n a := order_aux n n a a.
+
+Theorem order_multiplicative : ∀ n a b r s,
+  order_mod n a = r
+  → order_mod n b = s
+  → Nat.gcd r s = 1
+  → order_mod n (a * b) = r * s.
+Proof.
+intros * Hoa Hob Hg.
+...
 
 Theorem glop : ∀ p, prime p → ∃ a, a ^ ((p - 1) / 2) mod p = p - 1.
 Proof.
