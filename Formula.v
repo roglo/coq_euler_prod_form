@@ -2925,6 +2925,38 @@ split; intros Hn. {
 }
 Qed.
 
+Fixpoint merge l1 l2 :=
+  let fix merge_aux l2 :=
+  match l1, l2 with
+  | [], _ => l2
+  | _, [] => l1
+  | a1::l1', a2::l2' =>
+      if a1 <=? a2 then a1 :: merge l1' l2 else a2 :: merge_aux l2'
+  end
+  in merge_aux l2.
+
+Fixpoint merge_list_to_stack stack l :=
+  match stack with
+  | [] => [Some l]
+  | None :: stack' => Some l :: stack'
+  | Some l' :: stack' => None :: merge_list_to_stack stack' (merge l' l)
+  end.
+
+Fixpoint merge_stack stack :=
+  match stack with
+  | [] => []
+  | None :: stack' => merge_stack stack'
+  | Some l :: stack' => merge l (merge_stack stack')
+  end.
+
+Fixpoint iter_merge stack l :=
+  match l with
+  | [] => merge_stack stack
+  | a::l' => iter_merge (merge_list_to_stack stack [a]) l'
+  end.
+
+Definition sort_nat_list := iter_merge [].
+
 (* primitive roots *)
 
 Fixpoint prime_root_cycle_loop n g gr it :=
@@ -2957,11 +2989,9 @@ Fixpoint in_list_nat n l :=
 
 Definition is_quad_res p n := in_list_nat n (quad_res p).
 
-Compute (prime_roots 31, quad_res 31).
-...
-Compute (is_prime_root 31 5).
-Compute (is_quad_res 31 5).
-Compute (quad_res 31).
+Compute (prime_roots 13, sort_nat_list (quad_res 13)).
+Compute (is_prime_root 13 5).
+Compute (is_quad_res 13 5).
 
 Inspect 1.
 
