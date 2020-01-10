@@ -2992,6 +2992,8 @@ Definition is_quad_res p n := in_list_nat n (quad_res p).
 Compute (prime_roots 13, sort_nat_list (quad_res 13)).
 Compute (is_prime_root 13 5).
 Compute (is_quad_res 13 5).
+Compute (map (λ i, Nat_pow_mod 5 i 13) (seq 1 13)).
+...
 
 Inspect 1.
 
