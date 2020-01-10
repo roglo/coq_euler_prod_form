@@ -2845,7 +2845,7 @@ induction it; intros; [ now cbn; apply Nat.mod_1_l | ].
 cbn.
 destruct (Nat.eq_dec ai 1) as [Hai1| Hai1]. {
   rewrite Nat.pow_1_r.
-  rewrite Hai in Hai1.
+  rewrite Hai1 in Hai; symmetry in Hai.
 ...
 
 Theorem order_mod_prop : ∀ n a,
