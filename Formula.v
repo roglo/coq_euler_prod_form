@@ -2927,27 +2927,41 @@ Qed.
 
 (* primitive roots *)
 
-Fixpoint prim_root_cycle_loop n g gr it :=
+Fixpoint prime_root_cycle_loop n g gr it :=
   match it with
   | 0 => []
   | S it' =>
       let gr' := (g * gr) mod n in
       if gr' =? g then [gr]
-      else gr :: prim_root_cycle_loop n g gr' it'
+      else gr :: prime_root_cycle_loop n g gr' it'
   end.
 
-Definition prim_root_cycle n g := prim_root_cycle_loop n g g (n - 1).
+Definition prime_root_cycle n g := prime_root_cycle_loop n g g (n - 1).
 
-Definition is_prim_root n g := length (prim_root_cycle n g) =? n - 1.
+Definition is_prime_root n g := length (prime_root_cycle n g) =? n - 1.
 
-Definition prim_roots n := filter (is_prim_root n) (seq 1 (n - 1)).
+Definition prime_roots n := filter (is_prime_root n) (seq 1 (n - 1)).
 
 (*
-Print prim_root_cycle_loop.
-Compute (prim_roots 101).
-Compute (is_prim_root 31 11).
-Compute (prim_root_cycle 31 23).
+Print prime_root_cycle_loop.
+Compute (prime_roots 101).
+Compute (is_prime_root 31 11).
+Compute (prime_root_cycle 31 23).
 *)
+
+Fixpoint in_list_nat n l :=
+  match l with
+  | [] => false
+  | a :: l => if n =? a then true else in_list_nat n l
+  end.
+
+Definition is_quad_res p n := in_list_nat n (quad_res p).
+
+Compute (prime_roots 31, quad_res 31).
+...
+Compute (is_prime_root 31 5).
+Compute (is_quad_res 31 5).
+Compute (quad_res 31).
 
 Inspect 1.
 
