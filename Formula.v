@@ -2833,6 +2833,15 @@ Fixpoint order_aux it n a ai :=
 
 Definition order_mod n a := order_aux n n a a.
 
+Theorem order_mod_prop : ∀ n a,
+  Nat.gcd a n = 1
+  → (a ^ order_mod n a) mod n = 1 ∧
+     ∀ m, 0 < m < order_mod n a → (a ^ m) mod n ≠ 1.
+Proof.
+intros * Hg.
+split. {
+...
+
 Theorem order_multiplicative : ∀ n a b r s,
   order_mod n a = r
   → order_mod n b = s
@@ -2840,6 +2849,7 @@ Theorem order_multiplicative : ∀ n a b r s,
   → order_mod n (a * b) = r * s.
 Proof.
 intros * Hoa Hob Hg.
+assert (Hr :
 ...
 
 Theorem glop : ∀ p, prime p → ∃ a, a ^ ((p - 1) / 2) mod p = p - 1.
