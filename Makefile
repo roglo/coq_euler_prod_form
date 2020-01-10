@@ -1,4 +1,4 @@
-TARGET=Misc.vo Primes.vo Totient.vo
+TARGET=Misc.vo Primes.vo Totient.vo QuadRes.vo
 FILESFORDEP=`LC_ALL=C ls *.v`
 
 all: $(TARGET)

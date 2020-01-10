@@ -2079,27 +2079,6 @@ rewrite IHa.
 rewrite Nat.add_mod_idemp_l; [ easy | now intros H; rewrite H in Hp ].
 Qed.
 
-(* (a ^ b) mod c defined like that so that we can use "Compute"
-   for testing; proved equal to (a ^ b) mod c just below *)
-
-Fixpoint Nat_pow_mod_loop a b c :=
-  match b with
-  | 0 => 1 mod c
-  | S b' => (a * Nat_pow_mod_loop a b' c) mod c
-  end.
-
-Definition Nat_pow_mod a b c := Nat_pow_mod_loop a b c.
-
-Theorem Nat_pow_mod_is_pow_mod : ∀ a b c,
-  c ≠ 0 → Nat_pow_mod a b c = (a ^ b) mod c.
-Proof.
-intros * Hcz.
-revert a.
-induction b; intros; [ easy | ].
-cbn; rewrite IHb.
-now rewrite Nat.mul_mod_idemp_r.
-Qed.
-
 (* inverse modulo (true when n is prime) *)
 
 Definition inv_mod i n := Nat_pow_mod i (n - 2) n.
@@ -2507,4 +2486,31 @@ rewrite <- Nat.pow_add_r.
 rewrite Nat.sub_add; [ | flia Hip ].
 rewrite fermat_little_1; [ | easy ].
 apply Nat.mod_small; flia Hip.
+Qed.
+
+Theorem odd_prime : ∀ p, prime p → p ≠ 2 → p mod 2 = 1.
+Proof.
+intros * Hp Hp2.
+remember (p mod 2) as r eqn:Hp2z; symmetry in Hp2z.
+destruct r. 2: {
+  destruct r; [ easy | ].
+  specialize (Nat.mod_upper_bound p 2 (Nat.neq_succ_0 _)) as H1.
+  flia Hp2z H1.
+}
+exfalso.
+apply Nat.mod_divides in Hp2z; [ | easy ].
+destruct Hp2z as (d, Hd).
+destruct (lt_dec d 2) as [Hd2| Hd2]. {
+  destruct d; [ now subst p; rewrite Nat.mul_0_r in Hp | ].
+  destruct d; [ now subst p | flia Hd2 ].
+}
+apply Nat.nlt_ge in Hd2.
+specialize (prime_prop p Hp d) as H1.
+assert (H : 2 ≤ d ≤ p - 1). {
+  split; [ easy | flia Hd ].
+}
+specialize (H1 H); clear H.
+apply H1; clear H1.
+rewrite Hd.
+apply Nat.divide_factor_r.
 Qed.

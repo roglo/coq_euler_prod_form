@@ -652,6 +652,27 @@ rewrite Nat.gcd_sub_diag_r; [ | easy ].
 apply Nat.gcd_comm.
 Qed.
 
+(* (a ^ b) mod c defined like that so that we can use "Compute"
+   for testing; proved equal to (a ^ b) mod c just below *)
+
+Fixpoint Nat_pow_mod_loop a b c :=
+  match b with
+  | 0 => 1 mod c
+  | S b' => (a * Nat_pow_mod_loop a b' c) mod c
+  end.
+
+Definition Nat_pow_mod a b c := Nat_pow_mod_loop a b c.
+
+Theorem Nat_pow_mod_is_pow_mod : ∀ a b c,
+  c ≠ 0 → Nat_pow_mod a b c = (a ^ b) mod c.
+Proof.
+intros * Hcz.
+revert a.
+induction b; intros; [ easy | ].
+cbn; rewrite IHb.
+now rewrite Nat.mul_mod_idemp_r.
+Qed.
+
 Theorem Nat_pow_sub_pow : ∀ a b n,
   n ≠ 0
   → b ≤ a

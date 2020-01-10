@@ -1,8 +1,10 @@
-Formula.vio: Formula.v Misc.vio Primes.vio Totient.vio
-Formula.vo Formula.glob Formula.v.beautified Formula.required_vo: Formula.v Misc.vo Primes.vo Totient.vo
+Formula.vio: Formula.v Misc.vio Primes.vio Totient.vio QuadRes.vio
+Formula.vo Formula.glob Formula.v.beautified Formula.required_vo: Formula.v Misc.vo Primes.vo Totient.vo QuadRes.vo
 Misc.vio: Misc.v 
 Misc.vo Misc.glob Misc.v.beautified Misc.required_vo: Misc.v 
 Primes.vio: Primes.v Misc.vio
 Primes.vo Primes.glob Primes.v.beautified Primes.required_vo: Primes.v Misc.vo
+QuadRes.vio: QuadRes.v Misc.vio Primes.vio
+QuadRes.vo QuadRes.glob QuadRes.v.beautified QuadRes.required_vo: QuadRes.v Misc.vo Primes.vo
 Totient.vio: Totient.v Misc.vio
 Totient.vo Totient.glob Totient.v.beautified Totient.required_vo: Totient.v Misc.vo
