@@ -2884,39 +2884,17 @@ Theorem pow_nth_all_pow_mod : ∀ n a i,
   i < n - 1 → nth i (all_pow_mod n a) 0 = a ^ S i mod n.
 Proof.
 intros * Hin.
-assert (Hn2 : 2 ≤ n). {
-  destruct n; [ easy | ].
-  destruct n; [ easy | flia ].
-}
-unfold all_pow_mod; cbn.
-remember (n - 1) as m eqn:Hm; clear Hm.
-revert i Hin.
-induction m; intros; [ easy | ].
-destruct i; [ now cbn; rewrite Nat.mod_1_l | ].
-cbn.
-(* pas bon *)
-...
-destruct i; [ easy | ].
-  cbn.
-  rewrite Nat.mod_1_l.
-...
-intros * Hin.
-unfold all_pow_mod; cbn.
-revert n Hin.
-induction i; intros. {
-  cbn - [ "mod" ].
-  rewrite Nat.mul_1_r.
-  rewrite (List_map_nth_in _ 0); [ | now rewrite seq_length ].
-  rewrite seq_nth; [ | easy ].
-  rewrite Nat.add_0_r.
-  rewrite Nat_pow_mod_is_pow_mod; [ | flia Hin ].
-  now rewrite Nat.pow_1_r.
-}
-...
+unfold all_pow_mod.
+rewrite (List_map_nth_in _ 0); [ | now rewrite seq_length ].
+rewrite Nat_pow_mod_is_pow_mod; [ | flia Hin ].
+now rewrite seq_nth.
+Qed.
+
+(*
 Compute (let '(n, a, i) := (1, 5, 1) in (all_pow_mod n a)).
 Compute (let '(n, a, i) := (13, 5, 1) in (nth i (all_pow_mod n a) 0)).
 Compute (let '(n, a, i) := (13, 5, 2) in (nth i (all_pow_mod n a) a, Nat_pow_mod a (S i) n)).
-...
+*)
 
 Theorem order_mod_prop : ∀ n a,
   2 ≤ n
