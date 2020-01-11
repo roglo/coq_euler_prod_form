@@ -859,6 +859,18 @@ intros i.
 now specialize (Hf (S i)).
 Qed.
 
+Theorem List_map_nth_in {A B} : ∀ (f : A → B) a b l n,
+  n < length l → nth n (map f l) b = f (nth n l a).
+Proof.
+intros * Hnl.
+revert n Hnl.
+induction l as [| c l]; intros; [ easy | ].
+cbn in Hnl; cbn.
+destruct n; [ easy | ].
+apply Nat.succ_lt_mono in Hnl.
+now apply IHl.
+Qed.
+
 Theorem List_firstn_seq : ∀ n start len,
   firstn n (seq start len) = seq start (min n len).
 Proof.
