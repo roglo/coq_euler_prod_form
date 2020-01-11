@@ -2876,12 +2876,10 @@ assert (Hnz : n ≠ 0) by flia H2n.
 split. {
   unfold order_mod.
   remember (all_pow_mod n a) as l eqn:Hl; symmetry in Hl.
-  assert (Hlen : length l = n - 1). {
-    subst l.
-    apply all_pow_mod_length.
-  }
-  clear Hl.
   induction l as [| b l]. {
+Search all_pow_mod.
+...
+    cbn.
     cbn in Hlen; flia H2n Hlen.
   }
   cbn.
