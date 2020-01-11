@@ -2891,6 +2891,7 @@ assert (Hnz : n ≠ 0) by flia H2n.
 split. {
   unfold order_mod.
   remember (all_pow_mod n a) as l eqn:Hl; symmetry in Hl.
+...
   induction l as [| b l]. {
     apply eq_all_pow_mod_nil in Hl.
     flia H2n Hl.
