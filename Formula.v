@@ -2823,30 +2823,47 @@ intros * H3a Hcon.
 
 (* https://wstein.org/edu/2007/spring/ent/ent-html/node29.html *)
 
-Fixpoint order_aux it n a ai :=
-  match it with
-  | 0 => 0
-  | S it' =>
-      if Nat.eq_dec ai 1 then 1
-      else 1 + order_aux it' n a ((a * ai) mod n)
+Fixpoint List_find_nth {A} (f : A → bool) l :=
+  match l with
+  | [] => 0
+  | x :: l => if f x then 0 else 1 + List_find_nth f l
   end.
 
-Definition order_mod n a := order_aux n n a a.
+Definition all_pow_mod n a := map (λ i, Nat_pow_mod a i n) (seq 1 (n - 1)).
 
-Lemma glop : ∀ n a it ai,
-  2 ≤ n
-  → ai = a ^ (n + 1 - it) mod n
-  → Nat.gcd a n = 1
-  → (a ^ order_aux it n a ai) mod n = 1.
+Definition order_mod n a := S (List_find_nth (λ x, x =? 1) (all_pow_mod n a)).
+
+Theorem all_pow_mod_length : ∀ n a, length (all_pow_mod n a) = n - 1.
 Proof.
-intros * H2n Hai Hg.
-revert ai Hai Hg.
-induction it; intros; [ now cbn; apply Nat.mod_1_l | ].
-cbn.
-destruct (Nat.eq_dec ai 1) as [Hai1| Hai1]. {
-  rewrite Nat.pow_1_r.
-  rewrite Hai1 in Hai; symmetry in Hai.
-...
+intros.
+unfold all_pow_mod.
+now rewrite map_length, seq_length.
+Qed.
+
+Theorem all_pow_mod_hd : ∀ n a, a < n → hd a (all_pow_mod n a) = a.
+Proof.
+intros * Han.
+destruct n; [ easy | cbn ].
+rewrite Nat.sub_0_r.
+destruct n; [ easy | ].
+cbn - [ "mod" ].
+rewrite Nat.mul_mod_idemp_r; [ | easy ].
+now rewrite Nat.mul_1_r, Nat.mod_small.
+Qed.
+
+Theorem all_pow_mod_mod : ∀ n a, all_pow_mod n (a mod n) = all_pow_mod n a.
+Proof.
+intros.
+destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
+unfold all_pow_mod.
+remember (seq 1 (n - 1)) as l eqn:Hl; clear Hl.
+induction l as [| b l]; [ easy | ].
+cbn - [ "mod" ].
+rewrite Nat_pow_mod_is_pow_mod; [ | easy ].
+rewrite Nat_pow_mod_is_pow_mod; [ | easy ].
+rewrite Nat_mod_pow_mod.
+now rewrite IHl.
+Qed.
 
 Theorem order_mod_prop : ∀ n a,
   2 ≤ n
@@ -2855,8 +2872,32 @@ Theorem order_mod_prop : ∀ n a,
      ∀ m, 0 < m < order_mod n a → (a ^ m) mod n ≠ 1.
 Proof.
 intros * H2n Hg.
+assert (Hnz : n ≠ 0) by flia H2n.
 split. {
   unfold order_mod.
+  remember (all_pow_mod n a) as l eqn:Hl; symmetry in Hl.
+  assert (Hlen : length l = n - 1). {
+    subst l.
+    apply all_pow_mod_length.
+  }
+  clear Hl.
+  induction l as [| b l]. {
+    cbn in Hlen; flia H2n Hlen.
+  }
+  cbn.
+  remember (b =? 1) as c eqn:Hc; symmetry in Hc.
+  destruct c. {
+    apply Nat.eqb_eq in Hc; subst b.
+    cbn; rewrite Nat.mul_1_r.
+    specialize (all_pow_mod_hd n (a mod n)) as H1.
+    specialize (H1 (Nat.mod_upper_bound a n Hnz)).
+    rewrite all_pow_mod_mod in H1.
+...
+    now rewrite all_pow_mod_mod, Hl in H1; cbn in H1.
+  }
+  rewrite <- Nat.mul_mod_idemp_r; [ | easy ].
+  rewrite IHl.
+...
   replace n with (S (n - 1)) at 1 by flia H2n.
   cbn - [ "mod" ].
   destruct (Nat.eq_dec a 1) as [Ha1| Ha1]. {
