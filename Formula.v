@@ -2833,6 +2833,21 @@ Definition all_pow_mod n a := map (λ i, Nat_pow_mod a i n) (seq 1 (n - 1)).
 
 Definition order_mod n a := S (List_find_nth (λ x, x =? 1) (all_pow_mod n a)).
 
+Theorem List_seq_eq_nil : ∀ a b, seq a b = [] → b = 0.
+Proof.
+intros * Hs.
+now destruct b.
+Qed.
+
+Theorem eq_all_pow_mod_nil : ∀ n a, all_pow_mod n a = [] → n ≤ 1.
+Proof.
+intros * Hna.
+unfold all_pow_mod in Hna.
+apply map_eq_nil in Hna.
+apply List_seq_eq_nil in Hna.
+flia Hna.
+Qed.
+
 Theorem all_pow_mod_length : ∀ n a, length (all_pow_mod n a) = n - 1.
 Proof.
 intros.
@@ -2877,24 +2892,20 @@ split. {
   unfold order_mod.
   remember (all_pow_mod n a) as l eqn:Hl; symmetry in Hl.
   induction l as [| b l]. {
-Search all_pow_mod.
-...
-    cbn.
-    cbn in Hlen; flia H2n Hlen.
+    apply eq_all_pow_mod_nil in Hl.
+    flia H2n Hl.
   }
   cbn.
   remember (b =? 1) as c eqn:Hc; symmetry in Hc.
+  specialize (all_pow_mod_hd n (a mod n)) as H1.
+  specialize (H1 (Nat.mod_upper_bound a n Hnz)).
+  rewrite all_pow_mod_mod, Hl in H1; cbn in H1.
+  subst b.
   destruct c. {
-    apply Nat.eqb_eq in Hc; subst b.
-    cbn; rewrite Nat.mul_1_r.
-    specialize (all_pow_mod_hd n (a mod n)) as H1.
-    specialize (H1 (Nat.mod_upper_bound a n Hnz)).
-    rewrite all_pow_mod_mod in H1.
-...
-    now rewrite all_pow_mod_mod, Hl in H1; cbn in H1.
-  }
-  rewrite <- Nat.mul_mod_idemp_r; [ | easy ].
-  rewrite IHl.
+    apply Nat.eqb_eq in Hc.
+    now cbn; rewrite Nat.mul_1_r.
+  } {
+    apply Nat.eqb_neq in Hc.
 ...
   replace n with (S (n - 1)) at 1 by flia H2n.
   cbn - [ "mod" ].
