@@ -2896,6 +2896,14 @@ Compute (let '(n, a, i) := (13, 5, 1) in (nth i (all_pow_mod n a) 0)).
 Compute (let '(n, a, i) := (13, 5, 2) in (nth i (all_pow_mod n a) a, Nat_pow_mod a (S i) n)).
 *)
 
+Theorem gen_fermat_little : ∀ n a, 1 ≤ a < n → a ^ φ n mod n = 1.
+Proof.
+About fermat_little.
+intros * Han.
+Search φ.
+specialize (smaller_than_prime_all_different_multiples n) as H1.
+Abort.
+
 Theorem order_mod_prop : ∀ n a,
   2 ≤ n
   → Nat.gcd a n = 1
@@ -2905,7 +2913,69 @@ Proof.
 intros * H2n Hg.
 assert (Hnz : n ≠ 0) by flia H2n.
 split. {
+(**)
+Compute (let (n, a) := (13, 4) in (Nat_pow_mod a (order_mod n a) n)).
   unfold order_mod.
+  rewrite <- nth_all_pow_mod. 2: {
+    assert (H1i : 1 ∈ all_pow_mod n a). {
+      unfold all_pow_mod.
+      apply in_map_iff.
+...
+Compute (let (n, a) := (12, 5) in (Nat_pow_mod a (order_mod n a) n)).
+(* est-ce que, si gcd a n = 1, on a a ^ (n-1) = 1 [mod n] ? dans ce
+   cas, on n'a pas besoin de la généralisation du petit théorème de
+   Fermat ! *)
+Compute (let n := 8 in map (λ a, (Nat.gcd n a, Nat_pow_mod a (order_mod n a) n)) (seq 1 n)).
+Compute (Nat_pow_mod 3 7 8).
+...
+      exists (φ n).
+Check gen_fermat_little.
+...
+Search φ.
+Print all_pow_mod.
+Compute (all_pow_mod 15 2).
+Compute (φ 15).
+Compute (Nat_pow_mod 2 (φ 15) 15).
+...
+... suite ok
+    }
+    specialize (all_pow_mod_length n a) as Hlen.
+    remember (all_pow_mod n a) as l; clear Heql.
+    rewrite <- Hlen.
+    clear - H1i.
+    induction l as [| b l]; [ easy | cbn ].
+    destruct H1i as [H1i| H1i]; [ subst b; cbn; flia | ].
+    destruct (b =? 1); [ flia | ].
+    apply -> Nat.succ_lt_mono.
+    now apply IHl.
+  }
+...
+    remember (all_pow_mod n a) as l; clear Heql.
+    rewrite <- Hlen.
+    destruct l as [| b l]; [ cbn in Hlen; flia H2n Hlen | ].
+    clear; cbn.
+    destruct (b =? 1); [ flia | clear ].
+    apply -> Nat.succ_lt_mono.
+    induction l as [| b l]. {
+      cbn.
+...
+    }
+    cbn.
+...
+    destruct l as [| b l]; [ cbn in Hlen; flia H2n Hlen | ].
+    cbn.
+    destruct (b =? 1); [ flia | ].
+    apply Nat.
+
+    induction l as [| b l]. {
+      cbn.
+
+    clear Hg Hnz.
+    revert n Hlen H2n.
+    induction l as [| b l]; intros; [ cbn; flia H2n | ].
+    cbn in Hlen; cbn.
+    destruct (b =? 1); [ flia H2n | ].
+...
   rewrite <- nth_all_pow_mod. {
     remember (all_pow_mod n a) as l eqn:Hl; symmetry in Hl.
     destruct l as [| b l]. {
