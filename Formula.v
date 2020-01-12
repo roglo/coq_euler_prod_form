@@ -2880,7 +2880,7 @@ rewrite Nat_mod_pow_mod.
 now rewrite IHl.
 Qed.
 
-Theorem pow_nth_all_pow_mod : ∀ n a i,
+Theorem nth_all_pow_mod : ∀ n a i,
   i < n - 1 → nth i (all_pow_mod n a) 0 = a ^ S i mod n.
 Proof.
 intros * Hin.
@@ -2906,53 +2906,55 @@ intros * H2n Hg.
 assert (Hnz : n ≠ 0) by flia H2n.
 split. {
   unfold order_mod.
-  remember (all_pow_mod n a) as l eqn:Hl; symmetry in Hl.
-  rewrite <- pow_nth_all_pow_mod.
-...
-  induction l as [| b l]. {
-    apply eq_all_pow_mod_nil in Hl.
-    flia H2n Hl.
-  }
-  cbn.
-  remember (b =? 1) as c eqn:Hc; symmetry in Hc.
-  specialize (all_pow_mod_hd n (a mod n)) as H1.
-  specialize (H1 (Nat.mod_upper_bound a n Hnz)).
-  rewrite all_pow_mod_mod, Hl in H1; cbn in H1.
-  subst b.
-  destruct c. {
-    apply Nat.eqb_eq in Hc.
-    now cbn; rewrite Nat.mul_1_r.
-  } {
-    apply Nat.eqb_neq in Hc.
-...
-  replace n with (S (n - 1)) at 1 by flia H2n.
-  cbn - [ "mod" ].
-  destruct (Nat.eq_dec a 1) as [Ha1| Ha1]. {
-    subst a.
-    rewrite Nat.pow_1_l.
-    rewrite Nat.mod_1_l; [ easy | flia H2n ].
-  }
-  cbn - [ "mod" ].
-  rewrite <- Nat.mul_mod_idemp_r; [ | flia H2n ].
-  replace (n - 1) with (S (n - 2)) by flia H2n.
-  cbn.
-  destruct (Nat.eq_dec ((a * a) mod n) 1) as [Ha21| Ha21]. {
-    rewrite Nat.pow_1_r.
-    rewrite Nat.mul_mod_idemp_r; [ easy | flia H2n ].
-  }
-  cbn.
-  rewrite Nat.mul_mod_idemp_r; [ | flia H2n ].
-  rewrite Nat.mul_assoc.
-  rewrite Nat.mul_mod_idemp_r; [ | flia H2n ].
-  rewrite Nat.mul_assoc.
-  destruct (Nat.eq_dec n 3) as [Hn3| Hn3]. {
-    subst n.
-...
-    cbn - [ "mod" ].
-    replace (if Nat.eq_dec _ _ then 1 else 1) with 1. 2: {
-      now destruct (Nat.eq_dec _ _).
+  rewrite <- nth_all_pow_mod. {
+    remember (all_pow_mod n a) as l eqn:Hl; symmetry in Hl.
+    destruct l as [| b l]. {
+      apply eq_all_pow_mod_nil in Hl; flia H2n Hl.
     }
-    rewrite Nat.pow_1_r.
+    cbn.
+    specialize (all_pow_mod_hd n (a mod n)) as H1.
+    specialize (H1 (Nat.mod_upper_bound a n Hnz)).
+    rewrite all_pow_mod_mod, Hl in H1; cbn in H1.
+    remember (b =? 1) as b1 eqn:Hb1; symmetry in Hb1.
+    destruct b1; [ now apply Nat.eqb_eq in Hb1 | ].
+    apply Nat.eqb_neq in Hb1.
+    subst b.
+    destruct l as [| b l]. {
+      exfalso.
+      specialize (all_pow_mod_length n a) as H1.
+      rewrite Hl in H1; cbn in H1.
+      replace n with 2 in * by flia H1; clear H1 Hnz H2n n Hl.
+      remember (a mod 2) as b eqn:Hb; symmetry in Hb.
+      destruct b. {
+        apply Nat.mod_divide in Hb; [ | easy ].
+        destruct Hb as (k, Hk).
+        replace 2 with (1 * 2) in Hg by easy.
+        subst a.
+        rewrite Nat.gcd_mul_mono_r in Hg.
+        now apply Nat.eq_mul_1 in Hg.
+      }
+      destruct b; [ easy | ].
+      specialize (Nat.mod_upper_bound a 2 (Nat.neq_succ_0 _)) as H1.
+      flia Hb H1.
+    }
+    cbn.
+    specialize (all_pow_mod_length n a) as H1.
+    rewrite Hl in H1; cbn in H1.
+    specialize (nth_all_pow_mod n a 1) as H2.
+    assert (H : 1 < n - 1) by flia H1.
+    specialize (H2 H); clear H.
+    rewrite Hl in H2; cbn in H2.
+    rewrite Nat.mul_1_r, <- Nat.pow_2_r in H2.
+    remember (b =? 1) as b1 eqn:Hb2; symmetry in Hb2.
+    destruct b1; [ now apply Nat.eqb_eq in Hb2 | ].
+    apply Nat.eqb_neq in Hb2.
+    subst b.
+    destruct l as [| b l]. {
+      exfalso.
+      cbn in H1.
+      replace n with 3 in * by flia H1.
+      clear n H2n Hnz H1.
+(* ouais, c'est bon mais ça se complique, quoi *)
 ...
 
 Theorem order_multiplicative : ∀ n a b r s,
