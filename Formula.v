@@ -2902,7 +2902,7 @@ About fermat_little.
 intros * Han.
 Search φ.
 specialize (smaller_than_prime_all_different_multiples n) as H1.
-Abort.
+...
 
 Theorem order_mod_prop : ∀ n a,
   2 ≤ n
@@ -2920,14 +2920,15 @@ Compute (let (n, a) := (13, 4) in (Nat_pow_mod a (order_mod n a) n)).
     assert (H1i : 1 ∈ all_pow_mod n a). {
       unfold all_pow_mod.
       apply in_map_iff.
-...
-Compute (let (n, a) := (12, 5) in (Nat_pow_mod a (order_mod n a) n)).
-(* est-ce que, si gcd a n = 1, on a a ^ (n-1) = 1 [mod n] ? dans ce
-   cas, on n'a pas besoin de la généralisation du petit théorème de
-   Fermat ! *)
-Compute (let n := 8 in map (λ a, (Nat.gcd n a, Nat_pow_mod a (order_mod n a) n)) (seq 1 n)).
+(*...
+Print all_pow_mod.
+Compute (let (n, a) := (8, 3) in (Nat.gcd n a, all_pow_mod n a)).
+Compute (let n := 8 in map (λ a, (Nat.gcd n a, Nat_pow_mod a (order_mod n a) n)) (seq 1 (n - 1))).
 Compute (Nat_pow_mod 3 7 8).
 ...
+Compute (let (n, a) := (12, 5) in (Nat_pow_mod a (order_mod n a) n)).
+...
+*)
       exists (φ n).
 Check gen_fermat_little.
 ...
