@@ -2903,10 +2903,13 @@ Proof.
 intros * Hg.
 Search φ.
 Check smaller_than_prime_all_different_multiples.
+(* https://wstein.org/edu/2007/spring/ent/ent-html/node19.html#sec:flittle *)
 Theorem glop : ∀ n a,
   Nat.gcd n a = 1
   → ∀ i j, i < j ≤ φ n → (i * a) mod n ≠ (j * a) mod n.
 (* chais pas si c'est vrai, ça, ni même si c'est utile *)
+Compute (φ 8).
+Compute ((3 * 4) mod 8).
 ...
 specialize (smaller_than_prime_all_different_multiples n) as H1.
 ...
