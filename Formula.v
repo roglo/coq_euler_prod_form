@@ -2896,15 +2896,20 @@ Compute (let '(n, a, i) := (13, 5, 1) in (nth i (all_pow_mod n a) 0)).
 Compute (let '(n, a, i) := (13, 5, 2) in (nth i (all_pow_mod n a) a, Nat_pow_mod a (S i) n)).
 *)
 
-(*
-Voir indicatrice de Carmichael.
-...
+(* Euler's theorem *)
+
 Theorem gen_fermat_little : ∀ n a, Nat.gcd a n = 1 → a ^ φ n mod n = 1.
 Proof.
 intros * Hg.
 Search φ.
+Check smaller_than_prime_all_different_multiples.
+Theorem glop : ∀ n a,
+  Nat.gcd n a = 1
+  → ∀ i j, i < j ≤ φ n → (i * a) mod n ≠ (j * a) mod n.
+(* chais pas si c'est vrai, ça, ni même si c'est utile *)
+...
 specialize (smaller_than_prime_all_different_multiples n) as H1.
-*)
+...
 
 Theorem order_mod_prop : ∀ n a,
   2 ≤ n
