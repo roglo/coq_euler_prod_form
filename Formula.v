@@ -2944,42 +2944,6 @@ destruct (lt_dec i j) as [Hilj| Hjli]. {
 }
 Qed.
 
-(* well the initial version in Primes.v is shorter... *)
-Theorem smaller_than_prime_all_different_multiples : ∀ p,
-  prime p
-  → ∀ a, 1 ≤ a < p
-  → ∀ i j, i < j < p
-  → (i * a) mod p ≠ (j * a) mod p.
-Proof.
-intros * Hp * Hap * Hijp.
-destruct (Nat.eq_dec i 0) as [Hiz| Hiz]. {
-  subst i; cbn.
-  rewrite Nat.mod_0_l; [ | now intros H; subst p ].
-  intros H; symmetry in H.
-  apply Nat.mod_divide in H; [ | now intros H1; subst p ].
-  apply Nat.gauss in H. {
-    destruct H as (k, Hk).
-    destruct k; [ subst a; flia Hap | ].
-    cbn in Hk; flia Hap Hk.
-  } {
-    now apply eq_gcd_prime_small_1.
-  }
-}
-apply different_coprimes_all_different_multiples; [ | | | flia Hijp ]. {
-  apply in_coprimes_iff.
-  split; [ apply in_seq; flia Hap | ].
-  now apply eq_gcd_prime_small_1.
-} {
-  apply in_coprimes_iff.
-  split; [ apply in_seq; flia Hiz Hijp | ].
-  apply eq_gcd_prime_small_1; [ easy | flia Hiz Hijp ].
-} {
-  apply in_coprimes_iff.
-  split; [ apply in_seq; flia Hijp | ].
-  apply eq_gcd_prime_small_1; [ easy | flia Hijp ].
-}
-Qed.
-
 ...
 
 Theorem euler_fermat_little_gen : ∀ n a, Nat.gcd a n = 1 → a ^ φ n mod n = 1.
