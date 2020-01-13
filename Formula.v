@@ -2980,6 +2980,15 @@ assert
   rewrite <- (Nat.mul_mod_idemp_r j); [ | easy ].
   now apply different_coprimes_all_different_multiples.
 }
+assert (H2 : ∀ i, i ∈ coprimes n → (i * a) mod n ∈ coprimes n). {
+  intros i Hi.
+  apply in_coprimes_iff in Hi.
+  destruct Hi as (Hi, Hgi).
+  apply in_seq in Hi.
+  apply in_coprimes_iff.
+  split. {
+    apply in_seq.
+    split. {
 ...
 Compute (φ 8).
 Compute ((3 * 4) mod 8).
