@@ -2946,7 +2946,7 @@ Qed.
 
 Notation "a ≡ b 'mod' c" := (a mod c = b mod c) (at level 70, b at level 36).
 
-Theorem euler_fermat_little_gen : ∀ n a,
+Theorem euler_fermat_little : ∀ n a,
   n ≠ 0 → a ≠ 0 → Nat.gcd a n = 1 → a ^ φ n ≡ 1 mod n.
 Proof.
 intros * Hnz Haz Hg.
@@ -2971,6 +2971,7 @@ assert (Ha : a mod n ∈ coprimes n). {
     now apply Nat.mod_upper_bound.
   }
 }
+rewrite <- Nat_mod_pow_mod.
 ...
 Compute (φ 8).
 Compute ((3 * 4) mod 8).
