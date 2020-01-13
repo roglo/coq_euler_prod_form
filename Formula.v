@@ -2898,16 +2898,47 @@ Compute (let '(n, a, i) := (13, 5, 2) in (nth i (all_pow_mod n a) a, Nat_pow_mod
 
 (* Euler's theorem *)
 
+Theorem different_coprimes_all_different_multiples : ∀ n a,
+  a ∈ coprimes n
+  → ∀ i j,
+  i ∈ coprimes n
+  → j ∈ coprimes n
+  → i ≠ j
+  → (i * a) mod n ≠ (j * a) mod n.
+Proof.
+(* like smaller_than_prime_all_different_multiples but more general *)
+intros * Ha * Hi Hj Hij.
+intros Haa; symmetry in Haa.
+destruct (lt_dec i j) as [Hilj| Hjli]. {
+  apply Nat_eq_mod_sub_0 in Haa. 2: {
+    now apply Nat.mul_le_mono_r, Nat.lt_le_incl.
+  }
+  rewrite <- Nat.mul_sub_distr_r in Haa.
+  apply Nat.mod_divide in Haa. 2: {
+    apply in_coprimes_iff in Ha.
+    destruct Ha as (Ha, Hg).
+    apply in_seq in Ha.
+    flia Ha.
+  }
+  assert (H : Nat.gcd n (j - i) = 1). {
+    apply in_coprimes_iff in Ha.
+    apply in_coprimes_iff in Hi.
+    apply in_coprimes_iff in Hj.
+...
+    apply eq_gcd_prime_small_1.
+    apply eq_gcd_prime_small_1; [ easy | flia Hijp ].
+}
+specialize (H1 H); clear H.
+apply Nat.divide_pos_le in H1; [ flia H1 Hap | flia Hap ].
+...
+
 Theorem euler_fermat_little_gen : ∀ n a, Nat.gcd a n = 1 → a ^ φ n mod n = 1.
 Proof.
 intros * Hg.
 Search φ.
 Check smaller_than_prime_all_different_multiples.
 (* https://wstein.org/edu/2007/spring/ent/ent-html/node19.html#sec:flittle *)
-Theorem glop : ∀ n a,
-  Nat.gcd n a = 1
-  → ∀ i j, i < j ≤ φ n → (i * a) mod n ≠ (j * a) mod n.
-(* chais pas si c'est vrai, ça, ni même si c'est utile *)
+...
 Compute (φ 8).
 Compute ((3 * 4) mod 8).
 Print φ.
