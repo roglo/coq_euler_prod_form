@@ -2972,6 +2972,14 @@ assert (Ha : a mod n ∈ coprimes n). {
   }
 }
 rewrite <- Nat_mod_pow_mod.
+assert
+  (H1 : ∀ i j, i ∈ coprimes n → j ∈ coprimes n
+   → i ≠ j → (i * a) mod n ≠ (j * a) mod n). {
+  intros * Hi Hj Hij.
+  rewrite <- (Nat.mul_mod_idemp_r i); [ | easy ].
+  rewrite <- (Nat.mul_mod_idemp_r j); [ | easy ].
+  now apply different_coprimes_all_different_multiples.
+}
 ...
 Compute (φ 8).
 Compute ((3 * 4) mod 8).
