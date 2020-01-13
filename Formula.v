@@ -2909,27 +2909,44 @@ Proof.
 (* like smaller_than_prime_all_different_multiples but more general *)
 intros * Ha * Hi Hj Hij.
 intros Haa; symmetry in Haa.
-destruct (lt_dec i j) as [Hilj| Hjli]. {
+apply in_coprimes_iff in Ha.
+apply in_coprimes_iff in Hi.
+apply in_coprimes_iff in Hj.
+destruct Ha as (Ha, Hna).
+destruct Hi as (Hi, Hni).
+destruct Hj as (Hj, Hnj).
+assert (H : ∀ i j, i ∈ seq 1 (n - 1) → j ∈ seq 1 (n - 1) → i < j → (j * a) mod n ≠ (i * a) mod n). {
+  clear i j Hi Hj Hni Hnj Hij Haa.
+  intros * Hi Hj Hilj Haa.
+  apply in_seq in Hi.
+  apply in_seq in Hj.
   apply Nat_eq_mod_sub_0 in Haa. 2: {
     now apply Nat.mul_le_mono_r, Nat.lt_le_incl.
   }
   rewrite <- Nat.mul_sub_distr_r in Haa.
   apply Nat.mod_divide in Haa. 2: {
-    apply in_coprimes_iff in Ha.
-    destruct Ha as (Ha, Hg).
     apply in_seq in Ha.
     flia Ha.
   }
-  assert (H : Nat.gcd n (j - i) = 1). {
-    apply in_coprimes_iff in Ha.
-    apply in_coprimes_iff in Hi.
-    apply in_coprimes_iff in Hj.
-...
-    apply eq_gcd_prime_small_1.
-    apply eq_gcd_prime_small_1; [ easy | flia Hijp ].
+  rewrite Nat.mul_comm in Haa.
+  specialize (Nat.gauss n a (j - i) Haa Hna) as H1.
+  destruct H1 as (k, Hk).
+  destruct k; [ flia Hilj Hk | ].
+  cbn in Hk.
+  flia Hk Hi Hj.
 }
-specialize (H1 H); clear H.
-apply Nat.divide_pos_le in H1; [ flia H1 Hap | flia Hap ].
+destruct (lt_dec i j) as [Hilj| Hjli]. {
+  now revert Haa; apply H.
+} {
+  symmetry in Haa.
+  assert (Hilj : j < i) by flia Hij Hjli.
+  now revert Haa; apply H.
+}
+Qed.
+
+(* perhaps it is possible to rewrite smaller_than_prime_all_different_multiples
+   as a corollary of different_coprimes_all_different_multiples ? *)
+
 ...
 
 Theorem euler_fermat_little_gen : ∀ n a, Nat.gcd a n = 1 → a ^ φ n mod n = 1.
