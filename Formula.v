@@ -2944,14 +2944,29 @@ destruct (lt_dec i j) as [Hilj| Hjli]. {
 }
 Qed.
 
-...
-
-Theorem euler_fermat_little_gen : ∀ n a, Nat.gcd a n = 1 → a ^ φ n mod n = 1.
+Theorem euler_fermat_little_gen : ∀ n a,
+  n ≠ 0 → a ≠ 0 → Nat.gcd a n = 1 → a ^ φ n mod n = 1.
 Proof.
-intros * Hg.
-Search φ.
-Check smaller_than_prime_all_different_multiples.
+intros * Hnz Haz Hg.
+(* mmm... n must be different to 1 *)
+...
 (* https://wstein.org/edu/2007/spring/ent/ent-html/node19.html#sec:flittle *)
+assert (Ha : a mod n ∈ coprimes n). {
+  apply in_coprimes_iff.
+  rewrite Nat.gcd_comm, Nat.gcd_mod; [ | easy ].
+  rewrite Nat.gcd_comm.
+  split; [ | easy ].
+  apply in_seq.
+  rewrite Nat.add_comm, Nat.sub_add; [ | flia Hnz ].
+  split. {
+    remember (a mod n) as b eqn:Hb; symmetry in Hb.
+    destruct b; [ | flia ].
+    apply Nat.mod_divides in Hb; [ | easy ].
+    replace n with (n * 1) in Hg by flia.
+    destruct Hb as (k, Hk); subst a.
+    rewrite Nat.gcd_mul_mono_l in Hg.
+    apply Nat.eq_mul_1 in Hg.
+    destruct Hg as (Hn, Hg); subst n.
 ...
 Compute (φ 8).
 Compute ((3 * 4) mod 8).
