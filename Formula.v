@@ -2944,13 +2944,14 @@ destruct (lt_dec i j) as [Hilj| Hjli]. {
 }
 Qed.
 
+Notation "a ≡ b 'mod' c" := (a mod c = b mod c) (at level 70, b at level 36).
+
 Theorem euler_fermat_little_gen : ∀ n a,
-  n ≠ 0 → a ≠ 0 → Nat.gcd a n = 1 → a ^ φ n mod n = 1.
+  n ≠ 0 → a ≠ 0 → Nat.gcd a n = 1 → a ^ φ n ≡ 1 mod n.
 Proof.
 intros * Hnz Haz Hg.
-(* mmm... n must be different to 1 *)
-...
 (* https://wstein.org/edu/2007/spring/ent/ent-html/node19.html#sec:flittle *)
+destruct (Nat.eq_dec n 1) as [Hn1| Hn1]; [ now subst n | ].
 assert (Ha : a mod n ∈ coprimes n). {
   apply in_coprimes_iff.
   rewrite Nat.gcd_comm, Nat.gcd_mod; [ | easy ].
@@ -2965,8 +2966,11 @@ assert (Ha : a mod n ∈ coprimes n). {
     replace n with (n * 1) in Hg by flia.
     destruct Hb as (k, Hk); subst a.
     rewrite Nat.gcd_mul_mono_l in Hg.
-    apply Nat.eq_mul_1 in Hg.
-    destruct Hg as (Hn, Hg); subst n.
+    now apply Nat.eq_mul_1 in Hg.
+  } {
+    now apply Nat.mod_upper_bound.
+  }
+}
 ...
 Compute (φ 8).
 Compute ((3 * 4) mod 8).
