@@ -2898,7 +2898,7 @@ Compute (let '(n, a, i) := (13, 5, 2) in (nth i (all_pow_mod n a) a, Nat_pow_mod
 
 (* Euler's theorem *)
 
-Theorem gen_fermat_little : ∀ n a, Nat.gcd a n = 1 → a ^ φ n mod n = 1.
+Theorem euler_fermat_little_gen : ∀ n a, Nat.gcd a n = 1 → a ^ φ n mod n = 1.
 Proof.
 intros * Hg.
 Search φ.
