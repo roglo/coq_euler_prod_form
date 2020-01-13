@@ -2910,6 +2910,8 @@ Theorem glop : ∀ n a,
 (* chais pas si c'est vrai, ça, ni même si c'est utile *)
 Compute (φ 8).
 Compute ((3 * 4) mod 8).
+Print φ.
+Compute (coprimes 8).
 ...
 specialize (smaller_than_prime_all_different_multiples n) as H1.
 ...
