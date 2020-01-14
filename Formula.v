@@ -3055,6 +3055,27 @@ assert
       now rewrite Hf.
     }
     remember (coprimes n) as l eqn:Hl; clear Hl.
+    clear - H2 H3.
+(**)
+    induction l as [| a l]; [ constructor | ].
+    assert (Hnd : NoDup (map f l)). {
+      apply IHl. {
+        intros i j Hi Hj Hij.
+        apply H2; [ now right | now right | easy ].
+      } {
+        intros i Hi.
+        specialize (H3 i (or_intror Hi)) as H4.
+        destruct H4 as [H4| H4]; [ | easy ].
+        subst a.
+        rename i into k.
+...
+
+specialize (H2 a i (or_introl eq_refl) (or_intror Hi)) as H5.
+    cbn; constructor. {
+...
+      specialize (H3 a (or_introl eq_refl)) as H4.
+      destruct H4 as [H4| H4]. {
+...
     clear H1 Hcc Hf a Haz Hg Ha.
     induction l as [| a l]; [ constructor | ].
     cbn; constructor. {
