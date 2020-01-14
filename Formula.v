@@ -3051,14 +3051,20 @@ assert
       i ∈ coprimes n → j ∈ coprimes n → i ≠ j → f i ≠ f j). {
       now rewrite Hf.
     }
+    assert (H3 : ∀ i, i ∈ coprimes n → f i ∈ coprimes n). {
+      now rewrite Hf.
+    }
+    remember (coprimes n) as l eqn:Hl; clear Hl.
+    clear H1 Hcc Hf a Haz Hg Ha.
+    induction l as [| a l]; [ constructor | ].
+    cbn; constructor. {
+...
     assert
       (H : ∀ {A} (f : nat → A),
          (∀ i j, i ∈ coprimes n → j ∈ coprimes n → i < j → f i ≠ f j)
          → NoDup (map f (coprimes n))). {
-      clear; intros * Hij.
+      clear - Hcc; intros * Hij.
       remember (coprimes n) as l eqn:Hl.
-...
-      assert (Hc : ∀ i, i ∈ l → i ∈ coprimes n) by now rewrite Hl.
       clear Hl.
       induction l as [| i l]; intros; [ constructor | ].
       cbn; constructor. {
