@@ -3160,8 +3160,6 @@ Qed.
 
 About prime_φ. (* ← to include in that .v file I was talking about above *)
 
-...
-
 Theorem order_mod_prop : ∀ n a,
   2 ≤ n
   → Nat.gcd a n = 1
@@ -3178,23 +3176,27 @@ Compute (let (n, a) := (13, 4) in (Nat_pow_mod a (order_mod n a) n)).
     assert (H1i : 1 ∈ all_pow_mod n a). {
       unfold all_pow_mod.
       apply in_map_iff.
-(*...
-Print all_pow_mod.
-Compute (let (n, a) := (8, 3) in (Nat.gcd n a, all_pow_mod n a)).
-Compute (let n := 8 in map (λ a, (Nat.gcd n a, Nat_pow_mod a (order_mod n a) n)) (seq 1 (n - 1))).
-Compute (Nat_pow_mod 3 7 8).
-...
-Compute (let (n, a) := (12, 5) in (Nat_pow_mod a (order_mod n a) n)).
-...
-*)
       exists (φ n).
-Check gen_fermat_little.
+      rewrite Nat_pow_mod_is_pow_mod; [ | easy ].
+      split. {
+        replace 1 with (1 mod n) by now apply Nat.mod_1_l.
+        apply euler_fermat_little; [ easy | | easy ].
+        intros H; subst a.
+        rewrite Nat.gcd_0_l in Hg.
+        flia Hg H2n.
+      } {
+        apply in_seq.
+        rewrite Nat.add_comm, Nat.sub_add; [ | flia H2n ].
+Compute (map φ (seq 1 30)).
 ...
-Search φ.
-Print all_pow_mod.
-Compute (all_pow_mod 15 2).
-Compute (φ 15).
-Compute (Nat_pow_mod 2 (φ 15) 15).
+        split. {
+          unfold φ.
+        unfold coprimes.
+        rewrite List_length_filter_negb; [ | apply seq_NoDup ].
+        rewrite seq_length.
+        apply in_seq.
+        split; [ | flia ].
+        rewrite filter_length.
 ...
 ... suite ok
     }
