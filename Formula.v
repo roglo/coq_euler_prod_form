@@ -3046,7 +3046,6 @@ assert
     rewrite <- Nat.mul_mod_idemp_r; [ | easy ].
     now apply coprimes_mul_in_coprimes.
   } {
-...
     remember (λ i, (i * a) mod n) as f eqn:Hf.
     assert (H2 : ∀ i j,
       i ∈ coprimes n → j ∈ coprimes n → i ≠ j → f i ≠ f j). {
@@ -3055,13 +3054,12 @@ assert
     assert (H3 : ∀ i, i ∈ coprimes n → f i ∈ coprimes n). {
       now rewrite Hf.
     }
-    clear H1 Hcc.
-...
-    remember (coprimes n) as l eqn:Hl; clear Hl.
+    remember (coprimes n) as l eqn:Hl.
     clear - H2 H3.
-(**)
-...
     induction l as [| a l]; [ constructor | ].
+    cbn; constructor. {
+      intros Hfa.
+...
     assert (Hnd : NoDup (map f l)). {
       apply IHl. {
         intros i j Hi Hj Hij.
