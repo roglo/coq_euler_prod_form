@@ -3057,6 +3057,7 @@ assert
     remember (coprimes n) as l eqn:Hl; clear Hl.
     clear - H2 H3.
 (**)
+...
     induction l as [| a l]; [ constructor | ].
     assert (Hnd : NoDup (map f l)). {
       apply IHl. {
