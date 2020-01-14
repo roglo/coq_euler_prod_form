@@ -3137,12 +3137,28 @@ rewrite Hk.
 now rewrite Nat_mod_add_l_mul_r.
 Qed.
 
-Inspect 1.
-
 (* where can I put this theorem above? not in Primes.v since Prime does
    not know Totient; not in Totient.v since Totient does not know Primes.
    In a third .v file, perhaps? In that file, I could also all fermat's
    little theorem as a corollary. *)
+
+Corollary fermat_little_again : ∀ p,
+  prime p → ∀ a, 1 ≤ a < p → a ^ (p - 1) mod p = 1.
+Proof.
+intros * Hp * Hap.
+rewrite <- prime_φ; [ | easy ].
+replace 1 with (1 mod p). 2: {
+  apply Nat.mod_1_l.
+  now apply prime_ge_2.
+}
+apply euler_fermat_little; [ now intros H; subst p | flia Hap | ].
+rewrite Nat.gcd_comm.
+now apply eq_gcd_prime_small_1.
+Qed.
+
+(* proof of corollary above simpler than fermat_little, isn't it? *)
+
+About prime_φ. (* ← to include in that .v file I was talking about above *)
 
 ...
 
