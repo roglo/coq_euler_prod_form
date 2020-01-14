@@ -3056,11 +3056,13 @@ assert
          (∀ i j, i ∈ coprimes n → j ∈ coprimes n → i < j → f i ≠ f j)
          → NoDup (map f (coprimes n))). {
       clear; intros * Hij.
-      remember (coprimes n) as l eqn:Hl; clear Hl.
+      remember (coprimes n) as l eqn:Hl.
+...
+      assert (Hc : ∀ i, i ∈ l → i ∈ coprimes n) by now rewrite Hl.
+      clear Hl.
       induction l as [| i l]; intros; [ constructor | ].
       cbn; constructor. {
         intros H1.
-...
         apply in_map_iff in H1.
         destruct H1 as (j & Hji & Hj).
         symmetry in Hji.
