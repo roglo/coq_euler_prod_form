@@ -3046,61 +3046,86 @@ assert
     rewrite <- Nat.mul_mod_idemp_r; [ | easy ].
     now apply coprimes_mul_in_coprimes.
   } {
-    remember (λ i, (i * a) mod n) as f eqn:Hf.
-    assert (H2 : ∀ i j,
-      i ∈ coprimes n → j ∈ coprimes n → i ≠ j → f i ≠ f j). {
-      now rewrite Hf.
+    apply NoDup_map_iff with (d := 0).
+    intros * Hi Hj Hnth.
+    destruct (Nat.eq_dec i j) as [Heij| Heij]; [ easy | exfalso ].
+    revert Hnth.
+    apply H1; [ now apply nth_In | now apply nth_In | ].
+    specialize (NoDup_coprimes n) as H2.
+    remember (coprimes n) as l.
+    clear - Hi Hj Heij H2.
+    revert i j Hi Hj Heij.
+    induction l as [| a l]; intros; [ easy | ].
+    apply NoDup_cons_iff in H2.
+    destruct H2 as (Ha, Hnd).
+    intros H; cbn in H.
+    destruct i. {
+      destruct j; [ easy | ].
+      subst a; apply Ha.
+      cbn in Hj.
+      apply Nat.succ_lt_mono in Hj.
+      now apply nth_In.
     }
-    assert (H3 : ∀ i, i ∈ coprimes n → f i ∈ coprimes n). {
-      now rewrite Hf.
+    destruct j. {
+      subst a; apply Ha.
+      cbn in Hi.
+      apply Nat.succ_lt_mono in Hi.
+      now apply nth_In.
     }
-    remember (coprimes n) as l eqn:Hl.
-    clear - H2 H3.
-    induction l as [| a l]; [ constructor | ].
-    cbn; constructor. {
-      intros Hfa.
+    cbn in Hi, Hj.
+    apply Nat.succ_lt_mono in Hi.
+    apply Nat.succ_lt_mono in Hj.
+    apply -> Nat.succ_inj_wd_neg in Heij.
+    revert H.
+    now apply IHl.
+  }
+}
 ...
-    assert (Hnd : NoDup (map f l)). {
-      apply IHl. {
-        intros i j Hi Hj Hij.
-        apply H2; [ now right | now right | easy ].
-      } {
-        intros i Hi.
-        specialize (H3 i (or_intror Hi)) as H4.
-        destruct H4 as [H4| H4]; [ | easy ].
-        subst a.
-        rename i into k.
-...
-
-specialize (H2 a i (or_introl eq_refl) (or_intror Hi)) as H5.
-    cbn; constructor. {
-...
-      specialize (H3 a (or_introl eq_refl)) as H4.
-      destruct H4 as [H4| H4]. {
-...
-    clear H1 Hcc Hf a Haz Hg Ha.
-    induction l as [| a l]; [ constructor | ].
-    cbn; constructor. {
-...
-    assert
-      (H : ∀ {A} (f : nat → A),
-         (∀ i j, i ∈ coprimes n → j ∈ coprimes n → i < j → f i ≠ f j)
-         → NoDup (map f (coprimes n))). {
-      clear - Hcc; intros * Hij.
-      remember (coprimes n) as l eqn:Hl.
-      clear Hl.
-      induction l as [| i l]; intros; [ constructor | ].
-      cbn; constructor. {
-        intros H1.
-        apply in_map_iff in H1.
-        destruct H1 as (j & Hji & Hj).
-        symmetry in Hji.
-        destruct (Nat.lt_trichotomy i j) as [Ht| Ht]. {
-          revert Hji; apply Hij; [ now left | now right | easy ].
-        }
-        destruct Ht as [Ht| Ht]. {
-...
-          revert Hji; apply Hij.
+remember (λ i : nat, (i * a) mod n) as f eqn:Hf.
+remember (fold_left Nat.mul (map f (seq 1 (p - 1))) 1) as x eqn:Hx.
+assert (Hx1 : x mod p = fact (p - 1) mod p). {
+  subst x.
+  erewrite Permutation_fold_mul; [ | apply Hperm ].
+  f_equal.
+  clear.
+  (* lemma perhaps? *)
+  remember (p - 1) as n; clear p Heqn.
+  symmetry.
+  apply fact_eq_fold_left.
+}
+assert (Hx2 : x mod p = (fact (p - 1) * a ^ (p - 1)) mod p). {
+  subst x; rewrite Hf.
+  rewrite <- (map_map (λ i, i * a) (λ j, j mod p)).
+  rewrite fold_left_mul_map_mod.
+  rewrite fold_left_mul_map_mul.
+  rewrite seq_length.
+  f_equal; f_equal.
+  symmetry.
+  apply fact_eq_fold_left.
+}
+rewrite Hx2 in Hx1.
+apply Nat_eq_mod_sub_0 in Hx1. 2: {
+  rewrite <- (Nat.mul_1_r (fact _)) at 1.
+  apply Nat.mul_le_mono_l.
+  apply Nat.neq_0_lt_0.
+  apply Nat.pow_nonzero; flia Hap.
+}
+rewrite <- (Nat.mul_1_r (fact _)) in Hx1 at 2.
+rewrite <- Nat.mul_sub_distr_l in Hx1.
+apply Nat.mod_divide in Hx1; [ | easy ].
+specialize (Nat.gauss _ _ _ Hx1) as H2.
+specialize (Nat_gcd_prime_fact_lt p Hp (p - 1)) as H3.
+assert (H : p - 1 < p) by flia Hpz.
+specialize (H3 H); clear H.
+specialize (H2 H3); clear H3.
+destruct H2 as (c, H2).
+replace (a ^ (p - 1)) with (1 + c * p). 2: {
+  assert (Ha : a ^ (p - 1) ≠ 0) by (apply Nat.pow_nonzero; flia Hap).
+  flia H2 Ha.
+}
+rewrite Nat.mod_add; [ | easy ].
+rewrite Nat.mod_small; [ easy | flia Hap ].
+Qed.
 ...
         destruct len; [ easy | cbn in Hl ].
         injection Hl; clear Hl; intros Hl Hb; subst i.
