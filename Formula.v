@@ -3028,7 +3028,7 @@ assert
   rewrite <- (Nat.mul_mod_idemp_r j); [ | easy ].
   now apply different_coprimes_all_different_multiples.
 }
-assert (H2 : ∀ i, i ∈ coprimes n → (i * a) mod n ∈ coprimes n). {
+assert (Hcc : ∀ i, i ∈ coprimes n → (i * a) mod n ∈ coprimes n). {
   intros i Hi.
   rewrite <- Nat.mul_mod_idemp_r; [ | easy ].
   now apply coprimes_mul_in_coprimes.
@@ -3047,13 +3047,40 @@ assert
     now apply coprimes_mul_in_coprimes.
   } {
     remember (λ i, (i * a) mod n) as f eqn:Hf.
-...
-    assert (H2 : ∀ i j, i < j < p → f i ≠ f j) by now rewrite Hf.
+    assert (H2 : ∀ i j,
+      i ∈ coprimes n → j ∈ coprimes n → i ≠ j → f i ≠ f j). {
+      now rewrite Hf.
+    }
     assert
-      (H : ∀ {A} start len (f : nat → A),
-         (∀ i j, i < j < start + len → f i ≠ f j)
-         → NoDup (map f (seq start len))). {
+      (H : ∀ {A} (f : nat → A),
+         (∀ i j, i ∈ coprimes n → j ∈ coprimes n → i < j → f i ≠ f j)
+         → NoDup (map f (coprimes n))). {
       clear; intros * Hij.
+      remember (coprimes n) as l eqn:Hl; clear Hl.
+      induction l as [| i l]; intros; [ constructor | ].
+      cbn; constructor. {
+        intros H1.
+...
+        apply in_map_iff in H1.
+        destruct H1 as (j & Hji & Hj).
+        symmetry in Hji.
+        destruct (Nat.lt_trichotomy i j) as [Ht| Ht]. {
+          revert Hji; apply Hij; [ now left | now right | easy ].
+        }
+        destruct Ht as [Ht| Ht]. {
+...
+          revert Hji; apply Hij.
+...
+        destruct len; [ easy | cbn in Hl ].
+        injection Hl; clear Hl; intros Hl Hb; subst i.
+        specialize (Hij start j) as H1.
+        assert (H : start < j < start + S len). {
+          rewrite <- Hl in Hj.
+          apply in_seq in Hj; flia Hj.
+        }
+        specialize (H1 H); clear H.
+        now symmetry in Hji.
+...
       remember (seq start len) as l eqn:Hl; symmetry in Hl.
       revert start len Hij Hl; induction l as [| i l]; intros; [ constructor | ].
       rewrite map_cons; constructor. {
