@@ -2994,6 +2994,24 @@ Qed.
 Theorem fold_φ : ∀ n, length (coprimes n) = φ n.
 Proof. easy. Qed.
 
+Theorem gcd_prod_coprimes : ∀ n,
+  Nat.gcd n (fold_left Nat.mul (coprimes n) 1) = 1.
+Proof.
+intros.
+assert (H : ∀ a, a ∈ coprimes n → Nat.gcd n a = 1). {
+  intros * H.
+  now apply in_coprimes_iff in H.
+}
+remember (coprimes n) as l eqn:Hl; symmetry in Hl; clear Hl.
+induction l as [| a l]; intros; [ apply Nat.gcd_1_r | ].
+cbn; rewrite Nat.add_0_r.
+rewrite fold_left_mul_from_1.
+apply Nat_gcd_1_mul_r; [ now apply H; left | ].
+apply IHl.
+intros b Hb.
+now apply H; right.
+Qed.
+
 Theorem euler_fermat_little : ∀ n a,
   n ≠ 0 → a ≠ 0 → Nat.gcd a n = 1 → a ^ φ n ≡ 1 mod n.
 Proof.
@@ -3099,67 +3117,33 @@ apply Nat_eq_mod_sub_0 in Hx1. 2: {
   destruct z; [ | flia ].
   now apply Nat.pow_nonzero in Hz.
 }
-...
-rewrite <- (Nat.mul_1_r (fact _)) in Hx1 at 2.
+replace y with (y * 1) in Hx1 at 2 by flia.
 rewrite <- Nat.mul_sub_distr_l in Hx1.
 apply Nat.mod_divide in Hx1; [ | easy ].
 specialize (Nat.gauss _ _ _ Hx1) as H2.
-specialize (Nat_gcd_prime_fact_lt p Hp (p - 1)) as H3.
-assert (H : p - 1 < p) by flia Hpz.
-specialize (H3 H); clear H.
-specialize (H2 H3); clear H3.
-destruct H2 as (c, H2).
-replace (a ^ (p - 1)) with (1 + c * p). 2: {
-  assert (Ha : a ^ (p - 1) ≠ 0) by (apply Nat.pow_nonzero; flia Hap).
-  flia H2 Ha.
+assert (H : Nat.gcd n y = 1). {
+  rewrite Hy.
+  apply gcd_prod_coprimes.
 }
-rewrite Nat.mod_add; [ | easy ].
-rewrite Nat.mod_small; [ easy | flia Hap ].
+specialize (H2 H); clear H.
+rewrite Nat_mod_pow_mod.
+destruct H2 as (k, Hk).
+apply (Nat.add_cancel_r _ _ 1) in Hk.
+rewrite Nat.sub_add in Hk. 2: {
+  apply Nat.neq_0_lt_0.
+  now apply Nat.pow_nonzero.
+}
+rewrite Hk.
+now rewrite Nat_mod_add_l_mul_r.
 Qed.
-...
-        destruct len; [ easy | cbn in Hl ].
-        injection Hl; clear Hl; intros Hl Hb; subst i.
-        specialize (Hij start j) as H1.
-        assert (H : start < j < start + S len). {
-          rewrite <- Hl in Hj.
-          apply in_seq in Hj; flia Hj.
-        }
-        specialize (H1 H); clear H.
-        now symmetry in Hji.
-...
-      remember (seq start len) as l eqn:Hl; symmetry in Hl.
-      revert start len Hij Hl; induction l as [| i l]; intros; [ constructor | ].
-      rewrite map_cons; constructor. {
-        intros H1.
-        apply in_map_iff in H1.
-        destruct H1 as (j & Hji & Hj).
-        destruct len; [ easy | cbn in Hl ].
-        injection Hl; clear Hl; intros Hl Hb; subst i.
-        specialize (Hij start j) as H1.
-        assert (H : start < j < start + S len). {
-          rewrite <- Hl in Hj.
-          apply in_seq in Hj; flia Hj.
-        }
-        specialize (H1 H); clear H.
-        now symmetry in Hji.
-      }
-      destruct len; [ easy | ].
-      injection Hl; clear Hl; intros Hl Hi.
-      apply (IHl (S start) len); [ | easy ].
-      intros j k Hjk.
-      apply Hij; flia Hjk.
-    }
-    apply H.
-    now replace (1 + (p - 1)) with p by flia Hpz.
-  }
-}
-...
-Compute (φ 8).
-Compute ((3 * 4) mod 8).
-Print φ.
-Compute (coprimes 8).
-...
-specialize (smaller_than_prime_all_different_multiples n) as H1.
+
+Inspect 1.
+
+(* where can I put this theorem above? not in Primes.v since Prime does
+   not know Totient; not in Totient.v since Totient does not know Primes.
+   In a third .v file, perhaps? In that file, I could also all fermat's
+   little theorem as a corollary. *)
+
 ...
 
 Theorem order_mod_prop : ∀ n a,
