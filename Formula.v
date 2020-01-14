@@ -3080,30 +3080,21 @@ assert
     now apply IHl.
   }
 }
-...
 remember (λ i : nat, (i * a) mod n) as f eqn:Hf.
-remember (fold_left Nat.mul (map f (seq 1 (p - 1))) 1) as x eqn:Hx.
-assert (Hx1 : x mod p = fact (p - 1) mod p). {
-  subst x.
-  erewrite Permutation_fold_mul; [ | apply Hperm ].
-  f_equal.
-  clear.
-  (* lemma perhaps? *)
-  remember (p - 1) as n; clear p Heqn.
-  symmetry.
-  apply fact_eq_fold_left.
+remember (fold_left Nat.mul (map f (coprimes n)) 1) as x eqn:Hx.
+remember (fold_left Nat.mul (coprimes n) 1) as y eqn:Hy.
+assert (Hx1 : x mod n = y mod n). {
+  subst x y.
+  erewrite Permutation_fold_mul; [ easy | apply Hperm ].
 }
-assert (Hx2 : x mod p = (fact (p - 1) * a ^ (p - 1)) mod p). {
-  subst x; rewrite Hf.
-  rewrite <- (map_map (λ i, i * a) (λ j, j mod p)).
+assert (Hx2 : x mod n = (y * a ^ length (coprimes n)) mod n). {
+  subst x y; rewrite Hf.
+  rewrite <- (map_map (λ i, i * a) (λ j, j mod n)).
   rewrite fold_left_mul_map_mod.
-  rewrite fold_left_mul_map_mul.
-  rewrite seq_length.
-  f_equal; f_equal.
-  symmetry.
-  apply fact_eq_fold_left.
+  now rewrite fold_left_mul_map_mul.
 }
 rewrite Hx2 in Hx1.
+...
 apply Nat_eq_mod_sub_0 in Hx1. 2: {
   rewrite <- (Nat.mul_1_r (fact _)) at 1.
   apply Nat.mul_le_mono_l.
