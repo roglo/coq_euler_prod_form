@@ -2915,7 +2915,9 @@ apply in_coprimes_iff in Hj.
 destruct Ha as (Ha, Hna).
 destruct Hi as (Hi, Hni).
 destruct Hj as (Hj, Hnj).
-assert (H : ∀ i j, i ∈ seq 1 (n - 1) → j ∈ seq 1 (n - 1) → i < j → (j * a) mod n ≠ (i * a) mod n). {
+assert
+  (H : ∀ i j, i ∈ seq 1 (n - 1) → j ∈ seq 1 (n - 1) → i < j →
+   (j * a) mod n ≠ (i * a) mod n). {
   clear i j Hi Hj Hni Hnj Hij Haa.
   intros * Hi Hj Hilj Haa.
   apply in_seq in Hi.
@@ -2941,6 +2943,42 @@ destruct (lt_dec i j) as [Hilj| Hjli]. {
   symmetry in Haa.
   assert (Hilj : j < i) by flia Hij Hjli.
   now revert Haa; apply H.
+}
+Qed.
+
+Theorem coprimes_mul_in_coprimes : ∀ n i j,
+  i ∈ coprimes n → j ∈ coprimes n → (i * j) mod n ∈ coprimes n.
+Proof.
+intros * Hi Hj.
+destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
+apply in_coprimes_iff in Hi.
+apply in_coprimes_iff in Hj.
+destruct Hi as (Hi, Hgi).
+destruct Hj as (Hj, Hgj).
+apply in_seq in Hi.
+apply in_seq in Hj.
+apply in_coprimes_iff.
+split. {
+  apply in_seq.
+  split. {
+    remember ((i * j) mod n) as a eqn:Ha; symmetry in Ha.
+    destruct a; [ | flia ].
+    apply Nat.mod_divide in Ha; [ | easy ].
+    apply Nat.gauss in Ha; [ | easy ].
+    destruct Ha as (k, Hk).
+    replace n with (1 * n) in Hgj by flia.
+    subst j.
+    rewrite Nat.gcd_mul_mono_r in Hgj.
+    apply Nat.eq_mul_1 in Hgj.
+    destruct Hgj as (H1k, Hn); subst n.
+    flia Hi.
+  } {
+    rewrite Nat.add_comm, Nat.sub_add; [ | flia Hnz ].
+    now apply Nat.mod_upper_bound.
+  }
+} {
+  rewrite Nat.gcd_comm, Nat.gcd_mod; [ | easy ].
+  now apply Nat_gcd_1_mul_r.
 }
 Qed.
 
@@ -2982,13 +3020,9 @@ assert
 }
 assert (H2 : ∀ i, i ∈ coprimes n → (i * a) mod n ∈ coprimes n). {
   intros i Hi.
-  apply in_coprimes_iff in Hi.
-  destruct Hi as (Hi, Hgi).
-  apply in_seq in Hi.
-  apply in_coprimes_iff.
-  split. {
-    apply in_seq.
-    split. {
+  rewrite <- Nat.mul_mod_idemp_r; [ | easy ].
+  now apply coprimes_mul_in_coprimes.
+}
 ...
 Compute (φ 8).
 Compute ((3 * 4) mod 8).
