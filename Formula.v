@@ -2984,6 +2984,16 @@ Qed.
 
 Notation "a ≡ b 'mod' c" := (a mod c = b mod c) (at level 70, b at level 36).
 
+Theorem NoDup_coprimes : ∀ n, NoDup (coprimes n).
+Proof.
+intros.
+unfold coprimes.
+apply NoDup_filter, seq_NoDup.
+Qed.
+
+Theorem fold_φ : ∀ n, length (coprimes n) = φ n.
+Proof. easy. Qed.
+
 Theorem euler_fermat_little : ∀ n a,
   n ≠ 0 → a ≠ 0 → Nat.gcd a n = 1 → a ^ φ n ≡ 1 mod n.
 Proof.
@@ -3022,6 +3032,53 @@ assert (H2 : ∀ i, i ∈ coprimes n → (i * a) mod n ∈ coprimes n). {
   intros i Hi.
   rewrite <- Nat.mul_mod_idemp_r; [ | easy ].
   now apply coprimes_mul_in_coprimes.
+}
+assert
+  (Hperm :
+     Permutation (map (λ i, (i * a) mod n) (coprimes n)) (coprimes n)). {
+  apply NoDup_Permutation_bis; [ | apply NoDup_coprimes | | ]; cycle 1. {
+    now rewrite map_length.
+  } {
+    intros i Hi.
+    apply in_map_iff in Hi.
+    destruct Hi as (j & Hji & Hj).
+    rewrite <- Hji.
+    rewrite <- Nat.mul_mod_idemp_r; [ | easy ].
+    now apply coprimes_mul_in_coprimes.
+  } {
+    remember (λ i, (i * a) mod n) as f eqn:Hf.
+...
+    assert (H2 : ∀ i j, i < j < p → f i ≠ f j) by now rewrite Hf.
+    assert
+      (H : ∀ {A} start len (f : nat → A),
+         (∀ i j, i < j < start + len → f i ≠ f j)
+         → NoDup (map f (seq start len))). {
+      clear; intros * Hij.
+      remember (seq start len) as l eqn:Hl; symmetry in Hl.
+      revert start len Hij Hl; induction l as [| i l]; intros; [ constructor | ].
+      rewrite map_cons; constructor. {
+        intros H1.
+        apply in_map_iff in H1.
+        destruct H1 as (j & Hji & Hj).
+        destruct len; [ easy | cbn in Hl ].
+        injection Hl; clear Hl; intros Hl Hb; subst i.
+        specialize (Hij start j) as H1.
+        assert (H : start < j < start + S len). {
+          rewrite <- Hl in Hj.
+          apply in_seq in Hj; flia Hj.
+        }
+        specialize (H1 H); clear H.
+        now symmetry in Hji.
+      }
+      destruct len; [ easy | ].
+      injection Hl; clear Hl; intros Hl Hi.
+      apply (IHl (S start) len); [ | easy ].
+      intros j k Hjk.
+      apply Hij; flia Hjk.
+    }
+    apply H.
+    now replace (1 + (p - 1)) with p by flia Hpz.
+  }
 }
 ...
 Compute (φ 8).
