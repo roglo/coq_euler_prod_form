@@ -3087,20 +3087,19 @@ assert (Hx1 : x mod n = y mod n). {
   subst x y.
   erewrite Permutation_fold_mul; [ easy | apply Hperm ].
 }
-assert (Hx2 : x mod n = (y * a ^ length (coprimes n)) mod n). {
+assert (Hx2 : x mod n = (y * a ^ φ n) mod n). {
   subst x y; rewrite Hf.
   rewrite <- (map_map (λ i, i * a) (λ j, j mod n)).
   rewrite fold_left_mul_map_mod.
   now rewrite fold_left_mul_map_mul.
 }
 rewrite Hx2 in Hx1.
-...
 apply Nat_eq_mod_sub_0 in Hx1. 2: {
-  rewrite <- (Nat.mul_1_r (fact _)) at 1.
-  apply Nat.mul_le_mono_l.
-  apply Nat.neq_0_lt_0.
-  apply Nat.pow_nonzero; flia Hap.
+  remember (a ^ φ n) as z eqn:Hz; symmetry in Hz.
+  destruct z; [ | flia ].
+  now apply Nat.pow_nonzero in Hz.
 }
+...
 rewrite <- (Nat.mul_1_r (fact _)) in Hx1 at 2.
 rewrite <- Nat.mul_sub_distr_l in Hx1.
 apply Nat.mod_divide in Hx1; [ | easy ].
