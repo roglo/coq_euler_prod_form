@@ -3210,6 +3210,20 @@ split. {
     apply -> Nat.succ_lt_mono.
     now apply IHl.
   }
+  assert
+    (H :
+       nth (List_find_nth (λ x : nat, x =? 1) (all_pow_mod n a))
+           (all_pow_mod n a) 1 =
+       1). {
+    remember (all_pow_mod n a) as l eqn:Hl.
+    clear Hl.
+    induction l as [| b l]; [ easy | cbn ].
+    remember (b =? 1) as b1 eqn:Hb1; symmetry in Hb1.
+    destruct b1; [ now apply Nat.eqb_eq in Hb1 | apply IHl ].
+  }
+  etransitivity; [ | apply H ].
+  apply nth_indep.
+...
 unfold all_pow_mod at 2.
 remember (λ i, Nat_pow_mod a i n) as f eqn:Hf.
 remember (List_find_nth (λ x : nat, x =? 1) (all_pow_mod n a)) as m eqn:Hm.
