@@ -3087,10 +3087,19 @@ About prime_φ. (* ← to include in that .v file I was talking about above *)
 
 (* https://wstein.org/edu/2007/spring/ent/ent-html/node29.html *)
 
+Definition unsome {A} x (d : A) :=
+  match x with Some y => y | None => d end.
+
 Definition all_pow_mod n a :=
   map (λ i, (i, Nat_pow_mod a i n)) (seq 1 (n - 1)).
 Definition order_mod n a :=
+  unsome (findA (λ x, x =? 1) (all_pow_mod n a)) n.
+(*
+  fst (hd (n, 0) (filter (λ x, snd x =? 1) (all_pow_mod n a))).
   hd n (map fst (filter (λ x, snd x =? 1) (all_pow_mod n a))).
+*)
+
+...
 
 (*
 Fixpoint List_find_nth {A} (f : A → bool) l :=
@@ -3232,6 +3241,7 @@ intros * H2n Hg.
 assert (Hnz : n ≠ 0) by flia H2n.
 split. {
   unfold order_mod.
+Search all_pow_mod.
 Check nth_all_pow_mod.
 Compute (let (n, a) := (8, 3) in map fst (filter (λ x : nat * nat, snd x =? 1) (all_pow_mod n a))).
 Compute (let (n, a) := (13, 5) in map fst (filter (λ x : nat * nat, snd x =? 1) (all_pow_mod n a))).
