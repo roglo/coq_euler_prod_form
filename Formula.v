@@ -3189,6 +3189,29 @@ now cbn in Hi; exists i.
 Qed.
 *)
 
+Theorem in_filter_all_pow_mod_snd : ∀ n a x,
+  x ∈ filter (λ x, snd x =? 1) (all_pow_mod n a) → snd x = 1.
+Proof.
+intros * Hx.
+apply filter_In in Hx.
+destruct Hx as (Hxn, Hx1).
+now apply Nat.eqb_eq in Hx1.
+Qed.
+
+Theorem glop : ∀ n a x,
+  x ∈ filter (λ x, snd x =? 1) (all_pow_mod n a) → a ^ fst x = 1.
+Proof.
+intros * Hx.
+apply filter_In in Hx.
+destruct Hx as (Hxn, Hx1).
+apply Nat.eqb_eq in Hx1.
+destruct x as (i, b).
+cbn in Hx1; cbn; subst b.
+specialize (nth_all_pow_mod n a i) as H1.
+destruct (lt_dec i (n - 1)) as [Hin| Hin]. {
+  specialize (H1 Hin).
+...
+
 Theorem order_mod_prop : ∀ n a,
   2 ≤ n
   → Nat.gcd a n = 1
@@ -3200,6 +3223,8 @@ assert (Hnz : n ≠ 0) by flia H2n.
 split. {
   unfold order_mod.
 Check nth_all_pow_mod.
+Compute (let (n, a) := (8, 3) in map fst (filter (λ x : nat * nat, snd x =? 1) (all_pow_mod n a))).
+Compute (let (n, a) := (13, 5) in map fst (filter (λ x : nat * nat, snd x =? 1) (all_pow_mod n a))).
 ...
   rewrite <- nth_all_pow_mod. 2: {
     assert (H1i : 1 ∈ all_pow_mod n a). {
