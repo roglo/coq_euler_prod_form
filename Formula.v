@@ -3102,7 +3102,15 @@ Definition order_mod n a :=
 Search findA.
 Check (findA_NoDupA _ _ Nat.eq_dec 0).
 Print NoDupA.
-
+Print InA.
+Check findA.
+Check find.
+Search (option _ → _).
+...
+findA
+     : ∀ A B : Type, (A → bool) → list (A * B) → option B
+find
+     : ∀ A : Type, (A → bool) → list A → option A
 ...
 
 (*
