@@ -2821,81 +2821,6 @@ intros * H3a Hcon.
 ...
 *)
 
-(* https://wstein.org/edu/2007/spring/ent/ent-html/node29.html *)
-
-Fixpoint List_find_nth {A} (f : A → bool) l :=
-  match l with
-  | [] => 0
-  | x :: l => if f x then 0 else 1 + List_find_nth f l
-  end.
-
-Definition all_pow_mod n a := map (λ i, Nat_pow_mod a i n) (seq 1 (n - 1)).
-
-Definition order_mod n a := S (List_find_nth (λ x, x =? 1) (all_pow_mod n a)).
-
-Theorem List_seq_eq_nil : ∀ a b, seq a b = [] → b = 0.
-Proof.
-intros * Hs.
-now destruct b.
-Qed.
-
-Theorem eq_all_pow_mod_nil : ∀ n a, all_pow_mod n a = [] → n ≤ 1.
-Proof.
-intros * Hna.
-unfold all_pow_mod in Hna.
-apply map_eq_nil in Hna.
-apply List_seq_eq_nil in Hna.
-flia Hna.
-Qed.
-
-Theorem all_pow_mod_length : ∀ n a, length (all_pow_mod n a) = n - 1.
-Proof.
-intros.
-unfold all_pow_mod.
-now rewrite map_length, seq_length.
-Qed.
-
-Theorem all_pow_mod_hd : ∀ n a, a < n → hd a (all_pow_mod n a) = a.
-Proof.
-intros * Han.
-destruct n; [ easy | cbn ].
-rewrite Nat.sub_0_r.
-destruct n; [ easy | ].
-cbn - [ "mod" ].
-rewrite Nat.mul_mod_idemp_r; [ | easy ].
-now rewrite Nat.mul_1_r, Nat.mod_small.
-Qed.
-
-Theorem all_pow_mod_mod : ∀ n a, all_pow_mod n (a mod n) = all_pow_mod n a.
-Proof.
-intros.
-destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
-unfold all_pow_mod.
-remember (seq 1 (n - 1)) as l eqn:Hl; clear Hl.
-induction l as [| b l]; [ easy | ].
-cbn - [ "mod" ].
-rewrite Nat_pow_mod_is_pow_mod; [ | easy ].
-rewrite Nat_pow_mod_is_pow_mod; [ | easy ].
-rewrite Nat_mod_pow_mod.
-now rewrite IHl.
-Qed.
-
-Theorem nth_all_pow_mod : ∀ n a i,
-  i < n - 1 → nth i (all_pow_mod n a) 0 = a ^ S i mod n.
-Proof.
-intros * Hin.
-unfold all_pow_mod.
-rewrite (List_map_nth_in _ 0); [ | now rewrite seq_length ].
-rewrite Nat_pow_mod_is_pow_mod; [ | flia Hin ].
-now rewrite seq_nth.
-Qed.
-
-(*
-Compute (let '(n, a, i) := (1, 5, 1) in (all_pow_mod n a)).
-Compute (let '(n, a, i) := (13, 5, 1) in (nth i (all_pow_mod n a) 0)).
-Compute (let '(n, a, i) := (13, 5, 2) in (nth i (all_pow_mod n a) a, Nat_pow_mod a (S i) n)).
-*)
-
 (* Euler's theorem *)
 
 Theorem different_coprimes_all_different_multiples : ∀ n a,
@@ -3160,6 +3085,86 @@ Qed.
 
 About prime_φ. (* ← to include in that .v file I was talking about above *)
 
+(* https://wstein.org/edu/2007/spring/ent/ent-html/node29.html *)
+
+Definition all_pow_mod n a :=
+  map (λ i, (i, Nat_pow_mod a i n)) (seq 1 (n - 1)).
+Definition order_mod n a :=
+  hd n (map fst (filter (λ x, snd x =? 1) (all_pow_mod n a))).
+
+(*
+Fixpoint List_find_nth {A} (f : A → bool) l :=
+  match l with
+  | [] => 0
+  | x :: l => if f x then 0 else 1 + List_find_nth f l
+  end.
+Definition all_pow_mod' n a := map (λ i, Nat_pow_mod a i n) (seq 1 (n - 1)).
+Definition order_mod' n a := S (List_find_nth (λ x, x =? 1) (all_pow_mod' n a)).
+
+Compute (let (n, a) := (3, 5) in (order_mod n a, order_mod' n a)).
+Compute (let n := 19 in map (λ a, (order_mod n a, order_mod' n a)) (seq 1 n)).
+*)
+
+Theorem List_seq_eq_nil : ∀ a b, seq a b = [] → b = 0.
+Proof.
+intros * Hs.
+now destruct b.
+Qed.
+
+Theorem eq_all_pow_mod_nil : ∀ n a, all_pow_mod n a = [] → n ≤ 1.
+Proof.
+intros * Hna.
+unfold all_pow_mod in Hna.
+apply map_eq_nil in Hna.
+apply List_seq_eq_nil in Hna.
+flia Hna.
+Qed.
+
+Theorem all_pow_mod_length : ∀ n a, length (all_pow_mod n a) = n - 1.
+Proof.
+intros.
+unfold all_pow_mod.
+now rewrite map_length, seq_length.
+Qed.
+
+(*
+Theorem all_pow_mod_hd : ∀ n a, a < n → hd a (all_pow_mod n a) = a.
+Proof.
+intros * Han.
+destruct n; [ easy | cbn ].
+rewrite Nat.sub_0_r.
+destruct n; [ easy | ].
+cbn - [ "mod" ].
+rewrite Nat.mul_mod_idemp_r; [ | easy ].
+now rewrite Nat.mul_1_r, Nat.mod_small.
+Qed.
+*)
+
+Theorem all_pow_mod_mod : ∀ n a, all_pow_mod n (a mod n) = all_pow_mod n a.
+Proof.
+intros.
+destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
+unfold all_pow_mod.
+remember (seq 1 (n - 1)) as l eqn:Hl; clear Hl.
+induction l as [| b l]; [ easy | ].
+cbn - [ "mod" ].
+rewrite Nat_pow_mod_is_pow_mod; [ | easy ].
+rewrite Nat_pow_mod_is_pow_mod; [ | easy ].
+rewrite Nat_mod_pow_mod.
+now rewrite IHl.
+Qed.
+
+Theorem nth_all_pow_mod : ∀ n a i,
+  i < n - 1 → nth i (all_pow_mod n a) (0, 0) = (S i, a ^ S i mod n).
+Proof.
+intros * Hin.
+unfold all_pow_mod.
+rewrite (List_map_nth_in _ 0); [ | now rewrite seq_length ].
+rewrite Nat_pow_mod_is_pow_mod; [ | flia Hin ].
+now rewrite seq_nth.
+Qed.
+
+(*
 Theorem app_nth_List_find_nth : ∀ f l,
   (∃ i, f (nth i l 0) = true)
   → f (nth (List_find_nth f l) l 0) = true.
@@ -3182,6 +3187,7 @@ destruct i. {
 }
 now cbn in Hi; exists i.
 Qed.
+*)
 
 Theorem order_mod_prop : ∀ n a,
   2 ≤ n
@@ -3193,6 +3199,8 @@ intros * H2n Hg.
 assert (Hnz : n ≠ 0) by flia H2n.
 split. {
   unfold order_mod.
+Check nth_all_pow_mod.
+...
   rewrite <- nth_all_pow_mod. 2: {
     assert (H1i : 1 ∈ all_pow_mod n a). {
       unfold all_pow_mod.
