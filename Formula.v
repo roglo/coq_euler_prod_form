@@ -3099,6 +3099,10 @@ Definition order_mod n a :=
   hd n (map fst (filter (λ x, snd x =? 1) (all_pow_mod n a))).
 *)
 
+Search findA.
+Check (findA_NoDupA _ _ Nat.eq_dec 0).
+Print NoDupA.
+
 ...
 
 (*
