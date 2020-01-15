@@ -3189,6 +3189,19 @@ now cbn in Hi; exists i.
 Qed.
 *)
 
+Theorem in_all_pow_mod : ∀ n a i j,
+  (i, j) ∈ all_pow_mod n a
+  → a ^ i mod n = j.
+Proof.
+intros * Hij.
+unfold all_pow_mod in Hij.
+apply in_map_iff in Hij.
+destruct Hij as (x & Hij & Hx).
+injection Hij; clear Hij; intros; subst x j.
+rewrite Nat_pow_mod_is_pow_mod; [ easy | ].
+now intros H; subst n.
+Qed.
+
 Theorem in_filter_all_pow_mod_snd : ∀ n a x,
   x ∈ filter (λ x, snd x =? 1) (all_pow_mod n a) → snd x = 1.
 Proof.
@@ -3198,19 +3211,16 @@ destruct Hx as (Hxn, Hx1).
 now apply Nat.eqb_eq in Hx1.
 Qed.
 
-Theorem glop : ∀ n a x,
-  x ∈ filter (λ x, snd x =? 1) (all_pow_mod n a) → a ^ fst x = 1.
+Theorem in_filter_all_pow_mod_fst : ∀ n a x,
+  x ∈ filter (λ x, snd x =? 1) (all_pow_mod n a) → a ^ fst x mod n = 1.
 Proof.
 intros * Hx.
 apply filter_In in Hx.
+destruct x as (i, b); cbn in Hx; cbn.
 destruct Hx as (Hxn, Hx1).
-apply Nat.eqb_eq in Hx1.
-destruct x as (i, b).
-cbn in Hx1; cbn; subst b.
-specialize (nth_all_pow_mod n a i) as H1.
-destruct (lt_dec i (n - 1)) as [Hin| Hin]. {
-  specialize (H1 Hin).
-...
+apply in_all_pow_mod in Hxn.
+now apply Nat.eqb_eq in Hx1; subst b.
+Qed.
 
 Theorem order_mod_prop : ∀ n a,
   2 ≤ n
