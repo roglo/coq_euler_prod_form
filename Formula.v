@@ -3222,7 +3222,7 @@ split. {
     destruct b1; [ now apply Nat.eqb_eq in Hb1 | apply IHl ].
   }
   etransitivity; [ | apply H ].
-  apply nth_indep.
+  apply nth_indep; clear H.
 ...
 unfold all_pow_mod at 2.
 remember (λ i, Nat_pow_mod a i n) as f eqn:Hf.
