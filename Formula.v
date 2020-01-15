@@ -3160,6 +3160,29 @@ Qed.
 
 About prime_φ. (* ← to include in that .v file I was talking about above *)
 
+Theorem app_nth_List_find_nth : ∀ f l,
+  (∃ i, f (nth i l 0) = true)
+  → f (nth (List_find_nth f l) l 0) = true.
+Proof.
+intros * Hf.
+induction l as [| a l]. {
+  cbn.
+  destruct Hf as (i, Hi).
+  cbn in Hi.
+  now destruct i.
+}
+cbn.
+remember (f a) as c eqn:Hc; symmetry in Hc.
+destruct c; [ easy | ].
+apply IHl.
+destruct Hf as (i, Hi).
+destruct i. {
+  cbn in Hi.
+  now rewrite Hi in Hc.
+}
+now cbn in Hi; exists i.
+Qed.
+
 Theorem order_mod_prop : ∀ n a,
   2 ≤ n
   → Nat.gcd a n = 1
@@ -3223,6 +3246,20 @@ split. {
   }
   etransitivity; [ | apply H ].
   apply nth_indep; clear H.
+Search all_pow_mod.
+Inspect 1.
+...
+nth_all_pow_mod: ∀ n a i : nat, i < n - 1 → nth i (all_pow_mod n a) 0 = a ^ S i mod n
+...
+
+List_find_nth = 
+fix List_find_nth (A : Type) (f : A → bool) (l : list A) {struct l} : nat :=
+  match l with
+  | [] => 0
+  | x :: l0 => if f x then 0 else 1 + List_find_nth A f l0
+  end
+
+all_pow_mod = λ n a : nat, map (λ i : nat, Nat_pow_mod a i n) (seq 1 (n - 1))
 ...
 unfold all_pow_mod at 2.
 remember (λ i, Nat_pow_mod a i n) as f eqn:Hf.
