@@ -3085,6 +3085,24 @@ Qed.
 
 About prime_φ. (* ← to include in that .v file I was talking about above *)
 
+Theorem φ_interv : ∀ n, 2 ≤ n → 1 ≤ φ n < n.
+Proof.
+intros * H2n.
+unfold φ.
+unfold coprimes.
+split. {
+  destruct n; [ easy | ].
+  rewrite Nat.sub_succ, Nat.sub_0_r.
+  destruct n; [ flia H2n | ].
+  remember (S (S n)) as ssn.
+  cbn; rewrite Nat.gcd_1_r; cbn; flia.
+} {
+  rewrite List_length_filter_negb; [ | apply seq_NoDup ].
+  rewrite seq_length.
+  flia H2n.
+}
+Qed.
+
 (* https://wstein.org/edu/2007/spring/ent/ent-html/node29.html *)
 
 (*
@@ -3272,29 +3290,43 @@ Qed.
 
 Lemma order_mod_aux_prop : ∀ it n a i,
   n + 1 ≤ it + i
+  → (∀ j, 1 ≤ j < i → (a ^ j) mod n ≠ 1)
   → 2 ≤ n
   → Nat.gcd a n = 1
   → a ^ order_mod_aux it n a i mod n = 1 ∧
      ∀ m, 0 < m < order_mod_aux it n a i → (a ^ m) mod n ≠ 1.
 Proof.
-intros * Hnit H2n Hg.
+intros * Hnit Hj H2n Hg.
 assert (Hnz : n ≠ 0) by flia H2n.
-revert i Hnit.
+destruct (Nat.eq_dec a 0) as [Haz| Haz]. {
+  subst a.
+  rewrite Nat.gcd_0_l in Hg; flia H2n Hg.
+}
+revert i Hnit Hj.
 induction it; intros. {
   cbn; cbn in Hnit.
-Print order_mod_aux.
-...
-apply Nat.le_0_r in Hnit.
-i=1
-it=n
-i=2
-it=n-1
-induction it; intros; cbn; [ flia H2n Hnit | ].
-destruct (Nat.eq_dec (Nat_pow_mod a i n) 1) as [Ha1| Ha1]. {
-  now rewrite Nat_pow_mod_is_pow_mod in Ha1.
+  specialize (euler_fermat_little n a Hnz Haz Hg) as H1.
+  rewrite (Nat.mod_small 1) in H1; [ | easy ].
+  specialize (Hj (φ n)) as H2.
+  assert (H : 1 ≤ φ n < i). {
+    specialize (φ_interv n H2n) as H3.
+    split; [ easy | ].
+    transitivity n; [ easy | flia Hnit ].
+  }
+  now specialize (H2 H).
 }
-apply IHit.
-...
+cbn.
+rewrite Nat_pow_mod_is_pow_mod; [ | easy ].
+destruct (Nat.eq_dec (a ^ i mod n) 1) as [Ha1| Ha1]. {
+  split; [ easy | ].
+  intros m Hm.
+  now apply Hj.
+}
+apply IHit; [ flia Hnit | ].
+intros k Hk.
+destruct (Nat.eq_dec k i) as [Hki| Hki]; [ now subst k | ].
+apply Hj; flia Hk Hki.
+Qed.
 
 Theorem order_mod_prop : ∀ n a,
   2 ≤ n
@@ -3303,119 +3335,10 @@ Theorem order_mod_prop : ∀ n a,
      ∀ m, 0 < m < order_mod n a → (a ^ m) mod n ≠ 1.
 Proof.
 intros * H2n Hg.
-assert (Hnz : n ≠ 0) by flia H2n.
-split. {
-  unfold order_mod.
-(**)
-...
-Search all_pow_mod.
-Check nth_all_pow_mod.
-Compute (let (n, a) := (8, 3) in map fst (filter (λ x : nat * nat, snd x =? 1) (all_pow_mod n a))).
-Compute (let (n, a) := (13, 5) in map fst (filter (λ x : nat * nat, snd x =? 1) (all_pow_mod n a))).
-...
-  rewrite <- nth_all_pow_mod. 2: {
-    assert (H1i : 1 ∈ all_pow_mod n a). {
-      unfold all_pow_mod.
-      apply in_map_iff.
-      exists (φ n).
-      rewrite Nat_pow_mod_is_pow_mod; [ | easy ].
-      split. {
-        replace 1 with (1 mod n) by now apply Nat.mod_1_l.
-        apply euler_fermat_little; [ easy | | easy ].
-        intros H; subst a.
-        rewrite Nat.gcd_0_l in Hg.
-        flia Hg H2n.
-      } {
-        apply in_seq.
-        rewrite Nat.add_comm, Nat.sub_add; [ | flia H2n ].
-        (* lemma to do, perhaps? *)
-        unfold φ, coprimes.
-        split. {
-          destruct n; [ easy | ].
-          rewrite Nat.sub_succ, Nat.sub_0_r.
-          destruct n; [ flia H2n | ].
-          remember (S (S n)) as ssn.
-          cbn; rewrite Nat.gcd_1_r; cbn; flia.
-        } {
-          rewrite List_length_filter_negb; [ | apply seq_NoDup ].
-          rewrite seq_length.
-          flia Hnz.
-        }
-      }
-    }
-    specialize (all_pow_mod_length n a) as Hlen.
-    remember (all_pow_mod n a) as l; clear Heql.
-    rewrite <- Hlen.
-    clear - H1i.
-    induction l as [| b l]; [ easy | cbn ].
-    destruct H1i as [H1i| H1i]; [ subst b; cbn; flia | ].
-    destruct (b =? 1); [ flia | ].
-    apply -> Nat.succ_lt_mono.
-    now apply IHl.
-  }
-  assert
-    (H :
-       nth (List_find_nth (λ x : nat, x =? 1) (all_pow_mod n a))
-           (all_pow_mod n a) 1 =
-       1). {
-    remember (all_pow_mod n a) as l eqn:Hl.
-    clear Hl.
-    induction l as [| b l]; [ easy | cbn ].
-    remember (b =? 1) as b1 eqn:Hb1; symmetry in Hb1.
-    destruct b1; [ now apply Nat.eqb_eq in Hb1 | apply IHl ].
-  }
-  etransitivity; [ | apply H ].
-  apply nth_indep; clear H.
-Search all_pow_mod.
-Inspect 1.
-...
-nth_all_pow_mod: ∀ n a i : nat, i < n - 1 → nth i (all_pow_mod n a) 0 = a ^ S i mod n
-...
-
-List_find_nth = 
-fix List_find_nth (A : Type) (f : A → bool) (l : list A) {struct l} : nat :=
-  match l with
-  | [] => 0
-  | x :: l0 => if f x then 0 else 1 + List_find_nth A f l0
-  end
-
-all_pow_mod = λ n a : nat, map (λ i : nat, Nat_pow_mod a i n) (seq 1 (n - 1))
-...
-unfold all_pow_mod at 2.
-remember (λ i, Nat_pow_mod a i n) as f eqn:Hf.
-remember (List_find_nth (λ x : nat, x =? 1) (all_pow_mod n a)) as m eqn:Hm.
-specialize (map_nth f (seq 1 (n - 1)) 0 m) as H1.
-assert (H : nth m (map f (seq 1 (n - 1))) (f 0) = 1). {
-  rewrite H1.
-  rewrite Hf, Hm; cbn.
-...
-============================
-  Nat_pow_mod a
-    (nth (List_find_nth (λ x : nat, x =? 1) (all_pow_mod n a))
-       (seq 1 (n - 1)) 0) n = 1
-
-...
-  remember (all_pow_mod n a) as l eqn:Hl; symmetry in Hl.
-Check nth_all_pow_mod.
-Search List_find_nth.
-Compute (let l := all_pow_mod 8 4 in nth (List_find_nth (λ x : nat, x =? 1) l) l 0).
-  destruct l as [| b l]. {
-    apply eq_all_pow_mod_nil in Hl; flia H2n Hl.
-  }
-  cbn.
-  destruct b. {
-    cbn.
-Print all_pow_mod.
-Search (nth _ (map _ _)).
-...
-  }
-  destruct b; [ easy | ].
-  cbn.
-  cbn.
-Search all_pow_mod.
-eq_all_pow_mod_nil: ∀ n a : nat, all_pow_mod n a = [] → n ≤ 1
-cbn.
-...
+apply order_mod_aux_prop; [ easy | | easy | easy ].
+intros j Hj.
+flia Hj.
+Qed.
 
 Theorem order_multiplicative : ∀ n a b r s,
   order_mod n a = r
@@ -3424,7 +3347,6 @@ Theorem order_multiplicative : ∀ n a b r s,
   → order_mod n (a * b) = r * s.
 Proof.
 intros * Hoa Hob Hg.
-assert (Hr :
 ...
 
 Theorem glop : ∀ p, prime p → ∃ a, a ^ ((p - 1) / 2) mod p = p - 1.
