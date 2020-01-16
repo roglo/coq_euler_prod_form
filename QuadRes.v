@@ -219,9 +219,7 @@ split; intros Hap. 2: {
       rewrite <- Nat.mul_mod_idemp_r in H2; [ | easy ].
       rewrite <- H2 in Hxa.
       destruct (le_dec (b' mod p) x) as [Hbx| Hbx]. {
-        apply Nat_eq_mod_sub_0 in Hxa. 2: {
-          now apply Nat.mul_le_mono_l.
-        }
+        apply Nat_eq_mod_sub_0 in Hxa.
         rewrite <- Nat.mul_sub_distr_l in Hxa.
         apply Nat.mod_divide in Hxa; [ | easy ].
         apply Nat.gauss in Hxa; [ | now apply eq_gcd_prime_small_1 ].
@@ -230,9 +228,7 @@ split; intros Hap. 2: {
       } {
         apply Nat.nle_gt in Hbx.
         symmetry in Hxa.
-        apply Nat_eq_mod_sub_0 in Hxa. 2: {
-          now apply Nat.mul_le_mono_l, Nat.lt_le_incl.
-        }
+        apply Nat_eq_mod_sub_0 in Hxa.
         rewrite <- Nat.mul_sub_distr_l in Hxa.
         apply Nat.mod_divide in Hxa; [ | easy ].
         apply Nat.gauss in Hxa; [ | now apply eq_gcd_prime_small_1 ].
@@ -321,9 +317,7 @@ split; intros Hap. 2: {
         move Hj2 at bottom.
         rewrite <- Hkj in Hj2.
         destruct (le_dec k i) as [Hik| Hik]. {
-          apply Nat_eq_mod_sub_0 in Hj2. 2: {
-            now apply Nat.mul_le_mono_r.
-          }
+          apply Nat_eq_mod_sub_0 in Hj2.
           rewrite <- Nat.mul_sub_distr_r, Nat.mul_comm in Hj2.
           apply Nat.mod_divide in Hj2; [ | easy ].
           apply Nat.gauss in Hj2. 2: {
@@ -339,9 +333,7 @@ split; intros Hap. 2: {
         } {
           apply Nat.nle_gt in Hik.
           symmetry in Hj2.
-          apply Nat_eq_mod_sub_0 in Hj2. 2: {
-            now apply Nat.mul_le_mono_r, Nat.lt_le_incl.
-          }
+          apply Nat_eq_mod_sub_0 in Hj2.
           rewrite <- Nat.mul_sub_distr_r in Hj2.
           apply Nat.mod_divide in Hj2; [ | easy ].
           apply Nat.gauss in Hj2. 2: {

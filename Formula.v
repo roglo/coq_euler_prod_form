@@ -2847,9 +2847,7 @@ assert
   intros * Hi Hj Hilj Haa.
   apply in_seq in Hi.
   apply in_seq in Hj.
-  apply Nat_eq_mod_sub_0 in Haa. 2: {
-    now apply Nat.mul_le_mono_r, Nat.lt_le_incl.
-  }
+  apply Nat_eq_mod_sub_0 in Haa.
   rewrite <- Nat.mul_sub_distr_r in Haa.
   apply Nat.mod_divide in Haa. 2: {
     apply in_seq in Ha.
@@ -3037,11 +3035,7 @@ assert (Hx2 : x mod n = (y * a ^ φ n) mod n). {
   now rewrite fold_left_mul_map_mul.
 }
 rewrite Hx2 in Hx1.
-apply Nat_eq_mod_sub_0 in Hx1. 2: {
-  remember (a ^ φ n) as z eqn:Hz; symmetry in Hz.
-  destruct z; [ | flia ].
-  now apply Nat.pow_nonzero in Hz.
-}
+apply Nat_eq_mod_sub_0 in Hx1.
 replace y with (y * 1) in Hx1 at 2 by flia.
 rewrite <- Nat.mul_sub_distr_l in Hx1.
 apply Nat.mod_divide in Hx1; [ | easy ].
@@ -3490,23 +3484,8 @@ rewrite (Nat.mod_small 1) in H2; [ | easy ].
 rewrite (Nat.mul_comm s r) in H2.
 move Habo at bottom.
 move H2 at bottom.
-Search (_ mod _ = _ mod _).
-Check Nat_eq_mod_sub_0.
 rewrite <- Habo in H2.
-About Nat_eq_mod_sub_0.
-...
-apply Nat_eq_mod_sub_0 in H2. 2: {
-  apply Nat.pow_le_mono_r. {
-    apply Nat.neq_mul_0.
-    split. {
-      intros Ha; subst a.
-      rewrite Nat.gcd_0_l in Han; flia Han H2n.
-    } {
-      intros Hb; subst b.
-      rewrite Nat.gcd_0_l in Hbn; flia Hbn H2n.
-    }
-  }
-  rewrite <- Hoa, <- Hob.
+apply Nat_eq_mod_sub_0 in H2.
 ...
 
 Theorem glop : ∀ p, prime p → ∃ a, a ^ ((p - 1) / 2) mod p = p - 1.

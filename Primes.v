@@ -1904,9 +1904,7 @@ Theorem smaller_than_prime_all_different_multiples : ∀ p,
 Proof.
 intros * Hp * Hap * Hijp.
 intros Haa; symmetry in Haa.
-apply Nat_eq_mod_sub_0 in Haa. 2: {
-  now apply Nat.mul_le_mono_r, Nat.lt_le_incl.
-}
+apply Nat_eq_mod_sub_0 in Haa.
 rewrite <- Nat.mul_sub_distr_r in Haa.
 apply Nat.mod_divide in Haa; [ | flia Hap ].
 specialize (Nat.gauss _ _ _ Haa) as H1.
@@ -2040,12 +2038,7 @@ assert (Hx2 : x mod p = (fact (p - 1) * a ^ (p - 1)) mod p). {
   apply fact_eq_fold_left.
 }
 rewrite Hx2 in Hx1.
-apply Nat_eq_mod_sub_0 in Hx1. 2: {
-  rewrite <- (Nat.mul_1_r (fact _)) at 1.
-  apply Nat.mul_le_mono_l.
-  apply Nat.neq_0_lt_0.
-  apply Nat.pow_nonzero; flia Hap.
-}
+apply Nat_eq_mod_sub_0 in Hx1.
 rewrite <- (Nat.mul_1_r (fact _)) in Hx1 at 2.
 rewrite <- Nat.mul_sub_distr_l in Hx1.
 apply Nat.mod_divide in Hx1; [ | easy ].
@@ -2144,11 +2137,7 @@ split. {
   rewrite <- Nat.mul_mod_idemp_r in H1; [ | easy ].
   rewrite Hj in H1.
   replace 1 with (1 mod p) in H1 at 2; [ | rewrite Nat.mod_small; flia Hip ].
-  apply Nat_eq_mod_sub_0 in H1. 2: {
-    destruct i; [ flia Hip | ].
-    destruct p; [ flia Hip | ].
-    destruct p; [ flia Hip | cbn; flia ].
-  }
+  apply Nat_eq_mod_sub_0 in H1.
   apply Nat.mod_divide in H1; [ | easy ].
   destruct H1 as (c, Hc).
   rewrite Nat.mul_sub_distr_l, Nat.mul_1_r in Hc.
@@ -2180,7 +2169,7 @@ rewrite Nat_pow_mod_is_pow_mod in Hcon; [ | now intros H; subst p ].
 specialize (fermat_little_1 p Hp i) as H1.
 rewrite (Nat.mod_small i) in H1; [ | flia Hip ].
 rewrite <- Hcon in H1 at 2.
-apply Nat_eq_mod_sub_0 in H1; [ | apply Nat.pow_le_mono_r; flia Hip ].
+apply Nat_eq_mod_sub_0 in H1.
 replace p with (p - 2 + 2) in H1 at 1 by flia Hip.
 rewrite <- (Nat.mul_1_r (_ ^ (p - 2))) in H1.
 rewrite Nat.pow_add_r in H1.
@@ -2258,7 +2247,7 @@ assert
   rewrite <- H3 in Hk.
   destruct (Nat.eq_dec i k) as [Hink| Hink]; [ easy | ].
   destruct (le_dec i k) as [Hik| Hik]. {
-    apply Nat_eq_mod_sub_0 in Hk; [ | now apply Nat.mul_le_mono_r ].
+    apply Nat_eq_mod_sub_0 in Hk.
     rewrite <- Nat.mul_sub_distr_r in Hk.
     apply Nat.mod_divide in Hk; [ | easy ].
     specialize (Nat.gauss _ _ _ Hk) as H4.
@@ -2279,7 +2268,7 @@ assert
   }
   apply Nat.nle_gt in Hik.
   symmetry in Hk.
-  apply Nat_eq_mod_sub_0 in Hk; [ | apply Nat.mul_le_mono_r; flia Hik ].
+  apply Nat_eq_mod_sub_0 in Hk.
   rewrite <- Nat.mul_sub_distr_r in Hk.
   apply Nat.mod_divide in Hk; [ | easy ].
   specialize (Nat.gauss _ _ _ Hk) as H4.
