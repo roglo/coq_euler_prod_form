@@ -3280,8 +3280,8 @@ Proof.
 intros * Hnit H2n Hg.
 assert (Hnz : n ≠ 0) by flia H2n.
 revert i Hnit.
-induction it; intros; cbn. {
-  cbn in Hnit.
+induction it; intros. {
+  cbn; cbn in Hnit.
 Print order_mod_aux.
 ...
 apply Nat.le_0_r in Hnit.
