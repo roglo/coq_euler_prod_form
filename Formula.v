@@ -3103,8 +3103,6 @@ split. {
 }
 Qed.
 
-(* https://wstein.org/edu/2007/spring/ent/ent-html/node29.html *)
-
 (*
 Definition unsome {A} x (d : A) :=
   match x with Some y => y | None => d end.
@@ -3340,13 +3338,55 @@ intros j Hj.
 flia Hj.
 Qed.
 
+(* https://wstein.org/edu/2007/spring/ent/ent-html/node29.html *)
+
 Theorem order_multiplicative : ∀ n a b r s,
-  order_mod n a = r
+  Nat.gcd a n = 1
+  → Nat.gcd b n = 1
+  → order_mod n a = r
   → order_mod n b = s
   → Nat.gcd r s = 1
   → order_mod n (a * b) = r * s.
 Proof.
-intros * Hoa Hob Hg.
+intros * Han Hbn Hoa Hob Hg.
+destruct (lt_dec n 2) as [H2n| H2n]. {
+  destruct n. {
+    cbn in Hoa, Hob; cbn.
+    now subst r s.
+  }
+  destruct n; [ | flia H2n ].
+  cbn in Hoa, Hob.
+  now subst r s.
+}
+apply Nat.nlt_ge in H2n.
+specialize (order_mod_prop n (a * b) H2n) as H1.
+assert (H : Nat.gcd (a * b) n = 1) by now apply Nat_gcd_1_mul_l.
+specialize (H1 H); clear H.
+destruct H1 as (Habo, Habn).
+assert (H2 : (a * b) ^ (r * s) = a ^ (r * s) * b ^ (r * s)). {
+  apply Nat.pow_mul_l.
+}
+specialize (order_mod_prop n a H2n Han) as Har.
+rewrite Hoa in Har.
+destruct Har as (Har, Harn).
+specialize (order_mod_prop n b H2n Hbn) as Hbr.
+rewrite Hob in Hbr.
+destruct Hbr as (Hbr, Hbrn).
+apply (f_equal (λ x, x mod n)) in H2.
+rewrite (Nat.pow_mul_r a) in H2.
+rewrite (Nat.mul_comm r s) in H2.
+rewrite (Nat.pow_mul_r b) in H2.
+rewrite Nat.mul_mod in H2; [ | flia H2n ].
+rewrite <- (Nat_mod_pow_mod (a ^ r)) in H2.
+rewrite <- (Nat_mod_pow_mod (b ^ s)) in H2.
+rewrite Har, Hbr in H2.
+do 2 rewrite Nat.pow_1_l in H2.
+rewrite (Nat.mod_small 1) in H2; [ | easy ].
+rewrite Nat.mul_1_l in H2.
+rewrite (Nat.mod_small 1) in H2; [ | easy ].
+rewrite (Nat.mul_comm s r) in H2.
+move Habo at bottom.
+move H2 at bottom.
 ...
 
 Theorem glop : ∀ p, prime p → ∃ a, a ^ ((p - 1) / 2) mod p = p - 1.
