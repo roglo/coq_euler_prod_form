@@ -3087,6 +3087,7 @@ About prime_φ. (* ← to include in that .v file I was talking about above *)
 
 (* https://wstein.org/edu/2007/spring/ent/ent-html/node29.html *)
 
+(*
 Definition unsome {A} x (d : A) :=
   match x with Some y => y | None => d end.
 
@@ -3112,6 +3113,7 @@ findA
 find
      : ∀ A : Type, (A → bool) → list A → option A
 ...
+*)
 
 (*
 Fixpoint List_find_nth {A} (f : A → bool) l :=
@@ -3125,6 +3127,27 @@ Definition order_mod' n a := S (List_find_nth (λ x, x =? 1) (all_pow_mod' n a))
 Compute (let (n, a) := (3, 5) in (order_mod n a, order_mod' n a)).
 Compute (let n := 19 in map (λ a, (order_mod n a, order_mod' n a)) (seq 1 n)).
 *)
+
+Fixpoint order_mod_aux it n a i ai :=
+  match it with
+  | 0 => i
+  | S it' =>
+      if Nat.eq_dec ai 1 then i
+      else order_mod_aux it' n a (i + 1) ((ai * a) mod n)
+  end.
+
+Definition order_mod n a := order_mod_aux n n a 1 a.
+
+Definition unsome {A} x (d : A) :=
+  match x with Some y => y | None => d end.
+Definition all_pow_mod' n a :=
+  map (λ i, (i, Nat_pow_mod a i n)) (seq 1 (n - 1)).
+Definition order_mod' n a :=
+  fst (hd (n + 1, 0) (filter (λ x, snd x =? 1) (all_pow_mod' n a))).
+Compute (let (n, a) := (3, 5) in (order_mod n a, order_mod' n a)).
+Compute (let n := 18 in map (λ a, (order_mod n a, order_mod' n a)) (seq 1 n)).
+
+...
 
 Theorem List_seq_eq_nil : ∀ a b, seq a b = [] → b = 0.
 Proof.
