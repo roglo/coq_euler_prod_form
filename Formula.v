@@ -3338,6 +3338,47 @@ intros j Hj.
 flia Hj.
 Qed.
 
+Theorem glop : ∀ a b n,
+  Nat.gcd a n = 1
+  → Nat.gcd b n = 1
+  → order_mod n (a * b) ≤ order_mod n a * order_mod n b.
+Proof.
+intros * Han Hbn.
+destruct (lt_dec n 2) as [H2n| H2n]. {
+  destruct n; [ easy | ].
+  destruct n; [ cbn; flia | flia H2n ].
+}
+apply Nat.nlt_ge in H2n.
+destruct (lt_dec a 2) as [H2a| H2a]. {
+  destruct a. {
+    cbn.
+Search order_mod.
+Theorem order_mod_0_r : ∀ n, n ≠ 0 → order_mod n 0 = 0.
+Proof.
+intros * Hnz.
+...
+destruct n; [ easy | clear Hnz ].
+cbn - [ Nat_pow_mod ].
+rewrite Nat_pow_mod_is_pow_mod; [ | easy ].
+rewrite Nat.pow_1_r.
+rewrite Nat.mod_0_l; [ | easy ].
+cbn.
+
+
+destruct (Nat_pow_mod 0 1 (S n)) as [Hn1| Hn1]. {
+
+
+    unfold order_mod at 1.
+
+
+Search (_ ^ _ ≤ _ ^ _).
+apply (Nat.pow_le_mono_r_iff (a * b)).
+
+
+specialize (order_mod_prop n a H2n Han) as (Ha, Ham).
+specialize (order_mod_prop n b H2n Hbn) as (Hb, Hbm).
+...
+
 (* https://wstein.org/edu/2007/spring/ent/ent-html/node29.html *)
 
 Theorem order_multiplicative : ∀ n a b r s,
