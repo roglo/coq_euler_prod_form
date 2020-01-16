@@ -3128,15 +3128,15 @@ Compute (let (n, a) := (3, 5) in (order_mod n a, order_mod' n a)).
 Compute (let n := 19 in map (λ a, (order_mod n a, order_mod' n a)) (seq 1 n)).
 *)
 
-Fixpoint order_mod_aux it n a i ai :=
+Fixpoint order_mod_aux it n a i :=
   match it with
   | 0 => i
   | S it' =>
-      if Nat.eq_dec ai 1 then i
-      else order_mod_aux it' n a (i + 1) ((ai * a) mod n)
+      if Nat.eq_dec (Nat_pow_mod a i n) 1 then i
+      else order_mod_aux it' n a (i + 1)
   end.
 
-Definition order_mod n a := order_mod_aux n n a 1 a.
+Definition order_mod n a := order_mod_aux n n a 1.
 
 Definition unsome {A} x (d : A) :=
   match x with Some y => y | None => d end.
@@ -3147,14 +3147,13 @@ Definition order_mod' n a :=
 Compute (let (n, a) := (3, 5) in (order_mod n a, order_mod' n a)).
 Compute (let n := 18 in map (λ a, (order_mod n a, order_mod' n a)) (seq 1 n)).
 
-...
-
 Theorem List_seq_eq_nil : ∀ a b, seq a b = [] → b = 0.
 Proof.
 intros * Hs.
 now destruct b.
 Qed.
 
+(*
 Theorem eq_all_pow_mod_nil : ∀ n a, all_pow_mod n a = [] → n ≤ 1.
 Proof.
 intros * Hna.
@@ -3170,6 +3169,7 @@ intros.
 unfold all_pow_mod.
 now rewrite map_length, seq_length.
 Qed.
+*)
 
 (*
 Theorem all_pow_mod_hd : ∀ n a, a < n → hd a (all_pow_mod n a) = a.
@@ -3184,6 +3184,7 @@ now rewrite Nat.mul_1_r, Nat.mod_small.
 Qed.
 *)
 
+(*
 Theorem all_pow_mod_mod : ∀ n a, all_pow_mod n (a mod n) = all_pow_mod n a.
 Proof.
 intros.
@@ -3207,6 +3208,7 @@ rewrite (List_map_nth_in _ 0); [ | now rewrite seq_length ].
 rewrite Nat_pow_mod_is_pow_mod; [ | flia Hin ].
 now rewrite seq_nth.
 Qed.
+*)
 
 (*
 Theorem app_nth_List_find_nth : ∀ f l,
@@ -3233,6 +3235,7 @@ now cbn in Hi; exists i.
 Qed.
 *)
 
+(*
 Theorem in_all_pow_mod : ∀ n a i j,
   (i, j) ∈ all_pow_mod n a
   → a ^ i mod n = j.
@@ -3265,6 +3268,32 @@ destruct Hx as (Hxn, Hx1).
 apply in_all_pow_mod in Hxn.
 now apply Nat.eqb_eq in Hx1; subst b.
 Qed.
+*)
+
+Lemma order_mod_aux_prop_1 : ∀ it n a i,
+  n + 1 ≤ it + i
+  → 2 ≤ n
+  → Nat.gcd a n = 1
+  → a ^ order_mod_aux it n a i mod n = 1.
+Proof.
+intros * Hnit H2n Hg.
+assert (Hnz : n ≠ 0) by flia H2n.
+revert i Hnit.
+induction it; intros; cbn. {
+  cbn in Hnit.
+Print order_mod_aux.
+...
+apply Nat.le_0_r in Hnit.
+i=1
+it=n
+i=2
+it=n-1
+induction it; intros; cbn; [ flia H2n Hnit | ].
+destruct (Nat.eq_dec (Nat_pow_mod a i n) 1) as [Ha1| Ha1]. {
+  now rewrite Nat_pow_mod_is_pow_mod in Ha1.
+}
+apply IHit.
+...
 
 Theorem order_mod_prop : ∀ n a,
   2 ≤ n
@@ -3276,6 +3305,8 @@ intros * H2n Hg.
 assert (Hnz : n ≠ 0) by flia H2n.
 split. {
   unfold order_mod.
+(**)
+...
 Search all_pow_mod.
 Check nth_all_pow_mod.
 Compute (let (n, a) := (8, 3) in map fst (filter (λ x : nat * nat, snd x =? 1) (all_pow_mod n a))).
