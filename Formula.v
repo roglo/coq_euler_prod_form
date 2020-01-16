@@ -3356,15 +3356,23 @@ Search order_mod.
 Theorem order_mod_0_r : ∀ n, n ≠ 0 → order_mod n 0 = 0.
 Proof.
 intros * Hnz.
-...
+unfold order_mod.
 destruct n; [ easy | clear Hnz ].
+Lemma order_mod_aux_0_r : ∀ it n i,
+  n + 1 ≤ it + i
+  → order_mod_aux it n 0 i = 0.
+Proof.
+intros * Hni.
+revert i Hni.
+induction it; intros; cbn.
+Inspect 2.
+...
 cbn - [ Nat_pow_mod ].
 rewrite Nat_pow_mod_is_pow_mod; [ | easy ].
 rewrite Nat.pow_1_r.
 rewrite Nat.mod_0_l; [ | easy ].
 cbn.
-
-
+...
 destruct (Nat_pow_mod 0 1 (S n)) as [Hn1| Hn1]. {
 
 
