@@ -3436,6 +3436,8 @@ apply (Nat.pow_le_mono_r_iff (a * b)). {
   destruct b; [ easy | ].
   cbn; flia.
 }
+(* ah oui, crotte, la relation d'ordre ne se conserve pas, dans le
+   modulo *)
 ...
 
 (* https://wstein.org/edu/2007/spring/ent/ent-html/node29.html *)
