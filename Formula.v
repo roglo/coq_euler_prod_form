@@ -3389,6 +3389,7 @@ rewrite Nat.pow_1_r.
 rewrite Nat.mod_1_l; [ easy | flia H2n ].
 Qed.
 
+(*
 Theorem glop : ∀ a b n,
   Nat.gcd a n = 1
   → Nat.gcd b n = 1
@@ -3438,7 +3439,7 @@ apply (Nat.pow_le_mono_r_iff (a * b)). {
 }
 (* ah oui, crotte, la relation d'ordre ne se conserve pas, dans le
    modulo *)
-...
+*)
 
 (* https://wstein.org/edu/2007/spring/ent/ent-html/node29.html *)
 
@@ -3492,6 +3493,8 @@ move H2 at bottom.
 Search (_ mod _ = _ mod _).
 Check Nat_eq_mod_sub_0.
 rewrite <- Habo in H2.
+About Nat_eq_mod_sub_0.
+...
 apply Nat_eq_mod_sub_0 in H2. 2: {
   apply Nat.pow_le_mono_r. {
     apply Nat.neq_mul_0.

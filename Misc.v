@@ -335,9 +335,9 @@ Theorem Nat_sub_succ_1 : ∀ n, S n - 1 = n.
 Proof. now intros; rewrite Nat.sub_succ, Nat.sub_0_r. Qed.
 
 Theorem Nat_eq_mod_sub_0 : ∀ a b c,
-  b ≤ a → a mod c = b mod c → (a - b) mod c = 0.
+  a mod c = b mod c → (a - b) mod c = 0.
 Proof.
-intros * Hba Hab.
+intros * Hab.
 destruct (Nat.eq_dec c 0) as [Hcz| Hcz]; [ now subst c | ].
 specialize (Nat.div_mod a c Hcz) as H1.
 specialize (Nat.div_mod b c Hcz) as H2.
