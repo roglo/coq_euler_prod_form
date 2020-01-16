@@ -3387,6 +3387,21 @@ rewrite (Nat.mod_small 1) in H2; [ | easy ].
 rewrite (Nat.mul_comm s r) in H2.
 move Habo at bottom.
 move H2 at bottom.
+Search (_ mod _ = _ mod _).
+Check Nat_eq_mod_sub_0.
+rewrite <- Habo in H2.
+apply Nat_eq_mod_sub_0 in H2. 2: {
+  apply Nat.pow_le_mono_r. {
+    apply Nat.neq_mul_0.
+    split. {
+      intros Ha; subst a.
+      rewrite Nat.gcd_0_l in Han; flia Han H2n.
+    } {
+      intros Hb; subst b.
+      rewrite Nat.gcd_0_l in Hbn; flia Hbn H2n.
+    }
+  }
+  rewrite <- Hoa, <- Hob.
 ...
 
 Theorem glop : ∀ p, prime p → ∃ a, a ^ ((p - 1) / 2) mod p = p - 1.
