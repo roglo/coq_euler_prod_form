@@ -3270,11 +3270,12 @@ now apply Nat.eqb_eq in Hx1; subst b.
 Qed.
 *)
 
-Lemma order_mod_aux_prop_1 : ∀ it n a i,
+Lemma order_mod_aux_prop : ∀ it n a i,
   n + 1 ≤ it + i
   → 2 ≤ n
   → Nat.gcd a n = 1
-  → a ^ order_mod_aux it n a i mod n = 1.
+  → a ^ order_mod_aux it n a i mod n = 1 ∧
+     ∀ m, 0 < m < order_mod_aux it n a i → (a ^ m) mod n ≠ 1.
 Proof.
 intros * Hnit H2n Hg.
 assert (Hnz : n ≠ 0) by flia H2n.
