@@ -3383,58 +3383,6 @@ rewrite Nat.pow_1_r.
 rewrite Nat.mod_1_l; [ easy | flia H2n ].
 Qed.
 
-(*
-Theorem glop : ∀ a b n,
-  Nat.gcd a n = 1
-  → Nat.gcd b n = 1
-  → order_mod n (a * b) ≤ order_mod n a * order_mod n b.
-Proof.
-intros * Han Hbn.
-destruct (lt_dec n 2) as [H2n| H2n]. {
-  destruct n; [ easy | ].
-  destruct n; [ cbn; flia | flia H2n ].
-}
-apply Nat.nlt_ge in H2n.
-destruct (lt_dec a 2) as [H2a| H2a]. {
-  destruct a. {
-    cbn.
-    rewrite order_mod_0_r; [ easy | flia H2n ].
-  }
-  destruct a; [ | flia H2a ].
-  rewrite Nat.mul_1_l.
-  rewrite order_mod_1_r; [ | easy ].
-  now rewrite Nat.mul_1_l.
-}
-apply Nat.nlt_ge in H2a.
-destruct (lt_dec b 2) as [H2b| H2b]. {
-  rewrite Nat.mul_comm.
-  rewrite (Nat.mul_comm (order_mod n a)).
-  destruct b. {
-    cbn.
-    rewrite order_mod_0_r; [ easy | flia H2n ].
-  }
-  destruct b; [ | flia H2b ].
-  rewrite Nat.mul_1_l.
-  rewrite order_mod_1_r; [ | easy ].
-  now rewrite Nat.mul_1_l.
-}
-apply Nat.nlt_ge in H2b.
-specialize (order_mod_prop n (a * b) H2n) as H1.
-assert (H : Nat.gcd (a * b) n = 1). {
-  now apply Nat_gcd_1_mul_l.
-}
-specialize (H1 H); clear H.
-destruct H1 as (Hab, Habm).
-apply (Nat.pow_le_mono_r_iff (a * b)). {
-  destruct a; [ easy | ].
-  destruct a; [ flia H2a | ].
-  destruct b; [ easy | ].
-  cbn; flia.
-}
-(* ah oui, crotte, la relation d'ordre ne se conserve pas, dans le
-   modulo *)
-*)
-
 (* https://wstein.org/edu/2007/spring/ent/ent-html/node29.html *)
 
 Theorem order_multiplicative : ∀ n a b r s,
