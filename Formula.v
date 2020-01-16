@@ -3379,6 +3379,16 @@ intros * Hnz.
 now apply order_mod_aux_0_r.
 Qed.
 
+Theorem order_mod_1_r : ∀ n, 2 ≤ n → order_mod n 1 = 1.
+Proof.
+intros * H2n.
+destruct n; [ easy | ].
+cbn - [ Nat_pow_mod ].
+rewrite Nat_pow_mod_is_pow_mod; [ | easy ].
+rewrite Nat.pow_1_r.
+rewrite Nat.mod_1_l; [ easy | flia H2n ].
+Qed.
+
 Theorem glop : ∀ a b n,
   Nat.gcd a n = 1
   → Nat.gcd b n = 1
@@ -3395,6 +3405,13 @@ destruct (lt_dec a 2) as [H2a| H2a]. {
     cbn.
     rewrite order_mod_0_r; [ easy | flia H2n ].
   }
+  destruct a; [ | flia H2a ].
+  rewrite Nat.mul_1_l.
+  rewrite order_mod_1_r; [ | easy ].
+  now rewrite Nat.mul_1_l.
+}
+apply Nat.nlt_ge in H2a.
+Search (order_mod _ (_ * _)).
 ...
 
 (* https://wstein.org/edu/2007/spring/ent/ent-html/node29.html *)
