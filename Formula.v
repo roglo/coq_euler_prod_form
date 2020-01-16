@@ -3424,6 +3424,18 @@ destruct (lt_dec b 2) as [H2b| H2b]. {
   now rewrite Nat.mul_1_l.
 }
 apply Nat.nlt_ge in H2b.
+specialize (order_mod_prop n (a * b) H2n) as H1.
+assert (H : Nat.gcd (a * b) n = 1). {
+  now apply Nat_gcd_1_mul_l.
+}
+specialize (H1 H); clear H.
+destruct H1 as (Hab, Habm).
+apply (Nat.pow_le_mono_r_iff (a * b)). {
+  destruct a; [ easy | ].
+  destruct a; [ flia H2a | ].
+  destruct b; [ easy | ].
+  cbn; flia.
+}
 ...
 
 (* https://wstein.org/edu/2007/spring/ent/ent-html/node29.html *)
