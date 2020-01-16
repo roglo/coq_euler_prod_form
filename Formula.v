@@ -3411,7 +3411,19 @@ destruct (lt_dec a 2) as [H2a| H2a]. {
   now rewrite Nat.mul_1_l.
 }
 apply Nat.nlt_ge in H2a.
-Search (order_mod _ (_ * _)).
+destruct (lt_dec b 2) as [H2b| H2b]. {
+  rewrite Nat.mul_comm.
+  rewrite (Nat.mul_comm (order_mod n a)).
+  destruct b. {
+    cbn.
+    rewrite order_mod_0_r; [ easy | flia H2n ].
+  }
+  destruct b; [ | flia H2b ].
+  rewrite Nat.mul_1_l.
+  rewrite order_mod_1_r; [ | easy ].
+  now rewrite Nat.mul_1_l.
+}
+apply Nat.nlt_ge in H2b.
 ...
 
 (* https://wstein.org/edu/2007/spring/ent/ent-html/node29.html *)
