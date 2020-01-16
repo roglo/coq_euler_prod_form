@@ -3146,7 +3146,7 @@ Compute (let n := 19 in map (λ a, (order_mod n a, order_mod' n a)) (seq 1 n)).
 
 Fixpoint order_mod_aux it n a i :=
   match it with
-  | 0 => i
+  | 0 => 0
   | S it' =>
       if Nat.eq_dec (Nat_pow_mod a i n) 1 then i
       else order_mod_aux it' n a (i + 1)
@@ -3338,6 +3338,47 @@ intros j Hj.
 flia Hj.
 Qed.
 
+Lemma order_mod_aux_it_0_0 : ∀ it i, order_mod_aux it 0 0 i = 0.
+Proof.
+intros.
+revert i.
+induction it; intros; [ easy | cbn; destruct i; apply IHit ].
+Qed.
+
+Lemma order_mod_aux_0_r : ∀ it n i,
+  n + 1 ≤ it + i
+  → order_mod_aux it n 0 i = 0.
+Proof.
+intros * Hni.
+destruct (lt_dec n 2) as [H2n| H2n]. {
+  destruct n. {
+    destruct it; [ easy | ].
+    destruct i; apply order_mod_aux_it_0_0.
+  }
+  destruct n; [ | flia H2n ].
+  clear Hni.
+  revert i.
+  induction it; intros; [ easy | cbn ].
+  rewrite Nat_pow_mod_is_pow_mod; [ cbn | easy ].
+  apply IHit.
+}
+apply Nat.nlt_ge in H2n.
+revert i Hni.
+induction it; intros; [ easy | cbn ].
+rewrite Nat_pow_mod_is_pow_mod; [ | flia H2n ].
+destruct i; [ now rewrite Nat.mod_1_l | ].
+rewrite Nat.pow_0_l; [ | easy ].
+rewrite Nat.mod_0_l; [ cbn | flia H2n ].
+apply IHit.
+flia Hni.
+Qed.
+
+Theorem order_mod_0_r : ∀ n, n ≠ 0 → order_mod n 0 = 0.
+Proof.
+intros * Hnz.
+now apply order_mod_aux_0_r.
+Qed.
+
 Theorem glop : ∀ a b n,
   Nat.gcd a n = 1
   → Nat.gcd b n = 1
@@ -3352,39 +3393,8 @@ apply Nat.nlt_ge in H2n.
 destruct (lt_dec a 2) as [H2a| H2a]. {
   destruct a. {
     cbn.
-Search order_mod.
-Theorem order_mod_0_r : ∀ n, n ≠ 0 → order_mod n 0 = 0.
-Proof.
-intros * Hnz.
-unfold order_mod.
-destruct n; [ easy | clear Hnz ].
-Lemma order_mod_aux_0_r : ∀ it n i,
-  n + 1 ≤ it + i
-  → order_mod_aux it n 0 i = 0.
-Proof.
-intros * Hni.
-revert i Hni.
-induction it; intros; cbn.
-Inspect 2.
-...
-cbn - [ Nat_pow_mod ].
-rewrite Nat_pow_mod_is_pow_mod; [ | easy ].
-rewrite Nat.pow_1_r.
-rewrite Nat.mod_0_l; [ | easy ].
-cbn.
-...
-destruct (Nat_pow_mod 0 1 (S n)) as [Hn1| Hn1]. {
-
-
-    unfold order_mod at 1.
-
-
-Search (_ ^ _ ≤ _ ^ _).
-apply (Nat.pow_le_mono_r_iff (a * b)).
-
-
-specialize (order_mod_prop n a H2n Han) as (Ha, Ham).
-specialize (order_mod_prop n b H2n Hbn) as (Hb, Hbm).
+    rewrite order_mod_0_r; [ easy | flia H2n ].
+  }
 ...
 
 (* https://wstein.org/edu/2007/spring/ent/ent-html/node29.html *)
