@@ -3434,6 +3434,8 @@ move Habo at bottom.
 move H2 at bottom.
 rewrite <- Habo in H2.
 apply Nat_eq_mod_sub_0 in H2.
+apply Nat.mod_divide in H2; [ | flia H2n ].
+destruct H2 as (k, Hk).
 ...
 
 Theorem glop : ∀ p, prime p → ∃ a, a ^ ((p - 1) / 2) mod p = p - 1.
