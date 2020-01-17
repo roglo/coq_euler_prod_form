@@ -2037,22 +2037,12 @@ assert (Hx2 : x mod p = (fact (p - 1) * a ^ (p - 1)) mod p). {
   apply fact_eq_fold_left.
 }
 rewrite Hx2 in Hx1.
-apply Nat_eq_mod_sub_0 in Hx1.
 rewrite <- (Nat.mul_1_r (fact _)) in Hx1 at 2.
-rewrite <- Nat.mul_sub_distr_l in Hx1.
-apply Nat.mod_divide in Hx1; [ | easy ].
-specialize (Nat.gauss _ _ _ Hx1) as H2.
-specialize (Nat_gcd_prime_fact_lt p Hp (p - 1)) as H3.
-assert (H : p - 1 < p) by flia Hpz.
-specialize (H3 H); clear H.
-specialize (H2 H3); clear H3.
-destruct H2 as (c, H2).
-replace (a ^ (p - 1)) with (1 + c * p). 2: {
-  assert (Ha : a ^ (p - 1) ≠ 0) by (apply Nat.pow_nonzero; flia Hap).
-  flia H2 Ha.
+apply Nat_mul_mod_cancel_l in Hx1. 2: {
+  rewrite Nat.gcd_comm.
+  apply Nat_gcd_prime_fact_lt; [ easy | flia Hpz ].
 }
-rewrite Nat.mod_add; [ | easy ].
-rewrite Nat.mod_small; [ easy | flia Hap ].
+rewrite (Nat.mod_small 1) in Hx1; [ easy | flia Hap ].
 Qed.
 
 (* proof simpler than fermat_little; but could be a corollary *)
@@ -2136,6 +2126,7 @@ split. {
   rewrite <- Nat.mul_mod_idemp_r in H1; [ | easy ].
   rewrite Hj in H1.
   replace 1 with (1 mod p) in H1 at 2; [ | rewrite Nat.mod_small; flia Hip ].
+...
   apply Nat_eq_mod_sub_0 in H1.
   apply Nat.mod_divide in H1; [ | easy ].
   destruct H1 as (c, Hc).
