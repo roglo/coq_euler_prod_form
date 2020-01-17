@@ -2126,7 +2126,6 @@ split. {
   rewrite <- Nat.mul_mod_idemp_r in H1; [ | easy ].
   rewrite Hj in H1.
   replace 1 with (1 mod p) in H1 at 2; [ | rewrite Nat.mod_small; flia Hip ].
-...
   apply Nat_eq_mod_sub_0 in H1.
   apply Nat.mod_divide in H1; [ | easy ].
   destruct H1 as (c, Hc).
@@ -2237,24 +2236,15 @@ assert
   rewrite <- H3 in Hk.
   destruct (Nat.eq_dec i k) as [Hink| Hink]; [ easy | ].
   destruct (le_dec i k) as [Hik| Hik]. {
-    apply Nat_eq_mod_sub_0 in Hk.
-    rewrite <- Nat.mul_sub_distr_r in Hk.
-    apply Nat.mod_divide in Hk; [ | easy ].
-    specialize (Nat.gauss _ _ _ Hk) as H4.
-    assert (H : Nat.gcd p (k - i) = 1). {
-      apply eq_gcd_prime_small_1; [ easy | ].
-      apply in_seq in Hkl.
-      flia Hi Hkl Hink Hik.
+    apply Nat_mul_mod_cancel_r in Hk. 2: {
+      rewrite Nat.gcd_comm.
+      apply in_seq in H1.
+      apply eq_gcd_prime_small_1; [ easy | flia H1 ].
     }
-    specialize (H4 H); clear H.
-    apply Nat.mod_divide in H4; [ | easy ].
-    rewrite Nat.mod_small in H4. 2: {
-      unfold inv_mod.
-      rewrite Nat_pow_mod_is_pow_mod; [ | easy ].
-      now apply Nat.mod_upper_bound.
-    }
-    rewrite H4 in H1.
-    apply in_seq in H1; flia H1.
+    apply in_seq in Hkl.
+    rewrite Nat.mod_small in Hk; [ | flia Hkl ].
+    rewrite Nat.mod_small in Hk; [ easy | ].
+    apply (le_lt_trans _ k); [ easy | flia Hkl ].
   }
   apply Nat.nle_gt in Hik.
   symmetry in Hk.
