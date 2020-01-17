@@ -786,6 +786,50 @@ rewrite IHc; [ | easy ].
 now rewrite Nat.mul_mod_idemp_r.
 Qed.
 
+Notation "a ≡ b 'mod' c" := (a mod c = b mod c) (at level 70, b at level 36).
+
+Theorem Nat_mul_mod_cancel_r : ∀ a b c n,
+  Nat.gcd c n = 1
+  → a * c ≡ (b * c) mod n
+  → a ≡ b mod n.
+Proof.
+intros * Hg Hab.
+destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
+destruct (le_dec b a) as [Hba| Hba]. {
+  apply Nat_eq_mod_sub_0 in Hab.
+  rewrite <- Nat.mul_sub_distr_r in Hab.
+  apply Nat.mod_divide in Hab; [ | easy ].
+  rewrite Nat.gcd_comm in Hg.
+  rewrite Nat.mul_comm in Hab.
+  specialize (Nat.gauss n c (a - b) Hab Hg) as H1.
+  destruct H1 as (k, Hk).
+  replace a with (b + k * n) by flia Hba Hk.
+  now rewrite Nat.mod_add.
+} {
+  apply Nat.nle_gt in Hba.
+  symmetry in Hab.
+  apply Nat_eq_mod_sub_0 in Hab.
+  rewrite <- Nat.mul_sub_distr_r in Hab.
+  apply Nat.mod_divide in Hab; [ | easy ].
+  rewrite Nat.gcd_comm in Hg.
+  rewrite Nat.mul_comm in Hab.
+  specialize (Nat.gauss n c (b - a) Hab Hg) as H1.
+  destruct H1 as (k, Hk).
+  replace b with (a + k * n) by flia Hba Hk.
+  now rewrite Nat.mod_add.
+}
+Qed.
+
+Theorem Nat_mul_mod_cancel_l : ∀ a b c n,
+  Nat.gcd c n = 1
+  → c * a ≡ (c * b) mod n
+  → a ≡ b mod n.
+Proof.
+intros * Hg Hab.
+setoid_rewrite Nat.mul_comm in Hab.
+now apply Nat_mul_mod_cancel_r in Hab.
+Qed.
+
 Theorem List_hd_nth_0 {A} : ∀ l (d : A), hd d l = nth 0 l d.
 Proof. intros; now destruct l. Qed.
 

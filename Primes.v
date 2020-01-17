@@ -1904,15 +1904,14 @@ Theorem smaller_than_prime_all_different_multiples : ∀ p,
 Proof.
 intros * Hp * Hap * Hijp.
 intros Haa; symmetry in Haa.
-apply Nat_eq_mod_sub_0 in Haa.
-rewrite <- Nat.mul_sub_distr_r in Haa.
-apply Nat.mod_divide in Haa; [ | flia Hap ].
-specialize (Nat.gauss _ _ _ Haa) as H1.
-assert (H : Nat.gcd p (j - i) = 1). {
-  apply eq_gcd_prime_small_1; [ easy | flia Hijp ].
+(**)
+apply Nat_mul_mod_cancel_r in Haa. 2: {
+  rewrite Nat.gcd_comm.
+  now apply eq_gcd_prime_small_1.
 }
-specialize (H1 H); clear H.
-apply Nat.divide_pos_le in H1; [ flia H1 Hap | flia Hap ].
+rewrite Nat.mod_small in Haa; [ | easy ].
+rewrite Nat.mod_small in Haa; [ | flia Hijp ].
+flia Hijp Haa.
 Qed.
 
 Theorem fold_left_mul_map_mod : ∀ a b l,

@@ -2240,79 +2240,6 @@ Theorem ζ_Euler_product_eq : ...
 
 Require Import Totient QuadRes.
 
-(*
-Theorem sqr_mod_prime_is_1 : ∀ p a,
-  prime p → a ^ 2 mod p = 1 → a mod p = 1 ∨ a mod p = p - 1.
-Proof.
-intros * Hp Hap.
-assert (Hpz : p ≠ 0) by now intros H; rewrite H in Hp.
-assert (H2p : 2 ≤ p) by now apply prime_ge_2.
-destruct (Nat.eq_dec a 0) as [Haz| Haz]. {
-  rewrite Haz, Nat.pow_0_l in Hap; [ | easy ].
-  now rewrite Nat.mod_0_l in Hap.
-}
-destruct (Nat.eq_dec a 1) as [Ha1| Ha1]. {
-  left; rewrite Ha1.
-  apply Nat.mod_small; flia H2p.
-}
-replace 1 with (1 mod p) in Hap at 2 by now rewrite Nat.mod_1_l.
-apply Nat_eq_mod_sub_0 in Hap. 2: {
-  destruct a; [ easy | ].
-  cbn; rewrite Nat.mul_1_r; flia.
-}
-apply Nat.mod_divide in Hap; [ | easy ].
-rewrite Nat_sqr_sub_1 in Hap.
-apply prime_divide_mul in Hap; [ | easy ].
-destruct Hap as [Hap| Hap]. {
-  right.
-  destruct Hap as (c, Hc).
-  apply Nat.add_sub_eq_r in Hc.
-  rewrite <- Hc.
-  destruct c; [ flia Hc Haz | cbn ].
-  rewrite Nat.add_sub_swap; [ | flia Hpz ].
-  rewrite Nat.mod_add; [ | easy ].
-  apply Nat.mod_small; flia Hpz.
-} {
-  left.
-  destruct Hap as (c, Hc).
-  apply Nat.add_sub_eq_nz in Hc. 2: {
-    apply Nat.neq_mul_0.
-    split; [ | easy ].
-    intros H; subst c; cbn in Hc.
-    flia Hc Haz Ha1.
-  }
-  rewrite <- Hc.
-  rewrite Nat.mod_add; [ | easy ].
-  apply Nat.mod_1_l; flia H2p.
-}
-Qed.
-
-Theorem pow_prime_sub_1_div_2 : ∀ p, prime p → ∀ a, 1 ≤ a < p
-  → a ^ ((p - 1) / 2) mod p = 1 ∨
-     a ^ ((p - 1) / 2) mod p = p - 1.
-Proof.
-intros * Hp * Hap.
-assert (Hpz : p ≠ 0) by now intros H; rewrite H in Hp.
-move Hpz before Hp.
-specialize (fermat_little p Hp a Hap) as H1.
-destruct (Nat.eq_dec p 2) as [Hp2| Hp2]; [ now rewrite Hp2; left | ].
-move Hp2 before Hpz.
-replace (p - 1) with ((p - 1) / 2 * 2) in H1. 2: {
-  specialize (Nat.div_mod (p - 1) 2 (Nat.neq_succ_0 _)) as H2.
-  replace ((p - 1) mod 2) with 0 in H2. 2: {
-    symmetry.
-    specialize (odd_prime p Hp Hp2) as H3.
-    specialize (Nat.div_mod p 2 (Nat.neq_succ_0 _)) as H4.
-    rewrite H4, H3, Nat.add_sub.
-    now rewrite Nat.mul_comm, Nat.mod_mul.
-  }
-  now rewrite Nat.add_0_r, Nat.mul_comm in H2.
-}
-apply sqr_mod_prime_is_1; [ easy | ].
-now rewrite Nat.pow_mul_r in H1.
-Qed.
-*)
-
 Theorem prime_φ : ∀ p, prime p → φ p = p - 1.
 Proof.
 intros * Hp.
@@ -2847,18 +2774,10 @@ assert
   intros * Hi Hj Hilj Haa.
   apply in_seq in Hi.
   apply in_seq in Hj.
-  apply Nat_eq_mod_sub_0 in Haa.
-  rewrite <- Nat.mul_sub_distr_r in Haa.
-  apply Nat.mod_divide in Haa. 2: {
-    apply in_seq in Ha.
-    flia Ha.
-  }
-  rewrite Nat.mul_comm in Haa.
-  specialize (Nat.gauss n a (j - i) Haa Hna) as H1.
-  destruct H1 as (k, Hk).
-  destruct k; [ flia Hilj Hk | ].
-  cbn in Hk.
-  flia Hk Hi Hj.
+  apply Nat_mul_mod_cancel_r in Haa; [ | now rewrite Nat.gcd_comm ].
+  rewrite Nat.mod_small in Haa; [ | flia Hj ].
+  rewrite Nat.mod_small in Haa; [ | flia Hi ].
+  flia Hilj Haa.
 }
 destruct (lt_dec i j) as [Hilj| Hjli]. {
   now revert Haa; apply H.
@@ -2904,8 +2823,6 @@ split. {
   now apply Nat_gcd_1_mul_r.
 }
 Qed.
-
-Notation "a ≡ b 'mod' c" := (a mod c = b mod c) (at level 70, b at level 36).
 
 Theorem NoDup_coprimes : ∀ n, NoDup (coprimes n).
 Proof.
@@ -3035,25 +2952,13 @@ assert (Hx2 : x mod n = (y * a ^ φ n) mod n). {
   now rewrite fold_left_mul_map_mul.
 }
 rewrite Hx2 in Hx1.
-apply Nat_eq_mod_sub_0 in Hx1.
+(**)
 replace y with (y * 1) in Hx1 at 2 by flia.
-rewrite <- Nat.mul_sub_distr_l in Hx1.
-apply Nat.mod_divide in Hx1; [ | easy ].
-specialize (Nat.gauss _ _ _ Hx1) as H2.
-assert (H : Nat.gcd n y = 1). {
-  rewrite Hy.
+apply Nat_mul_mod_cancel_l in Hx1. 2: {
+  rewrite Hy, Nat.gcd_comm.
   apply gcd_prod_coprimes.
 }
-specialize (H2 H); clear H.
-rewrite Nat_mod_pow_mod.
-destruct H2 as (k, Hk).
-apply (Nat.add_cancel_r _ _ 1) in Hk.
-rewrite Nat.sub_add in Hk. 2: {
-  apply Nat.neq_0_lt_0.
-  now apply Nat.pow_nonzero.
-}
-rewrite Hk.
-now rewrite Nat_mod_add_l_mul_r.
+now rewrite Nat_mod_pow_mod.
 Qed.
 
 (* where can I put this theorem above? not in Primes.v since Prime does
@@ -3381,38 +3286,6 @@ cbn - [ Nat_pow_mod ].
 rewrite Nat_pow_mod_is_pow_mod; [ | easy ].
 rewrite Nat.pow_1_r.
 rewrite Nat.mod_1_l; [ easy | flia H2n ].
-Qed.
-
-Theorem Nat_mul_mod_cancel_r : ∀ a b c n,
-  Nat.gcd c n = 1
-  → a * c ≡ (b * c) mod n
-  → a ≡ b mod n.
-Proof.
-intros * Hg Hab.
-destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
-destruct (le_dec b a) as [Hba| Hba]. {
-  apply Nat_eq_mod_sub_0 in Hab.
-  rewrite <- Nat.mul_sub_distr_r in Hab.
-  apply Nat.mod_divide in Hab; [ | easy ].
-  rewrite Nat.gcd_comm in Hg.
-  rewrite Nat.mul_comm in Hab.
-  specialize (Nat.gauss n c (a - b) Hab Hg) as H1.
-  destruct H1 as (k, Hk).
-  replace a with (b + k * n) by flia Hba Hk.
-  now rewrite Nat.mod_add.
-} {
-  apply Nat.nle_gt in Hba.
-  symmetry in Hab.
-  apply Nat_eq_mod_sub_0 in Hab.
-  rewrite <- Nat.mul_sub_distr_r in Hab.
-  apply Nat.mod_divide in Hab; [ | easy ].
-  rewrite Nat.gcd_comm in Hg.
-  rewrite Nat.mul_comm in Hab.
-  specialize (Nat.gauss n c (b - a) Hab Hg) as H1.
-  destruct H1 as (k, Hk).
-  replace b with (a + k * n) by flia Hba Hk.
-  now rewrite Nat.mod_add.
-}
 Qed.
 
 Theorem order_mod_divisor : ∀ n a b,
