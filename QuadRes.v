@@ -333,20 +333,18 @@ split; intros Hap. 2: {
         } {
           apply Nat.nle_gt in Hik.
           symmetry in Hj2.
-...
-          apply Nat_eq_mod_sub_0 in Hj2.
-          rewrite <- Nat.mul_sub_distr_r in Hj2.
-          apply Nat.mod_divide in Hj2; [ | easy ].
-          apply Nat.gauss in Hj2. 2: {
+          apply Nat_mul_mod_cancel_r in Hj2. 2: {
+            rewrite Nat.gcd_comm.
             apply eq_gcd_prime_small_1; [ easy | ].
-            split; [ flia Hik | ].
-            rewrite Hl in Hk; apply in_seq in Hk.
-            flia Hk.
+            split; [ | easy ].
+            destruct j; [ | flia ].
+            rewrite Nat.mul_0_r, Nat.mod_0_l in Hkj; [ | easy ].
+            now symmetry in Hkj.
           }
-          apply Nat.divide_pos_le in Hj2; [ flia Hj1 Hj2 | ].
-          destruct j; [ | flia ].
-          rewrite Nat.mul_0_r, Nat.mod_0_l in Hkj; [ | easy ].
-          now symmetry in Hkj.
+          rewrite Hl in Hk; apply in_seq in Hk.
+          rewrite Nat.mod_small in Hj2; [ | flia Hk ].
+          rewrite Nat.mod_small in Hj2; [ flia Hj2 Hik | ].
+          rewrite Hl in Hi; apply in_seq in Hi; flia Hi.
         }
       }
     }
