@@ -3383,6 +3383,19 @@ rewrite Nat.pow_1_r.
 rewrite Nat.mod_1_l; [ easy | flia H2n ].
 Qed.
 
+Theorem order_mod_divisor : ∀ n a b,
+  Nat.gcd a n = 1
+  → a ^ b mod n = 1
+  → Nat.divide (order_mod n a) b.
+Proof.
+intros * Hg Habn.
+...
+specialize (order_mod_prop n (a * b) H2n) as H1.
+assert (H : Nat.gcd (a * b) n = 1) by now apply Nat_gcd_1_mul_l.
+specialize (H1 H); clear H.
+destruct H1 as (Habo, Habn).
+...
+
 (* https://wstein.org/edu/2007/spring/ent/ent-html/node29.html *)
 
 Theorem glop : ∀ n a b r s,
@@ -3449,16 +3462,9 @@ rewrite Nat.mul_1_l in H2.
 rewrite (Nat.mod_small 1) in H2; [ | easy ].
 rewrite (Nat.mul_comm s r) in H2.
 move H2 at bottom.
+...
+Check order_mod_divisor.
 (**)
-specialize (order_mod_prop n (a * b) H2n) as H1.
-assert (H : Nat.gcd (a * b) n = 1) by now apply Nat_gcd_1_mul_l.
-specialize (H1 H); clear H.
-destruct H1 as (Habo, Habn).
-(**)
-Theorem glop : ∀ n a b,
-  Nat.gcd a n = 1
-  → a ^ b mod n = 1
-  → Nat.divide (order_mod n a) b.
 ...
 rewrite <- Habo in H2.
 remember (r * s) as u.
