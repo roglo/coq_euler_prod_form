@@ -3383,6 +3383,21 @@ rewrite Nat.pow_1_r.
 rewrite Nat.mod_1_l; [ easy | flia H2n ].
 Qed.
 
+Theorem Nat_mul_mod_cancel_r : ∀ a b c n,
+  Nat.gcd c n = 1
+  → a * c ≡ (b * c) mod n
+  → a ≡ b mod n.
+Proof.
+intros * Hg Hab.
+destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
+apply Nat_eq_mod_sub_0 in Hab.
+rewrite <- Nat.mul_sub_distr_r in Hab.
+apply Nat.mod_divide in Hab; [ | easy ].
+rewrite Nat.gcd_comm in Hg.
+rewrite Nat.mul_comm in Hab.
+specialize (Nat.gauss n c (a - b) Hab Hg) as H1.
+...
+
 Theorem order_mod_divisor : ∀ n a b,
   Nat.gcd a n = 1
   → a ^ b mod n = 1
