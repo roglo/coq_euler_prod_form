@@ -3394,8 +3394,16 @@ destruct (lt_dec n 2) as [H2n| H2n]. {
   destruct n; [ easy | flia H2n ].
 }
 apply Nat.nlt_ge in H2n.
+destruct (Nat.eq_dec b 0) as [Hbz| Hbz]. {
+  now subst b; exists 0.
+}
 specialize (order_mod_prop n a H2n Hg) as H1.
 destruct H1 as (Han, Ham).
+destruct (lt_dec b (order_mod n a)) as [Hbo| Hbo]. {
+  apply Nat.neq_0_lt_0 in Hbz.
+  now specialize (Ham b (conj Hbz Hbo)) as H1.
+}
+apply Nat.nlt_ge in Hbo.
 ...
 
 (* https://wstein.org/edu/2007/spring/ent/ent-html/node29.html *)
