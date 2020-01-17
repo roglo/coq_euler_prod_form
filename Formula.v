@@ -3426,10 +3426,6 @@ destruct (lt_dec b 2) as [H2b| H2b]. {
   now rewrite Hoa.
 }
 apply Nat.nlt_ge in H2b.
-specialize (order_mod_prop n (a * b) H2n) as H1.
-assert (H : Nat.gcd (a * b) n = 1) by now apply Nat_gcd_1_mul_l.
-specialize (H1 H); clear H.
-destruct H1 as (Habo, Habn).
 assert (H2 : (a * b) ^ (r * s) = a ^ (r * s) * b ^ (r * s)). {
   apply Nat.pow_mul_l.
 }
@@ -3452,8 +3448,18 @@ rewrite (Nat.mod_small 1) in H2; [ | easy ].
 rewrite Nat.mul_1_l in H2.
 rewrite (Nat.mod_small 1) in H2; [ | easy ].
 rewrite (Nat.mul_comm s r) in H2.
-move Habo at bottom.
 move H2 at bottom.
+(**)
+specialize (order_mod_prop n (a * b) H2n) as H1.
+assert (H : Nat.gcd (a * b) n = 1) by now apply Nat_gcd_1_mul_l.
+specialize (H1 H); clear H.
+destruct H1 as (Habo, Habn).
+(**)
+Theorem glop : ∀ n a b,
+  Nat.gcd a n = 1
+  → a ^ b mod n = 1
+  → Nat.divide (order_mod n a) b.
+...
 rewrite <- Habo in H2.
 remember (r * s) as u.
 remember (order_mod n (a * b)) as v.
