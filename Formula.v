@@ -3390,13 +3390,30 @@ Theorem Nat_mul_mod_cancel_r : ∀ a b c n,
 Proof.
 intros * Hg Hab.
 destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
-apply Nat_eq_mod_sub_0 in Hab.
-rewrite <- Nat.mul_sub_distr_r in Hab.
-apply Nat.mod_divide in Hab; [ | easy ].
-rewrite Nat.gcd_comm in Hg.
-rewrite Nat.mul_comm in Hab.
-specialize (Nat.gauss n c (a - b) Hab Hg) as H1.
-...
+destruct (le_dec b a) as [Hba| Hba]. {
+  apply Nat_eq_mod_sub_0 in Hab.
+  rewrite <- Nat.mul_sub_distr_r in Hab.
+  apply Nat.mod_divide in Hab; [ | easy ].
+  rewrite Nat.gcd_comm in Hg.
+  rewrite Nat.mul_comm in Hab.
+  specialize (Nat.gauss n c (a - b) Hab Hg) as H1.
+  destruct H1 as (k, Hk).
+  replace a with (b + k * n) by flia Hba Hk.
+  now rewrite Nat.mod_add.
+} {
+  apply Nat.nle_gt in Hba.
+  symmetry in Hab.
+  apply Nat_eq_mod_sub_0 in Hab.
+  rewrite <- Nat.mul_sub_distr_r in Hab.
+  apply Nat.mod_divide in Hab; [ | easy ].
+  rewrite Nat.gcd_comm in Hg.
+  rewrite Nat.mul_comm in Hab.
+  specialize (Nat.gauss n c (b - a) Hab Hg) as H1.
+  destruct H1 as (k, Hk).
+  replace b with (a + k * n) by flia Hba Hk.
+  now rewrite Nat.mod_add.
+}
+Qed.
 
 Theorem order_mod_divisor : ∀ n a b,
   Nat.gcd a n = 1
