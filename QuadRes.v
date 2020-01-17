@@ -315,6 +315,14 @@ split; intros Hap. 2: {
         move Hj2 at bottom.
         rewrite <- Hkj in Hj2.
         destruct (le_dec k i) as [Hik| Hik]. {
+          apply Nat_mul_mod_cancel_r in Hj2. 2: {
+            rewrite Nat.gcd_comm.
+            apply eq_gcd_prime_small_1; [ easy | ].
+            split; [ | easy ].
+            destruct j; [ | flia ].
+            rewrite Nat.mul_0_r, Nat.mod_0_l in Hkj; [ | easy ].
+            now symmetry in Hkj.
+          }
 ...
           apply Nat_eq_mod_sub_0 in Hj2.
           rewrite <- Nat.mul_sub_distr_r, Nat.mul_comm in Hj2.
