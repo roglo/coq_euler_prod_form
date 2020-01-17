@@ -3426,16 +3426,6 @@ destruct (lt_dec b 2) as [H2b| H2b]. {
   now rewrite Hoa.
 }
 apply Nat.nlt_ge in H2b.
-(*
-destruct (Nat.eq_dec a 0) as [Haz| Haz]. {
-  subst a.
-  rewrite Nat.gcd_0_l in Han; flia Han H2n.
-}
-destruct (Nat.eq_dec b 0) as [Hbz| Hbz]. {
-  subst b.
-  rewrite Nat.gcd_0_l in Hbn; flia Hbn H2n.
-}
-*)
 specialize (order_mod_prop n (a * b) H2n) as H1.
 assert (H : Nat.gcd (a * b) n = 1) by now apply Nat_gcd_1_mul_l.
 specialize (H1 H); clear H.
@@ -3446,9 +3436,9 @@ assert (H2 : (a * b) ^ (r * s) = a ^ (r * s) * b ^ (r * s)). {
 specialize (order_mod_prop n a H2n Han) as Har.
 rewrite Hoa in Har.
 destruct Har as (Har, Harn).
-specialize (order_mod_prop n b H2n Hbn) as Hbr.
-rewrite Hob in Hbr.
-destruct Hbr as (Hbr, Hbrn).
+specialize (order_mod_prop n b H2n Hbn) as Hbs.
+rewrite Hob in Hbs.
+destruct Hbs as (Hbs, Hbsn).
 apply (f_equal (λ x, x mod n)) in H2.
 rewrite (Nat.pow_mul_r a) in H2.
 rewrite (Nat.mul_comm r s) in H2.
@@ -3456,7 +3446,7 @@ rewrite (Nat.pow_mul_r b) in H2.
 rewrite Nat.mul_mod in H2; [ | flia H2n ].
 rewrite <- (Nat_mod_pow_mod (a ^ r)) in H2.
 rewrite <- (Nat_mod_pow_mod (b ^ s)) in H2.
-rewrite Har, Hbr in H2.
+rewrite Har, Hbs in H2.
 do 2 rewrite Nat.pow_1_l in H2.
 rewrite (Nat.mod_small 1) in H2; [ | easy ].
 rewrite Nat.mul_1_l in H2.
@@ -3469,6 +3459,8 @@ remember (r * s) as u.
 remember (order_mod n (a * b)) as v.
 move u after v.
 move Hequ after Heqv.
+move Harn before Habn.
+move Hbsn before Harn.
 destruct (lt_dec u v) as [Huv| Huv]. {
   symmetry in H2.
   apply Nat_eq_mod_sub_0 in H2.
