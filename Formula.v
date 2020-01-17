@@ -3389,11 +3389,13 @@ Theorem order_mod_divisor : ∀ n a b,
   → Nat.divide (order_mod n a) b.
 Proof.
 intros * Hg Habn.
-...
-specialize (order_mod_prop n (a * b) H2n) as H1.
-assert (H : Nat.gcd (a * b) n = 1) by now apply Nat_gcd_1_mul_l.
-specialize (H1 H); clear H.
-destruct H1 as (Habo, Habn).
+destruct (lt_dec n 2) as [H2n| H2n]. {
+  destruct n; [ easy | ].
+  destruct n; [ easy | flia H2n ].
+}
+apply Nat.nlt_ge in H2n.
+specialize (order_mod_prop n a H2n Hg) as H1.
+destruct H1 as (Han, Ham).
 ...
 
 (* https://wstein.org/edu/2007/spring/ent/ent-html/node29.html *)
