@@ -3404,6 +3404,29 @@ destruct (lt_dec n 2) as [H2n| H2n]. {
   now subst r s.
 }
 apply Nat.nlt_ge in H2n.
+destruct (lt_dec a 2) as [H2a| H2a]. {
+  destruct a. {
+    rewrite Nat.gcd_0_l in Han; flia Han H2n.
+  }
+  destruct a; [ | flia H2a ].
+  rewrite order_mod_1_r in Hoa; [ | easy ].
+  subst r.
+  do 2 rewrite Nat.mul_1_l.
+  now rewrite Hob.
+}
+apply Nat.nlt_ge in H2a.
+destruct (lt_dec b 2) as [H2b| H2b]. {
+  destruct b. {
+    rewrite Nat.gcd_0_l in Hbn; flia Hbn H2n.
+  }
+  destruct b; [ | flia H2b ].
+  rewrite order_mod_1_r in Hob; [ | easy ].
+  subst s.
+  do 2 rewrite Nat.mul_1_r.
+  now rewrite Hoa.
+}
+apply Nat.nlt_ge in H2b.
+(*
 destruct (Nat.eq_dec a 0) as [Haz| Haz]. {
   subst a.
   rewrite Nat.gcd_0_l in Han; flia Han H2n.
@@ -3412,6 +3435,7 @@ destruct (Nat.eq_dec b 0) as [Hbz| Hbz]. {
   subst b.
   rewrite Nat.gcd_0_l in Hbn; flia Hbn H2n.
 }
+*)
 specialize (order_mod_prop n (a * b) H2n) as H1.
 assert (H : Nat.gcd (a * b) n = 1) by now apply Nat_gcd_1_mul_l.
 specialize (H1 H); clear H.
@@ -3467,9 +3491,15 @@ destruct (lt_dec u v) as [Huv| Huv]. {
     remember ((a * b) ^ (v - u)) as x eqn:Hx; symmetry in Hx.
     destruct x. {
       apply Nat.pow_nonzero in Hx; [ easy | ].
-      now apply Nat.neq_mul_0.
+      apply Nat.neq_mul_0; flia H2a H2b.
     }
     destruct x; [ clear Hk | flia Hk ].
+    replace 1 with ((a * b) ^ 0) in Hx by easy.
+    apply Nat.pow_inj_r in Hx; [ flia Hx Huv | ].
+    destruct a; [ easy | ].
+    destruct a; [ flia H2a | ].
+    destruct b; [ easy | cbn; flia ].
+  }
 ...
 
 Theorem order_multiplicative : ∀ n a b r s,
