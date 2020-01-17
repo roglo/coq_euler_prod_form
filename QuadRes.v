@@ -219,15 +219,17 @@ split; intros Hap. 2: {
       rewrite <- Nat.mul_mod_idemp_r in H2; [ | easy ].
       rewrite <- H2 in Hxa.
       destruct (le_dec (b' mod p) x) as [Hbx| Hbx]. {
-        apply Nat_eq_mod_sub_0 in Hxa.
-        rewrite <- Nat.mul_sub_distr_l in Hxa.
-        apply Nat.mod_divide in Hxa; [ | easy ].
-        apply Nat.gauss in Hxa; [ | now apply eq_gcd_prime_small_1 ].
-        destruct (Nat.eq_dec (b' mod p) x) as [Hb'x| Hb'x]; [ easy | ].
-        apply Nat.divide_pos_le in Hxa; [ flia Hxp Hxa | flia Hbx Hb'x ].
+        apply Nat_mul_mod_cancel_l in Hxa. 2: {
+          rewrite Nat.gcd_comm.
+          now apply eq_gcd_prime_small_1.
+        }
+        rewrite Nat.mod_mod in Hxa; [ | easy ].
+        rewrite <- Hxa.
+        now apply Nat.mod_small.
       } {
         apply Nat.nle_gt in Hbx.
         symmetry in Hxa.
+...
         apply Nat_eq_mod_sub_0 in Hxa.
         rewrite <- Nat.mul_sub_distr_l in Hxa.
         apply Nat.mod_divide in Hxa; [ | easy ].
