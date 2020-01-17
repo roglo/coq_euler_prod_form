@@ -3008,7 +3008,7 @@ Definition unsome {A} x (d : A) :=
 
 Definition all_pow_mod n a :=
   map (λ i, (i, Nat_pow_mod a i n)) (seq 1 (n - 1)).
-Definition order_mod n a :=
+Definition ord_mod n a :=
   unsome (findA (λ x, x =? 1) (all_pow_mod n a)) n.
 (*
   fst (hd (n, 0) (filter (λ x, snd x =? 1) (all_pow_mod n a))).
@@ -3037,30 +3037,30 @@ Fixpoint List_find_nth {A} (f : A → bool) l :=
   | x :: l => if f x then 0 else 1 + List_find_nth f l
   end.
 Definition all_pow_mod' n a := map (λ i, Nat_pow_mod a i n) (seq 1 (n - 1)).
-Definition order_mod' n a := S (List_find_nth (λ x, x =? 1) (all_pow_mod' n a)).
+Definition ord_mod' n a := S (List_find_nth (λ x, x =? 1) (all_pow_mod' n a)).
 
-Compute (let (n, a) := (3, 5) in (order_mod n a, order_mod' n a)).
-Compute (let n := 19 in map (λ a, (order_mod n a, order_mod' n a)) (seq 1 n)).
+Compute (let (n, a) := (3, 5) in (ord_mod n a, ord_mod' n a)).
+Compute (let n := 19 in map (λ a, (ord_mod n a, ord_mod' n a)) (seq 1 n)).
 *)
 
-Fixpoint order_mod_aux it n a i :=
+Fixpoint ord_mod_aux it n a i :=
   match it with
   | 0 => 0
   | S it' =>
       if Nat.eq_dec (Nat_pow_mod a i n) 1 then i
-      else order_mod_aux it' n a (i + 1)
+      else ord_mod_aux it' n a (i + 1)
   end.
 
-Definition order_mod n a := order_mod_aux n n a 1.
+Definition ord_mod n a := ord_mod_aux n n a 1.
 
 Definition unsome {A} x (d : A) :=
   match x with Some y => y | None => d end.
 Definition all_pow_mod' n a :=
   map (λ i, (i, Nat_pow_mod a i n)) (seq 1 (n - 1)).
-Definition order_mod' n a :=
+Definition ord_mod' n a :=
   fst (hd (n + 1, 0) (filter (λ x, snd x =? 1) (all_pow_mod' n a))).
-Compute (let (n, a) := (3, 5) in (order_mod n a, order_mod' n a)).
-Compute (let n := 18 in map (λ a, (order_mod n a, order_mod' n a)) (seq 1 n)).
+Compute (let (n, a) := (3, 5) in (ord_mod n a, ord_mod' n a)).
+Compute (let n := 18 in map (λ a, (ord_mod n a, ord_mod' n a)) (seq 1 n)).
 
 Theorem List_seq_eq_nil : ∀ a b, seq a b = [] → b = 0.
 Proof.
@@ -3185,13 +3185,13 @@ now apply Nat.eqb_eq in Hx1; subst b.
 Qed.
 *)
 
-Lemma order_mod_aux_prop : ∀ it n a i,
+Lemma ord_mod_aux_prop : ∀ it n a i,
   n + 1 ≤ it + i
   → (∀ j, 1 ≤ j < i → (a ^ j) mod n ≠ 1)
   → 2 ≤ n
   → Nat.gcd a n = 1
-  → a ^ order_mod_aux it n a i mod n = 1 ∧
-     ∀ m, 0 < m < order_mod_aux it n a i → (a ^ m) mod n ≠ 1.
+  → a ^ ord_mod_aux it n a i mod n = 1 ∧
+     ∀ m, 0 < m < ord_mod_aux it n a i → (a ^ m) mod n ≠ 1.
 Proof.
 intros * Hnit Hj H2n Hg.
 assert (Hnz : n ≠ 0) by flia H2n.
@@ -3225,34 +3225,34 @@ destruct (Nat.eq_dec k i) as [Hki| Hki]; [ now subst k | ].
 apply Hj; flia Hk Hki.
 Qed.
 
-Theorem order_mod_prop : ∀ n a,
+Theorem ord_mod_prop : ∀ n a,
   2 ≤ n
   → Nat.gcd a n = 1
-  → (a ^ order_mod n a) mod n = 1 ∧
-     ∀ m, 0 < m < order_mod n a → (a ^ m) mod n ≠ 1.
+  → (a ^ ord_mod n a) mod n = 1 ∧
+     ∀ m, 0 < m < ord_mod n a → (a ^ m) mod n ≠ 1.
 Proof.
 intros * H2n Hg.
-apply order_mod_aux_prop; [ easy | | easy | easy ].
+apply ord_mod_aux_prop; [ easy | | easy | easy ].
 intros j Hj.
 flia Hj.
 Qed.
 
-Lemma order_mod_aux_it_0_0 : ∀ it i, order_mod_aux it 0 0 i = 0.
+Lemma ord_mod_aux_it_0_0 : ∀ it i, ord_mod_aux it 0 0 i = 0.
 Proof.
 intros.
 revert i.
 induction it; intros; [ easy | cbn; destruct i; apply IHit ].
 Qed.
 
-Lemma order_mod_aux_0_r : ∀ it n i,
+Lemma ord_mod_aux_0_r : ∀ it n i,
   n + 1 ≤ it + i
-  → order_mod_aux it n 0 i = 0.
+  → ord_mod_aux it n 0 i = 0.
 Proof.
 intros * Hni.
 destruct (lt_dec n 2) as [H2n| H2n]. {
   destruct n. {
     destruct it; [ easy | ].
-    destruct i; apply order_mod_aux_it_0_0.
+    destruct i; apply ord_mod_aux_it_0_0.
   }
   destruct n; [ | flia H2n ].
   clear Hni.
@@ -3272,13 +3272,13 @@ apply IHit.
 flia Hni.
 Qed.
 
-Theorem order_mod_0_r : ∀ n, n ≠ 0 → order_mod n 0 = 0.
+Theorem ord_mod_0_r : ∀ n, n ≠ 0 → ord_mod n 0 = 0.
 Proof.
 intros * Hnz.
-now apply order_mod_aux_0_r.
+now apply ord_mod_aux_0_r.
 Qed.
 
-Theorem order_mod_1_r : ∀ n, 2 ≤ n → order_mod n 1 = 1.
+Theorem ord_mod_1_r : ∀ n, 2 ≤ n → ord_mod n 1 = 1.
 Proof.
 intros * H2n.
 destruct n; [ easy | ].
@@ -3288,10 +3288,10 @@ rewrite Nat.pow_1_r.
 rewrite Nat.mod_1_l; [ easy | flia H2n ].
 Qed.
 
-Theorem order_mod_divisor : ∀ n a b,
+Theorem ord_mod_divisor : ∀ n a b,
   Nat.gcd a n = 1
   → a ^ b mod n = 1
-  → Nat.divide (order_mod n a) b.
+  → Nat.divide (ord_mod n a) b.
 Proof.
 intros * Hg Habn.
 destruct (lt_dec n 2) as [H2n| H2n]. {
@@ -3302,9 +3302,9 @@ apply Nat.nlt_ge in H2n.
 destruct (Nat.eq_dec b 0) as [Hbz| Hbz]. {
   now subst b; exists 0.
 }
-specialize (order_mod_prop n a H2n Hg) as H1.
+specialize (ord_mod_prop n a H2n Hg) as H1.
 destruct H1 as (Han, Ham).
-destruct (lt_dec b (order_mod n a)) as [Hbo| Hbo]. {
+destruct (lt_dec b (ord_mod n a)) as [Hbo| Hbo]. {
   apply Nat.neq_0_lt_0 in Hbz.
   now specialize (Ham b (conj Hbz Hbo)) as H1.
 }
@@ -3316,10 +3316,10 @@ apply Nat.nlt_ge in Hbo.
 Theorem glop : ∀ n a b r s,
   Nat.gcd a n = 1
   → Nat.gcd b n = 1
-  → order_mod n a = r
-  → order_mod n b = s
+  → ord_mod n a = r
+  → ord_mod n b = s
   → Nat.gcd r s = 1
-  → Nat.divide (order_mod n (a * b)) (r * s).
+  → Nat.divide (ord_mod n (a * b)) (r * s).
 Proof.
 intros * Han Hbn Hoa Hob Hg.
 destruct (lt_dec n 2) as [H2n| H2n]. {
@@ -3337,7 +3337,7 @@ destruct (lt_dec a 2) as [H2a| H2a]. {
     rewrite Nat.gcd_0_l in Han; flia Han H2n.
   }
   destruct a; [ | flia H2a ].
-  rewrite order_mod_1_r in Hoa; [ | easy ].
+  rewrite ord_mod_1_r in Hoa; [ | easy ].
   subst r.
   do 2 rewrite Nat.mul_1_l.
   now rewrite Hob.
@@ -3348,7 +3348,7 @@ destruct (lt_dec b 2) as [H2b| H2b]. {
     rewrite Nat.gcd_0_l in Hbn; flia Hbn H2n.
   }
   destruct b; [ | flia H2b ].
-  rewrite order_mod_1_r in Hob; [ | easy ].
+  rewrite ord_mod_1_r in Hob; [ | easy ].
   subst s.
   do 2 rewrite Nat.mul_1_r.
   now rewrite Hoa.
@@ -3357,10 +3357,10 @@ apply Nat.nlt_ge in H2b.
 assert (H2 : (a * b) ^ (r * s) = a ^ (r * s) * b ^ (r * s)). {
   apply Nat.pow_mul_l.
 }
-specialize (order_mod_prop n a H2n Han) as Har.
+specialize (ord_mod_prop n a H2n Han) as Har.
 rewrite Hoa in Har.
 destruct Har as (Har, Harn).
-specialize (order_mod_prop n b H2n Hbn) as Hbs.
+specialize (ord_mod_prop n b H2n Hbn) as Hbs.
 rewrite Hob in Hbs.
 destruct Hbs as (Hbs, Hbsn).
 apply (f_equal (λ x, x mod n)) in H2.
@@ -3378,12 +3378,12 @@ rewrite (Nat.mod_small 1) in H2; [ | easy ].
 rewrite (Nat.mul_comm s r) in H2.
 move H2 at bottom.
 ...
-Check order_mod_divisor.
+Check ord_mod_divisor.
 (**)
 ...
 rewrite <- Habo in H2.
 remember (r * s) as u.
-remember (order_mod n (a * b)) as v.
+remember (ord_mod n (a * b)) as v.
 move u after v.
 move Hequ after Heqv.
 move Harn before Habn.
@@ -3424,10 +3424,10 @@ destruct (lt_dec u v) as [Huv| Huv]. {
 Theorem order_multiplicative : ∀ n a b r s,
   Nat.gcd a n = 1
   → Nat.gcd b n = 1
-  → order_mod n a = r
-  → order_mod n b = s
+  → ord_mod n a = r
+  → ord_mod n b = s
   → Nat.gcd r s = 1
-  → order_mod n (a * b) = r * s.
+  → ord_mod n (a * b) = r * s.
 Proof.
 intros * Han Hbn Hoa Hob Hg.
 ...
@@ -3441,17 +3441,17 @@ destruct (lt_dec n 2) as [H2n| H2n]. {
   now subst r s.
 }
 apply Nat.nlt_ge in H2n.
-specialize (order_mod_prop n (a * b) H2n) as H1.
+specialize (ord_mod_prop n (a * b) H2n) as H1.
 assert (H : Nat.gcd (a * b) n = 1) by now apply Nat_gcd_1_mul_l.
 specialize (H1 H); clear H.
 destruct H1 as (Habo, Habn).
 assert (H2 : (a * b) ^ (r * s) = a ^ (r * s) * b ^ (r * s)). {
   apply Nat.pow_mul_l.
 }
-specialize (order_mod_prop n a H2n Han) as Har.
+specialize (ord_mod_prop n a H2n Han) as Har.
 rewrite Hoa in Har.
 destruct Har as (Har, Harn).
-specialize (order_mod_prop n b H2n Hbn) as Hbr.
+specialize (ord_mod_prop n b H2n Hbn) as Hbr.
 rewrite Hob in Hbr.
 destruct Hbr as (Hbr, Hbrn).
 apply (f_equal (λ x, x mod n)) in H2.
