@@ -3310,6 +3310,22 @@ destruct (lt_dec b (ord_mod n a)) as [Hbo| Hbo]. {
 }
 apply Nat.nlt_ge in Hbo.
 destruct (Nat.eq_dec (ord_mod n a) 0) as [Hoz| Hoz]. {
+Print ord_mod_aux.
+Lemma eq_ord_mod_aux_0 : ∀ it n a i,
+  n + 1 ≤ it + i
+  → ord_mod_aux it n a i = 0
+  → n = 0 ∨ a = 0.
+Proof.
+intros * Hni Ho.
+revert i Hni Ho.
+induction it; intros. {
+  cbn in Ho.
+(* ah bin non *)
+...
+Theorem eq_ord_mod_0 : ∀ n a, ord_mod n a = 0 → n = 0 ∨ a = 0.
+Proof.
+intros * Ho.
+Print ord_mod.
 ...
 specialize (Nat.div_mod b (ord_mod n a)) as H1.
 assert (H : ord_mod n a ≠ 0). {
