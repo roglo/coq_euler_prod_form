@@ -3313,9 +3313,36 @@ apply ord_mod_aux_prop.
 ...
 *)
 
-Theorem ord_mod_neq_0 : ∀ n a, Nat.gcd a n = 1 → ord_mod n a ≠ 0.
+Lemma ord_mod_aux_neq_0 : ∀ it n a i,
+  2 ≤ n
+  → i < n
+  → n + 1 = it + i
+  → Nat.gcd a n = 1
+  → ord_mod_aux it n a i ≠ 0.
 Proof.
-intros * Hg Ho.
+intros * H2n Hin Hni Hg.
+revert i Hin Hni.
+induction it; intros; [ flia Hin Hni | cbn ].
+rewrite Nat_pow_mod_is_pow_mod; [ | flia Hin ].
+destruct (Nat.eq_dec (a ^ i mod n) 1) as [Ha1| Ha1]. {
+  intros H; subst i.
+  rewrite Nat.add_0_r, <- (Nat.add_1_r it) in Hni.
+...
+  specialize (IHit 1 H2n Hni) as H1.
+Search ord_mod_aux.
+specialize (ord_mod_aux_prop it n a 1) as H2.
+assert (H : n + 1 ≤ it + 1) by flia Hni.
+specialize (H2 H); clear H.
+assert (H : ∀ j, 1 ≤ j < 1 → a ^ j mod n ≠ 1); [ flia | ].
+specialize (H2 H H2n Hg); clear H.
+Print ord_mod_aux.
+Print ord_mod.
+...
+
+Theorem ord_mod_neq_0 : ∀ n a, 2 ≤ n → Nat.gcd a n = 1 → ord_mod n a ≠ 0.
+Proof.
+intros * H2n Hg Ho.
+unfold ord_mod in Ho.
 ...
 
 Theorem ord_mod_divisor : ∀ n a b,
