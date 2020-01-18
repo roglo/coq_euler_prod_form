@@ -3321,12 +3321,19 @@ Lemma ord_mod_aux_neq_0 : ∀ it n a i,
   → ord_mod_aux it n a i ≠ 0.
 Proof.
 intros * H2n Hin Hni Hg.
+Compute (ord_mod_aux 42 42 1 1).
+...
 revert i Hin Hni.
 induction it; intros; [ flia Hin Hni | cbn ].
 rewrite Nat_pow_mod_is_pow_mod; [ | flia Hin ].
 destruct (Nat.eq_dec (a ^ i mod n) 1) as [Ha1| Ha1]. {
   intros H; subst i.
   rewrite Nat.add_0_r, <- (Nat.add_1_r it) in Hni.
+  rewrite Nat.pow_0_r in Ha1.
+  rewrite Nat.mod_small in Ha1; [ | easy ].
+  clear Ha1.
+  specialize (IHit 1 H2n Hni) as H1.
+Print ord_mod_aux.
 ...
   specialize (IHit 1 H2n Hni) as H1.
 Search ord_mod_aux.
