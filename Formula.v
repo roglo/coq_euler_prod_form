@@ -3365,8 +3365,62 @@ destruct (Nat.eq_dec (a ^ 2 mod n) 1) as [Ha2n| Ha2n]; [ easy | ].
 remember (n - 2) as m eqn:Hm; symmetry in Hm.
 destruct m. {
   replace n with 2 in * by flia Hm H2n.
-  clear Hm Ho.
-  apply Han.
+  clear H2n Hm Ho.
+  specialize (Nat.div_mod a 2 (Nat.neq_succ_0 _)) as H1.
+  remember (a mod 2) as r eqn:Hr; symmetry in Hr.
+  destruct r. {
+    rewrite <- (Nat.mul_1_r 2), H1, Nat.add_0_r in Hg.
+    rewrite Nat.gcd_mul_mono_l in Hg.
+    flia Hg.
+  }
+  destruct r; [ easy | ].
+  specialize (Nat.mod_upper_bound a 2 (Nat.neq_succ_0 _)) as H2.
+  flia Hr H2.
+}
+cbn - [ Nat_pow_mod ] in Ho.
+rewrite Nat_pow_mod_is_pow_mod in Ho; [ | flia H2n ].
+destruct (Nat.eq_dec (a ^ 3 mod n) 1) as [Ha3n| Ha3n]; [ easy | ].
+move Ha3n before Ha2n.
+destruct m. {
+  replace n with 3 in * by flia Hm.
+  clear H2n Hm Ho.
+  specialize (Nat.div_mod a 3 (Nat.neq_succ_0 _)) as H1.
+  remember (a mod 3) as r eqn:Hr; symmetry in Hr.
+  destruct r. {
+    rewrite <- (Nat.mul_1_r 3), H1, Nat.add_0_r in Hg.
+    rewrite Nat.gcd_mul_mono_l in Hg.
+    flia Hg.
+  }
+  destruct r; [ easy | clear Han ].
+  destruct r. {
+    now rewrite <- Nat_mod_pow_mod, Hr in Ha2n.
+  }
+  specialize (Nat.mod_upper_bound a 3 (Nat.neq_succ_0 _)) as H2.
+  flia Hr H2.
+}
+cbn - [ Nat_pow_mod ] in Ho.
+rewrite Nat_pow_mod_is_pow_mod in Ho; [ | flia H2n ].
+destruct (Nat.eq_dec (a ^ 4 mod n) 1) as [Ha4n| Ha4n]; [ easy | ].
+move Ha4n before Ha3n.
+destruct m. {
+  replace n with 4 in * by flia Hm.
+  clear H2n Hm Ho.
+  specialize (Nat.div_mod a 4 (Nat.neq_succ_0 _)) as H1.
+  remember (a mod 4) as r eqn:Hr; symmetry in Hr.
+  destruct r. {
+    rewrite <- (Nat.mul_1_r 4), H1, Nat.add_0_r in Hg.
+    rewrite Nat.gcd_mul_mono_l in Hg.
+    flia Hg.
+  }
+  destruct r; [ easy | clear Han ].
+  destruct r. {
+    replace 4 with (2 * 2) in Hg by easy.
+    replace (4 * (a / 4) + 2) with (2 * (2 * (a / 4) + 1)) in H1 by ring.
+    rewrite H1 in Hg.
+    rewrite Nat.gcd_mul_mono_l in Hg.
+    flia Hg.
+  }
+  destruct r. {
 ...
 
 Theorem ord_mod_divisor : ∀ n a b,
