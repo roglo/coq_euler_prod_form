@@ -3322,7 +3322,6 @@ Lemma ord_mod_aux_neq_0 : ∀ it n a i,
 Proof.
 intros * H2n Hin Hni Hg.
 Compute (ord_mod_aux 42 42 1 1).
-...
 revert i Hin Hni.
 induction it; intros; [ flia Hin Hni | cbn ].
 rewrite Nat_pow_mod_is_pow_mod; [ | flia Hin ].
