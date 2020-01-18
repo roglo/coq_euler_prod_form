@@ -3313,6 +3313,7 @@ apply ord_mod_aux_prop.
 ...
 *)
 
+(*
 Lemma ord_mod_aux_neq_0 : ∀ it n a i,
   2 ≤ n
   → i < n
@@ -3322,6 +3323,7 @@ Lemma ord_mod_aux_neq_0 : ∀ it n a i,
 Proof.
 intros * H2n Hin Hni Hg.
 Compute (ord_mod_aux 42 42 1 1).
+Compute (ord_mod 2 7).
 revert i Hin Hni.
 induction it; intros; [ flia Hin Hni | cbn ].
 rewrite Nat_pow_mod_is_pow_mod; [ | flia Hin ].
@@ -3331,6 +3333,7 @@ destruct (Nat.eq_dec (a ^ i mod n) 1) as [Ha1| Ha1]. {
   rewrite Nat.pow_0_r in Ha1.
   rewrite Nat.mod_small in Ha1; [ | easy ].
   clear Ha1.
+...
   specialize (IHit 1 H2n Hni) as H1.
 Print ord_mod_aux.
 ...
@@ -3344,11 +3347,26 @@ specialize (H2 H H2n Hg); clear H.
 Print ord_mod_aux.
 Print ord_mod.
 ...
+*)
 
 Theorem ord_mod_neq_0 : ∀ n a, 2 ≤ n → Nat.gcd a n = 1 → ord_mod n a ≠ 0.
 Proof.
 intros * H2n Hg Ho.
 unfold ord_mod in Ho.
+replace n with (S (n - 1)) in Ho at 1 by flia H2n.
+cbn - [ Nat_pow_mod ] in Ho.
+rewrite Nat_pow_mod_is_pow_mod in Ho; [ | flia H2n ].
+rewrite Nat.pow_1_r in Ho.
+destruct (Nat.eq_dec (a mod n) 1) as [Han| Han]; [ easy | ].
+replace (n - 1) with (S (n - 2)) in Ho by flia H2n.
+cbn - [ Nat_pow_mod ] in Ho.
+rewrite Nat_pow_mod_is_pow_mod in Ho; [ | flia H2n ].
+destruct (Nat.eq_dec (a ^ 2 mod n) 1) as [Ha2n| Ha2n]; [ easy | ].
+remember (n - 2) as m eqn:Hm; symmetry in Hm.
+destruct m. {
+  replace n with 2 in * by flia Hm H2n.
+  clear Hm Ho.
+  apply Han.
 ...
 
 Theorem ord_mod_divisor : ∀ n a b,
