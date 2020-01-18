@@ -3299,16 +3299,25 @@ destruct (lt_dec n 2) as [H2n| H2n]. {
   destruct n; [ easy | flia H2n ].
 }
 apply Nat.nlt_ge in H2n.
+specialize (ord_mod_prop n a H2n Hg) as H1.
+destruct H1 as (Han, Ham).
 destruct (Nat.eq_dec b 0) as [Hbz| Hbz]. {
   now subst b; exists 0.
 }
-specialize (ord_mod_prop n a H2n Hg) as H1.
-destruct H1 as (Han, Ham).
 destruct (lt_dec b (ord_mod n a)) as [Hbo| Hbo]. {
   apply Nat.neq_0_lt_0 in Hbz.
   now specialize (Ham b (conj Hbz Hbo)) as H1.
 }
 apply Nat.nlt_ge in Hbo.
+destruct (Nat.eq_dec (ord_mod n a) 0) as [Hoz| Hoz]. {
+...
+specialize (Nat.div_mod b (ord_mod n a)) as H1.
+assert (H : ord_mod n a ≠ 0). {
+  intros H.
+  unfold ord_mod in H.
+Print ord_mod_aux.
+Search ord_mod.
+  intros H; rewrite H in Han.
 ...
 
 (* https://wstein.org/edu/2007/spring/ent/ent-html/node29.html *)
