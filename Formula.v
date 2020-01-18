@@ -3353,46 +3353,6 @@ Theorem ord_mod_neq_0 : ∀ n a, 2 ≤ n → Nat.gcd a n = 1 → ord_mod n a ≠
 Proof.
 intros * H2n Hg Ho.
 unfold ord_mod in Ho.
-destruct a. {
-  rewrite Nat.gcd_0_l in Hg.
-  flia H2n Hg.
-}
-destruct a. {
-  clear Hg.
-  replace n with (S (n - 1)) in Ho at 1 by flia H2n.
-  cbn - [ Nat_pow_mod ] in Ho.
-  rewrite Nat_pow_mod_is_pow_mod in Ho; [ | flia H2n ].
-  cbn in Ho.
-  now rewrite Nat.mod_1_l in Ho.
-}
-destruct a. {
-  replace n with (S (n - 1)) in Ho at 1 by flia H2n.
-  cbn - [ Nat_pow_mod ] in Ho.
-  rewrite Nat_pow_mod_is_pow_mod in Ho; [ | flia H2n ].
-  cbn in Ho.
-  destruct (Nat.eq_dec (2 mod n) 1) as [H2n1| H2n1]; [ easy | ].
-  replace (n - 1) with (S (n - 2)) in Ho by flia H2n.
-  cbn - [ Nat_pow_mod ] in Ho.
-  rewrite Nat_pow_mod_is_pow_mod in Ho; [ | flia H2n ].
-  cbn in Ho.
-  destruct (Nat.eq_dec (4 mod n) 1) as [H4n1| H4n1]; [ easy | ].
-...
-  replace (n - 2) with (S (n - 3)) in Ho by lia.
-  destruct (Nat.eq_dec n 2) as [Hn2| Hn2]; [ now subst n | ].
-  rewrite Nat.mod_small in Ho; [ | flia H2n Hn2 ].
-  cbn in Ho.
-  replace (n - 1) with (S (n - 2)) in Ho by flia H2n.
-  cbn - [ Nat_pow_mod ] in Ho.
-  rewrite Nat_pow_mod_is_pow_mod in Ho; [ | flia H2n ].
-  cbn in Ho.
-  destruct (Nat.eq_dec (4 mod n) 1) as [H4n1| H4n1]; [ easy | ].
-
-; [ now subst n | ].
-...
-  now rewrite Nat.mod_1_l in Ho.
-...
-intros * H2n Hg Ho.
-unfold ord_mod in Ho.
 replace n with (S (n - 1)) in Ho at 1 by flia H2n.
 cbn - [ Nat_pow_mod ] in Ho.
 rewrite Nat_pow_mod_is_pow_mod in Ho; [ | flia H2n ].
