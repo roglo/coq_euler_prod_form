@@ -3288,6 +3288,36 @@ rewrite Nat.pow_1_r.
 rewrite Nat.mod_1_l; [ easy | flia H2n ].
 Qed.
 
+(*
+Lemma eq_ord_mod_aux_0 : ∀ it n a i,
+  2 ≤ n
+  → i < n
+  → n + 1 = it + i
+  → ord_mod_aux it n a i = 0
+  → a = 0.
+Proof.
+intros * H2n Hin Hni Ho.
+revert i Hin Hni Ho.
+induction it; intros. {
+  cbn in Ho.
+  flia Hin Hni.
+}
+cbn in Ho.
+rewrite Nat_pow_mod_is_pow_mod in Ho; [ | flia Hin ].
+destruct (Nat.eq_dec (a ^ i mod n) 1) as [Ha1| Ha1]. {
+  subst i.
+  rewrite Nat.pow_0_r in Ha1.
+  apply (IHit 1); [ easy | flia Hni | ].
+Search ord_mod_aux.
+apply ord_mod_aux_prop.
+...
+*)
+
+Theorem ord_mod_neq_0 : ∀ n a, Nat.gcd a n = 1 → ord_mod n a ≠ 0.
+Proof.
+intros * Hg Ho.
+...
+
 Theorem ord_mod_divisor : ∀ n a b,
   Nat.gcd a n = 1
   → a ^ b mod n = 1
@@ -3311,21 +3341,6 @@ destruct (lt_dec b (ord_mod n a)) as [Hbo| Hbo]. {
 apply Nat.nlt_ge in Hbo.
 destruct (Nat.eq_dec (ord_mod n a) 0) as [Hoz| Hoz]. {
 Print ord_mod_aux.
-Lemma eq_ord_mod_aux_0 : ∀ it n a i,
-  n + 1 ≤ it + i
-  → ord_mod_aux it n a i = 0
-  → n = 0 ∨ a = 0.
-Proof.
-intros * Hni Ho.
-revert i Hni Ho.
-induction it; intros. {
-  cbn in Ho.
-(* ah bin non *)
-...
-Theorem eq_ord_mod_0 : ∀ n a, ord_mod n a = 0 → n = 0 ∨ a = 0.
-Proof.
-intros * Ho.
-Print ord_mod.
 ...
 specialize (Nat.div_mod b (ord_mod n a)) as H1.
 assert (H : ord_mod n a ≠ 0). {
