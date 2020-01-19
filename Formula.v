@@ -3315,14 +3315,15 @@ Print ord_mod.
 Lemma eq_ord_mod_aux_0 : ∀ it n a i,
   n ≠ 0
   → ord_mod_aux it n a i = 0
-  → it = 0 ∨ i = 0 ∨ a ^ i mod n ≠ 1.
+  → it = 0 ∨ i = 0 ∨ a ^ i mod n ≠ 1 ∧ ord_mod_aux (it - 1) n a (i + 1) = 0.
 Proof.
 intros * Hnz Ho.
 destruct it; [ now left | right ].
 cbn in Ho.
 rewrite Nat_pow_mod_is_pow_mod in Ho; [ | easy ].
 destruct (Nat.eq_dec (a ^ i mod n) 1) as [Hai| Hai]; [ now left | ].
-destruct i; [ now left | now right ].
+destruct i; [ now left | right ].
+now rewrite Nat.sub_succ, Nat.sub_0_r.
 Qed.
 
 Theorem ord_mod_neq_0 : ∀ n a, 2 ≤ n → Nat.gcd a n = 1 → ord_mod n a ≠ 0.
@@ -3332,6 +3333,7 @@ unfold ord_mod in Ho.
 apply eq_ord_mod_aux_0 in Ho; [ | flia H2n ].
 destruct Ho as [Ho| [Ho| Ho]]; [ flia H2n Ho | easy | ].
 rewrite Nat.pow_1_r in Ho.
+destruct Ho as (Han, Ho).
 ...
 replace n with (S (n - 1)) in Ho at 1 by flia H2n.
 cbn - [ Nat_pow_mod ] in Ho.
