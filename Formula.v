@@ -3312,10 +3312,27 @@ Print ord_mod.
 ...
 *)
 
+Lemma eq_ord_mod_aux_0 : ∀ it n a i,
+  2 ≤ n
+  → i < n
+  → n + 1 = it + i
+  → ord_mod_aux it n a i = 0
+  → (∀ j, 1 ≤ j < it → a ^ j mod n ≠ 1).
+Proof.
+intros * H2n Hin Hni Ho * Hj.
+revert i Hin Hni Ho.
+induction it; intros; [ flia Hni Hin | ].
+cbn in Ho.
+rewrite Nat_pow_mod_is_pow_mod in Ho; [ | flia H2n ].
+destruct (Nat.eq_dec (a ^ i mod n) 1) as [Hai| Hai]. {
+  subst i.
+...
+
 Theorem ord_mod_neq_0 : ∀ n a, 2 ≤ n → Nat.gcd a n = 1 → ord_mod n a ≠ 0.
 Proof.
 intros * H2n Hg Ho.
 unfold ord_mod in Ho.
+...
 replace n with (S (n - 1)) in Ho at 1 by flia H2n.
 cbn - [ Nat_pow_mod ] in Ho.
 rewrite Nat_pow_mod_is_pow_mod in Ho; [ | flia H2n ].
