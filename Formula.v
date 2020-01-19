@@ -3198,6 +3198,7 @@ intros j Hj.
 flia Hj.
 Qed.
 
+(*
 Lemma ord_mod_aux_it_0_0 : ∀ it i, ord_mod_aux it 0 0 i = 0.
 Proof.
 intros.
@@ -3238,6 +3239,7 @@ Proof.
 intros * Hnz.
 now apply ord_mod_aux_0_r.
 Qed.
+*)
 
 Theorem ord_mod_1_r : ∀ n, 2 ≤ n → ord_mod n 1 = 1.
 Proof.
