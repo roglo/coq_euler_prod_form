@@ -3002,46 +3002,7 @@ split. {
 }
 Qed.
 
-(*
-Definition unsome {A} x (d : A) :=
-  match x with Some y => y | None => d end.
-
-Definition all_pow_mod n a :=
-  map (λ i, (i, Nat_pow_mod a i n)) (seq 1 (n - 1)).
-Definition ord_mod n a :=
-  unsome (findA (λ x, x =? 1) (all_pow_mod n a)) n.
-(*
-  fst (hd (n, 0) (filter (λ x, snd x =? 1) (all_pow_mod n a))).
-  hd n (map fst (filter (λ x, snd x =? 1) (all_pow_mod n a))).
-*)
-
-Search findA.
-Check (findA_NoDupA _ _ Nat.eq_dec 0).
-Print NoDupA.
-Print InA.
-Check findA.
-Check find.
-Search (option _ → _).
-...
-findA
-     : ∀ A B : Type, (A → bool) → list (A * B) → option B
-find
-     : ∀ A : Type, (A → bool) → list A → option A
-...
-*)
-
-(*
-Fixpoint List_find_nth {A} (f : A → bool) l :=
-  match l with
-  | [] => 0
-  | x :: l => if f x then 0 else 1 + List_find_nth f l
-  end.
-Definition all_pow_mod' n a := map (λ i, Nat_pow_mod a i n) (seq 1 (n - 1)).
-Definition ord_mod' n a := S (List_find_nth (λ x, x =? 1) (all_pow_mod' n a)).
-
-Compute (let (n, a) := (3, 5) in (ord_mod n a, ord_mod' n a)).
-Compute (let n := 19 in map (λ a, (ord_mod n a, ord_mod' n a)) (seq 1 n)).
-*)
+(* order modulo *)
 
 Fixpoint ord_mod_aux it n a i :=
   match it with
