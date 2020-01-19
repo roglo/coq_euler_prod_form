@@ -3315,65 +3315,23 @@ Print ord_mod.
 Lemma eq_ord_mod_aux_0 : ∀ it n a i,
   n ≠ 0
   → ord_mod_aux it n a i = 0
-  → it = 0 ∨ it = 1 ∧ i = 0.
+  → it = 0 ∨ i = 0 ∨ a ^ i mod n ≠ 1.
 Proof.
 intros * Hnz Ho.
 destruct it; [ now left | right ].
 cbn in Ho.
 rewrite Nat_pow_mod_is_pow_mod in Ho; [ | easy ].
-destruct (Nat.eq_dec (a ^ i mod n) 1) as [Hai| Hai]. {
-  split; [ | easy ].
-...
-
-Lemma eq_ord_mod_aux_0 : ∀ it n a i,
-  ord_mod_aux it n a i = 0
-  → (∀ j, i ≤ j < i + it - 1 → a ^ j mod n ≠ 1).
-Proof.
-intros * Ho * Hj.
-Print ord_mod_aux.
-...
-intros * Ho * Hj.
-destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
-revert i Ho Hj.
-induction it; intros; [ flia Hj | ].
-cbn in Ho.
-rewrite Nat_pow_mod_is_pow_mod in Ho; [ | easy ].
-destruct (Nat.eq_dec (a ^ i mod n) 1) as [Hai| Hai]. {
-  subst i.
-  cbn in Hj.
-  rewrite Nat.sub_0_r in Hj.
-  destruct it; [ flia Hj | ].
-  destruct j. {
-    cbn.
-
-  apply (IHit 1).
-
-
-    replace j with 0 by flia Hj.
-cbn in IHit.
-    Print ord_mod_aux.
-...
-
-Lemma eq_ord_mod_aux_0 : ∀ it n a i,
-  2 ≤ n
-  → i < n
-  → n + 1 = it + i
-  → ord_mod_aux it n a i = 0
-  → (∀ j, 1 ≤ j < it → a ^ j mod n ≠ 1).
-Proof.
-intros * H2n Hin Hni Ho * Hj.
-revert i Hin Hni Ho.
-induction it; intros; [ flia Hni Hin | ].
-cbn in Ho.
-rewrite Nat_pow_mod_is_pow_mod in Ho; [ | flia H2n ].
-destruct (Nat.eq_dec (a ^ i mod n) 1) as [Hai| Hai]. {
-  subst i.
-...
+destruct (Nat.eq_dec (a ^ i mod n) 1) as [Hai| Hai]; [ now left | ].
+destruct i; [ now left | now right ].
+Qed.
 
 Theorem ord_mod_neq_0 : ∀ n a, 2 ≤ n → Nat.gcd a n = 1 → ord_mod n a ≠ 0.
 Proof.
 intros * H2n Hg Ho.
 unfold ord_mod in Ho.
+apply eq_ord_mod_aux_0 in Ho; [ | flia H2n ].
+destruct Ho as [Ho| [Ho| Ho]]; [ flia H2n Ho | easy | ].
+rewrite Nat.pow_1_r in Ho.
 ...
 replace n with (S (n - 1)) in Ho at 1 by flia H2n.
 cbn - [ Nat_pow_mod ] in Ho.
