@@ -3313,9 +3313,25 @@ Print ord_mod.
 *)
 
 Lemma eq_ord_mod_aux_0 : ∀ it n a i,
-  ord_mod_aux it n a i = 0
-  → (∀ j, i ≤ j < i + it → a ^ j mod n ≠ 1).
+  n ≠ 0
+  → ord_mod_aux it n a i = 0
+  → it = 0 ∨ it = 1 ∧ i = 0.
 Proof.
+intros * Hnz Ho.
+destruct it; [ now left | right ].
+cbn in Ho.
+rewrite Nat_pow_mod_is_pow_mod in Ho; [ | easy ].
+destruct (Nat.eq_dec (a ^ i mod n) 1) as [Hai| Hai]. {
+  split; [ | easy ].
+...
+
+Lemma eq_ord_mod_aux_0 : ∀ it n a i,
+  ord_mod_aux it n a i = 0
+  → (∀ j, i ≤ j < i + it - 1 → a ^ j mod n ≠ 1).
+Proof.
+intros * Ho * Hj.
+Print ord_mod_aux.
+...
 intros * Ho * Hj.
 destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
 revert i Ho Hj.
@@ -3324,7 +3340,18 @@ cbn in Ho.
 rewrite Nat_pow_mod_is_pow_mod in Ho; [ | easy ].
 destruct (Nat.eq_dec (a ^ i mod n) 1) as [Hai| Hai]. {
   subst i.
-Print ord_mod_aux.
+  cbn in Hj.
+  rewrite Nat.sub_0_r in Hj.
+  destruct it; [ flia Hj | ].
+  destruct j. {
+    cbn.
+
+  apply (IHit 1).
+
+
+    replace j with 0 by flia Hj.
+cbn in IHit.
+    Print ord_mod_aux.
 ...
 
 Lemma eq_ord_mod_aux_0 : ∀ it n a i,
