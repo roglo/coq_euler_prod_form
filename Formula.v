@@ -3274,9 +3274,14 @@ apply Nat.nlt_ge in H2n.
 specialize (ord_mod_mul_divide n a b r s Han Hbn Hg Hoa Hob) as H1.
 (* https://wstein.org/edu/2007/spring/ent/ent-html/node29.html *)
 remember (ord_mod n (a * b)) as d eqn:Hd.
-...
-specialize (Nat.gauss _ _ _ H1) as H2.
-assert (H : Nat.gcd d r = 1). {
+specialize (Nat.divide_mul_split d r s) as H2.
+assert (H : d ≠ 0). {
+  rewrite Hd.
+  apply ord_mod_neq_0; [ easy | ].
+  now apply Nat_gcd_1_mul_l.
+}
+specialize (H2 H H1); clear H.
+destruct H2 as (r1 & s1 & Hrs & Hr & Hs).
 ...
 assert
   (∃ r1 s1,
