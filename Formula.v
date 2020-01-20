@@ -3182,21 +3182,17 @@ assert (H : 0 < r < x). {
 now specialize (H3 H).
 Qed.
 
-Inspect 1.
-
-...
-
 (* https://wstein.org/edu/2007/spring/ent/ent-html/node29.html *)
 
-Theorem glop : ∀ n a b r s,
+Theorem ord_mod_mul_divide : ∀ n a b r s,
   Nat.gcd a n = 1
   → Nat.gcd b n = 1
+  → Nat.gcd r s = 1
   → ord_mod n a = r
   → ord_mod n b = s
-  → Nat.gcd r s = 1
   → Nat.divide (ord_mod n (a * b)) (r * s).
 Proof.
-intros * Han Hbn Hoa Hob Hg.
+intros * Han Hbn Hg Hoa Hob.
 destruct (lt_dec n 2) as [H2n| H2n]. {
   destruct n. {
     cbn in Hoa, Hob; cbn.
@@ -3252,49 +3248,9 @@ rewrite Nat.mul_1_l in H2.
 rewrite (Nat.mod_small 1) in H2; [ | easy ].
 rewrite (Nat.mul_comm s r) in H2.
 move H2 at bottom.
-...
-Check ord_mod_divisor.
-(**)
-...
-rewrite <- Habo in H2.
-remember (r * s) as u.
-remember (ord_mod n (a * b)) as v.
-move u after v.
-move Hequ after Heqv.
-move Harn before Habn.
-move Hbsn before Harn.
-destruct (lt_dec u v) as [Huv| Huv]. {
-  symmetry in H2.
-  apply Nat_eq_mod_sub_0 in H2.
-  replace v with (u + (v - u)) in H2 by flia Huv.
-  rewrite <- (Nat.mul_1_r ((a * b) ^ u)) in H2.
-  rewrite Nat.pow_add_r in H2.
-  rewrite <- Nat.mul_sub_distr_l in H2.
-  apply Nat.mod_divide in H2; [ | flia H2n ].
-  destruct H2 as (k, Hk).
-  destruct k. {
-    cbn in Hk.
-    apply Nat.eq_mul_0 in Hk.
-    destruct Hk as [Hk| Hk]. {
-      apply Nat.pow_nonzero in Hk; [ easy | ].
-      intros H; rewrite H in Habo.
-      rewrite Nat.pow_0_l in Habo; [ | flia Huv ].
-      rewrite Nat.mod_0_l in Habo; [ easy | flia H2n ].
-    }
-    apply Nat.sub_0_le in Hk.
-    remember ((a * b) ^ (v - u)) as x eqn:Hx; symmetry in Hx.
-    destruct x. {
-      apply Nat.pow_nonzero in Hx; [ easy | ].
-      apply Nat.neq_mul_0; flia H2a H2b.
-    }
-    destruct x; [ clear Hk | flia Hk ].
-    replace 1 with ((a * b) ^ 0) in Hx by easy.
-    apply Nat.pow_inj_r in Hx; [ flia Hx Huv | ].
-    destruct a; [ easy | ].
-    destruct a; [ flia H2a | ].
-    destruct b; [ easy | cbn; flia ].
-  }
-...
+apply ord_mod_divisor; [ | easy ].
+now apply Nat_gcd_1_mul_l.
+Qed.
 
 Theorem order_multiplicative : ∀ n a b r s,
   Nat.gcd a n = 1
@@ -3305,6 +3261,32 @@ Theorem order_multiplicative : ∀ n a b r s,
   → ord_mod n (a * b) = r * s.
 Proof.
 intros * Han Hbn Hoa Hob Hg.
+destruct (lt_dec n 2) as [H2n| H2n]. {
+  destruct n. {
+    cbn in Hoa; cbn.
+    now subst r.
+  }
+  destruct n; [ | flia H2n ].
+  cbn in Hoa; cbn.
+  now subst r.
+}
+apply Nat.nlt_ge in H2n.
+specialize (ord_mod_mul_divide n a b r s Han Hbn Hg Hoa Hob) as H1.
+destruct H1 as (k, Hk).
+destruct (lt_dec k 2) as [Hk2| Hk2]. {
+  destruct k. {
+    apply Nat.eq_mul_0 in Hk.
+    destruct Hk as [H| H]. {
+      move H at top; subst r.
+      now apply ord_mod_neq_0 in Hoa.
+    } {
+      move H at top; subst s.
+      now apply ord_mod_neq_0 in Hob.
+    }
+  }
+  destruct k; [ now rewrite Nat.mul_1_l in Hk | flia Hk2 ].
+}
+apply Nat.nlt_ge in Hk2.
 ...
 destruct (lt_dec n 2) as [H2n| H2n]. {
   destruct n. {
