@@ -3321,73 +3321,52 @@ assert (Hss : s1 = s). {
   move Hs at bottom.
   now apply Nat.divide_antisym.
 }
-...
-assert
-  (∃ r1 s1,
-   ord_mod n (a * b) = r1 * s1 ∧ Nat.divide r1 r ∧ Nat.divide s1 s). {
-Search (Nat.divide _ (_ * _)).
-unfold Nat.divide in H1.
-...
-destruct H1 as (k, Hk).
-destruct (lt_dec k 2) as [Hk2| Hk2]. {
-  destruct k. {
-    apply Nat.eq_mul_0 in Hk.
-    destruct Hk as [H| H]. {
-      move H at top; subst r.
-      now apply ord_mod_neq_0 in Hoa.
-    } {
-      move H at top; subst s.
-      now apply ord_mod_neq_0 in Hob.
-    }
+assert (Hrr : r1 = r). {
+  clear Hss.
+  specialize (ord_mod_prop n (a * b) H2n Habn) as (Habo & Habm).
+  rewrite <- Hd in Habo.
+  rewrite Hrs in Habo.
+  apply (f_equal (λ x, x ^ (s / s1))) in Habo.
+  rewrite Nat.pow_1_l in Habo.
+  apply (f_equal (λ x, x mod n)) in Habo.
+  rewrite Nat_mod_pow_mod in Habo.
+  rewrite Nat.mod_1_l in Habo; [ | easy ].
+  rewrite <- Nat.pow_mul_r in Habo.
+  rewrite <- Nat.mul_assoc in Habo.
+  assert (Hs1z : s1 ≠ 0). {
+    intros H; subst s1.
+    destruct Hs as (k, Hk).
+    rewrite Nat.mul_0_r in Hk.
+    rewrite Hk in Hob.
+    now apply ord_mod_neq_0 in Hob.
   }
-  destruct k; [ now rewrite Nat.mul_1_l in Hk | flia Hk2 ].
-}
-apply Nat.nlt_ge in Hk2.
-exfalso.
-Inspect 2.
-...
-destruct (lt_dec n 2) as [H2n| H2n]. {
-  destruct n. {
-    cbn in Hoa, Hob; cbn.
-    now subst r s.
+  rewrite <- Nat.divide_div_mul_exact in Habo; [ | easy | easy ].
+  rewrite (Nat.mul_comm s1), Nat.div_mul in Habo; [ | easy ].
+  rewrite (Nat.mul_comm r1) in Habo.
+  rewrite Nat.pow_mul_r in Habo.
+  rewrite Nat.pow_mul_l in Habo.
+  rewrite <- Nat_mod_pow_mod in Habo.
+  rewrite <- Nat.mul_mod_idemp_r in Habo; [ | flia H2n ].
+  specialize (ord_mod_prop n b H2n Hbn) as (Hbo & Hbm).
+  rewrite Hob in Hbo, Hbm.
+  rewrite Hbo, Nat.mul_1_r in Habo.
+  rewrite Nat_mod_pow_mod in Habo.
+  rewrite <- Nat.pow_mul_r in Habo.
+  specialize (ord_mod_prop n a H2n Han) as (Hao & Ham).
+  rewrite Hoa in Hao, Ham.
+  assert (H2 : Nat.divide r (s * r1)). {
+    rewrite <- Hoa.
+    now apply ord_mod_divisor.
   }
-  destruct n; [ | flia H2n ].
-  cbn in Hoa, Hob.
-  now subst r s.
+  apply Nat.gauss in H2; [ | easy ].
+  move Hr at bottom.
+  now apply Nat.divide_antisym.
 }
-apply Nat.nlt_ge in H2n.
-specialize (ord_mod_prop n (a * b) H2n) as H1.
-assert (H : Nat.gcd (a * b) n = 1) by now apply Nat_gcd_1_mul_l.
-specialize (H1 H); clear H.
-destruct H1 as (Habo, Habn).
-assert (H2 : (a * b) ^ (r * s) = a ^ (r * s) * b ^ (r * s)). {
-  apply Nat.pow_mul_l.
-}
-specialize (ord_mod_prop n a H2n Han) as Har.
-rewrite Hoa in Har.
-destruct Har as (Har, Harn).
-specialize (ord_mod_prop n b H2n Hbn) as Hbr.
-rewrite Hob in Hbr.
-destruct Hbr as (Hbr, Hbrn).
-apply (f_equal (λ x, x mod n)) in H2.
-rewrite (Nat.pow_mul_r a) in H2.
-rewrite (Nat.mul_comm r s) in H2.
-rewrite (Nat.pow_mul_r b) in H2.
-rewrite Nat.mul_mod in H2; [ | flia H2n ].
-rewrite <- (Nat_mod_pow_mod (a ^ r)) in H2.
-rewrite <- (Nat_mod_pow_mod (b ^ s)) in H2.
-rewrite Har, Hbr in H2.
-do 2 rewrite Nat.pow_1_l in H2.
-rewrite (Nat.mod_small 1) in H2; [ | easy ].
-rewrite Nat.mul_1_l in H2.
-rewrite (Nat.mod_small 1) in H2; [ | easy ].
-rewrite (Nat.mul_comm s r) in H2.
-move Habo at bottom.
-move H2 at bottom.
-rewrite <- Habo in H2.
-apply Nat_eq_mod_sub_0 in H2.
-apply Nat.mod_divide in H2; [ | flia H2n ].
-destruct H2 as (k, Hk).
+now subst r1 s1.
+Qed.
+
+Inspect 1.
+
 ...
 
 Theorem glop : ∀ p, prime p → ∃ a, a ^ ((p - 1) / 2) mod p = p - 1.
