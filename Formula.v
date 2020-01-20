@@ -3275,13 +3275,15 @@ specialize (ord_mod_mul_divide n a b r s Han Hbn Hg Hoa Hob) as H1.
 (* https://wstein.org/edu/2007/spring/ent/ent-html/node29.html *)
 remember (ord_mod n (a * b)) as d eqn:Hd.
 specialize (Nat.divide_mul_split d r s) as H2.
+assert (Habn : Nat.gcd (a * b) n = 1) by now apply Nat_gcd_1_mul_l.
 assert (H : d ≠ 0). {
   rewrite Hd.
-  apply ord_mod_neq_0; [ easy | ].
-  now apply Nat_gcd_1_mul_l.
+  now apply ord_mod_neq_0.
 }
 specialize (H2 H H1); clear H.
 destruct H2 as (r1 & s1 & Hrs & Hr & Hs).
+specialize (ord_mod_prop n (a * b) H2n Habn) as (Habo & Habm).
+rewrite <- Hd in Habo.
 ...
 assert
   (∃ r1 s1,
