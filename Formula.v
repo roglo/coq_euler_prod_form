@@ -3150,6 +3150,7 @@ apply Nat.nlt_ge in Hbo.
 destruct (Nat.eq_dec (ord_mod n a) 0) as [Hoz| Hoz]. {
   now apply ord_mod_neq_0 in Hoz.
 }
+specialize (Nat.div_mod b (ord_mod n a) Hoz) as H1.
 ...
 
 (* https://wstein.org/edu/2007/spring/ent/ent-html/node29.html *)
