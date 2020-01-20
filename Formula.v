@@ -3112,90 +3112,19 @@ Theorem ord_mod_neq_0 : ∀ n a, 2 ≤ n → Nat.gcd a n = 1 → ord_mod n a ≠
 Proof.
 intros * H2n Hg Ho.
 destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
+destruct (Nat.eq_dec a 0) as [Haz| Haz]. {
+  subst a.
+  rewrite Nat.gcd_0_l in Hg.
+  flia Hg H2n.
+}
 unfold ord_mod in Ho.
 specialize (eq_ord_mod_aux_0 n n a 1 Hnz (Nat.neq_succ_0 _) Ho) as H1.
-...
-
-intros * H2n Hg Ho.
-unfold ord_mod in Ho.
-apply eq_ord_mod_aux_0 in Ho; [ | flia H2n | easy ].
-destruct Ho as [Ho| Ho]; [ flia H2n Ho | ].
-rewrite Nat.pow_1_r in Ho.
-destruct Ho as (Han, Ho).
-apply eq_ord_mod_aux_0 in Ho; [ | flia H2n | easy ].
-cbn - [ "^" ] in Ho.
-destruct Ho as [Ho| Ho]; [ flia H2n Ho | ].
-destruct Ho as (Han2, Ho).
-...
-replace n with (S (n - 1)) in Ho at 1 by flia H2n.
-cbn - [ Nat_pow_mod ] in Ho.
-rewrite Nat_pow_mod_is_pow_mod in Ho; [ | flia H2n ].
-rewrite Nat.pow_1_r in Ho.
-destruct (Nat.eq_dec (a mod n) 1) as [Han| Han]; [ easy | ].
-replace (n - 1) with (S (n - 2)) in Ho by flia H2n.
-cbn - [ Nat_pow_mod ] in Ho.
-rewrite Nat_pow_mod_is_pow_mod in Ho; [ | flia H2n ].
-destruct (Nat.eq_dec (a ^ 2 mod n) 1) as [Ha2n| Ha2n]; [ easy | ].
-remember (n - 2) as m eqn:Hm; symmetry in Hm.
-destruct m. {
-  replace n with 2 in * by flia Hm H2n.
-  clear H2n Hm Ho.
-  specialize (Nat.div_mod a 2 (Nat.neq_succ_0 _)) as H1.
-  remember (a mod 2) as r eqn:Hr; symmetry in Hr.
-  destruct r. {
-    rewrite <- (Nat.mul_1_r 2), H1, Nat.add_0_r in Hg.
-    rewrite Nat.gcd_mul_mono_l in Hg.
-    flia Hg.
-  }
-  destruct r; [ easy | ].
-  specialize (Nat.mod_upper_bound a 2 (Nat.neq_succ_0 _)) as H2.
-  flia Hr H2.
-}
-cbn - [ Nat_pow_mod ] in Ho.
-rewrite Nat_pow_mod_is_pow_mod in Ho; [ | flia H2n ].
-destruct (Nat.eq_dec (a ^ 3 mod n) 1) as [Ha3n| Ha3n]; [ easy | ].
-move Ha3n before Ha2n.
-destruct m. {
-  replace n with 3 in * by flia Hm.
-  clear H2n Hm Ho.
-  specialize (Nat.div_mod a 3 (Nat.neq_succ_0 _)) as H1.
-  remember (a mod 3) as r eqn:Hr; symmetry in Hr.
-  destruct r. {
-    rewrite <- (Nat.mul_1_r 3), H1, Nat.add_0_r in Hg.
-    rewrite Nat.gcd_mul_mono_l in Hg.
-    flia Hg.
-  }
-  destruct r; [ easy | clear Han ].
-  destruct r. {
-    now rewrite <- Nat_mod_pow_mod, Hr in Ha2n.
-  }
-  specialize (Nat.mod_upper_bound a 3 (Nat.neq_succ_0 _)) as H2.
-  flia Hr H2.
-}
-cbn - [ Nat_pow_mod ] in Ho.
-rewrite Nat_pow_mod_is_pow_mod in Ho; [ | flia H2n ].
-destruct (Nat.eq_dec (a ^ 4 mod n) 1) as [Ha4n| Ha4n]; [ easy | ].
-move Ha4n before Ha3n.
-destruct m. {
-  replace n with 4 in * by flia Hm.
-  clear H2n Hm Ho.
-  specialize (Nat.div_mod a 4 (Nat.neq_succ_0 _)) as H1.
-  remember (a mod 4) as r eqn:Hr; symmetry in Hr.
-  destruct r. {
-    rewrite <- (Nat.mul_1_r 4), H1, Nat.add_0_r in Hg.
-    rewrite Nat.gcd_mul_mono_l in Hg.
-    flia Hg.
-  }
-  destruct r; [ easy | clear Han ].
-  destruct r. {
-    replace 4 with (2 * 2) in Hg by easy.
-    replace (4 * (a / 4) + 2) with (2 * (2 * (a / 4) + 1)) in H1 by ring.
-    rewrite H1 in Hg.
-    rewrite Nat.gcd_mul_mono_l in Hg.
-    flia Hg.
-  }
-  destruct r. {
-...
+specialize (euler_fermat_little n a Hnz Haz Hg) as H2.
+rewrite (Nat.mod_small 1) in H2; [ | easy ].
+revert H2; apply H1.
+specialize (φ_interv n H2n) as H2.
+flia H2.
+Qed.
 
 Theorem ord_mod_divisor : ∀ n a b,
   Nat.gcd a n = 1
@@ -3219,15 +3148,8 @@ destruct (lt_dec b (ord_mod n a)) as [Hbo| Hbo]. {
 }
 apply Nat.nlt_ge in Hbo.
 destruct (Nat.eq_dec (ord_mod n a) 0) as [Hoz| Hoz]. {
-Print ord_mod_aux.
-...
-specialize (Nat.div_mod b (ord_mod n a)) as H1.
-assert (H : ord_mod n a ≠ 0). {
-  intros H.
-  unfold ord_mod in H.
-Print ord_mod_aux.
-Search ord_mod.
-  intros H; rewrite H in Han.
+  now apply ord_mod_neq_0 in Hoz.
+}
 ...
 
 (* https://wstein.org/edu/2007/spring/ent/ent-html/node29.html *)
