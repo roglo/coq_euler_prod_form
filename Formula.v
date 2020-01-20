@@ -3297,6 +3297,10 @@ Theorem glop : ∀ p, prime p → ∃ a, is_prime_root p a = true.
 Proof.
 intros * Hp.
 unfold is_prime_root.
+enough (H : ∃ a, length (prime_root_cycle p a) = p - 1). {
+  destruct H as (a, H); exists a.
+  now apply Nat.eqb_eq in H.
+}
 remember (prime_divisors (p - 1)) as pd eqn:Hpd.
 (* https://wstein.org/edu/2007/spring/ent/ent-html/node29.html *)
 ...
