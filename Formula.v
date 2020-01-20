@@ -3158,6 +3158,18 @@ destruct (Nat.eq_dec (b mod ord_mod n a) 0) as [Hmz| Hmz]. {
 }
 exfalso; apply Hmz; clear Hmz.
 (* https://math.stackexchange.com/questions/127109/order-of-an-element-modulo-n-divides-phin *)
+assert (H2 : a ^ (b mod ord_mod n a) ≡ 1 mod n). {
+  rewrite H1 in Habn.
+  rewrite Nat.pow_add_r in Habn.
+  rewrite Nat.pow_mul_r in Habn.
+  rewrite <- Nat.mul_mod_idemp_l in Habn; [ | flia H2n ].
+  rewrite <- Nat_mod_pow_mod in Habn.
+  rewrite Han in Habn.
+  rewrite Nat.pow_1_l in Habn.
+  rewrite Nat.mod_1_l in Habn; [ | easy ].
+  rewrite Nat.mul_1_l in Habn.
+  now rewrite <- (Nat.mod_1_l n) in Habn.
+}
 ...
 
 (* https://wstein.org/edu/2007/spring/ent/ent-html/node29.html *)
