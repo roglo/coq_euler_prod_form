@@ -3287,6 +3287,8 @@ destruct (lt_dec k 2) as [Hk2| Hk2]. {
   destruct k; [ now rewrite Nat.mul_1_l in Hk | flia Hk2 ].
 }
 apply Nat.nlt_ge in Hk2.
+exfalso.
+Inspect 2.
 ...
 destruct (lt_dec n 2) as [H2n| H2n]. {
   destruct n. {
