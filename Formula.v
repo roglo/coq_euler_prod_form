@@ -3289,40 +3289,7 @@ rewrite Hob in Hbo, Hbm.
 specialize (ord_mod_prop n (a * b) H2n Habn) as (Habo & Habm).
 rewrite <- Hd in Habo, Habm.
 rewrite Hrs in Habo.
-assert (Hss : s1 = s). {
-  apply (f_equal (λ x, x ^ (r / r1))) in Habo.
-  rewrite Nat.pow_1_l in Habo.
-  apply (f_equal (λ x, x mod n)) in Habo.
-  rewrite Nat_mod_pow_mod in Habo.
-  rewrite Nat.mod_1_l in Habo; [ | easy ].
-  rewrite <- Nat.pow_mul_r in Habo.
-  rewrite Nat.mul_shuffle0 in Habo.
-  assert (Hr1z : r1 ≠ 0). {
-    intros H; subst r1.
-    destruct Hr as (k, Hk).
-    rewrite Nat.mul_0_r in Hk.
-    rewrite Hk in Hoa.
-    now apply ord_mod_neq_0 in Hoa.
-  }
-  rewrite <- Nat.divide_div_mul_exact in Habo; [ | easy | easy ].
-  rewrite (Nat.mul_comm r1), Nat.div_mul in Habo; [ | easy ].
-  rewrite Nat.pow_mul_r in Habo.
-  rewrite Nat.pow_mul_l in Habo.
-  rewrite <- Nat_mod_pow_mod in Habo.
-  rewrite <- Nat.mul_mod_idemp_l in Habo; [ | flia H2n ].
-  rewrite Hao, Nat.mul_1_l in Habo.
-  rewrite Nat_mod_pow_mod in Habo.
-  rewrite <- Nat.pow_mul_r in Habo.
-  assert (H2 : Nat.divide s (r * s1)). {
-    rewrite <- Hob.
-    now apply ord_mod_divisor.
-  }
-  apply Nat.gauss in H2; [ | now rewrite Nat.gcd_comm ].
-  move Hs at bottom.
-  now apply Nat.divide_antisym.
-}
 assert (Hrr : r1 = r). {
-  clear Hss.
   apply (f_equal (λ x, x ^ (s / s1))) in Habo.
   rewrite Nat.pow_1_l in Habo.
   apply (f_equal (λ x, x mod n)) in Habo.
@@ -3353,6 +3320,39 @@ assert (Hrr : r1 = r). {
   }
   apply Nat.gauss in H2; [ | easy ].
   move Hr at bottom.
+  now apply Nat.divide_antisym.
+}
+assert (Hss : s1 = s). {
+  clear Hrr.
+  apply (f_equal (λ x, x ^ (r / r1))) in Habo.
+  rewrite Nat.pow_1_l in Habo.
+  apply (f_equal (λ x, x mod n)) in Habo.
+  rewrite Nat_mod_pow_mod in Habo.
+  rewrite Nat.mod_1_l in Habo; [ | easy ].
+  rewrite <- Nat.pow_mul_r in Habo.
+  rewrite Nat.mul_shuffle0 in Habo.
+  assert (Hr1z : r1 ≠ 0). {
+    intros H; subst r1.
+    destruct Hr as (k, Hk).
+    rewrite Nat.mul_0_r in Hk.
+    rewrite Hk in Hoa.
+    now apply ord_mod_neq_0 in Hoa.
+  }
+  rewrite <- Nat.divide_div_mul_exact in Habo; [ | easy | easy ].
+  rewrite (Nat.mul_comm r1), Nat.div_mul in Habo; [ | easy ].
+  rewrite Nat.pow_mul_r in Habo.
+  rewrite Nat.pow_mul_l in Habo.
+  rewrite <- Nat_mod_pow_mod in Habo.
+  rewrite <- Nat.mul_mod_idemp_l in Habo; [ | flia H2n ].
+  rewrite Hao, Nat.mul_1_l in Habo.
+  rewrite Nat_mod_pow_mod in Habo.
+  rewrite <- Nat.pow_mul_r in Habo.
+  assert (H2 : Nat.divide s (r * s1)). {
+    rewrite <- Hob.
+    now apply ord_mod_divisor.
+  }
+  apply Nat.gauss in H2; [ | now rewrite Nat.gcd_comm ].
+  move Hs at bottom.
   now apply Nat.divide_antisym.
 }
 now subst r1 s1.
