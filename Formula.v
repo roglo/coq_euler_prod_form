@@ -3029,123 +3029,6 @@ intros * Hs.
 now destruct b.
 Qed.
 
-(*
-Theorem eq_all_pow_mod_nil : ∀ n a, all_pow_mod n a = [] → n ≤ 1.
-Proof.
-intros * Hna.
-unfold all_pow_mod in Hna.
-apply map_eq_nil in Hna.
-apply List_seq_eq_nil in Hna.
-flia Hna.
-Qed.
-
-Theorem all_pow_mod_length : ∀ n a, length (all_pow_mod n a) = n - 1.
-Proof.
-intros.
-unfold all_pow_mod.
-now rewrite map_length, seq_length.
-Qed.
-*)
-
-(*
-Theorem all_pow_mod_hd : ∀ n a, a < n → hd a (all_pow_mod n a) = a.
-Proof.
-intros * Han.
-destruct n; [ easy | cbn ].
-rewrite Nat.sub_0_r.
-destruct n; [ easy | ].
-cbn - [ "mod" ].
-rewrite Nat.mul_mod_idemp_r; [ | easy ].
-now rewrite Nat.mul_1_r, Nat.mod_small.
-Qed.
-*)
-
-(*
-Theorem all_pow_mod_mod : ∀ n a, all_pow_mod n (a mod n) = all_pow_mod n a.
-Proof.
-intros.
-destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
-unfold all_pow_mod.
-remember (seq 1 (n - 1)) as l eqn:Hl; clear Hl.
-induction l as [| b l]; [ easy | ].
-cbn - [ "mod" ].
-rewrite Nat_pow_mod_is_pow_mod; [ | easy ].
-rewrite Nat_pow_mod_is_pow_mod; [ | easy ].
-rewrite Nat_mod_pow_mod.
-now rewrite IHl.
-Qed.
-
-Theorem nth_all_pow_mod : ∀ n a i,
-  i < n - 1 → nth i (all_pow_mod n a) (0, 0) = (S i, a ^ S i mod n).
-Proof.
-intros * Hin.
-unfold all_pow_mod.
-rewrite (List_map_nth_in _ 0); [ | now rewrite seq_length ].
-rewrite Nat_pow_mod_is_pow_mod; [ | flia Hin ].
-now rewrite seq_nth.
-Qed.
-*)
-
-(*
-Theorem app_nth_List_find_nth : ∀ f l,
-  (∃ i, f (nth i l 0) = true)
-  → f (nth (List_find_nth f l) l 0) = true.
-Proof.
-intros * Hf.
-induction l as [| a l]. {
-  cbn.
-  destruct Hf as (i, Hi).
-  cbn in Hi.
-  now destruct i.
-}
-cbn.
-remember (f a) as c eqn:Hc; symmetry in Hc.
-destruct c; [ easy | ].
-apply IHl.
-destruct Hf as (i, Hi).
-destruct i. {
-  cbn in Hi.
-  now rewrite Hi in Hc.
-}
-now cbn in Hi; exists i.
-Qed.
-*)
-
-(*
-Theorem in_all_pow_mod : ∀ n a i j,
-  (i, j) ∈ all_pow_mod n a
-  → a ^ i mod n = j.
-Proof.
-intros * Hij.
-unfold all_pow_mod in Hij.
-apply in_map_iff in Hij.
-destruct Hij as (x & Hij & Hx).
-injection Hij; clear Hij; intros; subst x j.
-rewrite Nat_pow_mod_is_pow_mod; [ easy | ].
-now intros H; subst n.
-Qed.
-
-Theorem in_filter_all_pow_mod_snd : ∀ n a x,
-  x ∈ filter (λ x, snd x =? 1) (all_pow_mod n a) → snd x = 1.
-Proof.
-intros * Hx.
-apply filter_In in Hx.
-destruct Hx as (Hxn, Hx1).
-now apply Nat.eqb_eq in Hx1.
-Qed.
-
-Theorem in_filter_all_pow_mod_fst : ∀ n a x,
-  x ∈ filter (λ x, snd x =? 1) (all_pow_mod n a) → a ^ fst x mod n = 1.
-Proof.
-intros * Hx.
-apply filter_In in Hx.
-destruct x as (i, b); cbn in Hx; cbn.
-destruct Hx as (Hxn, Hx1).
-apply in_all_pow_mod in Hxn.
-now apply Nat.eqb_eq in Hx1; subst b.
-Qed.
-*)
-
 Lemma ord_mod_aux_prop : ∀ it n a i,
   n + 1 ≤ it + i
   → (∀ j, 1 ≤ j < i → (a ^ j) mod n ≠ 1)
@@ -3198,49 +3081,6 @@ intros j Hj.
 flia Hj.
 Qed.
 
-(*
-Lemma ord_mod_aux_it_0_0 : ∀ it i, ord_mod_aux it 0 0 i = 0.
-Proof.
-intros.
-revert i.
-induction it; intros; [ easy | cbn; destruct i; apply IHit ].
-Qed.
-
-Lemma ord_mod_aux_0_r : ∀ it n i,
-  n + 1 ≤ it + i
-  → ord_mod_aux it n 0 i = 0.
-Proof.
-intros * Hni.
-destruct (lt_dec n 2) as [H2n| H2n]. {
-  destruct n. {
-    destruct it; [ easy | ].
-    destruct i; apply ord_mod_aux_it_0_0.
-  }
-  destruct n; [ | flia H2n ].
-  clear Hni.
-  revert i.
-  induction it; intros; [ easy | cbn ].
-  rewrite Nat_pow_mod_is_pow_mod; [ cbn | easy ].
-  apply IHit.
-}
-apply Nat.nlt_ge in H2n.
-revert i Hni.
-induction it; intros; [ easy | cbn ].
-rewrite Nat_pow_mod_is_pow_mod; [ | flia H2n ].
-destruct i; [ now rewrite Nat.mod_1_l | ].
-rewrite Nat.pow_0_l; [ | easy ].
-rewrite Nat.mod_0_l; [ cbn | flia H2n ].
-apply IHit.
-flia Hni.
-Qed.
-
-Theorem ord_mod_0_r : ∀ n, n ≠ 0 → ord_mod n 0 = 0.
-Proof.
-intros * Hnz.
-now apply ord_mod_aux_0_r.
-Qed.
-*)
-
 Theorem ord_mod_1_r : ∀ n, 2 ≤ n → ord_mod n 1 = 1.
 Proof.
 intros * H2n.
@@ -3251,83 +3091,31 @@ rewrite Nat.pow_1_r.
 rewrite Nat.mod_1_l; [ easy | flia H2n ].
 Qed.
 
-(*
-Lemma eq_ord_mod_aux_0 : ∀ it n a i,
-  2 ≤ n
-  → i < n
-  → n + 1 = it + i
-  → ord_mod_aux it n a i = 0
-  → a = 0.
-Proof.
-intros * H2n Hin Hni Ho.
-revert i Hin Hni Ho.
-induction it; intros. {
-  cbn in Ho.
-  flia Hin Hni.
-}
-cbn in Ho.
-rewrite Nat_pow_mod_is_pow_mod in Ho; [ | flia Hin ].
-destruct (Nat.eq_dec (a ^ i mod n) 1) as [Ha1| Ha1]. {
-  subst i.
-  rewrite Nat.pow_0_r in Ha1.
-  apply (IHit 1); [ easy | flia Hni | ].
-Search ord_mod_aux.
-apply ord_mod_aux_prop.
-...
-*)
-
-(*
-Lemma ord_mod_aux_neq_0 : ∀ it n a i,
-  2 ≤ n
-  → i < n
-  → n + 1 = it + i
-  → Nat.gcd a n = 1
-  → ord_mod_aux it n a i ≠ 0.
-Proof.
-intros * H2n Hin Hni Hg.
-Compute (ord_mod_aux 42 42 1 1).
-Compute (ord_mod 2 7).
-revert i Hin Hni.
-induction it; intros; [ flia Hin Hni | cbn ].
-rewrite Nat_pow_mod_is_pow_mod; [ | flia Hin ].
-destruct (Nat.eq_dec (a ^ i mod n) 1) as [Ha1| Ha1]. {
-  intros H; subst i.
-  rewrite Nat.add_0_r, <- (Nat.add_1_r it) in Hni.
-  rewrite Nat.pow_0_r in Ha1.
-  rewrite Nat.mod_small in Ha1; [ | easy ].
-  clear Ha1.
-...
-  specialize (IHit 1 H2n Hni) as H1.
-Print ord_mod_aux.
-...
-  specialize (IHit 1 H2n Hni) as H1.
-Search ord_mod_aux.
-specialize (ord_mod_aux_prop it n a 1) as H2.
-assert (H : n + 1 ≤ it + 1) by flia Hni.
-specialize (H2 H); clear H.
-assert (H : ∀ j, 1 ≤ j < 1 → a ^ j mod n ≠ 1); [ flia | ].
-specialize (H2 H H2n Hg); clear H.
-Print ord_mod_aux.
-Print ord_mod.
-...
-*)
-
 Lemma eq_ord_mod_aux_0 : ∀ it n a i,
   n ≠ 0
   → i ≠ 0
   → ord_mod_aux it n a i = 0
-  → it = 0 ∨ a ^ i mod n ≠ 1 ∧ ord_mod_aux (it - 1) n a (i + 1) = 0.
+  → ∀ j, i ≤ j < i + it → a ^ j mod n ≠ 1.
 Proof.
-intros * Hnz Hiz Ho.
-destruct it; [ now left | right ].
+intros * Hnz Hiz Ho * Hj.
+revert i Hiz Ho Hj.
+induction it; intros; [ flia Hj | ].
 cbn in Ho.
 rewrite Nat_pow_mod_is_pow_mod in Ho; [ | easy ].
 destruct (Nat.eq_dec (a ^ i mod n) 1) as [Hai| Hai]; [ easy | ].
-now rewrite Nat.sub_succ, Nat.sub_0_r.
+destruct (Nat.eq_dec i j) as [Hij| Hij]; [ now subst i | ].
+apply (IHit (i + 1)); [ flia | easy | ].
+split; [ flia Hj Hij | flia Hj ].
 Qed.
 
 Theorem ord_mod_neq_0 : ∀ n a, 2 ≤ n → Nat.gcd a n = 1 → ord_mod n a ≠ 0.
 Proof.
+intros * H2n Hg Ho.
+destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
+unfold ord_mod in Ho.
+specialize (eq_ord_mod_aux_0 n n a 1 Hnz (Nat.neq_succ_0 _) Ho) as H1.
+...
+
 intros * H2n Hg Ho.
 unfold ord_mod in Ho.
 apply eq_ord_mod_aux_0 in Ho; [ | flia H2n | easy ].
