@@ -3151,6 +3151,13 @@ destruct (Nat.eq_dec (ord_mod n a) 0) as [Hoz| Hoz]. {
   now apply ord_mod_neq_0 in Hoz.
 }
 specialize (Nat.div_mod b (ord_mod n a) Hoz) as H1.
+destruct (Nat.eq_dec (b mod ord_mod n a) 0) as [Hmz| Hmz]. {
+  rewrite Hmz, Nat.add_0_r in H1.
+  exists (b / ord_mod n a).
+  now rewrite Nat.mul_comm.
+}
+exfalso; apply Hmz; clear Hmz.
+(* https://math.stackexchange.com/questions/127109/order-of-an-element-modulo-n-divides-phin *)
 ...
 
 (* https://wstein.org/edu/2007/spring/ent/ent-html/node29.html *)
