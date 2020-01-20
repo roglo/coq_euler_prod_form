@@ -3273,6 +3273,15 @@ destruct (lt_dec n 2) as [H2n| H2n]. {
 apply Nat.nlt_ge in H2n.
 specialize (ord_mod_mul_divide n a b r s Han Hbn Hg Hoa Hob) as H1.
 (* https://wstein.org/edu/2007/spring/ent/ent-html/node29.html *)
+remember (ord_mod n (a * b)) as d eqn:Hd.
+...
+specialize (Nat.gauss _ _ _ H1) as H2.
+assert (H : Nat.gcd d r = 1). {
+...
+assert
+  (∃ r1 s1,
+   ord_mod n (a * b) = r1 * s1 ∧ Nat.divide r1 r ∧ Nat.divide s1 s). {
+Search (Nat.divide _ (_ * _)).
 unfold Nat.divide in H1.
 ...
 destruct H1 as (k, Hk).
