@@ -3282,10 +3282,14 @@ assert (H : d ≠ 0). {
 }
 specialize (H2 H H1); clear H.
 destruct H2 as (r1 & s1 & Hrs & Hr & Hs).
+specialize (ord_mod_prop n a H2n Han) as (Hao & Ham).
+rewrite Hoa in Hao, Ham.
+specialize (ord_mod_prop n b H2n Hbn) as (Hbo & Hbm).
+rewrite Hob in Hbo, Hbm.
+specialize (ord_mod_prop n (a * b) H2n Habn) as (Habo & Habm).
+rewrite <- Hd in Habo, Habm.
+rewrite Hrs in Habo.
 assert (Hss : s1 = s). {
-  specialize (ord_mod_prop n (a * b) H2n Habn) as (Habo & Habm).
-  rewrite <- Hd in Habo.
-  rewrite Hrs in Habo.
   apply (f_equal (λ x, x ^ (r / r1))) in Habo.
   rewrite Nat.pow_1_l in Habo.
   apply (f_equal (λ x, x mod n)) in Habo.
@@ -3306,13 +3310,9 @@ assert (Hss : s1 = s). {
   rewrite Nat.pow_mul_l in Habo.
   rewrite <- Nat_mod_pow_mod in Habo.
   rewrite <- Nat.mul_mod_idemp_l in Habo; [ | flia H2n ].
-  specialize (ord_mod_prop n a H2n Han) as (Hao & Ham).
-  rewrite Hoa in Hao, Ham.
   rewrite Hao, Nat.mul_1_l in Habo.
   rewrite Nat_mod_pow_mod in Habo.
   rewrite <- Nat.pow_mul_r in Habo.
-  specialize (ord_mod_prop n b H2n Hbn) as (Hbo & Hbm).
-  rewrite Hob in Hbo, Hbm.
   assert (H2 : Nat.divide s (r * s1)). {
     rewrite <- Hob.
     now apply ord_mod_divisor.
@@ -3323,9 +3323,6 @@ assert (Hss : s1 = s). {
 }
 assert (Hrr : r1 = r). {
   clear Hss.
-  specialize (ord_mod_prop n (a * b) H2n Habn) as (Habo & Habm).
-  rewrite <- Hd in Habo.
-  rewrite Hrs in Habo.
   apply (f_equal (λ x, x ^ (s / s1))) in Habo.
   rewrite Nat.pow_1_l in Habo.
   apply (f_equal (λ x, x mod n)) in Habo.
@@ -3347,13 +3344,9 @@ assert (Hrr : r1 = r). {
   rewrite Nat.pow_mul_l in Habo.
   rewrite <- Nat_mod_pow_mod in Habo.
   rewrite <- Nat.mul_mod_idemp_r in Habo; [ | flia H2n ].
-  specialize (ord_mod_prop n b H2n Hbn) as (Hbo & Hbm).
-  rewrite Hob in Hbo, Hbm.
   rewrite Hbo, Nat.mul_1_r in Habo.
   rewrite Nat_mod_pow_mod in Habo.
   rewrite <- Nat.pow_mul_r in Habo.
-  specialize (ord_mod_prop n a H2n Han) as (Hao & Ham).
-  rewrite Hoa in Hao, Ham.
   assert (H2 : Nat.divide r (s * r1)). {
     rewrite <- Hoa.
     now apply ord_mod_divisor.
