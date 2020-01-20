@@ -2692,62 +2692,6 @@ Fixpoint in_list_nat n l :=
 
 Definition is_quad_res p n := in_list_nat n (quad_res p).
 
-Compute (let p := 13 in (prime_roots p, sort Nat.leb (quad_res p))).
-Compute (let (p, n) := (13, 5) in (is_prime_root p n, is_quad_res p n)).
-Compute (let (p, n) := (13, 5) in map (λ i, Nat_pow_mod n i p) (seq 1 (p - 1))).
-
-(*
-Theorem exists_nonresidue : ∀ p,
-  prime p → 3 ≤ p → ∃ a, ∀ b, b ^ 2 mod p ≠ a mod p.
-Proof.
-intros * Hp H3p.
-eapply (not_forall_in_interv_imp_exist 1 (p - 1)); [ | flia H3p | ]. {
-  intros.
-  unfold Decidable.decidable.
-...
-assert (H : ¬ ∀ a, ∃ b, b ^ 2 mod p = a mod p). {
-  intros Hcon.
-...
-(*
-remember (p - 3) as q eqn:Hq; symmetry in Hq.
-clear Hp.
-revert p (*Hp*) H3p Hq.
-induction q; intros. {
-  replace p with 3 by flia H3p Hq.
-  exists 2.
-  intros b Hb.
-  replace (2 mod 3) with 2 in Hb by easy.
-  rewrite Nat.pow_2_r in Hb.
-  rewrite <- Nat.mul_mod_idemp_l in Hb; [ | easy ].
-  rewrite <- Nat.mul_mod_idemp_r in Hb; [ | easy ].
-  clear - Hb.
-  remember (b mod 3) as n eqn:Hn; symmetry in Hn.
-  destruct n; [ easy | ].
-  destruct n; [ easy | ].
-  destruct n; [ easy | ].
-  specialize (Nat.mod_upper_bound b 3 (Nat.neq_succ_0 _)) as H1.
-  rewrite Hn in H1; flia H1.
-}
-destruct p; [ easy | ].
-specialize (IHq p) as H1.
-...
-*)
-intros * Hp H3p.
-apply (not_forall_in_interv_imp_exist 1 (p - 1)); [ | flia H3p | ]. {
-  intros.
-...
-*)
-
-(*
-Theorem not_all_div_2_mod_add_1_eq_1 : ∀ a,
-  2 ≤ a
-  → (∀ b, 1 ≤ b ≤ a → b ^ (a / 2) mod (a + 1) = 1)
-  → False.
-Proof.
-intros * H3a Hcon.
-...
-*)
-
 (* Euler's theorem *)
 
 Theorem different_coprimes_all_different_multiples : ∀ n a,
@@ -3349,6 +3293,14 @@ assert (Hss : s1 = s). {
 now subst r1 s1.
 Qed.
 
+Theorem glop : ∀ p, prime p → ∃ a, is_prime_root p a = true.
+Proof.
+intros * Hp.
+unfold is_prime_root.
+remember (prime_divisors (p - 1)) as pd eqn:Hpd.
+(* https://wstein.org/edu/2007/spring/ent/ent-html/node29.html *)
+...
+
 Theorem glop : ∀ p, prime p → ∃ a, a ^ ((p - 1) / 2) mod p = p - 1.
 Proof.
 intros * Hp.
@@ -3356,6 +3308,9 @@ destruct (Nat.eq_dec p 2) as [Hp2| Hp2]; [ now exists 1; subst p | ].
 assert (H2p : 2 ≤ p) by now apply prime_ge_2.
 assert (H3p : 3 ≤ p) by flia Hp2 H2p.
 clear Hp2 H2p.
+...
+remember (prime_divisors (p - 1)) as pd eqn:Hpd.
+(* https://wstein.org/edu/2007/spring/ent/ent-html/node29.html *)
 ...
 (* a must be a quadratic nonresidue of p *)
 (* https://en.wikipedia.org/wiki/Euler%27s_criterion *)
