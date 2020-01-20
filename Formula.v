@@ -3014,6 +3014,7 @@ Fixpoint ord_mod_aux it n a i :=
 
 Definition ord_mod n a := ord_mod_aux n n a 1.
 
+(*
 Definition unsome {A} x (d : A) :=
   match x with Some y => y | None => d end.
 Definition all_pow_mod' n a :=
@@ -3022,6 +3023,7 @@ Definition ord_mod' n a :=
   fst (hd (n + 1, 0) (filter (λ x, snd x =? 1) (all_pow_mod' n a))).
 Compute (let (n, a) := (3, 5) in (ord_mod n a, ord_mod' n a)).
 Compute (let n := 18 in map (λ a, (ord_mod n a, ord_mod' n a)) (seq 1 n)).
+*)
 
 Theorem List_seq_eq_nil : ∀ a b, seq a b = [] → b = 0.
 Proof.
@@ -3358,10 +3360,6 @@ assert (Hss : s1 = s). {
 now subst r1 s1.
 Qed.
 
-Inspect 1.
-
-...
-
 Theorem glop : ∀ p, prime p → ∃ a, a ^ ((p - 1) / 2) mod p = p - 1.
 Proof.
 intros * Hp.
@@ -3369,6 +3367,7 @@ destruct (Nat.eq_dec p 2) as [Hp2| Hp2]; [ now exists 1; subst p | ].
 assert (H2p : 2 ≤ p) by now apply prime_ge_2.
 assert (H3p : 3 ≤ p) by flia Hp2 H2p.
 clear Hp2 H2p.
+...
 (* a must be a quadratic nonresidue of p *)
 (* https://en.wikipedia.org/wiki/Euler%27s_criterion *)
 ...
