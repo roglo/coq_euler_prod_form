@@ -3303,6 +3303,12 @@ enough (H : ∃ a, length (prim_root_cycle p a) = p - 1). {
 }
 remember (prime_divisors (p - 1)) as pd eqn:Hpd.
 (* https://wstein.org/edu/2007/spring/ent/ent-html/node29.html *)
+Compute (prim_roots 13, quad_res 13).
+Compute (map (prim_root_cycle 13) [1; 5; 8; 12]).
+Compute (map (prim_root_cycle 13) [1; 3; 9]).
+Compute (map (λ x, x mod 13) [15; 45; 24; 72]).
+Compute (map (prim_root_cycle 13) [2; 6; 11; 7]).
+Compute (prime_decomp 12).
 ...
 
 Theorem glop : ∀ p, prime p → ∃ a, a ^ ((p - 1) / 2) mod p = p - 1.
