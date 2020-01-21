@@ -2669,20 +2669,20 @@ Qed.
 
 (* primitive roots *)
 
-Fixpoint prime_root_cycle_loop n g gr it :=
+Fixpoint prim_root_cycle_loop n g gr it :=
   match it with
   | 0 => []
   | S it' =>
       let gr' := (g * gr) mod n in
       if gr' =? g then [gr]
-      else gr :: prime_root_cycle_loop n g gr' it'
+      else gr :: prim_root_cycle_loop n g gr' it'
   end.
 
-Definition prime_root_cycle n g := prime_root_cycle_loop n g g (n - 1).
+Definition prim_root_cycle n g := prim_root_cycle_loop n g g (n - 1).
 
-Definition is_prime_root n g := length (prime_root_cycle n g) =? n - 1.
+Definition is_prim_root n g := length (prim_root_cycle n g) =? n - 1.
 
-Definition prime_roots n := filter (is_prime_root n) (seq 1 (n - 1)).
+Definition prim_roots n := filter (is_prim_root n) (seq 1 (n - 1)).
 
 Fixpoint in_list_nat n l :=
   match l with
@@ -3293,11 +3293,11 @@ assert (Hss : s1 = s). {
 now subst r1 s1.
 Qed.
 
-Theorem glop : ∀ p, prime p → ∃ a, is_prime_root p a = true.
+Theorem glop : ∀ p, prime p → ∃ a, is_prim_root p a = true.
 Proof.
 intros * Hp.
-unfold is_prime_root.
-enough (H : ∃ a, length (prime_root_cycle p a) = p - 1). {
+unfold is_prim_root.
+enough (H : ∃ a, length (prim_root_cycle p a) = p - 1). {
   destruct H as (a, H); exists a.
   now apply Nat.eqb_eq in H.
 }
