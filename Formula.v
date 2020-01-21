@@ -3331,6 +3331,16 @@ Print prim_roots.
 Print is_prim_root.
 Print prim_root_cycle.
 
+Theorem eq_list_with_occ_nil : ∀ l, list_with_occ l = [] → l = [].
+Proof.
+intros * Hl.
+destruct l as [| a l]; [ easy | exfalso ].
+cbn in Hl.
+destruct (list_with_occ l); [ easy | ].
+destruct p.
+now destruct (Nat.eq_dec a n).
+Qed.
+
 Theorem prim_roots'_are_prim_roots :
   ∀ p a, a ∈ prim_roots' p ↔
   (∀ i, 1 ≤ i ≤ p - 1 → ∃ j, a ^ j ≡ i mod p).
@@ -3338,7 +3348,34 @@ Proof.
 intros.
 split. {
   intros Hap * Hip.
-
+  unfold prim_roots' in Hap.
+  rewrite map_map in Hap.
+  remember (prime_decomp_pow (p - 1)) as l eqn:Hl; symmetry in Hl.
+  induction l as [| x l]. {
+    cbn in Hap.
+    destruct Hap as [Hap| Hap]; [ | easy ].
+    unfold prime_decomp_pow in Hl.
+    apply eq_list_with_occ_nil in Hl.
+    apply prime_decomp_nil_iff in Hl.
+    destruct Hl as [Hp| Hp]; [ flia Hp Hip | ].
+    replace i with 1 by flia Hp Hip; subst a.
+    exists 1.
+    now rewrite Nat.pow_1_r.
+  }
+  cbn in Hap.
+  destruct x as (d, q).
+  rewrite app_nil_r in Hap.
+  rewrite (map_map _ (λ '(x, y), (x * y) mod p)) in Hap.
+Lemma map_mul_1_l_mod : ∀ p l,
+  map (λ x, (1 * x) mod p) l = map (λ x, x mod p) l.
+Proof.
+intros.
+induction l as [| a l]; [ easy | ].
+cbn - [ Nat.mul ].
+rewrite Nat.mul_1_l.
+now rewrite IHl.
+...
+  rewrite Nat.mul_1_l in Hap.
 ...
 
 Theorem glop : ∀ p, prime p → ∃ a, is_prim_root p a = true.
