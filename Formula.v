@@ -3293,6 +3293,42 @@ assert (Hss : s1 = s). {
 now subst r1 s1.
 Qed.
 
+Fixpoint list_with_occ l :=
+  match l with
+  | [] => []
+  | x :: l' =>
+      match list_with_occ l' with
+      | [] => [(x, 1)]
+      | (y, c) :: l' =>
+          if Nat.eq_dec x y then (x, c + 1) :: l'
+          else (x, 1) :: (y, c) :: l'
+      end
+  end.
+
+Definition prime_decomp_pow p := list_with_occ (prime_decomp p).
+
+(* roots of equation x^n ≡ 1 mod p *)
+Definition roots_pow_sub_1_mod n p :=
+  filter (λ i, Nat_pow_mod i n p =? 1) (seq 1 p).
+
+Definition prim_roots' p :=
+  let l := prime_decomp_pow (p - 1) in
+  let l' :=
+    map
+      (λ '(d, q),
+       (roots_pow_sub_1_mod (d ^ q) p,
+        roots_pow_sub_1_mod (d ^ (q - 1)) p)) l
+  in
+  let l'' :=
+    map (λ '(l1, l2), fold_left (λ l x2, remove Nat.eq_dec x2 l) l2 l1) l'
+  in
+  fold_left (λ l1 l2, map (λ '(x, y), x * y mod 31) (list_prod l1 l2))
+     l'' [1].
+
+Compute (let p := 17 in (sort Nat.leb (prim_roots' p), prim_roots p)).
+
+...
+
 Theorem glop : ∀ p, prime p → ∃ a, is_prim_root p a = true.
 Proof.
 intros * Hp.
@@ -3309,6 +3345,7 @@ Compute (map (prim_root_cycle 13) [1; 3; 9]).
 Compute (map (λ x, x mod 13) [15; 45; 24; 72]).
 Compute (map (prim_root_cycle 13) [2; 6; 11; 7]).
 Compute (prime_decomp 12).
+About prime_decomp.
 ...
 
 Theorem glop : ∀ p, prime p → ∃ a, a ^ ((p - 1) / 2) mod p = p - 1.
