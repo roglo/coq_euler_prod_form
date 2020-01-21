@@ -3309,7 +3309,7 @@ Definition prime_decomp_pow p := list_with_occ (prime_decomp p).
 
 (* roots of equation x^n ≡ 1 mod p *)
 Definition roots_pow_sub_1_mod n p :=
-  filter (λ i, Nat_pow_mod i n p =? 1) (seq 1 p).
+  filter (λ i, Nat_pow_mod i n p =? 1) (seq 1 (p - 1)).
 
 Definition prim_roots' p :=
   let l := prime_decomp_pow (p - 1) in
@@ -3325,11 +3325,8 @@ Definition prim_roots' p :=
   fold_left (λ l1 l2, map (λ '(x, y), x * y mod p) (list_prod l1 l2))
      l'' [1].
 
+Compute (let p := 13 in (sort Nat.leb (prim_roots' p), (prim_roots p))).
 Compute (let p := 13 in combine (sort Nat.leb (prim_roots' p)) (prim_roots p)).
-
-Print prim_roots.
-Print is_prim_root.
-Print prim_root_cycle.
 
 Theorem eq_list_with_occ_nil : ∀ l, list_with_occ l = [] → l = [].
 Proof.
@@ -3339,6 +3336,37 @@ cbn in Hl.
 destruct (list_with_occ l); [ easy | ].
 destruct p.
 now destruct (Nat.eq_dec a n).
+Qed.
+
+Lemma map_mul_1_l_mod : ∀ p l,
+  (∀ x, x ∈ l → x < p)
+  → map (λ x, (1 * x) mod p) l = l.
+Proof.
+intros * Hlt.
+induction l as [| a l]; [ easy | ].
+cbn - [ Nat.mul ].
+rewrite Nat.mul_1_l.
+f_equal. {
+  apply Nat.mod_small.
+  now apply Hlt; left.
+}
+apply IHl.
+intros x Hx.
+now apply Hlt; right.
+Qed.
+
+Theorem List_in_remove {A} : ∀ eq_dec x y (l : list A),
+  y ∈ remove eq_dec x l → y ∈ l.
+Proof.
+intros * Hy.
+induction l as [| z l]; [ easy | ].
+cbn in Hy; cbn.
+destruct (eq_dec x z) as [Hxz| Hxz]. {
+  now right; subst z; apply IHl.
+} {
+  destruct Hy as [Hy| Hy]; [ now left | ].
+  now right; apply IHl.
+}
 Qed.
 
 Theorem prim_roots'_are_prim_roots :
@@ -3366,16 +3394,27 @@ split. {
   destruct x as (d, q).
   rewrite app_nil_r in Hap.
   rewrite (map_map _ (λ '(x, y), (x * y) mod p)) in Hap.
-Lemma map_mul_1_l_mod : ∀ p l,
-  map (λ x, (1 * x) mod p) l = map (λ x, x mod p) l.
-Proof.
-intros.
-induction l as [| a l]; [ easy | ].
-cbn - [ Nat.mul ].
-rewrite Nat.mul_1_l.
-now rewrite IHl.
-...
-  rewrite Nat.mul_1_l in Hap.
+  rewrite map_mul_1_l_mod in Hap. 2: {
+    intros x Hx.
+    remember (roots_pow_sub_1_mod (d ^ q) p) as l1 eqn:Hl1.
+    remember (roots_pow_sub_1_mod (d ^ (q - 1)) p) as l2 eqn:Hl2.
+    assert (H : ∀ x, x ∈ l1 → x < p). {
+      intros y Hy.
+      rewrite Hl1 in Hy.
+      unfold roots_pow_sub_1_mod in Hy.
+      apply filter_In in Hy.
+      destruct Hy as (Hy, _).
+      apply in_seq in Hy.
+      flia Hy.
+    }
+    clear - Hx H.
+    revert l1 Hx H.
+    induction l2 as [| a l2]; intros; cbn in Hx; [ now apply H | ].
+    eapply IHl2; [ apply Hx | ].
+    intros y Hy.
+    apply List_in_remove in Hy.
+    apply H, Hy.
+  }
 ...
 
 Theorem glop : ∀ p, prime p → ∃ a, is_prim_root p a = true.
