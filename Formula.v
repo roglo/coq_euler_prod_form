@@ -3322,10 +3322,10 @@ Definition prim_roots' p :=
   let l'' :=
     map (λ '(l1, l2), fold_left (λ l x2, remove Nat.eq_dec x2 l) l2 l1) l'
   in
-  fold_left (λ l1 l2, map (λ '(x, y), x * y mod 31) (list_prod l1 l2))
+  fold_left (λ l1 l2, map (λ '(x, y), x * y mod p) (list_prod l1 l2))
      l'' [1].
 
-Compute (let p := 17 in (sort Nat.leb (prim_roots' p), prim_roots p)).
+Compute (let p := 13 in combine (sort Nat.leb (prim_roots' p)) (prim_roots p)).
 
 ...
 
