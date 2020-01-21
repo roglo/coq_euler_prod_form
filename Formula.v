@@ -3379,6 +3379,21 @@ split. {
   unfold prim_roots' in Hap.
   rewrite map_map in Hap.
   remember (prime_decomp_pow (p - 1)) as l eqn:Hl; symmetry in Hl.
+remember (fold_left
+            (λ l1 l2 : list nat,
+               map (λ '(x, y), (x * y) mod p) (list_prod l1 l2))
+            (map
+               (λ x : nat * nat,
+                  let
+                  '(l1, l2) :=
+                   let
+                   '(d, q) := x in
+                    (roots_pow_sub_1_mod (d ^ q) p,
+                    roots_pow_sub_1_mod (d ^ (q - 1)) p) in
+                   fold_left
+                     (λ (l : list nat) (x2 : nat), remove Nat.eq_dec x2 l) l2
+                     l1) l)) as f.
+...
   induction l as [| x l]. {
     cbn in Hap.
     destruct Hap as [Hap| Hap]; [ | easy ].
@@ -3415,6 +3430,22 @@ split. {
     apply List_in_remove in Hy.
     apply H, Hy.
   }
+  apply IHl; [ admit | ].
+  clear IHl.
+remember (fold_left
+            (λ l1 l2 : list nat,
+               map (λ '(x, y), (x * y) mod p) (list_prod l1 l2))
+            (map
+               (λ x : nat * nat,
+                  let
+                  '(l1, l2) :=
+                   let
+                   '(d, q) := x in
+                    (roots_pow_sub_1_mod (d ^ q) p,
+                    roots_pow_sub_1_mod (d ^ (q - 1)) p) in
+                   fold_left
+                     (λ (l : list nat) (x2 : nat), remove Nat.eq_dec x2 l) l2
+                     l1) l)) as f.
 ...
 
 Theorem glop : ∀ p, prime p → ∃ a, is_prim_root p a = true.
