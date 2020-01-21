@@ -3391,8 +3391,8 @@ split. {
     now rewrite Nat.pow_1_r.
   }
   cbn in Hap.
-  destruct x as (d, q).
   rewrite app_nil_r in Hap.
+  destruct x as (d, q).
   rewrite (map_map _ (λ '(x, y), (x * y) mod p)) in Hap.
   rewrite map_mul_1_l_mod in Hap. 2: {
     intros x Hx.
