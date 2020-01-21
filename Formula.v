@@ -3327,6 +3327,18 @@ Definition prim_roots' p :=
 
 Compute (let p := 13 in combine (sort Nat.leb (prim_roots' p)) (prim_roots p)).
 
+Print prim_roots.
+Print is_prim_root.
+Print prim_root_cycle.
+
+Theorem prim_roots'_are_prim_roots :
+  ∀ p a, a ∈ prim_roots' p ↔
+  (∀ i, 1 ≤ i ≤ p - 1 → ∃ j, a ^ j ≡ i mod p).
+Proof.
+intros.
+split. {
+  intros Hap * Hip.
+
 ...
 
 Theorem glop : ∀ p, prime p → ∃ a, is_prim_root p a = true.
