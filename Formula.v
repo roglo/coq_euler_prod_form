@@ -3344,8 +3344,6 @@ rewrite Nat.mod_1_l in H1; [ | easy ].
 now rewrite Nat.mul_1_l in H1.
 Qed.
 
-...
-
 Theorem glop : ∀ p d,
   prime p
   → Nat.divide d (p - 1)
