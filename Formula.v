@@ -3313,20 +3313,19 @@ Definition roots_pow_sub_1_mod n p :=
 
 Definition prim_roots' p :=
   let l := prime_decomp_pow (p - 1) in
-  let l' :=
+  let l'' :=
     map
       (λ '(d, q),
-       (roots_pow_sub_1_mod (d ^ q) p,
-        roots_pow_sub_1_mod (d ^ (q - 1)) p)) l
-  in
-  let l'' :=
-    map (λ '(l1, l2), fold_left (λ l x2, remove Nat.eq_dec x2 l) l2 l1) l'
+       let l1 := roots_pow_sub_1_mod (d ^ q) p in
+       let l2 := roots_pow_sub_1_mod (d ^ (q - 1)) p in
+       fold_left (λ l x2, remove Nat.eq_dec x2 l) l2 l1)
+    l
   in
   fold_left (λ l1 l2, map (λ '(x, y), x * y mod p) (list_prod l1 l2))
      l'' [1].
 
-Compute (let p := 13 in (sort Nat.leb (prim_roots' p), (prim_roots p))).
-Compute (let p := 13 in combine (sort Nat.leb (prim_roots' p)) (prim_roots p)).
+Compute (let p := 31 in (sort Nat.leb (prim_roots' p), (prim_roots p))).
+Compute (let p := 31 in combine (sort Nat.leb (prim_roots' p)) (prim_roots p)).
 
 Theorem eq_list_with_occ_nil : ∀ l, list_with_occ l = [] → l = [].
 Proof.
@@ -3377,22 +3376,14 @@ intros.
 split. {
   intros Hap * Hip.
   unfold prim_roots' in Hap.
-  rewrite map_map in Hap.
   remember (prime_decomp_pow (p - 1)) as l eqn:Hl; symmetry in Hl.
-remember (fold_left
-            (λ l1 l2 : list nat,
-               map (λ '(x, y), (x * y) mod p) (list_prod l1 l2))
-            (map
-               (λ x : nat * nat,
-                  let
-                  '(l1, l2) :=
-                   let
-                   '(d, q) := x in
-                    (roots_pow_sub_1_mod (d ^ q) p,
-                    roots_pow_sub_1_mod (d ^ (q - 1)) p) in
-                   fold_left
-                     (λ (l : list nat) (x2 : nat), remove Nat.eq_dec x2 l) l2
-                     l1) l)) as f.
+  remember
+    (fold_left (λ l1 l2, map (λ '(x, y), (x * y) mod p) (list_prod l1 l2))
+       (map
+          (λ '(d, q),
+           fold_left (λ (l : list nat) (x2 : nat), remove Nat.eq_dec x2 l)
+           (roots_pow_sub_1_mod (d ^ (q - 1)) p)
+           (roots_pow_sub_1_mod (d ^ q) p)) l)) as f eqn:Hf.
 ...
   induction l as [| x l]. {
     cbn in Hap.
@@ -3430,22 +3421,8 @@ remember (fold_left
     apply List_in_remove in Hy.
     apply H, Hy.
   }
-  apply IHl; [ admit | ].
+  apply IHl; [ ... | ].
   clear IHl.
-remember (fold_left
-            (λ l1 l2 : list nat,
-               map (λ '(x, y), (x * y) mod p) (list_prod l1 l2))
-            (map
-               (λ x : nat * nat,
-                  let
-                  '(l1, l2) :=
-                   let
-                   '(d, q) := x in
-                    (roots_pow_sub_1_mod (d ^ q) p,
-                    roots_pow_sub_1_mod (d ^ (q - 1)) p) in
-                   fold_left
-                     (λ (l : list nat) (x2 : nat), remove Nat.eq_dec x2 l) l2
-                     l1) l)) as f.
 ...
 
 Theorem glop : ∀ p, prime p → ∃ a, is_prim_root p a = true.
