@@ -3309,7 +3309,35 @@ Definition prime_decomp_pow p := list_with_occ (prime_decomp p).
 
 (* roots of equation x^n ≡ 1 mod p *)
 Definition roots_pow_sub_1_mod n p :=
-  filter (λ i, Nat_pow_mod i n p =? 1) (seq 1 (p - 1)).
+  filter (λ x, Nat_pow_mod x n p =? 1) (seq 1 (p - 1)).
+
+Compute (let '(n, p) := (2, 13) in roots_pow_sub_1_mod n p).
+Compute (let '(n, p) := (4, 13) in roots_pow_sub_1_mod n p).
+Compute (let '(n, p) := (3, 13) in roots_pow_sub_1_mod n p).
+
+Theorem glop : ∀ p d,
+  prime p
+  → Nat.divide d (p - 1)
+  → length (roots_pow_sub_1_mod d p) = d.
+Proof.
+intros * Hp Hdp.
+destruct Hdp as (e, He).
+unfold roots_pow_sub_1_mod.
+rewrite (filter_ext _ (λ x, x ^ d mod p =? 1)). 2: {
+  intros x.
+  rewrite Nat_pow_mod_is_pow_mod; [ easy | ].
+  now intros H; subst p.
+}
+(* https://wstein.org/edu/2007/spring/ent/ent-html/node28.html#prop:dsols *)
+...
+rewrite (filter_ext _ (λ x, x ^ ((p - 1) / e) mod p =? 1)). 2: {
+  intros x.
+  rewrite He, Nat.mul_comm, Nat.div_mul; [ easy | ].
+  intros H; subst e; cbn in He.
+  specialize (prime_ge_2 p Hp) as H.
+  flia He H.
+}
+...
 
 Definition prim_roots' p :=
   let l := prime_decomp_pow (p - 1) in
