@@ -3315,12 +3315,35 @@ Compute (let '(n, p) := (2, 13) in roots_pow_sub_1_mod n p).
 Compute (let '(n, p) := (4, 13) in roots_pow_sub_1_mod n p).
 Compute (let '(n, p) := (3, 13) in roots_pow_sub_1_mod n p).
 
-Theorem Couteau : ∀ a b n, a ^ (b mod φ n) ≡ a ^ b mod n.
+Theorem Couteau : ∀ a b n, a ≠ 0 → a ^ (b mod φ n) ≡ a ^ b mod n.
 Proof.
-intros.
-Search φ.
-Search (_ mod φ _).
-Search (_ mod (_ - _)).
+intros * Haz.
+destruct (lt_dec n 2) as [H2n| H2n]. {
+  destruct n; [ easy | ].
+  destruct n; [ easy | flia H2n ].
+}
+apply Nat.nlt_ge in H2n.
+specialize (Nat.div_mod b (φ n)) as H1.
+assert (H : φ n ≠ 0). {
+  specialize (φ_interv n H2n) as H2.
+  flia H2.
+}
+specialize (H1 H); clear H.
+apply (f_equal (λ x, a ^ x mod n)) in H1.
+rewrite Nat.pow_add_r in H1.
+rewrite Nat.pow_mul_r in H1.
+rewrite <- Nat.mul_mod_idemp_l in H1; [ | flia H2n ].
+rewrite <- (Nat_mod_pow_mod (a ^ φ n)) in H1.
+destruct (Nat.eq_dec (Nat.gcd a n) 1) as [Hg1| Hg1]. 2: {
+
+...
+... suite ok
+}
+rewrite euler_fermat_little in H1; [ | flia H2n | easy | easy ].
+rewrite Nat.mod_1_l in H1; [ | easy ].
+rewrite Nat.pow_1_l in H1.
+rewrite Nat.mod_1_l in H1; [ | easy ].
+now rewrite Nat.mul_1_l in H1.
 ...
 
 Theorem glop : ∀ p d,
