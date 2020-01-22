@@ -3315,6 +3315,14 @@ Compute (let '(n, p) := (2, 13) in roots_pow_sub_1_mod n p).
 Compute (let '(n, p) := (4, 13) in roots_pow_sub_1_mod n p).
 Compute (let '(n, p) := (3, 13) in roots_pow_sub_1_mod n p).
 
+Theorem Couteau : ∀ a b n, a ^ (b mod φ n) ≡ a ^ b mod n.
+Proof.
+intros.
+Search φ.
+Search (_ mod φ _).
+Search (_ mod (_ - _)).
+...
+
 Theorem glop : ∀ p d,
   prime p
   → Nat.divide d (p - 1)
