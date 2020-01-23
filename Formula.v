@@ -3357,6 +3357,14 @@ rewrite (filter_ext _ (λ x, x ^ d mod p =? 1)). 2: {
   rewrite Nat_pow_mod_is_pow_mod; [ easy | ].
   now intros H; subst p.
 }
+assert (Hp1 :
+  length (filter (λ x, x ^ (p - 1) mod p =? 1) (seq 1 (p - 1))) = p - 1). {
+  rewrite List_filter_all_true; [ apply seq_length | ].
+  intros a Ha.
+  apply in_seq in Ha.
+  apply Nat.eqb_eq.
+  apply fermat_little; [ easy | flia Ha ].
+}
 (* https://wstein.org/edu/2007/spring/ent/ent-html/node28.html#prop:dsols *)
 ...
 rewrite (filter_ext _ (λ x, x ^ ((p - 1) / e) mod p =? 1)). 2: {
