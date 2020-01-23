@@ -3344,6 +3344,30 @@ rewrite Nat.mod_1_l in H1; [ | easy ].
 now rewrite Nat.mul_1_l in H1.
 Qed.
 
+(* polynomials on naturals *)
+
+Record nat_polyn := { np : list nat }.
+
+Fixpoint np_norm np :=
+  match np with
+  | 0 :: l => np_norm l
+  | _ => np
+  end.
+
+Fixpoint np_norm_eq np1 np2 :=
+  match np1 with
+  | [] => match np2 with [] => true | _ :: _ => false end
+  | c1 :: np1' =>
+      match np2 with
+      | [] => false
+      | c2 :: np2' => if Nat.eq_dec c1 c2 then np_norm_eq np1' np2' else false
+      end
+  end.
+
+Definition np_eq p1 p2 := np_norm_eq (np_norm (np p1)) (np_norm (np p2)).
+
+...
+
 Theorem glop : ∀ p d,
   prime p
   → Nat.divide d (p - 1)
