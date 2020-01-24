@@ -3380,6 +3380,12 @@ assert (Hd : ∀ x, x ^ (p - 1) - 1 ≡ ((x ^ d - 1) * g x) mod p). {
   intros.
   unfold g.
   rewrite summation_split_first; [ | flia H2e ].
+  rewrite Nat.mul_add_distr_l.
+  rewrite Nat.mul_sub_distr_r, Nat.mul_1_l.
+  rewrite <- Nat.pow_mul_r.
+  rewrite <- Nat.pow_add_r.
+  replace (d + d * (e - 1)) with (d * e) by flia H2e.
+  rewrite (Nat.mul_comm d e), <- He.
 ...
 
 Definition prim_roots' p :=
