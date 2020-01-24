@@ -3366,24 +3366,28 @@ assert (Hp1 :
   apply fermat_little; [ easy | flia Ha ].
 }
 (* https://wstein.org/edu/2007/spring/ent/ent-html/node28.html#prop:dsols *)
-set (g x := fold_right (λ e1 c, c + (x ^ d) ^ e1) 0 (seq 1 (e - 1))).
+set (g x := Σ (i = 1, e - 1), (x ^ d) ^ (e - i)).
 assert (Hd : ∀ x, x ^ (p - 1) - 1 ≡ ((x ^ d - 1) * g x) mod p). {
   intros.
-...
   unfold g.
-  replace (e - 1) with (S (e - 2)).
-  cbn.
-  rewrite Nat.mul_1_r.
-  replace (e - 2) with (S (e - 3)).
-  remember 2 as two; cbn; subst two.
+  destruct (lt_dec e 2) as [H2e| H2e]. {
+    destruct e. {
+      specialize (prime_ge_2 p Hp) as H.
+      flia He H.
+    }
+    destruct e; [ | flia H2e ].
+    cbn.
+    rewrite Nat.mul_0_r.
 ...
-rewrite (filter_ext _ (λ x, x ^ ((p - 1) / e) mod p =? 1)). 2: {
-  intros x.
-  rewrite He, Nat.mul_comm, Nat.div_mul; [ easy | ].
-  intros H; subst e; cbn in He.
-  specialize (prime_ge_2 p Hp) as H.
-  flia He H.
-}
+    destruct (Nat.eq_dec (x mod p) 0) as [Hxz| Hxz]. {
+      subst x; cbn.
+      rewrite Nat.pow_0_l; [ easy | ].
+      specialize (prime_ge_2 p Hp) as H.
+      flia H.
+    }
+    specialize (fermat_little p Hp (x mod p)) as H1.
+    assert (H : 1 ≤ x mod p < p). {
+      split; [ flia Hxz | ].
 ...
 
 Definition prim_roots' p :=
