@@ -3431,34 +3431,6 @@ assert (Hd : ∀ x, x ^ (p - 1) - 1 ≡ ((x ^ d - 1) * g x) mod p). {
     apply Nat.pow_le_mono_r; [ easy | flia He ].
   }
 ...
-  destruct (Nat.eq_dec e 3) as [He3| He3]. {
-    subst e; clear H2e.
-    cbn.
-    rewrite Nat.mul_1_r.
-    rewrite Nat.mul_sub_distr_r, Nat.mul_1_l.
-    rewrite Nat.mul_add_distr_l, Nat.mul_1_r.
-    rewrite <- Nat.pow_add_r.
-    replace (d + d) with (d * 2) by flia.
-    rewrite Nat.add_sub_assoc.
-    rewrite Nat.add_assoc. 2: {
-      apply Nat.add_le_mono. {
-        rewrite Nat.pow_mul_r.
-        rewrite <- (Nat.pow_1_r (x ^ d)) at 1.
-        apply Nat.pow_le_mono_r; [ | flia ].
-        now apply Nat.pow_nonzero.
-      } {
-        apply Nat.neq_0_lt_0.
-        now apply Nat.pow_nonzero.
-      }
-    }
-    rewrite Nat.sub_add. 2: {
-      apply Nat.pow_le_mono_r; [ easy | flia He ].
-    }
-    rewrite Nat.sub_add_distr.
-    now rewrite Nat.add_sub.
-  }
-  replace e with (S (S (e - 2))) at 2 by flia H2e He3.
-...
 
 Definition prim_roots' p :=
   let l := prime_decomp_pow (p - 1) in
