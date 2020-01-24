@@ -3403,6 +3403,12 @@ assert (Hd : ∀ x, x ^ (p - 1) - 1 ≡ ((x ^ d - 1) * g x) mod p). {
   rewrite <- Nat_sub_sub_distr. 2: {
     split. {
 ...
+    } {
+... suite ok
+      apply Nat.pow_le_mono_r; [ easy | flia He ].
+    }
+  }
+... vieille preuve insuffisante
   rewrite summation_split_first; [ | easy ].
   rewrite Nat.mul_add_distr_l, Nat.add_assoc.
   rewrite Nat.mul_sub_distr_r, Nat.mul_1_l.
