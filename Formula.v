@@ -3376,7 +3376,7 @@ destruct (lt_dec e 2) as [H2e| H2e]. {
 }
 apply Nat.nlt_ge in H2e.
 set (g x := Σ (i = 1, e), (x ^ d) ^ (e - i)).
-assert (Hd : ∀ x, x ^ (p - 1) - 1 ≡ ((x ^ d - 1) * g x) mod p). {
+assert (Hd : ∀ x, x ^ (p - 1) - 1 = (x ^ d - 1) * g x). {
   intros.
   destruct (Nat.eq_dec x 0) as [Hxz| Hxz]. {
     subst x.
@@ -3399,7 +3399,7 @@ assert (Hd : ∀ x, x ^ (p - 1) - 1 ≡ ((x ^ d - 1) * g x) mod p). {
     now apply Nat.pow_nonzero.
   }
   rewrite Nat.pow_1_l.
-  f_equal; f_equal.
+  f_equal.
   replace e with (S (e - 1)) at 2 by flia H2e.
   rewrite summation_shift.
   apply summation_eq_compat.
