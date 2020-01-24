@@ -3366,8 +3366,16 @@ assert (Hp1 :
   apply fermat_little; [ easy | flia Ha ].
 }
 (* https://wstein.org/edu/2007/spring/ent/ent-html/node28.html#prop:dsols *)
-assert (Hd :
-  ∀ x, x ^ (p - 1) - 1 ≡ ((x ^ d - 1) * (x ^ d ^ (e - 1) + x ^ d ^ (e - 2) + 42)) mod p).
+set (g x := fold_right (λ e1 c, c + (x ^ d) ^ e1) 0 (seq 1 (e - 1))).
+assert (Hd : ∀ x, x ^ (p - 1) - 1 ≡ ((x ^ d - 1) * g x) mod p). {
+  intros.
+...
+  unfold g.
+  replace (e - 1) with (S (e - 2)).
+  cbn.
+  rewrite Nat.mul_1_r.
+  replace (e - 2) with (S (e - 3)).
+  remember 2 as two; cbn; subst two.
 ...
 rewrite (filter_ext _ (λ x, x ^ ((p - 1) / e) mod p =? 1)). 2: {
   intros x.
