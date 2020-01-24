@@ -3384,60 +3384,29 @@ assert (Hd : ∀ x, x ^ (p - 1) - 1 ≡ ((x ^ d - 1) * g x) mod p). {
       specialize (prime_ge_2 _ Hp) as H1.
       flia H1.
     }
-    rewrite Nat.pow_0_l. 2: {
-      intros H; subst d.
-      rewrite Nat.mul_0_r in He.
-      specialize (prime_ge_2 _ Hp) as H1.
-      flia He H1.
-    }
-    easy.
+    rewrite Nat.pow_0_l; [ easy | ].
+    intros H; subst d.
+    rewrite Nat.mul_0_r in He.
+    specialize (prime_ge_2 _ Hp) as H1.
+    flia He H1.
   }
   unfold g.
-  rewrite summation_split_first; [ | flia H2e ].
-  rewrite Nat.mul_add_distr_l.
-  rewrite Nat.mul_sub_distr_r, Nat.mul_1_l.
-  rewrite <- Nat.pow_mul_r.
-  rewrite <- Nat.pow_add_r.
-  replace (d + d * (e - 1)) with (d * e) by flia H2e.
-  rewrite (Nat.mul_comm d e), <- He.
-  rewrite <- Nat_sub_sub_distr. 2: {
-    split. {
-...
-    } {
-... suite ok
-      apply Nat.pow_le_mono_r; [ easy | flia He ].
-    }
+  rewrite He, Nat.mul_comm.
+  rewrite Nat.pow_mul_r.
+  replace 1 with (1 ^ e) at 1 2 by apply Nat.pow_1_l.
+  rewrite Nat_pow_sub_pow; [ | flia H2e | ]. 2: {
+    apply Nat.neq_0_lt_0.
+    now apply Nat.pow_nonzero.
   }
-... vieille preuve insuffisante
-  rewrite summation_split_first; [ | easy ].
-  rewrite Nat.mul_add_distr_l, Nat.add_assoc.
-  rewrite Nat.mul_sub_distr_r, Nat.mul_1_l.
-  rewrite <- Nat.pow_mul_r.
-  rewrite <- Nat.pow_add_r.
-  replace (d + d * (e - 2)) with (d * (e - 1)). 2: {
-    rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
-    rewrite Nat.mul_sub_distr_l.
-    rewrite Nat.add_sub_assoc; [ | now apply Nat.mul_le_mono_l ].
-    apply (Nat.add_cancel_r _ _ d).
-    rewrite Nat.sub_add. 2: {
-      rewrite <- (Nat.mul_1_r d) at 1.
-      apply Nat.mul_le_mono_l.
-      flia H2e.
-    }
-    rewrite (Nat.add_comm d).
-    rewrite Nat.add_sub_swap; [ | now apply Nat.mul_le_mono_l ].
-    rewrite <- Nat.add_assoc.
-    replace (d + d) with (d * 2) by flia.
-    symmetry; apply Nat.sub_add.
-    now apply Nat.mul_le_mono_l.
-  }
-  rewrite Nat.add_sub_assoc. 2: {
-    apply Nat.pow_le_mono_r; [ easy | ].
-    apply Nat.mul_le_mono_l; flia.
-  }
-  rewrite Nat.sub_add. 2: {
-    apply Nat.pow_le_mono_r; [ easy | flia He ].
-  }
+  rewrite Nat.pow_1_l.
+  f_equal; f_equal.
+  replace e with (S (e - 1)) at 2 by flia H2e.
+  rewrite summation_shift.
+  apply summation_eq_compat.
+  intros i Hi.
+  rewrite Nat.pow_1_l, Nat.mul_1_r.
+  f_equal; flia.
+}
 ...
 
 Definition prim_roots' p :=
