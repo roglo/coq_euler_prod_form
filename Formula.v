@@ -3375,7 +3375,7 @@ destruct (lt_dec e 2) as [H2e| H2e]. {
   now rewrite Nat.mul_1_l in He; rewrite <- He.
 }
 apply Nat.nlt_ge in H2e.
-set (g x := Σ (i = 1, e), (x ^ d) ^ (e - i)).
+set (g x := Σ (i = 1, e), x ^ (d * (e - i))).
 assert (Hd : ∀ x, x ^ (p - 1) - 1 = (x ^ d - 1) * g x). {
   intros.
   destruct (Nat.eq_dec x 0) as [Hxz| Hxz]. {
@@ -3405,8 +3405,10 @@ assert (Hd : ∀ x, x ^ (p - 1) - 1 = (x ^ d - 1) * g x). {
   apply summation_eq_compat.
   intros i Hi.
   rewrite Nat.pow_1_l, Nat.mul_1_r.
+  rewrite <- Nat.pow_mul_r.
   f_equal; flia.
 }
+assert (Hg : length (filter (λ x, g x =? 1) (seq 1 (p - 1))) ≤ d * (e - 1)). {
 ...
 
 Definition prim_roots' p :=
