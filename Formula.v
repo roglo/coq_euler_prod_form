@@ -3344,6 +3344,22 @@ rewrite Nat.mod_1_l in H1; [ | easy ].
 now rewrite Nat.mul_1_l in H1.
 Qed.
 
+Theorem root_bound : ∀ f n a len,
+  f = (λ x, Σ (i = 0, n), a i * x ^ i)
+  → a n ≠ 0
+  → length (filter (λ x, f x =? 0) (seq 1 len)) ≤ n.
+Proof.
+intros * Hf Han.
+revert f a len Han Hf.
+induction n; intros. {
+  rewrite List_filter_all_false; [ easy | ].
+  intros x Hx.
+  apply Nat.eqb_neq.
+  rewrite Hf; cbn.
+  now rewrite Nat.mul_1_r.
+}
+...
+
 Theorem glop : ∀ p d,
   prime p
   → Nat.divide d (p - 1)
@@ -3409,10 +3425,12 @@ assert (Hd : ∀ x, x ^ (p - 1) - 1 = (x ^ d - 1) * g x). {
   f_equal; flia.
 }
 assert (Hx : length (filter (λ x, x ^ d mod p =? 1) (seq 1 (p - 1))) ≤ d). {
+...
+Check root_bound.
+... before root_bound: to be removed:
   rewrite He.
-  clear - Hp.
-  induction d. {
-    cbn.
+  destruct (Nat.eq_dec d 0) as [Hdz| Hdz]. {
+    subst d; cbn.
     rewrite List_filter_all_true. 2: {
       intros a Ha.
       apply Nat.eqb_eq.
@@ -3420,7 +3438,31 @@ assert (Hx : length (filter (λ x, x ^ d mod p =? 1) (seq 1 (p - 1))) ≤ d). {
     }
     now rewrite Nat.mul_0_r.
   }
+  assert (Hep : e ≤ p - 1). {
+    rewrite He.
+    destruct d; [ easy | flia ].
+  }
+  clear - Hp Hdz Hep.
+  revert e Hep.
+  induction d; intros; [ easy | clear Hdz ].
   rewrite Nat.mul_succ_r.
+  cbn.
+  destruct d. {
+    rewrite Nat.mul_0_r, Nat.add_0_l.
+    destruct (Nat.eq_dec e 0) as [Hez| Hez]. {
+      subst e; cbn; flia.
+    }
+    replace e with (1 + (e - 1)) by flia Hez.
+    rewrite seq_app; cbn.
+    rewrite Nat.mod_1_l; [ | now apply prime_ge_2 ].
+    cbn.
+    rewrite List_filter_all_false; [ cbn; flia | ].
+    intros a Ha.
+    rewrite Nat.mul_1_r.
+    apply Nat.eqb_neq.
+    apply in_seq in Ha.
+    rewrite Nat.mod_small; [ flia Ha | flia Ha Hep ].
+  }
 ...
 assert (Hg : length (filter (λ x, g x =? 0) (seq 1 (p - 1))) ≤ d * (e - 1)). {
 ...
