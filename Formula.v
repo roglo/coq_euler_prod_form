@@ -3359,6 +3359,17 @@ induction n; intros. {
   now rewrite Nat.mul_1_r.
 }
 (* https://wstein.org/edu/2007/spring/ent/ent-html/node28.html#prop:atmost *)
+remember (length (filter (λ x, f x =? 0) (seq 1 len))) as m eqn:Hm.
+symmetry in Hm.
+destruct m; [ flia | ].
+assert (H : ∃ α, f α = 0). {
+  clear - Hm.
+  revert m Hm.
+  induction len; intros; [ easy | ].
+  cbn in Hm.
+  remember (f 1) as f1 eqn:Hf1; symmetry in Hf1.
+  destruct f1; [ now exists 1 | ].
+  cbn in Hm.
 ...
 
 Theorem glop : ∀ p d,
