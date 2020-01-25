@@ -3408,7 +3408,9 @@ assert (Hd : ∀ x, x ^ (p - 1) - 1 = (x ^ d - 1) * g x). {
   rewrite <- Nat.pow_mul_r.
   f_equal; flia.
 }
-assert (Hg : length (filter (λ x, g x =? 1) (seq 1 (p - 1))) ≤ d * (e - 1)). {
+assert (Hg : length (filter (λ x, x ^ d =? 1) (seq 1 (p - 1))) ≤ d). {
+...
+assert (Hg : length (filter (λ x, g x =? 0) (seq 1 (p - 1))) ≤ d * (e - 1)). {
 ...
 
 Definition prim_roots' p :=
