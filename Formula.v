@@ -3344,13 +3344,13 @@ rewrite Nat.mod_1_l in H1; [ | easy ].
 now rewrite Nat.mul_1_l in H1.
 Qed.
 
-Theorem root_bound : ∀ f n a len,
+Theorem root_bound : ∀ f n a sta len,
   f = (λ n a x, Σ (i = 0, n), a i * x ^ i)
   → a n ≠ 0
-  → length (filter (λ x, f n a x =? 0) (seq 1 len)) ≤ n.
+  → length (filter (λ x, f n a x =? 0) (seq sta len)) ≤ n.
 Proof.
 intros * Hf Han.
-revert a len Han.
+revert a sta len Han.
 induction n; intros. {
   rewrite List_filter_all_false; [ easy | ].
   intros x Hx.
@@ -3359,17 +3359,21 @@ induction n; intros. {
   now rewrite Nat.mul_1_r.
 }
 (* https://wstein.org/edu/2007/spring/ent/ent-html/node28.html#prop:atmost *)
-remember (length (filter (λ x, f (S n) a x =? 0) (seq 1 len))) as m eqn:Hm.
+remember (length (filter (λ x, f (S n) a x =? 0) (seq sta len))) as m eqn:Hm.
 symmetry in Hm.
 destruct m; [ flia | ].
 assert (H : ∃ α, f (S n) a α = 0). {
   clear - Hm.
-  revert m Hm.
+  revert sta m Hm.
   induction len; intros; [ easy | ].
   cbn in Hm.
-  remember (f (S n) a 1) as f1 eqn:Hf1; symmetry in Hf1.
-  destruct f1; [ now exists 1 | ].
+  remember (f (S n) a sta) as f1 eqn:Hf1; symmetry in Hf1.
+  destruct f1; [ now exists sta | ].
   cbn in Hm.
+  apply (IHlen (S sta) m).
+  apply Hm.
+}
+destruct H as (α, Hα).
 ...
 
 Theorem glop : ∀ p d,
