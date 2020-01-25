@@ -3358,6 +3358,7 @@ induction n; intros. {
   rewrite Hf; cbn.
   now rewrite Nat.mul_1_r.
 }
+(* https://wstein.org/edu/2007/spring/ent/ent-html/node28.html#prop:atmost *)
 ...
 
 Theorem glop : ∀ p d,
