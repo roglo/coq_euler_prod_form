@@ -3408,7 +3408,19 @@ assert (Hd : ∀ x, x ^ (p - 1) - 1 = (x ^ d - 1) * g x). {
   rewrite <- Nat.pow_mul_r.
   f_equal; flia.
 }
-assert (Hg : length (filter (λ x, x ^ d =? 1) (seq 1 (p - 1))) ≤ d). {
+assert (Hx : length (filter (λ x, x ^ d mod p =? 1) (seq 1 (p - 1))) ≤ d). {
+  rewrite He.
+  clear - Hp.
+  induction d. {
+    cbn.
+    rewrite List_filter_all_true. 2: {
+      intros a Ha.
+      apply Nat.eqb_eq.
+      now apply Nat.mod_small, prime_ge_2.
+    }
+    now rewrite Nat.mul_0_r.
+  }
+  rewrite Nat.mul_succ_r.
 ...
 assert (Hg : length (filter (λ x, g x =? 0) (seq 1 (p - 1))) ≤ d * (e - 1)). {
 ...
