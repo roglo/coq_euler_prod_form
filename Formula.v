@@ -3387,7 +3387,7 @@ assert (H2 : ∀ x, f (S n) a x = Σ (i = 0, S n), a i * x ^ i - Σ (i = 0, S n)
 }
 clear H1; rename H2 into H1.
 assert
-  (H3 : ∀ x, α ≤ x → f (S n) a x = Σ (i = 0, S n), a i * (x ^ i - α ^ i)). {
+  (H2 : ∀ x, α ≤ x → f (S n) a x = Σ (i = 0, S n), a i * (x ^ i - α ^ i)). {
   intros * Hαx.
   specialize (H1 x).
   rewrite <- summation_sub in H1. 2: {
@@ -3400,6 +3400,12 @@ assert
   intros i Hi.
   symmetry; apply Nat.mul_sub_distr_l.
 }
+assert
+  (H3 : ∀ x,
+   α ≤ x →
+   f (S n) a x =
+     (x - α) *
+     Σ (i = 0, S n), a i * Σ (j = 0, i), x ^ (i - j) * α ^ j). {
 ...
 
 Theorem glop : ∀ p d,
