@@ -3386,13 +3386,20 @@ assert (H2 : ∀ x, f (S n) a x = Σ (i = 0, S n), a i * x ^ i - Σ (i = 0, S n)
   now rewrite Hf.
 }
 clear H1; rename H2 into H1.
-assert (H3 : ∀ x, f (S n) a x = Σ (i = 0, S n), a i * (x ^ i - α ^ i)). {
-  intros.
+assert
+  (H3 : ∀ x, α ≤ x → f (S n) a x = Σ (i = 0, S n), a i * (x ^ i - α ^ i)). {
+  intros * Hαx.
   specialize (H1 x).
   rewrite <- summation_sub in H1. 2: {
     intros i Hi.
     apply Nat.mul_le_mono_l.
-(* et c'est là que ça va pas *)
+    now apply Nat.pow_le_mono_l.
+  }
+  rewrite H1.
+  apply summation_eq_compat.
+  intros i Hi.
+  symmetry; apply Nat.mul_sub_distr_l.
+}
 ...
 
 Theorem glop : ∀ p d,
