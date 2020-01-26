@@ -3374,6 +3374,18 @@ assert (H : ∃ α, f (S n) a α = 0). {
   apply Hm.
 }
 destruct H as (α, Hα).
+apply -> Nat.succ_le_mono.
+assert (H1 : ∀ x, f (S n) a x = f (S n) a x - f (S n) a α). {
+  intros x.
+  now rewrite Hα, Nat.sub_0_r.
+}
+assert (H2 : ∀ x, f (S n) a x = Σ (i = 0, S n), a i * x ^ i - Σ (i = 0, S n), a i * α ^ i). {
+  intros.
+  specialize (H1 x).
+  rewrite Hf in H1.
+  now rewrite Hf.
+}
+clear H1; rename H2 into H1.
 ...
 
 Theorem glop : ∀ p d,
