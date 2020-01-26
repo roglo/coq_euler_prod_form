@@ -3388,8 +3388,11 @@ assert (H2 : ∀ x, f (S n) a x = Σ (i = 0, S n), a i * x ^ i - Σ (i = 0, S n)
 clear H1; rename H2 into H1.
 assert (H3 : ∀ x, f (S n) a x = Σ (i = 0, S n), a i * (x ^ i - α ^ i)). {
   intros.
-Search (Σ (_ = _, _), _ + Σ (_ = _, _), _).
-About summation_add.
+  specialize (H1 x).
+  rewrite <- summation_sub in H1. 2: {
+    intros i Hi.
+    apply Nat.mul_le_mono_l.
+(* et c'est là que ça va pas *)
 ...
 
 Theorem glop : ∀ p d,
