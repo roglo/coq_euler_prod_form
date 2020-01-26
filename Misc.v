@@ -265,6 +265,44 @@ rewrite (fold_left_add_fun_from_0 (g b)).
 flia.
 Qed.
 
+Theorem summation_sub : ∀ b e f g,
+  (∀ i, b ≤ i ≤ e → g i ≤ f i)
+  → Σ (i = b, e), (f i - g i) = Σ (i = b, e), f i - Σ (i = b, e), g i.
+Proof.
+intros * Hgf.
+remember (S e - b) as n eqn:Hn.
+revert b Hn Hgf.
+induction n; intros; [ easy | cbn ].
+rewrite fold_left_add_fun_from_0.
+rewrite IHn; [ | flia Hn | ]. 2: {
+  intros i Hi.
+  apply Hgf; flia Hi.
+}
+rewrite (fold_left_add_fun_from_0 (f b)).
+rewrite (fold_left_add_fun_from_0 (g b)).
+rewrite Nat.sub_add_distr.
+rewrite Nat.add_sub_swap. 2: {
+  apply Hgf.
+  split; [ easy | ].
+  flia Hn.
+}
+rewrite Nat.add_sub_assoc; [ easy | ].
+assert (Hbe : b + n ≤ e) by flia Hn.
+clear - Hbe Hgf.
+revert b Hgf Hbe.
+induction n; intros; [ easy | ].
+replace (S n) with (n + 1) by flia.
+rewrite seq_app.
+do 2 rewrite fold_left_app.
+setoid_rewrite fold_left_add_fun_from_0.
+apply Nat.add_le_mono. 2: {
+  cbn.
+  apply Hgf.
+  flia Hbe.
+}
+apply IHn; [ easy | flia Hbe ].
+Qed.
+
 Theorem summation_shift : ∀ b e f,
   Σ (i = S b, S e), f i = Σ (i = b, e), f (S i).
 Proof.

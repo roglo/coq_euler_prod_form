@@ -3387,6 +3387,9 @@ assert (H2 : ∀ x, f (S n) a x = Σ (i = 0, S n), a i * x ^ i - Σ (i = 0, S n)
 }
 clear H1; rename H2 into H1.
 assert (H3 : ∀ x, f (S n) a x = Σ (i = 0, S n), a i * (x ^ i - α ^ i)). {
+  intros.
+Search (Σ (_ = _, _), _ + Σ (_ = _, _), _).
+About summation_add.
 ...
 
 Theorem glop : ∀ p d,
