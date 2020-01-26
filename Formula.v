@@ -3386,6 +3386,7 @@ assert (H2 : ∀ x, f (S n) a x = Σ (i = 0, S n), a i * x ^ i - Σ (i = 0, S n)
   now rewrite Hf.
 }
 clear H1; rename H2 into H1.
+assert (H3 : ∀ x, f (S n) a x = Σ (i = 0, S n), a i * (x ^ i - α ^ i)). {
 ...
 
 Theorem glop : ∀ p d,
