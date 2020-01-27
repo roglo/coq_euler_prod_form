@@ -3376,7 +3376,7 @@ End Z_Notations.
 
 Import Z_Notations.
 
-... mouais, bon, est-ce qu'y faut que je fasse ça ?
+... mouais, bon, est-ce qu'y faut vraiment que je fasse ce Z ?
 
 Theorem root_bound : ∀ f n a sta len,
   f = (λ n a x, Σ (i = 0, n), a i * x ^ i)
