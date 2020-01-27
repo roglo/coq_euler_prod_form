@@ -3406,6 +3406,17 @@ assert
    f (S n) a x =
      (x - α) *
      Σ (i = 0, S n), a i * Σ (j = 0, i), x ^ (i - j) * α ^ j). {
+  intros x Hx.
+  rewrite mul_summation_distr_l.
+  rewrite H2; [ | easy ].
+  apply summation_eq_compat.
+  intros i Hi.
+  rewrite (Nat.mul_comm (x - α)).
+  rewrite <- Nat.mul_assoc; f_equal.
+  destruct i. {
+    cbn.
+...
+  rewrite Nat_pow_sub_pow.
 ...
 
 Theorem glop : ∀ p d,
