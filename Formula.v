@@ -3436,6 +3436,11 @@ assert
   rewrite IHl; f_equal; f_equal; f_equal; f_equal.
   flia.
 }
+(* mouais... cette hypothèse α ≤ x craint. En fait, faudrait
+   bosser dans ℤ ; c'est chiant parce que, jusqu'ici, ℕ me
+   suffisait ; déjà que j'essaie d'éviter d'entrer dans les
+   considérations des polynômes (supposant d'y mettre toute
+   la machinerie...) *)
 ...
 
 Theorem glop : ∀ p d,
