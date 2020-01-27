@@ -3344,40 +3344,6 @@ rewrite Nat.mod_1_l in H1; [ | easy ].
 now rewrite Nat.mul_1_l in H1.
 Qed.
 
-(* integers : Pos n represents n+1; Neg n represents (-n-1) *)
-
-Delimit Scope Z_scope with Z.
-
-Inductive Z :=
-  | Z0 : Z
-  | Zpos : nat → Z
-  | Zneg : nat → Z.
-
-Module Z_Notations.
-
-Definition of_decimal_int (n : Decimal.int) : Z :=
-  match n with
-  | Decimal.Pos (Decimal.D0 Decimal.Nil) => Z0
-  | Decimal.Pos ui => Zpos (Nat.of_uint ui - 1)
-  | Decimal.Neg ui => Zneg (Nat.of_uint ui - 1)
-  end.
-
-Definition to_decimal_int (z : Z) : Decimal.int :=
-  match z with
-  | Z0 => Decimal.Pos (Decimal.D0 Decimal.Nil)
-  | Zpos n => Decimal.Pos (Nat.to_uint (n + 1))
-  | Zneg n => Decimal.Neg (Nat.to_uint (n + 1))
-  end.
-
-Numeral Notation Z of_decimal_int to_decimal_int : Z_scope
-  (abstract after 5001).
-
-End Z_Notations.
-
-Import Z_Notations.
-
-... mouais, bon, est-ce qu'y faut vraiment que je fasse ce Z ?
-
 Theorem root_bound : ∀ f n a sta len,
   f = (λ n a x, Σ (i = 0, n), a i * x ^ i)
   → a n ≠ 0
