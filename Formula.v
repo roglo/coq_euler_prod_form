@@ -3387,7 +3387,7 @@ assert (H2 : ∀ x, f (S n) a x = Σ (i = 0, S n), a i * x ^ i - Σ (i = 0, S n)
 }
 clear H1; rename H2 into H1.
 assert
-  (H2 : ∀ x, α ≤ x → f (S n) a x = Σ (i = 0, S n), a i * (x ^ i - α ^ i)). {
+  (H2 : ∀ x, α ≤ x → f (S n) a x = Σ (i = 1, S n), a i * (x ^ i - α ^ i)). {
   intros * Hαx.
   specialize (H1 x).
   rewrite <- summation_sub in H1. 2: {
@@ -3396,6 +3396,9 @@ assert
     now apply Nat.pow_le_mono_l.
   }
   rewrite H1.
+  rewrite summation_split_first; [ | flia ].
+  do 2 rewrite Nat.pow_0_r.
+  rewrite Nat.sub_diag, Nat.add_0_l.
   apply summation_eq_compat.
   intros i Hi.
   symmetry; apply Nat.mul_sub_distr_l.
@@ -3405,18 +3408,34 @@ assert
    α ≤ x →
    f (S n) a x =
      (x - α) *
-     Σ (i = 0, S n), a i * Σ (j = 0, i), x ^ (i - j) * α ^ j). {
+     Σ (i = 0, n), a (i + 1) * Σ (j = 0, i), x ^ (i - j) * α ^ j). {
   intros x Hx.
   rewrite mul_summation_distr_l.
   rewrite H2; [ | easy ].
+  rewrite summation_shift.
   apply summation_eq_compat.
   intros i Hi.
+  replace (S i) with (i + 1) by flia.
   rewrite (Nat.mul_comm (x - α)).
   rewrite <- Nat.mul_assoc; f_equal.
-  destruct i. {
-    cbn.
-...
-  rewrite Nat_pow_sub_pow.
+  rewrite Nat_pow_sub_pow; [ | flia Hi | easy ].
+  rewrite Nat.add_sub.
+  rewrite Nat.mul_comm; f_equal.
+  cbn.
+  rewrite Nat.sub_0_r, Nat.add_sub, Nat.mul_1_r.
+  rewrite (Nat.add_comm i 1).
+  rewrite seq_app.
+  rewrite fold_left_app.
+  cbn - [ "-" ].
+  rewrite Nat.sub_0_r, Nat.mul_1_r.
+  clear.
+  remember (seq 1 i) as l; remember (x ^ i) as a.
+  clear.
+  revert a; induction l as [| b l]; intros; [ easy | ].
+  cbn - [ "-" ].
+  rewrite IHl; f_equal; f_equal; f_equal; f_equal.
+  flia.
+}
 ...
 
 Theorem glop : ∀ p d,
