@@ -2946,7 +2946,7 @@ split. {
 }
 Qed.
 
-(* order modulo *)
+(* multiplicative order modulo *)
 
 Fixpoint ord_mod_aux it n a i :=
   match it with
