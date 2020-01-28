@@ -3510,20 +3510,44 @@ assert (Hd : ∀ x, x ^ (p - 1) - 1 = (x ^ d - 1) * g x). {
   f_equal; flia.
 }
 (* generalization on Euler's theorem? *)
+Compute (φ 4).
+Compute (roots_pow_sub_1_mod 2 4).
 Compute (φ 6).
 Compute (roots_pow_sub_1_mod 2 6).
 Compute (roots_pow_sub_1_mod 1 6).
+Compute (φ 8).
+Compute (roots_pow_sub_1_mod 4 8).
+Compute (roots_pow_sub_1_mod 2 8). (* no: 4 *)
+Compute (φ 9).
+Compute (roots_pow_sub_1_mod 6 9).
+Compute (roots_pow_sub_1_mod 3 9).
+Compute (roots_pow_sub_1_mod 2 9).
 Compute (φ 10).
 Compute (roots_pow_sub_1_mod 4 10).
 Compute (roots_pow_sub_1_mod 2 10).
-Compute (φ 15).
-Compute (roots_pow_sub_1_mod 8 15).
-Compute (roots_pow_sub_1_mod 4 15). (* no: 8 *)
-Compute (roots_pow_sub_1_mod 2 15). (* no: 4 *)
+Compute (φ 12).
+Compute (roots_pow_sub_1_mod 4 12).
+Compute (roots_pow_sub_1_mod 2 12). (* no: 4 *)
 Compute (φ 14).
 Compute (roots_pow_sub_1_mod 6 14).
 Compute (roots_pow_sub_1_mod 3 14).
 Compute (roots_pow_sub_1_mod 2 14).
+Compute (φ 15).
+Compute (roots_pow_sub_1_mod 8 15).
+Compute (roots_pow_sub_1_mod 4 15). (* no: 8 *)
+Compute (roots_pow_sub_1_mod 2 15). (* no: 4 *)
+Compute (φ 16).
+Compute (roots_pow_sub_1_mod 8 16).
+Compute (roots_pow_sub_1_mod 4 16). (* no: 8 *)
+Compute (roots_pow_sub_1_mod 2 16). (* no: 4 *)
+Compute (φ 18).
+Compute (roots_pow_sub_1_mod 6 18).
+Compute (roots_pow_sub_1_mod 3 18).
+Compute (roots_pow_sub_1_mod 2 18).
+Compute (φ 20).
+Compute (roots_pow_sub_1_mod 8 20).
+Compute (roots_pow_sub_1_mod 4 20). (* no: 8 *)
+Compute (roots_pow_sub_1_mod 2 20). (* no: 4 *)
 Compute (φ 21).
 Compute (roots_pow_sub_1_mod 12 21).
 Compute (roots_pow_sub_1_mod 6 21). (* no: 12 *)
@@ -3531,6 +3555,38 @@ Compute (roots_pow_sub_1_mod 4 21).
 Compute (roots_pow_sub_1_mod 3 21).
 Compute (roots_pow_sub_1_mod 2 21). (* no: 4 *)
 Compute (roots_pow_sub_1_mod 1 21).
+Compute (φ 22).
+Compute (roots_pow_sub_1_mod 10 22).
+Compute (roots_pow_sub_1_mod 5 22).
+Compute (roots_pow_sub_1_mod 2 22).
+Compute (φ 24).
+Compute (roots_pow_sub_1_mod 8 24).
+Compute (roots_pow_sub_1_mod 4 24). (* no: 8 *)
+Compute (roots_pow_sub_1_mod 2 24). (* no: 8; four times! *)
+Compute (φ 25).
+Compute (length (roots_pow_sub_1_mod 20 25)).
+Compute (length (roots_pow_sub_1_mod 10 25)).
+Compute (length (roots_pow_sub_1_mod 5 25)).
+Compute (length (roots_pow_sub_1_mod 4 25)).
+Compute (length (roots_pow_sub_1_mod 2 25)).
+Compute (φ 26).
+Compute (length (roots_pow_sub_1_mod 12 26)).
+Compute (length (roots_pow_sub_1_mod 6 26)).
+Compute (length (roots_pow_sub_1_mod 4 26)).
+Compute (length (roots_pow_sub_1_mod 3 26)).
+Compute (length (roots_pow_sub_1_mod 2 26)).
+Compute (φ 27).
+Compute (length (roots_pow_sub_1_mod 18 27)).
+Compute (length (roots_pow_sub_1_mod 9 27)).
+Compute (length (roots_pow_sub_1_mod 6 27)).
+Compute (length (roots_pow_sub_1_mod 3 27)).
+Compute (length (roots_pow_sub_1_mod 2 27)).
+Compute (φ 28).
+Compute (length (roots_pow_sub_1_mod 12 28)).
+Compute (length (roots_pow_sub_1_mod 6 28)). (* no: 12 *)
+Compute (length (roots_pow_sub_1_mod 4 28)).
+Compute (length (roots_pow_sub_1_mod 3 28)).
+Compute (length (roots_pow_sub_1_mod 2 28)). (* no: 4 *)
 Compute (φ 30).
 Compute (roots_pow_sub_1_mod 8 30).
 Compute (roots_pow_sub_1_mod 4 30). (* no: 8 *)
