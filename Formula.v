@@ -3509,6 +3509,33 @@ assert (Hd : ∀ x, x ^ (p - 1) - 1 = (x ^ d - 1) * g x). {
   rewrite <- Nat.pow_mul_r.
   f_equal; flia.
 }
+(* generalization on Euler's theorem? *)
+Compute (φ 6).
+Compute (roots_pow_sub_1_mod 2 6).
+Compute (roots_pow_sub_1_mod 1 6).
+Compute (φ 10).
+Compute (roots_pow_sub_1_mod 4 10).
+Compute (roots_pow_sub_1_mod 2 10).
+Compute (φ 15).
+Compute (roots_pow_sub_1_mod 8 15).
+Compute (roots_pow_sub_1_mod 4 15). (* no: 8 *)
+Compute (roots_pow_sub_1_mod 2 15). (* no: 4 *)
+Compute (φ 14).
+Compute (roots_pow_sub_1_mod 6 14).
+Compute (roots_pow_sub_1_mod 3 14).
+Compute (roots_pow_sub_1_mod 2 14).
+Compute (φ 21).
+Compute (roots_pow_sub_1_mod 12 21).
+Compute (roots_pow_sub_1_mod 6 21). (* no: 12 *)
+Compute (roots_pow_sub_1_mod 4 21).
+Compute (roots_pow_sub_1_mod 3 21).
+Compute (roots_pow_sub_1_mod 2 21). (* no: 4 *)
+Compute (roots_pow_sub_1_mod 1 21).
+Compute (φ 30).
+Compute (roots_pow_sub_1_mod 8 30).
+Compute (roots_pow_sub_1_mod 4 30). (* no: 8 *)
+Compute (roots_pow_sub_1_mod 2 30). (* no: 4 *)
+Compute (roots_pow_sub_1_mod 1 30).
 ...
 assert (Hx : length (filter (λ x, x ^ d mod p =? 1) (seq 1 (p - 1))) ≤ d). {
 ...
