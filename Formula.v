@@ -3592,6 +3592,10 @@ Compute (roots_pow_sub_1_mod 8 30).
 Compute (roots_pow_sub_1_mod 4 30). (* no: 8 *)
 Compute (roots_pow_sub_1_mod 2 30). (* no: 4 *)
 Compute (roots_pow_sub_1_mod 1 30).
+Compute (let n := 28 in map (λ d, (d, length (roots_pow_sub_1_mod d n)))(divisors (φ n))).
+Compute (let n := 30 in map (λ d, (d, length (roots_pow_sub_1_mod d n)))(divisors (φ n))).
+Compute (let n := 39 in map (λ d, (d, length (roots_pow_sub_1_mod d n)))(divisors (φ n))).
+(* https://en.wikipedia.org/wiki/Root_of_unity_modulo_n *)
 ...
 assert (Hx : length (filter (λ x, x ^ d mod p =? 1) (seq 1 (p - 1))) ≤ d). {
 ...
