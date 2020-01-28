@@ -3344,6 +3344,7 @@ rewrite Nat.mod_1_l in H1; [ | easy ].
 now rewrite Nat.mul_1_l in H1.
 Qed.
 
+(*
 Theorem root_bound : ∀ f n a sta len,
   f = (λ n a x, Σ (i = 0, n), a i * x ^ i)
   → a n ≠ 0
@@ -3442,6 +3443,7 @@ assert
    considérations des polynômes (supposant d'y mettre toute
    la machinerie...) *)
 ...
+*)
 
 Theorem glop : ∀ p d,
   prime p
@@ -3507,6 +3509,7 @@ assert (Hd : ∀ x, x ^ (p - 1) - 1 = (x ^ d - 1) * g x). {
   rewrite <- Nat.pow_mul_r.
   f_equal; flia.
 }
+...
 assert (Hx : length (filter (λ x, x ^ d mod p =? 1) (seq 1 (p - 1))) ≤ d). {
 ...
 Check root_bound.
