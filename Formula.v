@@ -3466,6 +3466,19 @@ Fixpoint horner p la x acc :=
 
 Definition pol_eval p la x := horner p la x 0.
 
+Lemma horner_mod_r : ∀ p l x acc,
+  acc < p
+  → horner p l x acc = horner p l x (acc mod p).
+Proof.
+intros * Hacc.
+destruct l as [| a l]; [ now cbn; rewrite Nat.mod_small | ].
+cbn; symmetry.
+rewrite <- Nat.add_mod_idemp_l; [ | flia Hacc ].
+rewrite Nat.mul_mod_idemp_r; [ | flia Hacc ].
+rewrite Nat.add_mod_idemp_l; [ | flia Hacc ].
+easy.
+Qed.
+
 Theorem pol_eval_xpow : ∀ p n a, pol_eval p (xpow n) a = a ^ n mod p.
 Proof.
 intros.
@@ -3478,9 +3491,25 @@ destruct (lt_dec p 2) as [H2p| H2p]. {
 }
 apply Nat.nlt_ge in H2p.
 rewrite Nat.mod_1_l; [ | easy ].
-induction n; [ now rewrite Nat.mod_small | ].
+revert a.
+induction n; intros; [ now rewrite Nat.mod_small | ].
 cbn; rewrite Nat.mul_1_r, Nat.add_0_r.
-Print horner.
+...
+rewrite <- horner_mod_r.
+rewrite <- horner_mod_r; [ apply Nat.mod_upper_bound; flia H2p | ].
+
+...
+Lemma horner_0_acc : ∀ p l x acc,
+  acc < p
+  → horner p l x acc = horner p l x 0.
+Proof.
+intros * Hacc.
+...
+destruct l as [| a l]; [ admit | ].
+cbn.
+rewrite Nat.mul_0_r, Nat.add_0_l.
+rewrite Nat.add_mod.
+...
 Lemma horner_0_acc : ∀ p l x acc,
   acc < p
   → horner p l x acc = (horner p l x 0 + acc * S (length l)) mod p.
