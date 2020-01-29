@@ -3595,6 +3595,7 @@ Compute (roots_pow_sub_1_mod 1 30).
 Compute (let n := 28 in map (λ d, (d, length (roots_pow_sub_1_mod d n)))(divisors (φ n))).
 Compute (let n := 30 in map (λ d, (d, length (roots_pow_sub_1_mod d n)))(divisors (φ n))).
 Compute (let n := 39 in map (λ d, (d, length (roots_pow_sub_1_mod d n)))(divisors (φ n))).
+Abort. (* on verra plus tard...
 ...
 assert (Hx : length (filter (λ x, x ^ d mod p =? 1) (seq 1 (p - 1))) ≤ d). {
 ...
@@ -3638,6 +3639,7 @@ Check root_bound.
 ...
 assert (Hg : length (filter (λ x, g x =? 0) (seq 1 (p - 1))) ≤ d * (e - 1)). {
 ...
+*)
 
 Definition prim_roots' p :=
   let l := prime_decomp_pow (p - 1) in
@@ -3696,6 +3698,7 @@ destruct (eq_dec x z) as [Hxz| Hxz]. {
 }
 Qed.
 
+(*
 Theorem prim_roots'_are_prim_roots :
   ∀ p a, a ∈ prim_roots' p ↔
   (∀ i, 1 ≤ i ≤ p - 1 → ∃ j, a ^ j ≡ i mod p).
@@ -3752,6 +3755,7 @@ split. {
   apply IHl; [ ... | ].
   clear IHl.
 ...
+*)
 
 Theorem glop : ∀ p, prime p → ∃ a, is_prim_root p a = true.
 Proof.
