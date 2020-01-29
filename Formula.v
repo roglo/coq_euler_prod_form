@@ -3509,6 +3509,7 @@ assert (Hd : ∀ x, x ^ (p - 1) - 1 = (x ^ d - 1) * g x). {
   rewrite <- Nat.pow_mul_r.
   f_equal; flia.
 }
+...
 (* generalization on Euler's theorem? *)
 Compute (φ 4).
 Compute (roots_pow_sub_1_mod 2 4).
@@ -3595,7 +3596,6 @@ Compute (roots_pow_sub_1_mod 1 30).
 Compute (let n := 28 in map (λ d, (d, length (roots_pow_sub_1_mod d n)))(divisors (φ n))).
 Compute (let n := 30 in map (λ d, (d, length (roots_pow_sub_1_mod d n)))(divisors (φ n))).
 Compute (let n := 39 in map (λ d, (d, length (roots_pow_sub_1_mod d n)))(divisors (φ n))).
-Abort. (* on verra plus tard...
 ...
 assert (Hx : length (filter (λ x, x ^ d mod p =? 1) (seq 1 (p - 1))) ≤ d). {
 ...
