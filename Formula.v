@@ -3458,6 +3458,8 @@ rewrite (filter_ext _ (λ x, x ^ d mod p =? 1)). 2: {
   rewrite Nat_pow_mod_is_pow_mod; [ easy | ].
   now intros H; subst p.
 }
+(**)
+...
 assert (Hp1 :
   length (filter (λ x, x ^ (p - 1) mod p =? 1) (seq 1 (p - 1))) = p - 1). {
   rewrite List_filter_all_true; [ apply seq_length | ].
