@@ -3480,6 +3480,28 @@ apply Nat.nlt_ge in H2p.
 rewrite Nat.mod_1_l; [ | easy ].
 induction n; [ now rewrite Nat.mod_small | ].
 cbn; rewrite Nat.mul_1_r, Nat.add_0_r.
+Print horner.
+Lemma horner_0_acc : ∀ p l x acc,
+  acc < p
+  → horner p l x acc = (horner p l x 0 + acc * S (length l)) mod p.
+Proof.
+intros * Hacc.
+revert x acc Hacc.
+induction l as [| a l]; intros. {
+  cbn.
+  rewrite Nat.mul_1_r.
+  now rewrite Nat.mod_small.
+}
+cbn.
+rewrite Nat.mul_0_r, Nat.add_0_l.
+rewrite IHl.
+symmetry.
+rewrite IHl.
+rewrite Nat.add_mod_idemp_l.
+symmetry.
+rewrite <- Nat.add_mod_idemp_r.
+rewrite Nat.mul_mod_idemp_l.
+rewrite Nat.mul_add_distr_r.
 ...
 
 Theorem glop : ∀ p d,
