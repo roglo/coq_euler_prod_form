@@ -3481,7 +3481,17 @@ rewrite (filter_ext _ (λ x, x ^ d mod p =? 1)). 2: {
 }
 (**)
 assert
-  (length (filter (λ x, pol_eval p (xpow (p - 1)) x =? 1) (seq 1 (p - 1))) = p - 1). {
+  (length (filter (λ x, pol_eval p (xpow (p - 1)) x =? 1) (seq 1 (p - 1))) =
+   p - 1). {
+  rewrite List_filter_all_true; [ apply seq_length | ].
+  intros a Ha.
+  apply in_seq in Ha.
+  apply Nat.eqb_eq.
+  replace (1 + (p - 1)) with p in Ha. 2: {
+    destruct p; [ easy | flia ].
+  }
+  specialize (fermat_little p Hp a Ha) as H1.
+  unfold pol_eval.
 ...
 assert (Hp1 :
   length (filter (λ x, x ^ (p - 1) mod p =? 1) (seq 1 (p - 1))) = p - 1). {
