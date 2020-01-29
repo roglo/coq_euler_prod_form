@@ -3445,6 +3445,27 @@ assert
 ...
 *)
 
+Fixpoint pol_convol_mul p al₁ al₂ i len :=
+  match len with
+  | O => []
+  | S len₁ =>
+      (Σ (j = 0, i), List.nth j al₁ 0 * List.nth (i - j) al₂ 0) mod p ::
+     pol_convol_mul p al₁ al₂ (S i) len₁
+  end.
+
+Definition pol_mul p la lb :=
+  pol_convol_mul p la lb 0 (pred (length la + length lb)).
+
+Definition xpow n := 1 :: repeat 0 n.
+
+Fixpoint horner p la x acc :=
+  match la with
+  | [] => acc
+  | a :: la' => horner p la' x ((x * acc + a) mod p)
+  end.
+
+Definition pol_eval p la x := horner p la x 0.
+
 Theorem glop : ∀ p d,
   prime p
   → Nat.divide d (p - 1)
@@ -3459,6 +3480,8 @@ rewrite (filter_ext _ (λ x, x ^ d mod p =? 1)). 2: {
   now intros H; subst p.
 }
 (**)
+assert
+  (length (filter (λ x, pol_eval p (xpow (p - 1)) x =? 1) (seq 1 (p - 1))) = p - 1). {
 ...
 assert (Hp1 :
   length (filter (λ x, x ^ (p - 1) mod p =? 1) (seq 1 (p - 1))) = p - 1). {
