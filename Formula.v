@@ -3466,6 +3466,20 @@ Fixpoint horner p la x acc :=
 
 Definition pol_eval p la x := horner p la x 0.
 
+Theorem pol_eval_xpow : ∀ p n a, pol_eval p (xpow n) a = a ^ n mod p.
+Proof.
+intros.
+unfold xpow; cbn.
+rewrite Nat.mul_0_r, Nat.add_0_l.
+destruct (lt_dec p 2) as [H2p| H2p]. {
+  destruct p; [ now induction n | ].
+  destruct p; [ | flia H2p ].
+  now induction n.
+}
+apply Nat.nlt_ge in H2p.
+rewrite Nat.mod_1_l; [ | easy ].
+...
+
 Theorem glop : ∀ p d,
   prime p
   → Nat.divide d (p - 1)
@@ -3491,7 +3505,8 @@ assert
     destruct p; [ easy | flia ].
   }
   specialize (fermat_little p Hp a Ha) as H1.
-  unfold pol_eval.
+...
+Check pol_eval_xpow.
 ...
 assert (Hp1 :
   length (filter (λ x, x ^ (p - 1) mod p =? 1) (seq 1 (p - 1))) = p - 1). {
