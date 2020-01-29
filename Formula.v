@@ -3478,6 +3478,8 @@ destruct (lt_dec p 2) as [H2p| H2p]. {
 }
 apply Nat.nlt_ge in H2p.
 rewrite Nat.mod_1_l; [ | easy ].
+induction n; [ now rewrite Nat.mod_small | ].
+cbn; rewrite Nat.mul_1_r, Nat.add_0_r.
 ...
 
 Theorem glop : ∀ p d,
