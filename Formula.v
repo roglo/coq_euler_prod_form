@@ -3478,52 +3478,22 @@ Fixpoint pol_eval p la x :=
   | a :: la' => (a + x * pol_eval p la' x) mod p
   end.
 
-(*
-Lemma horner_mod_r : ∀ p l x acc,
-  horner p l x (acc mod p) = horner p l x acc mod p.
+Lemma pol_eval_repeat_0 : ∀ p x a n,
+  pol_eval p (repeat 0 n ++ [a]) x = (a * x ^ n) mod p.
 Proof.
 intros.
-destruct (Nat.eq_dec p 0) as [Hpz| Hpz]. {
-  subst p; cbn.
-  now induction l.
-}
-revert acc.
-induction l as [| a l]; intros; [ easy | ].
-cbn.
-rewrite <- IHl.
-rewrite Nat.mod_mod; [ | easy ].
-rewrite <- Nat.add_mod_idemp_l; [ | easy ].
-rewrite Nat.mul_mod_idemp_r; [ | easy ].
-now rewrite Nat.add_mod_idemp_l.
-Qed.
-
-Lemma horner_repeat_0 : ∀ p x acc n,
-  horner p (repeat 0 n) x acc ≡ (acc * x ^ n) mod p.
-Proof.
-intros.
-destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
-revert acc.
+destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p; induction n | ].
+revert a.
 induction n; intros. {
   cbn.
-  now rewrite Nat.mul_1_r.
+  now rewrite Nat.mul_0_r, Nat.add_0_r, Nat.mul_1_r.
 }
 cbn.
-rewrite Nat.add_0_r.
 rewrite IHn.
-rewrite Nat.mul_mod_idemp_l; [ | easy ].
-now rewrite (Nat.mul_comm x), Nat.mul_assoc.
+rewrite Nat.mul_mod_idemp_r; [ | easy ].
+rewrite Nat.mul_assoc, (Nat.mul_comm x).
+now rewrite Nat.mul_assoc.
 Qed.
-
-Lemma horner_upper_bound : ∀ p l x acc, acc < p → horner p l x acc < p.
-Proof.
-intros * Hacc.
-revert acc Hacc.
-induction l as [| a l]; intros; [ easy | ].
-cbn.
-apply IHl.
-apply Nat.mod_upper_bound; flia Hacc.
-Qed.
-*)
 
 Theorem pol_eval_xpow : ∀ p n a, pol_eval p (xpow n) a = a ^ n mod p.
 Proof.
@@ -3535,12 +3505,7 @@ destruct (lt_dec p 2) as [H2p| H2p]. {
   now induction n.
 }
 apply Nat.nlt_ge in H2p.
-...
-rewrite Nat.mod_1_l; [ | easy ].
-specialize (horner_repeat_0 p a 1 n) as H1.
-rewrite Nat.mul_1_l in H1.
-rewrite Nat.mod_small in H1; [ easy | ].
-now apply horner_upper_bound.
+now rewrite pol_eval_repeat_0, Nat.mul_1_l.
 Qed.
 
 Theorem glop : ∀ p d,
