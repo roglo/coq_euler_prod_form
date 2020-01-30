@@ -3456,6 +3456,36 @@ Fixpoint pol_convol_mul p al₁ al₂ i len :=
 Definition pol_mul p la lb :=
   pol_convol_mul p la lb 0 (pred (length la + length lb)).
 
+(* what???
+   code was borrowed from Puiseux;
+   computing addition the wrong direction!
+   I don't understand *)
+
+Fixpoint pol_add p al₁ al₂ :=
+  match al₁ with
+  | [] => al₂
+  | a₁ :: bl₁ =>
+      match al₂ with
+      | [] => al₁
+      | a₂ :: bl₂ => (a₁ + a₂) mod p :: pol_add p bl₁ bl₂
+      end
+  end.
+
+Compute (pol_add 30 [1; 2] [3]).
+
+(* = [4; 2] i.e. 4x+2 *)
+(* should be x+5 *)
+(* or else, multiplication should go the other way around!
+   with highest power last, not first
+   why Puiseux' theorem worked?
+   perhaps addition was not used there?
+   I should go to Puiseux' code to check that *)
+
+Compute (pol_mul 30 [1; 2] [3; 4]). (* (x+2)(3x+4)=3x²+10x+8 ok *)
+Compute (pol_mul 30 [1; 2; 5] [3; 4]). (* (x²+2x+5)(3x+4)=(3x³+10x²+23x+20) ok *)
+
+...
+
 Definition xpow n := 1 :: repeat 0 n.
 
 Fixpoint horner p la x acc :=
@@ -3463,6 +3493,18 @@ Fixpoint horner p la x acc :=
   | [] => acc
   | a :: la' => horner p la' x ((x * acc + a) mod p)
   end.
+
+Compute (xpow 10).
+
+Compute (pol_mul 30 [1; 2] [3; 4]).
+Compute (pol_mul 30 [1; 0; 0] [3; 4]).
+
+(*
+Definition pol_add p la lb :=
+...
+
+Definition pol_sub p la lb := pol_add p la (pol_opp p lb).
+*)
 
 Definition pol_eval p la x := horner p la x 0.
 
@@ -3543,6 +3585,11 @@ rewrite (filter_ext _ (λ x, x ^ d mod p =? 1)). 2: {
   now intros H; subst p.
 }
 (**)
+assert
+  (length (filter (λ x, pol_eval p (pol_sub (xpow (p - 1)) pol_1) x =? 0) (seq 1 (p - 1))) =
+   p - 1). {
+...
+
 assert
   (length (filter (λ x, pol_eval p (xpow (p - 1)) x =? 1) (seq 1 (p - 1))) =
    p - 1). {
