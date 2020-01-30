@@ -3383,15 +3383,8 @@ Notation "- a" := (pol_opp a) : pol_scope.
 Notation "a + b" := (pol_add a b) : pol_scope.
 Notation "a - b" := (pol_sub a b) : pol_scope.
 Notation "a * b" := (pol_mul a b) : pol_scope.
-(*
-Notation "'ẋ' ^ a" := (xpow a) (at level 30, format "'ẋ' ^ a") : pol_scope.
-*)
 Notation "'⒳' ^ a" := (xpow a) (at level 30, format "'⒳' ^ a") : pol_scope.
 Notation "'⒳'" := (xpow 1) (at level 30, format "'⒳'") : pol_scope.
-(*
-Notation "'ẋ' ^ a" := (xpow a) (at level 30, format "'ẋ' ^ a") : pol_scope.
-Notation "'ẋ'" := (xpow 1) (at level 30, format "'ẋ'") : pol_scope.
-*)
 
 Fixpoint pol_eval la x :=
   match la with
@@ -3499,6 +3492,10 @@ assert
   }
   apply Nat.mod_same; flia Ha.
 }
+(*
+Arguments pol_eval la%pol.
+Show.
+*)
 ...
 ... old version
 assert (Hp1 :
