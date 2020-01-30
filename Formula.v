@@ -3360,8 +3360,7 @@ Fixpoint pol_add {n : mod_num} al₁ al₂ :=
       end
   end.
 
-Definition pol_opp {n : mod_num} l := map (λ a, mn - 1 - a) l.
-
+Definition pol_opp {n : mod_num} l := map (λ a, mn - a) l.
 Definition pol_sub {n : mod_num} la lb := pol_add la (pol_opp lb).
 
 Fixpoint pol_convol_mul {n : mod_num} al₁ al₂ i len :=
@@ -3400,7 +3399,10 @@ Fixpoint pol_eval la x :=
   | a :: la' => a + x * pol_eval la' x
   end.
 
+(*
+bug here
 Arguments pol_eval la%pol.
+*)
 
 Lemma pol_eval_repeat_0 : ∀ n x a i,
   pol_eval (repeat 0 i ++ [a]) x ≡ (a * x ^ i) mod n.
@@ -3433,6 +3435,29 @@ apply Nat.nlt_ge in H2n.
 now rewrite pol_eval_repeat_0, Nat.mul_1_l.
 Qed.
 
+Theorem pol_eval_add {n : mod_num} : ∀ la lb x,
+  pol_eval (la + lb)%pol x ≡ (pol_eval la x + pol_eval lb x) mod mn.
+Proof.
+intros.
+destruct (Nat.eq_dec mn 0) as [Hnz| Hnz]; [ now rewrite Hnz | ].
+revert lb.
+induction la as [| a la]; intros; [ easy | cbn ].
+destruct lb as [| b lb]; [ now cbn; rewrite Nat.add_0_r | cbn ].
+rewrite Nat.add_mod_idemp_l; [ | easy ].
+rewrite Nat.add_assoc.
+rewrite (Nat.add_shuffle0 _ (_ * _)).
+rewrite <- (Nat.add_assoc (a + b)).
+rewrite <- Nat.mul_add_distr_l.
+rewrite <- Nat.add_mod_idemp_r; [ | easy ].
+rewrite <- Nat.mul_mod_idemp_r; [ | easy ].
+rewrite IHla.
+rewrite Nat.mul_mod_idemp_r; [ | easy ].
+now rewrite Nat.add_mod_idemp_r.
+Qed.
+
+Notation "a ≡? b 'mod' c" := (a mod c =? b mod c)
+  (at level 70, b at level 36).
+
 Theorem glop : ∀ p d,
   prime p
   → Nat.divide d (p - 1)
@@ -3446,14 +3471,12 @@ rewrite (filter_ext _ (λ x, x ^ d mod p =? 1)). 2: {
   rewrite Nat_pow_mod_is_pow_mod; [ easy | ].
   now intros H; subst p.
 }
-(**)
 set (pmn := {| mn := p |}).
 assert
-  (length (filter (λ x, pol_eval (pol_sub (xpow (p - 1)) pol_1) x mod p =? 0 mod p) (seq 1 (p - 1))) =
-   p - 1). {
-Check (λ a b c, (a * xpow 2 + b * xpow 1 + c)%pol).
-Notation "a ≡? b 'mod' c" := (a mod c =? b mod c) (at level 70).
-Show.
+  (Hp1 :
+    length
+      (filter (λ x : nat, pol_eval (⒳^(p - 1) - 1)%pol x ≡? 0 mod p)
+         (seq 1 (p - 1))) = p - 1). {
   rewrite List_filter_all_true; [ apply seq_length | ].
   intros a Ha.
   apply in_seq in Ha.
@@ -3463,48 +3486,20 @@ Show.
   }
   specialize (fermat_little p Hp a Ha) as H1.
   rewrite Nat.mod_0_l; [ | flia Ha ].
-Arguments pol_eval la%nat.
-Show.
-Theorem pol_eval_add {n : mod_num} : ∀ la lb x,
-  pol_eval (la + lb)%pol x ≡ (pol_eval la x + pol_eval lb x) mod mn.
-Proof.
-intros.
-revert lb.
-induction la as [| a la]; intros; [ easy | cbn ].
-destruct lb as [| b lb]; [ now cbn; rewrite Nat.add_0_r | cbn ].
-...
-rewrite IHla.
-rewrite Nat.mul_add_distr_l.
-do 2 rewrite Nat.add_assoc; f_equal.
-rewrite Nat.add_shuffle0; f_equal.
-...
-
-Theorem pol_eval_sub {n : mod_num} : ∀ la lb x,
-  pol_eval (la - lb)%pol x = pol_eval la x - pol_eval lb x.
-Proof.
-intros.
-unfold pol_sub, pol_opp.
-induction la as [| a la]. {
+  replace p with mn by easy.
+  unfold pol_sub.
+  rewrite pol_eval_add.
   cbn.
-  induction lb as [| b lb]; [ easy | ].
-  cbn.
-...
-  rewrite pol_eval_xpow.
-  now rewrite pol_eval_xpow.
-...
-assert
-  (length (filter (λ x, pol_eval p (xpow (p - 1)) x =? 1) (seq 1 (p - 1))) =
-   p - 1). {
-  rewrite List_filter_all_true; [ apply seq_length | ].
-  intros a Ha.
-  apply in_seq in Ha.
-  apply Nat.eqb_eq.
-  replace (1 + (p - 1)) with p in Ha. 2: {
+  rewrite Nat.mul_0_r, Nat.add_0_r.
+  rewrite <- Nat.add_mod_idemp_l; [ | flia Ha ].
+  rewrite pol_eval_repeat_0.
+  rewrite Nat.mul_1_l, H1.
+  replace (1 + (p - 1)) with p. 2: {
     destruct p; [ easy | flia ].
   }
-  specialize (fermat_little p Hp a Ha) as H1.
-  now rewrite pol_eval_xpow.
+  apply Nat.mod_same; flia Ha.
 }
+...
 ... old version
 assert (Hp1 :
   length (filter (λ x, x ^ (p - 1) mod p =? 1) (seq 1 (p - 1))) = p - 1). {
