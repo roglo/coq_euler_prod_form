@@ -3522,12 +3522,6 @@ rewrite (filter_ext _ (λ x, x ^ d mod p =? 1)). 2: {
   now intros H; subst p.
 }
 (**)
-(*
-assert
-  (length (filter (λ x, pol_eval p (pol_sub (xpow (p - 1)) pol_1) x =? 0) (seq 1 (p - 1))) =
-   p - 1). {
-...
-*)
 assert
   (length (filter (λ x, pol_eval p (xpow (p - 1)) x =? 1) (seq 1 (p - 1))) =
    p - 1). {
