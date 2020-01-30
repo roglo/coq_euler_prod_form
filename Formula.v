@@ -3346,32 +3346,34 @@ Qed.
 
 (* polynomials in ring ℤ/nℤ *)
 
+Class mod_num := { mn : nat }.
+
 Definition pol_1 := [1].
 
-Fixpoint pol_add n al₁ al₂ :=
+Fixpoint pol_add {n : mod_num} al₁ al₂ :=
   match al₁ with
   | [] => al₂
   | a₁ :: bl₁ =>
       match al₂ with
       | [] => al₁
-      | a₂ :: bl₂ => (a₁ + a₂) mod n :: pol_add n bl₁ bl₂
+      | a₂ :: bl₂ => (a₁ + a₂) mod mn :: pol_add bl₁ bl₂
       end
   end.
 
-Definition pol_opp n l := map (λ a, n - 1 - a) l.
+Definition pol_opp {n : mod_num} l := map (λ a, mn - 1 - a) l.
 
-Definition pol_sub n la lb := pol_add n la (pol_opp n lb).
+Definition pol_sub {n : mod_num} la lb := pol_add la (pol_opp lb).
 
-Fixpoint pol_convol_mul n al₁ al₂ i len :=
+Fixpoint pol_convol_mul {n : mod_num} al₁ al₂ i len :=
   match len with
   | O => []
   | S len₁ =>
-      (Σ (j = 0, i), List.nth j al₁ 0 * List.nth (i - j) al₂ 0) mod n ::
-     pol_convol_mul n al₁ al₂ (S i) len₁
+      (Σ (j = 0, i), List.nth j al₁ 0 * List.nth (i - j) al₂ 0) mod mn ::
+     pol_convol_mul al₁ al₂ (S i) len₁
   end.
 
-Definition pol_mul n la lb :=
-  pol_convol_mul n la lb 0 (pred (length la + length lb)).
+Definition pol_mul {n : mod_num} la lb :=
+  pol_convol_mul la lb 0 (pred (length la + length lb)).
 
 Definition xpow i := repeat 0 i ++ [1].
 
@@ -3381,9 +3383,16 @@ Notation "1" := pol_1 : pol_scope.
 Notation "- a" := (pol_opp a) : pol_scope.
 Notation "a + b" := (pol_add a b) : pol_scope.
 Notation "a - b" := (pol_sub a b) : pol_scope.
-Notation "a ^ b" := (pol_pow a b) : pol_scope.
-
-...
+Notation "a * b" := (pol_mul a b) : pol_scope.
+(*
+Notation "'ẋ' ^ a" := (xpow a) (at level 30, format "'ẋ' ^ a") : pol_scope.
+*)
+Notation "'⒳' ^ a" := (xpow a) (at level 30, format "'⒳' ^ a") : pol_scope.
+Notation "'⒳'" := (xpow 1) (at level 30, format "'⒳'") : pol_scope.
+(*
+Notation "'ẋ' ^ a" := (xpow a) (at level 30, format "'ẋ' ^ a") : pol_scope.
+Notation "'ẋ'" := (xpow 1) (at level 30, format "'ẋ'") : pol_scope.
+*)
 
 Fixpoint pol_eval n la x :=
   match la with
@@ -3435,9 +3444,11 @@ rewrite (filter_ext _ (λ x, x ^ d mod p =? 1)). 2: {
   now intros H; subst p.
 }
 (**)
+set (pmn := {| mn := p |}).
 assert
-  (length (filter (λ x, pol_eval p (pol_sub p (xpow (p - 1)) pol_1) x =? 0) (seq 1 (p - 1))) =
+  (length (filter (λ x, pol_eval p (pol_sub (xpow (p - 1)) pol_1) x =? 0) (seq 1 (p - 1))) =
    p - 1). {
+Check (λ a b c, (a * xpow 2 + b * xpow 1 + c)%pol).
 ...
 assert
   (length (filter (λ x, pol_eval p (xpow (p - 1)) x =? 1) (seq 1 (p - 1))) =
