@@ -3394,14 +3394,14 @@ Notation "'ẋ' ^ a" := (xpow a) (at level 30, format "'ẋ' ^ a") : pol_scope.
 Notation "'ẋ'" := (xpow 1) (at level 30, format "'ẋ'") : pol_scope.
 *)
 
-Fixpoint pol_eval n la x :=
+Fixpoint pol_eval la x :=
   match la with
   | [] => 0
-  | a :: la' => (a + x * pol_eval n la' x) mod n
+  | a :: la' => a + x * pol_eval la' x
   end.
 
 Lemma pol_eval_repeat_0 : ∀ n x a i,
-  pol_eval n (repeat 0 i ++ [a]) x = (a * x ^ i) mod n.
+  pol_eval (repeat 0 i ++ [a]) x ≡ (a * x ^ i) mod n.
 Proof.
 intros.
 destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n; induction i | ].
@@ -3411,13 +3411,14 @@ induction i; intros. {
   now rewrite Nat.mul_0_r, Nat.add_0_r, Nat.mul_1_r.
 }
 cbn.
+rewrite <- Nat.mul_mod_idemp_r; [ | easy ].
 rewrite IHi.
 rewrite Nat.mul_mod_idemp_r; [ | easy ].
 rewrite Nat.mul_assoc, (Nat.mul_comm x).
 now rewrite Nat.mul_assoc.
 Qed.
 
-Theorem pol_eval_xpow : ∀ n i a, pol_eval n (xpow i) a = a ^ i mod n.
+Theorem pol_eval_xpow : ∀ n i a, pol_eval (xpow i) a ≡ a ^ i mod n.
 Proof.
 intros.
 unfold xpow; cbn.
@@ -3446,9 +3447,11 @@ rewrite (filter_ext _ (λ x, x ^ d mod p =? 1)). 2: {
 (**)
 set (pmn := {| mn := p |}).
 assert
-  (length (filter (λ x, pol_eval p (pol_sub (xpow (p - 1)) pol_1) x =? 0) (seq 1 (p - 1))) =
+  (length (filter (λ x, pol_eval (pol_sub (xpow (p - 1)) pol_1) x mod p =? 0 mod p) (seq 1 (p - 1))) =
    p - 1). {
 Check (λ a b c, (a * xpow 2 + b * xpow 1 + c)%pol).
+Notation "a ≡? b 'mod' c" := (a mod c =? b mod c) (at level 70).
+Show.
 ...
 assert
   (length (filter (λ x, pol_eval p (xpow (p - 1)) x =? 1) (seq 1 (p - 1))) =
