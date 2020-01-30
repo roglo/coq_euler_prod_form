@@ -3400,6 +3400,8 @@ Fixpoint pol_eval la x :=
   | a :: la' => a + x * pol_eval la' x
   end.
 
+Arguments pol_eval la%pol.
+
 Lemma pol_eval_repeat_0 : ∀ n x a i,
   pol_eval (repeat 0 i ++ [a]) x ≡ (a * x ^ i) mod n.
 Proof.
@@ -3452,6 +3454,43 @@ assert
 Check (λ a b c, (a * xpow 2 + b * xpow 1 + c)%pol).
 Notation "a ≡? b 'mod' c" := (a mod c =? b mod c) (at level 70).
 Show.
+  rewrite List_filter_all_true; [ apply seq_length | ].
+  intros a Ha.
+  apply in_seq in Ha.
+  apply Nat.eqb_eq.
+  replace (1 + (p - 1)) with p in Ha. 2: {
+    destruct p; [ easy | flia ].
+  }
+  specialize (fermat_little p Hp a Ha) as H1.
+  rewrite Nat.mod_0_l; [ | flia Ha ].
+Arguments pol_eval la%nat.
+Show.
+Theorem pol_eval_add {n : mod_num} : ∀ la lb x,
+  pol_eval (la + lb)%pol x ≡ (pol_eval la x + pol_eval lb x) mod mn.
+Proof.
+intros.
+revert lb.
+induction la as [| a la]; intros; [ easy | cbn ].
+destruct lb as [| b lb]; [ now cbn; rewrite Nat.add_0_r | cbn ].
+...
+rewrite IHla.
+rewrite Nat.mul_add_distr_l.
+do 2 rewrite Nat.add_assoc; f_equal.
+rewrite Nat.add_shuffle0; f_equal.
+...
+
+Theorem pol_eval_sub {n : mod_num} : ∀ la lb x,
+  pol_eval (la - lb)%pol x = pol_eval la x - pol_eval lb x.
+Proof.
+intros.
+unfold pol_sub, pol_opp.
+induction la as [| a la]. {
+  cbn.
+  induction lb as [| b lb]; [ easy | ].
+  cbn.
+...
+  rewrite pol_eval_xpow.
+  now rewrite pol_eval_xpow.
 ...
 assert
   (length (filter (λ x, pol_eval p (xpow (p - 1)) x =? 1) (seq 1 (p - 1))) =
