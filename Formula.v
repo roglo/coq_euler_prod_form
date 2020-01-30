@@ -3496,6 +3496,7 @@ assert
 Arguments pol_eval la%pol.
 Show.
 *)
+assert ((xpow (p - 1) - 1 = (xpow d - 1) * (xpow e - 1))%pol).
 ...
 ... old version
 assert (Hp1 :
