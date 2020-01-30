@@ -3344,167 +3344,80 @@ rewrite Nat.mod_1_l in H1; [ | easy ].
 now rewrite Nat.mul_1_l in H1.
 Qed.
 
-(*
-Theorem root_bound : ∀ f n a sta len,
-  f = (λ n a x, Σ (i = 0, n), a i * x ^ i)
-  → a n ≠ 0
-  → length (filter (λ x, f n a x =? 0) (seq sta len)) ≤ n.
-Proof.
-intros * Hf Han.
-revert a sta len Han.
-induction n; intros. {
-  rewrite List_filter_all_false; [ easy | ].
-  intros x Hx.
-  apply Nat.eqb_neq.
-  rewrite Hf; cbn.
-  now rewrite Nat.mul_1_r.
-}
-(* https://wstein.org/edu/2007/spring/ent/ent-html/node28.html#prop:atmost *)
-remember (length (filter (λ x, f (S n) a x =? 0) (seq sta len))) as m eqn:Hm.
-symmetry in Hm.
-destruct m; [ flia | ].
-assert (H : ∃ α, f (S n) a α = 0). {
-  clear - Hm.
-  revert sta m Hm.
-  induction len; intros; [ easy | ].
-  cbn in Hm.
-  remember (f (S n) a sta) as f1 eqn:Hf1; symmetry in Hf1.
-  destruct f1; [ now exists sta | ].
-  cbn in Hm.
-  apply (IHlen (S sta) m).
-  apply Hm.
-}
-destruct H as (α, Hα).
-apply -> Nat.succ_le_mono.
-assert (H1 : ∀ x, f (S n) a x = f (S n) a x - f (S n) a α). {
-  intros x.
-  now rewrite Hα, Nat.sub_0_r.
-}
-assert (H2 : ∀ x, f (S n) a x = Σ (i = 0, S n), a i * x ^ i - Σ (i = 0, S n), a i * α ^ i). {
-  intros.
-  specialize (H1 x).
-  rewrite Hf in H1.
-  now rewrite Hf.
-}
-clear H1; rename H2 into H1.
-assert
-  (H2 : ∀ x, α ≤ x → f (S n) a x = Σ (i = 1, S n), a i * (x ^ i - α ^ i)). {
-  intros * Hαx.
-  specialize (H1 x).
-  rewrite <- summation_sub in H1. 2: {
-    intros i Hi.
-    apply Nat.mul_le_mono_l.
-    now apply Nat.pow_le_mono_l.
-  }
-  rewrite H1.
-  rewrite summation_split_first; [ | flia ].
-  do 2 rewrite Nat.pow_0_r.
-  rewrite Nat.sub_diag, Nat.add_0_l.
-  apply summation_eq_compat.
-  intros i Hi.
-  symmetry; apply Nat.mul_sub_distr_l.
-}
-assert
-  (H3 : ∀ x,
-   α ≤ x →
-   f (S n) a x =
-     (x - α) *
-     Σ (i = 0, n), a (i + 1) * Σ (j = 0, i), x ^ (i - j) * α ^ j). {
-  intros x Hx.
-  rewrite mul_summation_distr_l.
-  rewrite H2; [ | easy ].
-  rewrite summation_shift.
-  apply summation_eq_compat.
-  intros i Hi.
-  replace (S i) with (i + 1) by flia.
-  rewrite (Nat.mul_comm (x - α)).
-  rewrite <- Nat.mul_assoc; f_equal.
-  rewrite Nat_pow_sub_pow; [ | flia Hi | easy ].
-  rewrite Nat.add_sub.
-  rewrite Nat.mul_comm; f_equal.
-  cbn.
-  rewrite Nat.sub_0_r, Nat.add_sub, Nat.mul_1_r.
-  rewrite (Nat.add_comm i 1).
-  rewrite seq_app.
-  rewrite fold_left_app.
-  cbn - [ "-" ].
-  rewrite Nat.sub_0_r, Nat.mul_1_r.
-  clear.
-  remember (seq 1 i) as l; remember (x ^ i) as a.
-  clear.
-  revert a; induction l as [| b l]; intros; [ easy | ].
-  cbn - [ "-" ].
-  rewrite IHl; f_equal; f_equal; f_equal; f_equal.
-  flia.
-}
-(* mouais... cette hypothèse α ≤ x craint. En fait, faudrait
-   bosser dans ℤ ; c'est chiant parce que, jusqu'ici, ℕ me
-   suffisait ; déjà que j'essaie d'éviter d'entrer dans les
-   considérations des polynômes (supposant d'y mettre toute
-   la machinerie...) *)
-...
-*)
+(* polynomials in ring ℤ/nℤ *)
 
-Fixpoint pol_add p al₁ al₂ :=
+Definition pol_1 := [1].
+
+Fixpoint pol_add n al₁ al₂ :=
   match al₁ with
   | [] => al₂
   | a₁ :: bl₁ =>
       match al₂ with
       | [] => al₁
-      | a₂ :: bl₂ => (a₁ + a₂) mod p :: pol_add p bl₁ bl₂
+      | a₂ :: bl₂ => (a₁ + a₂) mod n :: pol_add n bl₁ bl₂
       end
   end.
 
-(*
-Definition pol_sub p la lb := pol_add p la (pol_opp p lb).
-*)
+Definition pol_opp n l := map (λ a, n - 1 - a) l.
 
-Fixpoint pol_convol_mul p al₁ al₂ i len :=
+Definition pol_sub n la lb := pol_add n la (pol_opp n lb).
+
+Fixpoint pol_convol_mul n al₁ al₂ i len :=
   match len with
   | O => []
   | S len₁ =>
-      (Σ (j = 0, i), List.nth j al₁ 0 * List.nth (i - j) al₂ 0) mod p ::
-     pol_convol_mul p al₁ al₂ (S i) len₁
+      (Σ (j = 0, i), List.nth j al₁ 0 * List.nth (i - j) al₂ 0) mod n ::
+     pol_convol_mul n al₁ al₂ (S i) len₁
   end.
 
-Definition pol_mul p la lb :=
-  pol_convol_mul p la lb 0 (pred (length la + length lb)).
+Definition pol_mul n la lb :=
+  pol_convol_mul n la lb 0 (pred (length la + length lb)).
 
-Definition xpow n := repeat 0 n ++ [1].
+Definition xpow i := repeat 0 i ++ [1].
 
-Fixpoint pol_eval p la x :=
+Declare Scope pol_scope.
+Delimit Scope pol_scope with pol.
+Notation "1" := pol_1 : pol_scope.
+Notation "- a" := (pol_opp a) : pol_scope.
+Notation "a + b" := (pol_add a b) : pol_scope.
+Notation "a - b" := (pol_sub a b) : pol_scope.
+Notation "a ^ b" := (pol_pow a b) : pol_scope.
+
+...
+
+Fixpoint pol_eval n la x :=
   match la with
   | [] => 0
-  | a :: la' => (a + x * pol_eval p la' x) mod p
+  | a :: la' => (a + x * pol_eval n la' x) mod n
   end.
 
-Lemma pol_eval_repeat_0 : ∀ p x a n,
-  pol_eval p (repeat 0 n ++ [a]) x = (a * x ^ n) mod p.
+Lemma pol_eval_repeat_0 : ∀ n x a i,
+  pol_eval n (repeat 0 i ++ [a]) x = (a * x ^ i) mod n.
 Proof.
 intros.
-destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p; induction n | ].
+destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n; induction i | ].
 revert a.
-induction n; intros. {
+induction i; intros. {
   cbn.
   now rewrite Nat.mul_0_r, Nat.add_0_r, Nat.mul_1_r.
 }
 cbn.
-rewrite IHn.
+rewrite IHi.
 rewrite Nat.mul_mod_idemp_r; [ | easy ].
 rewrite Nat.mul_assoc, (Nat.mul_comm x).
 now rewrite Nat.mul_assoc.
 Qed.
 
-Theorem pol_eval_xpow : ∀ p n a, pol_eval p (xpow n) a = a ^ n mod p.
+Theorem pol_eval_xpow : ∀ n i a, pol_eval n (xpow i) a = a ^ i mod n.
 Proof.
 intros.
 unfold xpow; cbn.
-destruct (lt_dec p 2) as [H2p| H2p]. {
-  destruct p; [ now induction n | ].
-  destruct p; [ | flia H2p ].
-  now induction n.
+destruct (lt_dec n 2) as [H2n| H2n]. {
+  destruct n; [ now induction i | ].
+  destruct n; [ | flia H2n ].
+  now induction i.
 }
-apply Nat.nlt_ge in H2p.
+apply Nat.nlt_ge in H2n.
 now rewrite pol_eval_repeat_0, Nat.mul_1_l.
 Qed.
 
@@ -3522,6 +3435,10 @@ rewrite (filter_ext _ (λ x, x ^ d mod p =? 1)). 2: {
   now intros H; subst p.
 }
 (**)
+assert
+  (length (filter (λ x, pol_eval p (pol_sub p (xpow (p - 1)) pol_1) x =? 0) (seq 1 (p - 1))) =
+   p - 1). {
+...
 assert
   (length (filter (λ x, pol_eval p (xpow (p - 1)) x =? 1) (seq 1 (p - 1))) =
    p - 1). {
