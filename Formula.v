@@ -3484,6 +3484,33 @@ rewrite Nat.mul_mod_idemp_r; [ | easy ].
 now rewrite Nat.add_mod_idemp_l.
 Qed.
 
+Lemma horner_repeat_0 : ∀ p x acc n,
+  horner p (repeat 0 n) x acc ≡ (acc * x ^ n) mod p.
+Proof.
+intros.
+destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
+revert acc.
+induction n; intros. {
+  cbn.
+  now rewrite Nat.mul_1_r.
+}
+cbn.
+rewrite Nat.add_0_r.
+rewrite IHn.
+rewrite Nat.mul_mod_idemp_l; [ | easy ].
+now rewrite (Nat.mul_comm x), Nat.mul_assoc.
+Qed.
+
+Lemma horner_upper_bound : ∀ p l x acc, acc < p → horner p l x acc < p.
+Proof.
+intros * Hacc.
+revert acc Hacc.
+induction l as [| a l]; intros; [ easy | ].
+cbn.
+apply IHl.
+apply Nat.mod_upper_bound; flia Hacc.
+Qed.
+
 Theorem pol_eval_xpow : ∀ p n a, pol_eval p (xpow n) a = a ^ n mod p.
 Proof.
 intros.
@@ -3496,11 +3523,11 @@ destruct (lt_dec p 2) as [H2p| H2p]. {
 }
 apply Nat.nlt_ge in H2p.
 rewrite Nat.mod_1_l; [ | easy ].
-revert a.
-induction n; intros; [ now rewrite Nat.mod_small | ].
-cbn; rewrite Nat.mul_1_r, Nat.add_0_r.
-rewrite horner_mod_r.
-...
+specialize (horner_repeat_0 p a 1 n) as H1.
+rewrite Nat.mul_1_l in H1.
+rewrite Nat.mod_small in H1; [ easy | ].
+now apply horner_upper_bound.
+Qed.
 
 Theorem glop : ∀ p d,
   prime p
@@ -3527,9 +3554,9 @@ assert
     destruct p; [ easy | flia ].
   }
   specialize (fermat_little p Hp a Ha) as H1.
-...
-Check pol_eval_xpow.
-...
+  now rewrite pol_eval_xpow.
+}
+... old version
 assert (Hp1 :
   length (filter (λ x, x ^ (p - 1) mod p =? 1) (seq 1 (p - 1))) = p - 1). {
   rewrite List_filter_all_true; [ apply seq_length | ].
