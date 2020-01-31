@@ -3502,41 +3502,24 @@ Show.
 assert ((⒳^(p-1) - 1 = (⒳^d - 1) * Σ (i = 1, e), ⒳^(d*(e-i)))%pol). {
 About Nat_pow_sub_pow. (* to be proved with polynomials *)
 Theorem polm_pow_sub_1 {n : mod_num} : ∀ k,
-  k ≠ 0
+  prime mn
+  → k ≠ 0
   → (⒳^k - 1 = (⒳ - 1) * (Σ (i = 0, k - 1), ⒳^(k-i-1)))%pol.
 Proof.
-intros * Hkz.
-(*
-destruct (lt_dec mn 2) as [H2n| H2n]. {
-  destruct mn. {
-    cbn.
-    destruct k; [ easy | clear Hkz ].
-    rewrite Nat.sub_succ.
-    do 2 rewrite Nat.sub_0_r.
-    rewrite Nat.sub_succ.
-    rewrite Nat.sub_0_r.
-    cbn - [ "-" ].
-    f_equal. {
-      rewrite Nat.mul_mod_idemp_l.
-...
-*)
+intros * Hp Hkz.
 destruct k; [ easy | clear Hkz ].
+rewrite Nat.sub_succ, (Nat.sub_0_r k).
 induction k. {
   cbn.
   rewrite Nat.mul_1_r, Nat.mul_0_r, Nat.add_0_l.
   destruct (lt_dec mn 2) as [H2n| H2n]. {
-    destruct mn as [| mn]. {
-      cbn.
-(* fail *)
-(* perhaps n must be prime and, in that case, we are
-   in a field? *)
-...
-    }
-    destruct mn; [ | flia H2n ].
-cbn.
-...
-  rewrite Nat.mod_mod.
-  rewrite Nat.mod_1_l.
+    destruct mn as [| mn]; [ easy | ].
+    destruct mn as [| mn]; [ easy | flia H2n ].
+  }
+  apply Nat.nlt_ge in H2n.
+  rewrite Nat.mod_mod; [ | flia H2n ].
+  now rewrite Nat.mod_1_l.
+}
 ...
 (* and, actually, an equality between polynomial is required: it has
    to be defined *)
