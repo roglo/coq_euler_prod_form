@@ -3500,9 +3500,9 @@ assert
 Arguments pol_eval la%pol.
 Show.
 *)
-assert ((xpow (p - 1) - 1 = (xpow d - 1) * Σ (i = 0, 3), (xpow e - 1))%pol).
-(* juste pour voir si je pouvais avoir un Σ avec la même syntaxe que pour les
-   nat, mais l'expression n'est pas correcte *)
+assert ((⒳^(p-1) - 1 = (⒳^d - 1) * Σ (i = 1, e), ⒳^(d*(e-i)))%pol). {
+(* actually, an equality between polynomial is required: it has
+   to be defined *)
 ...
 ... old version
 assert (Hp1 :
