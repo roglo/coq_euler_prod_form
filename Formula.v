@@ -3386,8 +3386,8 @@ Notation "- a" := (polm_opp a) : polm_scope.
 Notation "a + b" := (polm_add a b) : polm_scope.
 Notation "a - b" := (polm_sub a b) : polm_scope.
 Notation "a * b" := (polm_mul a b) : polm_scope.
-Notation "'⒳' ^ a" := (xpow a) (at level 30, format "'⒳' ^ a") : polm_scope.
-Notation "'⒳'" := (xpow 1) (at level 30, format "'⒳'") : polm_scope.
+Notation "'Ⓧ' ^ a" := (xpow a) (at level 30, format "'Ⓧ' ^ a") : polm_scope.
+Notation "'Ⓧ'" := (xpow 1) (at level 30, format "'Ⓧ'") : polm_scope.
 
 Fixpoint polm_eval la x :=
   match la with
@@ -3471,7 +3471,7 @@ set (pmn := {| mn := p |}).
 assert
   (Hp1 :
     length
-      (filter (λ x : nat, polm_eval (⒳^(p - 1) - 1)%pol x ≡? 0 mod p)
+      (filter (λ x : nat, polm_eval (Ⓧ^(p - 1) - 1)%pol x ≡? 0 mod p)
          (seq 1 (p - 1))) = p - 1). {
   rewrite List_filter_all_true; [ apply seq_length | ].
   intros a Ha.
@@ -3499,12 +3499,12 @@ assert
 Arguments polm_eval la%pol.
 Show.
 *)
-assert ((⒳^(p-1) - 1 = (⒳^d - 1) * Σ (i = 1, e), ⒳^(d*(e-i)))%pol). {
+assert ((Ⓧ^(p-1) - 1 = (Ⓧ^d - 1) * Σ (i = 1, e), Ⓧ^(d*(e-i)))%pol). {
 About Nat_pow_sub_pow. (* to be proved with polynomials *)
 Theorem polm_pow_sub_1 {n : mod_num} : ∀ k,
   prime mn
   → k ≠ 0
-  → (⒳^k - 1 = (⒳ - 1) * (Σ (i = 0, k - 1), ⒳^(k-i-1)))%pol.
+  → (Ⓧ^k - 1 = (Ⓧ - 1) * (Σ (i = 0, k - 1), Ⓧ^(k-i-1)))%pol.
 Proof.
 intros * Hp Hkz.
 destruct k; [ easy | clear Hkz ].
