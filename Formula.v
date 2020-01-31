@@ -3500,7 +3500,7 @@ Arguments pol_eval la%pol.
 Show.
 *)
 assert ((⒳^(p-1) - 1 = (⒳^d - 1) * Σ (i = 1, e), ⒳^(d*(e-i)))%pol). {
-Check Nat_pow_sub_pow. (* to be proved with polynomials *)
+About Nat_pow_sub_pow. (* to be proved with polynomials *)
 Search (_ ^ _ - _ ^ _)%pol.
 (* and, actually, an equality between polynomial is required: it has
    to be defined *)
