@@ -3379,9 +3379,6 @@ Definition polm_mul {n : mod_num} la lb :=
 
 Definition xpow i := repeat 0 i ++ [1].
 
-Definition polm_pow {n : mod_num} la n :=
-...
-
 Declare Scope polm_scope.
 Delimit Scope polm_scope with pol.
 Notation "1" := polm_1 : polm_scope.
@@ -3389,9 +3386,6 @@ Notation "- a" := (polm_opp a) : polm_scope.
 Notation "a + b" := (polm_add a b) : polm_scope.
 Notation "a - b" := (polm_sub a b) : polm_scope.
 Notation "a * b" := (polm_mul a b) : polm_scope.
-Check polm_pow.
-...
-Notation "a ^ n" := (polm_pow a n) : polm_scope.
 Notation "'⒳' ^ a" := (xpow a) (at level 30, format "'⒳' ^ a") : polm_scope.
 Notation "'⒳'" := (xpow 1) (at level 30, format "'⒳'") : polm_scope.
 
@@ -3507,11 +3501,12 @@ Show.
 *)
 assert ((⒳^(p-1) - 1 = (⒳^d - 1) * Σ (i = 1, e), ⒳^(d*(e-i)))%pol). {
 About Nat_pow_sub_pow. (* to be proved with polynomials *)
-Theorem polm_pow_sub_pow : ∀ a b n,
-  n ≠ 0
-  → (a ^ n - b ^ n)%pol = (a - b) * (Σ (i = 0, n - 1), a ^ (n - i - 1) * b ^ i).
+Theorem polm_pow_sub_1 {n : mod_num} : ∀ k,
+  k ≠ 0
+  → (⒳^k - 1 = (⒳ - 1) * (Σ (i = 0, k - 1), ⒳^(k-i-1)))%pol.
+Proof.
+intros * Hk.
 ...
-Search (_ ^ _ - _ ^ _)%pol.
 (* and, actually, an equality between polynomial is required: it has
    to be defined *)
 ...
