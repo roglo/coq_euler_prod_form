@@ -3527,6 +3527,7 @@ induction k. {
   destruct (lt_dec mn 2) as [H2n| H2n]. {
     destruct mn as [| mn]. {
       cbn.
+(* fail *)
 (* perhaps n must be prime and, in that case, we are
    in a field? *)
 ...
