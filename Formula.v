@@ -3348,60 +3348,66 @@ Qed.
 
 Class mod_num := { mn : nat }.
 
-Definition pol_1 := [1].
+Definition polm_1 := [1].
 
-Fixpoint pol_add {n : mod_num} al₁ al₂ :=
+Fixpoint polm_add {n : mod_num} al₁ al₂ :=
   match al₁ with
   | [] => al₂
   | a₁ :: bl₁ =>
       match al₂ with
       | [] => al₁
-      | a₂ :: bl₂ => (a₁ + a₂) mod mn :: pol_add bl₁ bl₂
+      | a₂ :: bl₂ => (a₁ + a₂) mod mn :: polm_add bl₁ bl₂
       end
   end.
 
-Definition pol_opp {n : mod_num} l := map (λ a, mn - a) l.
-Definition pol_sub {n : mod_num} la lb := pol_add la (pol_opp lb).
+Definition polm_opp {n : mod_num} l := map (λ a, mn - a) l.
+Definition polm_sub {n : mod_num} la lb := polm_add la (polm_opp lb).
 
 Notation "'Σ' ( i = b , e ) , g" :=
-  (fold_left (λ c i, pol_add c g) (seq b (S e - b)) []) : pol_scope.
+  (fold_left (λ c i, polm_add c g) (seq b (S e - b)) []) : polm_scope.
 
-Fixpoint pol_convol_mul {n : mod_num} al₁ al₂ i len :=
+Fixpoint polm_convol_mul {n : mod_num} al₁ al₂ i len :=
   match len with
   | O => []
   | S len₁ =>
       (Σ (j = 0, i), List.nth j al₁ 0 * List.nth (i - j) al₂ 0) mod mn ::
-     pol_convol_mul al₁ al₂ (S i) len₁
+     polm_convol_mul al₁ al₂ (S i) len₁
   end.
 
-Definition pol_mul {n : mod_num} la lb :=
-  pol_convol_mul la lb 0 (pred (length la + length lb)).
+Definition polm_mul {n : mod_num} la lb :=
+  polm_convol_mul la lb 0 (pred (length la + length lb)).
 
 Definition xpow i := repeat 0 i ++ [1].
 
-Declare Scope pol_scope.
-Delimit Scope pol_scope with pol.
-Notation "1" := pol_1 : pol_scope.
-Notation "- a" := (pol_opp a) : pol_scope.
-Notation "a + b" := (pol_add a b) : pol_scope.
-Notation "a - b" := (pol_sub a b) : pol_scope.
-Notation "a * b" := (pol_mul a b) : pol_scope.
-Notation "'⒳' ^ a" := (xpow a) (at level 30, format "'⒳' ^ a") : pol_scope.
-Notation "'⒳'" := (xpow 1) (at level 30, format "'⒳'") : pol_scope.
+Definition polm_pow {n : mod_num} la n :=
+...
 
-Fixpoint pol_eval la x :=
+Declare Scope polm_scope.
+Delimit Scope polm_scope with pol.
+Notation "1" := polm_1 : polm_scope.
+Notation "- a" := (polm_opp a) : polm_scope.
+Notation "a + b" := (polm_add a b) : polm_scope.
+Notation "a - b" := (polm_sub a b) : polm_scope.
+Notation "a * b" := (polm_mul a b) : polm_scope.
+Check polm_pow.
+...
+Notation "a ^ n" := (polm_pow a n) : polm_scope.
+Notation "'⒳' ^ a" := (xpow a) (at level 30, format "'⒳' ^ a") : polm_scope.
+Notation "'⒳'" := (xpow 1) (at level 30, format "'⒳'") : polm_scope.
+
+Fixpoint polm_eval la x :=
   match la with
   | [] => 0
-  | a :: la' => a + x * pol_eval la' x
+  | a :: la' => a + x * polm_eval la' x
   end.
 
 (*
 bug here
-Arguments pol_eval la%pol.
+Arguments polm_eval la%pol.
 *)
 
-Lemma pol_eval_repeat_0 : ∀ n x a i,
-  pol_eval (repeat 0 i ++ [a]) x ≡ (a * x ^ i) mod n.
+Lemma polm_eval_repeat_0 : ∀ n x a i,
+  polm_eval (repeat 0 i ++ [a]) x ≡ (a * x ^ i) mod n.
 Proof.
 intros.
 destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n; induction i | ].
@@ -3418,7 +3424,7 @@ rewrite Nat.mul_assoc, (Nat.mul_comm x).
 now rewrite Nat.mul_assoc.
 Qed.
 
-Theorem pol_eval_xpow : ∀ n i a, pol_eval (xpow i) a ≡ a ^ i mod n.
+Theorem polm_eval_xpow : ∀ n i a, polm_eval (xpow i) a ≡ a ^ i mod n.
 Proof.
 intros.
 unfold xpow; cbn.
@@ -3428,11 +3434,11 @@ destruct (lt_dec n 2) as [H2n| H2n]. {
   now induction i.
 }
 apply Nat.nlt_ge in H2n.
-now rewrite pol_eval_repeat_0, Nat.mul_1_l.
+now rewrite polm_eval_repeat_0, Nat.mul_1_l.
 Qed.
 
-Theorem pol_eval_add {n : mod_num} : ∀ la lb x,
-  pol_eval (la + lb)%pol x ≡ (pol_eval la x + pol_eval lb x) mod mn.
+Theorem polm_eval_add {n : mod_num} : ∀ la lb x,
+  polm_eval (la + lb)%pol x ≡ (polm_eval la x + polm_eval lb x) mod mn.
 Proof.
 intros.
 destruct (Nat.eq_dec mn 0) as [Hnz| Hnz]; [ now rewrite Hnz | ].
@@ -3471,7 +3477,7 @@ set (pmn := {| mn := p |}).
 assert
   (Hp1 :
     length
-      (filter (λ x : nat, pol_eval (⒳^(p - 1) - 1)%pol x ≡? 0 mod p)
+      (filter (λ x : nat, polm_eval (⒳^(p - 1) - 1)%pol x ≡? 0 mod p)
          (seq 1 (p - 1))) = p - 1). {
   rewrite List_filter_all_true; [ apply seq_length | ].
   intros a Ha.
@@ -3483,12 +3489,12 @@ assert
   specialize (fermat_little p Hp a Ha) as H1.
   rewrite Nat.mod_0_l; [ | flia Ha ].
   replace p with mn by easy.
-  unfold pol_sub.
-  rewrite pol_eval_add.
+  unfold polm_sub.
+  rewrite polm_eval_add.
   cbn.
   rewrite Nat.mul_0_r, Nat.add_0_r.
   rewrite <- Nat.add_mod_idemp_l; [ | flia Ha ].
-  rewrite pol_eval_repeat_0.
+  rewrite polm_eval_repeat_0.
   rewrite Nat.mul_1_l, H1.
   replace (1 + (p - 1)) with p. 2: {
     destruct p; [ easy | flia ].
@@ -3496,11 +3502,15 @@ assert
   apply Nat.mod_same; flia Ha.
 }
 (*
-Arguments pol_eval la%pol.
+Arguments polm_eval la%pol.
 Show.
 *)
 assert ((⒳^(p-1) - 1 = (⒳^d - 1) * Σ (i = 1, e), ⒳^(d*(e-i)))%pol). {
 About Nat_pow_sub_pow. (* to be proved with polynomials *)
+Theorem polm_pow_sub_pow : ∀ a b n,
+  n ≠ 0
+  → (a ^ n - b ^ n)%pol = (a - b) * (Σ (i = 0, n - 1), a ^ (n - i - 1) * b ^ i).
+...
 Search (_ ^ _ - _ ^ _)%pol.
 (* and, actually, an equality between polynomial is required: it has
    to be defined *)
