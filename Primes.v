@@ -321,6 +321,9 @@ replace (k + 2 + 1) with (S k + 2) in Hpn by flia.
 now apply IHn.
 Qed.
 
+Theorem prime_neq_0 : ∀ p, prime p → p ≠ 0.
+Proof. now intros * Hp H; subst p. Qed.
+
 Theorem prime_ge_2 : ∀ n, prime n → 2 ≤ n.
 Proof.
 intros * Hp.

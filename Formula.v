@@ -3524,6 +3524,12 @@ remember (S k) as sk; cbn - [ "-" ]; subst sk.
 f_equal. {
   cbn.
   rewrite Nat.sub_0_r.
+  destruct k. {
+    cbn.
+    rewrite Nat.mod_1_l; [ | now apply prime_ge_2 ].
+    rewrite Nat.mul_1_r, Nat.mod_mod; [ easy | now apply prime_neq_0 ].
+  }
+  cbn.
 ...
 (* and, actually, an equality between polynomial is required: it has
    to be defined *)
