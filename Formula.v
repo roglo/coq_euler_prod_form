@@ -3520,6 +3520,10 @@ induction k. {
   rewrite Nat.mod_mod; [ | flia H2n ].
   now rewrite Nat.mod_1_l.
 }
+remember (S k) as sk; cbn - [ "-" ]; subst sk.
+f_equal. {
+  cbn.
+  rewrite Nat.sub_0_r.
 ...
 (* and, actually, an equality between polynomial is required: it has
    to be defined *)
