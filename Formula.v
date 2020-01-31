@@ -3364,8 +3364,7 @@ Definition pol_opp {n : mod_num} l := map (λ a, mn - a) l.
 Definition pol_sub {n : mod_num} la lb := pol_add la (pol_opp lb).
 
 Notation "'Σ' ( i = b , e ) , g" :=
-  (fold_left (λ c i, pol_add c g) (seq b (S e - b)) [])
-  (at level 45, i at level 0, b at level 60, e at level 60) : pol_scope.
+  (fold_left (λ c i, pol_add c g) (seq b (S e - b)) []) : pol_scope.
 
 Fixpoint pol_convol_mul {n : mod_num} al₁ al₂ i len :=
   match len with
@@ -3501,7 +3500,9 @@ Arguments pol_eval la%pol.
 Show.
 *)
 assert ((⒳^(p-1) - 1 = (⒳^d - 1) * Σ (i = 1, e), ⒳^(d*(e-i)))%pol). {
-(* actually, an equality between polynomial is required: it has
+Check Nat_pow_sub_pow. (* to be proved with polynomials *)
+Search (_ ^ _ - _ ^ _)%pol.
+(* and, actually, an equality between polynomial is required: it has
    to be defined *)
 ...
 ... old version
