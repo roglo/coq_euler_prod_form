@@ -3505,7 +3505,35 @@ Theorem polm_pow_sub_1 {n : mod_num} : ∀ k,
   k ≠ 0
   → (⒳^k - 1 = (⒳ - 1) * (Σ (i = 0, k - 1), ⒳^(k-i-1)))%pol.
 Proof.
-intros * Hk.
+intros * Hkz.
+(*
+destruct (lt_dec mn 2) as [H2n| H2n]. {
+  destruct mn. {
+    cbn.
+    destruct k; [ easy | clear Hkz ].
+    rewrite Nat.sub_succ.
+    do 2 rewrite Nat.sub_0_r.
+    rewrite Nat.sub_succ.
+    rewrite Nat.sub_0_r.
+    cbn - [ "-" ].
+    f_equal. {
+      rewrite Nat.mul_mod_idemp_l.
+...
+*)
+destruct k; [ easy | clear Hkz ].
+induction k. {
+  cbn.
+  rewrite Nat.mul_1_r, Nat.mul_0_r, Nat.add_0_l.
+  destruct (lt_dec mn 2) as [H2n| H2n]. {
+    destruct mn as [| mn]. {
+      cbn.
+...
+    }
+    destruct mn; [ | flia H2n ].
+cbn.
+...
+  rewrite Nat.mod_mod.
+  rewrite Nat.mod_1_l.
 ...
 (* and, actually, an equality between polynomial is required: it has
    to be defined *)
