@@ -37,7 +37,7 @@ Definition List_combine_all {A} (l1 l2 : list A) (d : A) :=
 
 Notation "'Σ' ( i = b , e ) , g" :=
   (fold_left (λ c i, c + g) (seq b (S e - b)) 0)
-  (at level 45, i at level 0, b at level 60, e at level 60).
+  (at level 45, i at level 0, b at level 60, e at level 60) : nat_scope.
 
 Theorem fold_left_add_fun_from_0 {A} : ∀ a l (f : A → nat),
   fold_left (λ c i, c + f i) l a =

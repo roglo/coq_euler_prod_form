@@ -3363,6 +3363,10 @@ Fixpoint pol_add {n : mod_num} al₁ al₂ :=
 Definition pol_opp {n : mod_num} l := map (λ a, mn - a) l.
 Definition pol_sub {n : mod_num} la lb := pol_add la (pol_opp lb).
 
+Notation "'Σ' ( i = b , e ) , g" :=
+  (fold_left (λ c i, pol_add c g) (seq b (S e - b)) [])
+  (at level 45, i at level 0, b at level 60, e at level 60) : pol_scope.
+
 Fixpoint pol_convol_mul {n : mod_num} al₁ al₂ i len :=
   match len with
   | O => []
@@ -3496,7 +3500,9 @@ assert
 Arguments pol_eval la%pol.
 Show.
 *)
-assert ((xpow (p - 1) - 1 = (xpow d - 1) * (xpow e - 1))%pol).
+assert ((xpow (p - 1) - 1 = (xpow d - 1) * Σ (i = 0, 3), (xpow e - 1))%pol).
+(* juste pour voir si je pouvais avoir un Σ avec la même syntaxe que pour les
+   nat, mais l'expression n'est pas correcte *)
 ...
 ... old version
 assert (Hp1 :
