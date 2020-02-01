@@ -3486,7 +3486,8 @@ revert a b.
 induction len; intros; [ now cbn; rewrite Nat.add_0_r | ].
 remember (S len) as x; cbn; subst x.
 rewrite IHlen.
-...
+now rewrite Nat.add_succ_comm.
+Qed.
 
 Lemma fold_left_polm_add_rtl {n : mod_num} : ∀ f a b len,
   fold_left (λ c i, (c + f i)%pol) (seq b len) a =
@@ -3501,7 +3502,6 @@ cbn; subst x.
 rewrite IHlen.
 rewrite fold_left_polm_add_succ_last.
 ...
-rewrite summation_aux_succ_last.
 rewrite Nat.add_succ_l, Nat_sub_succ_1.
 do 2 rewrite Nat.add_succ_r; rewrite Nat_sub_succ_1.
 rewrite Nat.add_sub_swap, Nat.sub_diag; auto.
