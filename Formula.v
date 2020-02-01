@@ -3477,6 +3477,17 @@ rewrite IHl; symmetry; rewrite IHl.
 now rewrite polm_add_assoc.
 Qed.
 
+Lemma fold_left_polm_add_succ_last {n : mod_num} : ∀ f a b len,
+  (fold_left (λ c i, (c + f i)) (seq b (S len)) a =
+   fold_left (λ c i, (c + f i)) (seq b len) a + f (b + len)%nat)%pol.
+Proof.
+intros.
+revert a b.
+induction len; intros; [ now cbn; rewrite Nat.add_0_r | ].
+remember (S len) as x; cbn; subst x.
+rewrite IHlen.
+...
+
 Lemma fold_left_polm_add_rtl {n : mod_num} : ∀ f a b len,
   fold_left (λ c i, (c + f i)%pol) (seq b len) a =
   fold_left (λ c i, (c + f (b + len - 1 + b - i)%nat)%pol) (seq b len) a.
@@ -3488,8 +3499,8 @@ remember (S len) as x.
 rewrite Heqx in |- * at 1.
 cbn; subst x.
 rewrite IHlen.
+rewrite fold_left_polm_add_succ_last.
 ...
-
 rewrite summation_aux_succ_last.
 rewrite Nat.add_succ_l, Nat_sub_succ_1.
 do 2 rewrite Nat.add_succ_r; rewrite Nat_sub_succ_1.
