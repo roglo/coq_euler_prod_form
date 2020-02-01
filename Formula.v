@@ -3477,18 +3477,34 @@ rewrite IHl; symmetry; rewrite IHl.
 now rewrite polm_add_assoc.
 Qed.
 
-Lemma fold_left_polym_add_rtl {n : mod_num} : ∀ f a b len,
+Lemma fold_left_polm_add_rtl {n : mod_num} : ∀ f a b len,
   fold_left (λ c i, (c + f i)%pol) (seq b len) a =
   fold_left (λ c i, (c + f (b + len - 1 + b - i)%nat)%pol) (seq b len) a.
 Proof.
 intros.
+revert f a b.
+induction len; intros; [ easy | ].
+remember (S len) as x.
+rewrite Heqx in |- * at 1.
+cbn; subst x.
+rewrite IHlen.
+...
+
+rewrite summation_aux_succ_last.
+rewrite Nat.add_succ_l, Nat_sub_succ_1.
+do 2 rewrite Nat.add_succ_r; rewrite Nat_sub_succ_1.
+rewrite Nat.add_sub_swap, Nat.sub_diag; auto.
+rewrite rng_add_comm.
+apply rng_add_compat_r, summation_aux_compat.
+intros; reflexivity.
+Qed.
 ...
 
 Theorem polm_summation_rtl {n : mod_num} : ∀ g b k,
   (Σ (i = b, k), g i = Σ (i = b, k), g (k + b - i)%nat)%pol.
 Proof.
 intros g b k.
-rewrite fold_left_polym_add_rtl.
+rewrite fold_left_polm_add_rtl.
 ...
 intros g b k.
 remember (S k - b) as len eqn:Hlen.
