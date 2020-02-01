@@ -3436,13 +3436,19 @@ now rewrite Nat.add_shuffle0, IHla.
 Qed.
 
 Theorem polm_add_assoc {n : mod_num} : ∀ la lb lc,
-   ((la + lb) + lc = la + (lb + lc))%pol.
+  ((la + lb) + lc = la + (lb + lc))%pol.
 Proof.
 intros.
 rewrite (polm_add_comm _ (lb + lc)%pol).
 rewrite (polm_add_comm la).
 apply polm_add_add_swap.
 Qed.
+
+Theorem polm_mul_add_distr_l {n : mod_num} : ∀ la lb lc,
+  (la * (lb + lc) = la * lb + la * lc)%pol.
+Proof.
+intros.
+...
 
 Theorem polm_fold_left_add_fun_from_0 {n : mod_num} {A} : ∀ a l (f : A → _),
   (fold_left (λ c i, c + f i) l a =
@@ -3470,7 +3476,13 @@ Theorem polm_summation_shift {n : mod_num} : ∀ b e (f : nat → _),
   (Σ (i = S b, S e), f i = Σ (i = b, e), f (S i))%pol.
 Proof.
 intros.
-...
+rewrite Nat.sub_succ.
+remember (S e - b) as k eqn:Hk.
+revert b Hk.
+induction k; intros; [ easy | cbn ].
+setoid_rewrite polm_fold_left_add_fun_from_0.
+rewrite IHk; [ easy | flia Hk ].
+Qed.
 
 Lemma polm_eval_repeat_0 : ∀ n x a i,
   polm_eval (repeat 0 i ++ [a]) x ≡ (a * x ^ i) mod n.
@@ -3593,9 +3605,11 @@ induction k. {
   now rewrite Nat.mod_1_l.
 }
 rewrite polm_summation_split_first; [ | flia ].
-Check summation_shift.
+rewrite Nat.sub_0_r, Nat.sub_succ, Nat.sub_0_r at 1.
+rewrite polm_summation_shift.
 ...
-Check polm_summation_shift.
+Check polm_mul_add_distr_l.
+rewrite polm_mul_add_distr_l.
 ...
 remember (S k) as sk; cbn - [ "-" ]; subst sk.
 f_equal. {
