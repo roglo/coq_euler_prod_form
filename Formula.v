@@ -3363,9 +3363,6 @@ Fixpoint polm_add {n : mod_num} al₁ al₂ :=
 Definition polm_opp {n : mod_num} l := map (λ a, mn - a) l.
 Definition polm_sub {n : mod_num} la lb := polm_add la (polm_opp lb).
 
-Notation "'Σ' ( i = b , e ) , g" :=
-  (fold_left (λ c i, polm_add c g) (seq b (S e - b)) []) : polm_scope.
-
 Fixpoint polm_convol_mul {n : mod_num} al₁ al₂ i len :=
   match len with
   | O => []
@@ -3386,8 +3383,11 @@ Notation "- a" := (polm_opp a) : polm_scope.
 Notation "a + b" := (polm_add a b) : polm_scope.
 Notation "a - b" := (polm_sub a b) : polm_scope.
 Notation "a * b" := (polm_mul a b) : polm_scope.
-Notation "'Ⓧ' ^ a" := (xpow a) (at level 30, format "'Ⓧ' ^ a") : polm_scope.
-Notation "'Ⓧ'" := (xpow 1) (at level 30, format "'Ⓧ'") : polm_scope.
+Notation "'ⓧ' ^ a" := (xpow a) (at level 30, format "'ⓧ' ^ a") : polm_scope.
+Notation "'ⓧ'" := (xpow 1) (at level 30, format "'ⓧ'") : polm_scope.
+
+Notation "'Σ' ( i = b , e ) , g" :=
+  (fold_left (λ c i, polm_add c g) (seq b (S e - b)) []) : polm_scope.
 
 Fixpoint polm_eval la x :=
   match la with
@@ -3400,16 +3400,48 @@ bug here
 Arguments polm_eval la%pol.
 *)
 
-Theorem polm_add_assoc {n : mod_num} : ∀ la lb lc,
-   ((la + lb) + lc = la + (lb + lc))%pol.
-Proof.
-intros.
-...
-
 Theorem polm_add_0_r {n : mod_num} : ∀ la, (la + [] = la)%pol.
 Proof.
 intros.
 now induction la.
+Qed.
+
+Theorem polm_add_comm {n : mod_num} : ∀ la lb,
+   (la + lb = lb + la)%pol.
+Proof.
+intros.
+revert lb.
+induction la as [| a la]; intros; cbn. {
+  symmetry; apply polm_add_0_r.
+}
+destruct lb as [| b lb]; [ easy | cbn ].
+now rewrite Nat.add_comm, IHla.
+Qed.
+
+Theorem polm_add_add_swap {n : mod_num} : ∀ la lb lc,
+   (la + lb + lc = la + lc + lb)%pol.
+Proof.
+intros.
+revert lb lc.
+induction la as [| a la]; intros; [ apply polm_add_comm | cbn ].
+destruct lb as [| b lb]; cbn; [ now rewrite polm_add_0_r | ].
+destruct lc as [| c lc]; [ easy | cbn ].
+destruct (Nat.eq_dec mn 0) as [Hnz| Hnz]. {
+  rewrite Hnz; cbn.
+  now rewrite IHla.
+}
+rewrite Nat.add_mod_idemp_l; [ | easy ].
+rewrite Nat.add_mod_idemp_l; [ | easy ].
+now rewrite Nat.add_shuffle0, IHla.
+Qed.
+
+Theorem polm_add_assoc {n : mod_num} : ∀ la lb lc,
+   ((la + lb) + lc = la + (lb + lc))%pol.
+Proof.
+intros.
+rewrite (polm_add_comm _ (lb + lc)%pol).
+rewrite (polm_add_comm la).
+apply polm_add_add_swap.
 Qed.
 
 Theorem polm_fold_left_add_fun_from_0 {n : mod_num} {A} : ∀ a l (f : A → _),
@@ -3420,7 +3452,7 @@ intros.
 revert a.
 induction l as [| x l]; intros; [ symmetry; apply polm_add_0_r | cbn ].
 rewrite IHl; symmetry; rewrite IHl.
-apply polm_add_assoc.
+symmetry; apply polm_add_assoc.
 Qed.
 
 Theorem polm_summation_split_first {n : mod_num} : ∀ b e f,
@@ -3434,6 +3466,10 @@ cbn.
 apply polm_fold_left_add_fun_from_0.
 Qed.
 
+Theorem polm_summation_shift {n : mod_num} : ∀ b e (f : nat → _),
+  (Σ (i = S b, S e), f i = Σ (i = b, e), f (S i))%pol.
+Proof.
+intros.
 ...
 
 Lemma polm_eval_repeat_0 : ∀ n x a i,
@@ -3507,7 +3543,7 @@ set (pmn := {| mn := p |}).
 assert
   (Hp1 :
     length
-      (filter (λ x : nat, polm_eval (Ⓧ^(p - 1) - 1)%pol x ≡? 0 mod p)
+      (filter (λ x : nat, polm_eval (ⓧ^(p - 1) - 1)%pol x ≡? 0 mod p)
          (seq 1 (p - 1))) = p - 1). {
   rewrite List_filter_all_true; [ apply seq_length | ].
   intros a Ha.
@@ -3535,12 +3571,12 @@ assert
 Arguments polm_eval la%pol.
 Show.
 *)
-assert ((Ⓧ^(p-1) - 1 = (Ⓧ^d - 1) * Σ (i = 1, e), Ⓧ^(d*(e-i)))%pol). {
+assert ((ⓧ^(p-1) - 1 = (ⓧ^d - 1) * Σ (i = 1, e), ⓧ^(d*(e-i)))%pol). {
 About Nat_pow_sub_pow. (* to be proved with polynomials *)
 Theorem polm_pow_sub_1 {n : mod_num} : ∀ k,
   prime mn
   → k ≠ 0
-  → (Ⓧ^k - 1 = (Ⓧ - 1) * (Σ (i = 0, k - 1), Ⓧ^(k-i-1)))%pol.
+  → (ⓧ^k - 1 = (ⓧ - 1) * (Σ (i = 0, k - 1), ⓧ^(k-i-1)))%pol.
 Proof.
 intros * Hp Hkz.
 destruct k; [ easy | clear Hkz ].
@@ -3556,7 +3592,10 @@ induction k. {
   rewrite Nat.mod_mod; [ | flia H2n ].
   now rewrite Nat.mod_1_l.
 }
-Check summation_split_first.
+rewrite polm_summation_split_first; [ | flia ].
+Check summation_shift.
+...
+Check polm_summation_shift.
 ...
 remember (S k) as sk; cbn - [ "-" ]; subst sk.
 f_equal. {
