@@ -3400,6 +3400,29 @@ bug here
 Arguments polm_eval la%pol.
 *)
 
+Theorem polm_add_assoc {n : mod_num} : ∀ la lb lc,
+   ((la + lb) + lc = la + (lb + lc))%pol.
+Proof.
+intros.
+...
+
+Theorem polm_add_0_r {n : mod_num} : ∀ la, (la + [] = la)%pol.
+Proof.
+intros.
+now induction la.
+Qed.
+
+Theorem polm_fold_left_add_fun_from_0 {n : mod_num} {A} : ∀ a l (f : A → _),
+  (fold_left (λ c i, c + f i) l a =
+   a + fold_left (λ c i, c + f i) l [])%pol.
+Proof.
+intros.
+revert a.
+induction l as [| x l]; intros; [ symmetry; apply polm_add_0_r | cbn ].
+rewrite IHl; symmetry; rewrite IHl.
+apply polm_add_assoc.
+Qed.
+
 Theorem polm_summation_split_first {n : mod_num} : ∀ b e f,
   b ≤ e
   → (Σ (i = b, e), f i = f b + Σ (i = S b, e), f i)%pol.
@@ -3408,10 +3431,10 @@ intros * Hbe.
 rewrite Nat.sub_succ.
 replace (S e - b) with (S (e - b)) by flia Hbe.
 cbn.
-Check fold_left_add_fun_from_0.
-...
-apply fold_left_add_fun_from_0.
+apply polm_fold_left_add_fun_from_0.
 Qed.
+
+...
 
 Lemma polm_eval_repeat_0 : ∀ n x a i,
   polm_eval (repeat 0 i ++ [a]) x ≡ (a * x ^ i) mod n.
