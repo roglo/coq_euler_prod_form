@@ -3372,7 +3372,7 @@ Fixpoint polm_convol_mul {n : mod_num} al₁ al₂ i len :=
   end.
 
 Definition polm_mul {n : mod_num} la lb :=
-  polm_convol_mul la lb 0 (pred (length la + length lb)).
+  polm_convol_mul la lb 0 (length la + length lb - 1).
 
 Definition xpow i := repeat 0 i ++ [1].
 
@@ -3407,7 +3407,7 @@ now induction la.
 Qed.
 
 Theorem polm_add_comm {n : mod_num} : ∀ la lb,
-   (la + lb = lb + la)%pol.
+  (la + lb = lb + la)%pol.
 Proof.
 intros.
 revert lb.
@@ -3444,10 +3444,51 @@ rewrite (polm_add_comm la).
 apply polm_add_add_swap.
 Qed.
 
+Theorem summation_rtl {n : mod_num} : ∀ g b k,
+  (Σ (i = b, k), g i = Σ (i = b, k), g (k + b - i)%nat)%pol.
+Proof.
+intros g b k.
+remember (S k - b) as u eqn:Hu.
+...
+unfold summation.
+rewrite summation_aux_rtl.
+apply summation_aux_compat; intros i (Hi, Hikb).
+destruct b; simpl.
+ rewrite Nat.sub_0_r; reflexivity.
+
+ rewrite Nat.sub_0_r.
+ simpl in Hikb.
+ eapply Nat.le_lt_trans in Hikb; eauto .
+ apply lt_O_minus_lt, Nat.lt_le_incl in Hikb.
+ remember (b + (k - b))%nat as x eqn:H .
+ rewrite Nat.add_sub_assoc in H; auto.
+ rewrite Nat.add_sub_swap in H; auto.
+ rewrite Nat.sub_diag in H; subst x; reflexivity.
+Qed.
+
+Theorem polm_mul_comm {n : mod_num} : ∀ la lb,
+  (la * lb = lb * la)%pol.
+Proof.
+intros.
+unfold "*"%pol.
+rewrite Nat.add_comm.
+remember (length lb + length la - 1) as len; clear Heqlen.
+remember 0 as i; clear Heqi.
+revert i.
+induction len; intros; [ easy | ].
+cbn - [ "-" ].
+rewrite IHlen; f_equal; clear IHlen.
+Check polm_summation_rtl.
+...
+
 Theorem polm_mul_add_distr_l {n : mod_num} : ∀ la lb lc,
   (la * (lb + lc) = la * lb + la * lc)%pol.
 Proof.
 intros.
+revert lb lc.
+induction la as [| a la]; intros. {
+  rewrite polm_mul_comm.
+
 ...
 
 Theorem polm_fold_left_add_fun_from_0 {n : mod_num} {A} : ∀ a l (f : A → _),
@@ -3456,9 +3497,9 @@ Theorem polm_fold_left_add_fun_from_0 {n : mod_num} {A} : ∀ a l (f : A → _),
 Proof.
 intros.
 revert a.
-induction l as [| x l]; intros; [ symmetry; apply polm_add_0_r | cbn ].
+induction l as [| x l]; intros; [ now induction a | cbn ].
 rewrite IHl; symmetry; rewrite IHl.
-symmetry; apply polm_add_assoc.
+apply polm_add_assoc.
 Qed.
 
 Theorem polm_summation_split_first {n : mod_num} : ∀ b e f,
