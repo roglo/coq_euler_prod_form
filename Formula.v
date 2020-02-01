@@ -3504,9 +3504,15 @@ rewrite fold_left_polm_add_succ_last.
 rewrite Nat.add_succ_l, Nat_sub_succ_1.
 do 2 rewrite Nat.add_succ_r; rewrite Nat_sub_succ_1.
 rewrite Nat.add_sub_swap, Nat.sub_diag; [ | easy ].
-rewrite polm_add_comm.
+rewrite Nat.add_0_l.
+rewrite fold_left_polm_add_fun_from_0; symmetry.
+rewrite fold_left_polm_add_fun_from_0; symmetry.
+rewrite polm_add_add_swap.
+f_equal; f_equal.
+clear.
+revert b.
+induction len; intros; [ easy | ].
 ...
-
 rewrite rng_add_comm.
 apply rng_add_compat_r, summation_aux_compat.
 intros; reflexivity.
