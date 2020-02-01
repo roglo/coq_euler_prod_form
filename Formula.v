@@ -3400,6 +3400,19 @@ bug here
 Arguments polm_eval la%pol.
 *)
 
+Theorem polm_summation_split_first {n : mod_num} : ∀ b e f,
+  b ≤ e
+  → (Σ (i = b, e), f i = f b + Σ (i = S b, e), f i)%pol.
+Proof.
+intros * Hbe.
+rewrite Nat.sub_succ.
+replace (S e - b) with (S (e - b)) by flia Hbe.
+cbn.
+Check fold_left_add_fun_from_0.
+...
+apply fold_left_add_fun_from_0.
+Qed.
+
 Lemma polm_eval_repeat_0 : ∀ n x a i,
   polm_eval (repeat 0 i ++ [a]) x ≡ (a * x ^ i) mod n.
 Proof.
@@ -3520,9 +3533,11 @@ induction k. {
   rewrite Nat.mod_mod; [ | flia H2n ].
   now rewrite Nat.mod_1_l.
 }
+Check summation_split_first.
 ...
 remember (S k) as sk; cbn - [ "-" ]; subst sk.
 f_equal. {
+  do 2 rewrite Nat.sub_0_r.
   cbn.
   rewrite Nat.sub_0_r.
   destruct k. {
