@@ -3501,10 +3501,12 @@ rewrite Heqx in |- * at 1.
 cbn; subst x.
 rewrite IHlen.
 rewrite fold_left_polm_add_succ_last.
-...
 rewrite Nat.add_succ_l, Nat_sub_succ_1.
 do 2 rewrite Nat.add_succ_r; rewrite Nat_sub_succ_1.
-rewrite Nat.add_sub_swap, Nat.sub_diag; auto.
+rewrite Nat.add_sub_swap, Nat.sub_diag; [ | easy ].
+rewrite polm_add_comm.
+...
+
 rewrite rng_add_comm.
 apply rng_add_compat_r, summation_aux_compat.
 intros; reflexivity.
