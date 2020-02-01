@@ -3477,11 +3477,12 @@ rewrite IHl; symmetry; rewrite IHl.
 now rewrite polm_add_assoc.
 Qed.
 
-Theorem summation_rtl {n : mod_num} : ∀ g b k,
+Theorem polm_summation_rtl {n : mod_num} : ∀ g b k,
   (Σ (i = b, k), g i = Σ (i = b, k), g (k + b - i)%nat)%pol.
 Proof.
 intros g b k.
 remember (S k - b) as len eqn:Hlen.
+...
 revert k b Hlen.
 induction len; intros; [ easy | ].
 cbn.
