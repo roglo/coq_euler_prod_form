@@ -3444,11 +3444,64 @@ rewrite (polm_add_comm la).
 apply polm_add_add_swap.
 Qed.
 
+(*
+Theorem summation_aux_rtl : ∀ g b len,
+  (summation_aux r b len g =
+   summation_aux r b len (λ i, g (b + len - 1 + b - i)%nat))%K.
+Proof.
+intros g b len.
+revert g b.
+induction len; intros; [ reflexivity | idtac ].
+remember (S len) as x.
+rewrite Heqx in |- * at 1.
+simpl; subst x.
+rewrite IHlen.
+rewrite summation_aux_succ_last.
+rewrite Nat.add_succ_l, Nat_sub_succ_1.
+do 2 rewrite Nat.add_succ_r; rewrite Nat_sub_succ_1.
+rewrite Nat.add_sub_swap, Nat.sub_diag; auto.
+rewrite rng_add_comm.
+apply rng_add_compat_r, summation_aux_compat.
+intros; reflexivity.
+Qed.
+*)
+
+Theorem fold_left_polm_add_fun_from_0 {n : mod_num} {A} : ∀ a l (f : A → _),
+  (fold_left (λ c i, c + f i) l a =
+   a + fold_left (λ c i, c + f i) l [])%pol.
+Proof.
+intros.
+revert a.
+induction l as [| x l]; intros; [ now induction a | cbn ].
+rewrite IHl; symmetry; rewrite IHl.
+now rewrite polm_add_assoc.
+Qed.
+
 Theorem summation_rtl {n : mod_num} : ∀ g b k,
   (Σ (i = b, k), g i = Σ (i = b, k), g (k + b - i)%nat)%pol.
 Proof.
 intros g b k.
-remember (S k - b) as u eqn:Hu.
+remember (S k - b) as len eqn:Hlen.
+revert k b Hlen.
+induction len; intros; [ easy | ].
+cbn.
+rewrite Nat.add_sub.
+rewrite fold_left_polm_add_fun_from_0.
+rewrite (IHlen k); [ clear IHlen | flia Hlen ].
+Search (seq (S _)).
+symmetry; rewrite fold_left_polm_add_fun_from_0; symmetry.
+...
+rewrite fold_left_polm_add_fun_from_0; symmetry.
+rewrite fold_left_polm_add_fun_from_0; symmetry.
+rewrite Nat.add_sub.
+destruct k. {
+  replace len with 0 by flia Hlen; cbn.
+  now replace b with 0 by flia Hlen.
+}
+rewrite Nat.sub_succ_l in Hlen; [ | flia Hlen ].
+apply Nat.succ_inj in Hlen.
+...
+rewrite IHlen.
 ...
 unfold summation.
 rewrite summation_aux_rtl.
@@ -3490,17 +3543,6 @@ induction la as [| a la]; intros. {
   rewrite polm_mul_comm.
 
 ...
-
-Theorem polm_fold_left_add_fun_from_0 {n : mod_num} {A} : ∀ a l (f : A → _),
-  (fold_left (λ c i, c + f i) l a =
-   a + fold_left (λ c i, c + f i) l [])%pol.
-Proof.
-intros.
-revert a.
-induction l as [| x l]; intros; [ now induction a | cbn ].
-rewrite IHl; symmetry; rewrite IHl.
-apply polm_add_assoc.
-Qed.
 
 Theorem polm_summation_split_first {n : mod_num} : ∀ b e f,
   b ≤ e
