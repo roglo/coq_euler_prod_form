@@ -3521,64 +3521,18 @@ destruct (Nat.eq_dec (b + len) 0) as [Hblz| Hblz]. {
 replace len with (S (b + len) - S b) at 1 by flia.
 replace len with (S (b + len - 1) - b) at 2 by flia Hblz.
 replace (b + len) with (S (b + len - 1)) at 1 by flia Hblz.
-rewrite polm_summation_shift.
-apply polm_summation_eq_compat.
-...
-clear.
-revert b.
-induction len; intros; [ easy | ].
-cbn.
-rewrite Nat.add_sub.
-...
-rewrite rng_add_comm.
-apply rng_add_compat_r, summation_aux_compat.
-intros; reflexivity.
+apply polm_summation_shift.
 Qed.
-...
 
 Theorem polm_summation_rtl {n : mod_num} : ∀ g b k,
   (Σ (i = b, k), g i = Σ (i = b, k), g (k + b - i)%nat)%pol.
 Proof.
 intros g b k.
 rewrite fold_left_polm_add_rtl.
-...
-intros g b k.
-remember (S k - b) as len eqn:Hlen.
-revert k b Hlen.
-induction len; intros; [ easy | ].
-cbn.
-rewrite Nat.add_sub.
-rewrite fold_left_polm_add_fun_from_0.
-rewrite (IHlen k); [ clear IHlen | flia Hlen ].
-Search (seq (S _)).
-symmetry; rewrite fold_left_polm_add_fun_from_0; symmetry.
-...
-rewrite fold_left_polm_add_fun_from_0; symmetry.
-rewrite fold_left_polm_add_fun_from_0; symmetry.
-rewrite Nat.add_sub.
-destruct k. {
-  replace len with 0 by flia Hlen; cbn.
-  now replace b with 0 by flia Hlen.
-}
-rewrite Nat.sub_succ_l in Hlen; [ | flia Hlen ].
-apply Nat.succ_inj in Hlen.
-...
-rewrite IHlen.
-...
-unfold summation.
-rewrite summation_aux_rtl.
-apply summation_aux_compat; intros i (Hi, Hikb).
-destruct b; simpl.
- rewrite Nat.sub_0_r; reflexivity.
-
- rewrite Nat.sub_0_r.
- simpl in Hikb.
- eapply Nat.le_lt_trans in Hikb; eauto .
- apply lt_O_minus_lt, Nat.lt_le_incl in Hikb.
- remember (b + (k - b))%nat as x eqn:H .
- rewrite Nat.add_sub_assoc in H; auto.
- rewrite Nat.add_sub_swap in H; auto.
- rewrite Nat.sub_diag in H; subst x; reflexivity.
+apply polm_summation_eq_compat.
+intros i Hi.
+f_equal.
+flia Hi.
 Qed.
 
 Theorem polm_mul_comm {n : mod_num} : ∀ la lb,
@@ -3594,6 +3548,8 @@ induction len; intros; [ easy | ].
 cbn - [ "-" ].
 rewrite IHlen; f_equal; clear IHlen.
 Check polm_summation_rtl.
+... (* ah le con, je l'ai prouvé pour rien ! *)
+rewrite summation_rtl.
 ...
 
 Theorem polm_mul_add_distr_l {n : mod_num} : ∀ la lb lc,
