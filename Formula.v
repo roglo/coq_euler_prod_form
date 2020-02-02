@@ -3376,6 +3376,10 @@ Definition polm_mul {n : mod_num} la lb :=
 
 Definition xpow i := repeat 0 i ++ [1].
 
+Definition polm_is_zero {n : mod_num} la := forallb (λ a, a mod mn =? 0) la.
+Definition polm_eqb {n : mod_num} la lb := polm_is_zero (polm_sub la lb).
+Definition polm_eq {n : mod_num} la lb := polm_eqb la lb = true.
+
 Declare Scope polm_scope.
 Delimit Scope polm_scope with pol.
 Notation "1" := polm_1 : polm_scope.
@@ -3383,6 +3387,7 @@ Notation "- a" := (polm_opp a) : polm_scope.
 Notation "a + b" := (polm_add a b) : polm_scope.
 Notation "a - b" := (polm_sub a b) : polm_scope.
 Notation "a * b" := (polm_mul a b) : polm_scope.
+Notation "a = b" := (polm_eq a b) : polm_scope.
 Notation "'ⓧ' ^ a" := (xpow a) (at level 30, format "'ⓧ' ^ a") : polm_scope.
 Notation "'ⓧ'" := (xpow 1) (at level 30, format "'ⓧ'") : polm_scope.
 
@@ -3400,9 +3405,39 @@ bug here
 Arguments polm_eval la%pol.
 *)
 
+Theorem polm_eq_refl {n : mod_num} : reflexive _ polm_eq.
+...
+
+Theorem polm_eq_sym {n : mod_num} : symmetric _ polm_eq.
+...
+
+Theorem polm_eq_trans {n : mod_num} : transitive _ polm_eq.
+...
+
+Add Parametric Relation {n : mod_num} : (list nat) polm_eq
+ reflexivity proved by polm_eq_refl
+ symmetry proved by polm_eq_sym
+ transitivity proved by polm_eq_trans
+ as polm_eq_rel.
+
+...
+
+Instance ls_mul_morph {F : field} :
+  Proper (ls_eq ==> ls_eq ==> ls_eq) ls_mul.
+...
+but on polm_eq
+...
+
+Theorem polm_eq_eq {n : mod_num} : ∀ la lb, la = lb → (la = lb)%pol.
+Proof.
+intros * Hll.
+now subst la.
+Qed.
+
 Theorem polm_add_0_r {n : mod_num} : ∀ la, (la + [] = la)%pol.
 Proof.
 intros.
+apply polm_eq_eq.
 now induction la.
 Qed.
 
@@ -3415,6 +3450,10 @@ induction la as [| a la]; intros; cbn. {
   symmetry; apply polm_add_0_r.
 }
 destruct lb as [| b lb]; [ easy | cbn ].
+rewrite Nat.add_comm.
+...
+rewrite IHla.
+...
 now rewrite Nat.add_comm, IHla.
 Qed.
 
@@ -3644,6 +3683,8 @@ induction la as [| a la]; intros. {
   destruct lc as [| c lc]; cbn; [ now rewrite polm_add_0_r | ].
   do 2 rewrite Nat.sub_0_r.
 Check polm_mul_comm.
+(* I need a specific equality between polynomials, using a
+   normalization that removes the ending 0s *)
 ...
     rewrite Nat.sub_0_r.
 
