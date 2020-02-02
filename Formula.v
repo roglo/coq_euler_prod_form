@@ -3547,6 +3547,18 @@ flia Hi.
 Qed.
 *)
 
+Lemma fold_left_add_succ_last : ∀ f a b len,
+  fold_left (λ c i, c + f i) (seq b (S len)) a =
+  fold_left (λ c i, c + f i) (seq b len) a + f (b + len).
+Proof.
+intros.
+revert a b.
+induction len; intros; [ now cbn; rewrite Nat.add_0_r | ].
+remember (S len) as x; cbn; subst x.
+rewrite IHlen.
+now rewrite Nat.add_succ_comm.
+Qed.
+
 Lemma fold_left_add_rtl : ∀ f a b len,
   fold_left (λ c i, c + f i) (seq b len) a =
   fold_left (λ c i, c + f (b + len - 1 + b - i)) (seq b len) a.
@@ -3558,11 +3570,15 @@ remember (S len) as x.
 rewrite Heqx in |- * at 1.
 simpl; subst x.
 rewrite IHlen.
-...
-rewrite summation_aux_succ_last.
+rewrite fold_left_add_succ_last.
 rewrite Nat.add_succ_l, Nat_sub_succ_1.
 do 2 rewrite Nat.add_succ_r; rewrite Nat_sub_succ_1.
-rewrite Nat.add_sub_swap, Nat.sub_diag; auto.
+rewrite Nat.add_sub_swap, Nat.sub_diag; [ | easy ].
+rewrite fold_left_add_fun_from_0; symmetry.
+rewrite fold_left_add_fun_from_0; symmetry.
+rewrite Nat.add_shuffle0.
+f_equal; f_equal.
+...
 rewrite rng_add_comm.
 apply rng_add_compat_r, summation_aux_compat.
 intros; reflexivity.
