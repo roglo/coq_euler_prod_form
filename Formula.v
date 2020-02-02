@@ -3377,7 +3377,17 @@ Definition polm_mul {n : mod_num} la lb :=
 Definition xpow i := repeat 0 i ++ [1].
 
 Definition polm_is_zero {n : mod_num} la := forallb (λ a, a mod mn =? 0) la.
-Definition polm_eqb {n : mod_num} la lb := polm_is_zero (polm_sub la lb).
+Fixpoint polm_eqb {n : mod_num} la lb :=
+  match la with
+  | [] => polm_is_zero lb
+  | a :: la' =>
+      match lb with
+      | [] => polm_is_zero la
+      | b :: lb' =>
+          if Nat.eq_dec (a mod mn) (b mod mn) then polm_eqb la' lb'
+          else false
+      end
+  end.
 Definition polm_eq {n : mod_num} la lb := polm_eqb la lb = true.
 
 Declare Scope polm_scope.
@@ -3409,44 +3419,30 @@ Theorem polm_eq_refl {n : mod_num} : reflexive _ polm_eq.
 Proof.
 intros la.
 unfold "="%pol.
-unfold polm_eqb.
-unfold polm_is_zero.
-unfold polm_sub, polm_opp.
-destruct (Nat.eq_dec mn 0) as [Hnz| Hnz]. {
-  rewrite Hnz; cbn.
-  now apply forallb_forall.
-}
-induction la as [| a la]; [ easy | ].
-cbn; rewrite IHla.
-rewrite Bool.andb_true_r.
-apply Nat.eqb_eq.
-rewrite Nat.mod_mod; [ | easy ].
-rewrite Nat.add_comm.
-rewrite <- Nat.add_mod_idemp_r; [ | easy ].
-rewrite Nat.sub_add; [ now apply Nat.mod_same | ].
-now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+induction la as [| a la]; [ easy | cbn ].
+now destruct (Nat.eq_dec _ _).
 Qed.
 
 Theorem polm_eq_sym {n : mod_num} : symmetric _ polm_eq.
 Proof.
 intros la lb Hll.
 unfold "="%pol in Hll |-*.
-unfold polm_eqb in Hll |-*.
-unfold polm_is_zero in Hll |-*.
-unfold polm_sub, polm_opp in Hll |-*.
-destruct (Nat.eq_dec mn 0) as [Hnz| Hnz]. {
-  rewrite Hnz; cbn.
-  now apply forallb_forall.
+revert lb Hll.
+induction la as [| a la]; intros; [ now destruct lb | ].
+cbn in Hll |-*.
+destruct lb as [| b lb]; [ easy | cbn ].
+destruct (Nat.eq_dec (b mod mn) (a mod mn)) as [Hba| Hba]. {
+  apply IHla.
+  now destruct (Nat.eq_dec (a mod mn) (b mod mn)).
+} {
+  destruct (Nat.eq_dec (a mod mn) (b mod mn)) as [Hab| Hab]; [ | easy ].
+  now symmetry in Hab.
 }
-induction la as [| a la]. {
-  cbn.
-  destruct lb as [| b lb]; [ easy | ].
-  cbn in Hll; cbn.
-  apply Bool.andb_true_iff in Hll.
-  apply Bool.andb_true_iff.
-...
+Qed.
 
 Theorem polm_eq_trans {n : mod_num} : transitive _ polm_eq.
+Proof.
+intros la lb lc Hab Hbc.
 ...
 
 Add Parametric Relation {n : mod_num} : (list nat) polm_eq
@@ -3455,13 +3451,10 @@ Add Parametric Relation {n : mod_num} : (list nat) polm_eq
  transitivity proved by polm_eq_trans
  as polm_eq_rel.
 
-...
-
 Instance ls_mul_morph {F : field} :
   Proper (ls_eq ==> ls_eq ==> ls_eq) ls_mul.
 ...
 but on polm_eq
-...
 
 Theorem polm_eq_eq {n : mod_num} : ∀ la lb, la = lb → (la = lb)%pol.
 Proof.
