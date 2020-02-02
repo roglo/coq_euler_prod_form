@@ -3509,9 +3509,12 @@ rewrite fold_left_polm_add_fun_from_0; symmetry.
 rewrite fold_left_polm_add_fun_from_0; symmetry.
 rewrite polm_add_add_swap.
 f_equal; f_equal.
+...
 clear.
 revert b.
 induction len; intros; [ easy | ].
+cbn.
+rewrite Nat.add_sub.
 ...
 rewrite rng_add_comm.
 apply rng_add_compat_r, summation_aux_compat.
