@@ -3360,7 +3360,7 @@ Fixpoint polm_add {n : mod_num} al₁ al₂ :=
       end
   end.
 
-Definition polm_opp {n : mod_num} l := map (λ a, mn - a) l.
+Definition polm_opp {n : mod_num} l := map (λ a, mn - a mod mn) l.
 Definition polm_sub {n : mod_num} la lb := polm_add la (polm_opp lb).
 
 Fixpoint polm_convol_mul {n : mod_num} al₁ al₂ i len :=
@@ -3422,10 +3422,14 @@ rewrite Bool.andb_true_r.
 apply Nat.eqb_eq.
 rewrite Nat.mod_mod; [ | easy ].
 rewrite Nat.add_comm.
-(* doesn't work if a > mn; my equality is not reflexive! *)
-...
+rewrite <- Nat.add_mod_idemp_r; [ | easy ].
+rewrite Nat.sub_add; [ now apply Nat.mod_same | ].
+now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+Qed.
 
 Theorem polm_eq_sym {n : mod_num} : symmetric _ polm_eq.
+Proof.
+intros la lb Hll.
 ...
 
 Theorem polm_eq_trans {n : mod_num} : transitive _ polm_eq.
