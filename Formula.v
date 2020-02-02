@@ -3578,19 +3578,21 @@ rewrite fold_left_add_fun_from_0; symmetry.
 rewrite fold_left_add_fun_from_0; symmetry.
 rewrite Nat.add_shuffle0.
 f_equal; f_equal.
-...
-rewrite rng_add_comm.
-apply rng_add_compat_r, summation_aux_compat.
-intros; reflexivity.
+destruct (Nat.eq_dec (b + len) 0) as [Hblz| Hblz]. {
+  apply Nat.eq_add_0 in Hblz.
+  now destruct Hblz; subst b len.
+}
+replace len with (S (b + len) - S b) at 1 by flia.
+replace len with (S (b + len - 1) - b) at 2 by flia Hblz.
+replace (b + len) with (S (b + len - 1)) at 1 by flia Hblz.
+apply summation_shift.
 Qed.
-*)
 
 Theorem summation_rtl : ∀ g b k,
   Σ (i = b, k), g i = Σ (i = b, k), g (k + b - i).
 Proof.
 intros g b k.
 remember (S k - b) as e.
-...
 rewrite fold_left_add_rtl.
 ...
 rewrite summation_aux_rtl.
