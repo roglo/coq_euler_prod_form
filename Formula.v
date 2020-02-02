@@ -3430,6 +3430,20 @@ Qed.
 Theorem polm_eq_sym {n : mod_num} : symmetric _ polm_eq.
 Proof.
 intros la lb Hll.
+unfold "="%pol in Hll |-*.
+unfold polm_eqb in Hll |-*.
+unfold polm_is_zero in Hll |-*.
+unfold polm_sub, polm_opp in Hll |-*.
+destruct (Nat.eq_dec mn 0) as [Hnz| Hnz]. {
+  rewrite Hnz; cbn.
+  now apply forallb_forall.
+}
+induction la as [| a la]. {
+  cbn.
+  destruct lb as [| b lb]; [ easy | ].
+  cbn in Hll; cbn.
+  apply Bool.andb_true_iff in Hll.
+  apply Bool.andb_true_iff.
 ...
 
 Theorem polm_eq_trans {n : mod_num} : transitive _ polm_eq.
