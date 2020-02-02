@@ -3444,7 +3444,6 @@ rewrite (polm_add_comm la).
 apply polm_add_add_swap.
 Qed.
 
-(*
 Theorem fold_left_polm_add_fun_from_0 {n : mod_num} {A} : ∀ a l (f : A → _),
   (fold_left (λ c i, c + f i) l a =
    a + fold_left (λ c i, c + f i) l [])%pol.
@@ -3455,9 +3454,7 @@ induction l as [| x l]; intros; [ now induction a | cbn ].
 rewrite IHl; symmetry; rewrite IHl.
 now rewrite polm_add_assoc.
 Qed.
-*)
 
-(*
 Theorem polm_summation_shift {n : mod_num} : ∀ b e (f : nat → _),
   (Σ (i = S b, S e), f i = Σ (i = b, e), f (S i))%pol.
 Proof.
@@ -3469,7 +3466,6 @@ induction k; intros; [ easy | cbn ].
 setoid_rewrite fold_left_polm_add_fun_from_0.
 rewrite IHk; [ easy | flia Hk ].
 Qed.
-*)
 
 (*
 Lemma fold_left_polm_add_succ_last {n : mod_num} : ∀ f a b len,
@@ -3618,7 +3614,8 @@ rewrite Nat.mul_comm, Nat.add_0_r; f_equal.
 f_equal; flia Hj.
 Qed.
 
-Theorem polm_mul_nil_l {n : mod_num} : ∀ la, ([] * la)%pol = [].
+(*
+Theorem polm_mul_0_l {n : mod_num} : ∀ la, ([] * la)%pol = [].
 Proof.
 intros.
 rewrite polm_mul_comm.
@@ -3633,6 +3630,7 @@ induction len; intros; [ easy | cbn ].
 rewrite Nat.sub_0_r.
 Print polm_convol_mul.
 ...
+*)
 
 Theorem polm_mul_add_distr_l {n : mod_num} : ∀ la lb lc,
   (la * (lb + lc) = la * lb + la * lc)%pol.
@@ -3640,6 +3638,16 @@ Proof.
 intros.
 revert lb lc.
 induction la as [| a la]; intros. {
+  cbn.
+  revert lc.
+  induction lb as [| b lb]; intros; [ easy | cbn ].
+  destruct lc as [| c lc]; cbn; [ now rewrite polm_add_0_r | ].
+  do 2 rewrite Nat.sub_0_r.
+Check polm_mul_comm.
+...
+    rewrite Nat.sub_0_r.
+
+...
 do 3 rewrite polm_mul_nil_l.
 ...
   setoid_rewrite polm_mul_comm.
@@ -3658,7 +3666,7 @@ intros * Hbe.
 rewrite Nat.sub_succ.
 replace (S e - b) with (S (e - b)) by flia Hbe.
 cbn.
-apply polm_fold_left_add_fun_from_0.
+apply fold_left_polm_add_fun_from_0.
 Qed.
 
 Lemma polm_eval_repeat_0 : ∀ n x a i,
@@ -3715,6 +3723,32 @@ Qed.
 Notation "a ≡? b 'mod' c" := (a mod c =? b mod c)
   (at level 70, b at level 36).
 
+Theorem polm_pow_sub_1 {n : mod_num} : ∀ k,
+  prime mn
+  → k ≠ 0
+  → (ⓧ^k - 1 = (ⓧ - 1) * (Σ (i = 0, k - 1), ⓧ^(k-i-1)))%pol.
+Proof.
+intros * Hp Hkz.
+destruct k; [ easy | clear Hkz ].
+rewrite Nat.sub_succ, (Nat.sub_0_r k).
+induction k. {
+  cbn.
+  rewrite Nat.mul_1_r, Nat.mul_0_r, Nat.add_0_l.
+  destruct (lt_dec mn 2) as [H2n| H2n]. {
+    destruct mn as [| mn]; [ easy | ].
+    destruct mn as [| mn]; [ easy | flia H2n ].
+  }
+  apply Nat.nlt_ge in H2n.
+  rewrite Nat.mod_mod; [ | flia H2n ].
+  now rewrite Nat.mod_1_l.
+}
+rewrite polm_summation_split_first; [ | flia ].
+rewrite Nat.sub_0_r, Nat.sub_succ, Nat.sub_0_r at 1.
+rewrite polm_summation_shift.
+...
+rewrite polm_mul_add_distr_l.
+...
+
 Theorem glop : ∀ p d,
   prime p
   → Nat.divide d (p - 1)
@@ -3761,30 +3795,8 @@ Arguments polm_eval la%pol.
 Show.
 *)
 assert ((ⓧ^(p-1) - 1 = (ⓧ^d - 1) * Σ (i = 1, e), ⓧ^(d*(e-i)))%pol). {
-About Nat_pow_sub_pow. (* to be proved with polynomials *)
-Theorem polm_pow_sub_1 {n : mod_num} : ∀ k,
-  prime mn
-  → k ≠ 0
-  → (ⓧ^k - 1 = (ⓧ - 1) * (Σ (i = 0, k - 1), ⓧ^(k-i-1)))%pol.
-Proof.
-intros * Hp Hkz.
-destruct k; [ easy | clear Hkz ].
-rewrite Nat.sub_succ, (Nat.sub_0_r k).
-induction k. {
-  cbn.
-  rewrite Nat.mul_1_r, Nat.mul_0_r, Nat.add_0_l.
-  destruct (lt_dec mn 2) as [H2n| H2n]. {
-    destruct mn as [| mn]; [ easy | ].
-    destruct mn as [| mn]; [ easy | flia H2n ].
-  }
-  apply Nat.nlt_ge in H2n.
-  rewrite Nat.mod_mod; [ | flia H2n ].
-  now rewrite Nat.mod_1_l.
-}
-rewrite polm_summation_split_first; [ | flia ].
-rewrite Nat.sub_0_r, Nat.sub_succ, Nat.sub_0_r at 1.
-rewrite polm_summation_shift.
 ...
+Check polm_pow_sub_1.
 Check polm_mul_add_distr_l.
 rewrite polm_mul_add_distr_l.
 ...
