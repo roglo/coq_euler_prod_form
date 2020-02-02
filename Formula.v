@@ -3440,9 +3440,57 @@ destruct (Nat.eq_dec (b mod mn) (a mod mn)) as [Hba| Hba]. {
 }
 Qed.
 
+Theorem polm_eqb_0_r {n : mod_num} : ∀ la,
+  polm_eqb la [] = true → polm_is_zero la = true.
+Proof.
+intros * Hla.
+induction la as [| a la]; [ easy | ].
+cbn in Hla |-*.
+apply Bool.andb_true_iff in Hla.
+apply Bool.andb_true_iff.
+split; [ easy | ].
+apply IHla.
+now apply polm_eq_sym.
+Qed.
+
 Theorem polm_eq_trans {n : mod_num} : transitive _ polm_eq.
 Proof.
 intros la lb lc Hab Hbc.
+unfold "="%pol in Hab, Hbc |-*.
+revert la lc Hab Hbc.
+induction lb as [| b lb]; intros. {
+  cbn in *.
+  apply polm_eqb_0_r in Hab.
+  revert lc Hbc.
+  induction la as [| a la]; intros; [ easy | ].
+  destruct lc as [| c lc]; [ easy | ].
+  cbn in Hab, Hbc |-*.
+  apply Bool.andb_true_iff in Hab.
+  apply Bool.andb_true_iff in Hbc.
+  destruct Hab as (Ha, Hla).
+  destruct Hbc as (Hc, Hlc).
+  apply Nat.eqb_eq in Ha.
+  apply Nat.eqb_eq in Hc.
+  rewrite Ha, Hc; cbn.
+  now apply IHla.
+}
+destruct la as [| a la]. {
+  cbn in Hab, Hbc |-*.
+  destruct lc as [| c lc]; [ easy | cbn ].
+  apply Bool.andb_true_iff in Hab.
+  apply Bool.andb_true_iff.
+  destruct Hab as (Hb, Hlb).
+  apply Nat.eqb_eq in Hb.
+  rewrite Hb in Hbc.
+  destruct (Nat.eq_dec _ _) as [Hbec| Hbec]. {
+    split; [ now rewrite <- Hbec | ].
+    clear - Hlb Hbc.
+    apply forallb_forall.
+    intros c Hc.
+    apply Nat.eqb_eq.
+    specialize (proj1 (forallb_forall _ _) Hlb) as H1.
+    cbn in H1.
+Inspect 1.
 ...
 
 Add Parametric Relation {n : mod_num} : (list nat) polm_eq
