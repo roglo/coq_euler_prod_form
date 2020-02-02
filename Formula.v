@@ -3444,6 +3444,7 @@ rewrite (polm_add_comm la).
 apply polm_add_add_swap.
 Qed.
 
+(*
 Theorem fold_left_polm_add_fun_from_0 {n : mod_num} {A} : ∀ a l (f : A → _),
   (fold_left (λ c i, c + f i) l a =
    a + fold_left (λ c i, c + f i) l [])%pol.
@@ -3454,7 +3455,9 @@ induction l as [| x l]; intros; [ now induction a | cbn ].
 rewrite IHl; symmetry; rewrite IHl.
 now rewrite polm_add_assoc.
 Qed.
+*)
 
+(*
 Theorem polm_summation_shift {n : mod_num} : ∀ b e (f : nat → _),
   (Σ (i = S b, S e), f i = Σ (i = b, e), f (S i))%pol.
 Proof.
@@ -3466,7 +3469,9 @@ induction k; intros; [ easy | cbn ].
 setoid_rewrite fold_left_polm_add_fun_from_0.
 rewrite IHk; [ easy | flia Hk ].
 Qed.
+*)
 
+(*
 Lemma fold_left_polm_add_succ_last {n : mod_num} : ∀ f a b len,
   (fold_left (λ c i, (c + f i)) (seq b (S len)) a =
    fold_left (λ c i, (c + f i)) (seq b len) a + f (b + len)%nat)%pol.
@@ -3478,7 +3483,9 @@ remember (S len) as x; cbn; subst x.
 rewrite IHlen.
 now rewrite Nat.add_succ_comm.
 Qed.
+*)
 
+(*
 Theorem polm_summation_eq_compat {n : mod_num} : ∀ b e g h,
   (∀ i, b ≤ i ≤ e → g i = h i)
   → (Σ (i = b, e), g i = Σ (i = b, e), h i)%pol.
@@ -3493,7 +3500,9 @@ rewrite (IHk e); [ easy | flia Hk | ].
 intros i Hbie.
 apply Hgh; flia Hbie.
 Qed.
+*)
 
+(*
 Lemma fold_left_polm_add_rtl {n : mod_num} : ∀ f a b len,
   fold_left (λ c i, (c + f i)%pol) (seq b len) a =
   fold_left (λ c i, (c + f (b + len - 1 + b - i)%nat)%pol) (seq b len) a.
@@ -3523,7 +3532,9 @@ replace len with (S (b + len - 1) - b) at 2 by flia Hblz.
 replace (b + len) with (S (b + len - 1)) at 1 by flia Hblz.
 apply polm_summation_shift.
 Qed.
+*)
 
+(*
 Theorem polm_summation_rtl {n : mod_num} : ∀ g b k,
   (Σ (i = b, k), g i = Σ (i = b, k), g (k + b - i)%nat)%pol.
 Proof.
@@ -3534,6 +3545,53 @@ intros i Hi.
 f_equal.
 flia Hi.
 Qed.
+*)
+
+Lemma fold_left_add_rtl : ∀ f a b len,
+  fold_left (λ c i, c + f i) (seq b len) a =
+  fold_left (λ c i, c + f (b + len - 1 + b - i)) (seq b len) a.
+Proof.
+intros f a b len.
+revert f a b.
+induction len; intros; [ easy | ].
+remember (S len) as x.
+rewrite Heqx in |- * at 1.
+simpl; subst x.
+rewrite IHlen.
+...
+rewrite summation_aux_succ_last.
+rewrite Nat.add_succ_l, Nat_sub_succ_1.
+do 2 rewrite Nat.add_succ_r; rewrite Nat_sub_succ_1.
+rewrite Nat.add_sub_swap, Nat.sub_diag; auto.
+rewrite rng_add_comm.
+apply rng_add_compat_r, summation_aux_compat.
+intros; reflexivity.
+Qed.
+*)
+
+Theorem summation_rtl : ∀ g b k,
+  Σ (i = b, k), g i = Σ (i = b, k), g (k + b - i).
+Proof.
+intros g b k.
+remember (S k - b) as e.
+...
+rewrite fold_left_add_rtl.
+...
+rewrite summation_aux_rtl.
+apply summation_aux_compat; intros i (Hi, Hikb).
+destruct b; simpl.
+ rewrite Nat.sub_0_r; reflexivity.
+
+ rewrite Nat.sub_0_r.
+ simpl in Hikb.
+ eapply Nat.le_lt_trans in Hikb; eauto .
+ apply lt_O_minus_lt, Nat.lt_le_incl in Hikb.
+ remember (b + (k - b))%nat as x eqn:H .
+ rewrite Nat.add_sub_assoc in H; auto.
+ rewrite Nat.add_sub_swap in H; auto.
+ rewrite Nat.sub_diag in H; subst x; reflexivity.
+Qed.
+*)
 
 Theorem polm_mul_comm {n : mod_num} : ∀ la lb,
   (la * lb = lb * la)%pol.
@@ -3547,8 +3605,7 @@ revert i.
 induction len; intros; [ easy | ].
 cbn - [ "-" ].
 rewrite IHlen; f_equal; clear IHlen.
-Check polm_summation_rtl.
-... (* ah le con, je l'ai prouvé pour rien ! *)
+...
 rewrite summation_rtl.
 ...
 
