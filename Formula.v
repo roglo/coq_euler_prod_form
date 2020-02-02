@@ -3406,6 +3406,23 @@ Arguments polm_eval la%pol.
 *)
 
 Theorem polm_eq_refl {n : mod_num} : reflexive _ polm_eq.
+Proof.
+intros la.
+unfold "="%pol.
+unfold polm_eqb.
+unfold polm_is_zero.
+unfold polm_sub, polm_opp.
+destruct (Nat.eq_dec mn 0) as [Hnz| Hnz]. {
+  rewrite Hnz; cbn.
+  now apply forallb_forall.
+}
+induction la as [| a la]; [ easy | ].
+cbn; rewrite IHla.
+rewrite Bool.andb_true_r.
+apply Nat.eqb_eq.
+rewrite Nat.mod_mod; [ | easy ].
+rewrite Nat.add_comm.
+(* doesn't work if a > mn; my equality is not reflexive! *)
 ...
 
 Theorem polm_eq_sym {n : mod_num} : symmetric _ polm_eq.
