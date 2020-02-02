@@ -3592,24 +3592,11 @@ Theorem summation_rtl : ∀ g b k,
   Σ (i = b, k), g i = Σ (i = b, k), g (k + b - i).
 Proof.
 intros g b k.
-remember (S k - b) as e.
 rewrite fold_left_add_rtl.
-...
-rewrite summation_aux_rtl.
-apply summation_aux_compat; intros i (Hi, Hikb).
-destruct b; simpl.
- rewrite Nat.sub_0_r; reflexivity.
-
- rewrite Nat.sub_0_r.
- simpl in Hikb.
- eapply Nat.le_lt_trans in Hikb; eauto .
- apply lt_O_minus_lt, Nat.lt_le_incl in Hikb.
- remember (b + (k - b))%nat as x eqn:H .
- rewrite Nat.add_sub_assoc in H; auto.
- rewrite Nat.add_sub_swap in H; auto.
- rewrite Nat.sub_diag in H; subst x; reflexivity.
+apply summation_eq_compat.
+intros i Hi.
+f_equal; flia Hi.
 Qed.
-*)
 
 Theorem polm_mul_comm {n : mod_num} : ∀ la lb,
   (la * lb = lb * la)%pol.
@@ -3623,8 +3610,28 @@ revert i.
 induction len; intros; [ easy | ].
 cbn - [ "-" ].
 rewrite IHlen; f_equal; clear IHlen.
-...
 rewrite summation_rtl.
+f_equal.
+apply summation_eq_compat.
+intros j Hj.
+rewrite Nat.mul_comm, Nat.add_0_r; f_equal.
+f_equal; flia Hj.
+Qed.
+
+Theorem polm_mul_nil_l {n : mod_num} : ∀ la, ([] * la)%pol = [].
+Proof.
+intros.
+rewrite polm_mul_comm.
+unfold "*"%pol; cbn.
+rewrite Nat.add_0_r.
+destruct la as [| a la]; [ easy | cbn ].
+rewrite Nat.sub_0_r.
+remember (length la) as len eqn:Hlen; symmetry in Hlen.
+revert la Hlen.
+induction len; intros; [ easy | cbn ].
+...
+rewrite Nat.sub_0_r.
+Print polm_convol_mul.
 ...
 
 Theorem polm_mul_add_distr_l {n : mod_num} : ∀ la lb lc,
@@ -3633,8 +3640,14 @@ Proof.
 intros.
 revert lb lc.
 induction la as [| a la]; intros. {
-  rewrite polm_mul_comm.
-
+do 3 rewrite polm_mul_nil_l.
+...
+  setoid_rewrite polm_mul_comm.
+  revert lc.
+  induction lb as [| b lb]; intros; [ easy | ].
+  destruct lc as [| c lc].
+cbn.
+Search (_ * _)%pol.
 ...
 
 Theorem polm_summation_split_first {n : mod_num} : ∀ b e f,
