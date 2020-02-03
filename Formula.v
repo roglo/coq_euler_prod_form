@@ -3363,6 +3363,7 @@ Fixpoint polm_add {n : mod_num} al₁ al₂ :=
 Definition polm_opp {n : mod_num} l := map (λ a, mn - a mod mn) l.
 Definition polm_sub {n : mod_num} la lb := polm_add la (polm_opp lb).
 
+(*
 Fixpoint polm_convol_mul {n : mod_num} al₁ al₂ i len :=
   match len with
   | O => []
@@ -3370,9 +3371,14 @@ Fixpoint polm_convol_mul {n : mod_num} al₁ al₂ i len :=
       (Σ (j = 0, i), List.nth j al₁ 0 * List.nth (i - j) al₂ 0) mod mn ::
      polm_convol_mul al₁ al₂ (S i) len₁
   end.
-
 Definition polm_mul {n : mod_num} la lb :=
   polm_convol_mul la lb 0 (length la + length lb - 1).
+*)
+
+Definition polm_convol_mul_term {n : mod_num} la lb i :=
+  (Σ (j = 0, i), List.nth j la 0 * List.nth (i - j) lb 0) mod mn.
+Definition polm_mul {n : mod_num} la lb :=
+  map (polm_convol_mul_term la lb) (seq 0 (length la + length lb - 1)).
 
 Definition xpow i := repeat 0 i ++ [1].
 
@@ -3783,6 +3789,7 @@ revert i.
 induction len; intros; [ easy | ].
 cbn - [ "-" ].
 rewrite IHlen; f_equal.
+unfold polm_convol_mul_term.
 rewrite summation_rtl.
 f_equal.
 apply summation_eq_compat.
@@ -3810,6 +3817,7 @@ induction len; intros. {
 cbn.
 destruct i. {
   replace a with (S a - 1) at 1 by flia.
+  unfold polm_convol_mul_term.
   rewrite all_0_summation_0. 2: {
     intros i Hi.
     now destruct i.
@@ -3832,12 +3840,11 @@ Qed.
 
 Theorem nth_polm_mul {n : mod_num} : ∀ la lb i,
   i < length la + length lb - 1
-  → nth i (la * lb)%pol 0 ≡
-     (Σ (j = 0, i), nth j la 0 * nth (i - j) lb 0) mod mn.
+  → nth i (la * lb)%pol 0 = polm_convol_mul_term la lb i mod mn.
 Proof.
 intros * Hi.
 unfold "*"%pol.
-Print polm_convol_mul.
+rewrite (List_map_nth_in _ 0).
 ...
 
 Theorem polm_mul_add_distr_l {n : mod_num} : ∀ la lb lc,
