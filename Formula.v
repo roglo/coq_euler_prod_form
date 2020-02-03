@@ -3514,7 +3514,7 @@ now apply IHla1.
 ...
 *)
 
-Theorem glop {n : mod_num} : ∀ la lb,
+Theorem polm_eq_iff {n : mod_num} : ∀ la lb,
   (la = lb)%pol ↔ ∀ i, nth i la 0 ≡ nth i lb 0 mod mn.
 Proof.
 intros.
@@ -3522,8 +3522,18 @@ destruct (Nat.eq_dec mn 0) as [Hnz| Hnz]. {
   rewrite Hnz; cbn.
   split; intros Hll; [ easy | ].
   unfold "="%pol.
-Search polm_eqb.
-...
+  clear Hll.
+  revert lb.
+  induction la as [| a la]; intros. {
+    destruct lb as [| b lb]; [ easy | cbn ].
+    rewrite Hnz; cbn.
+    now apply forallb_forall.
+  } {
+    cbn; rewrite Hnz; cbn.
+    destruct lb as [| b lb]; [ now apply forallb_forall | ].
+    apply IHla.
+  }
+}
 split; intros Hll. {
   intros i.
   revert lb Hll.
@@ -3535,8 +3545,7 @@ split; intros Hll. {
     apply Bool.andb_true_iff in Hll.
     destruct Hll as (Hb, Hlb).
     apply Nat.eqb_eq in Hb.
-    destruct i. {
-      rewrite Hb, Nat.mod_0_l.
+    destruct i; [ now rewrite Hb, Nat.mod_0_l | ].
 ...
 
 Theorem polm_eq_trans {n : mod_num} : transitive _ polm_eq.
