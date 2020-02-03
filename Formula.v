@@ -3453,6 +3453,7 @@ apply IHla.
 now apply polm_eq_sym.
 Qed.
 
+(*
 Theorem polm_eqb_in {n : mod_num} : ∀ la lb a,
   polm_eqb la lb = true
   → a ∈ la
@@ -3511,9 +3512,12 @@ destruct Hlb as [Hlb| Hlb]. {
 }
 now apply IHla1.
 ...
+*)
 
 Theorem polm_eq_trans {n : mod_num} : transitive _ polm_eq.
 Proof.
+intros la lb lc Hab Hbc.
+...
 intros la lb lc Hab Hbc.
 apply polm_eq_sym in Hab.
 unfold "="%pol in Hab, Hbc |-*.
