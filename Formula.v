@@ -3608,12 +3608,30 @@ Add Parametric Relation {n : mod_num} : (list nat) polm_eq
  transitivity proved by polm_eq_trans
  as polm_eq_rel.
 
-(*
-Instance polm_mul_morph {F : field} :
-  Proper (ls_eq ==> ls_eq ==> ls_eq) ls_mul.
+Theorem nth_polm_add {n : mod_num} : ∀ la lb i,
+  nth i (la + lb)%pol 0 ≡ (nth i la 0 + nth i lb 0) mod mn.
+Proof.
+intros.
+destruct (Nat.eq_dec mn 0) as [Hnz| Hnz]; [ now rewrite Hnz | ].
+revert lb.
+induction la as [| a la]; intros; [ now destruct i | cbn ].
+destruct lb as [| b lb]; [ now destruct i; rewrite Nat.add_0_r | ].
+destruct i; cbn; [ now rewrite Nat.mod_mod | ].
 ...
-but on polm_eq
-*)
+
+Instance polm_add_morph {n : mod_num} :
+  Proper (polm_eq ==> polm_eq ==> polm_eq) polm_add.
+Proof.
+intros la lb Hab lc ld Hcd.
+apply polm_eq_iff; intros i.
+specialize (proj1 (polm_eq_iff _ _) Hab i) as H1.
+specialize (proj1 (polm_eq_iff _ _) Hcd i) as H2.
+clear Hab Hcd.
+Search polm_add.
+...
+rewrite nth_polm_add.
+rewrite nth_polm_add.
+...
 
 Theorem polm_eq_eq {n : mod_num} : ∀ la lb, la = lb → (la = lb)%pol.
 Proof.
@@ -3658,8 +3676,9 @@ destruct (Nat.eq_dec mn 0) as [Hnz| Hnz]. {
 }
 rewrite Nat.add_mod_idemp_l; [ | easy ].
 rewrite Nat.add_mod_idemp_l; [ | easy ].
-...
-now rewrite Nat.add_shuffle0, IHla.
+rewrite Nat.add_shuffle0.
+unfold "="%pol; cbn.
+destruct (Nat.eq_dec _ _); [ apply IHla | easy ].
 Qed.
 
 Theorem polm_add_assoc {n : mod_num} : ∀ la lb lc,
@@ -3667,6 +3686,7 @@ Theorem polm_add_assoc {n : mod_num} : ∀ la lb lc,
 Proof.
 intros.
 rewrite (polm_add_comm _ (lb + lc)%pol).
+...
 rewrite (polm_add_comm la).
 apply polm_add_add_swap.
 Qed.
