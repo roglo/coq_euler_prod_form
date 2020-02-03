@@ -3771,7 +3771,7 @@ intros i Hi.
 f_equal; flia Hi.
 Qed.
 
-Theorem polm_mul_comm_eq {n : mod_num} : ∀ la lb,
+Theorem polm_mul_comm {n : mod_num} : ∀ la lb,
   (la * lb)%pol = (lb * la)%pol.
 Proof.
 intros.
@@ -3791,21 +3791,54 @@ rewrite Nat.mul_comm, Nat.add_0_r; f_equal.
 f_equal; flia Hj.
 Qed.
 
-Theorem polm_mul_comm {n : mod_num} : ∀ la lb,
-  (la * lb = lb * la)%pol.
+Theorem polm_mul_0_l {n : mod_num} : ∀ la, ([] * la = [])%pol.
 Proof.
 intros.
-now rewrite polm_mul_comm_eq.
-Qed.
-
-(*
-Theorem polm_mul_0_l {n : mod_num} : ∀ la, ([] * la)%pol = [].
-Proof.
+unfold "="%pol; cbn.
+destruct (Nat.eq_dec mn 0) as [Hnz| Hnz]. {
+  remember (length la - 1) as len; clear Heqlen.
+  remember 0 as a in |-*; clear Heqa.
+  revert a.
+  induction len; intros; [ easy | cbn ].
+  rewrite Hnz; cbn.
+  now apply forallb_forall.
+}
+remember (length la - 1) as len; clear Heqlen.
+remember 0 as a in |-*; clear Heqa.
+revert a la.
+induction len; intros; [ easy | ].
+cbn - [ polm_eqb ].
+replace a with (S a - 1) at 1 by flia.
+rewrite all_0_summation_0. 2: {
+  intros i Hi.
+  now destruct i.
+}
+rewrite Nat.mod_0_l; [ | easy ].
+cbn.
+apply Bool.andb_true_iff.
+split. {
+  apply Nat.eqb_eq.
+  now apply Nat.mod_0_l.
+} {
+  apply forallb_forall.
+  intros b Hb.
+  apply Nat.eqb_eq.
+...
+rewrite Nat.mod_0_l; [ | easy ].
+rewrite Nat.mod_0_l; [ | easy ].
+cbn.
+apply forallb_forall.
+cbn.
+...
 intros.
-rewrite polm_mul_comm.
-unfold "*"%pol; cbn.
-rewrite Nat.add_0_r.
-destruct la as [| a la]; [ easy | cbn ].
+unfold "="%pol; cbn.
+remember (length la - 1) as len; clear Heqlen.
+remember 0 as a; clear Heqa.
+revert a la.
+induction len; intros; [ easy | ].
+cbn.
+...
+induction la as [| a la]; [ easy | cbn ].
 rewrite Nat.sub_0_r.
 remember (length la) as len eqn:Hlen; symmetry in Hlen.
 revert la Hlen.
@@ -3814,7 +3847,7 @@ induction len; intros; [ easy | cbn ].
 rewrite Nat.sub_0_r.
 Print polm_convol_mul.
 ...
-*)
+(**)
 
 Theorem polm_mul_add_distr_l {n : mod_num} : ∀ la lb lc,
   (la * (lb + lc))%pol = (la * lb + la * lc)%pol.
@@ -3822,12 +3855,14 @@ Proof.
 intros.
 revert lb lc.
 induction la as [| a la]; intros. {
+Search (_ * [])%pol.
+
   cbn.
+...
   revert lc.
   induction lb as [| b lb]; intros; [ easy | cbn ].
   destruct lc as [| c lc]; cbn; [ now rewrite polm_add_0_r | ].
-  do 2 rewrite Nat.sub_0_r.
-  cbn.
+  do 3 rewrite Nat.sub_0_r.
 ...
 Check polm_mul_comm.
 ...
