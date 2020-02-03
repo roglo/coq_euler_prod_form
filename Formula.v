@@ -3456,11 +3456,14 @@ Qed.
 Theorem polm_eq_trans {n : mod_num} : transitive _ polm_eq.
 Proof.
 intros la lb lc Hab Hbc.
+apply polm_eq_sym in Hab.
 unfold "="%pol in Hab, Hbc |-*.
 revert la lc Hab Hbc.
 induction lb as [| b lb]; intros. {
   cbn in *.
+(*
   apply polm_eqb_0_r in Hab.
+*)
   revert lc Hbc.
   induction la as [| a la]; intros; [ easy | ].
   destruct lc as [| c lc]; [ easy | ].
@@ -3474,16 +3477,17 @@ induction lb as [| b lb]; intros. {
   rewrite Ha, Hc; cbn.
   now apply IHla.
 }
+cbn in Hab, Hbc |-*.
 destruct la as [| a la]. {
-  cbn in Hab, Hbc |-*.
-  destruct lc as [| c lc]; [ easy | cbn ].
   apply Bool.andb_true_iff in Hab.
+  destruct lc as [| c lc]; [ easy | cbn ].
   apply Bool.andb_true_iff.
   destruct Hab as (Hb, Hlb).
   apply Nat.eqb_eq in Hb.
   rewrite Hb in Hbc.
   destruct (Nat.eq_dec _ _) as [Hbec| Hbec]. {
     split; [ now rewrite <- Hbec | ].
+...
     clear - Hlb Hbc.
     apply forallb_forall.
     intros c Hc.
@@ -3510,6 +3514,7 @@ destruct la as [| a la]. {
       destruct Hc as [Hc| Hc]. {
         subst c2.
         destruct (Nat.eq_dec _ _) as [H2| H2]. {
+          specialize (H1 (c mod mn)).
 ...
 
 Add Parametric Relation {n : mod_num} : (list nat) polm_eq
