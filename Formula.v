@@ -3820,7 +3820,7 @@ destruct i. {
 apply IHlen.
 Qed.
 
-(*
+(**)
 Instance polm_nth_morph {n : mod_num} :
   Proper (eq ==> polm_eq ==> eq) (λ n l, nth n l 0 mod mn).
 Proof.
@@ -3828,22 +3828,23 @@ intros a b Hab la lb Hll.
 subst a.
 now specialize (proj1 (polm_eq_iff _ _) Hll b).
 Qed.
-*)
+(**)
 
 Theorem polm_mul_add_distr_l {n : mod_num} : ∀ la lb lc,
   (la * (lb + lc) = la * lb + la * lc)%pol.
 Proof.
-(*
+(**)
 intros.
 apply polm_eq_iff.
 intros i.
-revert lb lc.
+revert i lb lc.
 induction la as [| a la]; intros. {
   apply polm_nth_morph; [ easy | ].
   now do 3 rewrite polm_mul_0_l.
 }
+destruct i. {
 ...
-*)
+(**)
 intros.
 revert lb lc.
 induction la as [| a la]; intros. {
