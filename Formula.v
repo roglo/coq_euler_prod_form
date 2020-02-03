@@ -3546,6 +3546,21 @@ split; intros Hll. {
     destruct Hll as (Hb, Hlb).
     apply Nat.eqb_eq in Hb.
     destruct i; [ now rewrite Hb, Nat.mod_0_l | ].
+    specialize (proj1 (forallb_forall _ _) Hlb) as H1.
+    cbn in H1.
+    destruct (lt_dec i (length lb)) as [Hib| Hib]. {
+      assert (H : nth i lb 0 ∈ lb) by now apply nth_In.
+      specialize (H1 _ H); clear H.
+      apply Nat.eqb_eq in H1.
+      rewrite H1.
+      now apply Nat.mod_0_l.
+    } {
+      apply Nat.nlt_ge in Hib.
+      rewrite nth_overflow; [ | easy ].
+      now rewrite Nat.mod_0_l.
+    }
+  } {
+    cbn.
 ...
 
 Theorem polm_eq_trans {n : mod_num} : transitive _ polm_eq.
