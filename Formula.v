@@ -3613,11 +3613,11 @@ Theorem nth_polm_add {n : mod_num} : ∀ la lb i,
 Proof.
 intros.
 destruct (Nat.eq_dec mn 0) as [Hnz| Hnz]; [ now rewrite Hnz | ].
-revert lb.
+revert i lb.
 induction la as [| a la]; intros; [ now destruct i | cbn ].
 destruct lb as [| b lb]; [ now destruct i; rewrite Nat.add_0_r | ].
-destruct i; cbn; [ now rewrite Nat.mod_mod | ].
-...
+destruct i; cbn; [ now rewrite Nat.mod_mod | apply IHla ].
+Qed.
 
 Instance polm_add_morph {n : mod_num} :
   Proper (polm_eq ==> polm_eq ==> polm_eq) polm_add.
@@ -3627,11 +3627,26 @@ apply polm_eq_iff; intros i.
 specialize (proj1 (polm_eq_iff _ _) Hab i) as H1.
 specialize (proj1 (polm_eq_iff _ _) Hcd i) as H2.
 clear Hab Hcd.
-Search polm_add.
-...
-rewrite nth_polm_add.
-rewrite nth_polm_add.
-...
+do 2 rewrite nth_polm_add.
+destruct (Nat.eq_dec mn 0) as [Hnz| Hnz]; [ now rewrite Hnz | ].
+rewrite <- Nat.add_mod_idemp_l; [ | easy ].
+rewrite <- Nat.add_mod_idemp_r; [ | easy ].
+rewrite H1, H2.
+rewrite Nat.add_mod_idemp_l; [ | easy ].
+rewrite Nat.add_mod_idemp_r; [ | easy ].
+easy.
+Qed.
+
+Instance polm_cons_morph {n : mod_num} :
+  Proper (eq ==> polm_eq ==> polm_eq) cons.
+Proof.
+intros a b Hab la lb Hll.
+subst a.
+apply polm_eq_iff; intros i.
+destruct i; [ easy | ].
+cbn.
+now specialize (proj1 (polm_eq_iff _ _) Hll i).
+Qed.
 
 Theorem polm_eq_eq {n : mod_num} : ∀ la lb, la = lb → (la = lb)%pol.
 Proof.
@@ -3686,7 +3701,6 @@ Theorem polm_add_assoc {n : mod_num} : ∀ la lb lc,
 Proof.
 intros.
 rewrite (polm_add_comm _ (lb + lc)%pol).
-...
 rewrite (polm_add_comm la).
 apply polm_add_add_swap.
 Qed.
@@ -3841,8 +3855,8 @@ intros i Hi.
 f_equal; flia Hi.
 Qed.
 
-Theorem polm_mul_comm {n : mod_num} : ∀ la lb,
-  (la * lb = lb * la)%pol.
+Theorem polm_mul_comm_eq {n : mod_num} : ∀ la lb,
+  (la * lb)%pol = (lb * la)%pol.
 Proof.
 intros.
 unfold "*"%pol.
@@ -3852,13 +3866,20 @@ remember 0 as i; clear Heqi.
 revert i.
 induction len; intros; [ easy | ].
 cbn - [ "-" ].
-rewrite IHlen; f_equal; clear IHlen.
+rewrite IHlen; f_equal.
 rewrite summation_rtl.
 f_equal.
 apply summation_eq_compat.
 intros j Hj.
 rewrite Nat.mul_comm, Nat.add_0_r; f_equal.
 f_equal; flia Hj.
+Qed.
+
+Theorem polm_mul_comm {n : mod_num} : ∀ la lb,
+  (la * lb = lb * la)%pol.
+Proof.
+intros.
+now rewrite polm_mul_comm_eq.
 Qed.
 
 (*
@@ -3890,6 +3911,7 @@ induction la as [| a la]; intros. {
   induction lb as [| b lb]; intros; [ easy | cbn ].
   destruct lc as [| c lc]; cbn; [ now rewrite polm_add_0_r | ].
   do 2 rewrite Nat.sub_0_r.
+...
 Check polm_mul_comm.
 (* I need a specific equality between polynomials, using a
    normalization that removes the ending 0s *)
