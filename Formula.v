@@ -3833,7 +3833,9 @@ Qed.
 Theorem polm_mul_add_distr_l {n : mod_num} : ∀ la lb lc,
   (la * (lb + lc) = la * lb + la * lc)%pol.
 Proof.
-(**)
+intros.
+(* il n'y a aucune raison que l'induction fonctionne *)
+...
 intros.
 apply polm_eq_iff.
 intros i.
