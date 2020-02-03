@@ -3619,7 +3619,6 @@ destruct lb as [| b lb]; [ now destruct i; rewrite Nat.add_0_r | ].
 destruct i; cbn; [ now rewrite Nat.mod_mod | apply IHla ].
 Qed.
 
-(*
 Instance polm_add_morph {n : mod_num} :
   Proper (polm_eq ==> polm_eq ==> polm_eq) polm_add.
 Proof.
@@ -3638,6 +3637,7 @@ rewrite Nat.add_mod_idemp_r; [ | easy ].
 easy.
 Qed.
 
+(*
 Instance polm_cons_morph {n : mod_num} :
   Proper (eq ==> polm_eq ==> polm_eq) cons.
 Proof.
@@ -3794,77 +3794,61 @@ Qed.
 Theorem polm_mul_0_l {n : mod_num} : ∀ la, ([] * la = [])%pol.
 Proof.
 intros.
-unfold "="%pol; cbn.
-destruct (Nat.eq_dec mn 0) as [Hnz| Hnz]. {
-  remember (length la - 1) as len; clear Heqlen.
-  remember 0 as a in |-*; clear Heqa.
-  revert a.
-  induction len; intros; [ easy | cbn ].
-  rewrite Hnz; cbn.
-  now apply forallb_forall.
-}
-remember (length la - 1) as len; clear Heqlen.
-remember 0 as a in |-*; clear Heqa.
-revert a la.
-induction len; intros; [ easy | ].
-cbn - [ polm_eqb ].
-replace a with (S a - 1) at 1 by flia.
-rewrite all_0_summation_0. 2: {
-  intros i Hi.
-  now destruct i.
-}
+apply polm_eq_iff.
+intros i; cbn.
+destruct (Nat.eq_dec mn 0) as [Hnz| Hnz]; [ now rewrite Hnz | ].
+transitivity (0 mod mn); [ | now destruct i ].
 rewrite Nat.mod_0_l; [ | easy ].
+remember (length la - 1) as len; clear Heqlen.
+remember 0 as a eqn:Ha in |-* at 1.
+clear Ha.
+revert i a la.
+induction len; intros. {
+  cbn.
+  now destruct i; apply Nat.mod_0_l.
+}
 cbn.
-apply Bool.andb_true_iff.
-split. {
-  apply Nat.eqb_eq.
+destruct i. {
+  replace a with (S a - 1) at 1 by flia.
+  rewrite all_0_summation_0. 2: {
+    intros i Hi.
+    now destruct i.
+  }
+  rewrite Nat.mod_0_l; [ | easy ].
   now apply Nat.mod_0_l.
-} {
-  apply forallb_forall.
-  intros b Hb.
-  apply Nat.eqb_eq.
-...
-rewrite Nat.mod_0_l; [ | easy ].
-rewrite Nat.mod_0_l; [ | easy ].
-cbn.
-apply forallb_forall.
-cbn.
-...
-intros.
-unfold "="%pol; cbn.
-remember (length la - 1) as len; clear Heqlen.
-remember 0 as a; clear Heqa.
-revert a la.
-induction len; intros; [ easy | ].
-cbn.
-...
-induction la as [| a la]; [ easy | cbn ].
-rewrite Nat.sub_0_r.
-remember (length la) as len eqn:Hlen; symmetry in Hlen.
-revert la Hlen.
-induction len; intros; [ easy | cbn ].
-...
-rewrite Nat.sub_0_r.
-Print polm_convol_mul.
-...
-(**)
+}
+apply IHlen.
+Qed.
+
+(*
+Instance polm_nth_morph {n : mod_num} :
+  Proper (eq ==> polm_eq ==> eq) (λ n l, nth n l 0 mod mn).
+Proof.
+intros a b Hab la lb Hll.
+subst a.
+now specialize (proj1 (polm_eq_iff _ _) Hll b).
+Qed.
+*)
 
 Theorem polm_mul_add_distr_l {n : mod_num} : ∀ la lb lc,
-  (la * (lb + lc))%pol = (la * lb + la * lc)%pol.
+  (la * (lb + lc) = la * lb + la * lc)%pol.
 Proof.
+(*
+intros.
+apply polm_eq_iff.
+intros i.
+revert lb lc.
+induction la as [| a la]; intros. {
+  apply polm_nth_morph; [ easy | ].
+  now do 3 rewrite polm_mul_0_l.
+}
+...
+*)
 intros.
 revert lb lc.
 induction la as [| a la]; intros. {
-Search (_ * [])%pol.
-
-  cbn.
-...
-  revert lc.
-  induction lb as [| b lb]; intros; [ easy | cbn ].
-  destruct lc as [| c lc]; cbn; [ now rewrite polm_add_0_r | ].
-  do 3 rewrite Nat.sub_0_r.
-...
-Check polm_mul_comm.
+  now do 3 rewrite polm_mul_0_l.
+}
 ...
 
 Theorem polm_mul_add_distr_l {n : mod_num} : ∀ la lb lc,
