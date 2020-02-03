@@ -3885,6 +3885,12 @@ destruct (lt_dec i (length la + length lb - 1)) as [Hi| Hi]. {
 }
 Qed.
 
+Check polm_eq_iff.
+Print polm_eqb.
+(* perhaps polm_mul_add_distr_l below could work with
+   eq, instead of polm_eq ? *)
+...
+
 Theorem polm_mul_add_distr_l {n : mod_num} : ∀ la lb lc,
   (la * (lb + lc) = la * lb + la * lc)%pol.
 Proof.
@@ -3897,11 +3903,20 @@ destruct (Nat.eq_dec mn 0) as [Hnz| Hnz]; [ now rewrite Hnz | ].
 rewrite Nat.mod_mod; [ | easy ].
 rewrite Nat.add_mod_idemp_l; [ | easy ].
 rewrite Nat.add_mod_idemp_r; [ | easy ].
-...
+rewrite <- summation_add.
+setoid_rewrite summation_mod_idemp.
+f_equal.
+apply summation_eq_compat.
+intros j Hj.
+rewrite <- Nat.mul_mod_idemp_r; [ | easy ].
+rewrite nth_polm_add.
+rewrite Nat.mul_mod_idemp_r; [ | easy ].
+now rewrite Nat.mul_add_distr_l.
+Qed.
 
 Theorem polm_summation_split_first {n : mod_num} : ∀ b e f,
   b ≤ e
-  → (Σ (i = b, e), f i = f b + Σ (i = S b, e), f i)%pol.
+  → (Σ (i = b, e), f i)%pol = (f b + Σ (i = S b, e), f i)%pol.
 Proof.
 intros * Hbe.
 rewrite Nat.sub_succ.
