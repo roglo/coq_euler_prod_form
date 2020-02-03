@@ -3838,14 +3838,51 @@ now specialize (proj1 (polm_eq_iff _ _) Hll b).
 Qed.
 (**)
 
-Theorem nth_polm_mul {n : mod_num} : ∀ la lb i,
-  i < length la + length lb - 1
-  → nth i (la * lb)%pol 0 = polm_convol_mul_term la lb i.
+Theorem polm_add_length {n : mod_num} : ∀ la lb,
+  length (la + lb)%pol = max (length la) (length lb).
 Proof.
-intros * Hi.
+intros.
+revert lb.
+induction la as [| a la]; intros; [ easy | cbn ].
+destruct lb as [| b lb]; [ easy | cbn ].
+now rewrite IHla.
+Qed.
+
+Theorem polm_mul_length {n : mod_num} : ∀ la lb,
+  length (la * lb)%pol = length la + length lb - 1.
+Proof.
+intros.
 unfold "*"%pol.
-rewrite (List_map_nth_in _ 0); [ | now rewrite seq_length ].
-now rewrite seq_nth.
+now rewrite map_length, seq_length.
+Qed.
+
+Theorem nth_polm_mul {n : mod_num} : ∀ la lb i,
+  nth i (la * lb)%pol 0 = polm_convol_mul_term la lb i.
+Proof.
+intros.
+destruct (lt_dec i (length la + length lb - 1)) as [Hi| Hi]. {
+  unfold "*"%pol.
+  rewrite (List_map_nth_in _ 0); [ | now rewrite seq_length ].
+  now rewrite seq_nth.
+} {
+  apply Nat.nlt_ge in Hi.
+  rewrite nth_overflow; [ | now rewrite polm_mul_length ].
+  symmetry.
+  unfold polm_convol_mul_term.
+  destruct (Nat.eq_dec mn 0) as [Hnz| Hnz]; [ now rewrite Hnz | ].
+  rewrite all_0_summation_0; [ now apply Nat.mod_0_l | ].
+  intros j Hj.
+  apply Nat.eq_mul_0.
+  destruct (lt_dec j (length la)) as [Hja| Hja]. {
+    right.
+    apply nth_overflow.
+    flia Hi Hja.
+  } {
+    left.
+    apply nth_overflow.
+    flia Hi Hja.
+  }
+}
 Qed.
 
 Theorem polm_mul_add_distr_l {n : mod_num} : ∀ la lb lc,
@@ -3854,113 +3891,12 @@ Proof.
 intros.
 apply polm_eq_iff; intros i.
 rewrite nth_polm_add.
-destruct (lt_dec i (length la + length (lb + lc)%pol - 1)) as [Hi| Hi]. {
-  rewrite nth_polm_mul; [ | easy ].
-  rewrite nth_polm_mul.
-...
-intros.
-apply polm_eq_iff.
-intros i.
-revert i lb lc.
-induction la as [| a la]; intros. {
-  apply polm_nth_morph; [ easy | ].
-  now do 3 rewrite polm_mul_0_l.
-}
-unfold "*"%pol in IHla.
+do 3 rewrite nth_polm_mul.
+unfold polm_convol_mul_term.
 destruct (Nat.eq_dec mn 0) as [Hnz| Hnz]; [ now rewrite Hnz | ].
-destruct i. {
-  cbn.
-  do 3 rewrite Nat.sub_0_r.
-  destruct lb as [| b lb]. {
-    cbn.
-    rewrite Nat.add_0_r.
-    destruct lc as [| c lc]. {
-      cbn.
-      rewrite Nat.add_0_r.
-      remember (length la) as len eqn:Hlen; symmetry in Hlen.
-      destruct len; [ easy | cbn ].
-      rewrite Nat.mul_0_r.
-      rewrite Nat.mod_0_l; [ | easy ].
-      rewrite Nat.mod_0_l; [ | easy ].
-      rewrite Nat.mod_0_l; [ | easy ].
-      now rewrite Nat.mod_0_l.
-    } {
-      cbn.
-      rewrite <- Nat.add_succ_comm; cbn.
-      remember (length la) as len eqn:Hlen; symmetry in Hlen.
-      destruct len; [ easy | cbn ].
-      rewrite Nat.mul_0_r.
-      rewrite Nat.mod_0_l; [ | easy ].
-      rewrite Nat.add_0_l.
-      rewrite Nat.mod_mod; [ | easy ].
-      rewrite Nat.mod_mod; [ | easy ].
-      easy.
-    }
-  } {
-    cbn.
-    rewrite <- Nat.add_succ_comm; cbn.
-    destruct lc as [| c lc]. {
-      cbn.
-      rewrite Nat.add_0_r.
-      rewrite <- Nat.add_succ_comm; cbn.
-      remember (length la) as len eqn:Hlen; symmetry in Hlen.
-      destruct len; [ easy | cbn ].
-      rewrite Nat.mul_0_r.
-      rewrite Nat.mod_0_l; [ | easy ].
-      rewrite Nat.add_0_r.
-      rewrite Nat.mod_mod; [ | easy ].
-      rewrite Nat.mod_mod; [ | easy ].
-      easy.
-    } {
-      cbn.
-      rewrite <- Nat.add_succ_comm; cbn.
-      rewrite <- Nat.add_succ_comm; cbn.
-      rewrite Nat.mod_mod; [ | easy ].
-      rewrite Nat.mod_mod; [ | easy ].
-      rewrite Nat.mul_mod_idemp_r; [ | easy ].
-      rewrite Nat.add_mod_idemp_l; [ | easy ].
-      rewrite Nat.add_mod_idemp_r; [ | easy ].
-      now rewrite Nat.mul_add_distr_l.
-    }
-  }
-} {
-  cbn.
-...
-(**)
-intros.
-revert lb lc.
-induction la as [| a la]; intros. {
-  now do 3 rewrite polm_mul_0_l.
-}
-...
-
-Theorem polm_mul_add_distr_l {n : mod_num} : ∀ la lb lc,
-  (la * (lb + lc) = la * lb + la * lc)%pol.
-Proof.
-intros.
-revert lb lc.
-induction la as [| a la]; intros. {
-  cbn.
-  revert lc.
-  induction lb as [| b lb]; intros; [ easy | cbn ].
-  destruct lc as [| c lc]; cbn; [ now rewrite polm_add_0_r | ].
-  do 2 rewrite Nat.sub_0_r.
-...
-Check polm_mul_comm.
-(* I need a specific equality between polynomials, using a
-   normalization that removes the ending 0s *)
-...
-    rewrite Nat.sub_0_r.
-
-...
-do 3 rewrite polm_mul_nil_l.
-...
-  setoid_rewrite polm_mul_comm.
-  revert lc.
-  induction lb as [| b lb]; intros; [ easy | ].
-  destruct lc as [| c lc].
-cbn.
-Search (_ * _)%pol.
+rewrite Nat.mod_mod; [ | easy ].
+rewrite Nat.add_mod_idemp_l; [ | easy ].
+rewrite Nat.add_mod_idemp_r; [ | easy ].
 ...
 
 Theorem polm_summation_split_first {n : mod_num} : ∀ b e f,
