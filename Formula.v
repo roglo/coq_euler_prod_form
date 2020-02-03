@@ -3490,7 +3490,26 @@ destruct la as [| a la]. {
     apply Nat.eqb_eq.
     specialize (proj1 (forallb_forall _ _) Hlb) as H1.
     cbn in H1.
-Inspect 1.
+    clear Hlb.
+    induction lb as [| b lb]. {
+      cbn in Hbc.
+      induction lc as [| c2 lc]; [ easy | ].
+      destruct Hc as [Hc| Hc]. {
+        subst c2.
+        cbn in Hbc.
+        apply Bool.andb_true_iff in Hbc.
+        now apply Nat.eqb_eq.
+      } {
+        cbn in Hbc.
+        apply Bool.andb_true_iff in Hbc.
+        now apply IHlc.
+      }
+    } {
+      cbn in Hbc.
+      destruct lc as [| c2 lc]; [ easy | ].
+      destruct Hc as [Hc| Hc]. {
+        subst c2.
+        destruct (Nat.eq_dec _ _) as [H2| H2]. {
 ...
 
 Add Parametric Relation {n : mod_num} : (list nat) polm_eq
