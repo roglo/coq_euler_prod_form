@@ -3463,7 +3463,7 @@ intros * Hll Ha Han.
 apply in_split in Ha.
 destruct Ha as (la1 & la2 & Hla).
 exists (nth (length la1) lb 0).
-split. {
+assert (Hlb : nth (length la1) lb 0 ∈ lb). {
   subst la.
   revert a la2 lb Hll Han.
   induction la1 as [| a1 la1]; intros. {
@@ -3488,7 +3488,28 @@ split. {
     apply (IHla1 a la2); [ | easy ].
     now destruct (Nat.eq_dec _ _).
   }
-} {
+}
+split; [ easy | ].
+subst la.
+revert lb Hll Hlb.
+induction la1 as [| a1 la1]; intros. {
+  cbn in Hll |-*.
+  destruct lb as [| b lb]. {
+    apply Bool.andb_true_iff in Hll.
+    destruct Hll as (Ha, Hla2).
+    now apply Nat.eqb_eq in Ha.
+  } {
+    now destruct (Nat.eq_dec _ _).
+  }
+}
+cbn in Hll, Hlb |-*.
+destruct lb as [| b lb]; [ easy | cbn ].
+cbn in Hlb.
+destruct (Nat.eq_dec _ _) as [H1| H1]; [ | easy ].
+destruct Hlb as [Hlb| Hlb]. {
+...
+}
+now apply IHla1.
 ...
 
 Theorem polm_eq_trans {n : mod_num} : transitive _ polm_eq.
