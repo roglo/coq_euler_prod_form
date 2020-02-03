@@ -3453,6 +3453,44 @@ apply IHla.
 now apply polm_eq_sym.
 Qed.
 
+Theorem polm_eqb_in {n : mod_num} : ∀ la lb a,
+  polm_eqb la lb = true
+  → a ∈ la
+  → a mod mn ≠ 0
+  → ∃ b, b ∈ lb ∧ a mod mn = b mod mn.
+Proof.
+intros * Hll Ha Han.
+apply in_split in Ha.
+destruct Ha as (la1 & la2 & Hla).
+exists (nth (length la1) lb 0).
+split. {
+  subst la.
+  revert a la2 lb Hll Han.
+  induction la1 as [| a1 la1]; intros. {
+    cbn in Hll |-*.
+    destruct lb as [| b lb]; [ | now left ].
+    apply Bool.andb_true_iff in Hll.
+    destruct Hll as (Ha & Hla2).
+    now apply Nat.eqb_eq in Ha.
+  }
+  destruct lb as [| b lb]. {
+    cbn in Hll.
+    apply Bool.andb_true_iff in Hll.
+    destruct Hll as (Ha & Hla2).
+    exfalso; apply Han; clear - Hla2.
+    specialize (proj1 (forallb_forall _ _) Hla2) as H1.
+    cbn in H1.
+    apply Nat.eqb_eq, H1.
+    now apply in_app_iff; right; left.
+  } {
+    cbn in Hll |-*.
+    right.
+    apply (IHla1 a la2); [ | easy ].
+    now destruct (Nat.eq_dec _ _).
+  }
+} {
+...
+
 Theorem polm_eq_trans {n : mod_num} : transitive _ polm_eq.
 Proof.
 intros la lb lc Hab Hbc.
@@ -3487,14 +3525,21 @@ destruct la as [| a la]. {
   rewrite Hb in Hbc.
   destruct (Nat.eq_dec _ _) as [Hbec| Hbec]. {
     split; [ now rewrite <- Hbec | ].
-...
-    clear - Hlb Hbc.
+    clear b c Hb Hbec.
     apply forallb_forall.
     intros c Hc.
     apply Nat.eqb_eq.
     specialize (proj1 (forallb_forall _ _) Hlb) as H1.
     cbn in H1.
     clear Hlb.
+...
+apply polm_eq_sym in Hbc.
+specialize (polm_eqb_in _ _ _ Hbc Hc) as (b, Hb).
+specialize (H1 b (proj1 Hb)).
+apply Nat.eqb_eq in H1.
+now rewrite <- (proj2 Hb) in H1.
+}
+...
     induction lb as [| b lb]. {
       cbn in Hbc.
       induction lc as [| c2 lc]; [ easy | ].
