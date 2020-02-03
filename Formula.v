@@ -3840,12 +3840,13 @@ Qed.
 
 Theorem nth_polm_mul {n : mod_num} : ∀ la lb i,
   i < length la + length lb - 1
-  → nth i (la * lb)%pol 0 = polm_convol_mul_term la lb i mod mn.
+  → nth i (la * lb)%pol 0 = polm_convol_mul_term la lb i.
 Proof.
 intros * Hi.
 unfold "*"%pol.
-rewrite (List_map_nth_in _ 0).
-...
+rewrite (List_map_nth_in _ 0); [ | now rewrite seq_length ].
+now rewrite seq_nth.
+Qed.
 
 Theorem polm_mul_add_distr_l {n : mod_num} : ∀ la lb lc,
   (la * (lb + lc) = la * lb + la * lc)%pol.
@@ -3854,8 +3855,8 @@ intros.
 apply polm_eq_iff; intros i.
 rewrite nth_polm_add.
 destruct (lt_dec i (length la + length (lb + lc)%pol - 1)) as [Hi| Hi]. {
-...
   rewrite nth_polm_mul; [ | easy ].
+  rewrite nth_polm_mul.
 ...
 intros.
 apply polm_eq_iff.
