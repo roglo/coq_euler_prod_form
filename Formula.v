@@ -3842,7 +3842,65 @@ induction la as [| a la]; intros. {
   apply polm_nth_morph; [ easy | ].
   now do 3 rewrite polm_mul_0_l.
 }
+unfold "*"%pol in IHla.
+destruct (Nat.eq_dec mn 0) as [Hnz| Hnz]; [ now rewrite Hnz | ].
 destruct i. {
+  cbn.
+  do 3 rewrite Nat.sub_0_r.
+  destruct lb as [| b lb]. {
+    cbn.
+    rewrite Nat.add_0_r.
+    destruct lc as [| c lc]. {
+      cbn.
+      rewrite Nat.add_0_r.
+      remember (length la) as len eqn:Hlen; symmetry in Hlen.
+      destruct len; [ easy | cbn ].
+      rewrite Nat.mul_0_r.
+      rewrite Nat.mod_0_l; [ | easy ].
+      rewrite Nat.mod_0_l; [ | easy ].
+      rewrite Nat.mod_0_l; [ | easy ].
+      now rewrite Nat.mod_0_l.
+    } {
+      cbn.
+      rewrite <- Nat.add_succ_comm; cbn.
+      remember (length la) as len eqn:Hlen; symmetry in Hlen.
+      destruct len; [ easy | cbn ].
+      rewrite Nat.mul_0_r.
+      rewrite Nat.mod_0_l; [ | easy ].
+      rewrite Nat.add_0_l.
+      rewrite Nat.mod_mod; [ | easy ].
+      rewrite Nat.mod_mod; [ | easy ].
+      easy.
+    }
+  } {
+    cbn.
+    rewrite <- Nat.add_succ_comm; cbn.
+    destruct lc as [| c lc]. {
+      cbn.
+      rewrite Nat.add_0_r.
+      rewrite <- Nat.add_succ_comm; cbn.
+      remember (length la) as len eqn:Hlen; symmetry in Hlen.
+      destruct len; [ easy | cbn ].
+      rewrite Nat.mul_0_r.
+      rewrite Nat.mod_0_l; [ | easy ].
+      rewrite Nat.add_0_r.
+      rewrite Nat.mod_mod; [ | easy ].
+      rewrite Nat.mod_mod; [ | easy ].
+      easy.
+    } {
+      cbn.
+      rewrite <- Nat.add_succ_comm; cbn.
+      rewrite <- Nat.add_succ_comm; cbn.
+      rewrite Nat.mod_mod; [ | easy ].
+      rewrite Nat.mod_mod; [ | easy ].
+      rewrite Nat.mul_mod_idemp_r; [ | easy ].
+      rewrite Nat.add_mod_idemp_l; [ | easy ].
+      rewrite Nat.add_mod_idemp_r; [ | easy ].
+      now rewrite Nat.mul_add_distr_l.
+    }
+  }
+} {
+  cbn.
 ...
 (**)
 intros.
