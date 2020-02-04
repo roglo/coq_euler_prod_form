@@ -3962,6 +3962,8 @@ rewrite (map_ext _ (λ i, nth i la 0)). 2: {
   rewrite all_0_summation_0; [ apply Nat.add_0_r | ].
   intros j Hj.
   cbn.
+  destruct j; [ flia Hj | now destruct j ].
+}
 ...
 intros; cbn.
 rewrite Nat.sub_0_r.
