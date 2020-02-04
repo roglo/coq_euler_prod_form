@@ -3885,74 +3885,6 @@ destruct (lt_dec i (length la + length lb - 1)) as [Hi| Hi]. {
 }
 Qed.
 
-(*
-Theorem polm_mul_add_distr_l {n : mod_num} : ∀ la lb lc,
-  (la * (lb + lc))%pol = (la * lb + la * lc)%pol.
-Proof.
-intros.
-unfold "*"%pol.
-unfold polm_convol_mul_term.
-destruct (Nat.eq_dec mn 0) as [Hnz| Hnz]. {
-  rewrite Hnz; cbn.
-  rewrite polm_add_length.
-  assert (H : ∀ l : list nat, map (λ _, 0) l = repeat 0 (length l)). {
-    intros l.
-    induction l as [| a l]; [ easy | ].
-    now cbn; rewrite IHl.
-  }
-  rewrite H, seq_length.
-  rewrite H, seq_length.
-  rewrite H, seq_length; clear H.
-  remember (length la) as l1; clear Heql1.
-  remember (length lb) as l2; clear Heql2.
-  remember (length lc) as l3; clear Heql3.
-  destruct l1; intros; cbn. {
-    destruct l2; intros; [ easy | ].
-    rewrite Nat.sub_succ, Nat.sub_0_r.
-    destruct l3. {
-      cbn; rewrite Nat.sub_0_r.
-      symmetry; apply polm_add_0_r.
-    } {
-      rewrite Nat.sub_succ, Nat.sub_0_r.
-      rewrite <- Nat.succ_max_distr.
-      rewrite Nat.sub_succ, Nat.sub_0_r.
-      revert l3.
-      induction l2; intros; [ easy | ].
-      destruct l3; [ easy | ].
-      rewrite <- Nat.succ_max_distr; cbn.
-      rewrite Hnz; f_equal.
-      apply IHl2.
-    }
-  } {
-    do 3 rewrite Nat.sub_0_r.
-    revert l2 l3.
-    induction l1; intros; cbn. {
-      revert l3.
-      induction l2; intros; [ easy | ].
-      destruct l3; [ easy | ].
-      rewrite <- Nat.succ_max_distr; cbn.
-      now rewrite Hnz, IHl2.
-    } {
-      now rewrite Hnz, IHl1.
-    }
-  }
-}
-...
-rewrite Nat.mod_mod; [ | easy ].
-rewrite Nat.add_mod_idemp_l; [ | easy ].
-rewrite Nat.add_mod_idemp_r; [ | easy ].
-rewrite <- summation_add.
-setoid_rewrite summation_mod_idemp.
-f_equal.
-apply summation_eq_compat.
-intros j Hj.
-rewrite <- Nat.mul_mod_idemp_r; [ | easy ].
-rewrite nth_polm_add.
-rewrite Nat.mul_mod_idemp_r; [ | easy ].
-now rewrite Nat.mul_add_distr_l.
-Qed.
-*)
-
 Theorem polm_mul_add_distr_l {n : mod_num} : ∀ la lb lc,
   (la * (lb + lc) = la * lb + la * lc)%pol.
 Proof.
@@ -4051,6 +3983,7 @@ destruct k; [ easy | clear Hkz ].
 rewrite Nat.sub_succ, (Nat.sub_0_r k).
 induction k. {
   cbn.
+...
   rewrite Nat.mul_1_r, Nat.mul_0_r, Nat.add_0_l.
   destruct (lt_dec mn 2) as [H2n| H2n]. {
     destruct mn as [| mn]; [ easy | ].
