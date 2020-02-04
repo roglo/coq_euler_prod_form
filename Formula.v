@@ -3896,6 +3896,19 @@ cbn.
 apply fold_left_polm_add_fun_from_0.
 Qed.
 
+Theorem polm_summation_split_last {n : mod_num} : ∀ g b e,
+  b ≤ S e
+  → (Σ (i = b, S e), g i)%pol = (Σ (i = b, e), g i + g (S e))%pol.
+Proof.
+intros * Hbe.
+replace (S (S e) - b) with (S (S e - b)) by flia Hbe.
+Search (seq _ (S _)).
+rewrite seq_S.
+rewrite fold_left_app.
+rewrite fold_left_polm_add_fun_from_0.
+now rewrite Nat.add_comm, Nat.sub_add.
+Qed.
+
 Lemma polm_eval_repeat_0 : ∀ n x a i,
   polm_eval (repeat 0 i ++ [a]) x ≡ (a * x ^ i) mod n.
 Proof.
@@ -3964,33 +3977,55 @@ rewrite (map_ext _ (λ i, nth i la 0)). 2: {
   cbn.
   destruct j; [ flia Hj | now destruct j ].
 }
-...
-intros; cbn.
-rewrite Nat.sub_0_r.
-induction la as [| a la]; [ easy | cbn ].
-rewrite Nat.add_0_r; f_equal.
-unfold polm_convol_mul_term.
-unfold "1"%pol.
-Search (map _ _ = map _ _).
-rewrite (map_ext _ (λ i, nth i ( a :: la) 0)).
-...
+induction la as [| a la]; [ easy | cbn; f_equal ].
+rewrite <- seq_shift.
+rewrite map_map.
+apply IHla.
+Qed.
+
+Theorem polm_mul_1_r {n : mod_num} : ∀ la, (la * 1)%pol = la.
+Proof.
+intros.
+rewrite polm_mul_comm.
+apply polm_mul_1_l.
+Qed.
+
+Theorem polm_summation_eq_compat {n : mod_num} : ∀ g h b e,
+  (∀ i, b ≤ i ≤ e → g i = h i)
+  → (Σ (i = b, e), g i)%pol = (Σ (i = b, e), h i)%pol.
+Proof.
+intros * Hgh.
+remember (S e - b) as k eqn:Hk.
+remember [] as a eqn:Ha; clear Ha.
+revert e a b Hk Hgh.
+induction k; intros; [ easy | cbn ].
+rewrite Hgh; [ | flia Hk ].
+rewrite (IHk e); [ easy | flia Hk | ].
+intros i Hbie.
+apply Hgh; flia Hbie.
+Qed.
 
 Theorem polm_pow_sub_1 {n : mod_num} : ∀ k,
   prime mn
   → k ≠ 0
-  → (ⓧ^k - 1 = (ⓧ - 1) * (Σ (i = 0, k - 1), ⓧ^(k-i-1)))%pol.
+  → (ⓧ^k - 1)%pol = ((ⓧ - 1) * (Σ (i = 0, k - 1), ⓧ^(k-i-1)))%pol.
 Proof.
 intros * Hp Hkz.
 destruct k; [ easy | clear Hkz ].
 rewrite Nat.sub_succ, (Nat.sub_0_r k).
 induction k. {
   cbn - [ polm_mul ].
-Search polm_mul.
+  now rewrite polm_mul_1_r.
+}
 ...
-rewrite polm_mul_comm.
-rewrite polm_mul_1_l.
-
-  cbn.
+rewrite polm_summation_split_last.
+rewrite (polm_summation_eq_compat _ (λ i, (ⓧ^(S k - i))%pol)). 2: {
+  intros i Hi.
+  f_equal; flia.
+}
+Check polm_summation_shift.
+...
+rewrite Nat.sub_diag.
 ...
   rewrite Nat.mul_1_r, Nat.mul_0_r, Nat.add_0_l.
   destruct (lt_dec mn 2) as [H2n| H2n]. {
