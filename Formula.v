@@ -3902,7 +3902,6 @@ Theorem polm_summation_split_last {n : mod_num} : ∀ g b e,
 Proof.
 intros * Hbe.
 replace (S (S e) - b) with (S (S e - b)) by flia Hbe.
-Search (seq _ (S _)).
 rewrite seq_S.
 rewrite fold_left_app.
 rewrite fold_left_polm_add_fun_from_0.
