@@ -4005,6 +4005,17 @@ intros i Hbie.
 apply Hgh; flia Hbie.
 Qed.
 
+Theorem xpow_add_r {n : mod_num} : ∀ a b, (ⓧ^(a+b))%pol = (ⓧ^a * ⓧ^b)%pol.
+Proof.
+intros.
+unfold xpow.
+unfold "*"%pol.
+do 2 rewrite app_length; cbn.
+rewrite Nat.add_assoc, Nat.add_sub.
+do 2 rewrite repeat_length.
+unfold polm_convol_mul_term.
+...
+
 Theorem polm_pow_sub_1 {n : mod_num} : ∀ k,
   prime mn
   → k ≠ 0
@@ -4017,8 +4028,15 @@ induction k. {
   cbn - [ polm_mul ].
   now rewrite polm_mul_1_r.
 }
+rewrite polm_summation_split_last; [ | flia ].
+rewrite (polm_summation_eq_compat _ (λ i, (ⓧ * ⓧ^(S k - i - 1))%pol)). 2: {
+  intros i Hi.
+Check Nat.pow_add_r.
 ...
-rewrite polm_summation_split_last.
+rewrite <- xpow_add_r.
+f_equal.
+flia Hi.
+...
 rewrite (polm_summation_eq_compat _ (λ i, (ⓧ^(S k - i))%pol)). 2: {
   intros i Hi.
   f_equal; flia.
