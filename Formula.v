@@ -3602,6 +3602,24 @@ Add Parametric Relation {n : mod_num} : (list nat) polm_eq
  transitivity proved by polm_eq_trans
  as polm_eq_rel.
 
+Theorem polm_add_length {n : mod_num} : ∀ la lb,
+  length (la + lb)%pol = max (length la) (length lb).
+Proof.
+intros.
+revert lb.
+induction la as [| a la]; intros; [ easy | cbn ].
+destruct lb as [| b lb]; [ easy | cbn ].
+now rewrite IHla.
+Qed.
+
+Theorem polm_mul_length {n : mod_num} : ∀ la lb,
+  length (la * lb)%pol = length la + length lb - 1.
+Proof.
+intros.
+unfold "*"%pol.
+now rewrite map_length, seq_length.
+Qed.
+
 Theorem nth_polm_add {n : mod_num} : ∀ la lb i,
   nth i (la + lb)%pol 0 ≡ (nth i la 0 + nth i lb 0) mod mn.
 Proof.
@@ -3611,6 +3629,49 @@ revert i lb.
 induction la as [| a la]; intros; [ now destruct i | cbn ].
 destruct lb as [| b lb]; [ now destruct i; rewrite Nat.add_0_r | ].
 destruct i; [ easy | cbn; apply IHla ].
+Qed.
+
+Theorem nth_polm_mul {n : mod_num} : ∀ la lb i,
+  nth i (la * lb)%pol 0 = polm_convol_mul_term la lb i.
+Proof.
+intros.
+destruct (lt_dec i (length la + length lb - 1)) as [Hi| Hi]. {
+  unfold "*"%pol.
+  rewrite (List_map_nth_in _ 0); [ | now rewrite seq_length ].
+  now rewrite seq_nth.
+} {
+  apply Nat.nlt_ge in Hi.
+  rewrite nth_overflow; [ | now rewrite polm_mul_length ].
+  symmetry.
+  unfold polm_convol_mul_term.
+  rewrite all_0_summation_0; [ easy | ].
+  intros j Hj.
+  apply Nat.eq_mul_0.
+  destruct (lt_dec j (length la)) as [Hja| Hja]. {
+    right.
+    apply nth_overflow.
+    flia Hi Hja.
+  } {
+    left.
+    apply nth_overflow.
+    flia Hi Hja.
+  }
+}
+Qed.
+
+Theorem polm_summation_eq_compat {n : mod_num} : ∀ g h b e,
+  (∀ i, b ≤ i ≤ e → g i = h i)
+  → (Σ (i = b, e), g i)%pol = (Σ (i = b, e), h i)%pol.
+Proof.
+intros * Hgh.
+remember (S e - b) as k eqn:Hk.
+remember [] as a eqn:Ha; clear Ha.
+revert e a b Hk Hgh.
+induction k; intros; [ easy | cbn ].
+rewrite Hgh; [ | flia Hk ].
+rewrite (IHk e); [ easy | flia Hk | ].
+intros i Hbie.
+apply Hgh; flia Hbie.
 Qed.
 
 Instance polm_add_morph {n : mod_num} :
@@ -3629,6 +3690,36 @@ rewrite H1, H2.
 rewrite Nat.add_mod_idemp_l; [ | easy ].
 rewrite Nat.add_mod_idemp_r; [ | easy ].
 easy.
+Qed.
+
+Instance polm_mul_morph {n : mod_num} :
+  Proper (polm_eq ==> polm_eq ==> polm_eq) polm_mul.
+Proof.
+intros la lb Hab lc ld Hcd.
+apply polm_eq_iff; intros i.
+specialize (proj1 (polm_eq_iff _ _) Hab) as H1.
+specialize (proj1 (polm_eq_iff _ _) Hcd) as H2.
+clear Hab Hcd.
+do 2 rewrite nth_polm_mul.
+destruct (Nat.eq_dec mn 0) as [Hnz| Hnz]; [ now rewrite Hnz | ].
+unfold polm_convol_mul_term.
+setoid_rewrite summation_mod_idemp.
+erewrite summation_eq_compat; [ easy | ].
+intros j Hj; cbn.
+rewrite <- Nat.mul_mod_idemp_l; [ | easy ].
+rewrite <- Nat.mul_mod_idemp_r; [ | easy ].
+rewrite H1, H2.
+rewrite Nat.mul_mod_idemp_l; [ | easy ].
+rewrite Nat.mul_mod_idemp_r; [ | easy ].
+easy.
+Qed.
+
+Instance polm_nth_morph {n : mod_num} :
+  Proper (eq ==> polm_eq ==> eq) (λ n l, nth n l 0 mod mn).
+Proof.
+intros a b Hab la lb Hll.
+subst a.
+now specialize (proj1 (polm_eq_iff _ _) Hll b).
 Qed.
 
 (*
@@ -3811,58 +3902,36 @@ destruct i. {
 apply IHlen.
 Qed.
 
-Instance polm_nth_morph {n : mod_num} :
-  Proper (eq ==> polm_eq ==> eq) (λ n l, nth n l 0 mod mn).
-Proof.
-intros a b Hab la lb Hll.
-subst a.
-now specialize (proj1 (polm_eq_iff _ _) Hll b).
-Qed.
-
-Theorem polm_add_length {n : mod_num} : ∀ la lb,
-  length (la + lb)%pol = max (length la) (length lb).
+Theorem polm_mul_0_r {n : mod_num} : ∀ la, (la * [] = [])%pol.
 Proof.
 intros.
-revert lb.
-induction la as [| a la]; intros; [ easy | cbn ].
-destruct lb as [| b lb]; [ easy | cbn ].
-now rewrite IHla.
+rewrite polm_mul_comm.
+apply polm_mul_0_l.
 Qed.
 
-Theorem polm_mul_length {n : mod_num} : ∀ la lb,
-  length (la * lb)%pol = length la + length lb - 1.
+Theorem polm_mul_mul_swap {n : mod_num} : ∀ la lb lc,
+   (la * lb * lc = la * lc * lb)%pol.
 Proof.
 intros.
-unfold "*"%pol.
-now rewrite map_length, seq_length.
-Qed.
-
-Theorem nth_polm_mul {n : mod_num} : ∀ la lb i,
-  nth i (la * lb)%pol 0 = polm_convol_mul_term la lb i.
-Proof.
-intros.
-destruct (lt_dec i (length la + length lb - 1)) as [Hi| Hi]. {
-  unfold "*"%pol.
-  rewrite (List_map_nth_in _ 0); [ | now rewrite seq_length ].
-  now rewrite seq_nth.
-} {
-  apply Nat.nlt_ge in Hi.
-  rewrite nth_overflow; [ | now rewrite polm_mul_length ].
-  symmetry.
-  unfold polm_convol_mul_term.
-  rewrite all_0_summation_0; [ easy | ].
-  intros j Hj.
-  apply Nat.eq_mul_0.
-  destruct (lt_dec j (length la)) as [Hja| Hja]. {
-    right.
-    apply nth_overflow.
-    flia Hi Hja.
-  } {
-    left.
-    apply nth_overflow.
-    flia Hi Hja.
-  }
+revert lb lc.
+induction la as [| a la]; intros. {
+  now do 3 rewrite polm_mul_0_l.
 }
+...
+induction la as [| a la]; intros; [ apply polm_mul_comm | cbn ].
+destruct lb as [| b lb]; cbn; [ now rewrite polm_add_0_r | ].
+destruct lc as [| c lc]; [ easy | cbn ].
+rewrite IHla; f_equal.
+apply Nat.add_shuffle0.
+Qed.
+
+Theorem polm_mul_assoc {n : mod_num} : ∀ la lb lc,
+  ((la * lb) * lc)%pol = (la * (lb * lc))%pol.
+Proof.
+intros.
+rewrite (polm_mul_comm _ (lb * lc)%pol).
+rewrite (polm_mul_comm la).
+apply polm_mul_mul_swap.
 Qed.
 
 Theorem polm_mul_add_distr_l {n : mod_num} : ∀ la lb lc,
@@ -3989,21 +4058,6 @@ rewrite polm_mul_comm.
 apply polm_mul_1_l.
 Qed.
 
-Theorem polm_summation_eq_compat {n : mod_num} : ∀ g h b e,
-  (∀ i, b ≤ i ≤ e → g i = h i)
-  → (Σ (i = b, e), g i)%pol = (Σ (i = b, e), h i)%pol.
-Proof.
-intros * Hgh.
-remember (S e - b) as k eqn:Hk.
-remember [] as a eqn:Ha; clear Ha.
-revert e a b Hk Hgh.
-induction k; intros; [ easy | cbn ].
-rewrite Hgh; [ | flia Hk ].
-rewrite (IHk e); [ easy | flia Hk | ].
-intros i Hbie.
-apply Hgh; flia Hbie.
-Qed.
-
 Theorem List_nth_repeat {A} : ∀ (a : A) b c i, i < b → nth i (repeat a b) c = a.
 Proof.
 intros * Hib.
@@ -4099,14 +4153,24 @@ f_equal. {
 }
 Qed.
 
-Inspect 1.
-
-...
+Theorem polm_mul_summation_distr_l {n : mod_num} : ∀ a b e f,
+  (a * (Σ (i = b, e), f i) = Σ (i = b, e), a * f i)%pol.
+Proof.
+intros.
+remember (S e - b) as m eqn:Hm.
+revert e a b Hm.
+induction m; intros; [ apply polm_mul_0_r | cbn ].
+rewrite fold_left_polm_add_fun_from_0.
+rewrite polm_mul_add_distr_l.
+rewrite (IHm e); [ | flia Hm ].
+symmetry.
+now rewrite fold_left_polm_add_fun_from_0.
+Qed.
 
 Theorem polm_pow_sub_1 {n : mod_num} : ∀ k,
   prime mn
   → k ≠ 0
-  → (ⓧ^k - 1)%pol = ((ⓧ - 1) * (Σ (i = 0, k - 1), ⓧ^(k-i-1)))%pol.
+  → (ⓧ^k - 1 = (ⓧ - 1) * (Σ (i = 0, k - 1), ⓧ^(k-i-1)))%pol.
 Proof.
 intros * Hp Hkz.
 destruct k; [ easy | clear Hkz ].
@@ -4118,7 +4182,13 @@ induction k. {
 rewrite polm_summation_split_last; [ | flia ].
 rewrite (polm_summation_eq_compat _ (λ i, (ⓧ * ⓧ^(S k - i - 1))%pol)). 2: {
   intros i Hi.
-Check Nat.pow_add_r.
+  rewrite <- xpow_add_r.
+  f_equal; flia Hi.
+}
+rewrite <- polm_mul_summation_distr_l.
+rewrite polm_mul_add_distr_l.
+...
+rewrite polm_mul_assoc.
 ...
 rewrite <- xpow_add_r.
 f_equal.
