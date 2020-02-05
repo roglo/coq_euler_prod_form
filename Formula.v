@@ -3917,6 +3917,15 @@ apply polm_eq_iff; intros i.
 do 2 rewrite nth_polm_mul.
 unfold polm_convol_mul_term.
 destruct (Nat.eq_dec mn 0) as [Hnz| Hnz]; [ now rewrite Hnz | ].
+unfold "*"%pol.
+unfold polm_convol_mul_term.
+rewrite
+  (summation_eq_compat _ _ _
+     (λ j,
+      (Σ (k = 0, j), nth k la 0 * nth (j - k) lb 0) * nth (i - j) lc 0)). 2: {
+  intros j Hj.
+  rewrite (List_map_nth_in _ 0).
+2: rewrite seq_length.
 ...
 
 Theorem polm_mul_assoc {n : mod_num} : ∀ la lb lc,
