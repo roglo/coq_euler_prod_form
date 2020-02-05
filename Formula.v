@@ -4004,6 +4004,15 @@ intros i Hbie.
 apply Hgh; flia Hbie.
 Qed.
 
+Theorem List_nth_repeat {A} : ∀ (a : A) b c i, i < b → nth i (repeat a b) c = a.
+Proof.
+intros * Hib.
+revert i Hib.
+induction b; intros; [ flia Hib | cbn ].
+destruct i; [ easy |  cbn].
+apply IHb; flia Hib.
+Qed.
+
 Theorem xpow_add_r {n : mod_num} : ∀ a b, (ⓧ^(a+b))%pol = (ⓧ^a * ⓧ^b)%pol.
 Proof.
 intros.
@@ -4016,7 +4025,28 @@ unfold polm_convol_mul_term.
 rewrite Nat.add_shuffle0.
 rewrite seq_app.
 rewrite map_app.
-f_equal. 2: {
+f_equal. {
+  rewrite (map_ext_in _ (λ _, 0)). {
+    remember (a + b) as c; clear Heqc.
+    induction c; cbn; [ easy | ].
+    rewrite <- seq_shift.
+    rewrite map_map.
+    now rewrite IHc.
+  } {
+    intros c Hc.
+    rewrite all_0_summation_0; [ easy | ].
+    intros i Hi.
+    apply in_seq in Hc; cbn in Hc.
+    destruct (lt_dec i a) as [Hia| Hia]. {
+      rewrite app_nth1; [ | now rewrite repeat_length ].
+      now rewrite List_nth_repeat.
+    } {
+      rewrite Nat.mul_comm.
+      rewrite app_nth1; [ | rewrite repeat_length; flia Hc Hi Hia ].
+      rewrite List_nth_repeat; [ easy | flia Hc Hi Hia ].
+    }
+  }
+} {
   symmetry.
   rewrite Nat.add_0_l.
   unfold seq at 2, map.
@@ -4051,12 +4081,7 @@ f_equal. 2: {
     intros i Hi; cbn.
     destruct i; cbn; [ easy | ].
     rewrite app_nth1; [ | rewrite repeat_length; flia Hi ].
-    (* lemma nth i (repeat 0 a) 0 = 0 to do *)
-    replace (nth i _ _) with 0; [ easy | ].
-    clear Hi; revert i.
-    induction a; intros; [ now destruct i | ].
-    destruct i; [ easy | cbn ].
-    apply IHa.
+    rewrite List_nth_repeat; [ easy | flia Hi ].
   }
   rewrite Nat.add_0_l.
   rewrite summation_split_first; [ | flia ].
@@ -4071,7 +4096,11 @@ f_equal. 2: {
   rewrite app_nth2; [ | rewrite repeat_length; flia Hi ].
   rewrite repeat_length.
   rewrite nth_overflow; [ easy | cbn; flia Hi ].
-} {
+}
+Qed.
+
+Inspect 1.
+
 ...
 
 Theorem polm_pow_sub_1 {n : mod_num} : ∀ k,
