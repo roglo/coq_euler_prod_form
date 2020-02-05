@@ -3916,7 +3916,7 @@ intros.
 apply polm_eq_iff; intros i.
 do 2 rewrite nth_polm_mul.
 unfold polm_convol_mul_term.
-(* cf polm_mul_add_distr_l below *)
+destruct (Nat.eq_dec mn 0) as [Hnz| Hnz]; [ now rewrite Hnz | ].
 ...
 
 Theorem polm_mul_assoc {n : mod_num} : ∀ la lb lc,
