@@ -3913,17 +3913,11 @@ Theorem polm_mul_mul_swap {n : mod_num} : ∀ la lb lc,
    (la * lb * lc = la * lc * lb)%pol.
 Proof.
 intros.
-revert lb lc.
-induction la as [| a la]; intros. {
-  now do 3 rewrite polm_mul_0_l.
-}
+apply polm_eq_iff; intros i.
+do 2 rewrite nth_polm_mul.
+unfold polm_convol_mul_term.
+(* cf polm_mul_add_distr_l below *)
 ...
-induction la as [| a la]; intros; [ apply polm_mul_comm | cbn ].
-destruct lb as [| b lb]; cbn; [ now rewrite polm_add_0_r | ].
-destruct lc as [| c lc]; [ easy | cbn ].
-rewrite IHla; f_equal.
-apply Nat.add_shuffle0.
-Qed.
 
 Theorem polm_mul_assoc {n : mod_num} : ∀ la lb lc,
   ((la * lb) * lc)%pol = (la * (lb * lc))%pol.
