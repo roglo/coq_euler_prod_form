@@ -4021,19 +4021,57 @@ f_equal. 2: {
   rewrite Nat.add_0_l.
   unfold seq at 2, map.
   f_equal.
-...
-  cbn; f_equal.
-  rewrite Nat.sub_0_r.
   destruct a. {
-    remember [1] as x; cbn; subst x.
-    destruct b; [ easy | ].
-...
-    rewrite Nat.add_0_r.
-    destruct b; [ easy | ].
-    cbn.
+    rewrite Nat.add_0_l.
+    unfold repeat at 1.
+    rewrite app_nil_l.
+    rewrite summation_split_first; [ | flia ].
+    unfold nth at 1.
+    rewrite Nat.mul_1_l, Nat.sub_0_r.
     rewrite app_nth2; [ | rewrite repeat_length; flia ].
-    rewrite repeat_length.
-    rewrite Nat.sub_diag; cbn.
+    rewrite repeat_length, Nat.sub_diag.
+    unfold nth at 1.
+    rewrite all_0_summation_0; [ easy | ].
+    intros i Hi.
+    destruct i; [ flia Hi | now destruct i ].
+  }
+  (* this code to split the summation at a
+     together with keeping the displaying with Σ
+     instead of fold_left *)
+  replace (S (S a + b)) with (a + S (S b)) by flia.
+  replace (a + S (S b) - 0) with (S a + S b) by flia.
+  rewrite seq_app.
+  rewrite fold_left_app.
+  replace (S a) with (S a - 0) at 2 by flia.
+  rewrite fold_left_add_fun_from_0.
+  replace (0 + S a) with (a + 1) by flia.
+  replace (S b) with (S (a + b + 1) - (a + 1)) by flia.
+  (* done *)
+  rewrite all_0_summation_0. 2: {
+    intros i Hi; cbn.
+    destruct i; cbn; [ easy | ].
+    rewrite app_nth1; [ | rewrite repeat_length; flia Hi ].
+    (* lemma nth i (repeat 0 a) 0 = 0 to do *)
+    replace (nth i _ _) with 0; [ easy | ].
+    clear Hi; revert i.
+    induction a; intros; [ now destruct i | ].
+    destruct i; [ easy | cbn ].
+    apply IHa.
+  }
+  rewrite Nat.add_0_l.
+  rewrite summation_split_first; [ | flia ].
+  rewrite app_nth2; [ | rewrite repeat_length; flia ].
+  rewrite repeat_length, Nat.add_1_r, Nat.sub_diag.
+  rewrite (Nat.add_comm (S a)), Nat.add_sub.
+  rewrite app_nth2; [ | rewrite repeat_length; flia ].
+  rewrite repeat_length, Nat.sub_diag.
+  rewrite all_0_summation_0; [ easy | ].
+  intros i Hi; cbn.
+  destruct i; [ easy | cbn ].
+  rewrite app_nth2; [ | rewrite repeat_length; flia Hi ].
+  rewrite repeat_length.
+  rewrite nth_overflow; [ easy | cbn; flia Hi ].
+} {
 ...
 
 Theorem polm_pow_sub_1 {n : mod_num} : ∀ k,
