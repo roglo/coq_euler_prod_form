@@ -4007,24 +4007,27 @@ Qed.
 Theorem xpow_add_r {n : mod_num} : ∀ a b, (ⓧ^(a+b))%pol = (ⓧ^a * ⓧ^b)%pol.
 Proof.
 intros.
-(* try to do it on paper *)
-...
-intros.
 unfold xpow.
 unfold "*"%pol.
 do 2 rewrite app_length; cbn.
 rewrite Nat.add_assoc, Nat.add_sub.
 do 2 rewrite repeat_length.
 unfold polm_convol_mul_term.
-...
-revert b.
-induction a; intros; cbn. {
-  rewrite Nat.add_0_r.
-  induction b; cbn; [ easy | ].
-  f_equal.
-  do 2 rewrite Nat.add_0_r.
-  rewrite IHb at 1.
-  f_equal.
+rewrite Nat.add_shuffle0.
+rewrite seq_app.
+rewrite map_app.
+f_equal. 2: {
+  cbn; f_equal.
+  rewrite Nat.sub_0_r.
+  symmetry.
+  destruct a. {
+    cbn.
+    rewrite Nat.add_0_r.
+    destruct b; [ easy | ].
+    cbn.
+    rewrite app_nth2; [ | rewrite repeat_length; flia ].
+    rewrite repeat_length.
+    rewrite Nat.sub_diag; cbn.
 ...
 
 Theorem polm_pow_sub_1 {n : mod_num} : ∀ k,
