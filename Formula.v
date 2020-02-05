@@ -4017,11 +4017,17 @@ rewrite Nat.add_shuffle0.
 rewrite seq_app.
 rewrite map_app.
 f_equal. 2: {
+  symmetry.
+  rewrite Nat.add_0_l.
+  unfold seq at 2, map.
+  f_equal.
+...
   cbn; f_equal.
   rewrite Nat.sub_0_r.
-  symmetry.
   destruct a. {
-    cbn.
+    remember [1] as x; cbn; subst x.
+    destruct b; [ easy | ].
+...
     rewrite Nat.add_0_r.
     destruct b; [ easy | ].
     cbn.
