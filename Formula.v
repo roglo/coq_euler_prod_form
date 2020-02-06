@@ -4241,6 +4241,11 @@ Compute (let p := 31 in combine (sort Nat.leb (prim_roots' p)) (prim_roots p)).
 
 Print nth_roots_of_unity_modulo.
 
+(* j'aimerais bien prouver que prim_roots'(p) donne les racines primitives
+   modulo p et/ou qu'il en existe au moins une (prim_roots'(p)≠[]) *)
+
+...
+
 Theorem glop : ∀ p d,
   prime p
   → Nat.divide d (p - 1)
@@ -4257,6 +4262,7 @@ rewrite (filter_ext _ (λ x, x ^ d mod p =? 1)). 2: {
 Compute (nth_roots_of_unity_modulo 3 19).
 Compute (Nat_pow_mod 6 3 19).
 Compute (map (λ i, Nat_pow_mod i 3 19) (seq 1 18)).
+Compute (let n := 29 in (prim_roots' n, length (prim_roots' n), φ (φ n))).
 ...
 set (pmn := {| mn := p |}).
 assert
