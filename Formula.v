@@ -4239,10 +4239,27 @@ Definition prim_roots' p :=
 Compute (let p := 31 in (sort Nat.leb (prim_roots' p), (prim_roots p))).
 Compute (let p := 31 in combine (sort Nat.leb (prim_roots' p)) (prim_roots p)).
 
-Print nth_roots_of_unity_modulo.
-
 (* j'aimerais bien prouver que prim_roots'(p) donne les racines primitives
    modulo p et/ou qu'il en existe au moins une (prim_roots'(p)≠[]) *)
+
+(* c'est censé marcher pour 1,2,4,p^α,2p^α mais ça a pas l'air : ça ne
+   marche que pour les nombres premiers *)
+
+(* mmm... tout dépend de ce qu'on appelle "racine primitive": pour les
+   nombres composés, il s'agit de générateurs uniquement des nombres
+   premiers avec eux. Pour 14, ils ne génèrent que 1,3,5,9,11,13 *)
+
+(* donc, mes définitions prim_roots et prim_roots' ne vont pas *)
+
+Compute (prim_roots 14).
+Compute (sort Nat.leb (map (λ i, Nat_pow_mod 3 i 14) (seq 1 14))).
+
+...
+
+Compute (let n := 9 in (prim_roots' n, length (prim_roots' n), φ (φ n))).
+
+Compute (nth_roots_of_unity_modulo 2 27, nth_roots_of_unity_modulo 1 27).
+Compute (nth_roots_of_unity_modulo 13 27, nth_roots_of_unity_modulo 13 27).
 
 ...
 
@@ -4262,7 +4279,6 @@ rewrite (filter_ext _ (λ x, x ^ d mod p =? 1)). 2: {
 Compute (nth_roots_of_unity_modulo 3 19).
 Compute (Nat_pow_mod 6 3 19).
 Compute (map (λ i, Nat_pow_mod i 3 19) (seq 1 18)).
-Compute (let n := 29 in (prim_roots' n, length (prim_roots' n), φ (φ n))).
 ...
 set (pmn := {| mn := p |}).
 assert
