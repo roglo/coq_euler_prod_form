@@ -4251,7 +4251,7 @@ Compute (let p := 31 in combine (sort Nat.leb (prim_roots' p)) (prim_roots p)).
 
 (* donc, mes définitions prim_roots et prim_roots' ne vont pas *)
 
-Compute (prim_roots 14).
+Compute (prim_roots 14, prim_roots' 14).
 Compute (sort Nat.leb (map (λ i, Nat_pow_mod 5 i 14) (seq 1 14))).
 
 Compute (let n := 9 in (prim_roots n, length (prim_roots n), φ (φ n))).
