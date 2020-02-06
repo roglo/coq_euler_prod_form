@@ -2680,7 +2680,7 @@ Fixpoint prim_root_cycle_loop n g gr it :=
 
 Definition prim_root_cycle n g := prim_root_cycle_loop n g g (n - 1).
 
-Definition is_prim_root n g := length (prim_root_cycle n g) =? n - 1.
+Definition is_prim_root n g := length (prim_root_cycle n g) =? φ n.
 
 Definition prim_roots n := filter (is_prim_root n) (seq 1 (n - 1)).
 
@@ -4252,10 +4252,9 @@ Compute (let p := 31 in combine (sort Nat.leb (prim_roots' p)) (prim_roots p)).
 (* donc, mes définitions prim_roots et prim_roots' ne vont pas *)
 
 Compute (prim_roots 14).
-Compute (sort Nat.leb (map (λ i, Nat_pow_mod 3 i 14) (seq 1 14))).
+Compute (sort Nat.leb (map (λ i, Nat_pow_mod 5 i 14) (seq 1 14))).
 
-...
-
+Compute (let n := 9 in (prim_roots n, length (prim_roots n), φ (φ n))).
 Compute (let n := 9 in (prim_roots' n, length (prim_roots' n), φ (φ n))).
 
 Compute (nth_roots_of_unity_modulo 2 27, nth_roots_of_unity_modulo 1 27).
