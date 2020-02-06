@@ -4269,6 +4269,13 @@ Compute (let n := 9 in (prim_roots' n, length (prim_roots' n), φ (φ n))).
 Compute (nth_roots_of_unity_modulo 2 27, nth_roots_of_unity_modulo 1 27).
 Compute (nth_roots_of_unity_modulo 13 27, nth_roots_of_unity_modulo 13 27).
 
+(* prim_root(n) ≠ [] ↔ n=2,4,p^α,2p^α *)
+
+(* prim_roots seem to work but not prim_roots' (that works only on primes) *)
+
+Compute (let n := 26 in (prim_roots n, prim_roots' n)).
+Compute (let n := 6 in sort Nat.leb (map (λ i, Nat_pow_mod 5 i n) (seq 1 (n - 1)))).
+
 ...
 
 Theorem glop : ∀ p d,
