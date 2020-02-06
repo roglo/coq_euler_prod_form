@@ -3308,12 +3308,12 @@ Fixpoint list_with_occ l :=
 Definition prime_decomp_pow p := list_with_occ (prime_decomp p).
 
 (* roots of equation x^n ≡ 1 mod p *)
-Definition roots_pow_sub_1_mod n p :=
+Definition nth_roots_of_unity_modulo n p :=
   filter (λ x, Nat_pow_mod x n p =? 1) (seq 1 (p - 1)).
 
-Compute (let '(n, p) := (2, 13) in roots_pow_sub_1_mod n p).
-Compute (let '(n, p) := (4, 13) in roots_pow_sub_1_mod n p).
-Compute (let '(n, p) := (3, 13) in roots_pow_sub_1_mod n p).
+Compute (let '(n, p) := (2, 13) in nth_roots_of_unity_modulo n p).
+Compute (let '(n, p) := (4, 13) in nth_roots_of_unity_modulo n p).
+Compute (let '(n, p) := (3, 13) in nth_roots_of_unity_modulo n p).
 
 Theorem Couteau : ∀ a b n, Nat.gcd a n = 1 → a ^ (b mod φ n) ≡ a ^ b mod n.
 Proof.
@@ -4223,20 +4223,38 @@ rewrite polm_mul_add_distr_l.
 ...
 *)
 
+Definition prim_roots' p :=
+  let l := prime_decomp_pow (p - 1) in
+  let l'' :=
+    map
+      (λ '(d, q),
+       let l1 := nth_roots_of_unity_modulo (d ^ q) p in
+       let l2 := nth_roots_of_unity_modulo (d ^ (q - 1)) p in
+       fold_left (λ l x2, remove Nat.eq_dec x2 l) l2 l1)
+    l
+  in
+  fold_left (λ l1 l2, map (λ '(x, y), x * y mod p) (list_prod l1 l2))
+     l'' [1].
+
+Compute (let p := 31 in (sort Nat.leb (prim_roots' p), (prim_roots p))).
+Compute (let p := 31 in combine (sort Nat.leb (prim_roots' p)) (prim_roots p)).
+
+Print nth_roots_of_unity_modulo.
+
 Theorem glop : ∀ p d,
   prime p
   → Nat.divide d (p - 1)
-  → length (roots_pow_sub_1_mod d p) = d.
+  → length (nth_roots_of_unity_modulo d p) = d.
 Proof.
 intros * Hp Hdp.
 destruct Hdp as (e, He).
-unfold roots_pow_sub_1_mod.
+unfold nth_roots_of_unity_modulo.
 rewrite (filter_ext _ (λ x, x ^ d mod p =? 1)). 2: {
   intros x.
   rewrite Nat_pow_mod_is_pow_mod; [ easy | ].
   now intros H; subst p.
 }
-Compute (roots_pow_sub_1_mod 3 19).
+Compute (nth_roots_of_unity_modulo 3 19).
 Compute (Nat_pow_mod 6 3 19).
 Compute (map (λ i, Nat_pow_mod i 3 19) (seq 1 18)).
 ...
@@ -4348,90 +4366,90 @@ assert (Hd : ∀ x, x ^ (p - 1) - 1 = (x ^ d - 1) * g x). {
 ...
 (* generalization on Euler's theorem? *)
 Compute (φ 4).
-Compute (roots_pow_sub_1_mod 2 4).
+Compute (nth_roots_of_unity_modulo 2 4).
 Compute (φ 6).
-Compute (roots_pow_sub_1_mod 2 6).
-Compute (roots_pow_sub_1_mod 1 6).
+Compute (nth_roots_of_unity_modulo 2 6).
+Compute (nth_roots_of_unity_modulo 1 6).
 Compute (φ 8).
-Compute (roots_pow_sub_1_mod 4 8).
-Compute (roots_pow_sub_1_mod 2 8). (* no: 4 *)
+Compute (nth_roots_of_unity_modulo 4 8).
+Compute (nth_roots_of_unity_modulo 2 8). (* no: 4 *)
 Compute (φ 9).
-Compute (roots_pow_sub_1_mod 6 9).
-Compute (roots_pow_sub_1_mod 3 9).
-Compute (roots_pow_sub_1_mod 2 9).
+Compute (nth_roots_of_unity_modulo 6 9).
+Compute (nth_roots_of_unity_modulo 3 9).
+Compute (nth_roots_of_unity_modulo 2 9).
 Compute (φ 10).
-Compute (roots_pow_sub_1_mod 4 10).
-Compute (roots_pow_sub_1_mod 2 10).
+Compute (nth_roots_of_unity_modulo 4 10).
+Compute (nth_roots_of_unity_modulo 2 10).
 Compute (φ 12).
-Compute (roots_pow_sub_1_mod 4 12).
-Compute (roots_pow_sub_1_mod 2 12). (* no: 4 *)
+Compute (nth_roots_of_unity_modulo 4 12).
+Compute (nth_roots_of_unity_modulo 2 12). (* no: 4 *)
 Compute (φ 14).
-Compute (roots_pow_sub_1_mod 6 14).
-Compute (roots_pow_sub_1_mod 3 14).
-Compute (roots_pow_sub_1_mod 2 14).
+Compute (nth_roots_of_unity_modulo 6 14).
+Compute (nth_roots_of_unity_modulo 3 14).
+Compute (nth_roots_of_unity_modulo 2 14).
 Compute (φ 15).
-Compute (roots_pow_sub_1_mod 8 15).
-Compute (roots_pow_sub_1_mod 4 15). (* no: 8 *)
-Compute (roots_pow_sub_1_mod 2 15). (* no: 4 *)
+Compute (nth_roots_of_unity_modulo 8 15).
+Compute (nth_roots_of_unity_modulo 4 15). (* no: 8 *)
+Compute (nth_roots_of_unity_modulo 2 15). (* no: 4 *)
 Compute (φ 16).
-Compute (roots_pow_sub_1_mod 8 16).
-Compute (roots_pow_sub_1_mod 4 16). (* no: 8 *)
-Compute (roots_pow_sub_1_mod 2 16). (* no: 4 *)
+Compute (nth_roots_of_unity_modulo 8 16).
+Compute (nth_roots_of_unity_modulo 4 16). (* no: 8 *)
+Compute (nth_roots_of_unity_modulo 2 16). (* no: 4 *)
 Compute (φ 18).
-Compute (roots_pow_sub_1_mod 6 18).
-Compute (roots_pow_sub_1_mod 3 18).
-Compute (roots_pow_sub_1_mod 2 18).
+Compute (nth_roots_of_unity_modulo 6 18).
+Compute (nth_roots_of_unity_modulo 3 18).
+Compute (nth_roots_of_unity_modulo 2 18).
 Compute (φ 20).
-Compute (roots_pow_sub_1_mod 8 20).
-Compute (roots_pow_sub_1_mod 4 20). (* no: 8 *)
-Compute (roots_pow_sub_1_mod 2 20). (* no: 4 *)
+Compute (nth_roots_of_unity_modulo 8 20).
+Compute (nth_roots_of_unity_modulo 4 20). (* no: 8 *)
+Compute (nth_roots_of_unity_modulo 2 20). (* no: 4 *)
 Compute (φ 21).
-Compute (roots_pow_sub_1_mod 12 21).
-Compute (roots_pow_sub_1_mod 6 21). (* no: 12 *)
-Compute (roots_pow_sub_1_mod 4 21).
-Compute (roots_pow_sub_1_mod 3 21).
-Compute (roots_pow_sub_1_mod 2 21). (* no: 4 *)
-Compute (roots_pow_sub_1_mod 1 21).
+Compute (nth_roots_of_unity_modulo 12 21).
+Compute (nth_roots_of_unity_modulo 6 21). (* no: 12 *)
+Compute (nth_roots_of_unity_modulo 4 21).
+Compute (nth_roots_of_unity_modulo 3 21).
+Compute (nth_roots_of_unity_modulo 2 21). (* no: 4 *)
+Compute (nth_roots_of_unity_modulo 1 21).
 Compute (φ 22).
-Compute (roots_pow_sub_1_mod 10 22).
-Compute (roots_pow_sub_1_mod 5 22).
-Compute (roots_pow_sub_1_mod 2 22).
+Compute (nth_roots_of_unity_modulo 10 22).
+Compute (nth_roots_of_unity_modulo 5 22).
+Compute (nth_roots_of_unity_modulo 2 22).
 Compute (φ 24).
-Compute (roots_pow_sub_1_mod 8 24).
-Compute (roots_pow_sub_1_mod 4 24). (* no: 8 *)
-Compute (roots_pow_sub_1_mod 2 24). (* no: 8; four times! *)
+Compute (nth_roots_of_unity_modulo 8 24).
+Compute (nth_roots_of_unity_modulo 4 24). (* no: 8 *)
+Compute (nth_roots_of_unity_modulo 2 24). (* no: 8; four times! *)
 Compute (φ 25).
-Compute (length (roots_pow_sub_1_mod 20 25)).
-Compute (length (roots_pow_sub_1_mod 10 25)).
-Compute (length (roots_pow_sub_1_mod 5 25)).
-Compute (length (roots_pow_sub_1_mod 4 25)).
-Compute (length (roots_pow_sub_1_mod 2 25)).
+Compute (length (nth_roots_of_unity_modulo 20 25)).
+Compute (length (nth_roots_of_unity_modulo 10 25)).
+Compute (length (nth_roots_of_unity_modulo 5 25)).
+Compute (length (nth_roots_of_unity_modulo 4 25)).
+Compute (length (nth_roots_of_unity_modulo 2 25)).
 Compute (φ 26).
-Compute (length (roots_pow_sub_1_mod 12 26)).
-Compute (length (roots_pow_sub_1_mod 6 26)).
-Compute (length (roots_pow_sub_1_mod 4 26)).
-Compute (length (roots_pow_sub_1_mod 3 26)).
-Compute (length (roots_pow_sub_1_mod 2 26)).
+Compute (length (nth_roots_of_unity_modulo 12 26)).
+Compute (length (nth_roots_of_unity_modulo 6 26)).
+Compute (length (nth_roots_of_unity_modulo 4 26)).
+Compute (length (nth_roots_of_unity_modulo 3 26)).
+Compute (length (nth_roots_of_unity_modulo 2 26)).
 Compute (φ 27).
-Compute (length (roots_pow_sub_1_mod 18 27)).
-Compute (length (roots_pow_sub_1_mod 9 27)).
-Compute (length (roots_pow_sub_1_mod 6 27)).
-Compute (length (roots_pow_sub_1_mod 3 27)).
-Compute (length (roots_pow_sub_1_mod 2 27)).
+Compute (length (nth_roots_of_unity_modulo 18 27)).
+Compute (length (nth_roots_of_unity_modulo 9 27)).
+Compute (length (nth_roots_of_unity_modulo 6 27)).
+Compute (length (nth_roots_of_unity_modulo 3 27)).
+Compute (length (nth_roots_of_unity_modulo 2 27)).
 Compute (φ 28).
-Compute (length (roots_pow_sub_1_mod 12 28)).
-Compute (length (roots_pow_sub_1_mod 6 28)). (* no: 12 *)
-Compute (length (roots_pow_sub_1_mod 4 28)).
-Compute (length (roots_pow_sub_1_mod 3 28)).
-Compute (length (roots_pow_sub_1_mod 2 28)). (* no: 4 *)
+Compute (length (nth_roots_of_unity_modulo 12 28)).
+Compute (length (nth_roots_of_unity_modulo 6 28)). (* no: 12 *)
+Compute (length (nth_roots_of_unity_modulo 4 28)).
+Compute (length (nth_roots_of_unity_modulo 3 28)).
+Compute (length (nth_roots_of_unity_modulo 2 28)). (* no: 4 *)
 Compute (φ 30).
-Compute (roots_pow_sub_1_mod 8 30).
-Compute (roots_pow_sub_1_mod 4 30). (* no: 8 *)
-Compute (roots_pow_sub_1_mod 2 30). (* no: 4 *)
-Compute (roots_pow_sub_1_mod 1 30).
-Compute (let n := 28 in map (λ d, (d, length (roots_pow_sub_1_mod d n)))(divisors (φ n))).
-Compute (let n := 30 in map (λ d, (d, length (roots_pow_sub_1_mod d n)))(divisors (φ n))).
-Compute (let n := 39 in map (λ d, (d, length (roots_pow_sub_1_mod d n)))(divisors (φ n))).
+Compute (nth_roots_of_unity_modulo 8 30).
+Compute (nth_roots_of_unity_modulo 4 30). (* no: 8 *)
+Compute (nth_roots_of_unity_modulo 2 30). (* no: 4 *)
+Compute (nth_roots_of_unity_modulo 1 30).
+Compute (let n := 28 in map (λ d, (d, length (nth_roots_of_unity_modulo d n)))(divisors (φ n))).
+Compute (let n := 30 in map (λ d, (d, length (nth_roots_of_unity_modulo d n)))(divisors (φ n))).
+Compute (let n := 39 in map (λ d, (d, length (nth_roots_of_unity_modulo d n)))(divisors (φ n))).
 ...
 assert (Hx : length (filter (λ x, x ^ d mod p =? 1) (seq 1 (p - 1))) ≤ d). {
 ...
@@ -4476,22 +4494,6 @@ Check root_bound.
 assert (Hg : length (filter (λ x, g x =? 0) (seq 1 (p - 1))) ≤ d * (e - 1)). {
 ...
 *)
-
-Definition prim_roots' p :=
-  let l := prime_decomp_pow (p - 1) in
-  let l'' :=
-    map
-      (λ '(d, q),
-       let l1 := roots_pow_sub_1_mod (d ^ q) p in
-       let l2 := roots_pow_sub_1_mod (d ^ (q - 1)) p in
-       fold_left (λ l x2, remove Nat.eq_dec x2 l) l2 l1)
-    l
-  in
-  fold_left (λ l1 l2, map (λ '(x, y), x * y mod p) (list_prod l1 l2))
-     l'' [1].
-
-Compute (let p := 31 in (sort Nat.leb (prim_roots' p), (prim_roots p))).
-Compute (let p := 31 in combine (sort Nat.leb (prim_roots' p)) (prim_roots p)).
 
 Theorem eq_list_with_occ_nil : ∀ l, list_with_occ l = [] → l = [].
 Proof.
@@ -4549,8 +4551,8 @@ split. {
        (map
           (λ '(d, q),
            fold_left (λ (l : list nat) (x2 : nat), remove Nat.eq_dec x2 l)
-           (roots_pow_sub_1_mod (d ^ (q - 1)) p)
-           (roots_pow_sub_1_mod (d ^ q) p)) l)) as f eqn:Hf.
+           (nth_roots_of_unity_modulo (d ^ (q - 1)) p)
+           (nth_roots_of_unity_modulo (d ^ q) p)) l)) as f eqn:Hf.
 ...
   induction l as [| x l]. {
     cbn in Hap.
@@ -4569,12 +4571,12 @@ split. {
   rewrite (map_map _ (λ '(x, y), (x * y) mod p)) in Hap.
   rewrite map_mul_1_l_mod in Hap. 2: {
     intros x Hx.
-    remember (roots_pow_sub_1_mod (d ^ q) p) as l1 eqn:Hl1.
-    remember (roots_pow_sub_1_mod (d ^ (q - 1)) p) as l2 eqn:Hl2.
+    remember (nth_roots_of_unity_modulo (d ^ q) p) as l1 eqn:Hl1.
+    remember (nth_roots_of_unity_modulo (d ^ (q - 1)) p) as l2 eqn:Hl2.
     assert (H : ∀ x, x ∈ l1 → x < p). {
       intros y Hy.
       rewrite Hl1 in Hy.
-      unfold roots_pow_sub_1_mod in Hy.
+      unfold nth_roots_of_unity_modulo in Hy.
       apply filter_In in Hy.
       destruct Hy as (Hy, _).
       apply in_seq in Hy.
