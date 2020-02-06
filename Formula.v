@@ -4273,7 +4273,7 @@ Compute (nth_roots_of_unity_modulo 13 27, nth_roots_of_unity_modulo 13 27).
 
 (* prim_roots seem to work but not prim_roots' (that works only on primes) *)
 
-Compute (let n := 26 in (prim_roots n, prim_roots' n)).
+Compute (let n := 26 in (prim_roots n, sort Nat.leb (prim_roots' n))).
 Compute (let n := 6 in sort Nat.leb (map (λ i, Nat_pow_mod 5 i n) (seq 1 (n - 1)))).
 
 ...
