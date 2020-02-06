@@ -3344,6 +3344,7 @@ rewrite Nat.mod_1_l in H1; [ | easy ].
 now rewrite Nat.mul_1_l in H1.
 Qed.
 
+(*
 (* polynomials in ring ℤ/nℤ *)
 
 Class mod_num := { mn : nat }.
@@ -4220,6 +4221,7 @@ rewrite polm_summation_shift.
 ...
 rewrite polm_mul_add_distr_l.
 ...
+*)
 
 Theorem glop : ∀ p d,
   prime p
@@ -4234,6 +4236,10 @@ rewrite (filter_ext _ (λ x, x ^ d mod p =? 1)). 2: {
   rewrite Nat_pow_mod_is_pow_mod; [ easy | ].
   now intros H; subst p.
 }
+Compute (roots_pow_sub_1_mod 3 19).
+Compute (Nat_pow_mod 6 3 19).
+Compute (map (λ i, Nat_pow_mod i 3 19) (seq 1 18)).
+...
 set (pmn := {| mn := p |}).
 assert
   (Hp1 :
