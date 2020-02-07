@@ -4276,6 +4276,28 @@ Compute (nth_roots_of_unity_modulo 13 27, nth_roots_of_unity_modulo 13 27).
 Compute (let n := 26 in (prim_roots n, sort Nat.leb (prim_roots' n))).
 Compute (let n := 6 in sort Nat.leb (map (λ i, Nat_pow_mod 5 i n) (seq 1 (n - 1)))).
 
+(* Theorem 2.3.5 in "An introduction to Theory of numbers" by Ivan Niven,
+   Herbert Zuckerman and Hugh Montgomery – John Wiley and Sons – 1991:
+      Let p and q be primes, and suppose that q^α | (p-1), where α ≥ 1.
+      Then there are precisely q^α - q^(α-1) residue classes α (mod p)
+      of order q
+*)
+
+...
+
+(* Theorem 2.3.6 in "An introduction to Theory of numbers" by Ivan Niven,
+   Herbert Zuckerman and Hugh Montgomery – John Wiley and Sons – 1991:
+     If p is a prime then there exist φ(p-1) primitive roots modulo p.
+*)
+
+...
+
+(* Theorem 2.3.7 in "An introduction to Theory of numbers" by Ivan Niven,
+   Herbert Zuckerman and Hugh Montgomery – John Wiley and Sons – 1991 *)
+
+(* well, the book supposes that there exist primitive roots modulo p,
+   which is exactly what we want to prove *)
+
 (* http://villemin.gerard.free.fr/Referenc/Prof/ARITHMET/RacinPri.htm
    Si p est premier et gcd a p = 1, alors x^n ≡ a mod p
    possède gcd n (p – 1) solutions à condition que:
@@ -4285,9 +4307,7 @@ Compute (let n := 6 in sort Nat.leb (map (λ i, Nat_pow_mod 5 i n) (seq 1 (n - 1
 Definition nth_roots_modulo n p a :=
   filter (λ x : nat, Nat_pow_mod x n p =? a) (seq 1 (p - 1)).
 
-(* Theorem 2.3.7 in "An introduction to Theory of numbers" by Ivan Niven,
-   Herbert Zuckerman and Hugh Montgomery – John Wiley and Sons – 1991 *)
-
+(*
 Theorem eq_nth_roots_modulo_gcd : ∀ n p a,
   prime p
   → Nat.gcd a p = 1
@@ -4296,6 +4316,7 @@ Theorem eq_nth_roots_modulo_gcd : ∀ n p a,
 Proof.
 intros * Hp Hg Hap.
 ...
+*)
 
 Theorem glop2 : ∀ p d,
   prime p
@@ -4305,6 +4326,7 @@ Proof.
 intros * Hp Hdp.
 assert (Hg1p : Nat.gcd 1 p = 1) by apply Nat.gcd_1_l.
 assert (He : ∀ e, 1 ^ e ≡ 1 mod p) by now intros; rewrite Nat.pow_1_l.
+...
 specialize (eq_nth_roots_modulo_gcd d _ _ Hp Hg1p (He _)) as H1.
 assert (Hgdp : Nat.gcd d (p - 1) = d) by now apply Nat.divide_gcd_iff'.
 now rewrite Hgdp in H1.
