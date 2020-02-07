@@ -4291,14 +4291,48 @@ Theorem glop : ∀ n p a,
   → a ^ ((p - 1) / Nat.gcd n (p - 1)) ≡ 1 mod p
   → length (nth_roots_modulo n p a) = Nat.gcd n (p - 1).
 Proof.
-(* à vérifier d'abord à la main *)
-...
+Admitted.
 
-Theorem glop : ∀ p d,
+Theorem glop2 : ∀ p d,
   prime p
   → Nat.divide d (p - 1)
   → length (nth_roots_of_unity_modulo d p) = d.
 Proof.
+intros * Hp Hdp.
+specialize (glop 1 p d Hp) as H1.
+(* j'ai inversé n et a je crois *)
+...
+assert (H2 : 0 < d < p). {
+  split. {
+    destruct d; [ | flia ].
+    destruct Hdp as (k, Hk).
+    rewrite Nat.mul_0_r in Hk.
+    destruct p; [ easy | now destruct p ].
+  } {
+    destruct Hdp as (k, Hk).
+    destruct p; [ easy | ].
+    rewrite Nat.sub_succ, Nat.sub_0_r in Hk.
+    rewrite Hk.
+    apply Nat.lt_succ_r.
+    destruct k; [ now rewrite Hk in Hp | ].
+    cbn; flia.
+  }
+}
+assert (H : Nat.gcd d p = 1). {
+  rewrite Nat.gcd_comm.
+  now apply eq_gcd_prime_small_1.
+}
+specialize (H1 H); clear H.
+rewrite Nat.gcd_1_l in H1.
+rewrite Nat.div_1_r in H1.
+assert (H : d ^ (p - 1) ≡ 1 mod p). {
+  rewrite fermat_little; [ | easy | easy ].
+  now symmetry; apply Nat.mod_small, prime_ge_2.
+}
+specialize (H1 H); clear H.
+unfold nth_roots_modulo in H1.
+unfold nth_roots_of_unity_modulo.
+...
 intros * Hp Hdp.
 destruct Hdp as (e, He).
 unfold nth_roots_of_unity_modulo.
