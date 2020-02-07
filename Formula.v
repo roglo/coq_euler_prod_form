@@ -4278,7 +4278,8 @@ Compute (let n := 6 in sort Nat.leb (map (λ i, Nat_pow_mod 5 i n) (seq 1 (n - 1
 
 (* http://villemin.gerard.free.fr/Referenc/Prof/ARITHMET/RacinPri.htm
    Si p est premier et gcd a p = 1, alors x^n ≡ a mod p
-   possède gcd n (p – 1) solutions à condition que: a^((p-1)/gcd(n,p-1)) ≡ 1 mod p
+   possède gcd n (p – 1) solutions à condition que:
+     a^((p-1)/gcd(n,p-1)) ≡ 1 mod p
    Et aucune solution sinon. *)
 
 Definition nth_roots_modulo n p a :=
