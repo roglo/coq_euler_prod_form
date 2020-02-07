@@ -4291,7 +4291,8 @@ Theorem glop : ∀ n p a,
   → a ^ ((p - 1) / Nat.gcd n (p - 1)) ≡ 1 mod p
   → length (nth_roots_modulo n p a) = Nat.gcd n (p - 1).
 Proof.
-Admitted.
+intros * Hp Hg Hap.
+...
 
 Theorem glop2 : ∀ p d,
   prime p
@@ -4299,8 +4300,17 @@ Theorem glop2 : ∀ p d,
   → length (nth_roots_of_unity_modulo d p) = d.
 Proof.
 intros * Hp Hdp.
-specialize (glop 1 p d Hp) as H1.
-(* j'ai inversé n et a je crois *)
+specialize (glop d p 1 Hp) as H1.
+assert (H : Nat.gcd 1 p = 1) by apply Nat.gcd_1_l.
+specialize (H1 H); clear H.
+assert (H : 1 ^ ((p - 1) / Nat.gcd d (p - 1)) ≡ 1 mod p). {
+  now rewrite Nat.pow_1_l.
+}
+specialize (H1 H); clear H.
+unfold nth_roots_modulo in H1.
+unfold nth_roots_of_unity_modulo.
+rewrite H1.
+now apply Nat.divide_gcd_iff'.
 ...
 assert (H2 : 0 < d < p). {
   split. {
