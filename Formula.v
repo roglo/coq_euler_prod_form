@@ -4285,7 +4285,7 @@ Compute (let n := 6 in sort Nat.leb (map (λ i, Nat_pow_mod 5 i n) (seq 1 (n - 1
 Definition nth_roots_modulo n p a :=
   filter (λ x : nat, Nat_pow_mod x n p =? a) (seq 1 (p - 1)).
 
-Theorem glop : ∀ n p a,
+Theorem eq_nth_roots_modulo_gcd : ∀ n p a,
   prime p
   → Nat.gcd a p = 1
   → a ^ ((p - 1) / Nat.gcd n (p - 1)) ≡ 1 mod p
@@ -4300,17 +4300,11 @@ Theorem glop2 : ∀ p d,
   → length (nth_roots_of_unity_modulo d p) = d.
 Proof.
 intros * Hp Hdp.
-specialize (glop d p 1 Hp) as H1.
-assert (H : Nat.gcd 1 p = 1) by apply Nat.gcd_1_l.
-specialize (H1 H); clear H.
-assert (H : 1 ^ ((p - 1) / Nat.gcd d (p - 1)) ≡ 1 mod p). {
-  now rewrite Nat.pow_1_l.
-}
-specialize (H1 H); clear H.
-unfold nth_roots_modulo in H1.
-unfold nth_roots_of_unity_modulo.
-rewrite H1.
-now apply Nat.divide_gcd_iff'.
+assert (Hg1p : Nat.gcd 1 p = 1) by apply Nat.gcd_1_l.
+assert (He : ∀ e, 1 ^ e ≡ 1 mod p) by now intros; rewrite Nat.pow_1_l.
+specialize (eq_nth_roots_modulo_gcd d _ _ Hp Hg1p (He _)) as H1.
+assert (Hgdp : Nat.gcd d (p - 1) = d) by now apply Nat.divide_gcd_iff'.
+now rewrite Hgdp in H1.
 ...
 assert (H2 : 0 < d < p). {
   split. {
