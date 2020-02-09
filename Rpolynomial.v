@@ -8,15 +8,17 @@ Import List List.ListNotations.
 
 (* ring *)
 
-Class ring α :=
-  { rng_zero : α;
-    rng_one : α;
-    rng_add : α → α → α;
-    rng_mul : α → α → α;
-    rng_opp : α → α }.
+Class ring A :=
+  { rng_zero : A;
+    rng_one : A;
+    rng_add : A → A → A;
+    rng_mul : A → A → A;
+    rng_opp : A → A;
+    rng_eq : A → A → Prop }.
 
 Declare Scope ring_scope.
 Delimit Scope ring_scope with Rng.
+Bind Scope ring_scope with ring.
 Notation "0" := rng_zero : ring_scope.
 Notation "1" := rng_one : ring_scope.
 Notation "a + b" := (rng_add a b) : ring_scope.
@@ -27,15 +29,14 @@ Notation "'Σ' ( i = b , e ) , g" :=
   (fold_left (λ c i, (c + g)%Rng) (seq b (S e - b)) 0%Rng)
   (at level 45, i at level 0, b at level 60, e at level 60) : ring_scope.
 
-(* lap : list as polynomial, i.e. the only field of the record in the
-   definition of polynomial after *)
-
-Section Lap.
+Section Polynomials.
 
 Variable A : Type.
 Variable rng : ring A.
 
-Definition lap_1 := [1%Rng].
+Record polynomial := mkpol { al : list A }.
+
+Definition pol_1 := mkpol [1%Rng].
 
 Fixpoint lap_add al₁ al₂ :=
   match al₁ with
@@ -46,9 +47,12 @@ Fixpoint lap_add al₁ al₂ :=
       | a₂ :: bl₂ => (a₁ + a₂)%Rng :: lap_add bl₁ bl₂
       end
   end.
+Definition pol_add p1 p2 := mkpol (lap_add (al p1) (al p2)).
 
-Definition lap_opp l := map (λ a, (- a)%Rng) l.
-Definition lap_sub la lb := lap_add la (lap_opp lb).
+Definition pol_opp p := mkpol (map (λ a, (- a)%Rng) (al p)).
+Definition pol_sub p1 p2 := pol_add p1 (pol_opp p2).
+
+...
 
 Definition lap_convol_mul_term la lb i :=
   (Σ (j = 0, i), List.nth j la 0 * List.nth (i - j)%nat lb 0)%Rng.
@@ -57,28 +61,17 @@ Definition polm_mul la lb :=
 
 Definition xpow i := repeat 0%Rng i ++ [1%Rng].
 
+Inductive lap_zerop : list A → Prop :=
+  | lap_nil : lap_zerop []
+  | lap_cons : ∀ a la, rng_eq a 0%Rng → lap_zerop la → lap_zerop (a :: la).
+
+Definition lap_eq la lb := lap_zerop (lap_sub la lb).
+
+Declare Scope lap_scope.
+Delimit Scope lap_scope with pol.
+Bind Scope lap_scope with list A.
+Notation "1" := lap_1 : polm_scope.
 ...
-
-(* do I have to add decidability of equality in my ring? If not,
-   it is not possible to compare two polynomials! *)
-
-Definition lap_is_zero la := forallb (λ a, rng_eq_dec a 0%Rng) la.
-Fixpoint polm_eqb {n : mod_num} la lb :=
-  match la with
-  | [] => polm_is_zero lb
-  | a :: la' =>
-      match lb with
-      | [] => polm_is_zero la
-      | b :: lb' =>
-          if Nat.eq_dec (a mod mn) (b mod mn) then polm_eqb la' lb'
-          else false
-      end
-  end.
-Definition polm_eq {n : mod_num} la lb := polm_eqb la lb = true.
-
-Declare Scope polm_scope.
-Delimit Scope polm_scope with pol.
-Notation "1" := polm_1 : polm_scope.
 Notation "- a" := (polm_opp a) : polm_scope.
 Notation "a + b" := (polm_add a b) : polm_scope.
 Notation "a - b" := (polm_sub a b) : polm_scope.
