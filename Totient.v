@@ -1,4 +1,5 @@
 Require Import Utf8 Arith.
+Require Import Sorting.Permutation.
 Import List List.ListNotations.
 
 Require Import Misc.
@@ -1290,4 +1291,215 @@ apply
     flia Hy.
   }
 }
+Qed.
+
+(* Euler's theorem *)
+
+Require Import Primes.
+
+Theorem different_coprimes_all_different_multiples : ∀ n a,
+  a ∈ coprimes n
+  → ∀ i j,
+  i ∈ coprimes n
+  → j ∈ coprimes n
+  → i ≠ j
+  → (i * a) mod n ≠ (j * a) mod n.
+Proof.
+(* like smaller_than_prime_all_different_multiples but more general *)
+intros * Ha * Hi Hj Hij.
+intros Haa; symmetry in Haa.
+apply in_coprimes_iff in Ha.
+apply in_coprimes_iff in Hi.
+apply in_coprimes_iff in Hj.
+destruct Ha as (Ha, Hna).
+destruct Hi as (Hi, Hni).
+destruct Hj as (Hj, Hnj).
+assert
+  (H : ∀ i j, i ∈ seq 1 (n - 1) → j ∈ seq 1 (n - 1) → i < j →
+   (j * a) mod n ≠ (i * a) mod n). {
+  clear i j Hi Hj Hni Hnj Hij Haa.
+  intros * Hi Hj Hilj Haa.
+  apply in_seq in Hi.
+  apply in_seq in Hj.
+  apply Nat_mul_mod_cancel_r in Haa; [ | now rewrite Nat.gcd_comm ].
+  rewrite Nat.mod_small in Haa; [ | flia Hj ].
+  rewrite Nat.mod_small in Haa; [ | flia Hi ].
+  flia Hilj Haa.
+}
+destruct (lt_dec i j) as [Hilj| Hjli]. {
+  now revert Haa; apply H.
+} {
+  symmetry in Haa.
+  assert (Hilj : j < i) by flia Hij Hjli.
+  now revert Haa; apply H.
+}
+Qed.
+
+Theorem coprimes_mul_in_coprimes : ∀ n i j,
+  i ∈ coprimes n → j ∈ coprimes n → (i * j) mod n ∈ coprimes n.
+Proof.
+intros * Hi Hj.
+destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
+apply in_coprimes_iff in Hi.
+apply in_coprimes_iff in Hj.
+destruct Hi as (Hi, Hgi).
+destruct Hj as (Hj, Hgj).
+apply in_seq in Hi.
+apply in_seq in Hj.
+apply in_coprimes_iff.
+split. {
+  apply in_seq.
+  split. {
+    remember ((i * j) mod n) as a eqn:Ha; symmetry in Ha.
+    destruct a; [ | flia ].
+    apply Nat.mod_divide in Ha; [ | easy ].
+    apply Nat.gauss in Ha; [ | easy ].
+    destruct Ha as (k, Hk).
+    replace n with (1 * n) in Hgj by flia.
+    subst j.
+    rewrite Nat.gcd_mul_mono_r in Hgj.
+    apply Nat.eq_mul_1 in Hgj.
+    destruct Hgj as (H1k, Hn); subst n.
+    flia Hi.
+  } {
+    rewrite Nat.add_comm, Nat.sub_add; [ | flia Hnz ].
+    now apply Nat.mod_upper_bound.
+  }
+} {
+  rewrite Nat.gcd_comm, Nat.gcd_mod; [ | easy ].
+  now apply Nat_gcd_1_mul_r.
+}
+Qed.
+
+Theorem NoDup_coprimes : ∀ n, NoDup (coprimes n).
+Proof.
+intros.
+unfold coprimes.
+apply NoDup_filter, seq_NoDup.
+Qed.
+
+Theorem gcd_prod_coprimes : ∀ n,
+  Nat.gcd n (fold_left Nat.mul (coprimes n) 1) = 1.
+Proof.
+intros.
+assert (H : ∀ a, a ∈ coprimes n → Nat.gcd n a = 1). {
+  intros * H.
+  now apply in_coprimes_iff in H.
+}
+remember (coprimes n) as l eqn:Hl; symmetry in Hl; clear Hl.
+induction l as [| a l]; intros; [ apply Nat.gcd_1_r | ].
+cbn; rewrite Nat.add_0_r.
+rewrite fold_left_mul_from_1.
+apply Nat_gcd_1_mul_r; [ now apply H; left | ].
+apply IHl.
+intros b Hb.
+now apply H; right.
+Qed.
+
+Theorem euler_fermat_little : ∀ n a,
+  n ≠ 0 → a ≠ 0 → Nat.gcd a n = 1 → a ^ φ n ≡ 1 mod n.
+Proof.
+intros * Hnz Haz Hg.
+(* https://wstein.org/edu/2007/spring/ent/ent-html/node19.html#sec:flittle *)
+destruct (Nat.eq_dec n 1) as [Hn1| Hn1]; [ now subst n | ].
+assert (Ha : a mod n ∈ coprimes n). {
+  apply in_coprimes_iff.
+  rewrite Nat.gcd_comm, Nat.gcd_mod; [ | easy ].
+  rewrite Nat.gcd_comm.
+  split; [ | easy ].
+  apply in_seq.
+  rewrite Nat.add_comm, Nat.sub_add; [ | flia Hnz ].
+  split. {
+    remember (a mod n) as b eqn:Hb; symmetry in Hb.
+    destruct b; [ | flia ].
+    apply Nat.mod_divides in Hb; [ | easy ].
+    replace n with (n * 1) in Hg by flia.
+    destruct Hb as (k, Hk); subst a.
+    rewrite Nat.gcd_mul_mono_l in Hg.
+    now apply Nat.eq_mul_1 in Hg.
+  } {
+    now apply Nat.mod_upper_bound.
+  }
+}
+rewrite <- Nat_mod_pow_mod.
+assert
+  (H1 : ∀ i j, i ∈ coprimes n → j ∈ coprimes n
+   → i ≠ j → (i * a) mod n ≠ (j * a) mod n). {
+  intros * Hi Hj Hij.
+  rewrite <- (Nat.mul_mod_idemp_r i); [ | easy ].
+  rewrite <- (Nat.mul_mod_idemp_r j); [ | easy ].
+  now apply different_coprimes_all_different_multiples.
+}
+assert (Hcc : ∀ i, i ∈ coprimes n → (i * a) mod n ∈ coprimes n). {
+  intros i Hi.
+  rewrite <- Nat.mul_mod_idemp_r; [ | easy ].
+  now apply coprimes_mul_in_coprimes.
+}
+assert
+  (Hperm :
+     Permutation (map (λ i, (i * a) mod n) (coprimes n)) (coprimes n)). {
+  apply NoDup_Permutation_bis; [ | apply NoDup_coprimes | | ]; cycle 1. {
+    now rewrite map_length.
+  } {
+    intros i Hi.
+    apply in_map_iff in Hi.
+    destruct Hi as (j & Hji & Hj).
+    rewrite <- Hji.
+    rewrite <- Nat.mul_mod_idemp_r; [ | easy ].
+    now apply coprimes_mul_in_coprimes.
+  } {
+    apply NoDup_map_iff with (d := 0).
+    intros * Hi Hj Hnth.
+    destruct (Nat.eq_dec i j) as [Heij| Heij]; [ easy | exfalso ].
+    revert Hnth.
+    apply H1; [ now apply nth_In | now apply nth_In | ].
+    specialize (NoDup_coprimes n) as H2.
+    remember (coprimes n) as l.
+    clear - Hi Hj Heij H2.
+    revert i j Hi Hj Heij.
+    induction l as [| a l]; intros; [ easy | ].
+    apply NoDup_cons_iff in H2.
+    destruct H2 as (Ha, Hnd).
+    intros H; cbn in H.
+    destruct i. {
+      destruct j; [ easy | ].
+      subst a; apply Ha.
+      cbn in Hj.
+      apply Nat.succ_lt_mono in Hj.
+      now apply nth_In.
+    }
+    destruct j. {
+      subst a; apply Ha.
+      cbn in Hi.
+      apply Nat.succ_lt_mono in Hi.
+      now apply nth_In.
+    }
+    cbn in Hi, Hj.
+    apply Nat.succ_lt_mono in Hi.
+    apply Nat.succ_lt_mono in Hj.
+    apply -> Nat.succ_inj_wd_neg in Heij.
+    revert H.
+    now apply IHl.
+  }
+}
+remember (λ i : nat, (i * a) mod n) as f eqn:Hf.
+remember (fold_left Nat.mul (map f (coprimes n)) 1) as x eqn:Hx.
+remember (fold_left Nat.mul (coprimes n) 1) as y eqn:Hy.
+assert (Hx1 : x mod n = y mod n). {
+  subst x y.
+  erewrite Permutation_fold_mul; [ easy | apply Hperm ].
+}
+assert (Hx2 : x mod n = (y * a ^ φ n) mod n). {
+  subst x y; rewrite Hf.
+  rewrite <- (map_map (λ i, i * a) (λ j, j mod n)).
+  rewrite fold_left_mul_map_mod.
+  now rewrite fold_left_mul_map_mul.
+}
+rewrite Hx2 in Hx1.
+replace y with (y * 1) in Hx1 at 2 by flia.
+apply Nat_mul_mod_cancel_l in Hx1. 2: {
+  rewrite Hy, Nat.gcd_comm.
+  apply gcd_prod_coprimes.
+}
+now rewrite Nat_mod_pow_mod.
 Qed.
