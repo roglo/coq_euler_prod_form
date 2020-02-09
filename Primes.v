@@ -1907,7 +1907,6 @@ Theorem smaller_than_prime_all_different_multiples : ∀ p,
 Proof.
 intros * Hp * Hap * Hijp.
 intros Haa; symmetry in Haa.
-(**)
 apply Nat_mul_mod_cancel_r in Haa. 2: {
   rewrite Nat.gcd_comm.
   now apply eq_gcd_prime_small_1.
