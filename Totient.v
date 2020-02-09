@@ -1503,3 +1503,43 @@ apply Nat_mul_mod_cancel_l in Hx1. 2: {
 }
 now rewrite Nat_mod_pow_mod.
 Qed.
+
+Theorem prime_φ : ∀ p, prime p → φ p = p - 1.
+Proof.
+intros * Hp.
+unfold φ.
+unfold coprimes.
+rewrite (filter_ext_in _ (λ d, true)). 2: {
+  intros a Ha.
+  apply Nat.eqb_eq.
+  apply in_seq in Ha.
+  rewrite Nat.add_comm, Nat.sub_add in Ha. 2: {
+    destruct p; [ easy | flia ].
+  }
+  now apply eq_gcd_prime_small_1.
+}
+clear Hp.
+destruct p; [ easy | ].
+rewrite Nat.sub_succ, Nat.sub_0_r.
+induction p; [ easy | ].
+rewrite <- (Nat.add_1_r p).
+rewrite seq_app.
+rewrite filter_app.
+now rewrite app_length, IHp.
+Qed.
+
+Corollary fermat_little_again : ∀ p,
+  prime p → ∀ a, 1 ≤ a < p → a ^ (p - 1) mod p = 1.
+Proof.
+intros * Hp * Hap.
+rewrite <- prime_φ; [ | easy ].
+replace 1 with (1 mod p). 2: {
+  apply Nat.mod_1_l.
+  now apply prime_ge_2.
+}
+apply euler_fermat_little; [ now intros H; subst p | flia Hap | ].
+rewrite Nat.gcd_comm.
+now apply eq_gcd_prime_small_1.
+Qed.
+
+(* proof of corollary above simpler than fermat_little, isn't it? *)

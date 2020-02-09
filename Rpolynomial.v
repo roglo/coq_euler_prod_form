@@ -38,4 +38,7 @@ Fixpoint lap_add {A} {rng : ring A} al₁ al₂ :=
 Definition lap_opp {A} {rng : ring A} l := map (λ a, (- a)%Rng) l.
 Definition lap_sub {A} {rng : ring A} la lb := lap_add la (lap_opp lb).
 
+(*
 ... to be continued from "Formula.v"
+*)
+

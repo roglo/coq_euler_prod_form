@@ -6,3 +6,9 @@ Primes.vio: Primes.v Misc.vio
 Primes.vo Primes.glob Primes.v.beautified Primes.required_vo: Primes.v Misc.vo
 QuadRes.vio: QuadRes.v Misc.vio Primes.vio
 QuadRes.vo QuadRes.glob QuadRes.v.beautified QuadRes.required_vo: QuadRes.v Misc.vo Primes.vo
+Rpolynomial.vio: Rpolynomial.v 
+Rpolynomial.vo Rpolynomial.glob Rpolynomial.v.beautified Rpolynomial.required_vo: Rpolynomial.v 
+Totient.vio: Totient.v Misc.vio Primes.vio
+Totient.vo Totient.glob Totient.v.beautified Totient.required_vo: Totient.v Misc.vo Primes.vo
+bug.vio: bug.v 
+bug.vo bug.glob bug.v.beautified bug.required_vo: bug.v 

@@ -2240,30 +2240,6 @@ Theorem ζ_Euler_product_eq : ...
 
 Require Import Totient QuadRes.
 
-Theorem prime_φ : ∀ p, prime p → φ p = p - 1.
-Proof.
-intros * Hp.
-unfold φ.
-unfold coprimes.
-rewrite (filter_ext_in _ (λ d, true)). 2: {
-  intros a Ha.
-  apply Nat.eqb_eq.
-  apply in_seq in Ha.
-  rewrite Nat.add_comm, Nat.sub_add in Ha. 2: {
-    destruct p; [ easy | flia ].
-  }
-  now apply eq_gcd_prime_small_1.
-}
-clear Hp.
-destruct p; [ easy | ].
-rewrite Nat.sub_succ, Nat.sub_0_r.
-induction p; [ easy | ].
-rewrite <- (Nat.add_1_r p).
-rewrite seq_app.
-rewrite filter_app.
-now rewrite app_length, IHp.
-Qed.
-
 Theorem prime_pow_φ : ∀ p, prime p →
   ∀ k, k ≠ 0 → φ (p ^ k) = p ^ (k - 1) * φ p.
 Proof.
@@ -2702,29 +2678,6 @@ Definition is_quad_res p n := in_list_nat n (quad_res p).
 
 Theorem fold_φ : ∀ n, length (coprimes n) = φ n.
 Proof. easy. Qed.
-
-(* where can I put this theorem above? not in Primes.v since Prime does
-   not know Totient; not in Totient.v since Totient does not know Primes.
-   In a third .v file, perhaps? In that file, I could also all fermat's
-   little theorem as a corollary. *)
-
-Corollary fermat_little_again : ∀ p,
-  prime p → ∀ a, 1 ≤ a < p → a ^ (p - 1) mod p = 1.
-Proof.
-intros * Hp * Hap.
-rewrite <- prime_φ; [ | easy ].
-replace 1 with (1 mod p). 2: {
-  apply Nat.mod_1_l.
-  now apply prime_ge_2.
-}
-apply euler_fermat_little; [ now intros H; subst p | flia Hap | ].
-rewrite Nat.gcd_comm.
-now apply eq_gcd_prime_small_1.
-Qed.
-
-(* proof of corollary above simpler than fermat_little, isn't it? *)
-
-About prime_φ. (* ← to include in that .v file I was talking about above *)
 
 Theorem φ_interv : ∀ n, 2 ≤ n → 1 ≤ φ n < n.
 Proof.
