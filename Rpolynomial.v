@@ -57,7 +57,38 @@ Definition polm_mul la lb :=
 
 Definition xpow i := repeat 0%Rng i ++ [1%Rng].
 
+...
+
+(* do I have to add decidability of equality in my ring? If not,
+   it is not possible to compare two polynomials! *)
+
+Definition lap_is_zero la := forallb (λ a, rng_eq_dec a 0%Rng) la.
+Fixpoint polm_eqb {n : mod_num} la lb :=
+  match la with
+  | [] => polm_is_zero lb
+  | a :: la' =>
+      match lb with
+      | [] => polm_is_zero la
+      | b :: lb' =>
+          if Nat.eq_dec (a mod mn) (b mod mn) then polm_eqb la' lb'
+          else false
+      end
+  end.
+Definition polm_eq {n : mod_num} la lb := polm_eqb la lb = true.
+
+Declare Scope polm_scope.
+Delimit Scope polm_scope with pol.
+Notation "1" := polm_1 : polm_scope.
+Notation "- a" := (polm_opp a) : polm_scope.
+Notation "a + b" := (polm_add a b) : polm_scope.
+Notation "a - b" := (polm_sub a b) : polm_scope.
+Notation "a * b" := (polm_mul a b) : polm_scope.
+Notation "a = b" := (polm_eq a b) : polm_scope.
+Notation "'ⓧ' ^ a" := (xpow a) (at level 30, format "'ⓧ' ^ a") : polm_scope.
+Notation "'ⓧ'" := (xpow 1) (at level 30, format "'ⓧ'") : polm_scope.
+
 (*
 ... to be continued from "Formula.v"
 *)
 
+End Lap.
