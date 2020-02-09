@@ -47,6 +47,7 @@ Fixpoint lap_add al₁ al₂ :=
       | a₂ :: bl₂ => (a₁ + a₂)%Rng :: lap_add bl₁ bl₂
       end
   end.
+
 Definition pol_add p1 p2 := mkpol (lap_add (al p1) (al p2)).
 
 Definition pol_opp p := mkpol (map (λ a, (- a)%Rng) (al p)).
@@ -54,6 +55,7 @@ Definition pol_sub p1 p2 := pol_add p1 (pol_opp p2).
 
 Definition lap_convol_mul_term la lb i :=
   (Σ (j = 0, i), List.nth j la 0 * List.nth (i - j)%nat lb 0)%Rng.
+
 Definition pol_mul p1 p2 :=
   mkpol
     (map
@@ -72,17 +74,16 @@ Declare Scope pol_scope.
 Delimit Scope pol_scope with pol.
 Bind Scope pol_scope with polynomial.
 Notation "1" := pol_1 : pol_scope.
-...
-Notation "- a" := (polm_opp a) : polm_scope.
-Notation "a + b" := (polm_add a b) : polm_scope.
-Notation "a - b" := (polm_sub a b) : polm_scope.
-Notation "a * b" := (polm_mul a b) : polm_scope.
-Notation "a = b" := (polm_eq a b) : polm_scope.
-Notation "'ⓧ' ^ a" := (xpow a) (at level 30, format "'ⓧ' ^ a") : polm_scope.
-Notation "'ⓧ'" := (xpow 1) (at level 30, format "'ⓧ'") : polm_scope.
+Notation "- a" := (pol_opp a) : pol_scope.
+Notation "a + b" := (pol_add a b) : pol_scope.
+Notation "a - b" := (pol_sub a b) : pol_scope.
+Notation "a * b" := (pol_mul a b) : pol_scope.
+Notation "a = b" := (pol_eq a b) : pol_scope.
+Notation "'ⓧ' ^ a" := (xpow a) (at level 30, format "'ⓧ' ^ a") : pol_scope.
+Notation "'ⓧ'" := (xpow 1) (at level 30, format "'ⓧ'") : pol_scope.
 
 (*
 ... to be continued from "Formula.v"
 *)
 
-End Lap.
+End Polynomials.
