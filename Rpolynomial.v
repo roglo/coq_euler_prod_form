@@ -52,25 +52,26 @@ Definition pol_add p1 p2 := mkpol (lap_add (al p1) (al p2)).
 Definition pol_opp p := mkpol (map (λ a, (- a)%Rng) (al p)).
 Definition pol_sub p1 p2 := pol_add p1 (pol_opp p2).
 
-...
-
 Definition lap_convol_mul_term la lb i :=
   (Σ (j = 0, i), List.nth j la 0 * List.nth (i - j)%nat lb 0)%Rng.
-Definition polm_mul la lb :=
-  map (lap_convol_mul_term la lb) (seq 0 (length la + length lb - 1)).
+Definition pol_mul p1 p2 :=
+  mkpol
+    (map
+       (lap_convol_mul_term (al p1) (al p2))
+       (seq 0 (length (al p1) + length (al p2) - 1))).
 
-Definition xpow i := repeat 0%Rng i ++ [1%Rng].
+Definition xpow i := mkpol (repeat 0%Rng i ++ [1%Rng]).
 
 Inductive lap_zerop : list A → Prop :=
   | lap_nil : lap_zerop []
   | lap_cons : ∀ a la, rng_eq a 0%Rng → lap_zerop la → lap_zerop (a :: la).
 
-Definition lap_eq la lb := lap_zerop (lap_sub la lb).
+Definition pol_eq p1 p2 := lap_zerop (al (pol_sub p1 p2)).
 
-Declare Scope lap_scope.
-Delimit Scope lap_scope with pol.
-Bind Scope lap_scope with list A.
-Notation "1" := lap_1 : polm_scope.
+Declare Scope pol_scope.
+Delimit Scope pol_scope with pol.
+Bind Scope pol_scope with polynomial.
+Notation "1" := pol_1 : pol_scope.
 ...
 Notation "- a" := (polm_opp a) : polm_scope.
 Notation "a + b" := (polm_add a b) : polm_scope.
