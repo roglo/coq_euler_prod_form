@@ -1,4 +1,4 @@
-(* MRing.v *)
+(* Ring2.v *)
 
 Require Import Utf8 Setoid.
 
