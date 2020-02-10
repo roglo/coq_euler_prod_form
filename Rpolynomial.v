@@ -5,7 +5,7 @@
 Set Nested Proofs Allowed.
 Require Import Utf8 Arith Setoid Morphisms.
 Import List List.ListNotations.
-Require Import Misc MRing.
+Require Import Misc Ring2.
 
 (*
 

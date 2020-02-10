@@ -8,8 +8,8 @@ QuadRes.vio: QuadRes.v Misc.vio Primes.vio
 QuadRes.vo QuadRes.glob QuadRes.v.beautified QuadRes.required_vo: QuadRes.v Misc.vo Primes.vo
 Ring2.vio: Ring2.v 
 Ring2.vo Ring2.glob Ring2.v.beautified Ring2.required_vo: Ring2.v 
-Rpolynomial.vio: Rpolynomial.v Misc.vio
-Rpolynomial.vo Rpolynomial.glob Rpolynomial.v.beautified Rpolynomial.required_vo: Rpolynomial.v Misc.vo
+Rpolynomial.vio: Rpolynomial.v Misc.vio Ring2.vio
+Rpolynomial.vo Rpolynomial.glob Rpolynomial.v.beautified Rpolynomial.required_vo: Rpolynomial.v Misc.vo Ring2.vo
 Totient.vio: Totient.v Misc.vio Primes.vio
 Totient.vo Totient.glob Totient.v.beautified Totient.required_vo: Totient.v Misc.vo Primes.vo
 bug.vio: bug.v 
