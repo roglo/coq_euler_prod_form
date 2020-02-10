@@ -133,6 +133,7 @@ intros * H.
 now inversion H.
 Qed.
 
+(*
 Theorem lap_eq_refl : reflexive _ lap_eq.
 Proof.
 intros l.
@@ -208,6 +209,7 @@ Add Parametric Relation : (list A) lap_eq
  symmetry proved by lap_eq_sym
  transitivity proved by lap_eq_trans
  as lap_eq_rel.
+*)
 
 Theorem pol_eq_iff : ∀ p1 p2,
   (p1 = p2)%pol ↔ ∀ i, (nth i (al p1) 0 = nth i (al p2) 0)%Rng.
@@ -252,14 +254,18 @@ split; intros Hll. {
 } {
   revert lb Hll.
   induction la as [| a la]; intros. {
-    cbn in Hll; cbn.
     induction lb as [| b lb]; constructor. {
       now specialize (Hll 0).
     } {
-      symmetry; apply IHlb.
-      intros i.
-      destruct i; [ now specialize (Hll 1) | ].
-      now specialize (Hll (S (S i))); cbn in Hll.
+      assert (H : (∀ i : nat, (nth i [] 0 = nth i lb 0)%Rng)). {
+        intros i; specialize (Hll (S i)).
+        now destruct i.
+      }
+      specialize (IHlb H); clear - IHlb.
+      rename IHlb into Hb.
+      induction lb as [| b lb]; [ easy | ].
+      apply lap_eq_nil_cons_inv in Hb.
+      now constructor.
     }
   } {
     destruct lb as [| b lb]. {
@@ -281,14 +287,18 @@ Theorem pol_eq_refl : reflexive _ pol_eq.
 Proof.
 intros p.
 unfold "="%pol.
-easy.
+remember (al p) as la; clear p Heqla.
+now induction la; constructor.
 Qed.
 
-Theorem polm_eq_sym : symmetric _ pol_eq.
+Theorem pol_eq_sym : symmetric _ pol_eq.
 Proof.
 intros p1 p2 Hll.
-unfold "="%pol in Hll |-*.
-easy.
+specialize (proj1 (pol_eq_iff _ _) Hll) as H1.
+clear Hll.
+apply pol_eq_iff.
+intros i; symmetry.
+apply H1.
 Qed.
 
 (*
