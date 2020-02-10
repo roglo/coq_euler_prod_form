@@ -139,7 +139,10 @@ Qed.
 
 Record polynomial := mkpol { al : list A }.
 
+Definition pol_zero := mkpol [].
 Definition pol_one := mkpol [1%Rng].
+
+Definition pol_eq p1 p2 := lap_eq (al p1) (al p2).
 
 Definition pol_add p1 p2 := mkpol (lap_add (al p1) (al p2)).
 
@@ -157,26 +160,20 @@ Definition xpow i := mkpol (repeat 0%Rng i ++ [1%Rng]).
 Declare Scope pol_scope.
 Delimit Scope pol_scope with pol.
 Bind Scope pol_scope with polynomial.
-(*
-Notation "0" := pol_0 : pol_scope.
-*)
+Notation "0" := pol_zero : pol_scope.
 Notation "1" := pol_one : pol_scope.
 Notation "- a" := (pol_opp a) : pol_scope.
 Notation "a + b" := (pol_add a b) : pol_scope.
 Notation "a - b" := (pol_sub a b) : pol_scope.
 Notation "a * b" := (pol_mul a b) : pol_scope.
-(*
 Notation "a = b" := (pol_eq a b) : pol_scope.
-*)
 Notation "'ⓧ' ^ a" := (xpow a) (at level 30, format "'ⓧ' ^ a") : pol_scope.
 Notation "'ⓧ'" := (xpow 1) (at level 30, format "'ⓧ'") : pol_scope.
 
 Notation "'Σ' ( i = b , e ) , g" :=
   (fold_left (λ c i, (c + g)%pol) (seq b (S e - b)) 0%pol) : pol_scope.
 
-...
-
-Theorem pol_pow_sub_1 {A} {rng : ring A} : ∀ k,
+Theorem pol_pow_sub_1 : ∀ k,
   k ≠ 0
   → (ⓧ^k - 1 = (ⓧ - 1) * (Σ (i = 0, k - 1), ⓧ^(k-i-1)))%pol.
 Proof.
@@ -198,12 +195,6 @@ rewrite <- polm_mul_summation_distr_l.
 rewrite polm_mul_add_distr_l.
 
 ...
-
-(*
-Definition pol_0 := mkpol [].
-*)
-
-Definition pol_eq p1 p2 := lap_eq (al p1) (al p2).
 
 Fixpoint lap_eval la x :=
   match la with
