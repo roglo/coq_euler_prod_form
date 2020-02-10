@@ -29,6 +29,19 @@ Inductive lap_eq : list A → list A → Prop :=
 Definition lap_zero := ([] : list A).
 Definition lap_one := [1%Rng].
 
+Fixpoint lap_add al1 al2 :=
+  match al1 with
+  | [] => al2
+  | a1 :: bl1 =>
+      match al2 with
+      | [] => al1
+      | a2 :: bl2 => (a1 + a2)%Rng :: lap_add bl1 bl2
+      end
+  end.
+
+Definition lap_convol_mul_term la lb i :=
+  (Σ (j = 0, i), List.nth j la 0 * List.nth (i - j)%nat lb 0)%Rng.
+
 Theorem lap_eq_nil_cons_inv : ∀ x l,
   lap_eq [] (x :: l)
   → (x = 0)%Rng ∧ lap_eq l [].
@@ -122,31 +135,16 @@ split; intros Hll. {
 }
 Qed.
 
-...
+(* polynomials *)
 
-(*
 Record polynomial := mkpol { al : list A }.
 
-Definition pol_0 := mkpol [].
-Definition pol_1 := mkpol [1%Rng].
-
-Fixpoint lap_add al1 al2 :=
-  match al1 with
-  | [] => al2
-  | a1 :: bl1 =>
-      match al2 with
-      | [] => al1
-      | a2 :: bl2 => (a1 + a2)%Rng :: lap_add bl1 bl2
-      end
-  end.
+Definition pol_one := mkpol [1%Rng].
 
 Definition pol_add p1 p2 := mkpol (lap_add (al p1) (al p2)).
 
 Definition pol_opp p := mkpol (map (λ a, (- a)%Rng) (al p)).
 Definition pol_sub p1 p2 := pol_add p1 (pol_opp p2).
-
-Definition lap_convol_mul_term la lb i :=
-  (Σ (j = 0, i), List.nth j la 0 * List.nth (i - j)%nat lb 0)%Rng.
 
 Definition pol_mul p1 p2 :=
   mkpol
@@ -155,6 +153,54 @@ Definition pol_mul p1 p2 :=
        (seq 0 (length (al p1) + length (al p2) - 1))).
 
 Definition xpow i := mkpol (repeat 0%Rng i ++ [1%Rng]).
+
+Declare Scope pol_scope.
+Delimit Scope pol_scope with pol.
+Bind Scope pol_scope with polynomial.
+(*
+Notation "0" := pol_0 : pol_scope.
+*)
+Notation "1" := pol_one : pol_scope.
+Notation "- a" := (pol_opp a) : pol_scope.
+Notation "a + b" := (pol_add a b) : pol_scope.
+Notation "a - b" := (pol_sub a b) : pol_scope.
+Notation "a * b" := (pol_mul a b) : pol_scope.
+(*
+Notation "a = b" := (pol_eq a b) : pol_scope.
+*)
+Notation "'ⓧ' ^ a" := (xpow a) (at level 30, format "'ⓧ' ^ a") : pol_scope.
+Notation "'ⓧ'" := (xpow 1) (at level 30, format "'ⓧ'") : pol_scope.
+
+Notation "'Σ' ( i = b , e ) , g" :=
+  (fold_left (λ c i, (c + g)%pol) (seq b (S e - b)) 0%pol) : pol_scope.
+
+...
+
+Theorem pol_pow_sub_1 {A} {rng : ring A} : ∀ k,
+  k ≠ 0
+  → (ⓧ^k - 1 = (ⓧ - 1) * (Σ (i = 0, k - 1), ⓧ^(k-i-1)))%pol.
+Proof.
+intros * Hkz.
+destruct k; [ easy | clear Hkz ].
+rewrite Nat.sub_succ, (Nat.sub_0_r k).
+induction k. {
+  cbn - [ pol_mul ].
+...
+  now rewrite pol_mul_1_r.
+}
+rewrite polm_summation_split_last; [ | flia ].
+rewrite (polm_summation_eq_compat _ (λ i, (ⓧ * ⓧ^(S k - i - 1))%pol)). 2: {
+  intros i Hi.
+  rewrite <- xpow_add_r.
+  f_equal; flia Hi.
+}
+rewrite <- polm_mul_summation_distr_l.
+rewrite polm_mul_add_distr_l.
+
+...
+
+(*
+Definition pol_0 := mkpol [].
 *)
 
 Definition pol_eq p1 p2 := lap_eq (al p1) (al p2).
@@ -201,22 +247,6 @@ Add Parametric Relation : _ pol_eq
  as pol_eq_rel.
 
 End Polynomials.
-
-Declare Scope pol_scope.
-Delimit Scope pol_scope with pol.
-Bind Scope pol_scope with polynomial.
-Notation "0" := pol_0 : pol_scope.
-Notation "1" := pol_1 : pol_scope.
-Notation "- a" := (pol_opp a) : pol_scope.
-Notation "a + b" := (pol_add a b) : pol_scope.
-Notation "a - b" := (pol_sub a b) : pol_scope.
-Notation "a * b" := (pol_mul a b) : pol_scope.
-Notation "a = b" := (pol_eq a b) : pol_scope.
-Notation "'ⓧ' ^ a" := (xpow a) (at level 30, format "'ⓧ' ^ a") : pol_scope.
-Notation "'ⓧ'" := (xpow 1) (at level 30, format "'ⓧ'") : pol_scope.
-
-Notation "'Σ' ( i = b , e ) , g" :=
-  (fold_left (λ c i, (c + g)%pol) (seq b (S e - b)) 0%pol) : pol_scope.
 
 (*
 Instance polm_add_morph {A} {rng : ring A} :
@@ -313,25 +343,3 @@ intros.
 rewrite polm_mul_comm.
 apply polm_mul_1_l.
 Qed.
-
-Theorem pol_pow_sub_1 {A} {rng : ring A} : ∀ k,
-  k ≠ 0
-  → (ⓧ^k - 1 = (ⓧ - 1) * (Σ (i = 0, k - 1), ⓧ^(k-i-1)))%pol.
-Proof.
-intros * Hkz.
-destruct k; [ easy | clear Hkz ].
-rewrite Nat.sub_succ, (Nat.sub_0_r k).
-induction k. {
-  cbn - [ pol_mul ].
-...
-  now rewrite pol_mul_1_r.
-}
-rewrite polm_summation_split_last; [ | flia ].
-rewrite (polm_summation_eq_compat _ (λ i, (ⓧ * ⓧ^(S k - i - 1))%pol)). 2: {
-  intros i Hi.
-  rewrite <- xpow_add_r.
-  f_equal; flia Hi.
-}
-rewrite <- polm_mul_summation_distr_l.
-rewrite polm_mul_add_distr_l.
-...
