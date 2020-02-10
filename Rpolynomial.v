@@ -264,13 +264,64 @@ rewrite Hgh; [ easy | ].
 split; [ easy | flia Hn ].
 Qed.
 
-Theorem pol_add_0_l {A} {rng : ring A} : ∀ p1, (0 + p1 = p1)%pol.
+Theorem pol_add_0_l {A} {rng : ring A} : ∀ p1, (0 + p1)%pol = p1.
 Proof. intros (la); easy. Qed.
+
+Theorem glop {A} {rng : ring A} : ∀ la lb,
+  lap_eq la lb → (mkpol la = mkpol lb)%pol.
+Proof.
+intros * Hll.
+revert lb Hll.
+induction la as [| a la]; intros; cbn. {
+  destruct lb as [| b lb]; [ easy | ].
+  apply lap_eq_nil_cons_inv in Hll.
+...
 
 Theorem pol_mul_1_l {A} {rng : ring A} : ∀ p1, (1 * p1 = p1)%pol.
 Proof.
 intros (la).
-unfold "*"%pol.
+unfold "*"%pol; cbn.
+rewrite Nat.sub_0_r.
+Check lap_eq.
+...
+apply glop.
+induction la as [| a la]; [ constructor | cbn ].
+constructor. {
+  rewrite rng_add_0_l.
+  rewrite rng_mul_1_l.
+  easy.
+} {
+...
+
+f_equal.
+induction la as [| a la]; [ easy | cbn ].
+f_equal.
+rewrite rng_add_0_l.
+...
+
+Theorem pol_mul_1_l {A} {rng : ring A} : ∀ p1, (1 * p1 = p1)%pol.
+Proof.
+intros (la).
+induction la as [| a la]; [ easy | ].
+cbn.
+unfold "*"%pol; cbn.
+rewrite rng_add_0_l.
+...
+
+intros (la).
+unfold "*"%pol; cbn.
+rewrite Nat.sub_0_r.
+unfold lap_convol_mul_term.
+unfold pol_eq.
+cbn - [ nth ].
+rewrite Nat.sub_0_r.
+
+...
+
+rewrite (map_ext _ (λ _, 0%Rng)). 2: {
+  intros i.
+Set Printing All.
+  rewrite all_0_rng_summation_0.
 ...
 
 Instance pol_mul_morph {A} {rng : ring A} :
