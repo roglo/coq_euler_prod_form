@@ -14,7 +14,10 @@ Class ring A :=
     rng_add : A → A → A;
     rng_mul : A → A → A;
     rng_opp : A → A;
-    rng_eq : A → A → Prop }.
+    rng_eq : A → A → Prop;
+    rng_eq_refl : ∀ a, rng_eq a a;
+    rng_eq_sym : ∀ a b, rng_eq a b → rng_eq b a;
+    rng_eq_trans : ∀ a b c, rng_eq a b → rng_eq b c → rng_eq a c }.
 
 Declare Scope ring_scope.
 Delimit Scope ring_scope with Rng.
@@ -30,6 +33,12 @@ Notation "- a" := (rng_opp a) : ring_scope.
 Notation "'Σ' ( i = b , e ) , g" :=
   (fold_left (λ c i, (c + g)%Rng) (seq b (S e - b)) 0%Rng)
   (at level 45, i at level 0, b at level 60, e at level 60) : ring_scope.
+
+Add Parametric Relation A (K : ring A) : A rng_eq
+ reflexivity proved by rng_eq_refl
+ symmetry proved by rng_eq_sym
+ transitivity proved by rng_eq_trans
+ as eq_rel.
 
 Section Polynomials.
 
@@ -104,7 +113,10 @@ Theorem pol_eq_iff : ∀ p1 p2,
   (p1 = p2)%pol ↔ ∀ i, (nth i (al p1) 0 = nth i (al p2) 0)%Rng.
 Proof.
 intros.
-...
+destruct p1 as [la].
+destruct p2 as [lb].
+unfold "="%pol; cbn.
+(*
 destruct (Nat.eq_dec mn 0) as [Hnz| Hnz]. {
   rewrite Hnz; cbn.
   split; intros Hll; [ easy | ].
@@ -121,12 +133,27 @@ destruct (Nat.eq_dec mn 0) as [Hnz| Hnz]. {
     apply IHla.
   }
 }
+*)
 split; intros Hll. {
   intros i.
   revert i lb Hll.
   induction la as [| a la]; intros. {
     cbn.
     destruct lb as [| b lb]; [ easy | cbn ].
+(* find a solution not using inversion;
+   need a lemma or lemmas dealing with it *)
+...
+    destruct i; [ now inversion Hll | symmetry ].
+    inversion_clear Hll; subst.
+    clear - H0.
+    revert i.
+    induction lb as [| b lb]; intros; [ now destruct i | ].
+    cbn.
+    destruct i; [ now inversion H0 | ].
+    apply IHlb.
+    now inversion H0.
+  }
+...
     unfold "="%pol in Hll.
     cbn in Hll.
     apply Bool.andb_true_iff in Hll.
