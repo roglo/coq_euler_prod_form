@@ -3,8 +3,9 @@
 (* polynomials on a ring *)
 
 Set Nested Proofs Allowed.
-Require Import Utf8 Arith Setoid.
+Require Import Utf8 Arith Setoid Morphisms.
 Import List List.ListNotations.
+Require Import Misc.
 
 (* ring *)
 
@@ -240,12 +241,119 @@ Notation "'Σ' ( i = b , e ) , g" :=
   (fold_left (λ c i, (c + g)%pol) (seq b (S e - b)) 0%pol) : pol_scope.
 
 (*
-... to be continued from "Formula.v"
+Instance polm_add_morph {A} {rng : ring A} :
+  Proper (pol_eq ==> pol_eq ==> pol_eq) pol_add.
+Proof.
+intros la lb Hab lc ld Hcd.
+Admitted. (*
+apply polm_eq_iff; intros i.
+specialize (proj1 (polm_eq_iff _ _) Hab i) as H1.
+specialize (proj1 (polm_eq_iff _ _) Hcd i) as H2.
+clear Hab Hcd.
+do 2 rewrite nth_polm_add.
+destruct (Nat.eq_dec mn 0) as [Hnz| Hnz]; [ now rewrite Hnz | ].
+rewrite <- Nat.add_mod_idemp_l; [ | easy ].
+rewrite <- Nat.add_mod_idemp_r; [ | easy ].
+rewrite H1, H2.
+rewrite Nat.add_mod_idemp_l; [ | easy ].
+rewrite Nat.add_mod_idemp_r; [ | easy ].
+easy.
+Qed.
 *)
+*)
+
+Theorem fold_left_polm_add_fun_from_0 {A} {rng : ring A} : ∀ a l (f : A → _),
+  (fold_left (λ c i, c + f i) l a)%pol =
+  (a + fold_left (λ c i, c + f i) l 0)%pol.
+Proof.
+intros (la) lb f.
+...
+induction lb as [| b lb]; cbn.
+...
+intros (la) *.
+revert la.
+induction l as [| x l]; intros; [ now induction la | cbn ].
+rewrite IHl.
+
+rewrite IHl; symmetry; rewrite IHl.
+
+rewrite IHl; symmetry; rewrite IHl.
+now rewrite polm_add_assoc.
+Qed.
+
+Theorem polm_summation_split_first {A} {rng : ring A} : ∀ b e f,
+  b ≤ e
+  → (Σ (i = b, e), f i)%pol = (f b + Σ (i = S b, e), f i)%pol.
+Proof.
+intros * Hbe.
+rewrite Nat.sub_succ.
+replace (S e - b) with (S (e - b)) by flia Hbe.
+cbn.
+...
+apply fold_left_polm_add_fun_from_0.
+Qed.
+
+Theorem polm_summation_split_last {n : mod_num} : ∀ g b e,
+  b ≤ S e
+  → (Σ (i = b, S e), g i)%pol = (Σ (i = b, e), g i + g (S e))%pol.
+Proof.
+intros * Hbe.
+replace (S (S e) - b) with (S (S e - b)) by flia Hbe.
+rewrite seq_S.
+rewrite fold_left_app.
+rewrite fold_left_polm_add_fun_from_0.
+now rewrite Nat.add_comm, Nat.sub_add.
+Qed.
+
+Theorem polm_mul_1_l {A} {rng : ring A} : ∀ p1, (1 * p1)%pol = p1.
+Proof.
+intros (la).
+unfold "*"%pol; cbn.
+f_equal.
+rewrite Nat.sub_0_r.
+f_equal.
+unfold lap_convol_mul_term.
+rewrite (map_ext _ (λ i, nth i la 0%Rng)). 2: {
+  intros i.
+...
+  rewrite summation_split_first; [ | ].
+  rewrite Nat.mul_1_l, Nat.sub_0_r.
+  rewrite all_0_summation_0; [ apply Nat.add_0_r | ].
+  intros j Hj.
+  cbn.
+  destruct j; [ flia Hj | now destruct j ].
+}
+induction la as [| a la]; [ easy | cbn; f_equal ].
+rewrite <- seq_shift.
+rewrite map_map.
+apply IHla.
+Qed.
+
+Theorem polm_mul_1_r {n : mod_num} : ∀ la, (la * 1)%pol = la.
+Proof.
+intros.
+rewrite polm_mul_comm.
+apply polm_mul_1_l.
+Qed.
 
 Theorem pol_pow_sub_1 {A} {rng : ring A} : ∀ k,
   k ≠ 0
   → (ⓧ^k - 1 = (ⓧ - 1) * (Σ (i = 0, k - 1), ⓧ^(k-i-1)))%pol.
 Proof.
 intros * Hkz.
+destruct k; [ easy | clear Hkz ].
+rewrite Nat.sub_succ, (Nat.sub_0_r k).
+induction k. {
+  cbn - [ pol_mul ].
+...
+  now rewrite pol_mul_1_r.
+}
+rewrite polm_summation_split_last; [ | flia ].
+rewrite (polm_summation_eq_compat _ (λ i, (ⓧ * ⓧ^(S k - i - 1))%pol)). 2: {
+  intros i Hi.
+  rewrite <- xpow_add_r.
+  f_equal; flia Hi.
+}
+rewrite <- polm_mul_summation_distr_l.
+rewrite polm_mul_add_distr_l.
 ...
