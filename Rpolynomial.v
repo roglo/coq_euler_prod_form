@@ -50,13 +50,13 @@ Record polynomial := mkpol { al : list A }.
 Definition pol_0 := mkpol [].
 Definition pol_1 := mkpol [1%Rng].
 
-Fixpoint lap_add al₁ al₂ :=
-  match al₁ with
-  | [] => al₂
-  | a₁ :: bl₁ =>
-      match al₂ with
-      | [] => al₁
-      | a₂ :: bl₂ => (a₁ + a₂)%Rng :: lap_add bl₁ bl₂
+Fixpoint lap_add al1 al2 :=
+  match al1 with
+  | [] => al2
+  | a1 :: bl1 =>
+      match al2 with
+      | [] => al1
+      | a2 :: bl2 => (a1 + a2)%Rng :: lap_add bl1 bl2
       end
   end.
 
@@ -141,66 +141,73 @@ Qed.
 
 Theorem lap_eq_sym : symmetric _ lap_eq.
 Proof.
-intros l₁ l₂ Heq.
-revert l₂ Heq.
-induction l₁ as [| x₁]; intros. {
-  now induction l₂; constructor; apply lap_eq_nil_cons_inv in Heq.
+intros l1 l2 Heq.
+revert l2 Heq.
+induction l1 as [| x1]; intros. {
+  now induction l2; constructor; apply lap_eq_nil_cons_inv in Heq.
 }
-induction l₂ as [| x₂]. {
+induction l2 as [| x2]. {
   apply lap_eq_cons_nil_inv in Heq.
   now constructor.
 }
 apply lap_eq_cons_cons_inv in Heq; destruct Heq.
-constructor; [ easy | now apply IHl₁ ].
+constructor; [ easy | now apply IHl1 ].
 Qed.
 
 Theorem lap_eq_trans : transitive _ lap_eq.
 Proof.
-intros l₁ l₂ l₃ H₁ H₂.
-...
-revert l₁ l₃ H₁ H₂.
-induction l₂ as [| x₂]; intros.
- revert l₃ H₂.
- induction l₁ as [| x₁]; intros; [ assumption | idtac ].
- destruct l₃ as [| x₃]; [ assumption | idtac ].
- apply lap_eq_cons_nil_inv in H₁.
- apply lap_eq_nil_cons_inv in H₂.
- constructor.
-  etransitivity; [ destruct H₁; eassumption | idtac ].
-  destruct H₂; symmetry; assumption.
-
-  apply IHl₁; [ destruct H₁ | destruct H₂ ]; assumption.
-
- destruct l₁ as [| x₁].
-  apply lap_eq_nil_cons_inv in H₁.
-  destruct l₃ as [| x₃]; constructor.
-   apply lap_eq_cons_inv in H₂.
-   destruct H₁, H₂.
-   etransitivity; [ symmetry; eassumption | assumption ].
-
-   apply lap_eq_cons_inv in H₂.
-   apply IHl₂; [ destruct H₁ | destruct H₂ ]; assumption.
-
-  apply lap_eq_cons_inv in H₁.
-  destruct l₃ as [| x₃]; constructor.
-   apply lap_eq_cons_nil_inv in H₂.
-   destruct H₁, H₂.
-   etransitivity; eassumption.
-
-   apply lap_eq_cons_nil_inv in H₂.
-   apply IHl₂; [ destruct H₁ | destruct H₂ ]; assumption.
-
-   apply lap_eq_cons_inv in H₂.
-   apply IHl₂; [ destruct H₁ | destruct H₂ ]; assumption.
+intros l1 l2 l3 H1 H2.
+revert l1 l3 H1 H2.
+induction l2 as [| x2]; intros. {
+  revert l3 H2.
+  induction l1 as [| x1]; intros; [ assumption | idtac ].
+  destruct l3 as [| x3]; [ assumption | idtac ].
+  apply lap_eq_cons_nil_inv in H1.
+  apply lap_eq_nil_cons_inv in H2.
+  constructor. {
+    etransitivity; [ destruct H1; eassumption | idtac ].
+    destruct H2; symmetry; assumption.
+  } {
+    apply IHl1; [ now destruct H1 | destruct H2 ].
+    now apply lap_eq_sym.
+  }
+} {
+  destruct l1 as [| x1]. {
+    apply lap_eq_nil_cons_inv in H1.
+    destruct l3 as [| x3]; constructor. {
+      apply lap_eq_cons_cons_inv in H2.
+      destruct H1, H2.
+      etransitivity; [ symmetry; eassumption | assumption ].
+    } {
+      apply lap_eq_cons_cons_inv in H2.
+      apply IHl2; [ destruct H1 | now destruct H2 ].
+      now apply lap_eq_sym.
+    }
+  } {
+    apply lap_eq_cons_cons_inv in H1.
+    destruct l3 as [| x3]; constructor. {
+      apply lap_eq_cons_nil_inv in H2.
+      destruct H1, H2.
+      etransitivity; eassumption.
+    } {
+      apply lap_eq_cons_nil_inv in H2.
+      apply IHl2; [ destruct H1 | destruct H2 ]; assumption.
+    } {
+      apply lap_eq_cons_cons_inv in H2.
+      etransitivity; [ apply H1 | apply H2 ].
+    } {
+      apply IHl2; [ easy | ].
+      now apply lap_eq_cons_cons_inv in H2.
+    }
+  }
+}
 Qed.
 
-Add Parametric Relation : (list α) lap_eq
+Add Parametric Relation : (list A) lap_eq
  reflexivity proved by lap_eq_refl
  symmetry proved by lap_eq_sym
  transitivity proved by lap_eq_trans
  as lap_eq_rel.
-
-...
 
 Theorem pol_eq_iff : ∀ p1 p2,
   (p1 = p2)%pol ↔ ∀ i, (nth i (al p1) 0 = nth i (al p2) 0)%Rng.
@@ -233,38 +240,17 @@ split; intros Hll. {
   induction la as [| a la]; intros. {
     cbn.
     destruct lb as [| b lb]; [ easy | cbn ].
-Theorem glop : ∀ b lb, lap_eq [] (b :: lb) → (b = 0)%Rng ∧ lap_eq lb [].
-Proof.
-intros.
-inversion H; subst.
-easy.
-Qed.
-apply glop in Hll.
-destruct i; [ easy | ].
-destruct Hll as (_, Hll); symmetry.
-clear - Hll.
-revert i.
-induction lb as [| b lb]; intros; [ now destruct i | cbn ].
-...
-symmetry in Hll.
-destruct i.
-
-...
-(* find a solution not using inversion;
-   need a lemma or lemmas dealing with it *)
-...
-    destruct i; [ now inversion Hll | symmetry ].
-    inversion_clear Hll; subst.
-    clear - H0.
+    apply lap_eq_nil_cons_inv in Hll.
+    destruct i; [ easy | ].
+    destruct Hll as (_, Hll); symmetry.
+    clear - Hll.
     revert i.
-    induction lb as [| b lb]; intros; [ now destruct i | ].
-    cbn.
-    destruct i; [ now inversion H0 | ].
-    apply IHlb.
-    now inversion H0.
-  }
-...
-    unfold "="%pol in Hll.
+    induction lb as [| b lb]; intros; [ now destruct i | cbn ].
+    apply lap_eq_cons_nil_inv in Hll.
+    destruct i; [ easy | ].
+    now apply IHlb.
+  } {
+(*
     cbn in Hll.
     apply Bool.andb_true_iff in Hll.
     destruct Hll as (Hb, Hlb).
@@ -284,49 +270,26 @@ destruct i.
       now rewrite Nat.mod_0_l.
     }
   } {
+*)
     cbn.
-    destruct i. {
-      destruct lb as [| b lb]. {
-        unfold "="%pol in Hll.
-        cbn in Hll |-*.
-        apply Bool.andb_true_iff in Hll.
-        destruct Hll as (Hb, Hlb).
-        apply Nat.eqb_eq in Hb.
-        rewrite Hb.
-        now symmetry; apply Nat.mod_0_l.
-      } {
-        unfold "="%pol in Hll.
-        cbn in Hll |-*.
-        now destruct (Nat.eq_dec _ _).
-      }
+    destruct lb as [| b lb]. {
+      apply lap_eq_cons_nil_inv in Hll.
+      destruct i; [ easy | cbn ].
+      destruct Hll as (_, Hll).
+      clear - Hll.
+      revert i.
+      induction la as [| a la]; intros; [ now destruct i | cbn ].
+      apply lap_eq_cons_nil_inv in Hll.
+      destruct i; [ easy | ].
+      now apply IHla.
     } {
-      destruct lb as [| b lb]. {
-        unfold "="%pol in Hll.
-        cbn in Hll |-*.
-        apply Bool.andb_true_iff in Hll.
-        destruct Hll as (Hb, Hlb).
-        specialize (proj1 (forallb_forall _ _) Hlb) as H1.
-        cbn in H1.
-        destruct (lt_dec i (length la)) as [Hia| Hia]. {
-          assert (H : nth i la 0 ∈ la) by now apply nth_In.
-          specialize (H1 _ H); clear H.
-          apply Nat.eqb_eq in H1.
-          rewrite H1.
-          now symmetry; apply Nat.mod_0_l.
-        } {
-          apply Nat.nlt_ge in Hia.
-          rewrite nth_overflow; [ | easy ].
-          now rewrite Nat.mod_0_l.
-        }
-      } {
-        unfold "="%pol in Hll.
-        cbn in Hll |-*.
-        destruct (Nat.eq_dec _ _) as [H1| H1]; [ | easy ].
-        now apply IHla.
-      }
+      apply lap_eq_cons_cons_inv in Hll.
+      destruct i; [ easy | cbn ].
+      now apply IHla.
     }
   }
 } {
+...
   unfold "="%pol.
   revert lb Hll.
   induction la as [| a la]; intros. {
