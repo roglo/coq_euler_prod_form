@@ -42,8 +42,8 @@ Add Parametric Relation A (r : ring A) : A rng_eq
 
 Section Polynomials.
 
-Variable A : Type.
-Variable rng : ring A.
+Context {A : Type}.
+Context {rng : ring A}.
 
 Record polynomial := mkpol { al : list A }.
 
@@ -85,22 +85,6 @@ Inductive lap_eq : list A → list A → Prop :=
 
 Definition pol_eq p1 p2 := lap_eq (al p1) (al p2).
 
-Declare Scope pol_scope.
-Delimit Scope pol_scope with pol.
-Bind Scope pol_scope with polynomial.
-Notation "0" := pol_0 : pol_scope.
-Notation "1" := pol_1 : pol_scope.
-Notation "- a" := (pol_opp a) : pol_scope.
-Notation "a + b" := (pol_add a b) : pol_scope.
-Notation "a - b" := (pol_sub a b) : pol_scope.
-Notation "a * b" := (pol_mul a b) : pol_scope.
-Notation "a = b" := (pol_eq a b) : pol_scope.
-Notation "'ⓧ' ^ a" := (xpow a) (at level 30, format "'ⓧ' ^ a") : pol_scope.
-Notation "'ⓧ'" := (xpow 1) (at level 30, format "'ⓧ'") : pol_scope.
-
-Notation "'Σ' ( i = b , e ) , g" :=
-  (fold_left (λ c i, (c + g)%pol) (seq b (S e - b)) 0%pol) : pol_scope.
-
 Fixpoint lap_eval la x :=
   match la with
   | [] => 0%Rng
@@ -134,12 +118,11 @@ now inversion H.
 Qed.
 
 Theorem pol_eq_iff : ∀ p1 p2,
-  (p1 = p2)%pol ↔ ∀ i, (nth i (al p1) 0 = nth i (al p2) 0)%Rng.
+  pol_eq p1 p2 ↔ ∀ i, (nth i (al p1) 0 = nth i (al p2) 0)%Rng.
 Proof.
 intros.
 destruct p1 as [la].
 destruct p2 as [lb].
-unfold "="%pol; cbn.
 split; intros Hll. {
   intros i.
   revert i lb Hll.
@@ -207,9 +190,8 @@ Qed.
 
 Theorem pol_eq_refl : reflexive _ pol_eq.
 Proof.
-intros p.
-unfold "="%pol.
-remember (al p) as la; clear p Heqla.
+intros (la).
+unfold pol_eq; cbn.
 now induction la; constructor.
 Qed.
 
@@ -239,8 +221,31 @@ Add Parametric Relation : _ pol_eq
  transitivity proved by pol_eq_trans
  as pol_eq_rel.
 
+End Polynomials.
+
+Declare Scope pol_scope.
+Delimit Scope pol_scope with pol.
+Bind Scope pol_scope with polynomial.
+Notation "0" := pol_0 : pol_scope.
+Notation "1" := pol_1 : pol_scope.
+Notation "- a" := (pol_opp a) : pol_scope.
+Notation "a + b" := (pol_add a b) : pol_scope.
+Notation "a - b" := (pol_sub a b) : pol_scope.
+Notation "a * b" := (pol_mul a b) : pol_scope.
+Notation "a = b" := (pol_eq a b) : pol_scope.
+Notation "'ⓧ' ^ a" := (xpow a) (at level 30, format "'ⓧ' ^ a") : pol_scope.
+Notation "'ⓧ'" := (xpow 1) (at level 30, format "'ⓧ'") : pol_scope.
+
+Notation "'Σ' ( i = b , e ) , g" :=
+  (fold_left (λ c i, (c + g)%pol) (seq b (S e - b)) 0%pol) : pol_scope.
+
 (*
 ... to be continued from "Formula.v"
 *)
 
-End Polynomials.
+Theorem pol_pow_sub_1 {A} {rng : ring A} : ∀ k,
+  k ≠ 0
+  → (ⓧ^k - 1 = (ⓧ - 1) * (Σ (i = 0, k - 1), ⓧ^(k-i-1)))%pol.
+Proof.
+intros * Hkz.
+...
