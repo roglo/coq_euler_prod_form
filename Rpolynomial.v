@@ -38,6 +38,7 @@ Variable rng : ring A.
 
 Record polynomial := mkpol { al : list A }.
 
+Definition pol_0 := mkpol [].
 Definition pol_1 := mkpol [1%Rng].
 
 Fixpoint lap_add al₁ al₂ :=
@@ -78,6 +79,7 @@ Definition pol_eq p1 p2 := lap_eq (al p1) (al p2).
 Declare Scope pol_scope.
 Delimit Scope pol_scope with pol.
 Bind Scope pol_scope with polynomial.
+Notation "0" := pol_0 : pol_scope.
 Notation "1" := pol_1 : pol_scope.
 Notation "- a" := (pol_opp a) : pol_scope.
 Notation "a + b" := (pol_add a b) : pol_scope.
@@ -86,6 +88,17 @@ Notation "a * b" := (pol_mul a b) : pol_scope.
 Notation "a = b" := (pol_eq a b) : pol_scope.
 Notation "'ⓧ' ^ a" := (xpow a) (at level 30, format "'ⓧ' ^ a") : pol_scope.
 Notation "'ⓧ'" := (xpow 1) (at level 30, format "'ⓧ'") : pol_scope.
+
+Notation "'Σ' ( i = b , e ) , g" :=
+  (fold_left (λ c i, (c + g)%pol) (seq b (S e - b)) 0%pol) : pol_scope.
+
+Fixpoint lap_eval la x :=
+  match la with
+  | [] => 0%Rng
+  | a :: la' => (a + x * lap_eval la' x)%Rng
+  end.
+
+Definition pol_eval p x := lap_eval (al p) x.
 
 (*
 ... to be continued from "Formula.v"
