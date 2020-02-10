@@ -173,6 +173,39 @@ Notation "'ⓧ'" := (xpow 1) (at level 30, format "'ⓧ'") : pol_scope.
 Notation "'Σ' ( i = b , e ) , g" :=
   (fold_left (λ c i, (c + g)%pol) (seq b (S e - b)) 0%pol) : pol_scope.
 
+Theorem pol_eq_refl : reflexive _ pol_eq.
+Proof.
+intros (la).
+unfold pol_eq; cbn.
+now induction la; constructor.
+Qed.
+
+Theorem pol_eq_sym : symmetric _ pol_eq.
+Proof.
+intros (la) (lb) Hll.
+specialize (proj1 (lap_eq_iff _ _) Hll) as H1.
+clear Hll.
+apply lap_eq_iff.
+intros i; symmetry.
+apply H1.
+Qed.
+
+Theorem pol_eq_trans : transitive _ pol_eq.
+Proof.
+intros (la) (lb) (lc) H12 H23.
+specialize (proj1 (lap_eq_iff _ _) H12) as H1.
+specialize (proj1 (lap_eq_iff _ _) H23) as H2.
+apply lap_eq_iff.
+intros i.
+etransitivity; [ apply H1 | apply H2 ].
+Qed.
+
+Add Parametric Relation : _ pol_eq
+ reflexivity proved by pol_eq_refl
+ symmetry proved by pol_eq_sym
+ transitivity proved by pol_eq_trans
+ as pol_eq_rel.
+
 Theorem pol_pow_sub_1 : ∀ k,
   k ≠ 0
   → (ⓧ^k - 1 = (ⓧ - 1) * (Σ (i = 0, k - 1), ⓧ^(k-i-1)))%pol.
@@ -185,7 +218,8 @@ induction k. {
 ...
 Theorem pol_add_0_l : ∀ p1, (0 + p1 = p1)%pol.
 Admitted.
-...
+Instance pol_mul_morph : Proper (pol_eq ==> pol_eq ==> pol_eq) pol_mul.
+Admitted.
   rewrite pol_add_0_l.
 ...
   now rewrite pol_mul_1_r.
@@ -201,6 +235,12 @@ rewrite polm_mul_add_distr_l.
 
 ...
 
+Instance pol_add_morph : Proper (pol_eq ==> pol_eq ==> pol_eq) pol_add.
+...
+
+Instance pol_sub_morph : Proper (pol_eq ==> pol_eq ==> pol_eq) pol_sub.
+...
+
 Fixpoint lap_eval la x :=
   match la with
   | [] => 0%Rng
@@ -208,39 +248,6 @@ Fixpoint lap_eval la x :=
   end.
 
 Definition pol_eval p x := lap_eval (al p) x.
-
-Theorem pol_eq_refl : reflexive _ pol_eq.
-Proof.
-intros (la).
-unfold pol_eq; cbn.
-now induction la; constructor.
-Qed.
-
-Theorem pol_eq_sym : symmetric _ pol_eq.
-Proof.
-intros p1 p2 Hll.
-specialize (proj1 (pol_eq_iff _ _) Hll) as H1.
-clear Hll.
-apply pol_eq_iff.
-intros i; symmetry.
-apply H1.
-Qed.
-
-Theorem pol_eq_trans : transitive _ pol_eq.
-Proof.
-intros p1 p2 p3 H12 H23.
-specialize (proj1 (pol_eq_iff _ _) H12) as H1.
-specialize (proj1 (pol_eq_iff _ _) H23) as H2.
-apply pol_eq_iff.
-intros i.
-etransitivity; [ apply H1 | apply H2 ].
-Qed.
-
-Add Parametric Relation : _ pol_eq
- reflexivity proved by pol_eq_refl
- symmetry proved by pol_eq_sym
- transitivity proved by pol_eq_trans
- as pol_eq_rel.
 
 End Polynomials.
 
