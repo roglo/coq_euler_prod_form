@@ -137,6 +137,38 @@ Qed.
 
 End Lap.
 
+Theorem lap_eq_refl {A} {rng : ring A} : reflexive _ lap_eq.
+Proof.
+intros la.
+now induction la; constructor.
+Qed.
+
+Theorem lap_eq_sym {A} {rng : ring A} : symmetric _ lap_eq.
+Proof.
+intros la lb Hll.
+specialize (proj1 (lap_eq_iff _ _) Hll) as H1.
+clear Hll.
+apply lap_eq_iff.
+intros i; symmetry.
+apply H1.
+Qed.
+
+Theorem lap_eq_trans {A} {rng : ring A} : transitive _ lap_eq.
+Proof.
+intros la lb lc H12 H23.
+specialize (proj1 (lap_eq_iff _ _) H12) as H1.
+specialize (proj1 (lap_eq_iff _ _) H23) as H2.
+apply lap_eq_iff.
+intros i.
+etransitivity; [ apply H1 | apply H2 ].
+Qed.
+
+Add Parametric Relation {A} {rng : ring A} : _ lap_eq
+ reflexivity proved by lap_eq_refl
+ symmetry proved by lap_eq_sym
+ transitivity proved by lap_eq_trans
+ as lap_eq_rel.
+
 (* polynomials *)
 
 Section Polynomials.
@@ -275,6 +307,14 @@ revert lb Hll.
 induction la as [| a la]; intros; cbn. {
   destruct lb as [| b lb]; [ easy | ].
   apply lap_eq_nil_cons_inv in Hll.
+  destruct Hll as (Hb, Hlb).
+Instance cons_rng_lap_morph {A} {rng : ring A} :
+  Proper (rng_eq ==> lap_eq ==> lap_eq) cons.
+Admitted.
+Instance mkpol_morph {A} {rng : ring A} :
+  Proper (lap_eq ==> pol_eq) mkpol.
+Admitted.
+  rewrite Hb.
 ...
 
 Theorem pol_mul_1_l {A} {rng : ring A} : ∀ p1, (1 * p1 = p1)%pol.
