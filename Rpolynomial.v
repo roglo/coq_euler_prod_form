@@ -277,6 +277,20 @@ split; intros Hll. {
 }
 Qed.
 
+Theorem pol_eq_refl : reflexive _ pol_eq.
+Proof.
+intros p.
+unfold "="%pol.
+easy.
+Qed.
+
+Theorem polm_eq_sym : symmetric _ pol_eq.
+Proof.
+intros p1 p2 Hll.
+unfold "="%pol in Hll |-*.
+easy.
+Qed.
+
 (*
 ... to be continued from "Formula.v"
 *)
