@@ -7,80 +7,17 @@ Require Import Utf8 Arith Setoid Morphisms.
 Import List List.ListNotations.
 Require Import Misc Ring2.
 
-(*
-
-(* ring *)
-
-Class ring A :=
-  { rng_zero : A;
-    rng_one : A;
-    rng_add : A → A → A;
-    rng_mul : A → A → A;
-    rng_opp : A → A;
-    rng_eq : A → A → Prop;
-    rng_eq_refl : ∀ a, rng_eq a a;
-    rng_eq_sym : ∀ a b, rng_eq a b → rng_eq b a;
-    rng_eq_trans : ∀ a b c, rng_eq a b → rng_eq b c → rng_eq a c }.
-
-Declare Scope ring_scope.
-Delimit Scope ring_scope with Rng.
-Bind Scope ring_scope with ring.
-Notation "0" := rng_zero : ring_scope.
-Notation "1" := rng_one : ring_scope.
-Notation "a = b" := (rng_eq a b) : ring_scope.
-Notation "a ≠ b" := (¬ rng_eq a b) : ring_scope.
-Notation "a + b" := (rng_add a b) : ring_scope.
-Notation "a * b" := (rng_mul a b) : ring_scope.
-Notation "- a" := (rng_opp a) : ring_scope.
-*)
-
 Notation "'Σ' ( i = b , e ) , g" :=
   (fold_left (λ c i, (c + g)%Rng) (seq b (S e - b)) 0%Rng)
   (at level 45, i at level 0, b at level 60, e at level 60) : ring_scope.
-
-(*
-Add Parametric Relation A (r : ring A) : A rng_eq
- reflexivity proved by rng_eq_refl
- symmetry proved by rng_eq_sym
- transitivity proved by rng_eq_trans
- as eq_rel.
-*)
 
 Section Polynomials.
 
 Context {A : Type}.
 Context {rng : ring A}.
 
-Record polynomial := mkpol { al : list A }.
-
-Definition pol_0 := mkpol [].
-Definition pol_1 := mkpol [1%Rng].
-
-Fixpoint lap_add al1 al2 :=
-  match al1 with
-  | [] => al2
-  | a1 :: bl1 =>
-      match al2 with
-      | [] => al1
-      | a2 :: bl2 => (a1 + a2)%Rng :: lap_add bl1 bl2
-      end
-  end.
-
-Definition pol_add p1 p2 := mkpol (lap_add (al p1) (al p2)).
-
-Definition pol_opp p := mkpol (map (λ a, (- a)%Rng) (al p)).
-Definition pol_sub p1 p2 := pol_add p1 (pol_opp p2).
-
-Definition lap_convol_mul_term la lb i :=
-  (Σ (j = 0, i), List.nth j la 0 * List.nth (i - j)%nat lb 0)%Rng.
-
-Definition pol_mul p1 p2 :=
-  mkpol
-    (map
-       (lap_convol_mul_term (al p1) (al p2))
-       (seq 0 (length (al p1) + length (al p2) - 1))).
-
-Definition xpow i := mkpol (repeat 0%Rng i ++ [1%Rng]).
+(* lap : list as polynomial, i.e. the only field of the record in the
+   definition of polynomial after *)
 
 Inductive lap_eq : list A → list A → Prop :=
   | lap_eq_nil_nil : lap_eq [] []
@@ -89,15 +26,8 @@ Inductive lap_eq : list A → list A → Prop :=
   | lap_eq_cons_cons : ∀ a b al bl,
       (a = b)%Rng → lap_eq al bl → lap_eq (a :: al) (b :: bl).
 
-Definition pol_eq p1 p2 := lap_eq (al p1) (al p2).
-
-Fixpoint lap_eval la x :=
-  match la with
-  | [] => 0%Rng
-  | a :: la' => (a + x * lap_eval la' x)%Rng
-  end.
-
-Definition pol_eval p x := lap_eval (al p) x.
+Definition lap_zero := ([] : list A).
+Definition lap_one := [1%Rng].
 
 Theorem lap_eq_nil_cons_inv : ∀ x l,
   lap_eq [] (x :: l)
@@ -123,12 +53,10 @@ intros * H.
 now inversion H.
 Qed.
 
-Theorem pol_eq_iff : ∀ p1 p2,
-  pol_eq p1 p2 ↔ ∀ i, (nth i (al p1) 0 = nth i (al p2) 0)%Rng.
+Theorem lap_eq_iff : ∀ la lb,
+  lap_eq la lb ↔ ∀ i, (nth i la 0 = nth i lb 0)%Rng.
 Proof.
 intros.
-destruct p1 as [la].
-destruct p2 as [lb].
 split; intros Hll. {
   intros i.
   revert i lb Hll.
@@ -193,6 +121,51 @@ split; intros Hll. {
   }
 }
 Qed.
+
+...
+
+(*
+Record polynomial := mkpol { al : list A }.
+
+Definition pol_0 := mkpol [].
+Definition pol_1 := mkpol [1%Rng].
+
+Fixpoint lap_add al1 al2 :=
+  match al1 with
+  | [] => al2
+  | a1 :: bl1 =>
+      match al2 with
+      | [] => al1
+      | a2 :: bl2 => (a1 + a2)%Rng :: lap_add bl1 bl2
+      end
+  end.
+
+Definition pol_add p1 p2 := mkpol (lap_add (al p1) (al p2)).
+
+Definition pol_opp p := mkpol (map (λ a, (- a)%Rng) (al p)).
+Definition pol_sub p1 p2 := pol_add p1 (pol_opp p2).
+
+Definition lap_convol_mul_term la lb i :=
+  (Σ (j = 0, i), List.nth j la 0 * List.nth (i - j)%nat lb 0)%Rng.
+
+Definition pol_mul p1 p2 :=
+  mkpol
+    (map
+       (lap_convol_mul_term (al p1) (al p2))
+       (seq 0 (length (al p1) + length (al p2) - 1))).
+
+Definition xpow i := mkpol (repeat 0%Rng i ++ [1%Rng]).
+*)
+
+Definition pol_eq p1 p2 := lap_eq (al p1) (al p2).
+
+Fixpoint lap_eval la x :=
+  match la with
+  | [] => 0%Rng
+  | a :: la' => (a + x * lap_eval la' x)%Rng
+  end.
+
+Definition pol_eval p x := lap_eval (al p) x.
 
 Theorem pol_eq_refl : reflexive _ pol_eq.
 Proof.
