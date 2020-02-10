@@ -183,6 +183,11 @@ rewrite Nat.sub_succ, (Nat.sub_0_r k).
 induction k. {
   cbn - [ pol_mul ].
 ...
+Theorem pol_add_0_l : ∀ p1, (0 + p1 = p1)%pol.
+Admitted.
+...
+  rewrite pol_add_0_l.
+...
   now rewrite pol_mul_1_r.
 }
 rewrite polm_summation_split_last; [ | flia ].
