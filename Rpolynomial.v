@@ -133,84 +133,6 @@ intros * H.
 now inversion H.
 Qed.
 
-(*
-Theorem lap_eq_refl : reflexive _ lap_eq.
-Proof.
-intros l.
-induction l; constructor; [ reflexivity | assumption ].
-Qed.
-
-Theorem lap_eq_sym : symmetric _ lap_eq.
-Proof.
-intros l1 l2 Heq.
-revert l2 Heq.
-induction l1 as [| x1]; intros. {
-  now induction l2; constructor; apply lap_eq_nil_cons_inv in Heq.
-}
-induction l2 as [| x2]. {
-  apply lap_eq_cons_nil_inv in Heq.
-  now constructor.
-}
-apply lap_eq_cons_cons_inv in Heq; destruct Heq.
-constructor; [ easy | now apply IHl1 ].
-Qed.
-
-Theorem lap_eq_trans : transitive _ lap_eq.
-Proof.
-intros l1 l2 l3 H1 H2.
-revert l1 l3 H1 H2.
-induction l2 as [| x2]; intros. {
-  revert l3 H2.
-  induction l1 as [| x1]; intros; [ assumption | idtac ].
-  destruct l3 as [| x3]; [ assumption | idtac ].
-  apply lap_eq_cons_nil_inv in H1.
-  apply lap_eq_nil_cons_inv in H2.
-  constructor. {
-    etransitivity; [ destruct H1; eassumption | idtac ].
-    destruct H2; symmetry; assumption.
-  } {
-    apply IHl1; [ now destruct H1 | destruct H2 ].
-    now apply lap_eq_sym.
-  }
-} {
-  destruct l1 as [| x1]. {
-    apply lap_eq_nil_cons_inv in H1.
-    destruct l3 as [| x3]; constructor. {
-      apply lap_eq_cons_cons_inv in H2.
-      destruct H1, H2.
-      etransitivity; [ symmetry; eassumption | assumption ].
-    } {
-      apply lap_eq_cons_cons_inv in H2.
-      apply IHl2; [ destruct H1 | now destruct H2 ].
-      now apply lap_eq_sym.
-    }
-  } {
-    apply lap_eq_cons_cons_inv in H1.
-    destruct l3 as [| x3]; constructor. {
-      apply lap_eq_cons_nil_inv in H2.
-      destruct H1, H2.
-      etransitivity; eassumption.
-    } {
-      apply lap_eq_cons_nil_inv in H2.
-      apply IHl2; [ destruct H1 | destruct H2 ]; assumption.
-    } {
-      apply lap_eq_cons_cons_inv in H2.
-      etransitivity; [ apply H1 | apply H2 ].
-    } {
-      apply IHl2; [ easy | ].
-      now apply lap_eq_cons_cons_inv in H2.
-    }
-  }
-}
-Qed.
-
-Add Parametric Relation : (list A) lap_eq
- reflexivity proved by lap_eq_refl
- symmetry proved by lap_eq_sym
- transitivity proved by lap_eq_trans
- as lap_eq_rel.
-*)
-
 Theorem pol_eq_iff : ∀ p1 p2,
   (p1 = p2)%pol ↔ ∀ i, (nth i (al p1) 0 = nth i (al p2) 0)%Rng.
 Proof.
@@ -300,6 +222,22 @@ apply pol_eq_iff.
 intros i; symmetry.
 apply H1.
 Qed.
+
+Theorem pol_eq_trans : transitive _ pol_eq.
+Proof.
+intros p1 p2 p3 H12 H23.
+specialize (proj1 (pol_eq_iff _ _) H12) as H1.
+specialize (proj1 (pol_eq_iff _ _) H23) as H2.
+apply pol_eq_iff.
+intros i.
+etransitivity; [ apply H1 | apply H2 ].
+Qed.
+
+Add Parametric Relation : _ pol_eq
+ reflexivity proved by pol_eq_refl
+ symmetry proved by pol_eq_sym
+ transitivity proved by pol_eq_trans
+ as pol_eq_rel.
 
 (*
 ... to be continued from "Formula.v"
