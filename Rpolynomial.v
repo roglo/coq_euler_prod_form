@@ -11,7 +11,7 @@ Notation "'Σ' ( i = b , e ) , g" :=
   (fold_left (λ c i, (c + g)%Rng) (seq b (S e - b)) 0%Rng)
   (at level 45, i at level 0, b at level 60, e at level 60) : ring_scope.
 
-Section Polynomials.
+Section Lap.
 
 Context {A : Type}.
 Context {rng : ring A}.
@@ -135,7 +135,14 @@ split; intros Hll. {
 }
 Qed.
 
+End Lap.
+
 (* polynomials *)
+
+Section Polynomials.
+
+Context {A : Type}.
+Context {rng : ring A}.
 
 Record polynomial := mkpol { al : list A }.
 
@@ -157,6 +164,8 @@ Definition pol_mul p1 p2 :=
 
 Definition xpow i := mkpol (repeat 0%Rng i ++ [1%Rng]).
 
+End Polynomials.
+
 Declare Scope pol_scope.
 Delimit Scope pol_scope with pol.
 Bind Scope pol_scope with polynomial.
@@ -173,14 +182,14 @@ Notation "'ⓧ'" := (xpow 1) (at level 30, format "'ⓧ'") : pol_scope.
 Notation "'Σ' ( i = b , e ) , g" :=
   (fold_left (λ c i, (c + g)%pol) (seq b (S e - b)) 0%pol) : pol_scope.
 
-Theorem pol_eq_refl : reflexive _ pol_eq.
+Theorem pol_eq_refl {A} {rng : ring A} : reflexive _ pol_eq.
 Proof.
 intros (la).
 unfold pol_eq; cbn.
 now induction la; constructor.
 Qed.
 
-Theorem pol_eq_sym : symmetric _ pol_eq.
+Theorem pol_eq_sym {A} {rng : ring A} : symmetric _ pol_eq.
 Proof.
 intros (la) (lb) Hll.
 specialize (proj1 (lap_eq_iff _ _) Hll) as H1.
@@ -190,7 +199,7 @@ intros i; symmetry.
 apply H1.
 Qed.
 
-Theorem pol_eq_trans : transitive _ pol_eq.
+Theorem pol_eq_trans {A} {rng : ring A} : transitive _ pol_eq.
 Proof.
 intros (la) (lb) (lc) H12 H23.
 specialize (proj1 (lap_eq_iff _ _) H12) as H1.
@@ -200,13 +209,13 @@ intros i.
 etransitivity; [ apply H1 | apply H2 ].
 Qed.
 
-Add Parametric Relation : _ pol_eq
+Add Parametric Relation {A} {rng : ring A} : _ pol_eq
  reflexivity proved by pol_eq_refl
  symmetry proved by pol_eq_sym
  transitivity proved by pol_eq_trans
  as pol_eq_rel.
 
-Theorem fold_left_rng_add_fun_from_0 : ∀ a l (f : nat → _),
+Theorem fold_left_rng_add_fun_from_0 {A} {rng : ring A} : ∀ a l (f : nat → _),
   (fold_left (λ c i, c + f i) l a =
    a + fold_left (λ c i, c + f i) l 0)%Rng.
 Proof.
@@ -218,7 +227,7 @@ rewrite rng_add_0_l.
 apply rng_add_assoc.
 Qed.
 
-Theorem all_0_rng_summation_0 : ∀ b e f,
+Theorem all_0_rng_summation_0 {A} {rng : ring A} : ∀ b e f,
   (∀ i, b ≤ i ≤ e → (f i = 0)%Rng)
   → (Σ (i = b, e), f i = 0)%Rng.
 Proof.
@@ -236,7 +245,30 @@ rewrite IHn; [ | | flia Hn ]. {
 }
 Qed.
 
-Instance pol_mul_morph : Proper (pol_eq ==> pol_eq ==> pol_eq) pol_mul.
+Theorem rng_summation_eq_compat {A} {rng : ring A} : ∀ b e g h,
+  (∀ i, b ≤ i ≤ e → (g i = h i)%Rng)
+  → (Σ (i = b, e), g i = Σ (i = b, e), h i)%Rng.
+Proof.
+intros * Hgh.
+remember (S e - b) as n eqn:Hn.
+remember 0%Rng as a eqn:Ha; clear Ha.
+revert e a b Hn Hgh.
+induction n as [| n IHn]; intros; [ easy | cbn ].
+rewrite (IHn e); [ | flia Hn | ]. 2: {
+  intros i Hbie.
+  apply Hgh; flia Hbie.
+}
+rewrite fold_left_rng_add_fun_from_0; symmetry.
+rewrite fold_left_rng_add_fun_from_0; symmetry.
+rewrite Hgh; [ easy | ].
+split; [ easy | flia Hn ].
+Qed.
+
+Theorem pol_add_0_l {A} {rng : ring A} : ∀ p1, (0 + p1 = p1)%pol.
+Proof. intros (la); easy. Qed.
+
+Instance pol_mul_morph {A} {rng : ring A} :
+  Proper (pol_eq ==> pol_eq ==> pol_eq) pol_mul.
 Proof.
 intros (la) (lb) Hab (lc) (ld) Hcd.
 apply lap_eq_iff; intros i.
@@ -286,34 +318,47 @@ destruct (le_dec (length la + length lc - 1) i) as [Hila| Hila]. {
   rewrite seq_nth; [ rewrite Nat.add_0_l | easy ].
   destruct (le_dec (length lb + length ld - 1) i) as [Hilb| Hilb]. {
     rewrite nth_overflow; [ | now rewrite map_length, seq_length ].
-...
-    rewrite nth_overflow; [ easy | now rewrite map_length, seq_length ].
-  } {
-...
+    rewrite all_0_rng_summation_0; [ easy | ].
+    intros j Hj.
+    rewrite H1.
+    destruct (le_dec (length lb) j) as [Hbj| Hbj]. {
+      rewrite nth_overflow; [ | easy ].
+      now rewrite rng_mul_0_l.
+    }
+    apply Nat.nle_gt in Hbj.
     rewrite <- H1.
-...
-    rewrite <- H1, <- H2.
-    destruct (lt_dec j (length la)) as [Hja| Hja]. {
-      assert (H : i - j ≥ length lc). {
-...
-do 2 rewrite nth_pol_add.
-destruct (Nat.eq_dec mn 0) as [Hnz| Hnz]; [ now rewrite Hnz | ].
-rewrite <- Nat.add_mod_idemp_l; [ | easy ].
-rewrite <- Nat.add_mod_idemp_r; [ | easy ].
-rewrite H1, H2.
-rewrite Nat.add_mod_idemp_l; [ | easy ].
-rewrite Nat.add_mod_idemp_r; [ | easy ].
-easy.
+    destruct (le_dec (length la) j) as [Haj| Haj]. {
+      rewrite nth_overflow; [ | easy ].
+      now rewrite rng_mul_0_l.
+    }
+    apply Nat.nle_gt in Haj.
+    rewrite rng_mul_comm.
+    rewrite H2.
+    destruct (le_dec (length ld) (i - j)) as [Hdj| Hdj]. {
+      rewrite nth_overflow; [ | easy ].
+      now rewrite rng_mul_0_l.
+    }
+    apply Nat.nle_gt in Hdj.
+    rewrite <- H2.
+    destruct (le_dec (length lc) (i - j)) as [Hcj| Hcj]. {
+      rewrite nth_overflow; [ | easy ].
+      now rewrite rng_mul_0_l.
+    }
+    apply Nat.nle_gt in Hcj.
+    flia Hbj Haj Hdj Hcj Hilb.
+  } {
+    apply Nat.nle_gt in Hilb.
+    rewrite (List_map_nth_in _ 0); [ | now rewrite seq_length ].
+    rewrite seq_nth; [ | easy ].
+    rewrite Nat.add_0_l.
+    apply rng_summation_eq_compat.
+    intros j Hj.
+    now rewrite H1, H2.
+  }
+}
 Qed.
-*)
-...
 
-Theorem pol_add_0_l : ∀ p1, (0 + p1 = p1)%pol.
-Proof. intros (la); easy. Qed.
-
-End Polynomials.
-
-Theorem pol_pow_sub_1 : ∀ k,
+Theorem pol_pow_sub_1 {A} {rng : ring A} : ∀ k,
   k ≠ 0
   → (ⓧ^k - 1 = (ⓧ - 1) * (Σ (i = 0, k - 1), ⓧ^(k-i-1)))%pol.
 Proof.
@@ -322,20 +367,7 @@ destruct k; [ easy | clear Hkz ].
 rewrite Nat.sub_succ, (Nat.sub_0_r k).
 induction k. {
   cbn - [ pol_mul ].
-...
   rewrite pol_add_0_l.
-...
-  now rewrite pol_mul_1_r.
-}
-rewrite polm_summation_split_last; [ | flia ].
-rewrite (polm_summation_eq_compat _ (λ i, (ⓧ * ⓧ^(S k - i - 1))%pol)). 2: {
-  intros i Hi.
-  rewrite <- xpow_add_r.
-  f_equal; flia Hi.
-}
-rewrite <- polm_mul_summation_distr_l.
-rewrite polm_mul_add_distr_l.
-
 ...
 
 Instance pol_add_morph : Proper (pol_eq ==> pol_eq ==> pol_eq) pol_add.
