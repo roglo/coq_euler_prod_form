@@ -206,6 +206,29 @@ Add Parametric Relation : _ pol_eq
  transitivity proved by pol_eq_trans
  as pol_eq_rel.
 
+Instance pol_mul_morph : Proper (pol_eq ==> pol_eq ==> pol_eq) pol_mul.
+Proof.
+intros (la) (lb) Hab (lc) (ld) Hcd.
+apply lap_eq_iff; intros i.
+...
+specialize (proj1 (polm_eq_iff _ _) Hab i) as H1.
+specialize (proj1 (polm_eq_iff _ _) Hcd i) as H2.
+clear Hab Hcd.
+do 2 rewrite nth_polm_add.
+destruct (Nat.eq_dec mn 0) as [Hnz| Hnz]; [ now rewrite Hnz | ].
+rewrite <- Nat.add_mod_idemp_l; [ | easy ].
+rewrite <- Nat.add_mod_idemp_r; [ | easy ].
+rewrite H1, H2.
+rewrite Nat.add_mod_idemp_l; [ | easy ].
+rewrite Nat.add_mod_idemp_r; [ | easy ].
+easy.
+Qed.
+*)
+...
+
+Theorem pol_add_0_l : ∀ p1, (0 + p1 = p1)%pol.
+Proof. intros (la); easy. Qed.
+
 Theorem pol_pow_sub_1 : ∀ k,
   k ≠ 0
   → (ⓧ^k - 1 = (ⓧ - 1) * (Σ (i = 0, k - 1), ⓧ^(k-i-1)))%pol.
@@ -216,10 +239,6 @@ rewrite Nat.sub_succ, (Nat.sub_0_r k).
 induction k. {
   cbn - [ pol_mul ].
 ...
-Theorem pol_add_0_l : ∀ p1, (0 + p1 = p1)%pol.
-Admitted.
-Instance pol_mul_morph : Proper (pol_eq ==> pol_eq ==> pol_eq) pol_mul.
-Admitted.
   rewrite pol_add_0_l.
 ...
   now rewrite pol_mul_1_r.
