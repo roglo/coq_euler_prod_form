@@ -216,24 +216,6 @@ intros.
 destruct p1 as [la].
 destruct p2 as [lb].
 unfold "="%pol; cbn.
-(*
-destruct (Nat.eq_dec mn 0) as [Hnz| Hnz]. {
-  rewrite Hnz; cbn.
-  split; intros Hll; [ easy | ].
-  unfold "="%pol.
-  clear Hll.
-  revert lb.
-  induction la as [| a la]; intros. {
-    destruct lb as [| b lb]; [ easy | cbn ].
-    rewrite Hnz; cbn.
-    now apply forallb_forall.
-  } {
-    cbn; rewrite Hnz; cbn.
-    destruct lb as [| b lb]; [ now apply forallb_forall | ].
-    apply IHla.
-  }
-}
-*)
 split; intros Hll. {
   intros i.
   revert i lb Hll.
@@ -250,27 +232,6 @@ split; intros Hll. {
     destruct i; [ easy | ].
     now apply IHlb.
   } {
-(*
-    cbn in Hll.
-    apply Bool.andb_true_iff in Hll.
-    destruct Hll as (Hb, Hlb).
-    apply Nat.eqb_eq in Hb.
-    destruct i; [ now rewrite Hb, Nat.mod_0_l | ].
-    specialize (proj1 (forallb_forall _ _) Hlb) as H1.
-    cbn in H1.
-    destruct (lt_dec i (length lb)) as [Hib| Hib]. {
-      assert (H : nth i lb 0 ∈ lb) by now apply nth_In.
-      specialize (H1 _ H); clear H.
-      apply Nat.eqb_eq in H1.
-      rewrite H1.
-      now apply Nat.mod_0_l.
-    } {
-      apply Nat.nlt_ge in Hib.
-      rewrite nth_overflow; [ | easy ].
-      now rewrite Nat.mod_0_l.
-    }
-  } {
-*)
     cbn.
     destruct lb as [| b lb]. {
       apply lap_eq_cons_nil_inv in Hll.
@@ -289,51 +250,28 @@ split; intros Hll. {
     }
   }
 } {
-...
-  unfold "="%pol.
   revert lb Hll.
   induction la as [| a la]; intros. {
     cbn in Hll; cbn.
-    assert (Hlb : ∀ i, nth i lb 0 ≡ 0 mod mn). {
-      intros i; specialize (Hll i).
-      now destruct i.
+    induction lb as [| b lb]; constructor. {
+      now specialize (Hll 0).
+    } {
+      symmetry; apply IHlb.
+      intros i.
+      destruct i; [ now specialize (Hll 1) | ].
+      now specialize (Hll (S (S i))); cbn in Hll.
     }
-    clear Hll.
-    apply forallb_forall.
-    intros b Hb.
-    apply Nat.eqb_eq.
-    apply (In_nth _ _ 0) in Hb.
-    destruct Hb as (i & Hil & Hb).
-    specialize (Hlb i).
-    rewrite Hb in Hlb.
-    rewrite Hlb.
-    now apply Nat.mod_0_l.
   } {
     destruct lb as [| b lb]. {
-      remember (a :: la) as l; cbn in Hll; subst l.
-      assert (Hla : ∀ i, nth i (a :: la) 0 ≡ 0 mod mn). {
-        intros i; specialize (Hll i).
-        now destruct i.
-      }
-      clear Hll.
-      apply forallb_forall.
-      intros a1 Ha.
-      apply Nat.eqb_eq.
-      apply (In_nth _ _ 0) in Ha.
-      destruct Ha as (i & Hil & Ha).
-      specialize (Hla i).
-      rewrite Ha in Hla.
-      rewrite Hla.
-      now apply Nat.mod_0_l.
+      constructor; [ now specialize (Hll 0) | ].
+      apply IHla.
+      intros i; cbn.
+      specialize (Hll (S i)); cbn in Hll.
+      now destruct i.
     } {
-      cbn.
-      destruct (Nat.eq_dec _ _) as [Hab| Hab]. {
-        apply IHla.
-        intros i.
-        now specialize (Hll (S i)).
-      } {
-        now specialize (Hll 0).
-      }
+      constructor; [ now specialize (Hll 0) | ].
+      apply IHla; intros i.
+      now specialize (Hll (S i)).
     }
   }
 }
