@@ -3,7 +3,7 @@
 (* polynomials on a ring *)
 
 Set Nested Proofs Allowed.
-Require Import Utf8 Arith Setoid Morphisms.
+Require Import Utf8 Arith Setoid Morphisms Psatz.
 Import List List.ListNotations.
 Require Import Misc Ring2.
 
@@ -206,14 +206,95 @@ Add Parametric Relation : _ pol_eq
  transitivity proved by pol_eq_trans
  as pol_eq_rel.
 
+Theorem fold_left_rng_add_fun_from_0 : ∀ a l (f : nat → _),
+  (fold_left (λ c i, c + f i) l a =
+   a + fold_left (λ c i, c + f i) l 0)%Rng.
+Proof.
+intros.
+revert a.
+induction l as [| x l]; intros; [ symmetry; apply rng_add_0_r | cbn ].
+rewrite IHl; symmetry; rewrite IHl.
+rewrite rng_add_0_l.
+apply rng_add_assoc.
+Qed.
+
+Theorem all_0_rng_summation_0 : ∀ b e f,
+  (∀ i, b ≤ i ≤ e → (f i = 0)%Rng)
+  → (Σ (i = b, e), f i = 0)%Rng.
+Proof.
+intros * Hz.
+remember (S e - b) as n eqn:Hn.
+revert b Hz Hn.
+induction n; intros; [ easy | cbn ].
+rewrite fold_left_rng_add_fun_from_0.
+rewrite IHn; [ | | flia Hn ]. {
+  rewrite Hz; [ | flia Hn ].
+  now do 2 rewrite rng_add_0_r.
+} {
+  intros i Hi.
+  apply Hz; flia Hi.
+}
+Qed.
+
 Instance pol_mul_morph : Proper (pol_eq ==> pol_eq ==> pol_eq) pol_mul.
 Proof.
 intros (la) (lb) Hab (lc) (ld) Hcd.
 apply lap_eq_iff; intros i.
-specialize (proj1 (lap_eq_iff _ _) Hab i) as H1.
-specialize (proj1 (lap_eq_iff _ _) Hcd i) as H2.
+specialize (proj1 (lap_eq_iff _ _) Hab) as H1.
+specialize (proj1 (lap_eq_iff _ _) Hcd) as H2.
 clear Hab Hcd.
 cbn in H1, H2 |-*.
+unfold lap_convol_mul_term.
+destruct (le_dec (length la + length lc - 1) i) as [Hila| Hila]. {
+  rewrite nth_overflow; [ | now rewrite map_length, seq_length ].
+  destruct (le_dec (length lb + length ld - 1) i) as [Hilb| Hilb]. {
+    rewrite nth_overflow; [ easy | now rewrite map_length, seq_length ].
+  } {
+    apply Nat.nle_gt in Hilb.
+    rewrite (List_map_nth_in _ 0); [ | now rewrite seq_length ].
+    rewrite seq_nth; [ rewrite Nat.add_0_l | easy ].
+    rewrite all_0_rng_summation_0; [ easy | ].
+    intros j Hj.
+    destruct (le_dec (length lb) j) as [Hbj| Hbj]. {
+      rewrite nth_overflow; [ | easy ].
+      now rewrite rng_mul_0_l.
+    }
+    apply Nat.nle_gt in Hbj.
+    rewrite <- H1.
+    destruct (le_dec (length la) j) as [Haj| Haj]. {
+      rewrite nth_overflow; [ | easy ].
+      now rewrite rng_mul_0_l.
+    }
+    apply Nat.nle_gt in Haj.
+    rewrite rng_mul_comm.
+    destruct (le_dec (length ld) (i - j)) as [Hdj| Hdj]. {
+      rewrite nth_overflow; [ | easy ].
+      now rewrite rng_mul_0_l.
+    }
+    apply Nat.nle_gt in Hdj.
+    rewrite <- H2.
+    destruct (le_dec (length lc) (i - j)) as [Hcj| Hcj]. {
+      rewrite nth_overflow; [ | easy ].
+      now rewrite rng_mul_0_l.
+    }
+    apply Nat.nle_gt in Hcj.
+    flia Hbj Haj Hdj Hcj Hila.
+  }
+} {
+  apply Nat.nle_gt in Hila.
+  rewrite (List_map_nth_in _ 0); [ | now rewrite seq_length ].
+  rewrite seq_nth; [ rewrite Nat.add_0_l | easy ].
+  destruct (le_dec (length lb + length ld - 1) i) as [Hilb| Hilb]. {
+    rewrite nth_overflow; [ | now rewrite map_length, seq_length ].
+...
+    rewrite nth_overflow; [ easy | now rewrite map_length, seq_length ].
+  } {
+...
+    rewrite <- H1.
+...
+    rewrite <- H1, <- H2.
+    destruct (lt_dec j (length la)) as [Hja| Hja]. {
+      assert (H : i - j ≥ length lc). {
 ...
 do 2 rewrite nth_pol_add.
 destruct (Nat.eq_dec mn 0) as [Hnz| Hnz]; [ now rewrite Hnz | ].
@@ -229,6 +310,8 @@ Qed.
 
 Theorem pol_add_0_l : ∀ p1, (0 + p1 = p1)%pol.
 Proof. intros (la); easy. Qed.
+
+End Polynomials.
 
 Theorem pol_pow_sub_1 : ∀ k,
   k ≠ 0
@@ -269,8 +352,6 @@ Fixpoint lap_eval la x :=
 
 Definition pol_eval p x := lap_eval (al p) x.
 
-End Polynomials.
-
 (*
 Instance polm_add_morph {A} {rng : ring A} :
   Proper (pol_eq ==> pol_eq ==> pol_eq) pol_add.
@@ -292,25 +373,6 @@ easy.
 Qed.
 *)
 *)
-
-Theorem fold_left_polm_add_fun_from_0 {A} {rng : ring A} : ∀ a l (f : A → _),
-  (fold_left (λ c i, c + f i) l a)%pol =
-  (a + fold_left (λ c i, c + f i) l 0)%pol.
-Proof.
-intros (la) lb f.
-...
-induction lb as [| b lb]; cbn.
-...
-intros (la) *.
-revert la.
-induction l as [| x l]; intros; [ now induction la | cbn ].
-rewrite IHl.
-
-rewrite IHl; symmetry; rewrite IHl.
-
-rewrite IHl; symmetry; rewrite IHl.
-now rewrite polm_add_assoc.
-Qed.
 
 Theorem polm_summation_split_first {A} {rng : ring A} : ∀ b e f,
   b ≤ e
