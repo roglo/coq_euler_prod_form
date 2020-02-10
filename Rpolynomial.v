@@ -267,6 +267,12 @@ Qed.
 Theorem pol_add_0_l {A} {rng : ring A} : ∀ p1, (0 + p1 = p1)%pol.
 Proof. intros (la); easy. Qed.
 
+Theorem pol_mul_1_l {A} {rng : ring A} : ∀ p1, (1 * p1 = p1)%pol.
+Proof.
+intros (la).
+unfold "*"%pol.
+...
+
 Instance pol_mul_morph {A} {rng : ring A} :
   Proper (pol_eq ==> pol_eq ==> pol_eq) pol_mul.
 Proof.
@@ -358,6 +364,9 @@ destruct (le_dec (length la + length lc - 1) i) as [Hila| Hila]. {
 }
 Qed.
 
+Theorem xpow_0 {A} {rng : ring A} : (ⓧ^0 = 1)%pol.
+Proof. easy. Qed.
+
 Theorem pol_pow_sub_1 {A} {rng : ring A} : ∀ k,
   k ≠ 0
   → (ⓧ^k - 1 = (ⓧ - 1) * (Σ (i = 0, k - 1), ⓧ^(k-i-1)))%pol.
@@ -368,6 +377,9 @@ rewrite Nat.sub_succ, (Nat.sub_0_r k).
 induction k. {
   cbn - [ pol_mul ].
   rewrite pol_add_0_l.
+  rewrite xpow_0.
+...
+  rewrite pol_mul_1_r.
 ...
 
 Instance pol_add_morph : Proper (pol_eq ==> pol_eq ==> pol_eq) pol_add.
