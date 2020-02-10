@@ -267,7 +267,7 @@ intros a b; split; intros H.
  rewrite H; reflexivity.
 Qed.
 
-Theorem rng_add_shuffle0 : ∀ n m p, (n + m + p = n + p + m)%Rng.
+Theorem rng_add_add_swap : ∀ n m p, (n + m + p = n + p + m)%Rng.
 Proof.
 intros n m p; simpl.
 do 2 rewrite <- rng_add_assoc.
@@ -275,7 +275,7 @@ assert (m + p = p + m)%Rng as H by apply rng_add_comm.
 rewrite H; reflexivity.
 Qed.
 
-Theorem rng_mul_shuffle0 : ∀ n m p, (n * m * p = n * p * m)%Rng.
+Theorem rng_mul_mul_swap : ∀ n m p, (n * m * p = n * p * m)%Rng.
 Proof.
 intros n m p.
 do 2 rewrite <- rng_mul_assoc.
