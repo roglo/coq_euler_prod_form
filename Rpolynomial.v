@@ -21,6 +21,8 @@ Delimit Scope ring_scope with Rng.
 Bind Scope ring_scope with ring.
 Notation "0" := rng_zero : ring_scope.
 Notation "1" := rng_one : ring_scope.
+Notation "a = b" := (rng_eq a b) : ring_scope.
+Notation "a ≠ b" := (¬ rng_eq a b) : ring_scope.
 Notation "a + b" := (rng_add a b) : ring_scope.
 Notation "a * b" := (rng_mul a b) : ring_scope.
 Notation "- a" := (rng_opp a) : ring_scope.
@@ -64,11 +66,14 @@ Definition pol_mul p1 p2 :=
 
 Definition xpow i := mkpol (repeat 0%Rng i ++ [1%Rng]).
 
-Inductive lap_zerop : list A → Prop :=
-  | lap_nil : lap_zerop []
-  | lap_cons : ∀ a la, rng_eq a 0%Rng → lap_zerop la → lap_zerop (a :: la).
+Inductive lap_eq : list A → list A → Prop :=
+  | lap_eq_nil_nil : lap_eq [] []
+  | lap_eq_nil_cons : ∀ b bl, (b = 0)%Rng → lap_eq bl [] → lap_eq [] (b :: bl)
+  | lap_eq_cons_nil : ∀ a al, (a = 0)%Rng → lap_eq al [] → lap_eq (a :: al) []
+  | lap_eq_cons_cons : ∀ a b al bl,
+      (a = b)%Rng → lap_eq al bl → lap_eq (a :: al) (b :: bl).
 
-Definition pol_eq p1 p2 := lap_zerop (al (pol_sub p1 p2)).
+Definition pol_eq p1 p2 := lap_eq (al p1) (al p2).
 
 Declare Scope pol_scope.
 Delimit Scope pol_scope with pol.
