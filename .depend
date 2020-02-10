@@ -1,13 +1,15 @@
 Formula.vio: Formula.v Misc.vio Primes.vio Totient.vio QuadRes.vio
 Formula.vo Formula.glob Formula.v.beautified Formula.required_vo: Formula.v Misc.vo Primes.vo Totient.vo QuadRes.vo
+MRing.vio: MRing.v 
+MRing.vo MRing.glob MRing.v.beautified MRing.required_vo: MRing.v 
 Misc.vio: Misc.v 
 Misc.vo Misc.glob Misc.v.beautified Misc.required_vo: Misc.v 
 Primes.vio: Primes.v Misc.vio
 Primes.vo Primes.glob Primes.v.beautified Primes.required_vo: Primes.v Misc.vo
 QuadRes.vio: QuadRes.v Misc.vio Primes.vio
 QuadRes.vo QuadRes.glob QuadRes.v.beautified QuadRes.required_vo: QuadRes.v Misc.vo Primes.vo
-Rpolynomial.vio: Rpolynomial.v 
-Rpolynomial.vo Rpolynomial.glob Rpolynomial.v.beautified Rpolynomial.required_vo: Rpolynomial.v 
+Rpolynomial.vio: Rpolynomial.v Misc.vio MRing.vio
+Rpolynomial.vo Rpolynomial.glob Rpolynomial.v.beautified Rpolynomial.required_vo: Rpolynomial.v Misc.vo MRing.vo
 Totient.vio: Totient.v Misc.vio Primes.vio
 Totient.vo Totient.glob Totient.v.beautified Totient.required_vo: Totient.v Misc.vo Primes.vo
 bug.vio: bug.v 

@@ -1,11 +1,7 @@
-(* Field.v *)
+(* MRing.v *)
 
 Require Import Utf8.
 Require Import Setoid.
-
-(*
-Set Implicit Arguments.
-*)
 
 Class ring A :=
   { rng_zero : A;
@@ -293,4 +289,4 @@ Qed.
 
 End ring_theorems.
 
-Hint Resolve rng_eq_refl.
+Hint Resolve rng_eq_refl : Arith.
