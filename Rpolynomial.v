@@ -7,7 +7,7 @@ Require Import Utf8 Arith Setoid Morphisms.
 Import List List.ListNotations.
 Require Import Misc MRing.
 
-...
+(*
 
 (* ring *)
 
@@ -32,16 +32,19 @@ Notation "a ≠ b" := (¬ rng_eq a b) : ring_scope.
 Notation "a + b" := (rng_add a b) : ring_scope.
 Notation "a * b" := (rng_mul a b) : ring_scope.
 Notation "- a" := (rng_opp a) : ring_scope.
+*)
 
 Notation "'Σ' ( i = b , e ) , g" :=
   (fold_left (λ c i, (c + g)%Rng) (seq b (S e - b)) 0%Rng)
   (at level 45, i at level 0, b at level 60, e at level 60) : ring_scope.
 
+(*
 Add Parametric Relation A (r : ring A) : A rng_eq
  reflexivity proved by rng_eq_refl
  symmetry proved by rng_eq_sym
  transitivity proved by rng_eq_trans
  as eq_rel.
+*)
 
 Section Polynomials.
 
