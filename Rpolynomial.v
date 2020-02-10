@@ -34,7 +34,7 @@ Notation "'Σ' ( i = b , e ) , g" :=
   (fold_left (λ c i, (c + g)%Rng) (seq b (S e - b)) 0%Rng)
   (at level 45, i at level 0, b at level 60, e at level 60) : ring_scope.
 
-Add Parametric Relation A (K : ring A) : A rng_eq
+Add Parametric Relation A (r : ring A) : A rng_eq
  reflexivity proved by rng_eq_refl
  symmetry proved by rng_eq_sym
  transitivity proved by rng_eq_trans
