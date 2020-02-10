@@ -2,8 +2,8 @@
 
 (* polynomials on a ring *)
 
-Require Import Utf8.
-Require Import Arith.
+Set Nested Proofs Allowed.
+Require Import Utf8 Arith Setoid.
 Import List List.ListNotations.
 
 (* ring *)
@@ -109,6 +109,99 @@ Fixpoint lap_eval la x :=
 
 Definition pol_eval p x := lap_eval (al p) x.
 
+Theorem lap_eq_nil_cons_inv : ∀ x l,
+  lap_eq [] (x :: l)
+  → (x = 0)%Rng ∧ lap_eq l [].
+Proof.
+intros x l H.
+now inversion H.
+Qed.
+
+Theorem lap_eq_cons_nil_inv : ∀ x l,
+  lap_eq (x :: l) []
+  → (x = 0)%Rng ∧ lap_eq l [].
+Proof.
+intros x l H.
+now inversion H.
+Qed.
+
+Theorem lap_eq_cons_cons_inv : ∀ a b la lb,
+  lap_eq (a :: la) (b :: lb)
+  → (a = b)%Rng ∧ lap_eq la lb.
+Proof.
+intros * H.
+now inversion H.
+Qed.
+
+Theorem lap_eq_refl : reflexive _ lap_eq.
+Proof.
+intros l.
+induction l; constructor; [ reflexivity | assumption ].
+Qed.
+
+Theorem lap_eq_sym : symmetric _ lap_eq.
+Proof.
+intros l₁ l₂ Heq.
+revert l₂ Heq.
+induction l₁ as [| x₁]; intros. {
+  now induction l₂; constructor; apply lap_eq_nil_cons_inv in Heq.
+}
+induction l₂ as [| x₂]. {
+  apply lap_eq_cons_nil_inv in Heq.
+  now constructor.
+}
+apply lap_eq_cons_cons_inv in Heq; destruct Heq.
+constructor; [ easy | now apply IHl₁ ].
+Qed.
+
+Theorem lap_eq_trans : transitive _ lap_eq.
+Proof.
+intros l₁ l₂ l₃ H₁ H₂.
+...
+revert l₁ l₃ H₁ H₂.
+induction l₂ as [| x₂]; intros.
+ revert l₃ H₂.
+ induction l₁ as [| x₁]; intros; [ assumption | idtac ].
+ destruct l₃ as [| x₃]; [ assumption | idtac ].
+ apply lap_eq_cons_nil_inv in H₁.
+ apply lap_eq_nil_cons_inv in H₂.
+ constructor.
+  etransitivity; [ destruct H₁; eassumption | idtac ].
+  destruct H₂; symmetry; assumption.
+
+  apply IHl₁; [ destruct H₁ | destruct H₂ ]; assumption.
+
+ destruct l₁ as [| x₁].
+  apply lap_eq_nil_cons_inv in H₁.
+  destruct l₃ as [| x₃]; constructor.
+   apply lap_eq_cons_inv in H₂.
+   destruct H₁, H₂.
+   etransitivity; [ symmetry; eassumption | assumption ].
+
+   apply lap_eq_cons_inv in H₂.
+   apply IHl₂; [ destruct H₁ | destruct H₂ ]; assumption.
+
+  apply lap_eq_cons_inv in H₁.
+  destruct l₃ as [| x₃]; constructor.
+   apply lap_eq_cons_nil_inv in H₂.
+   destruct H₁, H₂.
+   etransitivity; eassumption.
+
+   apply lap_eq_cons_nil_inv in H₂.
+   apply IHl₂; [ destruct H₁ | destruct H₂ ]; assumption.
+
+   apply lap_eq_cons_inv in H₂.
+   apply IHl₂; [ destruct H₁ | destruct H₂ ]; assumption.
+Qed.
+
+Add Parametric Relation : (list α) lap_eq
+ reflexivity proved by lap_eq_refl
+ symmetry proved by lap_eq_sym
+ transitivity proved by lap_eq_trans
+ as lap_eq_rel.
+
+...
+
 Theorem pol_eq_iff : ∀ p1 p2,
   (p1 = p2)%pol ↔ ∀ i, (nth i (al p1) 0 = nth i (al p2) 0)%Rng.
 Proof.
@@ -140,6 +233,23 @@ split; intros Hll. {
   induction la as [| a la]; intros. {
     cbn.
     destruct lb as [| b lb]; [ easy | cbn ].
+Theorem glop : ∀ b lb, lap_eq [] (b :: lb) → (b = 0)%Rng ∧ lap_eq lb [].
+Proof.
+intros.
+inversion H; subst.
+easy.
+Qed.
+apply glop in Hll.
+destruct i; [ easy | ].
+destruct Hll as (_, Hll); symmetry.
+clear - Hll.
+revert i.
+induction lb as [| b lb]; intros; [ now destruct i | cbn ].
+...
+symmetry in Hll.
+destruct i.
+
+...
 (* find a solution not using inversion;
    need a lemma or lemmas dealing with it *)
 ...
