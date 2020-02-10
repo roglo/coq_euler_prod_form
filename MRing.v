@@ -1,6 +1,6 @@
 (* MRing.v *)
 
-Require Import Utf8 Setoid Arith.
+Require Import Utf8 Setoid.
 
 Class ring A :=
   { rng_zero : A;
