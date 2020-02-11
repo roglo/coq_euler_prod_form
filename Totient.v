@@ -890,7 +890,7 @@ apply Nat_gcd_1_mul_r. {
   rewrite Nat.mul_assoc.
   apply Nat_gcd_1_mul_r. 2: {
     apply Nat.bezout_1_gcd.
-    apply Nat.bezout_comm; [ easy | ].
+    apply Nat_bezout_comm; [ easy | ].
     exists m, v.
     flia Hmng.
   }
