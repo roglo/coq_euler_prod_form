@@ -519,9 +519,8 @@ induction n; [ reflexivity | simpl ].
 rewrite IHn, Hlab; reflexivity.
 Qed.
 
-Add Parametric Morphism α (r : ring α) : (@cons α)
-  with signature rng_eq ==> lap_eq ==> lap_eq
-  as cons_lap_eq_morph.
+Instance cons_lap_eq_morph {A} {rng : ring A} :
+  Proper (rng_eq ==> lap_eq ==> lap_eq) cons.
 Proof.
 intros a b H la lb Hab.
 constructor; assumption.
@@ -600,9 +599,14 @@ intros α r a b c d Hac Hbd.
 rewrite Hac, Hbd; reflexivity.
 Qed.
 
+Instance lap_compose_morph {A} {rng : ring A} :
+  Proper (lap_eq ==> lap_eq ==> lap_eq) lap_compose.
+(*
+...
 Add Parametric Morphism α (r : ring α) : lap_compose
   with signature lap_eq ==> lap_eq ==> lap_eq
   as lap_compose_morph.
+*)
 Proof.
 intros la lb Hlab lc ld Hlcd.
 revert lb lc ld Hlab Hlcd.
@@ -1499,14 +1503,12 @@ Add Parametric Relation {α} {r : ring α} : (polynomial α) poly_eq
  transitivity proved by poly_eq_trans
  as poly_eq_rel.
 
-Add Parametric Morphism α (r : ring α) : (@al α)
-  with signature poly_eq ==> lap_eq
-  as al_morph.
-Proof. intros; assumption. Qed.
+Instance al_morph {A} {rng : ring A} :
+  Proper (poly_eq ==> lap_eq) al.
+Proof. intros a b Hab; easy. Qed.
 
-Add Parametric Morphism α (r : ring α) : poly_add
-  with signature poly_eq ==> poly_eq ==> poly_eq
-  as poly_add_morph.
+Instance poly_add_morph {A} {rng : ring A} :
+  Proper (poly_eq ==> poly_eq ==> poly_eq) poly_add.
 Proof.
 intros a c Hac b d Hbd.
 unfold poly_eq, poly_add; simpl.
@@ -1514,9 +1516,8 @@ unfold poly_eq in Hac, Hbd.
 rewrite Hac, Hbd; reflexivity.
 Qed.
 
-Add Parametric Morphism α (r : ring α) : poly_mul
-  with signature poly_eq ==> poly_eq ==> poly_eq
-  as poly_mul_morph.
+Instance poly_mul_morph {A} {rng : ring A} :
+  Proper (poly_eq ==> poly_eq ==> poly_eq) poly_mul.
 Proof.
 intros a c Hac b d Hbd.
 unfold poly_eq, poly_mul, lap_mul; simpl.
@@ -1532,13 +1533,12 @@ rewrite Nat.add_comm.
 reflexivity.
 Qed.
 
-Add Parametric Morphism α (K : ring α) : poly_compose
-  with signature poly_eq ==> poly_eq ==> poly_eq
-  as poly_compose_morph.
+Instance poly_compose_morph {A} {rng : ring A} :
+  Proper (poly_eq ==> poly_eq ==> poly_eq) poly_compose.
 Proof.
-intros A C HAC B D HBD.
+intros a c Hac b d Hbd.
 unfold poly_eq; simpl.
-rewrite HAC, HBD; reflexivity.
+rewrite Hac, Hbd; reflexivity.
 Qed.
 
 Section poly.
