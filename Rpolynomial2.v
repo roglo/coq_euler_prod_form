@@ -499,9 +499,8 @@ destruct (le_dec (length la) j) as [H₁| H₁].
    revert H₁; apply Nat.nlt_0_r.
 Qed.
 
-Add Parametric Morphism α (R : ring α) : (@lap_mul _ R)
-  with signature lap_eq ==> lap_eq ==> lap_eq
-  as lap_mul_morph.
+Instance lap_mul_morph {A} {rng : ring A} :
+  Proper (lap_eq ==> lap_eq ==> lap_eq) lap_mul.
 Proof.
 intros a c Hac b d Hbd.
 unfold lap_mul; simpl.
@@ -511,11 +510,11 @@ rewrite Nat.add_comm.
 reflexivity.
 Qed.
 
-Add Parametric Morphism α (r : ring α) : lap_power
-  with signature lap_eq ==> eq ==> lap_eq
-  as lap_power_morph.
+Instance lap_power_morph {A} {rng : ring A} :
+  Proper (lap_eq ==> eq ==> lap_eq) lap_power.
 Proof.
-intros la lb Hlab n.
+intros la lb Hlab n n' Hnn.
+subst n'.
 induction n; [ reflexivity | simpl ].
 rewrite IHn, Hlab; reflexivity.
 Qed.
