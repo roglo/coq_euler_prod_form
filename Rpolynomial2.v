@@ -283,9 +283,8 @@ constructor; [ rewrite Hb, rng_add_0_r; reflexivity | idtac ].
 apply IHlb; assumption.
 Qed.
 
-Add Parametric Morphism α (r : ring α) : lap_add
-  with signature lap_eq ==> lap_eq ==> lap_eq
-  as lap_add_morph.
+Instance lap_add_morph {A} {rng : ring A} :
+  Proper (lap_eq ==> lap_eq ==> lap_eq) lap_add.
 Proof.
 intros la lc Hac lb ld Hbd.
 revert lb lc ld Hac Hbd.
@@ -413,11 +412,11 @@ induction la as [| a]; intros.
   apply IHla; assumption.
 Qed.
 
-Add Parametric Morphism α (R : ring α) : (lap_convol_mul)
-  with signature lap_eq ==> lap_eq ==> eq ==> eq ==> lap_eq
-  as lap_convol_mul_morph.
+Instance lap_convol_mul_morph {A} {rng : ring A} :
+  Proper (lap_eq ==> lap_eq ==> eq ==> eq ==> lap_eq) lap_convol_mul.
 Proof.
-intros la lb Hlab lc ld Hlcd i len.
+intros la lb Hlab lc ld Hlcd i i' Hii len len' Hll.
+subst i' len'.
 revert la lb lc ld Hlab Hlcd i.
 induction len; intros; [ reflexivity | simpl ].
 constructor; [ idtac | apply IHlen; assumption ].
