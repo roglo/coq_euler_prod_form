@@ -11,10 +11,6 @@ Require Import Misc.
 Require Import Ring2.
 Require Import Rsummation.
 
-(*
-Set Implicit Arguments.
-*)
-
 (* lap : list as polynomial, i.e. the only field of the record in the
    definition of polynomial after *)
 
@@ -566,9 +562,9 @@ induction la as [| a]; intros.
    assumption.
 Qed.
 
-Theorem lap_add_nil_l : ∀ α (r : ring α) la,
+Theorem lap_add_nil_l {α} {r : ring α} : ∀ la,
   lap_eq (lap_add [] la) la.
-Proof. intros α r la; destruct la; reflexivity. Qed.
+Proof. intros la; destruct la; reflexivity. Qed.
 
 Theorem lap_add_nil_r : ∀ α (r : ring α) la,
   lap_eq (lap_add la []) la.
@@ -643,8 +639,8 @@ Qed.
 
 Section lap.
 
-Variable α : Type.
-Variable r : ring α.
+Context {α : Type}.
+Context {r : ring α}.
 
 (* addition theorems *)
 
@@ -1388,23 +1384,23 @@ Qed.
 
 End lap.
 
-Theorem lap_add_opp_l : ∀ α (r : ring α) la, (- la + la = 0)%lap.
+Theorem lap_add_opp_l {α} {r : ring α} : ∀ la, (- la + la = 0)%lap.
 Proof.
-intros α r la.
+intros.
 induction la as [| a]; [ reflexivity | simpl ].
 rewrite IHla, rng_add_opp_l.
 constructor; reflexivity.
 Qed.
 
-Theorem lap_mul_compat_l : ∀ α (r : ring α) a b c,
+Theorem lap_mul_compat_l {α} {r : ring α} : ∀ a b c,
   lap_eq a b
   → lap_eq (lap_mul c a) (lap_mul c b).
 Proof.
-intros α r a b c Hab.
+intros a b c Hab.
 rewrite Hab; reflexivity.
 Qed.
 
-Definition lap_ring α (R : ring α) : ring (list α) :=
+Definition lap_ring {α} {r : ring α} : ring (list α) :=
   {| rng_zero := lap_zero;
      rng_one := lap_one;
      rng_add := lap_add;
@@ -1414,22 +1410,23 @@ Definition lap_ring α (R : ring α) : ring (list α) :=
      rng_eq_refl := lap_eq_refl;
      rng_eq_sym := lap_eq_sym;
      rng_eq_trans := lap_eq_trans;
-     rng_add_comm := lap_add_comm α R;
-     rng_add_assoc := lap_add_assoc α R;
-     rng_add_0_l := lap_add_nil_l R;
-     rng_add_opp_l := lap_add_opp_l R;
+     rng_add_comm := lap_add_comm;
+     rng_add_assoc := lap_add_assoc;
+     rng_add_0_l := lap_add_nil_l;
+     rng_add_opp_l := lap_add_opp_l;
      rng_add_compat_l := lap_add_compat_l;
-     rng_mul_comm := lap_mul_comm R;
-     rng_mul_assoc := lap_mul_assoc R;
-     rng_mul_1_l := lap_mul_1_l R;
-     rng_mul_compat_l := @lap_mul_compat_l _ R;
-     rng_mul_add_distr_l := lap_mul_add_distr_l R |}.
+     rng_mul_comm := lap_mul_comm;
+     rng_mul_assoc := lap_mul_assoc;
+     rng_mul_1_l := lap_mul_1_l;
+     rng_mul_compat_l := lap_mul_compat_l;
+     rng_mul_add_distr_l := lap_mul_add_distr_l |}.
 
 Canonical Structure lap_ring.
 
 (* polynomial type *)
 
 Record polynomial α := mkpol { al : list α }.
+Arguments al {_}.
 
 Declare Scope poly_scope.
 Delimit Scope poly_scope with pol.
@@ -1443,28 +1440,28 @@ Notation "a ≠ b" := (¬eq_poly a b) : poly_scope.
 Definition poly_one {α} {r : ring α} := POL [1%Rng]%pol.
 Notation "1" := poly_one : poly_scope.
 
-Theorem eq_poly_refl α (r : ring α) : reflexive _ eq_poly.
+Theorem eq_poly_refl {α} {r : ring α} : reflexive _ eq_poly.
 Proof.
 intros pol.
 unfold eq_poly; reflexivity.
 Qed.
 
-Theorem eq_poly_sym α (r : ring α) : symmetric _ eq_poly.
+Theorem eq_poly_sym {α} {r : ring α} : symmetric _ eq_poly.
 Proof.
 intros pol₁ pol₂ Heq.
 unfold eq_poly; symmetry; assumption.
 Qed.
 
-Theorem eq_poly_trans α (r : ring α) : transitive _ eq_poly.
+Theorem eq_poly_trans {α} {r : ring α} : transitive _ eq_poly.
 Proof.
 intros pol₁ pol₂ pol₃ H₁ H₂.
 unfold eq_poly; etransitivity; eassumption.
 Qed.
 
-Add Parametric Relation α (r : ring α) : (polynomial α) eq_poly
- reflexivity proved by (eq_poly_refl r)
- symmetry proved by (eq_poly_sym (r := r))
- transitivity proved by (eq_poly_trans (r := r))
+Add Parametric Relation {α} {r : ring α} : (polynomial α) eq_poly
+ reflexivity proved by eq_poly_refl
+ symmetry proved by eq_poly_sym
+ transitivity proved by eq_poly_trans
  as eq_poly_rel.
 
 Definition poly_add {α} {r : ring α} pol₁ pol₂ :=
@@ -1532,8 +1529,8 @@ Qed.
 
 Section poly.
 
-Variable α : Type.
-Variable r : ring α.
+Context {α : Type}.
+Context {r : ring α}.
 
 Theorem poly_add_compat : ∀ a b c d,
   (a = c)%pol
@@ -1596,10 +1593,10 @@ End poly.
 
 (* *)
 
-Definition apply_lap α {R : ring α} la x :=
+Definition apply_lap {α} {R : ring α} la x :=
   (List.fold_right (λ c accu, accu * x + c) 0 la)%Rng.
 
-Definition apply_poly α {R : ring α} pol :=
+Definition apply_poly {α} {R : ring α} pol :=
   apply_lap (al pol).
 
 Theorem lap_add_map : ∀ α β (Rα : ring α) (Rβ : ring β) (f : α → β) la lb,
