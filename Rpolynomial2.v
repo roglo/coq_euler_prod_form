@@ -1555,25 +1555,21 @@ Qed.
 
 Theorem poly_add_assoc : ∀ pol₁ pol₂ pol₃,
   (pol₁ + (pol₂ + pol₃) = (pol₁ + pol₂) + pol₃)%pol.
-Proof.
-intros pol₁ pol₂ pol₃.
-unfold poly_eq.
-eapply lap_add_assoc; reflexivity.
-Qed.
+Proof. intros; apply lap_add_assoc. Qed.
 
 Theorem poly_add_0_l : ∀ pol, (0 + pol = pol)%pol.
-Proof.
-intros.
-unfold poly_eq.
-eapply lap_add_0_l; reflexivity.
-Qed.
+Proof. intros; apply lap_add_0_l. Qed.
 
 Theorem poly_add_opp_l : ∀ pol, (- pol + pol = 0)%pol.
-Proof.
-intros.
-unfold poly_eq.
-apply lap_add_opp_l.
-Qed.
+Proof. intros; apply lap_add_opp_l. Qed.
+
+Theorem poly_add_compat_l : ∀ a b c,
+  (a = b)%pol → (c + a = c + b)%pol.
+Proof. now intros; apply lap_add_compat_l. Qed.
+
+Theorem poly_mul_compat_l : ∀ a b c,
+  (a = b)%pol → (c * a = c * b)%pol.
+Proof. now intros; apply lap_mul_compat_l. Qed.
 
 Theorem poly_mul_compat : ∀ a b c d,
   (a = c)%pol
@@ -1631,7 +1627,7 @@ Definition polynomial_ring {α} {r : ring α} : ring (polynomial α) :=
      rng_add_assoc := poly_add_assoc;
      rng_add_0_l := poly_add_0_l;
      rng_add_opp_l := poly_add_opp_l;
-     rng_add_compat_l := poly_add_compat_l |}.
+     rng_add_compat_l := poly_add_compat_l;
      rng_mul_comm := poly_mul_comm;
      rng_mul_assoc := poly_mul_assoc;
      rng_mul_1_l := poly_mul_1_l;
