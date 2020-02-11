@@ -60,18 +60,21 @@ Theorem lap_eq_sym {α} {r : ring α} : symmetric _ lap_eq.
 Proof.
 intros l1 l2 Heq.
 revert l2 Heq.
-induction l1 as [| x1]; intros.
- induction l2 as [| x2]; constructor; apply lap_eq_nil_cons_inv in Heq.
-  destruct Heq; assumption.
-
-  apply IHl2; destruct Heq; assumption.
-
- induction l2 as [| x2].
-  apply lap_eq_cons_nil_inv in Heq; destruct Heq.
-  constructor; [ assumption | apply IHl1; assumption ].
-
-  apply lap_eq_cons_inv in Heq; destruct Heq.
-  constructor; [ symmetry; assumption | apply IHl1; assumption ].
+induction l1 as [| x1]; intros. {
+  induction l2 as [| x2]; constructor; apply lap_eq_nil_cons_inv in Heq. {
+    now destruct Heq.
+  } {
+    now apply IHl2; destruct Heq.
+  }
+} {
+  induction l2 as [| x2]. {
+    apply lap_eq_cons_nil_inv in Heq; destruct Heq.
+    constructor; [ easy | now apply IHl1 ].
+  } {
+    apply lap_eq_cons_inv in Heq; destruct Heq.
+    constructor; [ easy | now apply IHl1 ].
+  }
+}
 Qed.
 
 Theorem lap_eq_trans {α} {r : ring α} : transitive _ lap_eq.
