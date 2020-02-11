@@ -334,6 +334,9 @@ Qed.
 
 (* *)
 
+Theorem match_id {A} : ∀ a (b : A), match a with O => b | S _ => b end = b.
+Proof. now intros; destruct a. Qed.
+
 Theorem Nat_sub_sub_swap : ∀ a b c, a - b - c = a - c - b.
 Proof.
 intros.
