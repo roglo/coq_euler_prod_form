@@ -562,18 +562,18 @@ induction la as [| a]; intros.
    assumption.
 Qed.
 
-Theorem lap_add_nil_l {α} {r : ring α} : ∀ la,
+Theorem lap_add_0_l {α} {r : ring α} : ∀ la,
   lap_eq (lap_add [] la) la.
 Proof. intros la; destruct la; reflexivity. Qed.
 
-Theorem lap_add_nil_r : ∀ α (r : ring α) la,
+Theorem lap_add_0_r : ∀ α (r : ring α) la,
   lap_eq (lap_add la []) la.
 Proof. intros α r la; destruct la; reflexivity. Qed.
 
-Theorem lap_mul_nil_l : ∀ α (r : ring α) la, lap_eq (lap_mul [] la) [].
+Theorem lap_mul_0_l : ∀ α (r : ring α) la, lap_eq (lap_mul [] la) [].
 Proof. intros α r la; apply lap_convol_mul_nil_l. Qed.
 
-Theorem lap_mul_nil_r : ∀ α (r : ring α) la, lap_eq (lap_mul la []) [].
+Theorem lap_mul_0_r : ∀ α (r : ring α) la, lap_eq (lap_mul la []) [].
 Proof. intros α r la; apply lap_convol_mul_nil_r. Qed.
 
 Theorem lap_add_compat : ∀ α (r : ring α) a b c d,
@@ -615,8 +615,8 @@ induction la as [| a]; intros.
  simpl in IHlb.
  assert (lap_eq [b] []) as H by (rewrite Hb; constructor; reflexivity).
  rewrite H; clear H.
- rewrite lap_add_nil_r.
- rewrite <- IHlb; [ rewrite lap_mul_nil_l; reflexivity | assumption ].
+ rewrite lap_add_0_r.
+ rewrite <- IHlb; [ rewrite lap_mul_0_l; reflexivity | assumption ].
 
  simpl.
  destruct lb as [| b]; simpl.
@@ -624,9 +624,9 @@ induction la as [| a]; intros.
   destruct Hlab as (Ha, Hla).
   assert (lap_eq [a] []) as H by (rewrite Ha; constructor; reflexivity).
   rewrite H; clear H.
-  rewrite lap_add_nil_r.
+  rewrite lap_add_0_r.
   rewrite IHla; try eassumption; simpl.
-  rewrite lap_mul_nil_l; reflexivity.
+  rewrite lap_mul_0_l; reflexivity.
 
   apply lap_eq_cons_inv in Hlab.
   destruct Hlab as (Hab, Hlab).
@@ -1117,7 +1117,7 @@ remember [a] as aa; simpl; subst aa.
 rewrite lap_add_comm.
 apply lap_add_compat; [ apply lap_mul_1_r | idtac ].
 apply list_fold_right_seq.
- rewrite lap_mul_nil_r; reflexivity.
+ rewrite lap_mul_0_r; reflexivity.
 
  intros x y z Hyz.
  rewrite Hyz; reflexivity.
@@ -1305,14 +1305,14 @@ Theorem lap_compose_single : ∀ a lb lc,
 Proof.
 intros a lb lc.
 induction lb as [| b].
- simpl; rewrite lap_mul_nil_r; reflexivity.
+ simpl; rewrite lap_mul_0_r; reflexivity.
 
  rewrite lap_mul_cons_r; simpl.
  rewrite summation_only_one, rng_add_0_r, IHlb.
  rewrite lap_mul_add_distr_l, lap_mul_assoc.
  apply lap_add_compat; [ reflexivity | idtac ].
  rewrite lap_mul_cons; simpl.
- rewrite lap_mul_nil_r.
+ rewrite lap_mul_0_r.
  constructor; [ reflexivity | idtac ].
  rewrite lap_eq_0; reflexivity.
 Qed.
@@ -1324,7 +1324,7 @@ intros la lb lc.
 revert lb lc.
 induction la as [| a]; intros; [ reflexivity | simpl ].
 destruct lb as [| b]; simpl.
- rewrite lap_add_nil_r; reflexivity.
+ rewrite lap_add_0_r; reflexivity.
 
  rewrite IHla.
  rewrite lap_mul_add_distr_r.
@@ -1344,15 +1344,15 @@ Proof.
 intros la lb lc.
 revert lb lc.
 induction la as [| a]; intros; simpl.
- do 2 rewrite lap_mul_nil_l; reflexivity.
+ do 2 rewrite lap_mul_0_l; reflexivity.
 
  destruct lb as [| b]; simpl.
-  do 2 rewrite lap_mul_nil_r; reflexivity.
+  do 2 rewrite lap_mul_0_r; reflexivity.
 
   rewrite lap_mul_cons; simpl.
   do 2 rewrite lap_compose_add; simpl.
   do 2 rewrite IHla; simpl.
-  rewrite lap_mul_nil_l, lap_add_nil_l.
+  rewrite lap_mul_0_l, lap_add_0_l.
   do 3 rewrite lap_mul_add_distr_r; simpl.
   rewrite lap_mul_add_distr_l; simpl.
   rewrite lap_mul_add_distr_r; simpl.
@@ -1360,7 +1360,7 @@ induction la as [| a]; intros; simpl.
   do 2 rewrite lap_mul_assoc.
   do 2 rewrite lap_add_assoc; simpl.
   apply lap_add_compat.
-   rewrite lap_eq_0, lap_mul_nil_l, lap_add_nil_r.
+   rewrite lap_eq_0, lap_mul_0_l, lap_add_0_r.
    rewrite lap_add_comm, lap_add_assoc.
    rewrite <- lap_add_assoc.
    rewrite <- lap_add_assoc.
@@ -1377,7 +1377,7 @@ induction la as [| a]; intros; simpl.
      apply lap_compose_single.
 
    rewrite lap_mul_cons; simpl.
-   rewrite lap_mul_nil_r.
+   rewrite lap_mul_0_r.
    constructor; [ reflexivity | idtac ].
    rewrite lap_eq_0; reflexivity.
 Qed.
@@ -1412,7 +1412,7 @@ Definition lap_ring {α} {r : ring α} : ring (list α) :=
      rng_eq_trans := lap_eq_trans;
      rng_add_comm := lap_add_comm;
      rng_add_assoc := lap_add_assoc;
-     rng_add_0_l := lap_add_nil_l;
+     rng_add_0_l := lap_add_0_l;
      rng_add_opp_l := lap_add_opp_l;
      rng_add_compat_l := lap_add_compat_l;
      rng_mul_comm := lap_mul_comm;
@@ -1432,40 +1432,16 @@ Declare Scope poly_scope.
 Delimit Scope poly_scope with pol.
 Notation "'POL' l" := {| al := l |} (at level 1) : poly_scope.
 
-Definition eq_poly {α} {r : ring α} x y := lap_eq (al x) (al y).
+Definition poly_eq {α} {r : ring α} x y := lap_eq (al x) (al y).
 
-Notation "a = b" := (eq_poly a b) : poly_scope.
-Notation "a ≠ b" := (¬eq_poly a b) : poly_scope.
-
-Definition poly_one {α} {r : ring α} := POL [1%Rng]%pol.
-Notation "1" := poly_one : poly_scope.
-
-Theorem eq_poly_refl {α} {r : ring α} : reflexive _ eq_poly.
-Proof.
-intros pol.
-unfold eq_poly; reflexivity.
-Qed.
-
-Theorem eq_poly_sym {α} {r : ring α} : symmetric _ eq_poly.
-Proof.
-intros pol₁ pol₂ Heq.
-unfold eq_poly; symmetry; assumption.
-Qed.
-
-Theorem eq_poly_trans {α} {r : ring α} : transitive _ eq_poly.
-Proof.
-intros pol₁ pol₂ pol₃ H₁ H₂.
-unfold eq_poly; etransitivity; eassumption.
-Qed.
-
-Add Parametric Relation {α} {r : ring α} : (polynomial α) eq_poly
- reflexivity proved by eq_poly_refl
- symmetry proved by eq_poly_sym
- transitivity proved by eq_poly_trans
- as eq_poly_rel.
+Definition poly_zero {α} {r : ring α} : polynomial α := POL []%pol.
+Definition poly_one {α} {r : ring α} : polynomial α := POL [1%Rng]%pol.
 
 Definition poly_add {α} {r : ring α} pol₁ pol₂ :=
   {| al := lap_add (al pol₁) (al pol₂) |}.
+
+Definition poly_opp {α} {r : ring α} pol :=
+  {| al := lap_opp (al pol) |}.
 
 Definition poly_mul {α} {r : ring α} pol₁ pol₂ :=
   {| al := lap_mul (al pol₁) (al pol₂) |}.
@@ -1479,34 +1455,63 @@ Definition poly_compose {α} {r : ring α} a b :=
 Definition poly_compose2 {α} {r : ring α} a b :=
   POL (lap_compose2 (al a) (al b))%pol.
 
+Notation "0" := poly_zero : poly_scope.
+Notation "1" := poly_one : poly_scope.
+Notation "- a" := (poly_opp a) : poly_scope.
+Notation "a = b" := (poly_eq a b) : poly_scope.
+Notation "a ≠ b" := (¬poly_eq a b) : poly_scope.
 Notation "a + b" := (poly_add a b) : poly_scope.
 Notation "a * b" := (poly_mul a b) : poly_scope.
 Notation "a ^ b" := (poly_power a b) : poly_scope.
 Notation "a ∘ b" := (poly_compose a b) (left associativity, at level 32) :
   poly_scope.
 
+Theorem poly_eq_refl {α} {r : ring α} : reflexive _ poly_eq.
+Proof.
+intros pol.
+unfold poly_eq; reflexivity.
+Qed.
+
+Theorem poly_eq_sym {α} {r : ring α} : symmetric _ poly_eq.
+Proof.
+intros pol₁ pol₂ Heq.
+unfold poly_eq; symmetry; assumption.
+Qed.
+
+Theorem poly_eq_trans {α} {r : ring α} : transitive _ poly_eq.
+Proof.
+intros pol₁ pol₂ pol₃ H₁ H₂.
+unfold poly_eq; etransitivity; eassumption.
+Qed.
+
+Add Parametric Relation {α} {r : ring α} : (polynomial α) poly_eq
+ reflexivity proved by poly_eq_refl
+ symmetry proved by poly_eq_sym
+ transitivity proved by poly_eq_trans
+ as poly_eq_rel.
+
 Add Parametric Morphism α (r : ring α) : (@al α)
-  with signature eq_poly ==> lap_eq
+  with signature poly_eq ==> lap_eq
   as al_morph.
 Proof. intros; assumption. Qed.
 
 Add Parametric Morphism α (r : ring α) : poly_add
-  with signature eq_poly ==> eq_poly ==> eq_poly
+  with signature poly_eq ==> poly_eq ==> poly_eq
   as poly_add_morph.
 Proof.
 intros a c Hac b d Hbd.
-unfold eq_poly, poly_add; simpl.
-unfold eq_poly in Hac, Hbd.
+unfold poly_eq, poly_add; simpl.
+unfold poly_eq in Hac, Hbd.
 rewrite Hac, Hbd; reflexivity.
 Qed.
 
 Add Parametric Morphism α (r : ring α) : poly_mul
-  with signature eq_poly ==> eq_poly ==> eq_poly
+  with signature poly_eq ==> poly_eq ==> poly_eq
   as poly_mul_morph.
 Proof.
 intros a c Hac b d Hbd.
-unfold eq_poly, poly_mul, lap_mul; simpl.
-unfold eq_poly in Hac, Hbd.
+unfold poly_eq, poly_mul, lap_mul; simpl.
+unfold poly_eq in Hac, Hbd.
 remember (al a) as la.
 remember (al b) as lb.
 remember (al c) as lc.
@@ -1519,11 +1524,11 @@ reflexivity.
 Qed.
 
 Add Parametric Morphism α (K : ring α) : poly_compose
-  with signature eq_poly ==> eq_poly ==> eq_poly
+  with signature poly_eq ==> poly_eq ==> poly_eq
   as poly_compose_morph.
 Proof.
 intros A C HAC B D HBD.
-unfold eq_poly; simpl.
+unfold poly_eq; simpl.
 rewrite HAC, HBD; reflexivity.
 Qed.
 
@@ -1541,12 +1546,33 @@ intros a b c d Hac Hbd.
 rewrite Hac, Hbd; reflexivity.
 Qed.
 
+Theorem poly_add_comm : ∀ a b, (a + b = b + a)%pol.
+Proof.
+intros.
+unfold poly_eq; cbn.
+apply lap_add_comm.
+Qed.
+
 Theorem poly_add_assoc : ∀ pol₁ pol₂ pol₃,
   (pol₁ + (pol₂ + pol₃) = (pol₁ + pol₂) + pol₃)%pol.
 Proof.
 intros pol₁ pol₂ pol₃.
-unfold eq_poly.
+unfold poly_eq.
 eapply lap_add_assoc; reflexivity.
+Qed.
+
+Theorem poly_add_0_l : ∀ pol, (0 + pol = pol)%pol.
+Proof.
+intros.
+unfold poly_eq.
+eapply lap_add_0_l; reflexivity.
+Qed.
+
+Theorem poly_add_opp_l : ∀ pol, (- pol + pol = 0)%pol.
+Proof.
+intros.
+unfold poly_eq.
+apply lap_add_opp_l.
 Qed.
 
 Theorem poly_mul_compat : ∀ a b c d,
@@ -1561,7 +1587,7 @@ Qed.
 Theorem poly_mul_comm : ∀ a b, (a * b = b * a)%pol.
 Proof.
 intros a b.
-unfold eq_poly; simpl.
+unfold poly_eq; simpl.
 unfold lap_mul; simpl.
 rewrite Nat.add_comm.
 rewrite lap_convol_mul_comm; reflexivity.
@@ -1577,7 +1603,7 @@ Qed.
 Theorem poly_mul_1_l : ∀ a, (1 * a = a)%pol.
 Proof.
 intros a.
-unfold eq_poly; simpl.
+unfold poly_eq; simpl.
 unfold lap_mul; simpl.
 rewrite lap_convol_mul_1_l; reflexivity.
 Qed.
@@ -1590,6 +1616,27 @@ apply lap_mul_add_distr_l.
 Qed.
 
 End poly.
+
+Definition polynomial_ring {α} {r : ring α} : ring (polynomial α) :=
+  {| rng_zero := poly_zero;
+     rng_one := poly_one;
+     rng_add := poly_add;
+     rng_mul := poly_mul;
+     rng_opp := poly_opp;
+     rng_eq := poly_eq;
+     rng_eq_refl := poly_eq_refl;
+     rng_eq_sym := poly_eq_sym;
+     rng_eq_trans := poly_eq_trans;
+     rng_add_comm := poly_add_comm;
+     rng_add_assoc := poly_add_assoc;
+     rng_add_0_l := poly_add_0_l;
+     rng_add_opp_l := poly_add_opp_l;
+     rng_add_compat_l := poly_add_compat_l |}.
+     rng_mul_comm := poly_mul_comm;
+     rng_mul_assoc := poly_mul_assoc;
+     rng_mul_1_l := poly_mul_1_l;
+     rng_mul_compat_l := poly_mul_compat_l;
+     rng_mul_add_distr_l := poly_mul_add_distr_l |}.
 
 (* *)
 
