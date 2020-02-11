@@ -1463,8 +1463,11 @@ Notation "a ≠ b" := (¬poly_eq a b) : poly_scope.
 Notation "a + b" := (poly_add a b) : poly_scope.
 Notation "a * b" := (poly_mul a b) : poly_scope.
 Notation "a ^ b" := (poly_power a b) : poly_scope.
-Notation "a ∘ b" := (poly_compose a b) (left associativity, at level 32) :
+Notation "a ∘ b" := (poly_compose a b) (left associativity, at level 40) :
   poly_scope.
+...
+Notation "'ⓧ' ^ a" := (xpow a) (at level 30, format "'ⓧ' ^ a") : poly_scope.
+Notation "'ⓧ'" := (xpow 1) (at level 30, format "'ⓧ'") : poly_scope.
 
 Theorem poly_eq_refl {α} {r : ring α} : reflexive _ poly_eq.
 Proof.

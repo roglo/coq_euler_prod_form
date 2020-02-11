@@ -4019,6 +4019,24 @@ Compute (nth_roots_of_unity_modulo 13 27, nth_roots_of_unity_modulo 13 27).
 Compute (let n := 26 in (prim_roots n, sort Nat.leb (prim_roots' n))).
 Compute (let n := 6 in sort Nat.leb (map (λ i, Nat_pow_mod 5 i n) (seq 1 (n - 1)))).
 
+Require Import Rpolynomial2.
+
+Theorem pol_pow_sub_1 {A} {rng : ring A} : ∀ k,
+  k ≠ 0
+  → (ⓧ^k - 1 = (ⓧ - 1) * (Σ (i = 0, k - 1), ⓧ^(k-i-1)))%pol.
+Proof.
+intros * Hkz.
+destruct k; [ easy | clear Hkz ].
+rewrite Nat.sub_succ, (Nat.sub_0_r k).
+induction k. {
+  cbn - [ pol_mul ].
+  rewrite pol_add_0_l.
+  rewrite xpow_0.
+...
+  rewrite pol_mul_1_r.
+
+...
+
 (* Theorem 2.3.5 in "An introduction to Theory of numbers" by Ivan Niven,
    Herbert Zuckerman and Hugh Montgomery – John Wiley and Sons – 1991:
       Let p and q be primes, and suppose that q^α | (p-1), where α ≥ 1.
