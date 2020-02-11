@@ -871,6 +871,13 @@ setoid_rewrite Nat.mul_comm in Hab.
 now apply Nat_mul_mod_cancel_r in Hab.
 Qed.
 
+Definition Nat_le_neq_lt : ∀ x y : nat, x ≤ y → x ≠ y → (x < y)%nat :=
+  λ x y Hxy Hnxy,
+  match le_lt_eq_dec x y Hxy with
+  | left Hle => Hle
+  | right Heq => match Hnxy Heq with end
+  end.
+
 Theorem List_hd_nth_0 {A} : ∀ l (d : A), hd d l = nth 0 l d.
 Proof. intros; now destruct l. Qed.
 

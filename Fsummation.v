@@ -242,7 +242,6 @@ replace k with (b + len) in * .
    rewrite Nat.add_succ_r, <- Nat.add_succ_l in Hvk.
    rewrite Hi; auto.
     rewrite rng_add_0_l.
-...
     apply IHlen; auto; [ apply Nat_le_neq_lt; auto | idtac ].
     intros j (Hvj, Hjvl) Hjv.
     rewrite Nat.add_succ_l, <- Nat.add_succ_r in Hjvl.
@@ -275,7 +274,7 @@ reflexivity.
 Qed.
 
 Theorem summation_summation_shift : ∀ g k,
-  (Σ (i = 0, k), Σ (j = i, k), g i j =
+  (Σ (i = 0, k), (Σ (j = i, k), g i j) =
    Σ (i = 0, k), Σ (j = 0, k - i), g i (i + j)%nat)%Rng.
 Proof.
 intros g k.
@@ -310,12 +309,12 @@ reflexivity.
 Qed.
 
 Theorem summation_aux_succ_first : ∀ g b len,
-  summation_aux r b (S len) g = (g b + summation_aux r (S b) len g)%Rng.
+  summation_aux b (S len) g = (g b + summation_aux (S b) len g)%Rng.
 Proof. reflexivity. Qed.
 
 Theorem summation_split_first : ∀ g b k,
   b ≤ k
-  → Σ (i = b, k), g i = (g b + Σ (i = S b, k), g i)%Rng.
+  → (Σ (i = b, k), g i)%Rng = (g b + Σ (i = S b, k), g i)%Rng.
 Proof.
 intros g b k Hbk.
 unfold summation.
@@ -360,12 +359,12 @@ destruct (le_dec b k) as [Hbk| Hbk].
 
  unfold summation.
  apply Nat.nle_gt in Hbk.
- replace (S k - b) with O by fast_omega Hbk; simpl.
+ replace (S k - b) with O by flia Hbk; simpl.
  rewrite rng_add_0_r; reflexivity.
 Qed.
 
 Theorem summation_summation_exch : ∀ g k,
-  (Σ (j = 0, k), Σ (i = 0, j), g i j =
+  (Σ (j = 0, k), (Σ (i = 0, j), g i j) =
    Σ (i = 0, k), Σ (j = i, k), g i j)%Rng.
 Proof.
 intros g k.
@@ -384,8 +383,8 @@ apply Nat.le_le_succ_r; assumption.
 Qed.
 
 Theorem summation_aux_ub_add : ∀ g b k₁ k₂,
-  (summation_aux r b (k₁ + k₂) g =
-   summation_aux r b k₁ g + summation_aux r (b + k₁) k₂ g)%Rng.
+  (summation_aux b (k₁ + k₂) g =
+   summation_aux b k₁ g + summation_aux (b + k₁) k₂ g)%Rng.
 Proof.
 intros g b k₁ k₂.
 revert b k₁.
@@ -422,9 +421,9 @@ rewrite Nat.add_comm, Nat.add_sub; reflexivity.
 Qed.
 
 Theorem summation_aux_mul_summation_aux_summation_aux : ∀ g k n,
-  (summation_aux r 0 (S k * S n) g =
-   summation_aux r 0 (S k)
-     (λ i, summation_aux r 0 (S n) (λ j, g (i * S n + j)%nat)))%Rng.
+  (summation_aux 0 (S k * S n) g =
+   summation_aux 0 (S k)
+     (λ i, summation_aux 0 (S n) (λ j, g (i * S n + j)%nat)))%Rng.
 Proof.
 intros g k n.
 revert n; induction k; intros.
@@ -438,9 +437,9 @@ revert n; induction k; intros.
  symmetry; rewrite rng_add_comm.
  symmetry.
  rewrite summation_aux_succ_first.
- rewrite rng_add_shuffle0, rng_add_comm.
+ rewrite rng_add_add_swap, rng_add_comm.
  symmetry.
- replace (S k) with (k + 1)%nat by fast_omega.
+ replace (S k) with (k + 1)%nat by flia.
  rewrite summation_aux_ub_add.
  rewrite <- rng_add_assoc.
  apply rng_add_compat_l.
@@ -534,10 +533,10 @@ Theorem summation_add_add_sub : ∀ g b k n,
 Proof.
 intros g b k n.
 unfold summation.
-replace (S (k + n) - (b + n))%nat with (S k - b)%nat by fast_omega.
+replace (S (k + n) - (b + n))%nat with (S k - b)%nat by flia.
 apply summation_aux_compat.
 intros i Hi.
-replace (b + n + i - n)%nat with (b + i)%nat by fast_omega.
+replace (b + n + i - n)%nat with (b + i)%nat by flia.
 reflexivity.
 Qed.
 
