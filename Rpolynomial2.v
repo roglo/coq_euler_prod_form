@@ -601,12 +601,6 @@ Qed.
 
 Instance lap_compose_morph {A} {rng : ring A} :
   Proper (lap_eq ==> lap_eq ==> lap_eq) lap_compose.
-(*
-...
-Add Parametric Morphism α (r : ring α) : lap_compose
-  with signature lap_eq ==> lap_eq ==> lap_eq
-  as lap_compose_morph.
-*)
 Proof.
 intros la lb Hlab lc ld Hlcd.
 revert lb lc ld Hlab Hlcd.
