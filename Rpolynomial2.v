@@ -16,27 +16,21 @@ Require Import Rsummation.
 
 Inductive lap_eq {α} {r : ring α} : list α → list α → Prop :=
   | lap_eq_nil : lap_eq [] []
-  | lap_eq_cons : ∀ x₁ x₂ l₁ l₂,
-      (x₁ = x₂)%Rng
-      → lap_eq l₁ l₂
-        → lap_eq (x₁ :: l₁) (x₂ :: l₂)
+  | lap_eq_cons : ∀ x1 x2 l1 l2,
+      (x1 = x2)%Rng → lap_eq l1 l2 → lap_eq (x1 :: l1) (x2 :: l2)
   | lap_eq_cons_nil : ∀ x l,
-      (x = 0)%Rng
-      → lap_eq l []
-        → lap_eq (x :: l) []
+      (x = 0)%Rng → lap_eq l [] → lap_eq (x :: l) []
   | lap_eq_nil_cons : ∀ x l,
-      (x = 0)%Rng
-      → lap_eq [] l
-        → lap_eq [] (x :: l).
+      (x = 0)%Rng → lap_eq [] l → lap_eq [] (x :: l).
 
 Definition lap_zero {α} {r : ring α} := ([] : list α).
 Definition lap_one {α} {r : ring α} := [1%Rng].
 
-Theorem lap_eq_cons_inv : ∀ α (r : ring α) x₁ x₂ l₁ l₂,
-  lap_eq (x₁ :: l₁) (x₂ :: l₂)
-  → (x₁ = x₂)%Rng ∧ lap_eq l₁ l₂.
+Theorem lap_eq_cons_inv : ∀ α (r : ring α) x1 x2 l1 l2,
+  lap_eq (x1 :: l1) (x2 :: l2)
+  → (x1 = x2)%Rng ∧ lap_eq l1 l2.
 Proof.
-intros α r x₁ x₂ l₁ l₂ H.
+intros α r x1 x2 l1 l2 H.
 inversion H; split; assumption.
 Qed.
 
@@ -64,63 +58,63 @@ Qed.
 
 Theorem lap_eq_sym {α} {r : ring α} : symmetric _ lap_eq.
 Proof.
-intros l₁ l₂ Heq.
-revert l₂ Heq.
-induction l₁ as [| x₁]; intros.
- induction l₂ as [| x₂]; constructor; apply lap_eq_nil_cons_inv in Heq.
+intros l1 l2 Heq.
+revert l2 Heq.
+induction l1 as [| x1]; intros.
+ induction l2 as [| x2]; constructor; apply lap_eq_nil_cons_inv in Heq.
   destruct Heq; assumption.
 
-  apply IHl₂; destruct Heq; assumption.
+  apply IHl2; destruct Heq; assumption.
 
- induction l₂ as [| x₂].
+ induction l2 as [| x2].
   apply lap_eq_cons_nil_inv in Heq; destruct Heq.
-  constructor; [ assumption | apply IHl₁; assumption ].
+  constructor; [ assumption | apply IHl1; assumption ].
 
   apply lap_eq_cons_inv in Heq; destruct Heq.
-  constructor; [ symmetry; assumption | apply IHl₁; assumption ].
+  constructor; [ symmetry; assumption | apply IHl1; assumption ].
 Qed.
 
 Theorem lap_eq_trans {α} {r : ring α} : transitive _ lap_eq.
 Proof.
-intros l₁ l₂ l₃ H₁ H₂.
-revert l₁ l₃ H₁ H₂.
-induction l₂ as [| x₂]; intros.
- revert l₃ H₂.
- induction l₁ as [| x₁]; intros; [ assumption | idtac ].
- destruct l₃ as [| x₃]; [ assumption | idtac ].
- apply lap_eq_cons_nil_inv in H₁.
- apply lap_eq_nil_cons_inv in H₂.
+intros l1 l2 l3 H1 H2.
+revert l1 l3 H1 H2.
+induction l2 as [| x2]; intros.
+ revert l3 H2.
+ induction l1 as [| x1]; intros; [ assumption | idtac ].
+ destruct l3 as [| x3]; [ assumption | idtac ].
+ apply lap_eq_cons_nil_inv in H1.
+ apply lap_eq_nil_cons_inv in H2.
  constructor.
-  etransitivity; [ destruct H₁; eassumption | idtac ].
-  destruct H₂; symmetry; assumption.
+  etransitivity; [ destruct H1; eassumption | idtac ].
+  destruct H2; symmetry; assumption.
 
-  apply IHl₁; [ destruct H₁ | destruct H₂ ]; assumption.
+  apply IHl1; [ destruct H1 | destruct H2 ]; assumption.
 
- destruct l₁ as [| x₁].
-  apply lap_eq_nil_cons_inv in H₁.
-  destruct l₃ as [| x₃]; constructor.
-   apply lap_eq_cons_inv in H₂.
-   destruct H₁, H₂.
+ destruct l1 as [| x1].
+  apply lap_eq_nil_cons_inv in H1.
+  destruct l3 as [| x3]; constructor.
+   apply lap_eq_cons_inv in H2.
+   destruct H1, H2.
    etransitivity; [ symmetry; eassumption | assumption ].
 
-   apply lap_eq_cons_inv in H₂.
-   apply IHl₂; [ destruct H₁ | destruct H₂ ]; assumption.
+   apply lap_eq_cons_inv in H2.
+   apply IHl2; [ destruct H1 | destruct H2 ]; assumption.
 
-  apply lap_eq_cons_inv in H₁.
-  destruct l₃ as [| x₃]; constructor.
-   apply lap_eq_cons_nil_inv in H₂.
-   destruct H₁, H₂.
+  apply lap_eq_cons_inv in H1.
+  destruct l3 as [| x3]; constructor.
+   apply lap_eq_cons_nil_inv in H2.
+   destruct H1, H2.
    etransitivity; eassumption.
 
-   apply lap_eq_cons_nil_inv in H₂.
-   apply IHl₂; [ destruct H₁ | destruct H₂ ]; assumption.
+   apply lap_eq_cons_nil_inv in H2.
+   apply IHl2; [ destruct H1 | destruct H2 ]; assumption.
 
-   apply lap_eq_cons_inv in H₂.
-   destruct H₁, H₂.
+   apply lap_eq_cons_inv in H2.
+   destruct H1, H2.
    etransitivity; eassumption.
 
-   apply lap_eq_cons_inv in H₂.
-   apply IHl₂; [ destruct H₁ | destruct H₂ ]; assumption.
+   apply lap_eq_cons_inv in H2.
+   apply IHl2; [ destruct H1 | destruct H2 ]; assumption.
 Qed.
 
 Add Parametric Relation α (r : ring α) : (list α) lap_eq
@@ -142,13 +136,13 @@ Qed.
 
 (* addition *)
 
-Fixpoint lap_add {α} {r : ring α} al₁ al₂ :=
-  match al₁ with
-  | [] => al₂
-  | a₁ :: bl₁ =>
-      match al₂ with
-      | [] => al₁
-      | a₂ :: bl₂ => (a₁ + a₂)%Rng :: lap_add bl₁ bl₂
+Fixpoint lap_add {α} {r : ring α} al1 al2 :=
+  match al1 with
+  | [] => al2
+  | a1 :: bl1 =>
+      match al2 with
+      | [] => al1
+      | a2 :: bl2 => (a1 + a2)%Rng :: lap_add bl1 bl2
       end
   end.
 
@@ -156,12 +150,12 @@ Definition lap_opp {α} {r : ring α} la := List.map rng_opp la.
 
 (* multiplication *)
 
-Fixpoint lap_convol_mul {α} {r : ring α} al₁ al₂ i len :=
+Fixpoint lap_convol_mul {α} {r : ring α} al1 al2 i len :=
   match len with
   | O => []
-  | S len₁ =>
-      (Σ (j = 0, i), List.nth j al₁ 0 * List.nth (i - j) al₂ 0)%Rng ::
-      lap_convol_mul al₁ al₂ (S i) len₁
+  | S len1 =>
+      (Σ (j = 0, i), List.nth j al1 0 * List.nth (i - j) al2 0)%Rng ::
+      lap_convol_mul al1 al2 (S i) len1
   end.
 
 Definition lap_mul {α} {R : ring α} la lb :=
@@ -191,7 +185,7 @@ Definition lap_compose2 {α} {r : ring α} la lb :=
 Fixpoint list_pad {α} n (zero : α) rem :=
   match n with
   | O => rem
-  | S n₁ => zero :: list_pad n₁ zero rem
+  | S n1 => zero :: list_pad n1 zero rem
   end.
 
 Declare Scope lap_scope.
@@ -347,10 +341,10 @@ induction la as [| a]; intros.
     constructor; [ rewrite Hac, Hbd; reflexivity | apply IHla; assumption ].
 Qed.
 
-Theorem lap_convol_mul_comm : ∀ α (R : ring α) l₁ l₂ i len,
-  lap_eq (lap_convol_mul l₁ l₂ i len) (lap_convol_mul l₂ l₁ i len).
+Theorem lap_convol_mul_comm : ∀ α (R : ring α) l1 l2 i len,
+  lap_eq (lap_convol_mul l1 l2 i len) (lap_convol_mul l2 l1 i len).
 Proof.
-intros α R l₁ l₂ i len.
+intros α R l1 l2 i len.
 revert i.
 induction len; intros; [ reflexivity | simpl ].
 constructor; [ idtac | apply IHlen ].
@@ -473,19 +467,19 @@ constructor; [ idtac | constructor ].
 apply all_0_summation_0.
 intros j (_, Hj).
 apply rng_mul_eq_0.
-destruct (le_dec (length la) j) as [H₁| H₁].
+destruct (le_dec (length la) j) as [H1| H1].
  left.
  rewrite List.nth_overflow; [ reflexivity | assumption ].
 
- apply Nat.nle_gt in H₁.
+ apply Nat.nle_gt in H1.
  destruct (le_dec (length lb) (i + (pred (length la + length lb) + n) - j))
-  as [H₂| H₂].
+  as [H2| H2].
   right.
   rewrite List.nth_overflow; [ reflexivity | assumption ].
 
-  exfalso; apply H₂; clear H₂.
+  exfalso; apply H2; clear H2.
   rewrite <- Nat.add_pred_l.
-   apply Nat.lt_le_pred in H₁.
+   apply Nat.lt_le_pred in H1.
    apply Nat.le_add_le_sub_l.
    rewrite Nat.add_shuffle0, Nat.add_assoc.
    apply Nat.add_le_mono_r.
@@ -495,8 +489,8 @@ destruct (le_dec (length la) j) as [H₁| H₁].
    rewrite Nat.sub_diag.
    apply Nat.le_0_l.
 
-   intros H; rewrite H in H₁.
-   revert H₁; apply Nat.nlt_0_r.
+   intros H; rewrite H in H1.
+   revert H1; apply Nat.nlt_0_r.
 Qed.
 
 Instance lap_mul_morph {A} {rng : ring A} :
@@ -640,47 +634,47 @@ Context {r : ring α}.
 
 (* addition theorems *)
 
-Theorem lap_add_comm : ∀ al₁ al₂,
-  lap_eq (lap_add al₁ al₂) (lap_add al₂ al₁).
+Theorem lap_add_comm : ∀ al1 al2,
+  lap_eq (lap_add al1 al2) (lap_add al2 al1).
 Proof.
-intros al₁ al₂.
-revert al₂.
-induction al₁; intros.
- destruct al₂; [ apply lap_eq_refl | simpl ].
+intros al1 al2.
+revert al2.
+induction al1; intros.
+ destruct al2; [ apply lap_eq_refl | simpl ].
  constructor; [ reflexivity | apply lap_eq_refl ].
 
- destruct al₂.
+ destruct al2.
   constructor; [ reflexivity | apply lap_eq_refl ].
 
-  constructor; [ apply rng_add_comm | apply IHal₁ ].
+  constructor; [ apply rng_add_comm | apply IHal1 ].
 Qed.
 
-Theorem lap_add_assoc : ∀ al₁ al₂ al₃,
-  lap_eq (lap_add al₁ (lap_add al₂ al₃))
-    (lap_add (lap_add al₁ al₂) al₃).
+Theorem lap_add_assoc : ∀ al1 al2 al3,
+  lap_eq (lap_add al1 (lap_add al2 al3))
+    (lap_add (lap_add al1 al2) al3).
 Proof.
-intros al₁ al₂ al₃.
-revert al₂ al₃.
-induction al₁; intros.
- destruct al₂.
-  destruct al₃; [ apply lap_eq_refl | idtac ].
+intros al1 al2 al3.
+revert al2 al3.
+induction al1; intros.
+ destruct al2.
+  destruct al3; [ apply lap_eq_refl | idtac ].
   constructor; [ reflexivity | apply lap_eq_refl ].
 
-  destruct al₃; simpl.
+  destruct al3; simpl.
    constructor; [ reflexivity | apply lap_eq_refl ].
 
    constructor; [ reflexivity | apply lap_eq_refl ].
 
- destruct al₂.
-  destruct al₃; simpl.
+ destruct al2.
+  destruct al3; simpl.
    constructor; [ reflexivity | apply lap_eq_refl ].
 
    constructor; [ reflexivity | apply lap_eq_refl ].
 
-  destruct al₃; simpl.
+  destruct al3; simpl.
    constructor; [ reflexivity | apply lap_eq_refl ].
 
-   constructor; [ apply rng_add_assoc | apply IHal₁ ].
+   constructor; [ apply rng_add_assoc | apply IHal1 ].
 Qed.
 
 Theorem lap_add_shuffle0 : ∀ la lb lc,
@@ -732,19 +726,19 @@ induction len; intros.
  rewrite Nat.add_0_r in Hlen.
  rewrite all_0_summation_0; [ destruct n; reflexivity | idtac ].
  intros j (_, Hj).
- destruct (le_dec (length la) j) as [H₁| H₁].
+ destruct (le_dec (length la) j) as [H1| H1].
   rewrite List.nth_overflow; [ idtac | assumption ].
   rewrite rng_mul_0_l; reflexivity.
 
-  destruct (le_dec (length lb) (n + i - j)) as [H₂| H₂].
+  destruct (le_dec (length lb) (n + i - j)) as [H2| H2].
    rewrite rng_mul_comm.
    rewrite List.nth_overflow; [ idtac | assumption ].
    rewrite rng_mul_0_l; reflexivity.
 
-   exfalso; apply H₂; clear Hj H₂.
-   apply Nat.nle_gt in H₁; subst i.
+   exfalso; apply H2; clear Hj H2.
+   apply Nat.nle_gt in H1; subst i.
    rewrite <- Nat.add_pred_l.
-    apply Nat.lt_le_pred in H₁.
+    apply Nat.lt_le_pred in H1.
     apply Nat.le_add_le_sub_l.
     rewrite Nat.add_assoc.
     apply Nat.add_le_mono_r.
@@ -754,8 +748,8 @@ induction len; intros.
     rewrite Nat.sub_diag.
     apply Nat.le_0_l.
 
-    intros H; rewrite H in H₁.
-    revert H₁; apply Nat.nlt_0_r.
+    intros H; rewrite H in H1.
+    revert H1; apply Nat.nlt_0_r.
 
  simpl.
  destruct n; [ reflexivity | idtac ].
@@ -882,14 +876,14 @@ induction len; intros.
   destruct j; rewrite rng_mul_0_l; reflexivity.
 Qed.
 
-Fixpoint lap_convol_mul_add al₁ al₂ al₃ i len :=
+Fixpoint lap_convol_mul_add al1 al2 al3 i len :=
   match len with
   | O => []
-  | S len₁ =>
+  | S len1 =>
       (Σ (j = 0, i),
-       List.nth j al₁ 0 *
-       (List.nth (i - j) al₂ 0 + List.nth (i - j) al₃ 0))%Rng ::
-       lap_convol_mul_add al₁ al₂ al₃ (S i) len₁
+       List.nth j al1 0 *
+       (List.nth (i - j) al2 0 + List.nth (i - j) al3 0))%Rng ::
+       lap_convol_mul_add al1 al2 al3 (S i) len1
   end.
 
 (* *)
@@ -1434,17 +1428,17 @@ Definition poly_eq {α} {r : ring α} x y := lap_eq (al x) (al y).
 Definition poly_zero {α} {r : ring α} : polynomial α := POL []%pol.
 Definition poly_one {α} {r : ring α} : polynomial α := POL [1%Rng]%pol.
 
-Definition poly_add {α} {r : ring α} pol₁ pol₂ :=
-  {| al := lap_add (al pol₁) (al pol₂) |}.
+Definition poly_add {α} {r : ring α} pol1 pol2 :=
+  {| al := lap_add (al pol1) (al pol2) |}.
 
 Definition poly_opp {α} {r : ring α} pol :=
   {| al := lap_opp (al pol) |}.
 
-Definition poly_sub {α} {r : ring α} pol₁ pol₂ :=
-  poly_add pol₁ (poly_opp pol₂).
+Definition poly_sub {α} {r : ring α} pol1 pol2 :=
+  poly_add pol1 (poly_opp pol2).
 
-Definition poly_mul {α} {r : ring α} pol₁ pol₂ :=
-  {| al := lap_mul (al pol₁) (al pol₂) |}.
+Definition poly_mul {α} {r : ring α} pol1 pol2 :=
+  {| al := lap_mul (al pol1) (al pol2) |}.
 
 Definition poly_power {α} {r : ring α} pol n :=
   (POL (lap_power (al pol) n))%pol.
@@ -1481,13 +1475,13 @@ Qed.
 
 Theorem poly_eq_sym {α} {r : ring α} : symmetric _ poly_eq.
 Proof.
-intros pol₁ pol₂ Heq.
+intros pol1 pol2 Heq.
 unfold poly_eq; symmetry; assumption.
 Qed.
 
 Theorem poly_eq_trans {α} {r : ring α} : transitive _ poly_eq.
 Proof.
-intros pol₁ pol₂ pol₃ H₁ H₂.
+intros pol1 pol2 pol3 H1 H2.
 unfold poly_eq; etransitivity; eassumption.
 Qed.
 
@@ -1556,8 +1550,8 @@ unfold poly_eq; cbn.
 apply lap_add_comm.
 Qed.
 
-Theorem poly_add_assoc : ∀ pol₁ pol₂ pol₃,
-  (pol₁ + (pol₂ + pol₃) = (pol₁ + pol₂) + pol₃)%pol.
+Theorem poly_add_assoc : ∀ pol1 pol2 pol3,
+  (pol1 + (pol2 + pol3) = (pol1 + pol2) + pol3)%pol.
 Proof. intros; apply lap_add_assoc. Qed.
 
 Theorem poly_add_0_l : ∀ pol, (0 + pol = pol)%pol.
