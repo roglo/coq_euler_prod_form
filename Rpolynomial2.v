@@ -1608,12 +1608,10 @@ apply lap_mul_assoc.
 Qed.
 
 Theorem poly_mul_1_l : ∀ a, (1 * a = a)%pol.
-Proof.
-intros a.
-unfold poly_eq; simpl.
-unfold lap_mul; simpl.
-rewrite lap_convol_mul_1_l; reflexivity.
-Qed.
+Proof. intros; apply lap_mul_1_l. Qed.
+
+Theorem poly_mul_1_r : ∀ a, (a * 1 = a)%pol.
+Proof. intros; rewrite poly_mul_comm; apply poly_mul_1_l. Qed.
 
 Theorem poly_mul_add_distr_l : ∀ P Q R,
   (P * (Q + R) = P * Q + P * R)%pol.
