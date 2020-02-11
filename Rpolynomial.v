@@ -299,38 +299,37 @@ Qed.
 Theorem pol_add_0_l {A} {rng : ring A} : ∀ p1, (0 + p1)%pol = p1.
 Proof. intros (la); easy. Qed.
 
-Theorem glop {A} {rng : ring A} : ∀ la lb,
+Instance cons_rng_lap_morph {A} {rng : ring A} :
+  Proper (rng_eq ==> lap_eq ==> lap_eq) cons.
+Proof.
+intros a b Hab la lb Hll.
+now constructor.
+Qed.
+
+Instance mkpol_morph {A} {rng : ring A} :
+  Proper (lap_eq ==> pol_eq) mkpol.
+Proof. easy. Qed.
+
+Theorem lap_eq_mkpol_eq {A} {rng : ring A} : ∀ la lb,
   lap_eq la lb → (mkpol la = mkpol lb)%pol.
 Proof.
 intros * Hll.
-revert lb Hll.
-induction la as [| a la]; intros; cbn. {
-  destruct lb as [| b lb]; [ easy | ].
-  apply lap_eq_nil_cons_inv in Hll.
-  destruct Hll as (Hb, Hlb).
-Instance cons_rng_lap_morph {A} {rng : ring A} :
-  Proper (rng_eq ==> lap_eq ==> lap_eq) cons.
-Admitted.
-Instance mkpol_morph {A} {rng : ring A} :
-  Proper (lap_eq ==> pol_eq) mkpol.
-Admitted.
-  rewrite Hb.
-...
+now rewrite Hll.
+Qed.
 
 Theorem pol_mul_1_l {A} {rng : ring A} : ∀ p1, (1 * p1 = p1)%pol.
 Proof.
 intros (la).
 unfold "*"%pol; cbn.
 rewrite Nat.sub_0_r.
-Check lap_eq.
-...
-apply glop.
+apply lap_eq_mkpol_eq.
 induction la as [| a la]; [ constructor | cbn ].
 constructor. {
   rewrite rng_add_0_l.
   rewrite rng_mul_1_l.
   easy.
 } {
+Search lap_convol_mul_term.
 ...
 
 f_equal.
