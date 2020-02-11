@@ -1,6 +1,6 @@
 (* Fsummation.v *)
 
-(* summations on a field *)
+(* summations on a ring *)
 
 Require Import Utf8.
 Require Import QArith.
