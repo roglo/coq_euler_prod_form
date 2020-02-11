@@ -9,10 +9,6 @@ Require Import NPeano.
 Require Import Misc.
 Require Import Ring2.
 
-(*
-Set Implicit Arguments.
-*)
-
 Fixpoint summation_aux {α} {r : ring α} b len g :=
   match len with
   | O => 0%Rng
@@ -28,9 +24,6 @@ Section theorems_summation.
 
 Variable α : Type.
 Variable r : ring α.
-(*
-Variable f : field r.
-*)
 
 Open Scope nat_scope.
 
