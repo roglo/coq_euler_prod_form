@@ -2,6 +2,10 @@
 
 (* polynomials on a ring *)
 
+(* obsolete: I use Rpolynomial2.v now *)
+
+...
+
 Set Nested Proofs Allowed.
 Require Import Utf8 Arith Setoid Morphisms Psatz.
 Import List List.ListNotations.

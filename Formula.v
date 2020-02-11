@@ -4019,7 +4019,7 @@ Compute (nth_roots_of_unity_modulo 13 27, nth_roots_of_unity_modulo 13 27).
 Compute (let n := 26 in (prim_roots n, sort Nat.leb (prim_roots' n))).
 Compute (let n := 6 in sort Nat.leb (map (λ i, Nat_pow_mod 5 i n) (seq 1 (n - 1)))).
 
-Require Import Rpolynomial2.
+Require Import Ring2 Rpolynomial2.
 
 Theorem pol_pow_sub_1 {A} {rng : ring A} : ∀ k,
   k ≠ 0
@@ -4029,10 +4029,10 @@ intros * Hkz.
 destruct k; [ easy | clear Hkz ].
 rewrite Nat.sub_succ, (Nat.sub_0_r k).
 induction k. {
-  cbn - [ pol_mul ].
-  rewrite pol_add_0_l.
-  rewrite xpow_0.
+  cbn.
+  rewrite poly_add_0_l.
 ...
+  rewrite xpow_0.
   rewrite pol_mul_1_r.
 
 ...

@@ -1426,6 +1426,7 @@ Canonical Structure lap_ring.
 (* polynomial type *)
 
 Record polynomial α := mkpol { al : list α }.
+Arguments mkpol {_}.
 Arguments al {_}.
 
 Declare Scope poly_scope.
@@ -1443,6 +1444,9 @@ Definition poly_add {α} {r : ring α} pol₁ pol₂ :=
 Definition poly_opp {α} {r : ring α} pol :=
   {| al := lap_opp (al pol) |}.
 
+Definition poly_sub {α} {r : ring α} pol₁ pol₂ :=
+  poly_add pol₁ (poly_opp pol₂).
+
 Definition poly_mul {α} {r : ring α} pol₁ pol₂ :=
   {| al := lap_mul (al pol₁) (al pol₂) |}.
 
@@ -1455,19 +1459,23 @@ Definition poly_compose {α} {r : ring α} a b :=
 Definition poly_compose2 {α} {r : ring α} a b :=
   POL (lap_compose2 (al a) (al b))%pol.
 
+Definition xpow {α} {r : ring α} i := mkpol (repeat 0%Rng i ++ [1%Rng]).
+
 Notation "0" := poly_zero : poly_scope.
 Notation "1" := poly_one : poly_scope.
 Notation "- a" := (poly_opp a) : poly_scope.
 Notation "a = b" := (poly_eq a b) : poly_scope.
 Notation "a ≠ b" := (¬poly_eq a b) : poly_scope.
 Notation "a + b" := (poly_add a b) : poly_scope.
+Notation "a - b" := (poly_sub a b) : poly_scope.
 Notation "a * b" := (poly_mul a b) : poly_scope.
 Notation "a ^ b" := (poly_power a b) : poly_scope.
 Notation "a ∘ b" := (poly_compose a b) (left associativity, at level 40) :
   poly_scope.
-...
 Notation "'ⓧ' ^ a" := (xpow a) (at level 30, format "'ⓧ' ^ a") : poly_scope.
 Notation "'ⓧ'" := (xpow 1) (at level 30, format "'ⓧ'") : poly_scope.
+Notation "'Σ' ( i = b , e ) , g" :=
+  (fold_left (λ c i, (c + g)%pol) (seq b (S e - b)) 0%pol) : poly_scope.
 
 Theorem poly_eq_refl {α} {r : ring α} : reflexive _ poly_eq.
 Proof.
