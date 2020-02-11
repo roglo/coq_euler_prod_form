@@ -206,15 +206,15 @@ Notation "a - b" := (lap_add a (lap_opp b)) : lap_scope.
 Notation "a * b" := (lap_mul a b) : lap_scope.
 Notation "a ^ b" := (lap_power a b) : lap_scope.
 
-Definition list_nth_def_0 α {R : ring α} n l := List.nth n l 0%Rng.
+Definition list_nth_def_0 {α} {R : ring α} n l := List.nth n l 0%Rng.
 
 (* *)
 
-Add Parametric Morphism α (R : ring α) : (@list_nth_def_0 _ R)
-  with signature eq ==> lap_eq ==> rng_eq
-  as list_nth_rng_morph.
+Instance list_nth_rng_morph {A} {rng : ring A} :
+  Proper (eq ==> lap_eq ==> rng_eq) list_nth_def_0.
 Proof.
-intros n la lb Hab.
+intros n n' Hnn la lb Hab.
+subst n'.
 unfold list_nth_def_0.
 revert n lb Hab.
 induction la as [| a]; intros; simpl.
