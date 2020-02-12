@@ -4024,6 +4024,11 @@ Require Import Ring2 Rpolynomial2 Rsummation.
 Theorem xpow_0 {A} {rng : ring A} : (ⓧ^0 = 1)%pol.
 Proof. easy. Qed.
 
+Theorem lap_convol_mul_succ_r {A} {rng : ring A} : ∀ la lb i len,
+  lap_convol_mul la lb i (S len) =
+  (Σ (j = 0, i), nth j la 0 * nth (i - j) lb 0)%Rng :: lap_convol_mul la lb (S i) len.
+Proof. easy. Qed.
+
 Theorem xpow_add_r {A} {rng : ring A} : ∀ a b, (ⓧ ^ (a + b) = ⓧ ^ a * ⓧ ^ b)%pol.
 Proof.
 intros.
@@ -4032,8 +4037,15 @@ unfold lap_mul.
 rewrite app_length, repeat_length; cbn.
 rewrite app_length, repeat_length; cbn.
 replace (pred (a + 1 + (b + 1))) with (S (a + b)) by flia.
-Search (lap_convol_mul _ _ (S _)).
-Search (repeat _ _ ++ repeat _ _).
+rewrite lap_convol_mul_succ_r.
+rewrite summation_only_one.
+rewrite Nat.sub_diag.
+revert b.
+induction a; intros; cbn. {
+  rewrite rng_mul_1_l.
+  destruct b; [ easy | cbn ].
+  rewrite rng_mul_1_l, rng_mul_0_l, rng_add_0_l, rng_add_0_r.
+  cbn.
 ...
 
 Theorem pol_pow_sub_1 {A} {rng : ring A} (pr := polynomial_ring) : ∀ k,
