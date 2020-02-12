@@ -4046,6 +4046,7 @@ induction a; intros. {
   rewrite Nat.add_1_r; cbn.
   rewrite rng_mul_1_l, rng_mul_0_l, rng_add_0_l.
   rewrite rng_mul_0_l, rng_add_0_l.
+  apply lap_eq_cons; [ easy | ].
 ...
   induction b. {
     cbn.
