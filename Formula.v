@@ -4029,13 +4029,37 @@ Theorem lap_convol_mul_succ_r {A} {rng : ring A} : ∀ la lb i len,
   (Σ (j = 0, i), nth j la 0 * nth (i - j) lb 0)%Rng :: lap_convol_mul la lb (S i) len.
 Proof. easy. Qed.
 
-Theorem xpow_add_r {A} {rng : ring A} : ∀ a b, (ⓧ ^ (a + b) = ⓧ ^ a * ⓧ ^ b)%pol.
+Theorem lap_xpow_succ {A} {rng : ring A} : ∀ a,
+  (repeat 0%Rng (S a) ++ [1%Rng] =
+   [0%Rng; 1%Rng] * (repeat 0%Rng a ++ [1%Rng]))%lap.
+Proof.
+intros.
+induction a. {
+  cbn.
+  rewrite rng_mul_0_l, rng_add_0_l.
+  now rewrite rng_mul_0_l, rng_add_0_l, rng_mul_1_l, rng_add_0_r.
+}
+remember (S a) as sa; cbn; subst sa.
+rewrite rng_mul_0_l, rng_add_0_l.
+apply lap_eq_cons; [ easy | ].
+rewrite IHa at 1.
+cbn.
+rewrite rng_mul_1_l, rng_add_0_l, rng_add_0_r.
+apply lap_eq_cons; [ easy | ].
+rewrite app_length, repeat_length; cbn.
+...
+
+Theorem xpow_add_r {A} {rng : ring A} : ∀ a b,
+  (ⓧ ^ (a + b) = ⓧ ^ a * ⓧ ^ b)%pol.
 Proof.
 intros.
 unfold poly_eq; cbn.
 revert b.
 induction a; intros; [ now rewrite lap_mul_1_l | ].
 rewrite Nat.add_succ_comm, IHa; clear IHa.
+...
+do 2 rewrite lap_xpow_succ.
+...
 revert b.
 induction a; intros. {
   cbn.
