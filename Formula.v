@@ -4033,6 +4033,13 @@ Theorem xpow_add_r {A} {rng : ring A} : ∀ a b, (ⓧ ^ (a + b) = ⓧ ^ a * ⓧ 
 Proof.
 intros.
 unfold poly_eq; cbn.
+revert b.
+induction a; intros; [ now rewrite lap_mul_1_l | ].
+rewrite Nat.add_succ_comm, IHa.
+rewrite lap_mul_comm.
+...
+intros.
+unfold poly_eq; cbn.
 unfold lap_mul.
 rewrite app_length, repeat_length; cbn.
 rewrite app_length, repeat_length; cbn.
