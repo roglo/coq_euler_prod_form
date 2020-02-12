@@ -4035,9 +4035,27 @@ intros.
 unfold poly_eq; cbn.
 revert b.
 induction a; intros; [ now rewrite lap_mul_1_l | ].
-rewrite Nat.add_succ_comm, IHa.
-Print xpow.
-Search (repeat _ _ ++ _).
+rewrite Nat.add_succ_comm, IHa; clear IHa.
+revert b.
+induction a; intros. {
+  cbn.
+  rewrite rng_mul_0_r, rng_add_0_r.
+  rewrite rng_mul_0_l, rng_add_0_r.
+  rewrite app_length, repeat_length; cbn.
+  apply lap_eq_cons; [ easy | ].
+  rewrite Nat.add_1_r; cbn.
+  rewrite rng_mul_1_l, rng_mul_0_l, rng_add_0_l.
+  rewrite rng_mul_0_l, rng_add_0_l.
+...
+  induction b. {
+    cbn.
+    rewrite rng_mul_1_l, rng_mul_0_l, rng_add_0_l.
+    now rewrite rng_add_0_r, rng_add_0_l.
+  } {
+    cbn.
+    rewrite rng_mul_0_r, rng_add_0_l, rng_mul_0_l, rng_add_0_l.
+    rewrite rng_mul_0_l, rng_add_0_l.
+    apply lap_eq_cons; [ easy | ].
 ...
 rewrite lap_mul_comm.
 cbn.
