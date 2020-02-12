@@ -4036,7 +4036,19 @@ unfold poly_eq; cbn.
 revert b.
 induction a; intros; [ now rewrite lap_mul_1_l | ].
 rewrite Nat.add_succ_comm, IHa.
+Print xpow.
+Search (repeat _ _ ++ _).
+...
 rewrite lap_mul_comm.
+cbn.
+do 2 rewrite app_length, repeat_length.
+cbn.
+replace (b + 1 + (a + 1)) with (a + b + 2) by flia.
+replace (a + 1 + (b + 1)) with (a + b + 2) by flia.
+clear IHa.
+revert b.
+induction a; intros. {
+  cbn.
 ...
 intros.
 unfold poly_eq; cbn.
