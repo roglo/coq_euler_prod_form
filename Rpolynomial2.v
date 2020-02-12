@@ -1463,8 +1463,10 @@ Notation "a ∘ b" := (poly_compose a b) (left associativity, at level 40) :
   poly_scope.
 Notation "'ⓧ' ^ a" := (xpow a) (at level 30, format "'ⓧ' ^ a") : poly_scope.
 Notation "'ⓧ'" := (xpow 1) (at level 30, format "'ⓧ'") : poly_scope.
+(*
 Notation "'Σ' ( i = b , e ) , g" :=
   (fold_left (λ c i, (c + g)%pol) (seq b (S e - b)) 0%pol) : poly_scope.
+*)
 
 Theorem poly_eq_refl {α} {r : ring α} : reflexive _ poly_eq.
 Proof.
@@ -1627,6 +1629,9 @@ Definition polynomial_ring {α} {r : ring α} : ring (polynomial α) :=
      rng_mul_1_l := poly_mul_1_l;
      rng_mul_compat_l := poly_mul_compat_l;
      rng_mul_add_distr_l := poly_mul_add_distr_l |}.
+
+(* allows to use ring theorems on polynomials *)
+Canonical Structure polynomial_ring.
 
 (* *)
 

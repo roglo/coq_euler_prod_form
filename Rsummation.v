@@ -53,8 +53,8 @@ Qed.
 
 Section theorems_summation.
 
-Variable α : Type.
-Variable r : ring α.
+Context {α : Type}.
+Context {r : ring α}.
 
 Open Scope nat_scope.
 

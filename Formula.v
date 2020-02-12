@@ -4019,24 +4019,47 @@ Compute (nth_roots_of_unity_modulo 13 27, nth_roots_of_unity_modulo 13 27).
 Compute (let n := 26 in (prim_roots n, sort Nat.leb (prim_roots' n))).
 Compute (let n := 6 in sort Nat.leb (map (λ i, Nat_pow_mod 5 i n) (seq 1 (n - 1)))).
 
-Require Import Ring2 Rpolynomial2.
+Require Import Ring2 Rpolynomial2 Rsummation.
 
 Theorem xpow_0 {A} {rng : ring A} : (ⓧ^0 = 1)%pol.
 Proof. easy. Qed.
 
-Theorem pol_pow_sub_1 {A} {rng : ring A} : ∀ k,
+(*
+Theorem poly_summation_split_last {A} {rng : ring A} : ∀ g b k,
+  b ≤ S k → (Σ (i = b, S k), g i = Σ (i = b, k), g i + g (S k))%pol.
+Proof.
+intros * Hbk.
+set (pr := polynomial_ring).
+specialize (summation_split_last g b k Hbk) as H1.
+subst pr.
+rewrite H1.
+...
+*)
+
+Theorem pol_pow_sub_1 {A} {rng : ring A} (pr := polynomial_ring) : ∀ k,
   k ≠ 0
-  → (ⓧ^k - 1 = (ⓧ - 1) * (Σ (i = 0, k - 1), ⓧ^(k-i-1)))%pol.
+  → (ⓧ^k - 1 = (ⓧ - 1) * (Σ (i = 0, k - 1), ⓧ^(k-i-1))%Rng)%pol.
 Proof.
 intros * Hkz.
 destruct k; [ easy | clear Hkz ].
 rewrite Nat.sub_succ, (Nat.sub_0_r k).
 induction k. {
   cbn.
-  rewrite poly_add_0_l.
   rewrite xpow_0.
   now rewrite poly_mul_1_r.
 }
+rewrite summation_split_last; [ | flia ].
+...
+
+Search (Σ (_ = _, _), _)%pol.
+Search (Σ (_ = _, S _), _)%pol.
+Search (Σ (_ = _, S _), _)%Rng.
+Search (Σ (_ = _, S _), _).
+Check summation_split_last.
+Locate "Σ".
+Theorem rng_summation_split_last {A} {rng : ring A} : ∀ b e (f : nat → A),
+  b ≤ e → (Σ (i = b, e), f i = (Σ (i = b, e - 1), f i) + f e)%Rng.
+Proof.
 ...
 
 (* Theorem 2.3.5 in "An introduction to Theory of numbers" by Ivan Niven,
