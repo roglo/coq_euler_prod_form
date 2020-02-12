@@ -1810,7 +1810,7 @@ symmetry.
 rewrite summation_split_first; [ | flia ].
 unfold binomial at 1.
 rewrite Nat.mul_1_l, Nat.sub_0_r, Nat.pow_0_r, Nat.mul_1_r at 1.
-rewrite summation_shift.
+rewrite summation_succ_succ.
 cbn - [ "-" "^" ].
 rewrite mul_assoc_in_summation.
 rewrite mul_add_distr_r_in_summation.
@@ -1819,7 +1819,7 @@ rewrite Nat.add_assoc.
 do 2 rewrite <- mul_assoc_in_summation.
 rewrite Nat.add_shuffle0.
 f_equal.
-rewrite <- (summation_shift 0 n (λ i, binomial n i * a ^ (S n - i) * b ^ i)).
+rewrite <- (summation_succ_succ 0 n (λ i, binomial n i * a ^ (S n - i) * b ^ i)).
 rewrite summation_split_last; [ | flia | flia ].
 replace (S n - 1) with n by flia.
 rewrite binomial_succ_diag_r, Nat.mul_0_l, Nat.add_0_r.

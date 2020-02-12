@@ -303,7 +303,7 @@ apply Nat.add_le_mono. 2: {
 apply IHn; [ easy | flia Hbe ].
 Qed.
 
-Theorem summation_shift : ∀ b e f,
+Theorem summation_succ_succ : ∀ b e f,
   Σ (i = S b, S e), f i = Σ (i = b, e), f (S i).
 Proof.
 intros.
