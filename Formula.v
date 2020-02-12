@@ -4024,17 +4024,17 @@ Require Import Ring2 Rpolynomial2 Rsummation.
 Theorem xpow_0 {A} {rng : ring A} : (ⓧ^0 = 1)%pol.
 Proof. easy. Qed.
 
-(*
-Theorem poly_summation_split_last {A} {rng : ring A} : ∀ g b k,
-  b ≤ S k → (Σ (i = b, S k), g i = Σ (i = b, k), g i + g (S k))%pol.
+Theorem xpow_add_r {A} {rng : ring A} : ∀ a b, (ⓧ ^ (a + b) = ⓧ ^ a * ⓧ ^ b)%pol.
 Proof.
-intros * Hbk.
-set (pr := polynomial_ring).
-specialize (summation_split_last g b k Hbk) as H1.
-subst pr.
-rewrite H1.
+intros.
+unfold poly_eq; cbn.
+unfold lap_mul.
+rewrite app_length, repeat_length; cbn.
+rewrite app_length, repeat_length; cbn.
+replace (pred (a + 1 + (b + 1))) with (S (a + b)) by flia.
+Search (lap_convol_mul _ _ (S _)).
+Search (repeat _ _ ++ repeat _ _).
 ...
-*)
 
 Theorem pol_pow_sub_1 {A} {rng : ring A} (pr := polynomial_ring) : ∀ k,
   k ≠ 0
@@ -4049,6 +4049,24 @@ induction k. {
   now rewrite poly_mul_1_r.
 }
 rewrite summation_split_last; [ | flia ].
+replace (S (S k) - S k - 1) with 0 by flia.
+rewrite xpow_0.
+rewrite (summation_compat _ (λ i, (ⓧ^(1 + (S k - i - 1)))%pol)). 2: {
+  intros i Hi.
+  now replace (S (S k) - i - 1) with (1 + (S k - i - 1)) by flia Hi.
+}
+rewrite (summation_compat _ (λ i, (ⓧ^1 * ⓧ^(S k - i - 1))%pol)). 2: {
+  intros i Hi.
+...
+now rewrite xpow_add_r.
+Search (_ ^ (_ + _)%nat)%pol.
+Search (_ ^ _)%pol.
+Search (ⓧ ^ (_ + _)%nat)%pol.
+...
+  rewrite pol_pow_add_r.
+  now replace (S (S k) - i - 1) with (1 + (S k - i - 1)) by flia Hi.
+}
+
 ...
 
 Search (Σ (_ = _, _), _)%pol.
