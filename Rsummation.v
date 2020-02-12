@@ -14,7 +14,9 @@ Fixpoint summation_aux {α} {r : ring α} b len g :=
 
 Definition summation {α} {r : ring α} b e g := summation_aux b (S e - b) g.
 
-(**)
+(* the notation Σ have different implentations for historical reasons;
+   here with "summation", but elsewhere with "fold_left"; I'd like to
+   change that, but it is not so simple to make it work *)
 Notation "'Σ' ( i = b , e ) , g" := (summation b e (λ i, (g)))
   (at level 45, i at level 0, b at level 60, e at level 60) : ring_scope.
 (*
