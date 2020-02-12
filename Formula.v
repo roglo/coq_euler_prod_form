@@ -4043,9 +4043,9 @@ rewrite Nat.sub_diag.
 revert b.
 induction a; intros; cbn. {
   rewrite rng_mul_1_l.
-  destruct b; [ easy | cbn ].
+  induction b; [ easy | cbn ].
   rewrite rng_mul_1_l, rng_mul_0_l, rng_add_0_l, rng_add_0_r.
-  cbn.
+  rewrite IHb at 1.
 ...
 
 Theorem pol_pow_sub_1 {A} {rng : ring A} (pr := polynomial_ring) : ∀ k,
