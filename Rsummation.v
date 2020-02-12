@@ -3,6 +3,7 @@
 (* summations on a ring *)
 
 Require Import Utf8 Arith.
+Import List.
 Require Import Misc Ring2.
 
 Fixpoint summation_aux {α} {r : ring α} b len g :=
@@ -13,8 +14,40 @@ Fixpoint summation_aux {α} {r : ring α} b len g :=
 
 Definition summation {α} {r : ring α} b e g := summation_aux b (S e - b) g.
 
+(**)
 Notation "'Σ' ( i = b , e ) , g" := (summation b e (λ i, (g)))
   (at level 45, i at level 0, b at level 60, e at level 60) : ring_scope.
+(*
+Notation "'Σ' ( i = b , e ) , g" :=
+  (fold_left (λ c i, c + g) (seq b (S e - b)) 0)%Rng
+  (at level 45, i at level 0, b at level 60, e at level 60) : ring_scope.
+*)
+
+Theorem fold_left_rng_add_fun_from_0 {A} {rng : ring A} : ∀ a l (f : nat → _),
+  (fold_left (λ c i, c + f i) l a =
+   a + fold_left (λ c i, c + f i) l 0)%Rng.
+Proof.
+intros.
+revert a.
+induction l as [| x l]; intros; [ symmetry; apply rng_add_0_r | cbn ].
+rewrite IHl; symmetry; rewrite IHl.
+rewrite rng_add_0_l.
+apply rng_add_assoc.
+Qed.
+Theorem fold_left_is_summation {A} {rng : ring A} : ∀ b e g,
+  (fold_left (λ c i, c + g i) (seq b (S e - b)) 0 =
+   summation b e g)%Rng.
+Proof.
+intros.
+unfold summation.
+remember (S e - b) as len.
+clear Heqlen.
+revert g b.
+induction len; intros; [ easy | cbn ].
+rewrite fold_left_rng_add_fun_from_0.
+rewrite IHlen.
+now rewrite rng_add_0_l.
+Qed.
 
 Section theorems_summation.
 
@@ -51,6 +84,9 @@ Theorem summation_compat : ∀ g h b k,
   → (Σ (i = b, k), g i = Σ (i = b, k), h i)%Rng.
 Proof.
 intros g h b k Hgh.
+(*
+do 2 rewrite fold_left_is_summation.
+*)
 apply summation_aux_compat.
 intros i (_, Hi).
 apply Hgh.
