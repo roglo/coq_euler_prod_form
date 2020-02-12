@@ -2,14 +2,10 @@
 
 (* polynomials on a ring *)
 
-Require Import Utf8.
-Require Import QArith.
-Require Import NPeano.
+Require Import Utf8 Arith Setoid Morphisms.
 Import List ListNotations.
 
-Require Import Misc.
-Require Import Ring2.
-Require Import Rsummation.
+Require Import Misc Ring2 Rsummation.
 
 (* lap : list as polynomial, i.e. the only field of the record in the
    definition of polynomial after *)

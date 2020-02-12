@@ -2,12 +2,8 @@
 
 (* summations on a ring *)
 
-Require Import Utf8.
-Require Import QArith.
-Require Import NPeano.
-
-Require Import Misc.
-Require Import Ring2.
+Require Import Utf8 Arith.
+Require Import Misc Ring2.
 
 Fixpoint summation_aux {α} {r : ring α} b len g :=
   match len with
