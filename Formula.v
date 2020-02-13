@@ -4095,11 +4095,18 @@ do 2 rewrite lap_xpow_succ.
 now rewrite rng_mul_comm, rng_mul_mul_swap.
 Qed.
 
+Theorem rng_mul_summation_distr_l {A} {rng : ring A} : ∀ a b e f,
+  (a * (Σ (i = b, e), f i) = Σ (i = b, e), a * f i)%Rng.
+Proof.
+intros.
+...
+
 Theorem pol_pow_sub_1 {A} {rng : ring A} (pr := polynomial_ring) : ∀ k,
   k ≠ 0
   → (ⓧ^k - 1 = (ⓧ - 1) * (Σ (i = 0, k - 1), ⓧ^(k-i-1))%Rng)%pol.
 Proof.
 intros * Hkz.
+subst pr.
 destruct k; [ easy | clear Hkz ].
 rewrite Nat.sub_succ, (Nat.sub_0_r k).
 induction k. {
@@ -4118,6 +4125,7 @@ rewrite (summation_compat _ (λ i, (ⓧ^1 * ⓧ^(S k - i - 1))%pol)). 2: {
   intros i Hi.
   now rewrite xpow_add_r.
 }
+rewrite <- rng_mul_summation_distr_l.
 ...
 
 (* Theorem 2.3.5 in "An introduction to Theory of numbers" by Ivan Niven,
