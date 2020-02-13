@@ -4029,10 +4029,17 @@ Theorem lap_convol_mul_succ_r {A} {rng : ring A} : ∀ la lb i len,
   (Σ (j = 0, i), nth j la 0 * nth (i - j) lb 0)%Rng :: lap_convol_mul la lb (S i) len.
 Proof. easy. Qed.
 
+(* x^(a+1) = x * x^a *)
 Theorem lap_xpow_succ {A} {rng : ring A} : ∀ a,
   (repeat 0%Rng (S a) ++ [1%Rng] =
    [0%Rng; 1%Rng] * (repeat 0%Rng a ++ [1%Rng]))%lap.
 Proof.
+intros.
+unfold "*"%lap; cbn.
+rewrite rng_mul_0_l, rng_add_0_l.
+apply lap_eq_cons; [ easy | ].
+rewrite app_length, repeat_length; cbn.
+...
 intros.
 induction a. {
   cbn.
