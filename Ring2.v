@@ -320,6 +320,19 @@ intros a b; split; intros H.
  rewrite H; reflexivity.
 Qed.
 
+Theorem rng_opp_add_distr : ∀ a b,
+  (- (a + b) = - a - b)%Rng.
+Proof.
+intros.
+apply (rng_add_reg_l _ _ (b + a)%Rng).
+unfold rng_sub.
+rewrite rng_add_assoc.
+do 3 rewrite fold_rng_sub.
+rewrite rng_add_sub.
+rewrite rng_add_comm.
+now do 2 rewrite rng_add_opp_r.
+Qed.
+
 Theorem rng_add_add_swap : ∀ n m p, (n + m + p = n + p + m)%Rng.
 Proof.
 intros n m p; simpl.
