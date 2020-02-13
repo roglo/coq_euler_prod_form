@@ -22,7 +22,7 @@ Inductive lap_eq {α} {r : ring α} : list α → list α → Prop :=
 Definition lap_zero {α} {r : ring α} := ([] : list α).
 Definition lap_one {α} {r : ring α} := [1%Rng].
 
-Theorem lap_eq_cons_inv : ∀ α (r : ring α) x1 x2 l1 l2,
+Theorem lap_eq_cons_cons_inv : ∀ α (r : ring α) x1 x2 l1 l2,
   lap_eq (x1 :: l1) (x2 :: l2)
   → (x1 = x2)%Rng ∧ lap_eq l1 l2.
 Proof.
@@ -67,7 +67,7 @@ induction l1 as [| x1]; intros. {
     apply lap_eq_cons_nil_inv in Heq; destruct Heq.
     constructor; [ easy | now apply IHl1 ].
   } {
-    apply lap_eq_cons_inv in Heq; destruct Heq.
+    apply lap_eq_cons_cons_inv in Heq; destruct Heq.
     constructor; [ easy | now apply IHl1 ].
   }
 }
@@ -92,14 +92,14 @@ induction l2 as [| x2]; intros.
  destruct l1 as [| x1].
   apply lap_eq_nil_cons_inv in H1.
   destruct l3 as [| x3]; constructor.
-   apply lap_eq_cons_inv in H2.
+   apply lap_eq_cons_cons_inv in H2.
    destruct H1, H2.
    etransitivity; [ symmetry; eassumption | assumption ].
 
-   apply lap_eq_cons_inv in H2.
+   apply lap_eq_cons_cons_inv in H2.
    apply IHl2; [ destruct H1 | destruct H2 ]; assumption.
 
-  apply lap_eq_cons_inv in H1.
+  apply lap_eq_cons_cons_inv in H1.
   destruct l3 as [| x3]; constructor.
    apply lap_eq_cons_nil_inv in H2.
    destruct H1, H2.
@@ -108,11 +108,11 @@ induction l2 as [| x2]; intros.
    apply lap_eq_cons_nil_inv in H2.
    apply IHl2; [ destruct H1 | destruct H2 ]; assumption.
 
-   apply lap_eq_cons_inv in H2.
+   apply lap_eq_cons_cons_inv in H2.
    destruct H1, H2.
    etransitivity; eassumption.
 
-   apply lap_eq_cons_inv in H2.
+   apply lap_eq_cons_cons_inv in H2.
    apply IHl2; [ destruct H1 | destruct H2 ]; assumption.
 Qed.
 
@@ -227,7 +227,7 @@ induction la as [| a]; intros; simpl.
    apply lap_eq_cons_nil_inv in Hab.
    destruct Hab; assumption.
 
-   apply lap_eq_cons_inv in Hab.
+   apply lap_eq_cons_cons_inv in Hab.
    destruct Hab; assumption.
 
   destruct lb as [| b]; simpl.
@@ -245,7 +245,7 @@ induction la as [| a]; intros; simpl.
      apply lap_eq_cons_nil_inv in Hla.
      apply IHla; destruct Hla; assumption.
 
-   apply lap_eq_cons_inv in Hab.
+   apply lap_eq_cons_cons_inv in Hab.
    destruct Hab as (_, Hab).
    apply IHla; assumption.
 Qed.
@@ -297,7 +297,7 @@ induction la as [| a]; intros.
    etransitivity; [ eassumption | idtac ].
    apply lap_eq_nil_lap_add_r; assumption.
 
-   apply lap_eq_cons_inv in Hbd.
+   apply lap_eq_cons_cons_inv in Hbd.
    destruct Hbd as (Hbd, Hlbd).
    constructor; [ rewrite Hc, rng_add_0_l; assumption | idtac ].
    etransitivity; [ eassumption | idtac ].
@@ -306,7 +306,7 @@ induction la as [| a]; intros.
  destruct lb as [| b].
   destruct lc as [| c]; [ etransitivity; eassumption | idtac ].
   destruct ld as [| d]; [ assumption | simpl ].
-  apply lap_eq_cons_inv in Hac.
+  apply lap_eq_cons_cons_inv in Hac.
   destruct Hac as (Hac, Hlac).
   apply lap_eq_nil_cons_inv in Hbd.
   destruct Hbd as (Hd, Hld).
@@ -323,12 +323,12 @@ induction la as [| a]; intros.
     constructor; [ rewrite Ha, rng_add_0_l; assumption | idtac ].
     rewrite IHla; try eassumption; reflexivity.
 
-    apply lap_eq_cons_inv in Hbd.
+    apply lap_eq_cons_cons_inv in Hbd.
     destruct Hbd as (Hbd, Hlbd).
     constructor; [ rewrite Ha, rng_add_0_l; assumption | idtac ].
     rewrite IHla; try eassumption; reflexivity.
 
-   apply lap_eq_cons_inv in Hac.
+   apply lap_eq_cons_cons_inv in Hac.
    destruct Hac as (Hac, Hlac); simpl.
    destruct ld as [| d].
     apply lap_eq_cons_nil_inv in Hbd.
@@ -337,7 +337,7 @@ induction la as [| a]; intros.
     rewrite IHla; try eassumption.
     destruct lc; reflexivity.
 
-    apply lap_eq_cons_inv in Hbd.
+    apply lap_eq_cons_cons_inv in Hbd.
     destruct Hbd as (Hbd, Hlbd).
     constructor; [ rewrite Hac, Hbd; reflexivity | apply IHla; assumption ].
 Qed.
@@ -401,7 +401,7 @@ induction la as [| a]; intros.
   rewrite IHla; [ idtac | eassumption ].
   destruct n; reflexivity.
 
-  apply lap_eq_cons_inv in Hlab.
+  apply lap_eq_cons_cons_inv in Hlab.
   destruct Hlab as (Hab, Hlab).
   destruct n; [ assumption | simpl ].
   apply IHla; assumption.
@@ -619,7 +619,7 @@ induction la as [| a]; intros.
   rewrite IHla; try eassumption; simpl.
   rewrite lap_mul_0_l; reflexivity.
 
-  apply lap_eq_cons_inv in Hlab.
+  apply lap_eq_cons_cons_inv in Hlab.
   destruct Hlab as (Hab, Hlab).
   rewrite Hab.
   rewrite IHla; try eassumption.
@@ -1649,4 +1649,70 @@ revert lb.
 induction la as [| a]; intros; [ reflexivity | simpl ].
 destruct lb as [| b]; [ reflexivity | simpl ].
 rewrite Hab, IHla; reflexivity.
+Qed.
+
+Instance apply_lap_morph {A} {rng : ring A} :
+  Proper (lap_eq ==> rng_eq ==> rng_eq) apply_lap.
+Proof.
+intros la lb Hll x y Hxy.
+destruct la as [| a]. {
+  unfold apply_lap; cbn; symmetry.
+  clear - Hll.
+  induction lb as [| b]; [ easy | cbn ].
+  apply lap_eq_nil_cons_inv in Hll.
+  destruct Hll as (Hb, Hlb).
+  specialize (IHlb Hlb).
+  now rewrite IHlb, rng_mul_0_l, rng_add_0_l.
+} {
+  unfold apply_lap; cbn.
+  revert a la Hll.
+  induction lb as [| b]; intros. {
+    cbn.
+    apply lap_eq_cons_nil_inv in Hll.
+    destruct Hll as (Ha, Hla).
+    rewrite Ha, rng_add_0_r.
+    clear - Hla.
+    induction la as [| a]; [ now rewrite rng_mul_0_l | cbn ].
+    apply lap_eq_cons_nil_inv in Hla.
+    destruct Hla as (Ha, Hla).
+    specialize (IHla Hla).
+    rewrite IHla, Ha, rng_add_0_l.
+    apply rng_mul_0_l.
+  } {
+    cbn.
+    apply lap_eq_cons_cons_inv in Hll.
+    destruct Hll as (Hab, Hll).
+    rewrite Hab.
+    destruct la as [| a']. {
+      cbn.
+      rewrite rng_mul_0_l, rng_add_0_l.
+      clear - Hll.
+      revert b.
+      induction lb as [| b']; intros. {
+        cbn.
+        now rewrite rng_mul_0_l, rng_add_0_l.
+      } {
+        cbn.
+        apply lap_eq_nil_cons_inv in Hll.
+        destruct Hll as (Hb', Hlb).
+        specialize (IHlb Hlb).
+        now rewrite <- IHlb, Hb', rng_mul_0_l, rng_add_0_l.
+      }
+    } {
+      cbn.
+      rewrite IHlb; [ | easy ].
+      now rewrite Hxy.
+    }
+  }
+}
+Qed.
+
+Instance apply_poly_morph {A} {rng : ring A} :
+  Proper (poly_eq ==> rng_eq ==> rng_eq) apply_poly.
+Proof.
+intros (la) (lb) Hpp x y Hxy.
+unfold "="%pol in Hpp; cbn in Hpp.
+unfold apply_poly.
+cbn - [ apply_lap ].
+now rewrite Hxy, Hpp.
 Qed.

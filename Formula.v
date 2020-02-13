@@ -4136,13 +4136,14 @@ Qed.
 
 (* http://math.univ-lille1.fr/~fricain/M1-ARITHMETIQUE/chap2.pdf *)
 
-Fixpoint lap_eval {A} {rng : ring A} la x :=
-  match la with
-  | [] => 0%Rng
-  | a :: la' => (a + x * lap_eval la' x)%Rng
-  end.
-
-Definition poly_eval {A} {rng : ring A} p x := lap_eval (al p) x.
+(*
+Theorem apply_poly_eq {A} {rng : ring A} : ∀ p1 p2,
+  (p1 = p2)%pol → ∀ x, (apply_poly p1 x = apply_poly p2 x)%Rng.
+Proof.
+intros * Hpp *.
+now rewrite Hpp.
+Qed.
+*)
 
 Theorem glop2 {A} {rng : ring A} : ∀ p d,
   prime p
@@ -4160,8 +4161,11 @@ destruct Hdp as (e, He).
 specialize (fermat_little _ Hp) as H2.
 assert
   (H3 : ∀ x,
-   x ^ (p - 1) - 1 = (x - 1) * (Σ (i = 0, p - 1 - 1), x^(p - 1 - i - 1))). {
+   (x ^ (p - 1) - 1 = (x - 1) * (Σ (i = 0, p - 1 - 1), x^(p - 1 - i - 1)))%Rng). {
   intros.
+  specialize (apply_poly_morph _ _ H1 x x (rng_eq_refl _)) as H3.
+(* x should not be of type A, but of type [0..p] which is a field therefore
+   a ring: ring object to build! *)
 ...
 
 assert
@@ -4172,11 +4176,7 @@ assert
   split. {
     intros Hx.
 Check apply_poly.
-Theorem glop {A} {rng : ring A} : ∀ p1 p2,
-  (p1 = p2)%pol → ∀ x, (poly_eval p1 x = poly_eval p2 x)%Rng.
-Proof.
-intros * Hpp.
-Admitted.
+...
 specialize (glop _ _ H1) as H3.
 Theorem glip {A} {rng : ring A} : ∀ p1 p2 x, (poly_eval (p1 - p2)%pol x = poly_eval p1 x - poly_eval p2 x)%Rng.
 Admitted.
