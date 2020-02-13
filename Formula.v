@@ -4136,13 +4136,19 @@ Qed.
 
 (* http://math.univ-lille1.fr/~fricain/M1-ARITHMETIQUE/chap2.pdf *)
 
-Theorem glop2 : ∀ p d,
+Theorem glop2 {A} {rng : ring A} : ∀ p d,
   prime p
   → Nat.divide d (p - 1)
   → length (nth_roots_of_unity_modulo d p) = d.
 Proof.
 intros * Hp Hdp.
-Inspect 1.
+specialize (pol_pow_sub_1 (p - 1)) as H1.
+assert (H : p - 1 ≠ 0). {
+  destruct p; [ easy | ].
+  destruct p; [ easy | flia ].
+}
+specialize (H1 H); clear H.
+destruct Hdp as (e, He).
 ...
 assert (Hg1p : Nat.gcd 1 p = 1) by apply Nat.gcd_1_l.
 assert (He : ∀ e, 1 ^ e ≡ 1 mod p) by now intros; rewrite Nat.pow_1_l.
