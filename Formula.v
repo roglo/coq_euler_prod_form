@@ -4160,6 +4160,12 @@ destruct Hdp as (e, He).
 specialize (fermat_little _ Hp) as H2.
 assert
   (H3 : ∀ x,
+   x ^ (p - 1) - 1 = (x - 1) * (Σ (i = 0, p - 1 - 1), x^(p - 1 - i - 1))). {
+  intros.
+...
+
+assert
+  (H3 : ∀ x,
    x ^ (p - 1) ≡ 1 mod p ↔
    x ^ d ≡ 1 mod p ∨ Σ (i = 1, e - 1), x ^ ((i - 1) * d) ≡ 0 mod p). {
   intros.
