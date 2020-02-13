@@ -4136,14 +4136,75 @@ Qed.
 
 (* http://math.univ-lille1.fr/~fricain/M1-ARITHMETIQUE/chap2.pdf *)
 
-(*
-Theorem apply_poly_eq {A} {rng : ring A} : ∀ p1 p2,
-  (p1 = p2)%pol → ∀ x, (apply_poly p1 x = apply_poly p2 x)%Rng.
+Theorem ZnRing_add_comm n : ∀ a b, (a + b) mod n ≡ ((b + a) mod n) mod n.
+Proof. now intros; rewrite Nat.add_comm. Qed.
+
+Theorem ZnRing_add_assoc n : ∀ a b c,
+  (a + (b + c) mod n) mod n ≡ (((a + b) mod n + c) mod n) mod n.
 Proof.
-intros * Hpp *.
-now rewrite Hpp.
+intros.
+destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
+rewrite Nat.add_mod_idemp_r; [ | easy ].
+rewrite Nat.add_mod_idemp_l; [ | easy ].
+now rewrite Nat.add_assoc.
 Qed.
-*)
+
+Theorem ZnRing_add_0_l n : ∀ a, (0 + a) mod n ≡ a mod n.
+Proof.
+intros.
+destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
+rewrite Nat.mod_mod; [ | easy ].
+now rewrite Nat.add_0_l.
+Qed.
+
+Theorem ZnRing_add_opp_l n : ∀ a,
+  ((n - a mod n) mod n + a) mod n ≡ 0 mod n.
+Proof.
+intros.
+destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
+rewrite Nat.add_mod_idemp_l; [ | easy ].
+rewrite <- Nat.add_mod_idemp_r; [ | easy ].
+rewrite Nat.sub_add. 2: {
+  now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+}
+now rewrite Nat.mod_same.
+Qed.
+
+Theorem ZnRing_add_compat_l n : ∀ a b c,
+  a ≡ b mod n → (c + a) mod n ≡ ((c + b) mod n) mod n.
+Proof.
+intros * Hab.
+destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
+rewrite <- Nat.add_mod_idemp_r; [ | easy ].
+rewrite Hab.
+now rewrite Nat.add_mod_idemp_r.
+Qed.
+
+Theorem ZnRing_mul_comm n : ∀ a b, (a * b) mod n ≡ ((b * a) mod n) mod n.
+Proof. now intros; rewrite Nat.mul_comm. Qed.
+
+Theorem ZnRing_mul_assoc n : ∀ a b c,
+  (a * ((b * c) mod n)) mod n ≡ (((a * b) mod n * c) mod n) mod n.
+Proof.
+...
+
+Definition ZnRing (n : nat) :=
+  {| rng_zero := 0;
+     rng_one := 1;
+     rng_add a b := (a + b) mod n;
+     rng_mul a b := (a * b) mod n;
+     rng_opp a := (n - a mod n) mod n;
+     rng_eq a b := a ≡ b mod n;
+     rng_eq_refl _ := eq_refl;
+     rng_eq_sym _ _ H := eq_sym H;
+     rng_eq_trans _ _ _ H1 H2 := eq_trans H1 H2;
+     rng_add_comm := ZnRing_add_comm n;
+     rng_add_assoc := ZnRing_add_assoc n;
+     rng_add_0_l := ZnRing_add_0_l n;
+     rng_add_opp_l := ZnRing_add_opp_l n;
+     rng_add_compat_l := ZnRing_add_compat_l n;
+     rng_mul_comm := ZnRing_mul_comm n;
+     rng_mul_assoc := 42 |}.
 
 Theorem glop2 {A} {rng : ring A} : ∀ p d,
   prime p
@@ -4166,6 +4227,7 @@ assert
   specialize (apply_poly_morph _ _ H1 x x (rng_eq_refl _)) as H3.
 (* x should not be of type A, but of type [0..p] which is a field therefore
    a ring: ring object to build! *)
+Search (_ → ring _).
 ...
 
 assert
