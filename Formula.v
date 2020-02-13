@@ -4041,7 +4041,32 @@ revert i.
 induction a; intros; [ easy | ].
 cbn - [ summation ].
 apply lap_eq_cons; [ easy | ].
-...
+rewrite summation_split_first; [ | flia ].
+rewrite rng_mul_0_l, rng_add_0_l.
+rewrite summation_split_first; [ | flia ].
+rewrite rng_mul_1_l.
+rewrite all_0_summation_0. 2: {
+  intros j Hj.
+  destruct j; [ easy | ].
+  destruct j; [ flia Hj | ].
+  rewrite match_id.
+  apply rng_mul_0_l.
+}
+replace (i + 2 - 1) with (i + 1) by flia.
+rewrite rng_add_0_r.
+rewrite Nat.add_1_r.
+replace (i + S a) with (S (i + a)) at 1 by flia.
+cbn.
+replace (nth i _ _) with (nth 0 (repeat 0%Rng a ++ [1%Rng]) 0%Rng). 2: {
+  clear.
+  revert a.
+  induction i; intros; [ easy | cbn ].
+  apply IHi.
+}
+replace (S (i + 2)) with (S i + 2) by flia.
+replace (i + S a) with (S i + a) by flia.
+apply IHa.
+Qed.
 
 (* x^(a+1) = x * x^a *)
 Theorem lap_xpow_succ {A} {rng : ring A} : ∀ a,
@@ -4053,56 +4078,10 @@ unfold "*"%lap; cbn.
 rewrite rng_mul_0_l, rng_add_0_l.
 apply lap_eq_cons; [ easy | ].
 rewrite app_length, repeat_length; cbn.
-(*
-  ============================
-  (repeat 0%Rng a ++ [1%Rng] =
-   lap_convol_mul [0%Rng; 1%Rng] (repeat 0%Rng a ++ [1%Rng]) 1 (a + 1))%lap
-*)
 rewrite Nat.add_1_r; cbn.
 rewrite rng_mul_0_l, rng_add_0_l, rng_mul_1_l, rng_add_0_r.
-(*
-  ============================
-  (repeat 0%Rng a ++ [1%Rng] =
-   nth 0 (repeat 0%Rng a ++ [1%Rng]) 0%Rng
-   :: lap_convol_mul [0%Rng; 1%Rng] (repeat 0%Rng a ++ [1%Rng]) 2 a)%lap
-*)
-destruct a; [ easy | cbn ].
-apply lap_eq_cons; [ easy | ].
-rewrite rng_mul_0_l, rng_add_0_l, rng_mul_1_l, rng_add_0_r.
-rewrite rng_mul_0_l, rng_add_0_r.
-(*
-  ============================
-  (repeat 0%Rng a ++ [1%Rng] =
-   nth 0 (repeat 0%Rng a ++ [1%Rng]) 0%Rng
-   :: lap_convol_mul [0%Rng; 1%Rng] (0%Rng :: repeat 0%Rng a ++ [1%Rng]) 3 a)%lap
-*)
-destruct a; [ easy | cbn ].
-apply lap_eq_cons; [ easy | ].
-rewrite rng_mul_0_l, rng_add_0_l, rng_mul_1_l, rng_add_0_r.
-rewrite rng_mul_0_l, rng_add_0_r, rng_add_0_r.
-(*
-  ============================
-  (repeat 0%Rng a ++ [1%Rng] =
-   nth 0 (repeat 0%Rng a ++ [1%Rng]) 0%Rng
-   :: lap_convol_mul [0%Rng; 1%Rng]
-        (0%Rng :: 0%Rng :: repeat 0%Rng a ++ [1%Rng]) 4 a)%lap
-*)
-...
-intros.
-induction a. {
-  cbn.
-  rewrite rng_mul_0_l, rng_add_0_l.
-  now rewrite rng_mul_0_l, rng_add_0_l, rng_mul_1_l, rng_add_0_r.
-}
-remember (S a) as sa; cbn; subst sa.
-rewrite rng_mul_0_l, rng_add_0_l.
-apply lap_eq_cons; [ easy | ].
-rewrite IHa at 1.
-cbn.
-rewrite rng_mul_1_l, rng_add_0_l, rng_add_0_r.
-apply lap_eq_cons; [ easy | ].
-rewrite app_length, repeat_length; cbn.
-...
+now specialize (lap_xpow_from_convol_mul a 0) as H1.
+Qed.
 
 Theorem xpow_add_r {A} {rng : ring A} : ∀ a b,
   (ⓧ ^ (a + b) = ⓧ ^ a * ⓧ ^ b)%pol.
@@ -4112,58 +4091,9 @@ unfold poly_eq; cbn.
 revert b.
 induction a; intros; [ now rewrite lap_mul_1_l | ].
 rewrite Nat.add_succ_comm, IHa; clear IHa.
-...
 do 2 rewrite lap_xpow_succ.
-...
-revert b.
-induction a; intros. {
-  cbn.
-  rewrite rng_mul_0_r, rng_add_0_r.
-  rewrite rng_mul_0_l, rng_add_0_r.
-  rewrite app_length, repeat_length; cbn.
-  apply lap_eq_cons; [ easy | ].
-  rewrite Nat.add_1_r; cbn.
-  rewrite rng_mul_1_l, rng_mul_0_l, rng_add_0_l.
-  rewrite rng_mul_0_l, rng_add_0_l.
-  apply lap_eq_cons; [ easy | ].
-...
-  induction b. {
-    cbn.
-    rewrite rng_mul_1_l, rng_mul_0_l, rng_add_0_l.
-    now rewrite rng_add_0_r, rng_add_0_l.
-  } {
-    cbn.
-    rewrite rng_mul_0_r, rng_add_0_l, rng_mul_0_l, rng_add_0_l.
-    rewrite rng_mul_0_l, rng_add_0_l.
-    apply lap_eq_cons; [ easy | ].
-...
-rewrite lap_mul_comm.
-cbn.
-do 2 rewrite app_length, repeat_length.
-cbn.
-replace (b + 1 + (a + 1)) with (a + b + 2) by flia.
-replace (a + 1 + (b + 1)) with (a + b + 2) by flia.
-clear IHa.
-revert b.
-induction a; intros. {
-  cbn.
-...
-intros.
-unfold poly_eq; cbn.
-unfold lap_mul.
-rewrite app_length, repeat_length; cbn.
-rewrite app_length, repeat_length; cbn.
-replace (pred (a + 1 + (b + 1))) with (S (a + b)) by flia.
-rewrite lap_convol_mul_succ_r.
-rewrite summation_only_one.
-rewrite Nat.sub_diag.
-revert b.
-induction a; intros; cbn. {
-  rewrite rng_mul_1_l.
-  induction b; [ easy | cbn ].
-  rewrite rng_mul_1_l, rng_mul_0_l, rng_add_0_l, rng_add_0_r.
-  rewrite IHb at 1.
-...
+now rewrite rng_mul_comm, rng_mul_mul_swap.
+Qed.
 
 Theorem pol_pow_sub_1 {A} {rng : ring A} (pr := polynomial_ring) : ∀ k,
   k ≠ 0
@@ -4186,27 +4116,8 @@ rewrite (summation_compat _ (λ i, (ⓧ^(1 + (S k - i - 1)))%pol)). 2: {
 }
 rewrite (summation_compat _ (λ i, (ⓧ^1 * ⓧ^(S k - i - 1))%pol)). 2: {
   intros i Hi.
-...
-now rewrite xpow_add_r.
-Search (_ ^ (_ + _)%nat)%pol.
-Search (_ ^ _)%pol.
-Search (ⓧ ^ (_ + _)%nat)%pol.
-...
-  rewrite pol_pow_add_r.
-  now replace (S (S k) - i - 1) with (1 + (S k - i - 1)) by flia Hi.
+  now rewrite xpow_add_r.
 }
-
-...
-
-Search (Σ (_ = _, _), _)%pol.
-Search (Σ (_ = _, S _), _)%pol.
-Search (Σ (_ = _, S _), _)%Rng.
-Search (Σ (_ = _, S _), _).
-Check summation_split_last.
-Locate "Σ".
-Theorem rng_summation_split_last {A} {rng : ring A} : ∀ b e (f : nat → A),
-  b ≤ e → (Σ (i = b, e), f i = (Σ (i = b, e - 1), f i) + f e)%Rng.
-Proof.
 ...
 
 (* Theorem 2.3.5 in "An introduction to Theory of numbers" by Ivan Niven,
