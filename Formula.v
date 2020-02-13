@@ -4186,9 +4186,43 @@ Proof. now intros; rewrite Nat.mul_comm. Qed.
 Theorem ZnRing_mul_assoc n : ∀ a b c,
   (a * ((b * c) mod n)) mod n ≡ (((a * b) mod n * c) mod n) mod n.
 Proof.
-...
+intros.
+destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
+rewrite Nat.mul_mod_idemp_r; [ | easy ].
+rewrite Nat.mul_mod_idemp_l; [ | easy ].
+now rewrite Nat.mul_assoc.
+Qed.
 
-Definition ZnRing (n : nat) :=
+Theorem ZnRing_mul_1_l n : ∀ a, (1 * a) mod n ≡ a mod n.
+Proof.
+intros.
+destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
+rewrite Nat.mod_mod; [ | easy ].
+now rewrite Nat.mul_1_l.
+Qed.
+
+Theorem ZnRing_mul_compat_l n : ∀ a b c,
+  a ≡ b mod n → (c * a) mod n ≡ ((c * b) mod n) mod n.
+Proof.
+intros * Hab.
+destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
+rewrite <- Nat.mul_mod_idemp_r; [ | easy ].
+rewrite Hab.
+now rewrite Nat.mul_mod_idemp_r.
+Qed.
+
+Theorem ZnRing_mul_add_distr_l n : ∀ a b c,
+  (a * ((b + c) mod n)) mod n ≡ (((a * b) mod n + (a * c) mod n) mod n) mod n.
+Proof.
+intros.
+destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
+rewrite Nat.mul_mod_idemp_r; [ | easy ].
+rewrite Nat.add_mod_idemp_l; [ | easy ].
+rewrite Nat.add_mod_idemp_r; [ | easy ].
+now rewrite Nat.mul_add_distr_l.
+Qed.
+
+Definition ZnRing (n : nat) : ring nat :=
   {| rng_zero := 0;
      rng_one := 1;
      rng_add a b := (a + b) mod n;
@@ -4204,14 +4238,44 @@ Definition ZnRing (n : nat) :=
      rng_add_opp_l := ZnRing_add_opp_l n;
      rng_add_compat_l := ZnRing_add_compat_l n;
      rng_mul_comm := ZnRing_mul_comm n;
-     rng_mul_assoc := 42 |}.
+     rng_mul_assoc := ZnRing_mul_assoc n;
+     rng_mul_1_l := ZnRing_mul_1_l n;
+     rng_mul_compat_l := ZnRing_mul_compat_l n;
+     rng_mul_add_distr_l := ZnRing_mul_add_distr_l n |}.
 
-Theorem glop2 {A} {rng : ring A} : ∀ p d,
+(*
+Canonical Structure ZnRing.
+Warning: Projection value has no head constant: λ a b : nat, (a + b) mod n in canonical instance
+ZnRing of rng_add, ignoring it. [projection-no-head-constant,typechecker]
+Warning: Projection value has no head constant: λ a b : nat, (a * b) mod n in canonical instance
+ZnRing of rng_mul, ignoring it. [projection-no-head-constant,typechecker]
+Warning: Projection value has no head constant: λ a : nat, (n - a mod n) mod n in canonical instance
+ZnRing of rng_opp, ignoring it. [projection-no-head-constant,typechecker]
+Warning: Projection value has no head constant: λ a b : nat, a ≡ b mod n in canonical instance ZnRing of rng_eq,
+ignoring it. [projection-no-head-constant,typechecker]
+Warning: Projection value has no head constant: λ a : nat, eq_refl in canonical instance ZnRing of rng_eq_refl,
+ignoring it. [projection-no-head-constant,typechecker]
+Warning: Projection value has no head constant: λ (a b : nat) (H : (λ a0 b0 : nat, a0 ≡ b0 mod n) a b), eq_sym H
+in canonical instance ZnRing of rng_eq_sym, ignoring it. [projection-no-head-constant,typechecker]
+Warning: Projection value has no head constant:
+λ (a b c : nat) (H1 : (λ a0 b0 : nat, a0 ≡ b0 mod n) a b) (H2 : (λ a0 b0 : nat, a0 ≡ b0 mod n) b c),
+  eq_trans H1 H2 in canonical instance ZnRing of rng_eq_trans, ignoring it.
+[projection-no-head-constant,typechecker]
+*)
+
+Theorem apply_poly_sub {A} {rng : ring A} : ∀ p1 p2 x,
+  (apply_poly (p1 - p2)%pol x = apply_poly p1 x - apply_poly p2 x)%Rng.
+Proof.
+intros.
+...
+
+Theorem number_of_nth_roots_of_unity : ∀ p d,
   prime p
   → Nat.divide d (p - 1)
   → length (nth_roots_of_unity_modulo d p) = d.
 Proof.
 intros * Hp Hdp.
+set (pr := ZnRing p).
 specialize (pol_pow_sub_1 (p - 1)) as H1.
 assert (H : p - 1 ≠ 0). {
   destruct p; [ easy | ].
@@ -4225,310 +4289,9 @@ assert
    (x ^ (p - 1) - 1 = (x - 1) * (Σ (i = 0, p - 1 - 1), x^(p - 1 - i - 1)))%Rng). {
   intros.
   specialize (apply_poly_morph _ _ H1 x x (rng_eq_refl _)) as H3.
-(* x should not be of type A, but of type [0..p] which is a field therefore
-   a ring: ring object to build! *)
-Search (_ → ring _).
 ...
-
-assert
-  (H3 : ∀ x,
-   x ^ (p - 1) ≡ 1 mod p ↔
-   x ^ d ≡ 1 mod p ∨ Σ (i = 1, e - 1), x ^ ((i - 1) * d) ≡ 0 mod p). {
-  intros.
-  split. {
-    intros Hx.
-Check apply_poly.
+  rewrite apply_poly_sub in H3.
 ...
-specialize (glop _ _ H1) as H3.
-Theorem glip {A} {rng : ring A} : ∀ p1 p2 x, (poly_eval (p1 - p2)%pol x = poly_eval p1 x - poly_eval p2 x)%Rng.
-Admitted.
-...
-assert (Hg1p : Nat.gcd 1 p = 1) by apply Nat.gcd_1_l.
-assert (He : ∀ e, 1 ^ e ≡ 1 mod p) by now intros; rewrite Nat.pow_1_l.
-...
-specialize (eq_nth_roots_modulo_gcd d _ _ Hp Hg1p (He _)) as H1.
-assert (Hgdp : Nat.gcd d (p - 1) = d) by now apply Nat.divide_gcd_iff'.
-now rewrite Hgdp in H1.
-...
-assert (H2 : 0 < d < p). {
-  split. {
-    destruct d; [ | flia ].
-    destruct Hdp as (k, Hk).
-    rewrite Nat.mul_0_r in Hk.
-    destruct p; [ easy | now destruct p ].
-  } {
-    destruct Hdp as (k, Hk).
-    destruct p; [ easy | ].
-    rewrite Nat.sub_succ, Nat.sub_0_r in Hk.
-    rewrite Hk.
-    apply Nat.lt_succ_r.
-    destruct k; [ now rewrite Hk in Hp | ].
-    cbn; flia.
-  }
-}
-assert (H : Nat.gcd d p = 1). {
-  rewrite Nat.gcd_comm.
-  now apply eq_gcd_prime_small_1.
-}
-specialize (H1 H); clear H.
-rewrite Nat.gcd_1_l in H1.
-rewrite Nat.div_1_r in H1.
-assert (H : d ^ (p - 1) ≡ 1 mod p). {
-  rewrite fermat_little; [ | easy | easy ].
-  now symmetry; apply Nat.mod_small, prime_ge_2.
-}
-specialize (H1 H); clear H.
-unfold nth_roots_modulo in H1.
-unfold nth_roots_of_unity_modulo.
-...
-intros * Hp Hdp.
-destruct Hdp as (e, He).
-unfold nth_roots_of_unity_modulo.
-rewrite (filter_ext _ (λ x, x ^ d mod p =? 1)). 2: {
-  intros x.
-  rewrite Nat_pow_mod_is_pow_mod; [ easy | ].
-  now intros H; subst p.
-}
-Compute (nth_roots_of_unity_modulo 3 19).
-Compute (Nat_pow_mod 6 3 19).
-Compute (map (λ i, Nat_pow_mod i 3 19) (seq 1 18)).
-...
-set (pmn := {| mn := p |}).
-assert
-  (Hp1 :
-    length
-      (filter (λ x : nat, polm_eval (ⓧ^(p - 1) - 1)%pol x ≡? 0 mod p)
-         (seq 1 (p - 1))) = p - 1). {
-  rewrite List_filter_all_true; [ apply seq_length | ].
-  intros a Ha.
-  apply in_seq in Ha.
-  apply Nat.eqb_eq.
-  replace (1 + (p - 1)) with p in Ha. 2: {
-    destruct p; [ easy | flia ].
-  }
-  specialize (fermat_little p Hp a Ha) as H1.
-  rewrite Nat.mod_0_l; [ | flia Ha ].
-  replace p with mn by easy.
-  unfold polm_sub.
-  rewrite polm_eval_add.
-  cbn.
-  rewrite Nat.mul_0_r, Nat.add_0_r.
-  rewrite <- Nat.add_mod_idemp_l; [ | flia Ha ].
-  rewrite polm_eval_repeat_0.
-  rewrite Nat.mul_1_l, H1.
-  replace (1 + (p - 1)) with p. 2: {
-    destruct p; [ easy | flia ].
-  }
-  apply Nat.mod_same; flia Ha.
-}
-(*
-Arguments polm_eval la%pol.
-Show.
-*)
-assert ((ⓧ^(p-1) - 1 = (ⓧ^d - 1) * Σ (i = 1, e), ⓧ^(d*(e-i)))%pol). {
-...
-Check polm_pow_sub_1.
-Check polm_mul_add_distr_l.
-rewrite polm_mul_add_distr_l.
-...
-remember (S k) as sk; cbn - [ "-" ]; subst sk.
-f_equal. {
-  do 2 rewrite Nat.sub_0_r.
-  cbn.
-  rewrite Nat.sub_0_r.
-  destruct k. {
-    cbn.
-    rewrite Nat.mod_1_l; [ | now apply prime_ge_2 ].
-    rewrite Nat.mul_1_r, Nat.mod_mod; [ easy | now apply prime_neq_0 ].
-  }
-  cbn.
-...
-(* and, actually, an equality between polynomial is required: it has
-   to be defined *)
-...
-... old version
-assert (Hp1 :
-  length (filter (λ x, x ^ (p - 1) mod p =? 1) (seq 1 (p - 1))) = p - 1). {
-  rewrite List_filter_all_true; [ apply seq_length | ].
-  intros a Ha.
-  apply in_seq in Ha.
-  apply Nat.eqb_eq.
-  apply fermat_little; [ easy | flia Ha ].
-}
-(* https://wstein.org/edu/2007/spring/ent/ent-html/node28.html#prop:dsols *)
-destruct (lt_dec e 2) as [H2e| H2e]. {
-  destruct e. {
-    specialize (prime_ge_2 p Hp) as H.
-    flia He H.
-  }
-  destruct e; [ | flia H2e ].
-  now rewrite Nat.mul_1_l in He; rewrite <- He.
-}
-apply Nat.nlt_ge in H2e.
-set (g x := Σ (i = 1, e), x ^ (d * (e - i))).
-assert (Hd : ∀ x, x ^ (p - 1) - 1 = (x ^ d - 1) * g x). {
-  intros.
-  destruct (Nat.eq_dec x 0) as [Hxz| Hxz]. {
-    subst x.
-    rewrite Nat.pow_0_l. 2: {
-      specialize (prime_ge_2 _ Hp) as H1.
-      flia H1.
-    }
-    rewrite Nat.pow_0_l; [ easy | ].
-    intros H; subst d.
-    rewrite Nat.mul_0_r in He.
-    specialize (prime_ge_2 _ Hp) as H1.
-    flia He H1.
-  }
-  unfold g.
-  rewrite He, Nat.mul_comm.
-  rewrite Nat.pow_mul_r.
-  replace 1 with (1 ^ e) at 1 2 by apply Nat.pow_1_l.
-  rewrite Nat_pow_sub_pow; [ | flia H2e | ]. 2: {
-    apply Nat.neq_0_lt_0.
-    now apply Nat.pow_nonzero.
-  }
-  rewrite Nat.pow_1_l.
-  f_equal.
-  replace e with (S (e - 1)) at 2 by flia H2e.
-  rewrite summation_shift.
-  apply summation_eq_compat.
-  intros i Hi.
-  rewrite Nat.pow_1_l, Nat.mul_1_r.
-  rewrite <- Nat.pow_mul_r.
-  f_equal; flia.
-}
-...
-(* generalization on Euler's theorem? *)
-Compute (φ 4).
-Compute (nth_roots_of_unity_modulo 2 4).
-Compute (φ 6).
-Compute (nth_roots_of_unity_modulo 2 6).
-Compute (nth_roots_of_unity_modulo 1 6).
-Compute (φ 8).
-Compute (nth_roots_of_unity_modulo 4 8).
-Compute (nth_roots_of_unity_modulo 2 8). (* no: 4 *)
-Compute (φ 9).
-Compute (nth_roots_of_unity_modulo 6 9).
-Compute (nth_roots_of_unity_modulo 3 9).
-Compute (nth_roots_of_unity_modulo 2 9).
-Compute (φ 10).
-Compute (nth_roots_of_unity_modulo 4 10).
-Compute (nth_roots_of_unity_modulo 2 10).
-Compute (φ 12).
-Compute (nth_roots_of_unity_modulo 4 12).
-Compute (nth_roots_of_unity_modulo 2 12). (* no: 4 *)
-Compute (φ 14).
-Compute (nth_roots_of_unity_modulo 6 14).
-Compute (nth_roots_of_unity_modulo 3 14).
-Compute (nth_roots_of_unity_modulo 2 14).
-Compute (φ 15).
-Compute (nth_roots_of_unity_modulo 8 15).
-Compute (nth_roots_of_unity_modulo 4 15). (* no: 8 *)
-Compute (nth_roots_of_unity_modulo 2 15). (* no: 4 *)
-Compute (φ 16).
-Compute (nth_roots_of_unity_modulo 8 16).
-Compute (nth_roots_of_unity_modulo 4 16). (* no: 8 *)
-Compute (nth_roots_of_unity_modulo 2 16). (* no: 4 *)
-Compute (φ 18).
-Compute (nth_roots_of_unity_modulo 6 18).
-Compute (nth_roots_of_unity_modulo 3 18).
-Compute (nth_roots_of_unity_modulo 2 18).
-Compute (φ 20).
-Compute (nth_roots_of_unity_modulo 8 20).
-Compute (nth_roots_of_unity_modulo 4 20). (* no: 8 *)
-Compute (nth_roots_of_unity_modulo 2 20). (* no: 4 *)
-Compute (φ 21).
-Compute (nth_roots_of_unity_modulo 12 21).
-Compute (nth_roots_of_unity_modulo 6 21). (* no: 12 *)
-Compute (nth_roots_of_unity_modulo 4 21).
-Compute (nth_roots_of_unity_modulo 3 21).
-Compute (nth_roots_of_unity_modulo 2 21). (* no: 4 *)
-Compute (nth_roots_of_unity_modulo 1 21).
-Compute (φ 22).
-Compute (nth_roots_of_unity_modulo 10 22).
-Compute (nth_roots_of_unity_modulo 5 22).
-Compute (nth_roots_of_unity_modulo 2 22).
-Compute (φ 24).
-Compute (nth_roots_of_unity_modulo 8 24).
-Compute (nth_roots_of_unity_modulo 4 24). (* no: 8 *)
-Compute (nth_roots_of_unity_modulo 2 24). (* no: 8; four times! *)
-Compute (φ 25).
-Compute (length (nth_roots_of_unity_modulo 20 25)).
-Compute (length (nth_roots_of_unity_modulo 10 25)).
-Compute (length (nth_roots_of_unity_modulo 5 25)).
-Compute (length (nth_roots_of_unity_modulo 4 25)).
-Compute (length (nth_roots_of_unity_modulo 2 25)).
-Compute (φ 26).
-Compute (length (nth_roots_of_unity_modulo 12 26)).
-Compute (length (nth_roots_of_unity_modulo 6 26)).
-Compute (length (nth_roots_of_unity_modulo 4 26)).
-Compute (length (nth_roots_of_unity_modulo 3 26)).
-Compute (length (nth_roots_of_unity_modulo 2 26)).
-Compute (φ 27).
-Compute (length (nth_roots_of_unity_modulo 18 27)).
-Compute (length (nth_roots_of_unity_modulo 9 27)).
-Compute (length (nth_roots_of_unity_modulo 6 27)).
-Compute (length (nth_roots_of_unity_modulo 3 27)).
-Compute (length (nth_roots_of_unity_modulo 2 27)).
-Compute (φ 28).
-Compute (length (nth_roots_of_unity_modulo 12 28)).
-Compute (length (nth_roots_of_unity_modulo 6 28)). (* no: 12 *)
-Compute (length (nth_roots_of_unity_modulo 4 28)).
-Compute (length (nth_roots_of_unity_modulo 3 28)).
-Compute (length (nth_roots_of_unity_modulo 2 28)). (* no: 4 *)
-Compute (φ 30).
-Compute (nth_roots_of_unity_modulo 8 30).
-Compute (nth_roots_of_unity_modulo 4 30). (* no: 8 *)
-Compute (nth_roots_of_unity_modulo 2 30). (* no: 4 *)
-Compute (nth_roots_of_unity_modulo 1 30).
-Compute (let n := 28 in map (λ d, (d, length (nth_roots_of_unity_modulo d n)))(divisors (φ n))).
-Compute (let n := 30 in map (λ d, (d, length (nth_roots_of_unity_modulo d n)))(divisors (φ n))).
-Compute (let n := 39 in map (λ d, (d, length (nth_roots_of_unity_modulo d n)))(divisors (φ n))).
-...
-assert (Hx : length (filter (λ x, x ^ d mod p =? 1) (seq 1 (p - 1))) ≤ d). {
-...
-Check root_bound.
-... before root_bound: to be removed:
-  rewrite He.
-  destruct (Nat.eq_dec d 0) as [Hdz| Hdz]. {
-    subst d; cbn.
-    rewrite List_filter_all_true. 2: {
-      intros a Ha.
-      apply Nat.eqb_eq.
-      now apply Nat.mod_small, prime_ge_2.
-    }
-    now rewrite Nat.mul_0_r.
-  }
-  assert (Hep : e ≤ p - 1). {
-    rewrite He.
-    destruct d; [ easy | flia ].
-  }
-  clear - Hp Hdz Hep.
-  revert e Hep.
-  induction d; intros; [ easy | clear Hdz ].
-  rewrite Nat.mul_succ_r.
-  cbn.
-  destruct d. {
-    rewrite Nat.mul_0_r, Nat.add_0_l.
-    destruct (Nat.eq_dec e 0) as [Hez| Hez]. {
-      subst e; cbn; flia.
-    }
-    replace e with (1 + (e - 1)) by flia Hez.
-    rewrite seq_app; cbn.
-    rewrite Nat.mod_1_l; [ | now apply prime_ge_2 ].
-    cbn.
-    rewrite List_filter_all_false; [ cbn; flia | ].
-    intros a Ha.
-    rewrite Nat.mul_1_r.
-    apply Nat.eqb_neq.
-    apply in_seq in Ha.
-    rewrite Nat.mod_small; [ flia Ha | flia Ha Hep ].
-  }
-...
-assert (Hg : length (filter (λ x, g x =? 0) (seq 1 (p - 1))) ≤ d * (e - 1)). {
-...
-*)
 
 Theorem eq_list_with_occ_nil : ∀ l, list_with_occ l = [] → l = [].
 Proof.
