@@ -579,4 +579,16 @@ induction len; intros; [ reflexivity | simpl ].
 rewrite IHlen; reflexivity.
 Qed.
 
+Theorem rng_mul_summation_distr_l : ∀ a b e f,
+  (a * (Σ (i = b, e), f i) = Σ (i = b, e), a * f i)%Rng.
+Proof.
+intros.
+unfold summation.
+remember (S e - b) as n eqn:Hn.
+revert e a b Hn.
+induction n; intros; [ apply rng_mul_0_r | cbn ].
+rewrite rng_mul_add_distr_l.
+rewrite (IHn e); [ easy | flia Hn ].
+Qed.
+
 End theorems_summation.
