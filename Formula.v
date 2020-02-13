@@ -4121,8 +4121,11 @@ rewrite (summation_compat _ (λ i, (ⓧ^1 * ⓧ^(S k - i - 1))%pol)). 2: {
 }
 rewrite <- rng_mul_summation_distr_l.
 rewrite rng_mul_add_distr_l, rng_mul_assoc, rng_mul_mul_swap.
-rewrite <- IHk.
+rewrite <- IHk; cbn.
+rewrite rng_mul_1_r.
 ...
+Print poly_sub.
+unfold poly_sub.
 rewrite rng_mul_sub_distr_r.
 ...
 

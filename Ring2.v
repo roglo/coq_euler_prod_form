@@ -1,6 +1,6 @@
 (* Ring2.v *)
 
-Require Import Utf8 Setoid.
+Require Import Utf8 Setoid Morphisms.
 
 Class ring A :=
   { rng_zero : A;
@@ -29,13 +29,15 @@ Class ring A :=
       rng_eq (rng_mul a (rng_add b c))
         (rng_add (rng_mul a b) (rng_mul a c)) }.
 
+Definition rng_sub {A} {R : ring A} a b := rng_add a (rng_opp b).
+
 Declare Scope ring_scope.
 Delimit Scope ring_scope with Rng.
 Bind Scope ring_scope with ring.
 Notation "a = b" := (rng_eq a b) : ring_scope.
 Notation "a ≠ b" := (¬ rng_eq a b) : ring_scope.
 Notation "a + b" := (rng_add a b) : ring_scope.
-Notation "a - b" := (rng_add a (rng_opp b)) : ring_scope.
+Notation "a - b" := (rng_sub a b) : ring_scope.
 Notation "a * b" := (rng_mul a b) : ring_scope.
 Notation "- a" := (rng_opp a) : ring_scope.
 Notation "0" := rng_zero : ring_scope.
@@ -55,9 +57,8 @@ Add Parametric Relation A (rng : ring A) : A rng_eq
  transitivity proved by rng_eq_trans
  as eq_rel.
 
-Add Parametric Morphism A (rng : ring A) : rng_add
-  with signature rng_eq ==> rng_eq ==> rng_eq
-  as add_morph.
+Instance add_morph {A} {rng : ring A} :
+  Proper (rng_eq ==> rng_eq ==> rng_eq) rng_add.
 Proof.
 intros a b Hab c d Hcd.
 rewrite rng_add_comm; symmetry.
@@ -68,9 +69,8 @@ rewrite rng_add_comm; symmetry.
 rewrite rng_add_compat_l; [ reflexivity | eassumption ].
 Qed.
 
-Add Parametric Morphism A (rng : ring A) : rng_opp
-  with signature rng_eq ==> rng_eq
-  as opp_morph.
+Instance opp_morph {A} {rng : ring A} :
+  Proper (rng_eq ==> rng_eq) rng_opp.
 Proof.
 intros a b Heq.
 apply rng_add_compat_l with (c := rng_opp b) in Heq.
@@ -86,9 +86,16 @@ rewrite rng_add_0_l in Heq.
 assumption.
 Qed.
 
-Add Parametric Morphism A (F : ring A) : rng_mul
-  with signature rng_eq ==> rng_eq ==> rng_eq
-  as mul_morph.
+Instance sub_morph {A} {rng : ring A} :
+  Proper (rng_eq ==> rng_eq ==> rng_eq) rng_sub.
+Proof.
+intros a b Hab c d Hcd.
+unfold rng_sub.
+now rewrite Hab, Hcd.
+Qed.
+
+Instance rng_mul_morph {A} {rng : ring A} :
+  Proper (rng_eq ==> rng_eq ==> rng_eq) rng_mul.
 Proof.
 intros a b Hab c d Hcd.
 rewrite rng_mul_comm; symmetry.
@@ -106,7 +113,7 @@ Context {r : ring A}.
 
 Theorem rng_add_opp_r : ∀ x, (x - x = 0)%Rng.
 Proof.
-intros x; simpl; rewrite rng_add_comm.
+intros x; unfold rng_sub; rewrite rng_add_comm.
 apply rng_add_opp_l.
 Qed.
 
@@ -118,8 +125,7 @@ reflexivity.
 Qed.
 
 Theorem rng_add_compat_r : ∀ a b c,
-  (a = b)%Rng
-  → (a + c = b + c)%Rng.
+  (a = b)%Rng → (a + c = b + c)%Rng.
 Proof.
 intros a b c Hab.
 rewrite Hab; reflexivity.
@@ -132,6 +138,20 @@ Theorem rng_add_compat : ∀ a b c d,
 Proof.
 intros a b c d Hab Hcd.
 rewrite Hab, Hcd; reflexivity.
+Qed.
+
+Theorem rng_sub_compat_l : ∀ a b c,
+  (a = b)%Rng → (a - c = b - c)%Rng.
+Proof.
+intros a b c Hab.
+now rewrite Hab.
+Qed.
+
+Theorem rng_sub_compat_r : ∀ a b c,
+  (b = c)%Rng → (a - b = a - c)%Rng.
+Proof.
+intros a b c Hbc.
+now rewrite Hbc.
 Qed.
 
 Theorem rng_mul_compat_r : ∀ a b c,
@@ -151,6 +171,42 @@ intros a b c d Hab Hcd.
 rewrite Hab, Hcd; reflexivity.
 Qed.
 
+Theorem rng_add_0_r : ∀ a, (a + 0 = a)%Rng.
+Proof.
+intros a; simpl.
+rewrite rng_add_comm.
+apply rng_add_0_l.
+Qed.
+
+Theorem fold_rng_sub : ∀ a b, (a + - b = a - b)%Rng.
+Proof. intros; easy. Qed.
+
+Theorem rng_add_sub : ∀ a b, (a + b - b = a)%Rng.
+Proof.
+intros.
+unfold rng_sub.
+rewrite <- rng_add_assoc.
+rewrite fold_rng_sub.
+rewrite rng_add_opp_r.
+apply rng_add_0_r.
+Qed.
+
+Theorem rng_add_reg_r : ∀ a b c, (a + c = b + c)%Rng → (a = b)%Rng.
+Proof.
+intros a b c Habc; simpl in Habc; simpl.
+eapply rng_sub_compat_l with (c := c) in Habc.
+now do 2 rewrite rng_add_sub in Habc.
+Qed.
+
+Theorem rng_add_reg_l : ∀ a b c, (c + a = c + b)%Rng → (a = b)%Rng.
+Proof.
+intros a b c Habc; simpl in Habc; simpl.
+apply rng_add_reg_r with (c := c).
+rewrite rng_add_comm; symmetry.
+rewrite rng_add_comm; symmetry.
+assumption.
+Qed.
+
 Theorem rng_mul_add_distr_r : ∀ x y z,
   ((x + y) * z = x * z + y * z)%Rng.
 Proof.
@@ -162,38 +218,6 @@ assert (rng_eq (rng_mul z y) (rng_mul y z)) as H.
  apply rng_mul_comm.
 
  rewrite H; reflexivity.
-Qed.
-
-Theorem rng_add_0_r : ∀ a, (a + 0 = a)%Rng.
-Proof.
-intros a; simpl.
-rewrite rng_add_comm.
-apply rng_add_0_l.
-Qed.
-
-Theorem rng_opp_0 : (- 0 = 0)%Rng.
-Proof.
-simpl; etransitivity; [ symmetry; apply rng_add_0_l | idtac ].
-apply rng_add_opp_r.
-Qed.
-
-Theorem rng_add_reg_r : ∀ a b c, (a + c = b + c)%Rng → (a = b)%Rng.
-Proof.
-intros a b c Habc; simpl in Habc; simpl.
-apply rng_add_compat_r with (c := (- c)%Rng) in Habc.
-do 2 rewrite <- rng_add_assoc in Habc.
-rewrite rng_add_opp_r in Habc.
-do 2 rewrite rng_add_0_r in Habc.
-assumption.
-Qed.
-
-Theorem rng_add_reg_l : ∀ a b c, (c + a = c + b)%Rng → (a = b)%Rng.
-Proof.
-intros a b c Habc; simpl in Habc; simpl.
-apply rng_add_reg_r with (c := c).
-rewrite rng_add_comm; symmetry.
-rewrite rng_add_comm; symmetry.
-assumption.
 Qed.
 
 Theorem rng_mul_0_l : ∀ a, (0 * a = 0)%Rng.
@@ -222,8 +246,10 @@ Theorem rng_mul_opp_l : ∀ a b, ((- a) * b = - (a * b))%Rng.
 Proof.
 intros a b; simpl.
 apply rng_add_reg_l with (c := (a * b)%Rng).
+rewrite fold_rng_sub.
 rewrite rng_add_opp_r.
 rewrite <- rng_mul_add_distr_r.
+rewrite fold_rng_sub.
 rewrite rng_add_opp_r, rng_mul_0_l.
 reflexivity.
 Qed.
@@ -236,14 +262,37 @@ rewrite rng_mul_comm; symmetry.
 apply rng_mul_opp_l.
 Qed.
 
+Theorem rng_mul_sub_distr_l : ∀ x y z,
+  (x * (y - z) = x * y - x * z)%Rng.
+Proof.
+intros.
+unfold rng_sub.
+rewrite rng_mul_add_distr_l.
+now rewrite <- rng_mul_opp_r.
+Qed.
+
+Theorem rng_mul_sub_distr_r : ∀ x y z,
+  ((x - y) * z = x * z - y * z)%Rng.
+Proof.
+intros.
+setoid_rewrite rng_mul_comm.
+apply rng_mul_sub_distr_l.
+Qed.
+
+Theorem rng_opp_0 : (- 0 = 0)%Rng.
+Proof.
+simpl; etransitivity; [ symmetry; apply rng_add_0_l | idtac ].
+apply rng_add_opp_r.
+Qed.
+
 Theorem rng_add_move_0_r : ∀ a b, (a + b = 0)%Rng ↔ (a = - b)%Rng.
 Proof.
 intros a b.
 split; intros H.
- apply rng_add_compat_r with (c := (- b)%Rng) in H.
- rewrite <- rng_add_assoc in H.
- rewrite rng_add_opp_r in H.
- rewrite rng_add_0_r, rng_add_0_l in H; assumption.
+ apply rng_sub_compat_l with (c := b) in H.
+ rewrite rng_add_sub in H.
+ unfold rng_sub in H.
+ now rewrite rng_add_0_l in H.
 
  rewrite H.
  rewrite rng_add_opp_l; reflexivity.
