@@ -4263,10 +4263,27 @@ Warning: Projection value has no head constant:
 [projection-no-head-constant,typechecker]
 *)
 
+Theorem rng_opp_add_distr {A} {rng : ring A} : ∀ a b,
+  (- (a + b) = - a - b)%Rng.
+Proof.
+...
+
 Theorem apply_poly_sub {A} {rng : ring A} : ∀ p1 p2 x,
   (apply_poly (p1 - p2)%pol x = apply_poly p1 x - apply_poly p2 x)%Rng.
 Proof.
-intros.
+intros (la) (lb) *.
+unfold apply_poly; cbn.
+revert lb.
+induction la as [| a]; intros. {
+  cbn.
+  unfold rng_sub.
+  rewrite rng_add_0_l.
+  induction lb as [| b]; [ symmetry; apply rng_opp_0 | cbn ].
+Search (- (_ + _))%Rng.
+...
+rewrite rng_opp_add_distr.
+rewrite <- rng_mul_opp_l.
+rewrite <- IHlb.
 ...
 
 Theorem number_of_nth_roots_of_unity : ∀ p d,
