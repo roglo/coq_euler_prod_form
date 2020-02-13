@@ -4136,6 +4136,14 @@ Qed.
 
 (* http://math.univ-lille1.fr/~fricain/M1-ARITHMETIQUE/chap2.pdf *)
 
+Fixpoint lap_eval {A} {rng : ring A} la x :=
+  match la with
+  | [] => 0%Rng
+  | a :: la' => (a + x * lap_eval la' x)%Rng
+  end.
+
+Definition poly_eval {A} {rng : ring A} p x := lap_eval (al p) x.
+
 Theorem glop2 {A} {rng : ring A} : ∀ p d,
   prime p
   → Nat.divide d (p - 1)
@@ -4149,6 +4157,23 @@ assert (H : p - 1 ≠ 0). {
 }
 specialize (H1 H); clear H.
 destruct Hdp as (e, He).
+specialize (fermat_little _ Hp) as H2.
+assert
+  (H3 : ∀ x,
+   x ^ (p - 1) ≡ 1 mod p ↔
+   x ^ d ≡ 1 mod p ∨ Σ (i = 1, e - 1), x ^ ((i - 1) * d) ≡ 0 mod p). {
+  intros.
+  split. {
+    intros Hx.
+Check apply_poly.
+Theorem glop {A} {rng : ring A} : ∀ p1 p2,
+  (p1 = p2)%pol → ∀ x, (poly_eval p1 x = poly_eval p2 x)%Rng.
+Proof.
+intros * Hpp.
+Admitted.
+specialize (glop _ _ H1) as H3.
+Theorem glip {A} {rng : ring A} : ∀ p1 p2 x, (poly_eval (p1 - p2)%pol x = poly_eval p1 x - poly_eval p2 x)%Rng.
+Admitted.
 ...
 assert (Hg1p : Nat.gcd 1 p = 1) by apply Nat.gcd_1_l.
 assert (He : ∀ e, 1 ^ e ≡ 1 mod p) by now intros; rewrite Nat.pow_1_l.
