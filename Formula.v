@@ -4123,53 +4123,16 @@ rewrite <- rng_mul_summation_distr_l.
 rewrite rng_mul_add_distr_l, rng_mul_assoc, rng_mul_mul_swap.
 rewrite <- IHk; cbn.
 rewrite rng_mul_1_r.
-...
-Print poly_sub.
 unfold poly_sub.
-rewrite rng_mul_sub_distr_r.
-...
-
-(* Theorem 2.3.5 in "An introduction to Theory of numbers" by Ivan Niven,
-   Herbert Zuckerman and Hugh Montgomery – John Wiley and Sons – 1991:
-      Let p and q be primes, and suppose that q^α | (p-1), where α ≥ 1.
-      Then there are precisely q^α - q^(α-1) residue classes α (mod p)
-      of order q
-*)
-
-...
-
-(* Theorem 2.3.6 in "An introduction to Theory of numbers" by Ivan Niven,
-   Herbert Zuckerman and Hugh Montgomery – John Wiley and Sons – 1991:
-     If p is a prime then there exist φ(p-1) primitive roots modulo p.
-*)
-
-...
-
-(* Theorem 2.3.7 in "An introduction to Theory of numbers" by Ivan Niven,
-   Herbert Zuckerman and Hugh Montgomery – John Wiley and Sons – 1991 *)
-
-(* well, the book supposes that there exist primitive roots modulo p,
-   which is exactly what we want to prove *)
-
-(* http://villemin.gerard.free.fr/Referenc/Prof/ARITHMET/RacinPri.htm
-   Si p est premier et gcd a p = 1, alors x^n ≡ a mod p
-   possède gcd n (p – 1) solutions à condition que:
-     a^((p-1)/gcd(n,p-1)) ≡ 1 mod p
-   Et aucune solution sinon. *)
-
-Definition nth_roots_modulo n p a :=
-  filter (λ x : nat, Nat_pow_mod x n p =? a) (seq 1 (p - 1)).
-
-(*
-Theorem eq_nth_roots_modulo_gcd : ∀ n p a,
-  prime p
-  → Nat.gcd a p = 1
-  → a ^ ((p - 1) / Nat.gcd n (p - 1)) ≡ 1 mod p
-  → length (nth_roots_modulo n p a) = Nat.gcd n (p - 1).
-Proof.
-intros * Hp Hg Hap.
-...
-*)
+rewrite rng_mul_add_distr_r; cbn.
+rewrite rng_mul_opp_l, rng_mul_1_l.
+do 3 rewrite fold_rng_sub; cbn.
+rewrite rng_add_assoc; cbn.
+do 3 rewrite fold_rng_sub.
+rewrite rng_sub_add; cbn.
+rewrite <- xpow_add_r.
+now rewrite Nat.add_1_r.
+Qed.
 
 (* http://math.univ-lille1.fr/~fricain/M1-ARITHMETIQUE/chap2.pdf *)
 
@@ -4181,6 +4144,7 @@ Proof.
 intros * Hp Hdp.
 assert (Hg1p : Nat.gcd 1 p = 1) by apply Nat.gcd_1_l.
 assert (He : ∀ e, 1 ^ e ≡ 1 mod p) by now intros; rewrite Nat.pow_1_l.
+Inspect 1.
 ...
 specialize (eq_nth_roots_modulo_gcd d _ _ Hp Hg1p (He _)) as H1.
 assert (Hgdp : Nat.gcd d (p - 1) = d) by now apply Nat.divide_gcd_iff'.

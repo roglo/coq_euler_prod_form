@@ -147,6 +147,8 @@ Fixpoint lap_add {α} {r : ring α} al1 al2 :=
 
 Definition lap_opp {α} {r : ring α} la := List.map rng_opp la.
 
+Definition lap_sub {A} {rng : ring A} la lb := lap_add la (lap_opp lb).
+
 (* multiplication *)
 
 Fixpoint lap_convol_mul {α} {r : ring α} al1 al2 i len :=
@@ -195,7 +197,7 @@ Notation "- a" := (lap_opp a) : lap_scope.
 Notation "a = b" := (lap_eq a b) : lap_scope.
 Notation "a ≠ b" := (¬lap_eq a b) : lap_scope.
 Notation "a + b" := (lap_add a b) : lap_scope.
-Notation "a - b" := (lap_add a (lap_opp b)) : lap_scope.
+Notation "a - b" := (lap_sub a b) : lap_scope.
 Notation "a * b" := (lap_mul a b) : lap_scope.
 Notation "a ^ b" := (lap_power a b) : lap_scope.
 
@@ -1463,10 +1465,6 @@ Notation "a ∘ b" := (poly_compose a b) (left associativity, at level 40) :
   poly_scope.
 Notation "'ⓧ' ^ a" := (xpow a) (at level 30, format "'ⓧ' ^ a") : poly_scope.
 Notation "'ⓧ'" := (xpow 1) (at level 30, format "'ⓧ'") : poly_scope.
-(*
-Notation "'Σ' ( i = b , e ) , g" :=
-  (fold_left (λ c i, (c + g)%pol) (seq b (S e - b)) 0%pol) : poly_scope.
-*)
 
 Theorem poly_eq_refl {α} {r : ring α} : reflexive _ poly_eq.
 Proof.

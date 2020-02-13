@@ -191,6 +191,15 @@ rewrite rng_add_opp_r.
 apply rng_add_0_r.
 Qed.
 
+Theorem rng_sub_add : ∀ a b, (a - b + b = a)%Rng.
+Proof.
+intros.
+unfold rng_sub.
+rewrite <- rng_add_assoc.
+rewrite rng_add_opp_l.
+apply rng_add_0_r.
+Qed.
+
 Theorem rng_add_reg_r : ∀ a b c, (a + c = b + c)%Rng → (a = b)%Rng.
 Proof.
 intros a b c Habc; simpl in Habc; simpl.
