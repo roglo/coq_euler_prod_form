@@ -4203,6 +4203,8 @@ intros * Hp Hg Hap.
 ...
 *)
 
+(* http://math.univ-lille1.fr/~fricain/M1-ARITHMETIQUE/chap2.pdf *)
+
 Theorem glop2 : ∀ p d,
   prime p
   → Nat.divide d (p - 1)
