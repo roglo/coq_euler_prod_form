@@ -4142,9 +4142,10 @@ Theorem glop2 : ∀ p d,
   → length (nth_roots_of_unity_modulo d p) = d.
 Proof.
 intros * Hp Hdp.
+Inspect 1.
+...
 assert (Hg1p : Nat.gcd 1 p = 1) by apply Nat.gcd_1_l.
 assert (He : ∀ e, 1 ^ e ≡ 1 mod p) by now intros; rewrite Nat.pow_1_l.
-Inspect 1.
 ...
 specialize (eq_nth_roots_modulo_gcd d _ _ Hp Hg1p (He _)) as H1.
 assert (Hgdp : Nat.gcd d (p - 1) = d) by now apply Nat.divide_gcd_iff'.
