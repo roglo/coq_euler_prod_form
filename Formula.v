@@ -4026,8 +4026,22 @@ Proof. easy. Qed.
 
 Theorem lap_convol_mul_succ_r {A} {rng : ring A} : ∀ la lb i len,
   lap_convol_mul la lb i (S len) =
-  (Σ (j = 0, i), nth j la 0 * nth (i - j) lb 0)%Rng :: lap_convol_mul la lb (S i) len.
+  (Σ (j = 0, i), nth j la 0 * nth (i - j) lb 0)%Rng ::
+  lap_convol_mul la lb (S i) len.
 Proof. easy. Qed.
+
+Theorem lap_xpow_from_convol_mul {A} {rng : ring A} : ∀ a i,
+  (repeat 0%Rng a ++ [1%Rng] =
+   nth 0 (repeat 0%Rng a ++ [1%Rng]) 0%Rng
+   :: lap_convol_mul [0%Rng; 1%Rng]
+        (repeat 0%Rng (i + a) ++ [1%Rng]) (i + 2) a)%lap.
+Proof.
+intros.
+revert i.
+induction a; intros; [ easy | ].
+cbn - [ summation ].
+apply lap_eq_cons; [ easy | ].
+...
 
 (* x^(a+1) = x * x^a *)
 Theorem lap_xpow_succ {A} {rng : ring A} : ∀ a,
@@ -4039,6 +4053,40 @@ unfold "*"%lap; cbn.
 rewrite rng_mul_0_l, rng_add_0_l.
 apply lap_eq_cons; [ easy | ].
 rewrite app_length, repeat_length; cbn.
+(*
+  ============================
+  (repeat 0%Rng a ++ [1%Rng] =
+   lap_convol_mul [0%Rng; 1%Rng] (repeat 0%Rng a ++ [1%Rng]) 1 (a + 1))%lap
+*)
+rewrite Nat.add_1_r; cbn.
+rewrite rng_mul_0_l, rng_add_0_l, rng_mul_1_l, rng_add_0_r.
+(*
+  ============================
+  (repeat 0%Rng a ++ [1%Rng] =
+   nth 0 (repeat 0%Rng a ++ [1%Rng]) 0%Rng
+   :: lap_convol_mul [0%Rng; 1%Rng] (repeat 0%Rng a ++ [1%Rng]) 2 a)%lap
+*)
+destruct a; [ easy | cbn ].
+apply lap_eq_cons; [ easy | ].
+rewrite rng_mul_0_l, rng_add_0_l, rng_mul_1_l, rng_add_0_r.
+rewrite rng_mul_0_l, rng_add_0_r.
+(*
+  ============================
+  (repeat 0%Rng a ++ [1%Rng] =
+   nth 0 (repeat 0%Rng a ++ [1%Rng]) 0%Rng
+   :: lap_convol_mul [0%Rng; 1%Rng] (0%Rng :: repeat 0%Rng a ++ [1%Rng]) 3 a)%lap
+*)
+destruct a; [ easy | cbn ].
+apply lap_eq_cons; [ easy | ].
+rewrite rng_mul_0_l, rng_add_0_l, rng_mul_1_l, rng_add_0_r.
+rewrite rng_mul_0_l, rng_add_0_r, rng_add_0_r.
+(*
+  ============================
+  (repeat 0%Rng a ++ [1%Rng] =
+   nth 0 (repeat 0%Rng a ++ [1%Rng]) 0%Rng
+   :: lap_convol_mul [0%Rng; 1%Rng]
+        (0%Rng :: 0%Rng :: repeat 0%Rng a ++ [1%Rng]) 4 a)%lap
+*)
 ...
 intros.
 induction a. {
