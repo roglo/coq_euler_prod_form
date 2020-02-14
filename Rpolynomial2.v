@@ -1810,50 +1810,32 @@ revert lb.
 induction la as [| a]; intros. {
   now rewrite rng_mul_0_l, lap_mul_0_l.
 } {
-(**)
-  destruct lb as [| b]. {
-    now rewrite rng_mul_0_r, lap_mul_0_r.
-  }
   rewrite apply_lap_cons.
   rewrite rng_mul_add_distr_r.
   rewrite rng_mul_mul_swap.
   rewrite <- IHla.
-...
-Search (apply_lap (_ :: _)).
-  destruct lb as [| b]. {
-    now rewrite rng_mul_0_r, lap_mul_0_r.
-  } {
-    rewrite lap_mul_cons.
-    do 3 rewrite apply_lap_cons.
-    rewrite rng_mul_add_distr_l.
-    do 2 rewrite rng_mul_add_distr_r.
-    do 2 rewrite <- rng_add_assoc.
-    apply rng_add_compat_l.
-    cbn - [ apply_lap lap_mul ].
-    do 2 rewrite apply_lap_add.
-    rewrite apply_lap_cons, rng_add_0_l.
-    rewrite IHla.
-    rewrite apply_lap_const.
-...
-    rewrite IHla.
-...
-    rewrite lap_mul_cons_l.
-    rewrite apply_lap_add.
-...
-    cbn - [ apply_lap ].
-    rewrite rng_add_comm.
-    rewrite (rng_add_comm _ a).
-    unfold rng_sub.
-    do 2 rewrite <- rng_add_assoc.
-    apply rng_add_compat_l.
-    rewrite rng_add_comm, fold_rng_sub.
-    rewrite fold_rng_sub.
-    rewrite rng_sub_add_distr.
-    rewrite IHla.
-    now rewrite rng_mul_sub_distr_r.
+  rewrite lap_mul_cons_l.
+  rewrite apply_lap_add.
+  rewrite apply_lap_cons, rng_add_0_l.
+  apply rng_add_compat_r.
+  clear.
+  induction lb as [| b]. {
+    cbn.
+    now rewrite rng_mul_0_r.
   }
+  rewrite lap_mul_cons.
+  do 2 rewrite apply_lap_cons.
+  rewrite rng_mul_add_distr_l.
+  apply rng_add_compat_l.
+  rewrite lap_mul_0_l, lap_add_0_l.
+  rewrite lap_mul_0_l.
+  rewrite apply_lap_add.
+  rewrite apply_lap_const.
+  rewrite rng_add_0_r.
+  rewrite IHlb.
+  now rewrite rng_mul_assoc.
 }
-...
+Qed.
 
 Theorem apply_poly_xpow {A} {rng : ring A} : ∀ k x,
   (apply_poly (ⓧ ^ k)%pol x = x ^ k)%Rng.
