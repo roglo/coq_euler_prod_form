@@ -4291,6 +4291,10 @@ assert
   rewrite apply_poly_xpow in H3.
   rewrite apply_poly_one in H3.
   rewrite rng_pow_1_r in H3.
+Theorem apply_poly_sum {A} {rng : ring A} : ∀ p1 p2 x,
+  (apply_poly (Σ (i = b, e), f i =
+  (apply_poly (p1 - p2)%pol x = apply_poly p1 x - apply_poly p2 x)%Rng.
+Proof.
 ...
 
 Theorem eq_list_with_occ_nil : ∀ l, list_with_occ l = [] → l = [].
