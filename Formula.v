@@ -4263,6 +4263,10 @@ Warning: Projection value has no head constant:
 [projection-no-head-constant,typechecker]
 *)
 
+(* degree of a polynomial *)
+
+(* calculable version *)
+
 Fixpoint lap_deg_loop {A} {rng : ring A}
   (eq_dec : ∀ a b : A, {a = b} + {a ≠ b}) la i :=
   match i with
@@ -4279,7 +4283,15 @@ Definition poly_deg {A} {rng : ring A} eq_dec pol := lap_deg eq_dec (al pol).
 
 Compute (@lap_deg nat (ZnRing 7) Nat.eq_dec (map (λ x, x mod 7) [1;2;0;0;0;7;2])).
 
-Check (poly_deg Nat.eq_dec (POL [1;2;3]%nat)%pol).
+(* propositional version *)
+
+Inductive lap_has_degree {A} {rng : ring A} : list A → nat → Prop :=
+  | Has_degree_0 : lap_has_degree [] 0
+  | Has_degree_succ : ∀ a la n, (a ≠ 0)%Rng → lap_has_degree la n → lap_has_degree (la ++ [a]) (S n).
+
+(* ouais mais c'est pas suffisant : j'arriverai pas à prouver comme ça que le
+   polynome x² (lap = [0; 0; 1]) est de degré 2 *)
+
 ...
 
 Definition roots_of_pol pol := ... (* mmm... no way to compute them *)
