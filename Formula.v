@@ -4278,11 +4278,13 @@ induction la as [| a]; intros. {
   rewrite <- rng_mul_opp_l.
   now rewrite <- IHlb.
 } {
-...
-  rewrite lap_add_comm.
-Print "+"%lap.
-
   cbn.
+  remember (map rng_opp lb) as lc eqn:Hlc; symmetry in Hlc.
+  destruct lc as [| c]. {
+    apply map_eq_nil in Hlc; subst lb; cbn.
+    now rewrite rng_sub_0_r.
+  } {
+    cbn.
 ...
   rewrite <- rng_add_comm.
   unfold rng_sub.

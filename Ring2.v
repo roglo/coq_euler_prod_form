@@ -294,6 +294,14 @@ simpl; etransitivity; [ symmetry; apply rng_add_0_l | idtac ].
 apply rng_add_opp_r.
 Qed.
 
+Theorem rng_sub_0_r : ∀ a, (a - 0 = a)%Rng.
+Proof.
+intros.
+unfold rng_sub.
+rewrite rng_opp_0.
+apply rng_add_0_r.
+Qed.
+
 Theorem rng_add_move_0_r : ∀ a b, (a + b = 0)%Rng ↔ (a = - b)%Rng.
 Proof.
 intros a b.
