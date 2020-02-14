@@ -2,6 +2,7 @@
 
 (* polynomials on a ring *)
 
+Set Nested Proofs Allowed.
 Require Import Utf8 Arith Setoid Morphisms.
 Import List ListNotations.
 
@@ -1752,6 +1753,34 @@ induction la as [| a]; intros. {
 }
 Qed.
 
+Theorem apply_lap_cons {A} {rng : ring A} : ∀ a la x,
+  (apply_lap (a :: la) x = a + apply_lap la x * x)%Rng.
+Proof.
+intros.
+cbn; rewrite rng_add_comm.
+now apply rng_add_compat_l.
+Qed.
+
+Theorem lap_add_cons_cons {A} {rng : ring A} : ∀ a b la lb,
+  ((a :: la) + (b :: lb) = (a + b)%Rng :: la + lb)%lap.
+Proof. easy. Qed.
+
+Theorem apply_lap_add {A} {rng : ring A} : ∀ la lb x,
+  (apply_lap (la + lb)%lap x = apply_lap la x + apply_lap lb x)%Rng.
+Proof.
+intros.
+revert lb.
+induction la as [| a]; intros. {
+  now rewrite lap_add_0_l, rng_add_0_l.
+}
+destruct lb as [| b]. {
+  now rewrite lap_add_0_r, rng_add_0_r.
+}
+rewrite lap_add_cons_cons.
+do 3 rewrite apply_lap_cons.
+rewrite IHla.
+...
+
 Theorem apply_poly_mul {A} {rng : ring A} : ∀ p1 p2 x,
   (apply_poly (p1 * p2)%pol x = apply_poly p1 x * apply_poly p2 x)%Rng.
 Proof.
@@ -1766,6 +1795,14 @@ induction la as [| a]; intros. {
     now rewrite rng_mul_0_r, lap_mul_0_r.
   } {
     rewrite lap_mul_cons.
+    do 3 rewrite apply_lap_cons.
+    rewrite rng_mul_add_distr_l.
+    do 2 rewrite rng_mul_add_distr_r.
+    do 2 rewrite <- rng_add_assoc.
+    apply rng_add_compat_l.
+    cbn - [ apply_lap lap_mul ].
+...
+do 2 rewrite apply_lap_add.
 ...
     cbn - [ apply_lap ].
     rewrite rng_add_comm.
