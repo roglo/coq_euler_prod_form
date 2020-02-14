@@ -4263,8 +4263,21 @@ Warning: Projection value has no head constant:
 [projection-no-head-constant,typechecker]
 *)
 
-Check Nat.eq_dec.
+(* non ça va pas, ça... le degré ne peut pas se calculer avec 1 + le polynôme
+   sans sa tête
+Inductive poly_has_degree {A} {rng : ring A} : nat → polynomial A → Prop :=
+  | Deg_zero : ∀ a pol,
+      (pol = POL [a])%pol
+      → poly_has_degree 0 pol
+  | Deg_succ : ∀ n a pol,
+      (a ≠ 0)%Rng
+      → poly_has_degree n pol
+      → poly_has_degree (S n) (pol + POL [a])%pol.
+*)
 
+...
+
+(*
 Fixpoint lap_deg_loop {A} {rng : ring A}
   (eq_dec : ∀ a b : A, {a = b} + {a ≠ b}) la i :=
   match i with
@@ -4278,8 +4291,7 @@ Definition lap_deg {A} {rng : ring A} eq_dec la :=
   lap_deg_loop eq_dec la (length la).
 
 Definition poly_deg {A} {rng : ring A} eq_dec pol := lap_deg eq_dec (al pol).
-
-...
+*)
 
 Definition roots_of_pol pol := ... (* mmm... no way to compute them *)
 
