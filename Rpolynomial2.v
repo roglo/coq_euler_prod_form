@@ -1756,25 +1756,18 @@ Theorem apply_poly_mul {A} {rng : ring A} : ∀ p1 p2 x,
   (apply_poly (p1 * p2)%pol x = apply_poly p1 x * apply_poly p2 x)%Rng.
 Proof.
 intros (la) (lb) *.
-unfold apply_poly; cbn.
+unfold apply_poly.
+cbn - [ apply_lap ].
 revert lb.
 induction la as [| a]; intros. {
-  cbn.
-  rewrite rng_mul_0_l.
-  unfold lap_mul; cbn.
-  induction lb as [| b]; [ easy | ].
-  cbn.
-...
-  rewrite rng_opp_add_distr.
-  rewrite <- rng_mul_opp_l.
-  now rewrite <- IHlb.
+  now rewrite rng_mul_0_l, lap_mul_0_l.
 } {
-  cbn.
   destruct lb as [| b]. {
-    cbn.
-    now rewrite rng_sub_0_r.
+    now rewrite rng_mul_0_r, lap_mul_0_r.
   } {
-    cbn.
+    rewrite lap_mul_cons.
+...
+    cbn - [ apply_lap ].
     rewrite rng_add_comm.
     rewrite (rng_add_comm _ a).
     unfold rng_sub.
