@@ -4291,8 +4291,13 @@ assert
   rewrite apply_poly_xpow in H3.
   rewrite apply_poly_one in H3.
   rewrite rng_pow_1_r in H3.
-...
-rewrite apply_poly_sum in H3.
+  rewrite apply_poly_sum in H3.
+  rewrite H3.
+  apply rng_mul_compat_l.
+  apply summation_compat.
+  intros i Hi.
+  now rewrite apply_poly_xpow.
+}
 ...
 
 Theorem eq_list_with_occ_nil : ∀ l, list_with_occ l = [] → l = [].

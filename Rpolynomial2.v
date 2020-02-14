@@ -1755,7 +1755,18 @@ Qed.
 Theorem apply_poly_opp {A} {rng : ring A} : ∀ pol x,
   (apply_poly (- pol)%pol x = - apply_poly pol x)%Rng.
 Proof.
-...
+intros (la) *.
+induction la as [| a]; intros. {
+  cbn.
+  symmetry; apply rng_opp_0.
+} {
+  cbn.
+  rewrite rng_opp_add_distr.
+  apply rng_add_compat_r.
+  rewrite <- rng_mul_opp_l.
+  now rewrite IHla.
+}
+Qed.
 
 Theorem apply_poly_sub {A} {rng : ring A} : ∀ p1 p2 x,
   (apply_poly (p1 - p2)%pol x = apply_poly p1 x - apply_poly p2 x)%Rng.
@@ -1764,39 +1775,7 @@ intros (la) (lb) *.
 unfold poly_sub, rng_sub.
 rewrite apply_poly_add.
 apply rng_add_compat_l.
-...
 apply apply_poly_opp.
-...
-intros (la) (lb) *.
-unfold apply_poly; cbn.
-revert lb.
-induction la as [| a]; intros. {
-  cbn.
-  unfold rng_sub.
-  rewrite rng_add_0_l.
-  induction lb as [| b]; [ symmetry; apply rng_opp_0 | cbn ].
-  rewrite rng_opp_add_distr.
-  rewrite <- rng_mul_opp_l.
-  now rewrite <- IHlb.
-} {
-  cbn.
-  destruct lb as [| b]. {
-    cbn.
-    now rewrite rng_sub_0_r.
-  } {
-    cbn.
-    rewrite rng_add_comm.
-    rewrite (rng_add_comm _ a).
-    unfold rng_sub.
-    do 2 rewrite <- rng_add_assoc.
-    apply rng_add_compat_l.
-    rewrite rng_add_comm, fold_rng_sub.
-    rewrite fold_rng_sub.
-    rewrite rng_sub_add_distr.
-    rewrite IHla.
-    now rewrite rng_mul_sub_distr_r.
-  }
-}
 Qed.
 
 Theorem apply_poly_sum {A} {rng : ring A} (pr := polynomial_ring) : ∀ b e f x,
@@ -1809,10 +1788,9 @@ clear Heqn.
 revert b.
 induction n; intros; [ easy | ].
 cbn - [ apply_poly ].
-...
 rewrite apply_poly_add.
-rewrite IHn.
-...
+now rewrite IHn.
+Qed.
 
 Theorem apply_poly_one {A} {rng : ring A} : ∀ x, (apply_poly 1%pol x = 1)%Rng.
 Proof.
