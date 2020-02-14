@@ -4292,6 +4292,9 @@ Inductive lap_has_degree {A} {rng : ring A} : list A → nat → Prop :=
 (* ouais mais c'est pas suffisant : j'arriverai pas à prouver comme ça que le
    polynome x² (lap = [0; 0; 1]) est de degré 2 *)
 
+(* ou alors faut prendre la liste à l'envers, mais j'aime pas ça. C'est
+   toujours chiant de prouver des trucs sur les listes à l'envers *)
+
 ...
 
 Definition roots_of_pol pol := ... (* mmm... no way to compute them *)
