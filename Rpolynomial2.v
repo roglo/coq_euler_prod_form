@@ -1752,6 +1752,43 @@ induction la as [| a]; intros. {
 }
 Qed.
 
+Theorem apply_poly_mul {A} {rng : ring A} : ∀ p1 p2 x,
+  (apply_poly (p1 * p2)%pol x = apply_poly p1 x * apply_poly p2 x)%Rng.
+Proof.
+intros (la) (lb) *.
+unfold apply_poly; cbn.
+revert lb.
+induction la as [| a]; intros. {
+  cbn.
+  rewrite rng_mul_0_l.
+  unfold lap_mul; cbn.
+  induction lb as [| b]; [ easy | ].
+  cbn.
+...
+  rewrite rng_opp_add_distr.
+  rewrite <- rng_mul_opp_l.
+  now rewrite <- IHlb.
+} {
+  cbn.
+  destruct lb as [| b]. {
+    cbn.
+    now rewrite rng_sub_0_r.
+  } {
+    cbn.
+    rewrite rng_add_comm.
+    rewrite (rng_add_comm _ a).
+    unfold rng_sub.
+    do 2 rewrite <- rng_add_assoc.
+    apply rng_add_compat_l.
+    rewrite rng_add_comm, fold_rng_sub.
+    rewrite fold_rng_sub.
+    rewrite rng_sub_add_distr.
+    rewrite IHla.
+    now rewrite rng_mul_sub_distr_r.
+  }
+}
+...
+
 Theorem apply_poly_xpow {A} {rng : ring A} : ∀ k x,
   (apply_poly (ⓧ ^ k)%pol x = x ^ k)%Rng.
 Proof.

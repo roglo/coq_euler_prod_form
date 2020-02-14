@@ -4287,6 +4287,8 @@ assert
   rewrite apply_poly_xpow in H3.
   rewrite apply_poly_one in H3.
 ...
+  rewrite apply_poly_mul in H3.
+...
 
 Theorem eq_list_with_occ_nil : ∀ l, list_with_occ l = [] → l = [].
 Proof.
