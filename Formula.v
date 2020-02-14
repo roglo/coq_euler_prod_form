@@ -4263,6 +4263,29 @@ Warning: Projection value has no head constant:
 [projection-no-head-constant,typechecker]
 *)
 
+Check Nat.eq_dec.
+
+Fixpoint lap_deg_loop {A} {rng : ring A}
+  (eq_dec : ∀ a b : A, {a = b} + {a ≠ b}) la i :=
+  match i with
+  | 0 => 0
+  | S i' =>
+      if eq_dec (nth i la 0%Rng) 0%Rng then lap_deg_loop eq_dec la i'
+      else lap_deg_loop eq_dec la i' + 1
+  end.
+
+Definition lap_deg {A} {rng : ring A} eq_dec la :=
+  lap_deg_loop eq_dec la (length la).
+
+Definition poly_deg {A} {rng : ring A} eq_dec pol := lap_deg eq_dec (al pol).
+
+...
+
+Definition roots_of_pol pol := ... (* mmm... no way to compute them *)
+
+Theorem toto : length (roots_of_pol pol) ≤ poly_deg pol.
+...
+
 Theorem number_of_nth_roots_of_unity : ∀ p d,
   prime p
   → Nat.divide d (p - 1)
