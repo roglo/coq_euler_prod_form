@@ -4263,36 +4263,6 @@ Warning: Projection value has no head constant:
 [projection-no-head-constant,typechecker]
 *)
 
-Theorem apply_poly_sub {A} {rng : ring A} : ∀ p1 p2 x,
-  (apply_poly (p1 - p2)%pol x = apply_poly p1 x - apply_poly p2 x)%Rng.
-Proof.
-intros (la) (lb) *.
-unfold apply_poly; cbn.
-revert lb.
-induction la as [| a]; intros. {
-  cbn.
-  unfold rng_sub.
-  rewrite rng_add_0_l.
-  induction lb as [| b]; [ symmetry; apply rng_opp_0 | cbn ].
-  rewrite rng_opp_add_distr.
-  rewrite <- rng_mul_opp_l.
-  now rewrite <- IHlb.
-} {
-  cbn.
-  remember (map rng_opp lb) as lc eqn:Hlc; symmetry in Hlc.
-  destruct lc as [| c]. {
-    apply map_eq_nil in Hlc; subst lb; cbn.
-    now rewrite rng_sub_0_r.
-  } {
-    cbn.
-...
-  rewrite <- rng_add_comm.
-  unfold rng_sub.
-  rewrite <- rng_add_assoc.
-  rewrite fold_rng_sub.
-  rewrite <- IHla.
-...
-
 Theorem number_of_nth_roots_of_unity : ∀ p d,
   prime p
   → Nat.divide d (p - 1)
@@ -4313,8 +4283,8 @@ assert
    (x ^ (p - 1) - 1 = (x - 1) * (Σ (i = 0, p - 1 - 1), x^(p - 1 - i - 1)))%Rng). {
   intros.
   specialize (apply_poly_morph _ _ H1 x x (rng_eq_refl _)) as H3.
-...
   rewrite apply_poly_sub in H3.
+  rewrite apply_poly_xpow in H3.
 ...
 
 Theorem eq_list_with_occ_nil : ∀ l, list_with_occ l = [] → l = [].

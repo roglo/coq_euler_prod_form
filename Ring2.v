@@ -216,6 +216,27 @@ rewrite rng_add_comm; symmetry.
 assumption.
 Qed.
 
+Theorem rng_opp_add_distr : ∀ a b,
+  (- (a + b) = - a - b)%Rng.
+Proof.
+intros.
+apply (rng_add_reg_l _ _ (b + a)%Rng).
+unfold rng_sub.
+rewrite rng_add_assoc.
+do 3 rewrite fold_rng_sub.
+rewrite rng_add_sub.
+rewrite rng_add_comm.
+now do 2 rewrite rng_add_opp_r.
+Qed.
+
+Theorem rng_sub_add_distr : ∀ a b c, (a - (b + c) = a - b - c)%Rng.
+Proof.
+intros.
+unfold rng_sub.
+rewrite rng_opp_add_distr.
+apply rng_add_assoc.
+Qed.
+
 Theorem rng_mul_add_distr_r : ∀ x y z,
   ((x + y) * z = x * z + y * z)%Rng.
 Proof.
@@ -326,19 +347,6 @@ intros a b; split; intros H.
  apply rng_add_opp_r.
 
  rewrite H; reflexivity.
-Qed.
-
-Theorem rng_opp_add_distr : ∀ a b,
-  (- (a + b) = - a - b)%Rng.
-Proof.
-intros.
-apply (rng_add_reg_l _ _ (b + a)%Rng).
-unfold rng_sub.
-rewrite rng_add_assoc.
-do 3 rewrite fold_rng_sub.
-rewrite rng_add_sub.
-rewrite rng_add_comm.
-now do 2 rewrite rng_add_opp_r.
 Qed.
 
 Theorem rng_add_add_swap : ∀ n m p, (n + m + p = n + p + m)%Rng.
