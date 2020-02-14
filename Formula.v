@@ -4266,15 +4266,49 @@ Warning: Projection value has no head constant:
 (* degree of a polynomial *)
 
 Inductive lap_has_degree {A} {rng : ring A} : list A → nat → Prop :=
-  | Has_degree_0 :
-      lap_has_degree [] 0
-  | Has_degree_succ : ∀ la a,
-      (a ≠ 0)%Rng → lap_has_degree (la ++ [a]) (S (length la)).
+  | Has_degree : ∀ la a n,
+      (a ≠ 0)%Rng → n = length la
+      → lap_has_degree (la ++ [a]) n
+  | Has_smaller_degree : ∀ la a n,
+      (a = 0)%Rng → lap_has_degree la n
+      → lap_has_degree (la ++ [a]) n.
 
 Definition poly_has_degree {A} {rng : ring A} pol n :=
   lap_has_degree (al pol) n.
 
-Print poly_has_degree.
+Example degree_5x2_4x_3 (rng := ZnRing 7) : lap_has_degree [3; 4; 5] 2.
+Proof.
+assert (H : [3; 4; 5] ≠ []) by easy.
+specialize (app_removelast_last 0 H) as H1; clear H.
+rewrite H1.
+now apply Has_degree; cbn.
+Qed.
+
+Theorem degree_unique {A} {rng : ring A} : ∀ pol n1 n2,
+  poly_has_degree pol n1 → poly_has_degree pol n2 → n1 = n2.
+Proof.
+intros (la) * H1 H2.
+unfold poly_has_degree in H1, H2; cbn in H1, H2.
+revert n2 H2.
+induction H1; intros; subst. {
+  inversion H2; subst. {
+    apply app_inj_tail in H0.
+    now rewrite (proj1 H0).
+  } {
+    apply app_inj_tail in H0.
+    now rewrite (proj2 H0) in H1.
+  }
+} {
+  inversion H2; subst. {
+    apply app_inj_tail in H0.
+    now rewrite (proj2 H0) in H3.
+  } {
+    apply app_inj_tail in H0.
+    apply IHlap_has_degree.
+    now rewrite (proj1 H0) in H4.
+  }
+}
+Qed.
 
 ...
 
