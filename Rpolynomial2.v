@@ -1753,6 +1753,18 @@ induction la as [| a]; intros. {
 }
 Qed.
 
+Theorem apply_lap_const {A} {rng : ring A} : ∀ c x, (apply_lap [c] x = c)%Rng.
+Proof.
+intros; cbn.
+now rewrite rng_mul_0_l, rng_add_0_l.
+Qed.
+
+Theorem apply_poly_one {A} {rng : ring A} : ∀ x, (apply_poly 1%pol x = 1)%Rng.
+Proof.
+intros; cbn.
+now rewrite rng_mul_0_l, rng_add_0_l.
+Qed.
+
 Theorem apply_lap_cons {A} {rng : ring A} : ∀ a la x,
   (apply_lap (a :: la) x = a + apply_lap la x * x)%Rng.
 Proof.
@@ -1779,7 +1791,14 @@ destruct lb as [| b]. {
 rewrite lap_add_cons_cons.
 do 3 rewrite apply_lap_cons.
 rewrite IHla.
-...
+do 2 rewrite <- rng_add_assoc.
+apply rng_add_compat_l.
+rewrite (rng_add_comm (_ * _)%Rng).
+rewrite <- rng_add_assoc.
+apply rng_add_compat_l.
+rewrite rng_add_comm.
+apply rng_mul_add_distr_r.
+Qed.
 
 Theorem apply_poly_mul {A} {rng : ring A} : ∀ p1 p2 x,
   (apply_poly (p1 * p2)%pol x = apply_poly p1 x * apply_poly p2 x)%Rng.
@@ -1791,6 +1810,16 @@ revert lb.
 induction la as [| a]; intros. {
   now rewrite rng_mul_0_l, lap_mul_0_l.
 } {
+(**)
+  destruct lb as [| b]. {
+    now rewrite rng_mul_0_r, lap_mul_0_r.
+  }
+  rewrite apply_lap_cons.
+  rewrite rng_mul_add_distr_r.
+  rewrite rng_mul_mul_swap.
+  rewrite <- IHla.
+...
+Search (apply_lap (_ :: _)).
   destruct lb as [| b]. {
     now rewrite rng_mul_0_r, lap_mul_0_r.
   } {
@@ -1801,8 +1830,15 @@ induction la as [| a]; intros. {
     do 2 rewrite <- rng_add_assoc.
     apply rng_add_compat_l.
     cbn - [ apply_lap lap_mul ].
+    do 2 rewrite apply_lap_add.
+    rewrite apply_lap_cons, rng_add_0_l.
+    rewrite IHla.
+    rewrite apply_lap_const.
 ...
-do 2 rewrite apply_lap_add.
+    rewrite IHla.
+...
+    rewrite lap_mul_cons_l.
+    rewrite apply_lap_add.
 ...
     cbn - [ apply_lap ].
     rewrite rng_add_comm.
@@ -1831,10 +1867,4 @@ induction k. {
   rewrite IHk, rng_add_0_r.
   apply rng_mul_comm.
 }
-Qed.
-
-Theorem apply_poly_one {A} {rng : ring A} : ∀ x, (apply_poly 1%pol x = 1)%Rng.
-Proof.
-intros; cbn.
-now rewrite rng_mul_0_l, rng_add_0_l.
 Qed.
