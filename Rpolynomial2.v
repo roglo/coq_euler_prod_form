@@ -1765,3 +1765,9 @@ induction k. {
   apply rng_mul_comm.
 }
 Qed.
+
+Theorem apply_poly_one {A} {rng : ring A} : ∀ x, (apply_poly 1%pol x = 1)%Rng.
+Proof.
+intros; cbn.
+now rewrite rng_mul_0_l, rng_add_0_l.
+Qed.

@@ -4285,6 +4285,7 @@ assert
   specialize (apply_poly_morph _ _ H1 x x (rng_eq_refl _)) as H3.
   rewrite apply_poly_sub in H3.
   rewrite apply_poly_xpow in H3.
+  rewrite apply_poly_one in H3.
 ...
 
 Theorem eq_list_with_occ_nil : ∀ l, list_with_occ l = [] → l = [].
