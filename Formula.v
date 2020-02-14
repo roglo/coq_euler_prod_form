@@ -4265,35 +4265,16 @@ Warning: Projection value has no head constant:
 
 (* degree of a polynomial *)
 
-(* calculable version *)
-
-Fixpoint lap_deg_loop {A} {rng : ring A}
-  (eq_dec : ∀ a b : A, {a = b} + {a ≠ b}) la i :=
-  match i with
-  | 0 => 0
-  | S i' =>
-      if eq_dec (nth i la 0%Rng) 0%Rng then lap_deg_loop eq_dec la i'
-      else i
-  end.
-
-Definition lap_deg {A} {rng : ring A} eq_dec la :=
-  lap_deg_loop eq_dec la (length la).
-
-Definition poly_deg {A} {rng : ring A} eq_dec pol := lap_deg eq_dec (al pol).
-
-Compute (@lap_deg nat (ZnRing 7) Nat.eq_dec (map (λ x, x mod 7) [1;2;0;0;0;7;2])).
-
-(* propositional version *)
-
 Inductive lap_has_degree {A} {rng : ring A} : list A → nat → Prop :=
-  | Has_degree_0 : lap_has_degree [] 0
-  | Has_degree_succ : ∀ a la n, (a ≠ 0)%Rng → lap_has_degree la n → lap_has_degree (la ++ [a]) (S n).
+  | Has_degree_0 :
+      lap_has_degree [] 0
+  | Has_degree_succ : ∀ la a,
+      (a ≠ 0)%Rng → lap_has_degree (la ++ [a]) (S (length la)).
 
-(* ouais mais c'est pas suffisant : j'arriverai pas à prouver comme ça que le
-   polynome x² (lap = [0; 0; 1]) est de degré 2 *)
+Definition poly_has_degree {A} {rng : ring A} pol n :=
+  lap_has_degree (al pol) n.
 
-(* ou alors faut prendre la liste à l'envers, mais j'aime pas ça. C'est
-   toujours chiant de prouver des trucs sur les listes à l'envers *)
+Print poly_has_degree.
 
 ...
 
