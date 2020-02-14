@@ -373,6 +373,9 @@ intros n m H; simpl in H; simpl.
 destruct H as [H| H]; rewrite H; [ apply rng_mul_0_l | apply rng_mul_0_r ].
 Qed.
 
+Theorem rng_pow_1_r : ∀ a, (a ^ 1 = a)%Rng.
+Proof. now intros; cbn; rewrite rng_mul_1_r. Qed.
+
 End ring_theorems.
 
 Hint Resolve rng_eq_refl : Arith.
