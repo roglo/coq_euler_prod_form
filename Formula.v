@@ -4263,35 +4263,24 @@ Warning: Projection value has no head constant:
 [projection-no-head-constant,typechecker]
 *)
 
-(* non ça va pas, ça... le degré ne peut pas se calculer avec 1 + le polynôme
-   sans sa tête
-Inductive poly_has_degree {A} {rng : ring A} : nat → polynomial A → Prop :=
-  | Deg_zero : ∀ a pol,
-      (pol = POL [a])%pol
-      → poly_has_degree 0 pol
-  | Deg_succ : ∀ n a pol,
-      (a ≠ 0)%Rng
-      → poly_has_degree n pol
-      → poly_has_degree (S n) (pol + POL [a])%pol.
-*)
-
-...
-
-(*
 Fixpoint lap_deg_loop {A} {rng : ring A}
   (eq_dec : ∀ a b : A, {a = b} + {a ≠ b}) la i :=
   match i with
   | 0 => 0
   | S i' =>
       if eq_dec (nth i la 0%Rng) 0%Rng then lap_deg_loop eq_dec la i'
-      else lap_deg_loop eq_dec la i' + 1
+      else i
   end.
 
 Definition lap_deg {A} {rng : ring A} eq_dec la :=
   lap_deg_loop eq_dec la (length la).
 
 Definition poly_deg {A} {rng : ring A} eq_dec pol := lap_deg eq_dec (al pol).
-*)
+
+Compute (@lap_deg nat (ZnRing 7) Nat.eq_dec (map (λ x, x mod 7) [1;2;0;0;0;7;2])).
+
+Check (poly_deg Nat.eq_dec (POL [1;2;3]%nat)%pol).
+...
 
 Definition roots_of_pol pol := ... (* mmm... no way to compute them *)
 
