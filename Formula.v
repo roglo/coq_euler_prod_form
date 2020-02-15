@@ -4278,6 +4278,49 @@ Inductive lap_has_degree {A} {rng : ring A} : list A → nat → Prop :=
 Definition poly_has_degree {A} {rng : ring A} pol n :=
   lap_has_degree (al pol) n.
 
+Theorem lap_degree_inv {A} {rng : ring A} : ∀ la n,
+  lap_has_degree la n
+  → (∃ a lb, (a ≠ 0)%Rng ∧ (la = lb ++ [a])%lap ∧ n = length lb) ∨
+     (∃ lb, (la = lb ++ [0%Rng])%lap ∧ lap_has_degree lb n).
+Proof.
+intros * Hdeg.
+inversion Hdeg; subst; [ left | right ]. {
+  now exists a, la0.
+} {
+  rename la0 into lb.
+  exists lb.
+  split; [ | easy ].
+  remember (length lb) as k eqn:Hk.
+  enough
+    (H1 :
+     (lb + (repeat 0%Rng k ++ [a]) = lb + (repeat 0%Rng k ++ [0%Rng]))%lap). {
+    setoid_rewrite lap_add_comm in H1.
+(* ah, fait chier, tiens *)
+...
+    cbn in H1.
+    apply (lap_add_compat_l _ _ (- lb)%lap) in H1.
+    do 2 rewrite lap_add_assoc in H1.
+    rewrite lap_add_opp_l in H1.
+    do 2 rewrite lap_add_0_l in H1.
+
+    subst k; clear - H1.
+    induction lb as [| b]; [ easy | cbn ].
+    apply lap_eq_cons; [ easy | ].
+    apply IHlb.
+...
+  clear Hdeg.
+  revert n H0.
+  induction la0 as [| b lb]; intros; cbn; [ now rewrite H | ].
+  apply lap_eq_cons; [ easy | ].
+
+  destruct n. {
+    inversion H0; subst.
+
+  apply (IHlb (n + 1)).
+
+Search (_ :: _ = _)%lap.
+...
+
 Example degree_5x2_4x_3 (rng := ZnRing 7) : lap_has_degree [3; 4; 5] 2.
 Proof.
 assert (H : [3; 4; 5] ≠ []) by easy.
@@ -4317,6 +4360,30 @@ induction H1; intros; subst. {
 }
 Qed.
 
+Instance lap_degree_morph {A} {rng : ring A} :
+  Proper (lap_eq ==> eq ==> iff) lap_has_degree.
+Proof.
+intros la lb Hll n n' Hnn; subst n'.
+assert
+  (H : ∀ la lb n,
+     (la = lb)%lap → lap_has_degree la n → lap_has_degree lb n). {
+  clear; intros la lb n Hll Hdeg.
+exfalso.
+...
+  inversion Hdeg; subst.
+Print lap_has_degree.
+...
+ ... suite ok
+}
+now split; apply H.
+...
+
+Example xk_1 {A} {rng : ring A} : ∀ k, poly_has_degree (ⓧ^k - 1)%pol k.
+Proof.
+intros.
+unfold poly_has_degree; cbn.
+...
+rewrite lap_add_comm; cbn.
 ...
 
 Definition roots_of_pol pol := ... (* mmm... no way to compute them *)
