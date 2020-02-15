@@ -4271,10 +4271,9 @@ Inductive lap_has_degree {A} {rng : ring A} : list A → nat → Prop :=
       (a ≠ 0)%Rng
       → n = length la
       → lap_has_degree (la ++ [a]) n
-  | Has_smaller_degree : ∀ la a n,
-      (a = 0)%Rng
-      → lap_has_degree la n
-      → lap_has_degree (la ++ [a]) n.
+  | Has_smaller_degree : ∀ la n,
+      lap_has_degree la n
+      → lap_has_degree (la ++ [0%Rng]) n.
 
 Definition poly_has_degree {A} {rng : ring A} pol n :=
   lap_has_degree (al pol) n.
@@ -4287,7 +4286,8 @@ rewrite H1.
 now apply Has_degree; cbn.
 Qed.
 
-(* existence of degree *)
+(* existence of degree requires decidability of equality in ring
+   of coefficients
 
 Theorem lap_degree_exists {A} {rng : ring A} : ∀ la,
   ∃ n, lap_has_degree la n.
@@ -4297,7 +4297,11 @@ induction la as [| a]. {
   exists 0; constructor.
 } {
   destruct IHla as (n, Hla).
+  assert (H : a :: la ≠ []) by easy.
+  specialize (app_removelast_last 0%Rng H) as H1; clear H.
+  rewrite H1.
 ...
+*)
 
 (* unicity of degree *)
 
@@ -4317,19 +4321,21 @@ induction H1; intros; subst. {
     now rewrite (proj1 H0) in H3.
   } {
     apply app_inj_tail in H0.
-    now rewrite (proj2 H0) in H1.
+    rewrite <- (proj2 H0) in H.
+    now exfalso; apply H.
   }
 } {
   inversion H2; subst. {
-    symmetry in H3.
-    now apply app_eq_nil in H3.
+    symmetry in H0.
+    now apply app_eq_nil in H0.
   } {
-    apply app_inj_tail in H0.
-    now rewrite (proj2 H0) in H3.
+    apply app_inj_tail in H.
+    rewrite (proj2 H) in H0.
+    now exfalso; apply H0.
   } {
-    apply app_inj_tail in H0.
+    apply app_inj_tail in H.
     apply IHlap_has_degree.
-    now rewrite (proj1 H0) in H4.
+    now rewrite (proj1 H) in H0.
   }
 }
 Qed.
