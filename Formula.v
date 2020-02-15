@@ -4369,9 +4369,16 @@ Proof.
 intros * Hkz.
 destruct k; [ easy | clear Hkz ].
 unfold poly_has_degree; cbn.
-Print lap_has_degree.
-...
 rewrite lap_add_0_r.
+rewrite app_comm_cons.
+constructor. {
+(* perhaps I must add in ring that 1 ≠ 0 *)
+...
+... rest ok
+} {
+  cbn.
+  now rewrite repeat_length.
+}
 ...
 
 Definition roots_of_pol pol := ... (* mmm... no way to compute them *)
