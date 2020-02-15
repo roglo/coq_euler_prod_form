@@ -4364,15 +4364,33 @@ inversion Hdeg; subst; [ now left | right; left | right; right ]. {
 }
 Qed.
 
-Example xk_1 {A} {rng : ring A} : ∀ k, k ≠ 0 → poly_has_degree (ⓧ^k - 1)%pol k.
+Example xk_1 {A} {rng : ring A} : ∀ k, poly_has_degree (ⓧ^k - 1)%pol k.
 Proof.
-intros * Hkz.
+intros.
+destruct k. {
+  unfold poly_has_degree; cbn.
+  rewrite fold_rng_sub.
+  change (lap_has_degree ([] ++ [(1 - 1)%Rng]) 0).
+Check Has_smaller_degree.
+...
+  apply (Has_smaller_degree).
+Check Has_degree_nil.
+...
+  rewrite rng_add_opp_r.
+
+Search (_ - _)%Rng.
+  rewrite rng_add_sub.
+  constructor.
 destruct k; [ easy | clear Hkz ].
 unfold poly_has_degree; cbn.
 rewrite lap_add_0_r.
 rewrite app_comm_cons.
 constructor. {
-(* perhaps I must add in ring that 1 ≠ 0 *)
+(* perhaps I must add in ring that 1≠0 *)
+(* I could add it, but it makes the definition of rings
+   less general; beyond that, if there is no decidability
+   of equality, there is no way to consider 1=0 and 1≠0 as
+   two possibilities *)
 ...
 ... rest ok
 } {
