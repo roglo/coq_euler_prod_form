@@ -4364,23 +4364,10 @@ inversion Hdeg; subst; [ now left | right; left | right; right ]. {
 }
 Qed.
 
-Example xk_1 {A} {rng : ring A} : ∀ k, poly_has_degree (ⓧ^k - 1)%pol k.
+Example xk_1 {A} {rng : ring A} : ∀ k,
+  k ≠ 0 → poly_has_degree (ⓧ^k - 1)%pol k.
 Proof.
-intros.
-destruct k. {
-  unfold poly_has_degree; cbn.
-  rewrite fold_rng_sub.
-  change (lap_has_degree ([] ++ [(1 - 1)%Rng]) 0).
-Check Has_smaller_degree.
-...
-  apply (Has_smaller_degree).
-Check Has_degree_nil.
-...
-  rewrite rng_add_opp_r.
-
-Search (_ - _)%Rng.
-  rewrite rng_add_sub.
-  constructor.
+intros * Hkz.
 destruct k; [ easy | clear Hkz ].
 unfold poly_has_degree; cbn.
 rewrite lap_add_0_r.
