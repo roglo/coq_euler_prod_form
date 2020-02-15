@@ -4286,18 +4286,10 @@ rewrite H1.
 now apply Has_degree; cbn.
 Qed.
 
-Theorem degree_exists {A} {rng : ring A} : ∀ pol,
-  (pol ≠ 0)%pol → ∃ n, poly_has_degree pol n.
-Proof.
-intros (la) Hla.
-unfold poly_has_degree; cbn.
-unfold "="%pol in Hla; cbn in Hla.
-induction la as [| a]; [ now exfalso; apply Hla | ].
-assert (H : a :: la ≠ []) by easy.
-specialize (app_removelast_last 0%Rng H) as H1; clear H.
-rewrite H1.
-(* decidability required! *)
-...
+(* existence of a degree for any polynomial requires decidability
+   of equality in its coefficients *)
+
+(* unicity of degree *)
 
 Theorem degree_unique {A} {rng : ring A} : ∀ pol n1 n2,
   poly_has_degree pol n1 → poly_has_degree pol n2 → n1 = n2.
