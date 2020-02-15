@@ -4323,61 +4323,6 @@ intros (la) * H1 H2.
 now apply (lap_degree_unique la n1 n2).
 Qed.
 
-Instance lap_degree_morph {A} {rng : ring A} :
-  Proper (lap_eq ==> eq ==> iff) lap_has_degree.
-Proof.
-intros la lb Hll n n' Hnn; subst n'.
-assert
-  (H : ∀ la lb n,
-     (la = lb)%lap → lap_has_degree la n → lap_has_degree lb n). {
-  clear; intros la lb n Hll Hdeg.
-(**)
-  inversion Hdeg; subst. {
-    rename la0 into lc; rename H into Ha.
-    assert (Hb : lb ≠ []). {
-      intros H1; subst lb.
-      clear - Hll Ha.
-      induction lc as [| c]; [ now inversion Hll | ].
-      cbn in Hll.
-      apply lap_eq_cons_nil_inv in Hll.
-      now apply IHlc.
-    }
-    specialize (app_removelast_last 0%Rng Hb) as H1.
-    rewrite H1.
-    apply Has_degree. {
-      intros H.
-...
-  induction Hdeg. {
-    induction la as [| b]. {
-      cbn in Hll, H0; subst n.
-      assert (Hb : lb ≠ []). {
-        intros H1; subst lb.
-        now inversion Hll.
-      }
-      specialize (app_removelast_last 0%Rng Hb) as H1.
-      rewrite H1.
-      apply Has_smaller_degree.
-...
-  revert n la Hll Hdeg.
-  induction lb as [| b]; intros. {
-    exfalso.
-    inversion Hdeg; subst. {
-      inversion Hll. {
-        clear - H1.
-        now induction la0.
-      } {
-...
-  inversion Hdeg; subst. {
-    rename la0 into lc.
-
-Print lap_has_degree.
-...
- ... suite ok
-}
-now split; apply H.
-...
-*)
-
 Theorem lap_degree_inv {A} {rng : ring A} : ∀ la n,
   lap_has_degree la n
   → (∃ a lb, (a ≠ 0)%Rng ∧ (la = lb ++ [a])%lap ∧ n = length lb) ∨
@@ -4390,37 +4335,9 @@ inversion Hdeg; subst; [ left | right ]. {
   rename la0 into lb.
   exists lb.
   split; [ | easy ].
-...
-  remember (length lb) as k eqn:Hk.
-  enough
-    (H1 :
-     (lb + (repeat 0%Rng k ++ [a]) = lb + (repeat 0%Rng k ++ [0%Rng]))%lap). {
-    setoid_rewrite lap_add_comm in H1.
-(* ah, fait chier, tiens *)
-...
-    cbn in H1.
-    apply (lap_add_compat_l _ _ (- lb)%lap) in H1.
-    do 2 rewrite lap_add_assoc in H1.
-    rewrite lap_add_opp_l in H1.
-    do 2 rewrite lap_add_0_l in H1.
-
-    subst k; clear - H1.
-    induction lb as [| b]; [ easy | cbn ].
-    apply lap_eq_cons; [ easy | ].
-    apply IHlb.
-...
-  clear Hdeg.
-  revert n H0.
-  induction la0 as [| b lb]; intros; cbn; [ now rewrite H | ].
-  apply lap_eq_cons; [ easy | ].
-
-  destruct n. {
-    inversion H0; subst.
-
-  apply (IHlb (n + 1)).
-
-Search (_ :: _ = _)%lap.
-...
+  now apply lap_app_at_eq.
+}
+Qed.
 
 Example xk_1 {A} {rng : ring A} : ∀ k, poly_has_degree (ⓧ^k - 1)%pol k.
 Proof.

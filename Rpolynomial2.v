@@ -698,6 +698,16 @@ rewrite rng_add_0_r.
 constructor; [ reflexivity | assumption ].
 Qed.
 
+Theorem lap_app_at_eq : ∀ a b la,
+  (a = b)%Rng → (la ++ [a] = la ++ [b])%lap.
+Proof.
+intros * Hab.
+revert a b Hab.
+induction la as [| c]; intros; [ now constructor | cbn ].
+constructor; [ easy | ].
+now apply IHla.
+Qed.
+
 Theorem lap_add_map2 : ∀ β (f g : β → α) la,
   (List.map f la + List.map g la = List.map (λ b, (f b + g b)%Rng) la)%lap.
 Proof.
