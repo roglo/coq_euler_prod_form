@@ -556,12 +556,12 @@ induction la as [| a]; intros.
 Qed.
 
 Theorem lap_add_0_l {α} {r : ring α} : ∀ la,
-  lap_eq (lap_add [] la) la.
-Proof. intros la; destruct la; reflexivity. Qed.
+  lap_add [] la = la.
+Proof. easy. Qed.
 
 Theorem lap_add_0_r : ∀ α (r : ring α) la,
-  lap_eq (lap_add la []) la.
-Proof. intros α r la; destruct la; reflexivity. Qed.
+  lap_add la [] = la.
+Proof. intros; now destruct la. Qed.
 
 Theorem lap_mul_0_l : ∀ α (r : ring α) la, lap_eq (lap_mul [] la) [].
 Proof. intros α r la; apply lap_convol_mul_nil_l. Qed.
@@ -1402,6 +1402,15 @@ intros a b c Hab.
 rewrite Hab; reflexivity.
 Qed.
 
+Theorem glop {A} {rng : ring A} : ∀ la lb,
+  la = lb → (la = lb)%lap.
+Proof. now intros; subst. Qed.
+
+Check (λ la lb, glop la lb).
+Check lap_add_0_l.
+
+...
+
 Definition lap_ring {α} {r : ring α} : ring (list α) :=
   {| rng_zero := lap_zero;
      rng_one := lap_one;
@@ -1414,7 +1423,7 @@ Definition lap_ring {α} {r : ring α} : ring (list α) :=
      rng_eq_trans := lap_eq_trans;
      rng_add_comm := lap_add_comm;
      rng_add_assoc := lap_add_assoc;
-     rng_add_0_l := lap_add_0_l;
+     rng_add_0_l a b := glop a b lap_add_0_l;
      rng_add_opp_l := lap_add_opp_l;
      rng_add_compat_l := lap_add_compat_l;
      rng_mul_comm := lap_mul_comm;

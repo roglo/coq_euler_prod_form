@@ -4369,55 +4369,9 @@ Proof.
 intros * Hkz.
 destruct k; [ easy | clear Hkz ].
 unfold poly_has_degree; cbn.
-Theorem glop {A} {rng : ring A} : ∀ la lb n,
-   (la ≠ [])%lap
-   → (la = lb)%lap
-  → lap_has_degree la n
-  → lap_has_degree lb n.
-Proof.
-intros * Hlaz Hll Hla.
-revert la Hlaz Hll Hla.
-induction lb as [| b]; intros; [ easy | ].
-(**)
-destruct la as [| a]; [ now exfalso; apply Hlaz | ].
-apply lap_eq_cons_cons_inv in Hll.
-destruct Hll as (Hab, Hll).
-assert (H : b :: lb ≠ []) by easy.
-specialize (app_removelast_last 0%Rng H) as H1; clear H.
-rewrite H1.
-...
 Print lap_has_degree.
-apply Has_degree.
 ...
-destruct la as [| a]. {
-  now inversion Hla; subst; apply app_eq_nil in H.
-}
-assert (H : a :: la ≠ []) by easy.
-specialize (app_removelast_last 0%Rng H) as H1.
-rewrite H1 in Hla.
-...
-
-inversion Hla. {
-  rename a0 into c; rename la0 into lc.
-  subst n0.
-...
-
-eapply glop.
 rewrite lap_add_0_r.
-rewrite rng_add_0_l.
-easy.
-...
-destruct k; [ easy | clear Hkz ].
-unfold "+"%lap.
-apply Has_degree.
-
-
-  cbn.
-  rewrite fold_rng_sub.
-  replace [(1 - 1)%Rng] with ([] ++ [(1 - 1)%Rng]) by easy.
-  apply Has_smaller_degree.
-...
-rewrite lap_add_comm; cbn.
 ...
 
 Definition roots_of_pol pol := ... (* mmm... no way to compute them *)
