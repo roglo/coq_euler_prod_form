@@ -4293,6 +4293,10 @@ Theorem lap_degree_exists {A} {rng : ring A} : ∀ la,
   ∃ n, lap_has_degree la n.
 Proof.
 intros.
+induction la as [| a]. {
+  exists 0; constructor.
+} {
+  destruct IHla as (n, Hla).
 ...
 
 (* unicity of degree *)
