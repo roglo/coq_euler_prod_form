@@ -4278,6 +4278,106 @@ Inductive lap_has_degree {A} {rng : ring A} : list A → nat → Prop :=
 Definition poly_has_degree {A} {rng : ring A} pol n :=
   lap_has_degree (al pol) n.
 
+Example degree_5x2_4x_3 (rng := ZnRing 7) : lap_has_degree [3; 4; 5] 2.
+Proof.
+assert (H : [3; 4; 5] ≠ []) by easy.
+specialize (app_removelast_last 0 H) as H1; clear H.
+rewrite H1.
+now apply Has_degree; cbn.
+Qed.
+
+(* existence of a degree for any polynomial requires decidability
+   of equality in its coefficients *)
+
+(* unicity of degree *)
+
+Theorem lap_degree_unique {A} {rng : ring A} : ∀ la n1 n2,
+  lap_has_degree la n1 → lap_has_degree la n2 → n1 = n2.
+Proof.
+intros * H1 H2.
+revert n2 H2.
+induction H1; intros; subst. {
+  inversion H2; subst. {
+    apply app_inj_tail in H0.
+    now rewrite (proj1 H0).
+  } {
+    apply app_inj_tail in H0.
+    now rewrite (proj2 H0) in H1.
+  }
+} {
+  inversion H2; subst. {
+    apply app_inj_tail in H0.
+    now rewrite (proj2 H0) in H3.
+  } {
+    apply app_inj_tail in H0.
+    apply IHlap_has_degree.
+    now rewrite (proj1 H0) in H4.
+  }
+}
+Qed.
+
+Theorem degree_unique {A} {rng : ring A} : ∀ pol n1 n2,
+  poly_has_degree pol n1 → poly_has_degree pol n2 → n1 = n2.
+Proof.
+intros (la) * H1 H2.
+now apply (lap_degree_unique la n1 n2).
+Qed.
+
+Instance lap_degree_morph {A} {rng : ring A} :
+  Proper (lap_eq ==> eq ==> iff) lap_has_degree.
+Proof.
+intros la lb Hll n n' Hnn; subst n'.
+assert
+  (H : ∀ la lb n,
+     (la = lb)%lap → lap_has_degree la n → lap_has_degree lb n). {
+  clear; intros la lb n Hll Hdeg.
+(**)
+  inversion Hdeg; subst. {
+    rename la0 into lc; rename H into Ha.
+    assert (Hb : lb ≠ []). {
+      intros H1; subst lb.
+      clear - Hll Ha.
+      induction lc as [| c]; [ now inversion Hll | ].
+      cbn in Hll.
+      apply lap_eq_cons_nil_inv in Hll.
+      now apply IHlc.
+    }
+    specialize (app_removelast_last 0%Rng Hb) as H1.
+    rewrite H1.
+    apply Has_degree. {
+      intros H.
+...
+  induction Hdeg. {
+    induction la as [| b]. {
+      cbn in Hll, H0; subst n.
+      assert (Hb : lb ≠ []). {
+        intros H1; subst lb.
+        now inversion Hll.
+      }
+      specialize (app_removelast_last 0%Rng Hb) as H1.
+      rewrite H1.
+      apply Has_smaller_degree.
+...
+  revert n la Hll Hdeg.
+  induction lb as [| b]; intros. {
+    exfalso.
+    inversion Hdeg; subst. {
+      inversion Hll. {
+        clear - H1.
+        now induction la0.
+      } {
+...
+  inversion Hdeg; subst. {
+    rename la0 into lc.
+
+Print lap_has_degree.
+...
+ ... suite ok
+}
+now split; apply H.
+...
+*)
+
 Theorem lap_degree_inv {A} {rng : ring A} : ∀ la n,
   lap_has_degree la n
   → (∃ a lb, (a ≠ 0)%Rng ∧ (la = lb ++ [a])%lap ∧ n = length lb) ∨
@@ -4290,6 +4390,7 @@ inversion Hdeg; subst; [ left | right ]. {
   rename la0 into lb.
   exists lb.
   split; [ | easy ].
+...
   remember (length lb) as k eqn:Hk.
   enough
     (H1 :
@@ -4319,63 +4420,6 @@ inversion Hdeg; subst; [ left | right ]. {
   apply (IHlb (n + 1)).
 
 Search (_ :: _ = _)%lap.
-...
-
-Example degree_5x2_4x_3 (rng := ZnRing 7) : lap_has_degree [3; 4; 5] 2.
-Proof.
-assert (H : [3; 4; 5] ≠ []) by easy.
-specialize (app_removelast_last 0 H) as H1; clear H.
-rewrite H1.
-now apply Has_degree; cbn.
-Qed.
-
-(* existence of a degree for any polynomial requires decidability
-   of equality in its coefficients *)
-
-(* unicity of degree *)
-
-Theorem degree_unique {A} {rng : ring A} : ∀ pol n1 n2,
-  poly_has_degree pol n1 → poly_has_degree pol n2 → n1 = n2.
-Proof.
-intros (la) * H1 H2.
-unfold poly_has_degree in H1, H2; cbn in H1, H2.
-revert n2 H2.
-induction H1; intros; subst. {
-  inversion H2; subst. {
-    apply app_inj_tail in H0.
-    now rewrite (proj1 H0).
-  } {
-    apply app_inj_tail in H0.
-    now rewrite (proj2 H0) in H1.
-  }
-} {
-  inversion H2; subst. {
-    apply app_inj_tail in H0.
-    now rewrite (proj2 H0) in H3.
-  } {
-    apply app_inj_tail in H0.
-    apply IHlap_has_degree.
-    now rewrite (proj1 H0) in H4.
-  }
-}
-Qed.
-
-Instance lap_degree_morph {A} {rng : ring A} :
-  Proper (lap_eq ==> eq ==> iff) lap_has_degree.
-Proof.
-intros la lb Hll n n' Hnn; subst n'.
-assert
-  (H : ∀ la lb n,
-     (la = lb)%lap → lap_has_degree la n → lap_has_degree lb n). {
-  clear; intros la lb n Hll Hdeg.
-exfalso.
-...
-  inversion Hdeg; subst.
-Print lap_has_degree.
-...
- ... suite ok
-}
-now split; apply H.
 ...
 
 Example xk_1 {A} {rng : ring A} : ∀ k, poly_has_degree (ⓧ^k - 1)%pol k.
