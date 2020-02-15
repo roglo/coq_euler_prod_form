@@ -4378,10 +4378,16 @@ Proof.
 intros * Hlaz Hll Hla.
 revert la Hlaz Hll Hla.
 induction lb as [| b]; intros; [ easy | ].
+(**)
+destruct la as [| a]; [ now exfalso; apply Hlaz | ].
+apply lap_eq_cons_cons_inv in Hll.
+destruct Hll as (Hab, Hll).
 assert (H : b :: lb ≠ []) by easy.
 specialize (app_removelast_last 0%Rng H) as H1; clear H.
 rewrite H1.
+...
 Print lap_has_degree.
+apply Has_degree.
 ...
 destruct la as [| a]. {
   now inversion Hla; subst; apply app_eq_nil in H.
