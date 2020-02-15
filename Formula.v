@@ -4266,6 +4266,7 @@ Warning: Projection value has no head constant:
 (* degree of a polynomial *)
 
 Inductive lap_has_degree {A} {rng : ring A} : list A → nat → Prop :=
+  | Has_degree_nil : lap_has_degree [] 0
   | Has_degree : ∀ la a n,
       (a ≠ 0)%Rng
       → n = length la
@@ -4286,8 +4287,13 @@ rewrite H1.
 now apply Has_degree; cbn.
 Qed.
 
-(* existence of a degree for any polynomial requires decidability
-   of equality in its coefficients *)
+(* existence of degree *)
+
+Theorem lap_degree_exists {A} {rng : ring A} : ∀ la,
+  ∃ n, lap_has_degree la n.
+Proof.
+intros.
+...
 
 (* unicity of degree *)
 
@@ -4297,15 +4303,23 @@ Proof.
 intros * H1 H2.
 revert n2 H2.
 induction H1; intros; subst. {
-  inversion H2; subst. {
+  inversion H2; subst; [ easy | | ]; now apply app_eq_nil in H.
+} {
+  inversion H2. {
+    symmetry in H1.
+    now apply app_eq_nil in H1.
+  } {
     apply app_inj_tail in H0.
-    now rewrite (proj1 H0).
+    now rewrite (proj1 H0) in H3.
   } {
     apply app_inj_tail in H0.
     now rewrite (proj2 H0) in H1.
   }
 } {
   inversion H2; subst. {
+    symmetry in H3.
+    now apply app_eq_nil in H3.
+  } {
     apply app_inj_tail in H0.
     now rewrite (proj2 H0) in H3.
   } {
@@ -4325,11 +4339,12 @@ Qed.
 
 Theorem lap_degree_inv {A} {rng : ring A} : ∀ la n,
   lap_has_degree la n
-  → (∃ a lb, (a ≠ 0)%Rng ∧ (la = lb ++ [a])%lap ∧ n = length lb) ∨
+  → (la = [])%lap ∧ n = 0 ∨
+     (∃ a lb, (a ≠ 0)%Rng ∧ (la = lb ++ [a])%lap ∧ n = length lb) ∨
      (∃ lb, (la = lb ++ [0%Rng])%lap ∧ lap_has_degree lb n).
 Proof.
 intros * Hdeg.
-inversion Hdeg; subst; [ left | right ]. {
+inversion Hdeg; subst; [ now left | right; left | right; right ]. {
   now exists a, la0.
 } {
   rename la0 into lb.
@@ -4339,10 +4354,52 @@ inversion Hdeg; subst; [ left | right ]. {
 }
 Qed.
 
-Example xk_1 {A} {rng : ring A} : ∀ k, poly_has_degree (ⓧ^k - 1)%pol k.
+Example xk_1 {A} {rng : ring A} : ∀ k, k ≠ 0 → poly_has_degree (ⓧ^k - 1)%pol k.
 Proof.
-intros.
+intros * Hkz.
+destruct k; [ easy | clear Hkz ].
 unfold poly_has_degree; cbn.
+Theorem glop {A} {rng : ring A} : ∀ la lb n,
+   (la ≠ [])%lap
+   → (la = lb)%lap
+  → lap_has_degree la n
+  → lap_has_degree lb n.
+Proof.
+intros * Hlaz Hll Hla.
+revert la Hlaz Hll Hla.
+induction lb as [| b]; intros; [ easy | ].
+assert (H : b :: lb ≠ []) by easy.
+specialize (app_removelast_last 0%Rng H) as H1; clear H.
+rewrite H1.
+Print lap_has_degree.
+...
+destruct la as [| a]. {
+  now inversion Hla; subst; apply app_eq_nil in H.
+}
+assert (H : a :: la ≠ []) by easy.
+specialize (app_removelast_last 0%Rng H) as H1.
+rewrite H1 in Hla.
+...
+
+inversion Hla. {
+  rename a0 into c; rename la0 into lc.
+  subst n0.
+...
+
+eapply glop.
+rewrite lap_add_0_r.
+rewrite rng_add_0_l.
+easy.
+...
+destruct k; [ easy | clear Hkz ].
+unfold "+"%lap.
+apply Has_degree.
+
+
+  cbn.
+  rewrite fold_rng_sub.
+  replace [(1 - 1)%Rng] with ([] ++ [(1 - 1)%Rng]) by easy.
+  apply Has_smaller_degree.
 ...
 rewrite lap_add_comm; cbn.
 ...

@@ -178,7 +178,7 @@ rewrite rng_add_comm.
 apply rng_add_0_l.
 Qed.
 
-Theorem fold_rng_sub : ∀ a b, (a + - b = a - b)%Rng.
+Theorem fold_rng_sub : ∀ a b, (a + - b)%Rng = (a - b)%Rng.
 Proof. intros; easy. Qed.
 
 Theorem rng_add_sub : ∀ a b, (a + b - b = a)%Rng.
