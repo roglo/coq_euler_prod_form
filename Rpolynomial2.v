@@ -1256,7 +1256,7 @@ Qed.
 Theorem lap_eq_0 : lap_eq [0%Rng] [].
 Proof. constructor; reflexivity. Qed.
 
-Theorem lap_convol_mul_cons_succ' : ∀ b la lb i len,
+Theorem lap_convol_mul_cons_succ : ∀ b la lb i len,
   length la ≤ S i
   → lap_eq (lap_convol_mul la (b :: lb) (S i) len)
        (lap_convol_mul la lb i len).
@@ -1267,22 +1267,6 @@ induction len; intros; [ reflexivity | idtac ].
 constructor; [ idtac | apply IHlen; flia Hla ].
 rewrite summation_split_last; [ idtac | apply Nat.le_0_l ].
 rewrite List.nth_overflow; [ | easy ].
-rewrite rng_mul_0_l, rng_add_0_r.
-apply summation_compat; intros j (_, Hj).
-apply rng_mul_compat_l.
-rewrite Nat.sub_succ_l; [ reflexivity | assumption ].
-Qed.
-
-Theorem lap_convol_mul_cons_succ : ∀ a b lb i len,
-  lap_eq (lap_convol_mul [a] (b :: lb) (S i) len)
-    (lap_convol_mul [a] lb i len).
-Proof.
-intros a b lb i len.
-revert a b lb i.
-induction len; intros; [ reflexivity | idtac ].
-constructor; [ idtac | apply IHlen ].
-rewrite summation_split_last; [ idtac | apply Nat.le_0_l ].
-rewrite List.nth_overflow; [ idtac | simpl; flia ].
 rewrite rng_mul_0_l, rng_add_0_r.
 apply summation_compat; intros j (_, Hj).
 apply rng_mul_compat_l.
@@ -1306,7 +1290,7 @@ rewrite lap_add_assoc.
 apply lap_add_compat; [ idtac | reflexivity ].
 rewrite lap_add_comm.
 apply lap_add_compat; [ reflexivity | idtac ].
-apply lap_convol_mul_cons_succ.
+now apply lap_convol_mul_cons_succ.
 Qed.
 
 (* *)

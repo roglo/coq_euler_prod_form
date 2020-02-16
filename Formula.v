@@ -4427,17 +4427,12 @@ Definition lap_mod_by_x_sub_a {A} {rng : ring A} la a :=
 Definition poly_divmod_by_x_sub_a {A} {rng : ring A} pol a :=
   ({| al := lap_div_by_x_sub_a (al pol) a |}, lap_mod_by_x_sub_a (al pol) a).
 
+(*
 Compute (let r := Z_ring in poly_divmod_by_x_sub_a {| al := [1;2;1]%Z |} 1%Z).
-
 Compute (let r := Z_ring in lap_divmod_by_x_sub_a [1;2;1]%Z 1%Z).
-Compute (let r := Z_ring in lap_divmod_by_x_sub_a [1;2;1]%Z (-1)%Z).
-Compute (let r := Z_ring in lap_divmod_by_x_sub_a [1;-2;1]%Z 1%Z).
-Compute (let r := Z_ring in lap_divmod_by_x_sub_a [42;-29;2;1] 3)%Z.
-Compute (let r := Z_ring in lap_divmod_by_x_sub_a [-14;5;1] (-7))%Z.
-Compute (let r := Z_ring in lap_divmod_by_x_sub_a [-14;5;1] 2)%Z.
-Compute (let r := Z_ring in lap_divmod_by_x_sub_a [3;4;5] 6)%Z.
+*)
 
-Theorem glop {A} {rng : ring A} : ∀ la a q r,
+Theorem lap_div_mod_x_sub_a {A} {rng : ring A} : ∀ la a q r,
   q = lap_div_by_x_sub_a la a
   → r = lap_mod_by_x_sub_a la a
   → (la = [(-a)%Rng; 1%Rng] * q + [r])%lap.
@@ -4485,8 +4480,11 @@ apply lap_eq_cons. {
   subst qr; cbn.
   rewrite rng_mul_1_l, rng_add_0_r.
   apply lap_eq_cons; [ easy | ].
-  rewrite lap_convol_mul_cons_succ'; [ easy | cbn; flia ].
+  rewrite lap_convol_mul_cons_succ; [ easy | cbn; flia ].
 }
+Qed.
+
+Inspect 1.
 
 ...
 
