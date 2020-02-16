@@ -4387,6 +4387,8 @@ Theorem glop {A} {rng : ring A} : ∀ pol roots n,
 (* the (required) NoDup prevents to take multiple roots into account;
    this is not a serious issue, because of "≤", but it means that
    this theorem is not perfect *)
+Proof.
+intros * Hr Hnd Hdeg.
 ...
 
 Definition roots_of_pol pol := ... (* mmm... no way to compute them *)
