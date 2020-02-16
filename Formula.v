@@ -4435,6 +4435,13 @@ Compute (let r := Z_ring in lap_divmod_by_x_sub_a [-14;5;1] (-7))%Z.
 Compute (let r := Z_ring in lap_divmod_by_x_sub_a [-14;5;1] 2)%Z.
 Compute (let r := Z_ring in lap_divmod_by_x_sub_a [3;4;5] 6)%Z.
 
+Theorem glop {A} {rng : ring A} : ∀ (pol q : polynomial A) (r : A) a,
+  (q, r) = poly_divmod_by_x_sub_a pol a
+  → (pol = POL [(-a)%Rng; 1%Rng] * q + POL [r])%pol.
+Proof.
+intros * Hqr.
+...
+
 Theorem glop {A} {rng : ring A} : ∀ pol a q r,
   (q, r) = poly_divmod_by_x_sub_a pol a
   → (r = 0)%Rng
