@@ -4414,16 +4414,18 @@ Definition is_polynomial_root {A} {rng : ring A} pol x :=
 Print fold_right.
 
 Definition lap_divmod_by_x_sub_a {A} {rng : ring A} la a :=
-  let l :=
-    fold_right
-      (λ ai bl, match bl with [] => ai | b :: _ => (ai + a * b)%Rng end :: bl)
-      [] la
-  in
-  (tl l, hd 0%Rng l).
+  fold_right
+    (λ ai bl, match bl with [] => ai | b :: _ => (ai + a * b)%Rng end :: bl)
+    [] la.
+
+Definition lap_div_by_x_sub_a {A} {rng : ring A} la a :=
+  tl (lap_divmod_by_x_sub_a la a).
+
+Definition lap_mod_by_x_sub_a {A} {rng : ring A} la a :=
+  hd 0%Rng (lap_divmod_by_x_sub_a la a).
 
 Definition poly_divmod_by_x_sub_a {A} {rng : ring A} pol a :=
-  let (q, r) := lap_divmod_by_x_sub_a (al pol) a in
-  ({| al := q |}, r).
+  ({| al := lap_div_by_x_sub_a (al pol) a |}, lap_mod_by_x_sub_a (al pol) a).
 
 Compute (let r := Z_ring in poly_divmod_by_x_sub_a {| al := [1;2;1]%Z |} 1%Z).
 
@@ -4436,13 +4438,18 @@ Compute (let r := Z_ring in lap_divmod_by_x_sub_a [-14;5;1] 2)%Z.
 Compute (let r := Z_ring in lap_divmod_by_x_sub_a [3;4;5] 6)%Z.
 
 Theorem glop {A} {rng : ring A} : ∀ la a q r,
-  (q, r) = lap_divmod_by_x_sub_a la a
+  q = lap_div_by_x_sub_a la a
+  → r = lap_mod_by_x_sub_a la a
   → (la = [(-a)%Rng; 1%Rng] * q + [r])%lap.
 Proof.
-intros * Hqr.
+intros * Hq Hr.
 cbn.
 rewrite rng_add_0_r.
 rewrite lap_add_0_r.
+unfold lap_div_by_x_sub_a in Hq.
+unfold lap_mod_by_x_sub_a in Hr.
+remember (lap_divmod_by_x_sub_a la a) as qr eqn:Hqr.
+subst q r.
 ...
 
 Theorem glop {A} {rng : ring A} : ∀ (pol q : polynomial A) (r : A) a,
