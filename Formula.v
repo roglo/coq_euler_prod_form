@@ -4365,25 +4365,28 @@ inversion Hdeg; subst; [ now left | right; left | right; right ]. {
 Qed.
 
 Example xk_1 {A} {rng : ring A} : ∀ k,
-  k ≠ 0 → poly_has_degree (ⓧ^k - 1)%pol k.
+  (1 ≠ 0)%Rng → k ≠ 0 → poly_has_degree (ⓧ^k - 1)%pol k.
 Proof.
-intros * Hkz.
+intros * H1n0 Hkz.
 destruct k; [ easy | clear Hkz ].
 unfold poly_has_degree; cbn.
 rewrite lap_add_0_r.
 rewrite app_comm_cons.
-constructor. {
-(* perhaps I must add in ring that 1≠0 *)
-(* I could add it, but it makes the definition of rings
-   less general; beyond that, if there is no decidability
-   of equality, there is no way to consider 1=0 and 1≠0 as
-   two possibilities *)
-...
-... rest ok
-} {
-  cbn.
-  now rewrite repeat_length.
-}
+constructor; [ easy | cbn ].
+now rewrite repeat_length.
+Qed.
+
+Definition is_polynomial_root {A} {rng : ring A} pol x :=
+  (eval_poly pol x = 0)%Rng.
+
+Theorem glop {A} {rng : ring A} : ∀ pol roots n,
+  (∀ x, x ∈ roots ↔ is_polynomial_root pol x)
+  → NoDup roots
+  → poly_has_degree pol n
+  → length roots ≤ n.
+(* the (required) NoDup prevents to take multiple roots into account;
+   this is not a serious issue, because of "≤", but it means that
+   this theorem is not perfect *)
 ...
 
 Definition roots_of_pol pol := ... (* mmm... no way to compute them *)
