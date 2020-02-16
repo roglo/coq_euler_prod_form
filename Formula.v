@@ -4450,6 +4450,49 @@ unfold lap_div_by_x_sub_a in Hq.
 unfold lap_mod_by_x_sub_a in Hr.
 remember (lap_divmod_by_x_sub_a la a) as qr eqn:Hqr.
 subst q r.
+unfold lap_divmod_by_x_sub_a in Hqr.
+revert a qr Hqr.
+induction la as [| b]; intros. {
+  cbn in Hqr.
+  subst qr; cbn.
+  rewrite rng_mul_0_r, rng_add_0_l.
+  now constructor.
+}
+cbn in Hqr.
+remember
+  (fold_right
+     (λ ai bl, match bl with [] => ai | b :: _ => (ai + a * b)%Rng end :: bl)
+     [] la) as qr' eqn:Hqr'.
+specialize (IHla _ qr' Hqr').
+apply lap_eq_cons. {
+  destruct qr' as [| c]. {
+    subst qr; cbn.
+    now rewrite rng_mul_0_r, rng_add_0_l.
+  }
+  subst qr; cbn.
+  rewrite rng_add_comm.
+  rewrite rng_mul_opp_l.
+  rewrite fold_rng_sub.
+  now rewrite rng_add_sub.
+} {
+  rewrite IHla.
+  destruct qr' as [| c]. {
+    subst qr; cbn.
+    cbn.
+    rewrite rng_mul_0_r, rng_add_0_l.
+    now constructor.
+  }
+  subst qr; cbn.
+  rewrite rng_mul_1_l, rng_add_0_r.
+  apply lap_eq_cons; [ easy | ].
+Search (lap_convol_mul _ (_ :: _) (S _)).
+...
+Check lap_convol_mul_cons_succ.
+  set (gr := lap_ring).
+  specialize (lap_convol_mul_cons_succ [(- a)%Rng; 1%Rng]%lap) as H1.
+  specialize (H1 c).
+...
+  rewrite lap_convol_mul_cons_succ.
 ...
 
 Theorem glop {A} {rng : ring A} : ∀ (pol q : polynomial A) (r : A) a,
