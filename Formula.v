@@ -4136,10 +4136,10 @@ Qed.
 
 (* http://math.univ-lille1.fr/~fricain/M1-ARITHMETIQUE/chap2.pdf *)
 
-Theorem ZnRing_add_comm n : ∀ a b, (a + b) mod n ≡ ((b + a) mod n) mod n.
+Theorem Zn_ring_add_comm n : ∀ a b, (a + b) mod n ≡ ((b + a) mod n) mod n.
 Proof. now intros; rewrite Nat.add_comm. Qed.
 
-Theorem ZnRing_add_assoc n : ∀ a b c,
+Theorem Zn_ring_add_assoc n : ∀ a b c,
   (a + (b + c) mod n) mod n ≡ (((a + b) mod n + c) mod n) mod n.
 Proof.
 intros.
@@ -4149,7 +4149,7 @@ rewrite Nat.add_mod_idemp_l; [ | easy ].
 now rewrite Nat.add_assoc.
 Qed.
 
-Theorem ZnRing_add_0_l n : ∀ a, (0 + a) mod n ≡ a mod n.
+Theorem Zn_ring_add_0_l n : ∀ a, (0 + a) mod n ≡ a mod n.
 Proof.
 intros.
 destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
@@ -4157,7 +4157,7 @@ rewrite Nat.mod_mod; [ | easy ].
 now rewrite Nat.add_0_l.
 Qed.
 
-Theorem ZnRing_add_opp_l n : ∀ a,
+Theorem Zn_ring_add_opp_l n : ∀ a,
   ((n - a mod n) mod n + a) mod n ≡ 0 mod n.
 Proof.
 intros.
@@ -4170,7 +4170,7 @@ rewrite Nat.sub_add. 2: {
 now rewrite Nat.mod_same.
 Qed.
 
-Theorem ZnRing_add_compat_l n : ∀ a b c,
+Theorem Zn_ring_add_compat_l n : ∀ a b c,
   a ≡ b mod n → (c + a) mod n ≡ ((c + b) mod n) mod n.
 Proof.
 intros * Hab.
@@ -4180,10 +4180,10 @@ rewrite Hab.
 now rewrite Nat.add_mod_idemp_r.
 Qed.
 
-Theorem ZnRing_mul_comm n : ∀ a b, (a * b) mod n ≡ ((b * a) mod n) mod n.
+Theorem Zn_ring_mul_comm n : ∀ a b, (a * b) mod n ≡ ((b * a) mod n) mod n.
 Proof. now intros; rewrite Nat.mul_comm. Qed.
 
-Theorem ZnRing_mul_assoc n : ∀ a b c,
+Theorem Zn_ring_mul_assoc n : ∀ a b c,
   (a * ((b * c) mod n)) mod n ≡ (((a * b) mod n * c) mod n) mod n.
 Proof.
 intros.
@@ -4193,7 +4193,7 @@ rewrite Nat.mul_mod_idemp_l; [ | easy ].
 now rewrite Nat.mul_assoc.
 Qed.
 
-Theorem ZnRing_mul_1_l n : ∀ a, (1 * a) mod n ≡ a mod n.
+Theorem Zn_ring_mul_1_l n : ∀ a, (1 * a) mod n ≡ a mod n.
 Proof.
 intros.
 destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
@@ -4201,7 +4201,7 @@ rewrite Nat.mod_mod; [ | easy ].
 now rewrite Nat.mul_1_l.
 Qed.
 
-Theorem ZnRing_mul_compat_l n : ∀ a b c,
+Theorem Zn_ring_mul_compat_l n : ∀ a b c,
   a ≡ b mod n → (c * a) mod n ≡ ((c * b) mod n) mod n.
 Proof.
 intros * Hab.
@@ -4211,7 +4211,7 @@ rewrite Hab.
 now rewrite Nat.mul_mod_idemp_r.
 Qed.
 
-Theorem ZnRing_mul_add_distr_l n : ∀ a b c,
+Theorem Zn_ring_mul_add_distr_l n : ∀ a b c,
   (a * ((b + c) mod n)) mod n ≡ (((a * b) mod n + (a * c) mod n) mod n) mod n.
 Proof.
 intros.
@@ -4222,7 +4222,7 @@ rewrite Nat.add_mod_idemp_r; [ | easy ].
 now rewrite Nat.mul_add_distr_l.
 Qed.
 
-Definition ZnRing (n : nat) : ring nat :=
+Definition Zn_ring (n : nat) : ring nat :=
   {| rng_zero := 0;
      rng_one := 1;
      rng_add a b := (a + b) mod n;
@@ -4232,34 +4232,66 @@ Definition ZnRing (n : nat) : ring nat :=
      rng_eq_refl _ := eq_refl;
      rng_eq_sym _ _ H := eq_sym H;
      rng_eq_trans _ _ _ H1 H2 := eq_trans H1 H2;
-     rng_add_comm := ZnRing_add_comm n;
-     rng_add_assoc := ZnRing_add_assoc n;
-     rng_add_0_l := ZnRing_add_0_l n;
-     rng_add_opp_l := ZnRing_add_opp_l n;
-     rng_add_compat_l := ZnRing_add_compat_l n;
-     rng_mul_comm := ZnRing_mul_comm n;
-     rng_mul_assoc := ZnRing_mul_assoc n;
-     rng_mul_1_l := ZnRing_mul_1_l n;
-     rng_mul_compat_l := ZnRing_mul_compat_l n;
-     rng_mul_add_distr_l := ZnRing_mul_add_distr_l n |}.
+     rng_add_comm := Zn_ring_add_comm n;
+     rng_add_assoc := Zn_ring_add_assoc n;
+     rng_add_0_l := Zn_ring_add_0_l n;
+     rng_add_opp_l := Zn_ring_add_opp_l n;
+     rng_add_compat_l := Zn_ring_add_compat_l n;
+     rng_mul_comm := Zn_ring_mul_comm n;
+     rng_mul_assoc := Zn_ring_mul_assoc n;
+     rng_mul_1_l := Zn_ring_mul_1_l n;
+     rng_mul_compat_l := Zn_ring_mul_compat_l n;
+     rng_mul_add_distr_l := Zn_ring_mul_add_distr_l n |}.
+
+Require Import ZArith.
+
+Theorem Z_mul_compat_l : ∀ a b c, a = b → (c * a = c * b)%Z.
+Proof.
+intros * Hab.
+destruct (Z.eq_dec c 0%Z) as [Hzc| Hzc]; [ now subst c | ].
+now apply Z.mul_cancel_l.
+Qed.
+
+Definition Z_ring : ring Z :=
+  {| rng_zero := 0%Z;
+     rng_one := 1%Z;
+     rng_add a b := (a + b)%Z;
+     rng_mul a b := (a * b)%Z;
+     rng_opp a := (- a)%Z;
+     rng_eq a b := a = b;
+     rng_eq_refl _ := eq_refl;
+     rng_eq_sym _ _ H := eq_sym H;
+     rng_eq_trans _ _ _ H1 H2 := eq_trans H1 H2;
+     rng_add_comm := Z.add_comm;
+     rng_add_assoc := Z.add_assoc;
+     rng_add_0_l := Z.add_0_l;
+     rng_add_opp_l := Z.add_opp_diag_l;
+     rng_add_compat_l a b c := proj2 (Z.add_cancel_l a b c);
+     rng_mul_comm := Z.mul_comm;
+     rng_mul_assoc := Z.mul_assoc;
+     rng_mul_1_l := Z.mul_1_l;
+     rng_mul_compat_l := Z_mul_compat_l;
+     rng_mul_add_distr_l := Z.mul_add_distr_l |}.
+
+Canonical Structure Z_ring.
 
 (*
-Canonical Structure ZnRing.
+Canonical Structure Zn_ring.
 Warning: Projection value has no head constant: λ a b : nat, (a + b) mod n in canonical instance
-ZnRing of rng_add, ignoring it. [projection-no-head-constant,typechecker]
+Zn_ring of rng_add, ignoring it. [projection-no-head-constant,typechecker]
 Warning: Projection value has no head constant: λ a b : nat, (a * b) mod n in canonical instance
-ZnRing of rng_mul, ignoring it. [projection-no-head-constant,typechecker]
+Zn_ring of rng_mul, ignoring it. [projection-no-head-constant,typechecker]
 Warning: Projection value has no head constant: λ a : nat, (n - a mod n) mod n in canonical instance
-ZnRing of rng_opp, ignoring it. [projection-no-head-constant,typechecker]
-Warning: Projection value has no head constant: λ a b : nat, a ≡ b mod n in canonical instance ZnRing of rng_eq,
+Zn_ring of rng_opp, ignoring it. [projection-no-head-constant,typechecker]
+Warning: Projection value has no head constant: λ a b : nat, a ≡ b mod n in canonical instance Zn_ring of rng_eq,
 ignoring it. [projection-no-head-constant,typechecker]
-Warning: Projection value has no head constant: λ a : nat, eq_refl in canonical instance ZnRing of rng_eq_refl,
+Warning: Projection value has no head constant: λ a : nat, eq_refl in canonical instance Zn_ring of rng_eq_refl,
 ignoring it. [projection-no-head-constant,typechecker]
 Warning: Projection value has no head constant: λ (a b : nat) (H : (λ a0 b0 : nat, a0 ≡ b0 mod n) a b), eq_sym H
-in canonical instance ZnRing of rng_eq_sym, ignoring it. [projection-no-head-constant,typechecker]
+in canonical instance Zn_ring of rng_eq_sym, ignoring it. [projection-no-head-constant,typechecker]
 Warning: Projection value has no head constant:
 λ (a b c : nat) (H1 : (λ a0 b0 : nat, a0 ≡ b0 mod n) a b) (H2 : (λ a0 b0 : nat, a0 ≡ b0 mod n) b c),
-  eq_trans H1 H2 in canonical instance ZnRing of rng_eq_trans, ignoring it.
+  eq_trans H1 H2 in canonical instance Zn_ring of rng_eq_trans, ignoring it.
 [projection-no-head-constant,typechecker]
 *)
 
@@ -4278,7 +4310,7 @@ Inductive lap_has_degree {A} {rng : ring A} : list A → nat → Prop :=
 Definition poly_has_degree {A} {rng : ring A} pol n :=
   lap_has_degree (al pol) n.
 
-Example degree_5x2_4x_3 (rng := ZnRing 7) : lap_has_degree [3; 4; 5] 2.
+Example degree_5x2_4x_3 (rng := Zn_ring 7) : lap_has_degree [3; 4; 5] 2.
 Proof.
 assert (H : [3; 4; 5] ≠ []) by easy.
 specialize (app_removelast_last 0 H) as H1; clear H.
@@ -4379,6 +4411,26 @@ Qed.
 Definition is_polynomial_root {A} {rng : ring A} pol x :=
   (eval_poly pol x = 0)%Rng.
 
+Print fold_right.
+
+Definition lap_quotient_x_sub_a {A} {rng : ring A} la a :=
+  fold_right
+    (λ ai bl, match bl with [] => ai | b :: _ => (ai + a * b)%Rng end :: bl)
+    [] la.
+
+Compute (let r := Z_ring in lap_quotient_x_sub_a [1;2;1]%Z (-1)%Z).
+Compute (let r := Z_ring in lap_quotient_x_sub_a [3;4;5]%Z 6%Z).
+Compute (let r := Z_ring in lap_quotient_x_sub_a [3;4;5] 6)%Z.
+
+... pas l'air d'être ça...
+
+Print Z_ring.
+Print Zn_ring.
+Print polynomial_ring.
+Print lap_ring.
+
+...
+
 Theorem glop {A} {rng : ring A} : ∀ pol roots n,
   (∀ x, x ∈ roots ↔ is_polynomial_root pol x)
   → NoDup roots
@@ -4402,7 +4454,7 @@ Theorem number_of_nth_roots_of_unity : ∀ p d,
   → length (nth_roots_of_unity_modulo d p) = d.
 Proof.
 intros * Hp Hdp.
-set (pr := ZnRing p).
+set (pr := Zn_ring p).
 specialize (pol_pow_sub_1 (p - 1)) as H1.
 assert (H : p - 1 ≠ 0). {
   destruct p; [ easy | ].
