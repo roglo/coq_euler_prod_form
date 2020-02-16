@@ -3142,16 +3142,21 @@ Compute (let n := 6 in sort Nat.leb (map (λ i, Nat_pow_mod 5 i n) (seq 1 (n - 1
 
 Require Import Ring2 Rpolynomial2 Rsummation.
 
-Theorem xpow_0 {A} {rng : ring A} : (ⓧ^0 = 1)%pol.
+Section In_ring_A.
+
+Context {A : Type}.
+Context {rng : ring A}.
+
+Theorem xpow_0 : (ⓧ^0 = 1)%pol.
 Proof. easy. Qed.
 
-Theorem lap_convol_mul_succ_r {A} {rng : ring A} : ∀ la lb i len,
+Theorem lap_convol_mul_succ_r : ∀ la lb i len,
   lap_convol_mul la lb i (S len) =
   (Σ (j = 0, i), nth j la 0 * nth (i - j) lb 0)%Rng ::
   lap_convol_mul la lb (S i) len.
 Proof. easy. Qed.
 
-Theorem lap_xpow_from_convol_mul {A} {rng : ring A} : ∀ a i,
+Theorem lap_xpow_from_convol_mul : ∀ a i,
   (repeat 0%Rng a ++ [1%Rng] =
    nth 0 (repeat 0%Rng a ++ [1%Rng]) 0%Rng
    :: lap_convol_mul [0%Rng; 1%Rng]
@@ -3190,7 +3195,7 @@ apply IHa.
 Qed.
 
 (* x^(a+1) = x * x^a *)
-Theorem lap_xpow_succ {A} {rng : ring A} : ∀ a,
+Theorem lap_xpow_succ : ∀ a,
   (repeat 0%Rng (S a) ++ [1%Rng] =
    [0%Rng; 1%Rng] * (repeat 0%Rng a ++ [1%Rng]))%lap.
 Proof.
@@ -3204,7 +3209,7 @@ rewrite rng_mul_0_l, rng_add_0_l, rng_mul_1_l, rng_add_0_r.
 now specialize (lap_xpow_from_convol_mul a 0) as H1.
 Qed.
 
-Theorem xpow_add_r {A} {rng : ring A} : ∀ a b,
+Theorem xpow_add_r : ∀ a b,
   (ⓧ ^ (a + b) = ⓧ ^ a * ⓧ ^ b)%pol.
 Proof.
 intros.
@@ -3216,7 +3221,7 @@ do 2 rewrite lap_xpow_succ.
 now rewrite rng_mul_comm, rng_mul_mul_swap.
 Qed.
 
-Theorem pol_pow_sub_1 {A} {rng : ring A} (pr := polynomial_ring) : ∀ k,
+Theorem pol_pow_sub_1 (pr := polynomial_ring) : ∀ k,
   k ≠ 0
   → (ⓧ^k - 1 = (ⓧ - 1) * (Σ (i = 0, k - 1), ⓧ^(k-i-1))%Rng)%pol.
 Proof.
@@ -3416,6 +3421,8 @@ Warning: Projection value has no head constant:
 [projection-no-head-constant,typechecker]
 *)
 
+End In_ring_A.
+
 (* degree of a polynomial *)
 
 Inductive lap_has_degree {A} {rng : ring A} : list A → nat → Prop :=
@@ -3431,7 +3438,7 @@ Inductive lap_has_degree {A} {rng : ring A} : list A → nat → Prop :=
 Definition poly_has_degree {A} {rng : ring A} pol n :=
   lap_has_degree (al pol) n.
 
-Example degree_5x2_4x_3 (rng := Zn_ring 7) : lap_has_degree [3; 4; 5] 2.
+Example degree_5x2_4x_3 (rng' := Zn_ring 7) : lap_has_degree [3; 4; 5] 2.
 Proof.
 assert (H : [3; 4; 5] ≠ []) by easy.
 specialize (app_removelast_last 0 H) as H1; clear H.
@@ -3439,10 +3446,15 @@ rewrite H1.
 now apply Has_degree; cbn.
 Qed.
 
+Section In_ring_A.
+
+Context {A : Type}.
+Context {rng : ring A}.
+
 (* existence of degree requires decidability of equality in ring
    of coefficients
 
-Theorem lap_degree_exists {A} {rng : ring A} : ∀ la,
+Theorem lap_degree_exists : ∀ la,
   ∃ n, lap_has_degree la n.
 Proof.
 intros.
@@ -3458,7 +3470,7 @@ induction la as [| a]. {
 
 (* unicity of degree *)
 
-Theorem lap_degree_unique {A} {rng : ring A} : ∀ la n1 n2,
+Theorem lap_degree_unique : ∀ la n1 n2,
   lap_has_degree la n1 → lap_has_degree la n2 → n1 = n2.
 Proof.
 intros * H1 H2.
@@ -3493,14 +3505,14 @@ induction H1; intros; subst. {
 }
 Qed.
 
-Theorem degree_unique {A} {rng : ring A} : ∀ pol n1 n2,
+Theorem degree_unique : ∀ pol n1 n2,
   poly_has_degree pol n1 → poly_has_degree pol n2 → n1 = n2.
 Proof.
 intros (la) * H1 H2.
 now apply (lap_degree_unique la n1 n2).
 Qed.
 
-Theorem lap_degree_inv {A} {rng : ring A} : ∀ la n,
+Theorem lap_degree_inv : ∀ la n,
   lap_has_degree la n
   → (la = [])%lap ∧ n = 0 ∨
      (∃ a lb, (a ≠ 0)%Rng ∧ (la = lb ++ [a])%lap ∧ n = length lb) ∨
@@ -3517,7 +3529,7 @@ inversion Hdeg; subst; [ now left | right; left | right; right ]. {
 }
 Qed.
 
-Example xk_1 {A} {rng : ring A} : ∀ k,
+Example xk_1 : ∀ k,
   (1 ≠ 0)%Rng → k ≠ 0 → poly_has_degree (ⓧ^k - 1)%pol k.
 Proof.
 intros * H1n0 Hkz.
@@ -3529,33 +3541,48 @@ constructor; [ easy | cbn ].
 now rewrite repeat_length.
 Qed.
 
-Definition is_polynomial_root {A} {rng : ring A} pol x :=
+Definition is_polynomial_root pol x :=
   (eval_poly pol x = 0)%Rng.
 
-Print fold_right.
-
-Definition lap_divmod_by_x_sub_a {A} {rng : ring A} la a :=
+Definition lap_divrem_by_x_sub_a la a :=
   fold_right
     (λ ai bl, match bl with [] => ai | b :: _ => (ai + a * b)%Rng end :: bl)
     [] la.
 
-Definition lap_div_by_x_sub_a {A} {rng : ring A} la a :=
-  tl (lap_divmod_by_x_sub_a la a).
+Definition lap_div_by_x_sub_a la a :=
+  tl (lap_divrem_by_x_sub_a la a).
 
-Definition lap_mod_by_x_sub_a {A} {rng : ring A} la a :=
-  hd 0%Rng (lap_divmod_by_x_sub_a la a).
+Definition lap_rem_by_x_sub_a la a :=
+  hd 0%Rng (lap_divrem_by_x_sub_a la a).
 
-Definition poly_divmod_by_x_sub_a {A} {rng : ring A} pol a :=
-  ({| al := lap_div_by_x_sub_a (al pol) a |}, lap_mod_by_x_sub_a (al pol) a).
+Definition poly_divrem_by_x_sub_a pol a :=
+  ({| al := lap_div_by_x_sub_a (al pol) a |}, lap_rem_by_x_sub_a (al pol) a).
 
 (*
-Compute (let r := Z_ring in poly_divmod_by_x_sub_a {| al := [1;2;1]%Z |} 1%Z).
-Compute (let r := Z_ring in lap_divmod_by_x_sub_a [1;2;1]%Z 1%Z).
+Compute (let r := Z_ring in poly_divrem_by_x_sub_a {| al := [1;2;1]%Z |} 1%Z).
+Compute (let r := Z_ring in lap_divrem_by_x_sub_a [1;2;1]%Z 1%Z).
 *)
 
-Theorem lap_div_mod_x_sub_a {A} {rng : ring A} : ∀ la a q r,
+Lemma rem_is_eval_a : ∀ la a, (lap_rem_by_x_sub_a la a = eval_lap la a)%Rng.
+Proof.
+intros.
+unfold lap_rem_by_x_sub_a.
+unfold lap_divrem_by_x_sub_a, eval_lap.
+induction la as [| b]; intros; [ easy | cbn ].
+remember (fold_right _ _ _) as lb eqn:Hlb; symmetry in Hlb.
+destruct lb as [| c]. {
+  cbn in Hlb, IHla.
+  rewrite <- IHla.
+  now rewrite rng_mul_0_l, rng_add_0_l.
+}
+cbn in IHla.
+rewrite <- IHla.
+now rewrite rng_add_comm, rng_mul_comm.
+Qed.
+
+Lemma lap_div_rem_x_sub_a : ∀ la a q r,
   q = lap_div_by_x_sub_a la a
-  → r = lap_mod_by_x_sub_a la a
+  → r = lap_rem_by_x_sub_a la a
   → (la = [(-a)%Rng; 1%Rng] * q + [r])%lap.
 Proof.
 intros * Hq Hr.
@@ -3563,10 +3590,10 @@ cbn.
 rewrite rng_add_0_r.
 rewrite lap_add_0_r.
 unfold lap_div_by_x_sub_a in Hq.
-unfold lap_mod_by_x_sub_a in Hr.
-remember (lap_divmod_by_x_sub_a la a) as qr eqn:Hqr.
+unfold lap_rem_by_x_sub_a in Hr.
+remember (lap_divrem_by_x_sub_a la a) as qr eqn:Hqr.
 subst q r.
-unfold lap_divmod_by_x_sub_a in Hqr.
+unfold lap_divrem_by_x_sub_a in Hqr.
 revert a qr Hqr.
 induction la as [| b]; intros. {
   cbn in Hqr.
@@ -3605,19 +3632,26 @@ apply lap_eq_cons. {
 }
 Qed.
 
-Inspect 1.
+Lemma lap_div_eval_a_x_sub_a : ∀ la a q,
+  q = lap_div_by_x_sub_a la a
+  → (la = [(-a)%Rng; 1%Rng] * q + [eval_lap la a])%lap.
+Proof.
+intros * Hq.
+rewrite <- rem_is_eval_a.
+now apply lap_div_rem_x_sub_a.
+Qed.
 
 ...
 
-Theorem glop {A} {rng : ring A} : ∀ (pol q : polynomial A) (r : A) a,
-  (q, r) = poly_divmod_by_x_sub_a pol a
+Theorem glop : ∀ (pol q : polynomial A) (r : A) a,
+  (q, r) = poly_divrem_by_x_sub_a pol a
   → (pol = POL [(-a)%Rng; 1%Rng] * q + POL [r])%pol.
 Proof.
 intros * Hqr.
 ...
 
-Theorem glop {A} {rng : ring A} : ∀ pol a q r,
-  (q, r) = poly_divmod_by_x_sub_a pol a
+Theorem glop : ∀ pol a q r,
+  (q, r) = poly_divrem_by_x_sub_a pol a
   → (r = 0)%Rng
   ↔ (eval_poly pol a = 0)%Rng.
 Proof.
@@ -3626,7 +3660,7 @@ split. {
   intros Hr.
 ...
 
-Theorem glop {A} {rng : ring A} : ∀ pol roots n,
+Theorem glop : ∀ pol roots n,
   (∀ x, x ∈ roots ↔ is_polynomial_root pol x)
   → NoDup roots
   → poly_has_degree pol n
