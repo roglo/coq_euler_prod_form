@@ -4413,22 +4413,36 @@ Definition is_polynomial_root {A} {rng : ring A} pol x :=
 
 Print fold_right.
 
-Definition lap_quotient_x_sub_a {A} {rng : ring A} la a :=
-  fold_right
-    (λ ai bl, match bl with [] => ai | b :: _ => (ai + a * b)%Rng end :: bl)
-    [] la.
+Definition lap_divmod_by_x_sub_a {A} {rng : ring A} la a :=
+  let l :=
+    fold_right
+      (λ ai bl, match bl with [] => ai | b :: _ => (ai + a * b)%Rng end :: bl)
+      [] la
+  in
+  (tl l, hd 0%Rng l).
 
-Compute (let r := Z_ring in lap_quotient_x_sub_a [1;2;1]%Z (-1)%Z).
-Compute (let r := Z_ring in lap_quotient_x_sub_a [3;4;5]%Z 6%Z).
-Compute (let r := Z_ring in lap_quotient_x_sub_a [3;4;5] 6)%Z.
+Definition poly_divmod_by_x_sub_a {A} {rng : ring A} pol a :=
+  let (q, r) := lap_divmod_by_x_sub_a (al pol) a in
+  ({| al := q |}, r).
 
-... pas l'air d'être ça...
+Compute (let r := Z_ring in poly_divmod_by_x_sub_a {| al := [1;2;1]%Z |} 1%Z).
 
-Print Z_ring.
-Print Zn_ring.
-Print polynomial_ring.
-Print lap_ring.
+Compute (let r := Z_ring in lap_divmod_by_x_sub_a [1;2;1]%Z 1%Z).
+Compute (let r := Z_ring in lap_divmod_by_x_sub_a [1;2;1]%Z (-1)%Z).
+Compute (let r := Z_ring in lap_divmod_by_x_sub_a [1;-2;1]%Z 1%Z).
+Compute (let r := Z_ring in lap_divmod_by_x_sub_a [42;-29;2;1] 3)%Z.
+Compute (let r := Z_ring in lap_divmod_by_x_sub_a [-14;5;1] (-7))%Z.
+Compute (let r := Z_ring in lap_divmod_by_x_sub_a [-14;5;1] 2)%Z.
+Compute (let r := Z_ring in lap_divmod_by_x_sub_a [3;4;5] 6)%Z.
 
+Theorem glop {A} {rng : ring A} : ∀ pol a q r,
+  (q, r) = poly_divmod_by_x_sub_a pol a
+  → (r = 0)%Rng
+  ↔ (eval_poly pol a = 0)%Rng.
+Proof.
+intros * Hqr.
+split. {
+  intros Hr.
 ...
 
 Theorem glop {A} {rng : ring A} : ∀ pol roots n,
