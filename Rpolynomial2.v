@@ -1256,6 +1256,23 @@ Qed.
 Theorem lap_eq_0 : lap_eq [0%Rng] [].
 Proof. constructor; reflexivity. Qed.
 
+Theorem lap_convol_mul_cons_succ' : ∀ b la lb i len,
+  length la ≤ S i
+  → lap_eq (lap_convol_mul la (b :: lb) (S i) len)
+       (lap_convol_mul la lb i len).
+Proof.
+intros * Hla.
+revert b la lb i Hla.
+induction len; intros; [ reflexivity | idtac ].
+constructor; [ idtac | apply IHlen; flia Hla ].
+rewrite summation_split_last; [ idtac | apply Nat.le_0_l ].
+rewrite List.nth_overflow; [ | easy ].
+rewrite rng_mul_0_l, rng_add_0_r.
+apply summation_compat; intros j (_, Hj).
+apply rng_mul_compat_l.
+rewrite Nat.sub_succ_l; [ reflexivity | assumption ].
+Qed.
+
 Theorem lap_convol_mul_cons_succ : ∀ a b lb i len,
   lap_eq (lap_convol_mul [a] (b :: lb) (S i) len)
     (lap_convol_mul [a] lb i len).

@@ -4485,14 +4485,9 @@ apply lap_eq_cons. {
   subst qr; cbn.
   rewrite rng_mul_1_l, rng_add_0_r.
   apply lap_eq_cons; [ easy | ].
-Search (lap_convol_mul _ (_ :: _) (S _)).
-...
-Check lap_convol_mul_cons_succ.
-  set (gr := lap_ring).
-  specialize (lap_convol_mul_cons_succ [(- a)%Rng; 1%Rng]%lap) as H1.
-  specialize (H1 c).
-...
-  rewrite lap_convol_mul_cons_succ.
+  rewrite lap_convol_mul_cons_succ'; [ easy | cbn; flia ].
+}
+
 ...
 
 Theorem glop {A} {rng : ring A} : ∀ (pol q : polynomial A) (r : A) a,
