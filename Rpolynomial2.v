@@ -1648,11 +1648,11 @@ Canonical Structure polynomial_ring.
 
 (* *)
 
-Definition apply_lap {α} {R : ring α} la x :=
+Definition eval_lap {α} {R : ring α} la x :=
   (List.fold_right (λ c accu, accu * x + c) 0 la)%Rng.
 
-Definition apply_poly {α} {R : ring α} pol :=
-  apply_lap (al pol).
+Definition eval_poly {α} {R : ring α} pol :=
+  eval_lap (al pol).
 
 Theorem lap_add_map : ∀ α β (Rα : ring α) (Rβ : ring β) (f : α → β) la lb,
   (∀ a b, (f (a + b) = f a + f b)%Rng)
@@ -1666,12 +1666,12 @@ destruct lb as [| b]; [ reflexivity | simpl ].
 rewrite Hab, IHla; reflexivity.
 Qed.
 
-Instance apply_lap_morph {A} {rng : ring A} :
-  Proper (lap_eq ==> rng_eq ==> rng_eq) apply_lap.
+Instance eval_lap_morph {A} {rng : ring A} :
+  Proper (lap_eq ==> rng_eq ==> rng_eq) eval_lap.
 Proof.
 intros la lb Hll x y Hxy.
 destruct la as [| a]. {
-  unfold apply_lap; cbn; symmetry.
+  unfold eval_lap; cbn; symmetry.
   clear - Hll.
   induction lb as [| b]; [ easy | cbn ].
   apply lap_eq_nil_cons_inv in Hll.
@@ -1679,7 +1679,7 @@ destruct la as [| a]. {
   specialize (IHlb Hlb).
   now rewrite IHlb, rng_mul_0_l, rng_add_0_l.
 } {
-  unfold apply_lap; cbn.
+  unfold eval_lap; cbn.
   revert a la Hll.
   induction lb as [| b]; intros. {
     cbn.
@@ -1722,27 +1722,27 @@ destruct la as [| a]. {
 }
 Qed.
 
-Instance apply_poly_morph {A} {rng : ring A} :
-  Proper (poly_eq ==> rng_eq ==> rng_eq) apply_poly.
+Instance eval_poly_morph {A} {rng : ring A} :
+  Proper (poly_eq ==> rng_eq ==> rng_eq) eval_poly.
 Proof.
 intros (la) (lb) Hpp x y Hxy.
 unfold "="%pol in Hpp; cbn in Hpp.
-unfold apply_poly.
-cbn - [ apply_lap ].
+unfold eval_poly.
+cbn - [ eval_lap ].
 now rewrite Hxy, Hpp.
 Qed.
 
-Theorem apply_lap_const {A} {rng : ring A} : ∀ c x, (apply_lap [c] x = c)%Rng.
+Theorem eval_lap_const {A} {rng : ring A} : ∀ c x, (eval_lap [c] x = c)%Rng.
 Proof.
 intros; cbn.
 now rewrite rng_mul_0_l, rng_add_0_l.
 Qed.
 
-Theorem apply_poly_add {A} {rng : ring A} : ∀ p1 p2 x,
-  (apply_poly (p1 + p2)%pol x = apply_poly p1 x + apply_poly p2 x)%Rng.
+Theorem eval_poly_add {A} {rng : ring A} : ∀ p1 p2 x,
+  (eval_poly (p1 + p2)%pol x = eval_poly p1 x + eval_poly p2 x)%Rng.
 Proof.
 intros (la) (lb) *.
-unfold apply_poly; cbn.
+unfold eval_poly; cbn.
 revert lb.
 induction la as [| a]; intros. {
   cbn.
@@ -1766,8 +1766,8 @@ induction la as [| a]; intros. {
 }
 Qed.
 
-Theorem apply_poly_opp {A} {rng : ring A} : ∀ pol x,
-  (apply_poly (- pol)%pol x = - apply_poly pol x)%Rng.
+Theorem eval_poly_opp {A} {rng : ring A} : ∀ pol x,
+  (eval_poly (- pol)%pol x = - eval_poly pol x)%Rng.
 Proof.
 intros (la) *.
 induction la as [| a]; intros. {
@@ -1782,18 +1782,18 @@ induction la as [| a]; intros. {
 }
 Qed.
 
-Theorem apply_poly_sub {A} {rng : ring A} : ∀ p1 p2 x,
-  (apply_poly (p1 - p2)%pol x = apply_poly p1 x - apply_poly p2 x)%Rng.
+Theorem eval_poly_sub {A} {rng : ring A} : ∀ p1 p2 x,
+  (eval_poly (p1 - p2)%pol x = eval_poly p1 x - eval_poly p2 x)%Rng.
 Proof.
 intros (la) (lb) *.
 unfold poly_sub, rng_sub.
-rewrite apply_poly_add.
+rewrite eval_poly_add.
 apply rng_add_compat_l.
-apply apply_poly_opp.
+apply eval_poly_opp.
 Qed.
 
-Theorem apply_poly_sum {A} {rng : ring A} (pr := polynomial_ring) : ∀ b e f x,
-  (apply_poly (Σ (i = b, e), f i)%pol x = Σ (i = b, e), apply_poly (f i) x)%Rng.
+Theorem eval_poly_sum {A} {rng : ring A} (pr := polynomial_ring) : ∀ b e f x,
+  (eval_poly (Σ (i = b, e), f i)%pol x = Σ (i = b, e), eval_poly (f i) x)%Rng.
 Proof.
 intros.
 unfold summation.
@@ -1801,19 +1801,19 @@ remember (S e - b) as n.
 clear Heqn.
 revert b.
 induction n; intros; [ easy | ].
-cbn - [ apply_poly ].
-rewrite apply_poly_add.
+cbn - [ eval_poly ].
+rewrite eval_poly_add.
 now rewrite IHn.
 Qed.
 
-Theorem apply_poly_one {A} {rng : ring A} : ∀ x, (apply_poly 1%pol x = 1)%Rng.
+Theorem eval_poly_one {A} {rng : ring A} : ∀ x, (eval_poly 1%pol x = 1)%Rng.
 Proof.
 intros; cbn.
 now rewrite rng_mul_0_l, rng_add_0_l.
 Qed.
 
-Theorem apply_lap_cons {A} {rng : ring A} : ∀ a la x,
-  (apply_lap (a :: la) x = a + apply_lap la x * x)%Rng.
+Theorem eval_lap_cons {A} {rng : ring A} : ∀ a la x,
+  (eval_lap (a :: la) x = a + eval_lap la x * x)%Rng.
 Proof.
 intros.
 cbn; rewrite rng_add_comm.
@@ -1824,8 +1824,8 @@ Theorem lap_add_cons_cons {A} {rng : ring A} : ∀ a b la lb,
   ((a :: la) + (b :: lb) = (a + b)%Rng :: la + lb)%lap.
 Proof. easy. Qed.
 
-Theorem apply_lap_add {A} {rng : ring A} : ∀ la lb x,
-  (apply_lap (la + lb)%lap x = apply_lap la x + apply_lap lb x)%Rng.
+Theorem eval_lap_add {A} {rng : ring A} : ∀ la lb x,
+  (eval_lap (la + lb)%lap x = eval_lap la x + eval_lap lb x)%Rng.
 Proof.
 intros.
 revert lb.
@@ -1836,7 +1836,7 @@ destruct lb as [| b]. {
   now rewrite lap_add_0_r, rng_add_0_r.
 }
 rewrite lap_add_cons_cons.
-do 3 rewrite apply_lap_cons.
+do 3 rewrite eval_lap_cons.
 rewrite IHla.
 do 2 rewrite <- rng_add_assoc.
 apply rng_add_compat_l.
@@ -1847,23 +1847,23 @@ rewrite rng_add_comm.
 apply rng_mul_add_distr_r.
 Qed.
 
-Theorem apply_poly_mul {A} {rng : ring A} : ∀ p1 p2 x,
-  (apply_poly (p1 * p2)%pol x = apply_poly p1 x * apply_poly p2 x)%Rng.
+Theorem eval_poly_mul {A} {rng : ring A} : ∀ p1 p2 x,
+  (eval_poly (p1 * p2)%pol x = eval_poly p1 x * eval_poly p2 x)%Rng.
 Proof.
 intros (la) (lb) *.
-unfold apply_poly.
-cbn - [ apply_lap ].
+unfold eval_poly.
+cbn - [ eval_lap ].
 revert lb.
 induction la as [| a]; intros. {
   now rewrite rng_mul_0_l, lap_mul_0_l.
 } {
-  rewrite apply_lap_cons.
+  rewrite eval_lap_cons.
   rewrite rng_mul_add_distr_r.
   rewrite rng_mul_mul_swap.
   rewrite <- IHla.
   rewrite lap_mul_cons_l.
-  rewrite apply_lap_add.
-  rewrite apply_lap_cons, rng_add_0_l.
+  rewrite eval_lap_add.
+  rewrite eval_lap_cons, rng_add_0_l.
   apply rng_add_compat_r.
   clear.
   induction lb as [| b]. {
@@ -1871,21 +1871,21 @@ induction la as [| a]; intros. {
     now rewrite rng_mul_0_r.
   }
   rewrite lap_mul_cons.
-  do 2 rewrite apply_lap_cons.
+  do 2 rewrite eval_lap_cons.
   rewrite rng_mul_add_distr_l.
   apply rng_add_compat_l.
   rewrite lap_mul_0_l, lap_add_0_l.
   rewrite lap_mul_0_l.
-  rewrite apply_lap_add.
-  rewrite apply_lap_const.
+  rewrite eval_lap_add.
+  rewrite eval_lap_const.
   rewrite rng_add_0_r.
   rewrite IHlb.
   now rewrite rng_mul_assoc.
 }
 Qed.
 
-Theorem apply_poly_xpow {A} {rng : ring A} : ∀ k x,
-  (apply_poly (ⓧ ^ k)%pol x = x ^ k)%Rng.
+Theorem eval_poly_xpow {A} {rng : ring A} : ∀ k x,
+  (eval_poly (ⓧ ^ k)%pol x = x ^ k)%Rng.
 Proof.
 intros; cbn.
 induction k. {

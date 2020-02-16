@@ -4410,21 +4410,21 @@ assert
   (H3 : ∀ x,
    (x ^ (p - 1) - 1 = (x - 1) * (Σ (i = 0, p - 1 - 1), x^(p - 1 - i - 1)))%Rng). {
   intros.
-  specialize (apply_poly_morph _ _ H1 x x (rng_eq_refl _)) as H3.
-  rewrite apply_poly_sub in H3.
-  rewrite apply_poly_xpow in H3.
-  rewrite apply_poly_one in H3.
-  rewrite apply_poly_mul in H3.
-  rewrite apply_poly_sub in H3.
-  rewrite apply_poly_xpow in H3.
-  rewrite apply_poly_one in H3.
+  specialize (eval_poly_morph _ _ H1 x x (rng_eq_refl _)) as H3.
+  rewrite eval_poly_sub in H3.
+  rewrite eval_poly_xpow in H3.
+  rewrite eval_poly_one in H3.
+  rewrite eval_poly_mul in H3.
+  rewrite eval_poly_sub in H3.
+  rewrite eval_poly_xpow in H3.
+  rewrite eval_poly_one in H3.
   rewrite rng_pow_1_r in H3.
-  rewrite apply_poly_sum in H3.
+  rewrite eval_poly_sum in H3.
   rewrite H3.
   apply rng_mul_compat_l.
   apply summation_compat.
   intros i Hi.
-  now rewrite apply_poly_xpow.
+  now rewrite eval_poly_xpow.
 }
 ...
 
