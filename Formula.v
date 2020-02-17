@@ -3632,11 +3632,10 @@ apply lap_eq_cons. {
 }
 Qed.
 
-Lemma lap_div_eval_a_x_sub_a : ∀ la a q,
-  q = lap_div_by_x_sub_a la a
-  → (la = [(-a)%Rng; 1%Rng] * q + [eval_lap la a])%lap.
+Lemma lap_div_eval_a_x_sub_a : ∀ la a,
+  (la = [-a; 1]%Rng * lap_div_by_x_sub_a la a + [eval_lap la a])%lap.
 Proof.
-intros * Hq.
+intros.
 rewrite <- rem_is_eval_a.
 now apply lap_div_rem_x_sub_a.
 Qed.
