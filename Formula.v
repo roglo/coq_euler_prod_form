@@ -3661,6 +3661,29 @@ apply mkpol_eq.
 apply lap_div_by_x_sub_a.
 Qed.
 
+Theorem x_sub_root_dividing : ∀ lap a,
+  is_polynomial_root {| al := lap |} a
+  → (lap = [- a; 1]%Rng * lap_quot_by_x_sub_a lap a)%lap.
+Proof.
+intros * Hr.
+unfold is_polynomial_root in Hr.
+unfold eval_poly in Hr.
+rewrite al_mkpol in Hr.
+specialize (lap_div_by_x_sub_a lap a) as H1.
+rewrite Hr in H1.
+...
+rewrite lap_add_0_r in H1.
+...
+
+Theorem x_sub_root_dividing : ∀ pol a,
+  is_polynomial_root pol a
+  → (pol = mkpol [- a; 1]%Rng * poly_quot_by_x_sub_a pol a)%pol.
+Proof.
+intros * Hr.
+unfold is_polynomial_root in Hr.
+specialize (poly_div_rem_by_x_sub_a pol a) as H1.
+...
+rewrite Hr in H1.
 ...
 
 Theorem glop : ∀ (pol q : polynomial A) (r : A) a,
