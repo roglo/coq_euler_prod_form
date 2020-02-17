@@ -3549,17 +3549,17 @@ Definition lap_divrem_by_x_sub_a la a :=
     (λ ai bl, match bl with [] => ai | b :: _ => (ai + a * b)%Rng end :: bl)
     [] la.
 
-Definition lap_div_by_x_sub_a la a :=
+Definition lap_quot_by_x_sub_a la a :=
   tl (lap_divrem_by_x_sub_a la a).
 
 Definition lap_rem_by_x_sub_a la a :=
   hd 0%Rng (lap_divrem_by_x_sub_a la a).
 
 Definition poly_divrem_by_x_sub_a pol a :=
-  ({| al := lap_div_by_x_sub_a (al pol) a |}, lap_rem_by_x_sub_a (al pol) a).
+  ({| al := lap_quot_by_x_sub_a (al pol) a |}, lap_rem_by_x_sub_a (al pol) a).
 
-Definition poly_div_by_x_sub_a pol a :=
-  {| al := lap_div_by_x_sub_a (al pol) a |}.
+Definition poly_quot_by_x_sub_a pol a :=
+  {| al := lap_quot_by_x_sub_a (al pol) a |}.
 
 (*
 Compute (let r := Z_ring in poly_divrem_by_x_sub_a {| al := [1;2;1]%Z |} 1%Z).
@@ -3584,7 +3584,7 @@ now rewrite rng_add_comm, rng_mul_comm.
 Qed.
 
 Lemma lap_div_rem_x_sub_a : ∀ la a q r,
-  q = lap_div_by_x_sub_a la a
+  q = lap_quot_by_x_sub_a la a
   → r = lap_rem_by_x_sub_a la a
   → (la = [(-a)%Rng; 1%Rng] * q + [r])%lap.
 Proof.
@@ -3592,7 +3592,7 @@ intros * Hq Hr.
 cbn.
 rewrite rng_add_0_r.
 rewrite lap_add_0_r.
-unfold lap_div_by_x_sub_a in Hq.
+unfold lap_quot_by_x_sub_a in Hq.
 unfold lap_rem_by_x_sub_a in Hr.
 remember (lap_divrem_by_x_sub_a la a) as qr eqn:Hqr.
 subst q r.
@@ -3635,8 +3635,8 @@ apply lap_eq_cons. {
 }
 Qed.
 
-Lemma lap_div_x_sub_a : ∀ la a,
-  (la = [-a; 1]%Rng * lap_div_by_x_sub_a la a + [eval_lap la a])%lap.
+Lemma lap_div_by_x_sub_a : ∀ la a,
+  (la = [-a; 1]%Rng * lap_quot_by_x_sub_a la a + [eval_lap la a])%lap.
 Proof.
 intros.
 rewrite <- rem_is_eval_a.
@@ -3649,16 +3649,16 @@ Proof. now intros. Qed.
 Lemma mkpol_eq : ∀ la lb, (la = lb)%lap → (mkpol la = mkpol lb)%pol.
 Proof. now intros * Hll. Qed.
 
-Theorem pol_div_by_x_sub_a : ∀ pol a,
+Theorem poly_div_rem_by_x_sub_a : ∀ pol a,
   (pol =
-   mkpol [- a; 1]%Rng * poly_div_by_x_sub_a pol a +
+   mkpol [- a; 1]%Rng * poly_quot_by_x_sub_a pol a +
    mkpol [eval_poly pol a])%pol.
 Proof.
 intros (la) a.
 unfold "+"%pol.
 cbn - [ "+"%lap "*"%lap eval_poly ].
 apply mkpol_eq.
-apply lap_div_x_sub_a.
+apply lap_div_by_x_sub_a.
 Qed.
 
 ...
