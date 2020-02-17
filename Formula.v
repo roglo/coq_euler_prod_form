@@ -3724,7 +3724,8 @@ unfold lap_quot_by_x_sub_a.
 rewrite <- fold_left_is_summation.
 unfold lap_divrem_by_x_sub_a; cbn.
 rewrite Nat.sub_0_r.
-...
+(* seems difficult to prove *)
+Abort.
 
 Theorem glop : ∀ pol roots n,
   (∀ x, x ∈ roots ↔ is_polynomial_root pol x)
