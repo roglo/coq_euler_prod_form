@@ -3716,8 +3716,11 @@ specialize (H1 H); clear H.
 rewrite H1.
 unfold poly_quot_by_x_sub_a.
 unfold "*"%pol.
-cbn.
-(* hou la la... *)
+cbn - [ "*"%lap summation ].
+apply mkpol_eq.
+rewrite rng_add_0_l.
+apply lap_mul_compat_l.
+unfold lap_quot_by_x_sub_a.
 ...
 
 Theorem glop : ∀ pol roots n,
