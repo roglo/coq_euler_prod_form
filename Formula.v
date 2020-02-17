@@ -3558,6 +3558,9 @@ Definition lap_rem_by_x_sub_a la a :=
 Definition poly_divrem_by_x_sub_a pol a :=
   ({| al := lap_div_by_x_sub_a (al pol) a |}, lap_rem_by_x_sub_a (al pol) a).
 
+Definition poly_div_by_x_sub_a pol a :=
+  {| al := lap_div_by_x_sub_a (al pol) a |}.
+
 (*
 Compute (let r := Z_ring in poly_divrem_by_x_sub_a {| al := [1;2;1]%Z |} 1%Z).
 Compute (let r := Z_ring in lap_divrem_by_x_sub_a [1;2;1]%Z 1%Z).
@@ -3640,6 +3643,13 @@ rewrite <- rem_is_eval_a.
 now apply lap_div_rem_x_sub_a.
 Qed.
 
+Theorem pol_div_eval_a_x_sub_a : ∀ pol a,
+  (pol =
+   POL [- a; 1]%Rng * poly_div_by_x_sub_a pol a + POL [eval_poly pol a])%pol.
+Proof.
+intros (la) a.
+unfold "+"%pol.
+Lemma al_POL {A} {rng : ring A} : ∀ la, (al POL la%pol) = la.
 ...
 
 Theorem glop : ∀ (pol q : polynomial A) (r : A) a,
