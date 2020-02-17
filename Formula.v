@@ -3721,6 +3721,9 @@ apply mkpol_eq.
 rewrite rng_add_0_l.
 apply lap_mul_compat_l.
 unfold lap_quot_by_x_sub_a.
+rewrite <- fold_left_is_summation.
+unfold lap_divrem_by_x_sub_a; cbn.
+rewrite Nat.sub_0_r.
 ...
 
 Theorem glop : ∀ pol roots n,
