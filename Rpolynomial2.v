@@ -1510,6 +1510,10 @@ Instance al_morph {A} {rng : ring A} :
   Proper (poly_eq ==> lap_eq) al.
 Proof. intros a b Hab; easy. Qed.
 
+Instance mkpol_morph {A} {rng : ring A} :
+  Proper (lap_eq ==> poly_eq) mkpol.
+Proof. now intros la lb Hlab. Qed.
+
 Instance poly_add_morph {A} {rng : ring A} :
   Proper (poly_eq ==> poly_eq ==> poly_eq) poly_add.
 Proof.

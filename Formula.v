@@ -3661,7 +3661,7 @@ apply mkpol_eq.
 apply lap_div_by_x_sub_a.
 Qed.
 
-Lemma lap_x_sub_root_dividing : ∀ lap a,
+Lemma lap_x_sub_root_divides : ∀ lap a,
   is_polynomial_root {| al := lap |} a
   → (lap = [- a; 1]%Rng * lap_quot_by_x_sub_a lap a)%lap.
 Proof.
@@ -3675,33 +3675,20 @@ rewrite lap_add_compat in H1; [ | easy | apply lap_eq_0 ].
 now rewrite lap_add_0_r in H1.
 Qed.
 
-Theorem x_sub_root_dividing : ∀ pol a,
+Theorem x_sub_root_divides : ∀ pol a,
   is_polynomial_root pol a
   → (pol = mkpol [- a; 1]%Rng * poly_quot_by_x_sub_a pol a)%pol.
 Proof.
 intros * Hr.
 unfold is_polynomial_root in Hr.
 specialize (poly_div_rem_by_x_sub_a pol a) as H1.
-Set Printing All.
-...
 rewrite Hr in H1.
-...
+rewrite rng_add_compat in H1; [ rewrite rng_add_0_r in H1 | easy | ]. 2: {
+  now constructor.
+}
+easy.
+Qed.
 
-Theorem glop : ∀ (pol q : polynomial A) (r : A) a,
-  (q, r) = poly_divrem_by_x_sub_a pol a
-  → (pol = POL [(-a)%Rng; 1%Rng] * q + POL [r])%pol.
-Proof.
-intros * Hqr.
-...
-
-Theorem glop : ∀ pol a q r,
-  (q, r) = poly_divrem_by_x_sub_a pol a
-  → (r = 0)%Rng
-  ↔ (eval_poly pol a = 0)%Rng.
-Proof.
-intros * Hqr.
-split. {
-  intros Hr.
 ...
 
 Theorem glop : ∀ pol roots n,
