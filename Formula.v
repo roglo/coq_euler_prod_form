@@ -3689,6 +3689,35 @@ rewrite rng_add_compat in H1; [ | easy | ]. {
 now constructor.
 Qed.
 
+Theorem pol_pow_sub_1' (pr := polynomial_ring) : ∀ k,
+  k ≠ 0
+  → (ⓧ^k - 1 = (ⓧ - 1) * (Σ (i = 0, k - 1), ⓧ^(k-i-1))%Rng)%pol.
+Proof.
+intros k Hkz.
+specialize (x_sub_root_divides (ⓧ^k - 1)%pol 1%Rng) as H1.
+assert (H : is_polynomial_root (ⓧ^k - 1)%pol 1%Rng). {
+  unfold is_polynomial_root; cbn.
+  subst pr; clear.
+  destruct k; cbn. {
+    rewrite rng_mul_0_l, rng_add_0_l.
+    apply rng_add_opp_r.
+  }
+  rewrite lap_add_0_r.
+  rewrite rng_mul_1_r.
+  rewrite rng_add_0_l.
+  rewrite fold_rng_sub.
+  induction k; cbn. {
+    rewrite rng_mul_0_l, rng_add_0_l.
+    apply rng_add_opp_r.
+  }
+  now rewrite rng_mul_1_r, rng_add_0_r.
+}
+specialize (H1 H); clear H.
+rewrite H1.
+unfold poly_quot_by_x_sub_a.
+unfold "*"%pol.
+cbn.
+(* hou la la... *)
 ...
 
 Theorem glop : ∀ pol roots n,
