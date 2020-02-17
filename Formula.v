@@ -3683,10 +3683,10 @@ intros * Hr.
 unfold is_polynomial_root in Hr.
 specialize (poly_div_rem_by_x_sub_a pol a) as H1.
 rewrite Hr in H1.
-rewrite rng_add_compat in H1; [ rewrite rng_add_0_r in H1 | easy | ]. 2: {
-  now constructor.
+rewrite rng_add_compat in H1; [ | easy | ]. {
+  now rewrite rng_add_0_r in H1.
 }
-easy.
+now constructor.
 Qed.
 
 ...
