@@ -3635,7 +3635,7 @@ apply lap_eq_cons. {
 }
 Qed.
 
-Lemma lap_div_eval_a_x_sub_a : ∀ la a,
+Lemma lap_div_x_sub_a : ∀ la a,
   (la = [-a; 1]%Rng * lap_div_by_x_sub_a la a + [eval_lap la a])%lap.
 Proof.
 intros.
@@ -3643,13 +3643,24 @@ rewrite <- rem_is_eval_a.
 now apply lap_div_rem_x_sub_a.
 Qed.
 
-Theorem pol_div_eval_a_x_sub_a : ∀ pol a,
+Lemma al_mkpol : ∀ la, (al (mkpol la) = la)%lap.
+Proof. now intros. Qed.
+
+Lemma mkpol_eq : ∀ la lb, (la = lb)%lap → (mkpol la = mkpol lb)%pol.
+Proof. now intros * Hll. Qed.
+
+Theorem pol_div_by_x_sub_a : ∀ pol a,
   (pol =
-   POL [- a; 1]%Rng * poly_div_by_x_sub_a pol a + POL [eval_poly pol a])%pol.
+   mkpol [- a; 1]%Rng * poly_div_by_x_sub_a pol a +
+   mkpol [eval_poly pol a])%pol.
 Proof.
 intros (la) a.
 unfold "+"%pol.
-Lemma al_POL {A} {rng : ring A} : ∀ la, (al POL la%pol) = la.
+cbn - [ "+"%lap "*"%lap eval_poly ].
+apply mkpol_eq.
+apply lap_div_x_sub_a.
+Qed.
+
 ...
 
 Theorem glop : ∀ (pol q : polynomial A) (r : A) a,

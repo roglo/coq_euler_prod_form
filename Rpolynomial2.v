@@ -1438,12 +1438,11 @@ Arguments al {_}.
 
 Declare Scope poly_scope.
 Delimit Scope poly_scope with pol.
-Notation "'POL' l" := {| al := l |} (at level 1) : poly_scope.
 
 Definition poly_eq {α} {r : ring α} x y := lap_eq (al x) (al y).
 
-Definition poly_zero {α} {r : ring α} : polynomial α := POL []%pol.
-Definition poly_one {α} {r : ring α} : polynomial α := POL [1%Rng]%pol.
+Definition poly_zero {α} {r : ring α} : polynomial α := mkpol [].
+Definition poly_one {α} {r : ring α} : polynomial α := mkpol [1]%Rng.
 
 Definition poly_add {α} {r : ring α} pol1 pol2 :=
   {| al := lap_add (al pol1) (al pol2) |}.
@@ -1458,13 +1457,13 @@ Definition poly_mul {α} {r : ring α} pol1 pol2 :=
   {| al := lap_mul (al pol1) (al pol2) |}.
 
 Definition poly_power {α} {r : ring α} pol n :=
-  (POL (lap_power (al pol) n))%pol.
+  mkpol (lap_power (al pol) n).
 
 Definition poly_compose {α} {r : ring α} a b :=
-  POL (lap_compose (al a) (al b))%pol.
+  mkpol (lap_compose (al a) (al b)).
 
 Definition poly_compose2 {α} {r : ring α} a b :=
-  POL (lap_compose2 (al a) (al b))%pol.
+  mkpol (lap_compose2 (al a) (al b)).
 
 Definition xpow {α} {r : ring α} i := mkpol (repeat 0%Rng i ++ [1%Rng]).
 
