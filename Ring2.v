@@ -8,6 +8,7 @@ Class ring A :=
     rng_add : A → A → A;
     rng_mul : A → A → A;
     rng_opp : A → A;
+    rng_1_neq_0 : rng_one ≠ rng_zero;
     rng_eq_dec : ∀ a b : A, {a = b} + {a ≠ b};
     rng_add_comm : ∀ a b, rng_add a b = rng_add b a;
     rng_add_assoc : ∀ a b c,
@@ -57,6 +58,13 @@ Proof.
 intros a; simpl.
 rewrite rng_mul_comm, rng_mul_1_l.
 reflexivity.
+Qed.
+
+Theorem rng_add_compat_l : ∀ a b c,
+  (a = b)%Rng → (c + a = c + b)%Rng.
+Proof.
+intros a b c Hab.
+rewrite Hab; reflexivity.
 Qed.
 
 Theorem rng_add_compat_r : ∀ a b c,

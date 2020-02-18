@@ -65,7 +65,7 @@ Proof.
 intros g h b₁ b₂ len Hgh.
 revert b₁ b₂ Hgh.
 induction len; intros; [ reflexivity | simpl ].
-rewrite IHlen.
+rewrite (IHlen _ (S b₂)).
  apply rng_add_compat_r.
  assert (0 ≤ 0 < S len) as H.
   split; [ reflexivity | apply Nat.lt_0_succ ].

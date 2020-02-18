@@ -3,25 +3,23 @@
 (* polynomials on a ring *)
 
 Set Nested Proofs Allowed.
-Require Import Utf8 Arith Setoid Morphisms.
+Require Import Utf8 Arith.
 Import List ListNotations.
 
 Require Import Misc Ring2 Rsummation.
 
-(* lap : list as polynomial, i.e. the only field of the record in the
-   definition of polynomial after *)
+(* (lap : list as polynomial) *)
 
-Inductive lap_eq {α} {r : ring α} : list α → list α → Prop :=
-  | lap_eq_nil : lap_eq [] []
-  | lap_eq_cons : ∀ x1 x2 l1 l2,
-      (x1 = x2)%Rng → lap_eq l1 l2 → lap_eq (x1 :: l1) (x2 :: l2)
-  | lap_eq_cons_nil : ∀ x l,
-      (x = 0)%Rng → lap_eq l [] → lap_eq (x :: l) []
-  | lap_eq_nil_cons : ∀ x l,
-      (x = 0)%Rng → lap_eq [] l → lap_eq [] (x :: l).
+Record poly {A} {rng : ring A} := mkpoly
+  { lap : list A;
+    lap_prop : last lap 1%Rng ≠ 0%Rng }.
 
-Definition lap_zero {α} {r : ring α} := ([] : list α).
-Definition lap_one {α} {r : ring α} := [1%Rng].
+Arguments mkpoly {_} {_}.
+
+Definition lap_zero {α} {r : ring α} := mkpoly [] rng_1_neq_0.
+Definition lap_one {α} {r : ring α} := mkpoly [1%Rng] rng_1_neq_0.
+
+...
 
 Theorem lap_eq_cons_cons_inv : ∀ α (r : ring α) x1 x2 l1 l2,
   lap_eq (x1 :: l1) (x2 :: l2)
