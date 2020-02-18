@@ -69,10 +69,11 @@ Definition Z_ring : ring Z :=
 Compute (@lap_norm_aux Z Z_ring [3; 4; 0; 5; 0; 0; 0]%Z 7).
 *)
 
-Theorem poly_norm_prop {A} {rng : ring A} la i :
-  last (lap_norm_aux la i) 1%Rng ≠ 0%Rng.
+Theorem poly_norm_prop {A} {rng : ring A} la :
+  last (lap_norm_aux la (length la)) 1%Rng ≠ 0%Rng.
 Proof.
 intros.
+...
 revert la.
 induction i; intros; [ apply rng_1_neq_0 | cbn ].
 destruct (rng_eq_dec (nth i la 0%Rng) 0%Rng) as [Hil| Hil]. {
