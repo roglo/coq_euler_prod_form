@@ -35,8 +35,14 @@ Definition lap_opp {α} {r : ring α} la := List.map rng_opp la.
 
 Definition lap_sub {A} {rng : ring A} la lb := lap_add la (lap_opp lb).
 
+Definition lap_norm {A} {rng : ring A} la :=
+...
+
+Definition poly_norm {A} {rng : ring A} la :=
+  mkpoly (lap_norm la) (lap_norm_prop la).
+
 Definition poly_add {A} {rng : ring A} p1 p2 :=
-  mkpoly (lap_add (lap p1) (lap p2)).
+  poly_norm (lap_add (lap p1) (lap p2)).
 
 ,,,
 
