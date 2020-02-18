@@ -386,74 +386,11 @@ Proof. easy. Qed.
 Theorem lap_add_0_r {α} {r : ring α} : ∀ la, lap_add la [] = la.
 Proof. intros; now destruct la. Qed.
 
-Theorem lap_mul_0_l {α} {r : ring α} : ∀ la, lap_mul [] la = [].
-Proof.
-intros.
-...
-Proof. intros α r la; apply lap_convol_mul_nil_l. Qed.
+Theorem lap_mul_0_l {α} {r : ring α} : ∀ la, lap_norm (lap_mul [] la) = [].
+Proof. intros; apply lap_convol_mul_nil_l. Qed.
 
-Theorem lap_mul_0_r : ∀ α (r : ring α) la, lap_eq (lap_mul la []) [].
+Theorem lap_mul_0_r : ∀ α (r : ring α) la, lap_norm (lap_mul la []) = [].
 Proof. intros α r la; apply lap_convol_mul_nil_r. Qed.
-
-Theorem lap_add_compat : ∀ α (r : ring α) a b c d,
-  lap_eq a c
-  → lap_eq b d
-    → lap_eq (lap_add a b) (lap_add c d).
-Proof.
-intros α r a b c d Hac Hbd.
-rewrite Hac, Hbd; reflexivity.
-Qed.
-
-Theorem lap_add_compat_l {α} {r : ring α} : ∀ a b c,
-  lap_eq a b
-  → lap_eq (lap_add c a) (lap_add c b).
-Proof.
-intros a b c Hab.
-rewrite Hab; reflexivity.
-Qed.
-
-Theorem lap_mul_compat : ∀ α (r : ring α) a b c d,
-  lap_eq a c
-  → lap_eq b d
-    → lap_eq (lap_mul a b) (lap_mul c d).
-Proof.
-intros α r a b c d Hac Hbd.
-rewrite Hac, Hbd; reflexivity.
-Qed.
-
-Instance lap_compose_morph {A} {rng : ring A} :
-  Proper (lap_eq ==> lap_eq ==> lap_eq) lap_compose.
-Proof.
-intros la lb Hlab lc ld Hlcd.
-revert lb lc ld Hlab Hlcd.
-induction la as [| a]; intros.
- induction lb as [| b]; [ reflexivity | simpl ].
- apply lap_eq_nil_cons_inv in Hlab.
- destruct Hlab as (Hb, Hlb).
- simpl in IHlb.
- assert (lap_eq [b] []) as H by (rewrite Hb; constructor; reflexivity).
- rewrite H; clear H.
- rewrite lap_add_0_r.
- rewrite <- IHlb; [ rewrite lap_mul_0_l; reflexivity | assumption ].
-
- simpl.
- destruct lb as [| b]; simpl.
-  apply lap_eq_cons_nil_inv in Hlab.
-  destruct Hlab as (Ha, Hla).
-  assert (lap_eq [a] []) as H by (rewrite Ha; constructor; reflexivity).
-  rewrite H; clear H.
-  rewrite lap_add_0_r.
-  rewrite IHla; try eassumption; simpl.
-  rewrite lap_mul_0_l; reflexivity.
-
-  apply lap_eq_cons_cons_inv in Hlab.
-  destruct Hlab as (Hab, Hlab).
-  rewrite Hab.
-  rewrite IHla; try eassumption.
-  apply lap_add_compat; [ idtac | reflexivity ].
-  apply lap_mul_compat; [ idtac | assumption ].
-  reflexivity.
-Qed.
 
 Section lap.
 
@@ -463,57 +400,36 @@ Context {r : ring α}.
 (* addition theorems *)
 
 Theorem lap_add_comm : ∀ al1 al2,
-  lap_eq (lap_add al1 al2) (lap_add al2 al1).
+  lap_add al1 al2 = lap_add al2 al1.
 Proof.
 intros al1 al2.
 revert al2.
-induction al1; intros.
- destruct al2; [ apply lap_eq_refl | simpl ].
- constructor; [ reflexivity | apply lap_eq_refl ].
-
- destruct al2.
-  constructor; [ reflexivity | apply lap_eq_refl ].
-
-  constructor; [ apply rng_add_comm | apply IHal1 ].
+induction al1; intros; [ now destruct al2 | ].
+destruct al2; [ easy | cbn ].
+now rewrite rng_add_comm, IHal1.
 Qed.
 
 Theorem lap_add_assoc : ∀ al1 al2 al3,
-  lap_eq (lap_add al1 (lap_add al2 al3))
-    (lap_add (lap_add al1 al2) al3).
+  lap_add al1 (lap_add al2 al3) = lap_add (lap_add al1 al2) al3.
 Proof.
 intros al1 al2 al3.
 revert al2 al3.
-induction al1; intros.
- destruct al2.
-  destruct al3; [ apply lap_eq_refl | idtac ].
-  constructor; [ reflexivity | apply lap_eq_refl ].
-
-  destruct al3; simpl.
-   constructor; [ reflexivity | apply lap_eq_refl ].
-
-   constructor; [ reflexivity | apply lap_eq_refl ].
-
- destruct al2.
-  destruct al3; simpl.
-   constructor; [ reflexivity | apply lap_eq_refl ].
-
-   constructor; [ reflexivity | apply lap_eq_refl ].
-
-  destruct al3; simpl.
-   constructor; [ reflexivity | apply lap_eq_refl ].
-
-   constructor; [ apply rng_add_assoc | apply IHal1 ].
+induction al1; intros; [ easy | ].
+destruct al2; [ easy | cbn ].
+destruct al3; [ easy | cbn ].
+rewrite rng_add_assoc.
+now rewrite IHal1.
 Qed.
 
-Theorem lap_add_shuffle0 : ∀ la lb lc,
-  lap_eq (lap_add (lap_add la lb) lc)
-     (lap_add (lap_add la lc) lb).
+Theorem lap_add_add_swap : ∀ la lb lc,
+  lap_add (lap_add la lb) lc = lap_add (lap_add la lc) lb.
 Proof.
 intros la lb lc.
 do 2 rewrite <- lap_add_assoc.
-apply lap_add_compat; [ reflexivity | simpl ].
-apply lap_add_comm.
+now rewrite (lap_add_comm lb).
 Qed.
+
+...
 
 Theorem lap_app_add : ∀ la lb,
   (la ++ lb = la + list_pad (length la) 0%Rng lb)%lap.
