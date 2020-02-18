@@ -19,21 +19,7 @@ Arguments mkpoly {_} {_}.
 Definition lap_zero {α} {r : ring α} := mkpoly [] rng_1_neq_0.
 Definition lap_one {α} {r : ring α} := mkpoly [1%Rng] rng_1_neq_0.
 
-(* addition *)
-
-Fixpoint lap_add {α} {r : ring α} al1 al2 :=
-  match al1 with
-  | [] => al2
-  | a1 :: bl1 =>
-      match al2 with
-      | [] => al1
-      | a2 :: bl2 => (a1 + a2)%Rng :: lap_add bl1 bl2
-      end
-  end.
-
-Definition lap_opp {α} {r : ring α} la := List.map rng_opp la.
-
-Definition lap_sub {A} {rng : ring A} la lb := lap_add la (lap_opp lb).
+(* normalization *)
 
 Fixpoint strip_0s {A} {rng : ring A} la :=
   match la with
@@ -41,7 +27,39 @@ Fixpoint strip_0s {A} {rng : ring A} la :=
   | a :: la' => if rng_eq_dec a 0%Rng then strip_0s la' else la
   end.
 
+Lemma strip_0s_app {A} {rng : ring A} : ∀ la lb,
+  strip_0s (la ++ lb) =
+  match strip_0s la with
+  | [] => strip_0s lb
+  | lc => lc ++ lb
+  end.
+Proof.
+intros.
+revert lb.
+induction la as [| a]; intros; [ easy | cbn ].
+destruct (rng_eq_dec a 0%Rng) as [Haz| Haz]; [ apply IHla | easy ].
+Qed.
+
 Definition lap_norm {A} {rng : ring A} la := rev (strip_0s (rev la)).
+
+Theorem poly_norm_prop {A} {rng : ring A} : ∀ la,
+  last (lap_norm la) 1%Rng ≠ 0%Rng.
+Proof.
+intros.
+unfold lap_norm.
+induction la as [| a]; [ apply rng_1_neq_0 | cbn ].
+rewrite strip_0s_app.
+remember (strip_0s (rev la)) as lb eqn:Hlb; symmetry in Hlb.
+destruct lb as [| b]; cbn. {
+  destruct (rng_eq_dec a 0%Rng) as [Haz| Haz]; [ apply rng_1_neq_0 | easy ].
+}
+cbn in IHla.
+rewrite List_last_app.
+now rewrite List_last_app in IHla.
+Qed.
+
+Definition poly_norm {A} {rng : ring A} la :=
+  mkpoly (lap_norm la) (poly_norm_prop la).
 
 (**)
 Require Import ZArith.
@@ -69,99 +87,26 @@ Definition Z_ring : ring Z :=
 Compute (@lap_norm Z Z_ring [3; 4; 0; 5; 0; 0; 0]%Z).
 (**)
 
-(*
-Theorem poly_norm_prop {A} {rng : ring A} la :
-  last (lap_norm_aux la (length la)) 1%Rng ≠ 0%Rng.
-Proof.
-intros.
-...
-revert la.
-induction i; intros; [ apply rng_1_neq_0 | cbn ].
-destruct (rng_eq_dec (nth i la 0%Rng) 0%Rng) as [Hil| Hil]. {
-  apply IHi.
-}
-destruct la as [| a]; [ apply rng_1_neq_0 | cbn ].
-cbn in Hil.
-remember (firstn i la) as lb eqn:Hlb; symmetry in Hlb.
-destruct lb as [| b]. {
-  destruct i; [ easy | ].
-  cbn in Hlb.
-  destruct la as [| b]; [ | easy ].
-  cbn in Hil.
-  now rewrite match_id in Hil.
-}
-cbn.
-destruct i. {
-...
-induction la as [| a]; [ apply rng_1_neq_0 | ].
-cbn - [ nth ].
-destruct (rng_eq_dec (nth (length la) (a :: la) 0%Rng) 0%Rng) as [H1| H1]. {
-...
+(* addition *)
 
-Theorem poly_norm_prop {A} {rng : ring A} la :
-  last (lap_norm_aux la (length la)) 1%Rng ≠ 0%Rng.
-Proof.
-intros.
-induction la as [| a]; [ apply rng_1_neq_0 | ].
-cbn - [ nth ].
-destruct (rng_eq_dec (nth (length la) (a :: la) 0%Rng) 0%Rng) as [H1| H1]. {
-...
-
-remember (length la) as len eqn:Hlen; symmetry in Hlen.
-destruct len. {
-  cbn.
-  destruct (rng_eq_dec a 0%Rng) as [Haz| Haz]; [ | easy ].
-  apply rng_1_neq_0.
-}
-destruct (rng_eq_dec (nth len la 0%Rng) 0%Rng) as [H1| H1]. {
-  cbn.
-  cbn.
-...
-*)
-
-Lemma strip_0s_app {A} {rng : ring A} : ∀ la lb,
-  strip_0s (la ++ lb) =
-  match strip_0s la with
-  | [] => strip_0s lb
-  | lc => lc ++ lb
+Fixpoint lap_add {α} {r : ring α} al1 al2 :=
+  match al1 with
+  | [] => al2
+  | a1 :: bl1 =>
+      match al2 with
+      | [] => al1
+      | a2 :: bl2 => (a1 + a2)%Rng :: lap_add bl1 bl2
+      end
   end.
-Proof.
-intros.
-revert lb.
-induction la as [| a]; intros; [ easy | cbn ].
-destruct (rng_eq_dec a 0%Rng) as [Haz| Haz]; [ apply IHla | easy ].
-Qed.
 
-Theorem poly_norm_prop {A} {rng : ring A} : ∀ la,
-  last (lap_norm la) 1%Rng ≠ 0%Rng.
-Proof.
-intros.
-unfold lap_norm.
-induction la as [| a]; [ apply rng_1_neq_0 | cbn ].
-rewrite strip_0s_app.
-remember (strip_0s (rev la)) as lb eqn:Hlb; symmetry in Hlb.
-destruct lb as [| b]; cbn. {
-  destruct (rng_eq_dec a 0%Rng) as [Haz| Haz]; [ apply rng_1_neq_0 | easy ].
-}
-cbn in IHla.
-rewrite List_last_app.
-now rewrite List_last_app in IHla.
-Qed.
-
-Definition poly_norm {A} {rng : ring A} la :=
-  mkpoly (lap_norm la) (poly_norm_prop la).
-
-Check poly_norm.
-
-Arguments poly_norm {A}%type_scope {rng}%ring_scope _%list_scope
- (poly_norm_ la).
-
-...
+Definition lap_opp {α} {r : ring α} la := List.map rng_opp la.
+Definition lap_sub {A} {rng : ring A} la lb := lap_add la (lap_opp lb).
 
 Definition poly_add {A} {rng : ring A} p1 p2 :=
   poly_norm (lap_add (lap p1) (lap p2)).
 
-,,,
+Compute (@poly_add Z Z_ring (poly_norm [3;4;5]%Z) (poly_norm [2;3;-4;5]%Z)).
+Compute (@poly_add Z Z_ring (poly_norm [3;4;5]%Z) (poly_norm [2;3;-5]%Z)).
 
 (* multiplication *)
 
@@ -176,6 +121,12 @@ Fixpoint lap_convol_mul {α} {r : ring α} al1 al2 i len :=
 Definition lap_mul {α} {R : ring α} la lb :=
   lap_convol_mul la lb 0 (pred (length la + length lb)).
 
+Definition poly_mul {A} {rng : ring A} p1 p2 :=
+  poly_norm (lap_mul (lap p1) (lap p2)).
+
+Compute (@lap_mul Z Z_ring [3;4;5]%Z [2;3;-4;5]%Z).
+Compute (@poly_mul Z Z_ring (poly_norm [3;4;5]%Z) (poly_norm [2;3;-4;5]%Z)).
+
 (* power *)
 
 Fixpoint lap_power {α} {r : ring α} la n :=
@@ -183,6 +134,11 @@ Fixpoint lap_power {α} {r : ring α} la n :=
   | O => [1%Rng]
   | S m => lap_mul la (lap_power la m)
   end.
+
+Definition poly_power {A} {rng : ring A} pol n :=
+  poly_norm (lap_power (lap pol) n).
+
+Compute (@poly_power Z Z_ring (poly_norm [1; -1]%Z) 4).
 
 (* composition *)
 
@@ -208,8 +164,6 @@ Delimit Scope lap_scope with lap.
 Notation "0" := lap_zero : lap_scope.
 Notation "1" := lap_one : lap_scope.
 Notation "- a" := (lap_opp a) : lap_scope.
-Notation "a = b" := (lap_eq a b) : lap_scope.
-Notation "a ≠ b" := (¬lap_eq a b) : lap_scope.
 Notation "a + b" := (lap_add a b) : lap_scope.
 Notation "a - b" := (lap_sub a b) : lap_scope.
 Notation "a * b" := (lap_mul a b) : lap_scope.
@@ -219,50 +173,7 @@ Definition list_nth_def_0 {α} {R : ring α} n l := List.nth n l 0%Rng.
 
 (* *)
 
-Instance list_nth_rng_morph {A} {rng : ring A} :
-  Proper (eq ==> lap_eq ==> rng_eq) list_nth_def_0.
-Proof.
-intros n n' Hnn la lb Hab.
-subst n'.
-unfold list_nth_def_0.
-revert n lb Hab.
-induction la as [| a]; intros; simpl.
- rewrite match_id.
- symmetry.
- revert n.
- induction lb as [| b]; intros; [ destruct n; reflexivity | idtac ].
- apply lap_eq_nil_cons_inv in Hab.
- destruct Hab as (Hb, Hlb).
- destruct n; [ assumption | simpl ].
- apply IHlb; assumption.
-
- destruct n; simpl.
-  destruct lb as [| b]; simpl.
-   apply lap_eq_cons_nil_inv in Hab.
-   destruct Hab; assumption.
-
-   apply lap_eq_cons_cons_inv in Hab.
-   destruct Hab; assumption.
-
-  destruct lb as [| b]; simpl.
-   apply lap_eq_cons_nil_inv in Hab.
-   destruct Hab as (_, Hla).
-   clear a IHla.
-   revert n.
-   induction la as [| a]; intros.
-    destruct n; reflexivity.
-
-    destruct n; simpl.
-     apply lap_eq_cons_nil_inv in Hla.
-     destruct Hla; assumption.
-
-     apply lap_eq_cons_nil_inv in Hla.
-     apply IHla; destruct Hla; assumption.
-
-   apply lap_eq_cons_cons_inv in Hab.
-   destruct Hab as (_, Hab).
-   apply IHla; assumption.
-Qed.
+...
 
 Theorem lap_eq_nil_lap_add_r : ∀ α (r : ring α) la lb,
   lap_eq [] la
