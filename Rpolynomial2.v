@@ -224,6 +224,7 @@ rewrite lap_convol_mul_comm.
 apply lap_convol_mul_nil_l.
 Qed.
 
+(*
 Theorem lap_convol_mul_succ : ∀ α (r : ring α) la lb i len,
   lap_norm (lap_convol_mul la lb i (S len)) =
   lap_norm
@@ -236,6 +237,7 @@ unfold lap_norm; f_equal.
 cbn - [ summation ].
 rewrite rev_app_distr.
 cbn - [ strip_0s summation ].
+...
 revert la lb i.
 induction len; intros. {
   cbn - [ summation ].
@@ -256,10 +258,12 @@ induction len; intros; simpl.
  rewrite Nat.add_succ_r, Nat.add_succ_l.
  reflexivity.
 Qed.
+*)
 
+(*
 Theorem lap_eq_app_0s : ∀ α (r : ring α) la lb,
   List.Forall (λ b, b = 0)%Rng lb
-  → lap_eq la (la ++ lb).
+  → ap_eq la (la ++ lb).
 Proof.
 intros α r la lb Hz.
 induction la as [| a]; simpl.
@@ -339,7 +343,9 @@ Proof.
 intros a b H la lb Hab.
 constructor; assumption.
 Qed.
+*)
 
+(*
 Theorem list_nth_lap_eq : ∀ α (r : ring α) la lb,
   (∀ i, (List.nth i la 0 = List.nth i lb 0)%Rng)
   → lap_eq la lb.
@@ -372,20 +378,18 @@ induction la as [| a]; intros.
    pose proof (Hi (S i)) as H.
    assumption.
 Qed.
+*)
 
-Theorem lap_add_0_l {α} {r : ring α} : ∀ la,
-  lap_add [] la = la.
+Theorem lap_add_0_l {α} {r : ring α} : ∀ la, lap_add [] la = la.
 Proof. easy. Qed.
 
-Theorem lap_add_0_l' {α} {r : ring α} : ∀ la,
-  lap_eq (lap_add [] la) la.
-Proof. easy. Qed.
-
-Theorem lap_add_0_r : ∀ α (r : ring α) la,
-  lap_add la [] = la.
+Theorem lap_add_0_r {α} {r : ring α} : ∀ la, lap_add la [] = la.
 Proof. intros; now destruct la. Qed.
 
-Theorem lap_mul_0_l : ∀ α (r : ring α) la, lap_eq (lap_mul [] la) [].
+Theorem lap_mul_0_l {α} {r : ring α} : ∀ la, lap_mul [] la = [].
+Proof.
+intros.
+...
 Proof. intros α r la; apply lap_convol_mul_nil_l. Qed.
 
 Theorem lap_mul_0_r : ∀ α (r : ring α) la, lap_eq (lap_mul la []) [].
