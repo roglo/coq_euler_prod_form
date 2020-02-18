@@ -348,7 +348,7 @@ Qed.
 (*
 Theorem list_nth_lap_eq : ∀ α (r : ring α) la lb,
   (∀ i, (List.nth i la 0 = List.nth i lb 0)%Rng)
-  → lap_eq la lb.
+  → la = lb.
 Proof.
 intros α r la lb Hi.
 revert lb Hi.
@@ -429,8 +429,7 @@ do 2 rewrite <- lap_add_assoc.
 now rewrite (lap_add_comm lb).
 Qed.
 
-...
-
+(*
 Theorem lap_app_add : ∀ la lb,
   (la ++ lb = la + list_pad (length la) 0%Rng lb)%lap.
 Proof.
@@ -457,16 +456,18 @@ intros β f g la.
 induction la as [| b]; [ reflexivity | simpl ].
 constructor; auto with Arith.
 Qed.
+*)
 
 (* multiplication theorems *)
 
-Theorem lap_mul_comm : ∀ a b, lap_eq (lap_mul a b) (lap_mul b a).
+Theorem lap_mul_comm : ∀ a b, lap_mul a b = lap_mul b a.
 Proof.
 intros a b.
 unfold lap_mul.
-rewrite lap_convol_mul_comm, Nat.add_comm; reflexivity.
+now rewrite lap_convol_mul_comm, Nat.add_comm.
 Qed.
 
+(*
 Theorem list_nth_lap_convol_mul_aux : ∀ la lb n i len,
   pred (List.length la + List.length lb) = (i + len)%nat
   → (List.nth n (lap_convol_mul la lb i len) 0%Rng =
@@ -560,15 +561,15 @@ rewrite Nat_sub_sub_distr; [ idtac | easy ].
 rewrite Nat.sub_diag.
 apply list_nth_lap_convol_mul; reflexivity.
 Qed.
+*)
 
-(* inspired from series_mul_assoc *)
 Theorem lap_mul_assoc : ∀ la lb lc,
-  lap_eq (lap_mul la (lap_mul lb lc))
-    (lap_mul (lap_mul la lb) lc).
+  lap_mul la (lap_mul lb lc) = lap_mul (lap_mul la lb) lc.
 Proof.
 intros la lb lc.
 symmetry; rewrite lap_mul_comm.
 unfold lap_mul.
+...
 apply list_nth_lap_eq; intros k.
 rewrite list_nth_lap_convol_mul; [ idtac | reflexivity ].
 rewrite list_nth_lap_convol_mul; [ idtac | reflexivity ].
