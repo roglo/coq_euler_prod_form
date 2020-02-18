@@ -119,17 +119,39 @@ destruct (rng_eq_dec (nth len la 0%Rng) 0%Rng) as [H1| H1]. {
 ...
 *)
 
+Lemma strip_0s_app {A} {rng : ring A} : ∀ la lb,
+  strip_0s (la ++ lb) =
+  match strip_0s la with
+  | [] => strip_0s lb
+  | lc => lc ++ lb
+  end.
+Proof.
+intros.
+revert lb.
+induction la as [| a]; intros; [ easy | cbn ].
+destruct (rng_eq_dec a 0%Rng) as [Haz| Haz]; [ apply IHla | easy ].
+Qed.
+
 Theorem poly_norm_prop {A} {rng : ring A} : ∀ la,
   last (lap_norm la) 1%Rng ≠ 0%Rng.
 Proof.
 intros.
 unfold lap_norm.
-...
+induction la as [| a]; [ apply rng_1_neq_0 | cbn ].
+rewrite strip_0s_app.
+remember (strip_0s (rev la)) as lb eqn:Hlb; symmetry in Hlb.
+destruct lb as [| b]; cbn. {
+  destruct (rng_eq_dec a 0%Rng) as [Haz| Haz]; [ apply rng_1_neq_0 | easy ].
+}
+cbn in IHla.
+rewrite List_last_app.
+now rewrite List_last_app in IHla.
+Qed.
 
 Definition poly_norm {A} {rng : ring A} la :=
-  mkpoly (lap_norm la).
+  mkpoly (lap_norm la) (poly_norm_prop la).
 
-Print poly_norm.
+Check poly_norm.
 
 Arguments poly_norm {A}%type_scope {rng}%ring_scope _%list_scope
  (poly_norm_ la).
