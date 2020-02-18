@@ -179,8 +179,7 @@ Proof.
 intros α R l1 l2 i len.
 revert i.
 induction len; intros; [ reflexivity | simpl ].
-...
-constructor; [ idtac | apply IHlen ].
+rewrite IHlen; f_equal.
 rewrite summation_rtl.
 apply summation_compat; intros j (_, Hj).
 rewrite Nat.add_0_r.
@@ -191,12 +190,14 @@ rewrite Nat.sub_diag, Nat.add_0_l; reflexivity.
 Qed.
 
 Theorem lap_convol_mul_nil_l : ∀ α (R : ring α) l i len,
-  lap_eq (lap_convol_mul [] l i len) [].
+  lap_convol_mul [] l i len = [].
 Proof.
 intros α R l i len.
 revert i.
 induction len; intros; [ reflexivity | simpl ].
-constructor; [ idtac | apply IHlen ].
+rewrite IHlen; f_equal.
+rewrite all_0_summation_0.
+...
 rewrite all_0_summation_0; [ reflexivity | idtac ].
 intros k (_, Hk).
 destruct k; rewrite rng_mul_0_l; reflexivity.
