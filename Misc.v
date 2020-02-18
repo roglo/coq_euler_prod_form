@@ -1207,6 +1207,13 @@ intros.
 now induction l.
 Qed.
 
+Theorem List_eq_rev_nil {A} : ∀ (l : list A), rev l = [] → l = [].
+Proof.
+intros * Hl.
+destruct l as [| a]; [ easy | cbn in Hl ].
+now apply app_eq_nil in Hl.
+Qed.
+
 Theorem NoDup_app_app_swap {A} : ∀ l1 l2 l3 : list A,
   NoDup (l1 ++ l2 ++ l3) → NoDup (l1 ++ l3 ++ l2).
 Proof.

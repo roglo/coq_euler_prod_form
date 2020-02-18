@@ -84,7 +84,9 @@ Definition Z_ring : ring Z :=
      rng_mul_1_l := Z.mul_1_l;
      rng_mul_add_distr_l := Z.mul_add_distr_l |}.
 
+(*
 Compute (@lap_norm Z Z_ring [3; 4; 0; 5; 0; 0; 0]%Z).
+*)
 (**)
 
 (* addition *)
@@ -105,8 +107,10 @@ Definition lap_sub {A} {rng : ring A} la lb := lap_add la (lap_opp lb).
 Definition poly_add {A} {rng : ring A} p1 p2 :=
   poly_norm (lap_add (lap p1) (lap p2)).
 
+(*
 Compute (@poly_add Z Z_ring (poly_norm [3;4;5]%Z) (poly_norm [2;3;-4;5]%Z)).
 Compute (@poly_add Z Z_ring (poly_norm [3;4;5]%Z) (poly_norm [2;3;-5]%Z)).
+*)
 
 (* multiplication *)
 
@@ -124,8 +128,10 @@ Definition lap_mul {α} {R : ring α} la lb :=
 Definition poly_mul {A} {rng : ring A} p1 p2 :=
   poly_norm (lap_mul (lap p1) (lap p2)).
 
+(*
 Compute (@lap_mul Z Z_ring [3;4;5]%Z [2;3;-4;5]%Z).
 Compute (@poly_mul Z Z_ring (poly_norm [3;4;5]%Z) (poly_norm [2;3;-4;5]%Z)).
+*)
 
 (* power *)
 
@@ -138,7 +144,9 @@ Fixpoint lap_power {α} {r : ring α} la n :=
 Definition poly_power {A} {rng : ring A} pol n :=
   poly_norm (lap_power (lap pol) n).
 
+(*
 Compute (@poly_power Z Z_ring (poly_norm [1; -1]%Z) 4).
+*)
 
 (* composition *)
 
@@ -190,67 +198,33 @@ rewrite Nat.sub_diag, Nat.add_0_l; reflexivity.
 Qed.
 
 Theorem lap_convol_mul_nil_l : ∀ α (R : ring α) l i len,
-  lap_convol_mul [] l i len = [].
+  lap_norm (lap_convol_mul [] l i len) = [].
 Proof.
 intros α R l i len.
+unfold lap_norm.
 revert i.
-induction len; intros; [ reflexivity | simpl ].
-rewrite IHlen; f_equal.
-rewrite all_0_summation_0.
-...
-rewrite all_0_summation_0; [ reflexivity | idtac ].
+induction len; intros; [ reflexivity | ].
+cbn - [ summation ].
+rewrite all_0_summation_0. {
+  rewrite strip_0s_app; cbn.
+  specialize (IHlen (S i)).
+  apply List_eq_rev_nil in IHlen.
+  rewrite IHlen.
+  now destruct (rng_eq_dec 0%Rng 0%Rng).
+}
 intros k (_, Hk).
-destruct k; rewrite rng_mul_0_l; reflexivity.
+now rewrite match_id, rng_mul_0_l.
 Qed.
 
 Theorem lap_convol_mul_nil_r : ∀ α (R : ring α) l i len,
-  lap_eq (lap_convol_mul l [] i len) [].
+  lap_norm (lap_convol_mul l [] i len) = [].
 Proof.
 intros α R l i len.
 rewrite lap_convol_mul_comm.
 apply lap_convol_mul_nil_l.
 Qed.
 
-Theorem list_nth_rng_eq : ∀ α (r : ring α) la lb n,
-  lap_eq la lb → (List.nth n la 0 = List.nth n lb 0)%Rng.
-Proof.
-intros α r la lb n Hlab.
-revert lb n Hlab.
-induction la as [| a]; intros.
- revert n.
- induction lb as [| b]; intros; [ reflexivity | simpl ].
- apply lap_eq_nil_cons_inv in Hlab.
- destruct Hlab as (Hb, Hlb).
- symmetry in Hb.
- destruct n; [ assumption | idtac ].
- rewrite <- IHlb; [ destruct n; reflexivity | assumption ].
-
- revert n.
- induction lb as [| b]; intros.
-  simpl.
-  apply lap_eq_cons_nil_inv in Hlab.
-  destruct Hlab as (Ha, Hla).
-  destruct n; [ assumption | idtac ].
-  rewrite IHla; [ idtac | eassumption ].
-  destruct n; reflexivity.
-
-  apply lap_eq_cons_cons_inv in Hlab.
-  destruct Hlab as (Hab, Hlab).
-  destruct n; [ assumption | simpl ].
-  apply IHla; assumption.
-Qed.
-
-Instance lap_convol_mul_morph {A} {rng : ring A} :
-  Proper (lap_eq ==> lap_eq ==> eq ==> eq ==> lap_eq) lap_convol_mul.
-Proof.
-intros la lb Hlab lc ld Hlcd i i' Hii len len' Hll.
-subst i' len'.
-revert la lb lc ld Hlab Hlcd i.
-induction len; intros; [ reflexivity | simpl ].
-constructor; [ idtac | apply IHlen; assumption ].
-apply summation_compat; intros j (_, Hj).
-apply rng_mul_compat; apply list_nth_rng_eq; assumption.
-Qed.
+...
 
 Theorem lap_convol_mul_succ : ∀ α (r : ring α) la lb i len,
   lap_eq
