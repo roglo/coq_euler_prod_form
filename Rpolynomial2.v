@@ -35,11 +35,91 @@ Definition lap_opp {α} {r : ring α} la := List.map rng_opp la.
 
 Definition lap_sub {A} {rng : ring A} la lb := lap_add la (lap_opp lb).
 
-Definition lap_norm {A} {rng : ring A} la :=
+Fixpoint lap_norm_aux {A} {rng : ring A} la i :=
+  match i with
+  | 0 => []
+  | S i' =>
+      if rng_eq_dec (nth i' la 0%Rng) 0%Rng then lap_norm_aux la i'
+      else firstn i la
+  end.
+
+(*
+Require Import ZArith.
+
+Theorem Z_1_neq_0 : (1 ≠ 0)%Z.
+Proof. easy. Qed.
+
+Definition Z_ring : ring Z :=
+  {| rng_zero := 0%Z;
+     rng_one := 1%Z;
+     rng_add a b := (a + b)%Z;
+     rng_mul a b := (a * b)%Z;
+     rng_opp a := (- a)%Z;
+     rng_1_neq_0 := Z_1_neq_0;
+     rng_eq_dec := Z.eq_dec;
+     rng_add_comm := Z.add_comm;
+     rng_add_assoc := Z.add_assoc;
+     rng_add_0_l := Z.add_0_l;
+     rng_add_opp_l := Z.add_opp_diag_l;
+     rng_mul_comm := Z.mul_comm;
+     rng_mul_assoc := Z.mul_assoc;
+     rng_mul_1_l := Z.mul_1_l;
+     rng_mul_add_distr_l := Z.mul_add_distr_l |}.
+
+Compute (@lap_norm_aux Z Z_ring [3; 4; 0; 5; 0; 0; 0]%Z 7).
+*)
+
+Theorem poly_norm_prop {A} {rng : ring A} la i :
+  last (lap_norm_aux la i) 1%Rng ≠ 0%Rng.
+Proof.
+intros.
+revert la.
+induction i; intros; [ apply rng_1_neq_0 | cbn ].
+destruct (rng_eq_dec (nth i la 0%Rng) 0%Rng) as [Hil| Hil]. {
+  apply IHi.
+}
+destruct la as [| a]; [ apply rng_1_neq_0 | cbn ].
+cbn in Hil.
+remember (firstn i la) as lb eqn:Hlb; symmetry in Hlb.
+destruct lb as [| b]. {
+  destruct i; [ easy | ].
+  cbn in Hlb.
+  destruct la as [| b]; [ | easy ].
+  cbn in Hil.
+  now rewrite match_id in Hil.
+}
+cbn.
+destruct i. {
+...
+induction la as [| a]; [ apply rng_1_neq_0 | ].
+cbn - [ nth ].
+destruct (rng_eq_dec (nth (length la) (a :: la) 0%Rng) 0%Rng) as [H1| H1]. {
+...
+
+Theorem poly_norm_prop {A} {rng : ring A} la :
+  last (lap_norm_aux la (length la)) 1%Rng ≠ 0%Rng.
+Proof.
+intros.
+induction la as [| a]; [ apply rng_1_neq_0 | ].
+cbn - [ nth ].
+destruct (rng_eq_dec (nth (length la) (a :: la) 0%Rng) 0%Rng) as [H1| H1]. {
+...
+
+remember (length la) as len eqn:Hlen; symmetry in Hlen.
+destruct len. {
+  cbn.
+  destruct (rng_eq_dec a 0%Rng) as [Haz| Haz]; [ | easy ].
+  apply rng_1_neq_0.
+}
+destruct (rng_eq_dec (nth len la 0%Rng) 0%Rng) as [H1| H1]. {
+  cbn.
+  cbn.
 ...
 
 Definition poly_norm {A} {rng : ring A} la :=
-  mkpoly (lap_norm la) (lap_norm_prop la).
+  mkpoly (lap_norm_aux la (length la)) (poly_norm_prop la).
+
+...
 
 Definition poly_add {A} {rng : ring A} p1 p2 :=
   poly_norm (lap_add (lap p1) (lap p2)).
