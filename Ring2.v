@@ -1,6 +1,6 @@
 (* Ring2.v *)
 
-Require Import Utf8 Setoid Morphisms.
+Require Import Utf8.
 
 Class ring A :=
   { rng_zero : A;
@@ -8,34 +8,24 @@ Class ring A :=
     rng_add : A → A → A;
     rng_mul : A → A → A;
     rng_opp : A → A;
-    rng_eq : A → A → Prop;
-    rng_eq_refl : ∀ a, rng_eq a a;
-    rng_eq_sym : ∀ a b, rng_eq a b → rng_eq b a;
-    rng_eq_trans : ∀ a b c, rng_eq a b → rng_eq b c → rng_eq a c;
-    rng_add_comm : ∀ a b, rng_eq (rng_add a b) (rng_add b a);
+    rng_eq_dec : ∀ a b : A, {a = b} + {a ≠ b};
+    rng_add_comm : ∀ a b, rng_add a b = rng_add b a;
     rng_add_assoc : ∀ a b c,
-      rng_eq (rng_add a (rng_add b c)) (rng_add (rng_add a b) c);
-    rng_add_0_l : ∀ a, rng_eq (rng_add rng_zero a) a;
-    rng_add_opp_l : ∀ a, rng_eq (rng_add (rng_opp a) a) rng_zero;
-    rng_add_compat_l : ∀ a b c,
-      rng_eq a b → rng_eq (rng_add c a) (rng_add c b);
-    rng_mul_comm : ∀ a b, rng_eq (rng_mul a b) (rng_mul b a);
+      rng_add a (rng_add b c) = rng_add (rng_add a b) c;
+    rng_add_0_l : ∀ a, rng_add rng_zero a = a;
+    rng_add_opp_l : ∀ a, rng_add (rng_opp a) a = rng_zero;
+    rng_mul_comm : ∀ a b, rng_mul a b = rng_mul b a;
     rng_mul_assoc : ∀ a b c,
-      rng_eq (rng_mul a (rng_mul b c)) (rng_mul (rng_mul a b) c);
-    rng_mul_1_l : ∀ a, rng_eq (rng_mul rng_one a) a;
-    rng_mul_compat_l : ∀ a b c,
-      rng_eq a b → rng_eq (rng_mul c a) (rng_mul c b);
+      rng_mul a (rng_mul b c) = rng_mul (rng_mul a b) c;
+    rng_mul_1_l : ∀ a, rng_mul rng_one a = a;
     rng_mul_add_distr_l : ∀ a b c,
-      rng_eq (rng_mul a (rng_add b c))
-        (rng_add (rng_mul a b) (rng_mul a c)) }.
+      rng_mul a (rng_add b c) = rng_add (rng_mul a b) (rng_mul a c) }.
 
 Definition rng_sub {A} {R : ring A} a b := rng_add a (rng_opp b).
 
 Declare Scope ring_scope.
 Delimit Scope ring_scope with Rng.
 Bind Scope ring_scope with ring.
-Notation "a = b" := (rng_eq a b) : ring_scope.
-Notation "a ≠ b" := (¬ rng_eq a b) : ring_scope.
 Notation "a + b" := (rng_add a b) : ring_scope.
 Notation "a - b" := (rng_sub a b) : ring_scope.
 Notation "a * b" := (rng_mul a b) : ring_scope.
@@ -50,6 +40,8 @@ Fixpoint rng_power {A} {R : ring A} a n :=
   end.
 
 Notation "a ^ b" := (rng_power a b) : ring_scope.
+
+...
 
 Add Parametric Relation A (rng : ring A) : A rng_eq
  reflexivity proved by rng_eq_refl
