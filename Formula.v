@@ -3728,6 +3728,63 @@ rewrite Nat.sub_0_r.
 Abort.
 
 Theorem glop : ∀ pol roots n,
+  n ≠ 0
+  → (∀ x, x ∈ roots ↔ is_polynomial_root pol x)
+  → NoDup roots
+  → poly_has_degree pol n
+  → length roots ≤ n.
+Proof.
+intros (la) * Hnz Hr Hnd Hdeg.
+unfold poly_has_degree in Hdeg; cbn in Hdeg.
+assert (H : ∀ x, x ∈ roots ↔ (eval_lap la x = 0)%Rng). {
+  intros x.
+  split; intros H. {
+    now specialize (proj1 (Hr x) H) as H1.
+  } {
+    now specialize (proj2 (Hr x) H) as H1.
+  }
+}
+move H before Hr; clear Hr; rename H into Hr.
+remember (length roots) as nroot eqn:Hnroot.
+symmetry in Hnroot.
+revert la n roots Hnz Hr Hdeg Hnd Hnroot.
+induction nroot; intros; [ flia | ].
+destruct roots as [| r]; [ cbn in Hnroot; flia Hnroot | ].
+specialize (proj1 (Hr r) (or_introl eq_refl)) as H1.
+specialize (lap_x_sub_root_divides la r H1) as H2.
+destruct n; [ easy | clear Hnz ].
+specialize (IHnroot (lap_quot_by_x_sub_a la r) (n - 1)) as H3.
+destruct n. {
+  inversion Hdeg. {
+    subst n la; rename la0 into la.
+    rename H into H4.
+    rename H0 into H5.
+    symmetry in H5.
+    destruct la as [| b lb]; [ cbn in H5; flia H5 | ].
+    destruct lb; [ | easy ].
+    clear H5.
+    cbn in H1.
+    rewrite rng_mul_0_l, rng_add_0_l in H1.
+    clear H2. (* because just implies b=-r*a *)
+    cbn in Hnroot.
+    destruct roots as [| r2]. {
+      cbn in Hnroot; flia Hnroot.
+    }
+    specialize (proj1 (Hr r2) (or_intror (or_introl eq_refl))) as H2.
+    cbn in H2.
+    rewrite rng_mul_0_l, rng_add_0_l in H2.
+    rewrite <- H2 in H1.
+    apply rng_add_reg_r in H1.
+Search (_ * _ = _ * _)%Rng.
+(* to get r=r2, it requires that the ring is integral; if we limit to
+   ℤ/nℤ, it requires that n is prime; if we want to be general (not
+   only ℤ/nℤ), I don't know *)
+...
+    apply rng_mul_reg_l in H1.
+    apply rng_add_compat in H1.
+...
+
+Theorem glop : ∀ pol roots n,
   (∀ x, x ∈ roots ↔ is_polynomial_root pol x)
   → NoDup roots
   → poly_has_degree pol n
@@ -3737,6 +3794,17 @@ Theorem glop : ∀ pol roots n,
    this theorem is not perfect *)
 Proof.
 intros * Hr Hnd Hdeg.
+remember (length roots) as nroot eqn:Hnroot.
+symmetry in Hnroot.
+revert pol n roots Hr Hdeg Hnd Hnroot.
+induction nroot; intros; [ flia | ].
+destruct roots as [| r]; [ cbn in Hnroot; flia Hnroot | ].
+specialize (proj1 (Hr r) (or_introl eq_refl)) as H1.
+specialize (x_sub_root_divides pol r H1) as H2.
+destruct n. {
+Search lap_has_degree.
+...
+specialize (IHnroot (poly_quot_by_x_sub_a pol r) (n - 1)) as H3.
 ...
 
 Definition roots_of_pol pol := ... (* mmm... no way to compute them *)
