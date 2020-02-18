@@ -41,63 +41,6 @@ Fixpoint rng_power {A} {R : ring A} a n :=
 
 Notation "a ^ b" := (rng_power a b) : ring_scope.
 
-...
-
-Add Parametric Relation A (rng : ring A) : A rng_eq
- reflexivity proved by rng_eq_refl
- symmetry proved by rng_eq_sym
- transitivity proved by rng_eq_trans
- as eq_rel.
-
-Instance add_morph {A} {rng : ring A} :
-  Proper (rng_eq ==> rng_eq ==> rng_eq) rng_add.
-Proof.
-intros a b Hab c d Hcd.
-rewrite rng_add_comm; symmetry.
-rewrite rng_add_comm; symmetry.
-rewrite rng_add_compat_l; [ idtac | eassumption ].
-rewrite rng_add_comm; symmetry.
-rewrite rng_add_comm; symmetry.
-rewrite rng_add_compat_l; [ reflexivity | eassumption ].
-Qed.
-
-Instance opp_morph {A} {rng : ring A} :
-  Proper (rng_eq ==> rng_eq) rng_opp.
-Proof.
-intros a b Heq.
-apply rng_add_compat_l with (c := rng_opp b) in Heq.
-rewrite rng_add_opp_l in Heq.
-rewrite rng_add_comm in Heq.
-apply rng_add_compat_l with (c := rng_opp a) in Heq.
-rewrite rng_add_assoc in Heq.
-rewrite rng_add_opp_l in Heq.
-rewrite rng_add_0_l in Heq.
-symmetry in Heq.
-rewrite rng_add_comm in Heq.
-rewrite rng_add_0_l in Heq.
-assumption.
-Qed.
-
-Instance sub_morph {A} {rng : ring A} :
-  Proper (rng_eq ==> rng_eq ==> rng_eq) rng_sub.
-Proof.
-intros a b Hab c d Hcd.
-unfold rng_sub.
-now rewrite Hab, Hcd.
-Qed.
-
-Instance rng_mul_morph {A} {rng : ring A} :
-  Proper (rng_eq ==> rng_eq ==> rng_eq) rng_mul.
-Proof.
-intros a b Hab c d Hcd.
-rewrite rng_mul_comm; symmetry.
-rewrite rng_mul_comm; symmetry.
-rewrite rng_mul_compat_l; [ idtac | eassumption ].
-rewrite rng_mul_comm; symmetry.
-rewrite rng_mul_comm; symmetry.
-rewrite rng_mul_compat_l; [ reflexivity | eassumption ].
-Qed.
-
 Section ring_theorems.
 
 Context {A : Type}.
@@ -236,7 +179,7 @@ intros x y z; simpl.
 rewrite rng_mul_comm.
 rewrite rng_mul_add_distr_l.
 rewrite rng_mul_comm.
-assert (rng_eq (rng_mul z y) (rng_mul y z)) as H.
+assert (rng_mul z y = rng_mul y z) as H.
  apply rng_mul_comm.
 
  rewrite H; reflexivity.
@@ -297,8 +240,11 @@ Theorem rng_mul_sub_distr_r : ∀ x y z,
   ((x - y) * z = x * z - y * z)%Rng.
 Proof.
 intros.
-setoid_rewrite rng_mul_comm.
-apply rng_mul_sub_distr_l.
+rewrite rng_mul_comm.
+rewrite rng_mul_sub_distr_l.
+rewrite (rng_mul_comm _ x).
+rewrite (rng_mul_comm _ y).
+easy.
 Qed.
 
 Theorem rng_opp_0 : (- 0 = 0)%Rng.
@@ -369,5 +315,3 @@ Theorem rng_pow_1_r : ∀ a, (a ^ 1 = a)%Rng.
 Proof. now intros; cbn; rewrite rng_mul_1_r. Qed.
 
 End ring_theorems.
-
-Hint Resolve rng_eq_refl : Arith.
