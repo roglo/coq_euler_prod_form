@@ -224,15 +224,27 @@ rewrite lap_convol_mul_comm.
 apply lap_convol_mul_nil_l.
 Qed.
 
-...
-
 Theorem lap_convol_mul_succ : ∀ α (r : ring α) la lb i len,
-  lap_eq
-    (lap_convol_mul la lb i (S len))
+  lap_norm (lap_convol_mul la lb i (S len)) =
+  lap_norm
     (lap_convol_mul la lb i len ++
      [Σ (j = 0, i + len),
       List.nth j la 0 * List.nth (i + len - j) lb 0])%Rng.
 Proof.
+intros α r la lb i len.
+unfold lap_norm; f_equal.
+cbn - [ summation ].
+rewrite rev_app_distr.
+cbn - [ strip_0s summation ].
+revert la lb i.
+induction len; intros. {
+  cbn - [ summation ].
+  now rewrite Nat.add_0_r.
+}
+cbn - [ strip_0s summation ].
+rewrite strip_0s_app.
+rewrite IHlen.
+...
 intros α r la lb i len.
 revert la lb i.
 induction len; intros; simpl.
