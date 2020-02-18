@@ -173,106 +173,13 @@ Definition list_nth_def_0 {α} {R : ring α} n l := List.nth n l 0%Rng.
 
 (* *)
 
-...
-
-Theorem lap_eq_nil_lap_add_r : ∀ α (r : ring α) la lb,
-  lap_eq [] la
-  → lap_eq lb (lap_add la lb).
-Proof.
-intros α r la lb H.
-revert lb.
-induction la as [| a]; intros; [ reflexivity | simpl ].
-destruct lb as [| b]; [ assumption | idtac ].
-apply lap_eq_nil_cons_inv in H.
-destruct H as (Ha, Hla).
-constructor; [ rewrite Ha, rng_add_0_l; reflexivity | idtac ].
-apply IHla; assumption.
-Qed.
-
-Theorem lap_eq_nil_lap_add_l : ∀ α (r : ring α) la lb,
-  lap_eq [] lb
-  → lap_eq la (lap_add la lb).
-Proof.
-intros α r la lb H.
-revert la.
-induction lb as [| b]; intros; [ destruct la; reflexivity | idtac ].
-destruct la as [| a]; [ assumption | simpl ].
-apply lap_eq_nil_cons_inv in H.
-destruct H as (Hb, Hlb).
-constructor; [ rewrite Hb, rng_add_0_r; reflexivity | idtac ].
-apply IHlb; assumption.
-Qed.
-
-Instance lap_add_morph {A} {rng : ring A} :
-  Proper (lap_eq ==> lap_eq ==> lap_eq) lap_add.
-Proof.
-intros la lc Hac lb ld Hbd.
-revert lb lc ld Hac Hbd.
-induction la as [| a]; intros.
- destruct lc as [| c]; intros; [ assumption | idtac ].
- apply lap_eq_nil_cons_inv in Hac.
- destruct Hac as (Hc, Hlc); simpl.
- destruct ld as [| d].
-  etransitivity; [ eassumption | constructor; assumption ].
-
-  destruct lb as [| b].
-   apply lap_eq_nil_cons_inv in Hbd.
-   destruct Hbd as (Hd, Hld).
-   constructor; [ rewrite Hc, rng_add_0_l; assumption | idtac ].
-   etransitivity; [ eassumption | idtac ].
-   apply lap_eq_nil_lap_add_r; assumption.
-
-   apply lap_eq_cons_cons_inv in Hbd.
-   destruct Hbd as (Hbd, Hlbd).
-   constructor; [ rewrite Hc, rng_add_0_l; assumption | idtac ].
-   etransitivity; [ eassumption | idtac ].
-   apply lap_eq_nil_lap_add_r; assumption.
-
- destruct lb as [| b].
-  destruct lc as [| c]; [ etransitivity; eassumption | idtac ].
-  destruct ld as [| d]; [ assumption | simpl ].
-  apply lap_eq_cons_cons_inv in Hac.
-  destruct Hac as (Hac, Hlac).
-  apply lap_eq_nil_cons_inv in Hbd.
-  destruct Hbd as (Hd, Hld).
-  constructor; [ rewrite Hd, rng_add_0_r; assumption | idtac ].
-  etransitivity; [ eassumption | idtac ].
-  apply lap_eq_nil_lap_add_l; assumption.
-
-  destruct lc as [| c].
-   apply lap_eq_cons_nil_inv in Hac.
-   destruct Hac as (Ha, Hla); simpl.
-   destruct ld as [| d].
-    apply lap_eq_cons_nil_inv in Hbd.
-    destruct Hbd as (Hb, Hlb).
-    constructor; [ rewrite Ha, rng_add_0_l; assumption | idtac ].
-    rewrite IHla; try eassumption; reflexivity.
-
-    apply lap_eq_cons_cons_inv in Hbd.
-    destruct Hbd as (Hbd, Hlbd).
-    constructor; [ rewrite Ha, rng_add_0_l; assumption | idtac ].
-    rewrite IHla; try eassumption; reflexivity.
-
-   apply lap_eq_cons_cons_inv in Hac.
-   destruct Hac as (Hac, Hlac); simpl.
-   destruct ld as [| d].
-    apply lap_eq_cons_nil_inv in Hbd.
-    destruct Hbd as (Hb, Hlb).
-    constructor; [ rewrite Hb, rng_add_0_r; assumption | idtac ].
-    rewrite IHla; try eassumption.
-    destruct lc; reflexivity.
-
-    apply lap_eq_cons_cons_inv in Hbd.
-    destruct Hbd as (Hbd, Hlbd).
-    constructor; [ rewrite Hac, Hbd; reflexivity | apply IHla; assumption ].
-Qed.
-
 Theorem lap_convol_mul_comm : ∀ α (R : ring α) l1 l2 i len,
-  lap_eq (lap_convol_mul l1 l2 i len) (lap_convol_mul l2 l1 i len).
+  lap_convol_mul l1 l2 i len = lap_convol_mul l2 l1 i len.
 Proof.
 intros α R l1 l2 i len.
 revert i.
 induction len; intros; [ reflexivity | simpl ].
+...
 constructor; [ idtac | apply IHlen ].
 rewrite summation_rtl.
 apply summation_compat; intros j (_, Hj).
