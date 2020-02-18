@@ -3728,13 +3728,14 @@ rewrite Nat.sub_0_r.
 Abort.
 
 Theorem glop : ∀ la roots n,
-  n ≠ 0
+  (∀ a b, (a * b = 0)%Rng → (a = 0)%Rng ∨ (b = 0)%Rng)
+  → n ≠ 0
   → (∀ x, x ∈ roots ↔ (eval_lap la x = 0)%Rng)
   → NoDup roots
   → lap_has_degree la n
   → length roots ≤ n.
 Proof.
-intros * Hnz Hr Hnd Hdeg.
+intros * Hintegr Hnz Hr Hnd Hdeg.
 remember (length roots) as nroot eqn:Hnroot.
 symmetry in Hnroot.
 revert la n roots Hnz Hr Hdeg Hnd Hnroot.
@@ -3765,13 +3766,17 @@ destruct n. {
     rewrite rng_mul_0_l, rng_add_0_l in H2.
     rewrite <- H2 in H1.
     apply rng_add_reg_r in H1.
-Search (_ * _ = _ * _)%Rng.
-(* to get r=r2, it requires that the ring is integral; if we limit to
-   ℤ/nℤ, it requires that n is prime; if we want to be general (not
-   only ℤ/nℤ), I don't know *)
+    apply (rng_sub_compat_l _ _ (a * r2)%Rng) in H1.
+    rewrite rng_add_opp_r in H1.
+    rewrite <- rng_mul_sub_distr_l in H1.
+    apply Hintegr in H1.
+    destruct H1 as [H1| H1]; [ easy | ].
+    apply (rng_add_compat_r _ _ r2) in H1.
+    rewrite rng_sub_add, rng_add_0_l in H1.
+Print NoDup.
+(* ah, crotte, c'est l'égalité de Leibnitz *)
 ...
-    apply rng_mul_reg_l in H1.
-    apply rng_add_compat in H1.
+    rewrite <- H1 in Hnd.
 ...
 
 Theorem glop : ∀ pol roots n,
