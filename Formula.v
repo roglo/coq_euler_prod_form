@@ -3727,24 +3727,14 @@ rewrite Nat.sub_0_r.
 (* seems difficult to prove *)
 Abort.
 
-Theorem glop : ∀ pol roots n,
+Theorem glop : ∀ la roots n,
   n ≠ 0
-  → (∀ x, x ∈ roots ↔ is_polynomial_root pol x)
+  → (∀ x, x ∈ roots ↔ (eval_lap la x = 0)%Rng)
   → NoDup roots
-  → poly_has_degree pol n
+  → lap_has_degree la n
   → length roots ≤ n.
 Proof.
-intros (la) * Hnz Hr Hnd Hdeg.
-unfold poly_has_degree in Hdeg; cbn in Hdeg.
-assert (H : ∀ x, x ∈ roots ↔ (eval_lap la x = 0)%Rng). {
-  intros x.
-  split; intros H. {
-    now specialize (proj1 (Hr x) H) as H1.
-  } {
-    now specialize (proj2 (Hr x) H) as H1.
-  }
-}
-move H before Hr; clear Hr; rename H into Hr.
+intros * Hnz Hr Hnd Hdeg.
 remember (length roots) as nroot eqn:Hnroot.
 symmetry in Hnroot.
 revert la n roots Hnz Hr Hdeg Hnd Hnroot.
@@ -3782,6 +3772,26 @@ Search (_ * _ = _ * _)%Rng.
 ...
     apply rng_mul_reg_l in H1.
     apply rng_add_compat in H1.
+...
+
+Theorem glop : ∀ pol roots n,
+  n ≠ 0
+  → (∀ x, x ∈ roots ↔ is_polynomial_root pol x)
+  → NoDup roots
+  → poly_has_degree pol n
+  → length roots ≤ n.
+Proof.
+intros (la) * Hnz Hr Hnd Hdeg.
+unfold poly_has_degree in Hdeg; cbn in Hdeg.
+assert (H : ∀ x, x ∈ roots ↔ (eval_lap la x = 0)%Rng). {
+  intros x.
+  split; intros H. {
+    now specialize (proj1 (Hr x) H) as H1.
+  } {
+    now specialize (proj2 (Hr x) H) as H1.
+  }
+}
+move H before Hr; clear Hr; rename H into Hr.
 ...
 
 Theorem glop : ∀ pol roots n,
