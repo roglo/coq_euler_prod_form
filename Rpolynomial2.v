@@ -35,15 +35,15 @@ Definition lap_opp {α} {r : ring α} la := List.map rng_opp la.
 
 Definition lap_sub {A} {rng : ring A} la lb := lap_add la (lap_opp lb).
 
-Fixpoint lap_norm_aux {A} {rng : ring A} la i :=
-  match i with
-  | 0 => []
-  | S i' =>
-      if rng_eq_dec (nth i' la 0%Rng) 0%Rng then lap_norm_aux la i'
-      else firstn i la
+Fixpoint strip_0s {A} {rng : ring A} la :=
+  match la with
+  | [] => []
+  | a :: la' => if rng_eq_dec a 0%Rng then strip_0s la' else la
   end.
 
-(*
+Definition lap_norm {A} {rng : ring A} la := rev (strip_0s (rev la)).
+
+(**)
 Require Import ZArith.
 
 Theorem Z_1_neq_0 : (1 ≠ 0)%Z.
@@ -66,9 +66,10 @@ Definition Z_ring : ring Z :=
      rng_mul_1_l := Z.mul_1_l;
      rng_mul_add_distr_l := Z.mul_add_distr_l |}.
 
-Compute (@lap_norm_aux Z Z_ring [3; 4; 0; 5; 0; 0; 0]%Z 7).
-*)
+Compute (@lap_norm Z Z_ring [3; 4; 0; 5; 0; 0; 0]%Z).
+(**)
 
+(*
 Theorem poly_norm_prop {A} {rng : ring A} la :
   last (lap_norm_aux la (length la)) 1%Rng ≠ 0%Rng.
 Proof.
@@ -116,9 +117,22 @@ destruct (rng_eq_dec (nth len la 0%Rng) 0%Rng) as [H1| H1]. {
   cbn.
   cbn.
 ...
+*)
+
+Theorem poly_norm_prop {A} {rng : ring A} : ∀ la,
+  last (lap_norm la) 1%Rng ≠ 0%Rng.
+Proof.
+intros.
+unfold lap_norm.
+...
 
 Definition poly_norm {A} {rng : ring A} la :=
-  mkpoly (lap_norm_aux la (length la)) (poly_norm_prop la).
+  mkpoly (lap_norm la).
+
+Print poly_norm.
+
+Arguments poly_norm {A}%type_scope {rng}%ring_scope _%list_scope
+ (poly_norm_ la).
 
 ...
 
