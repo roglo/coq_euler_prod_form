@@ -19,119 +19,6 @@ Arguments mkpoly {_} {_}.
 Definition lap_zero {α} {r : ring α} := mkpoly [] rng_1_neq_0.
 Definition lap_one {α} {r : ring α} := mkpoly [1%Rng] rng_1_neq_0.
 
-...
-
-Theorem lap_eq_cons_cons_inv : ∀ α (r : ring α) x1 x2 l1 l2,
-  lap_eq (x1 :: l1) (x2 :: l2)
-  → (x1 = x2)%Rng ∧ lap_eq l1 l2.
-Proof.
-intros α r x1 x2 l1 l2 H.
-inversion H; split; assumption.
-Qed.
-
-Theorem lap_eq_cons_nil_inv : ∀ α (r : ring α) x l,
-  lap_eq (x :: l) []
-  → (x = 0)%Rng ∧ lap_eq l [].
-Proof.
-intros α r x l H.
-inversion H; split; assumption.
-Qed.
-
-Theorem lap_eq_nil_cons_inv : ∀ α (r : ring α) x l,
-  lap_eq [] (x :: l)
-  → (x = 0)%Rng ∧ lap_eq [] l.
-Proof.
-intros α r x l H.
-inversion H; split; assumption.
-Qed.
-
-Theorem lap_eq_refl {α} {r : ring α} : reflexive _ lap_eq.
-Proof.
-intros l.
-induction l; constructor; [ reflexivity | assumption ].
-Qed.
-
-Theorem lap_eq_sym {α} {r : ring α} : symmetric _ lap_eq.
-Proof.
-intros l1 l2 Heq.
-revert l2 Heq.
-induction l1 as [| x1]; intros. {
-  induction l2 as [| x2]; constructor; apply lap_eq_nil_cons_inv in Heq. {
-    now destruct Heq.
-  } {
-    now apply IHl2; destruct Heq.
-  }
-} {
-  induction l2 as [| x2]. {
-    apply lap_eq_cons_nil_inv in Heq; destruct Heq.
-    constructor; [ easy | now apply IHl1 ].
-  } {
-    apply lap_eq_cons_cons_inv in Heq; destruct Heq.
-    constructor; [ easy | now apply IHl1 ].
-  }
-}
-Qed.
-
-Theorem lap_eq_trans {α} {r : ring α} : transitive _ lap_eq.
-Proof.
-intros l1 l2 l3 H1 H2.
-revert l1 l3 H1 H2.
-induction l2 as [| x2]; intros.
- revert l3 H2.
- induction l1 as [| x1]; intros; [ assumption | idtac ].
- destruct l3 as [| x3]; [ assumption | idtac ].
- apply lap_eq_cons_nil_inv in H1.
- apply lap_eq_nil_cons_inv in H2.
- constructor.
-  etransitivity; [ destruct H1; eassumption | idtac ].
-  destruct H2; symmetry; assumption.
-
-  apply IHl1; [ destruct H1 | destruct H2 ]; assumption.
-
- destruct l1 as [| x1].
-  apply lap_eq_nil_cons_inv in H1.
-  destruct l3 as [| x3]; constructor.
-   apply lap_eq_cons_cons_inv in H2.
-   destruct H1, H2.
-   etransitivity; [ symmetry; eassumption | assumption ].
-
-   apply lap_eq_cons_cons_inv in H2.
-   apply IHl2; [ destruct H1 | destruct H2 ]; assumption.
-
-  apply lap_eq_cons_cons_inv in H1.
-  destruct l3 as [| x3]; constructor.
-   apply lap_eq_cons_nil_inv in H2.
-   destruct H1, H2.
-   etransitivity; eassumption.
-
-   apply lap_eq_cons_nil_inv in H2.
-   apply IHl2; [ destruct H1 | destruct H2 ]; assumption.
-
-   apply lap_eq_cons_cons_inv in H2.
-   destruct H1, H2.
-   etransitivity; eassumption.
-
-   apply lap_eq_cons_cons_inv in H2.
-   apply IHl2; [ destruct H1 | destruct H2 ]; assumption.
-Qed.
-
-Add Parametric Relation α (r : ring α) : (list α) lap_eq
- reflexivity proved by lap_eq_refl
- symmetry proved by lap_eq_sym
- transitivity proved by lap_eq_trans
- as lap_eq_rel.
-
-Theorem lap_eq_list_fold_right : ∀ α (K : ring α) β g h x (l : list β),
-  (∀ i a b, i ∈ l → lap_eq a b → lap_eq (g i a) (h i b))
-  → lap_eq (List.fold_right g x l) (List.fold_right h x l).
-Proof.
-intros α K β g h x l H.
-induction l as [| y]; intros; [ reflexivity | simpl ].
-apply H; [ left; reflexivity | idtac ].
-apply IHl; intros i a b Hi Heq.
-apply H; [ right; assumption | assumption ].
-Qed.
-
 (* addition *)
 
 Fixpoint lap_add {α} {r : ring α} al1 al2 :=
@@ -147,6 +34,11 @@ Fixpoint lap_add {α} {r : ring α} al1 al2 :=
 Definition lap_opp {α} {r : ring α} la := List.map rng_opp la.
 
 Definition lap_sub {A} {rng : ring A} la lb := lap_add la (lap_opp lb).
+
+Definition poly_add {A} {rng : ring A} p1 p2 :=
+  mkpoly (lap_add (lap p1) (lap p2)).
+
+,,,
 
 (* multiplication *)
 
