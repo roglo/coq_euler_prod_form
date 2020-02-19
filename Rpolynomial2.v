@@ -732,22 +732,54 @@ destruct (rng_eq_dec b 0%Rng) as [Hbz| Hbz]. {
 easy.
 Qed.
 
-Theorem lap_mul_assoc' : ∀ la lb lc,
-  (la * (lb * lc))%lap = (la * lb * lc)%lap.
+Theorem lap_convol_mul_length : ∀ la lb i len,
+  length (lap_convol_mul la lb i len) = len.
 Proof.
-intros la lb lc.
-specialize (lap_mul_assoc la lb lc) as H1.
-apply eq_lap_norm_eq_length; [ easy | ].
+intros.
+revert la lb i.
+induction len; intros; [ easy | ].
+cbn.
+now rewrite IHlen.
+Qed.
+
+Theorem lap_mul_assoc' : ∀ la lb lc,
+  la = lap_norm la
+  → lb = lap_norm lb
+  → lc = lap_norm lc
+  → (la * (lb * lc))%lap = (la * lb * lc)%lap.
+Proof.
+intros * Hla Hlb Hlc.
+apply eq_lap_norm_eq_length; [ apply lap_mul_assoc | ].
+unfold "*"%lap.
+do 4 rewrite lap_convol_mul_length.
+destruct la as [| a]. {
+  cbn.
+  destruct lb as [| b]. {
+    cbn.
+    induction lc as [| c]; [ easy | cbn ].
+(* ouais mais non c'est faux, ça *)
 ...
 
 Theorem lap_mul_mul_swap : ∀ la lb lc,
+  lap_norm (lap_mul (lap_mul la lb) lc) = lap_norm (lap_mul (lap_mul la lc) lb).
+Proof.
+intros la lb lc.
+do 2 rewrite <- lap_mul_assoc.
+now rewrite (lap_mul_comm lb).
+Qed.
+
+Theorem lap_mul_mul_swap' : ∀ la lb lc,
   lap_mul (lap_mul la lb) lc = lap_mul (lap_mul la lc) lb.
 Proof.
 intros la lb lc.
+apply eq_lap_norm_eq_length; [ apply lap_mul_mul_swap | ].
+unfold "*"%lap.
+do 4 rewrite lap_convol_mul_length.
+destruct la as [| a]. {
+  cbn.
+  destruct lb as [| b]. {
+    cbn.
 ...
-do 2 rewrite <- lap_mul_assoc.
-apply lap_mul_compat; [ reflexivity | apply lap_mul_comm ].
-Qed.
 
 Theorem lap_eq_skipn_succ : ∀ cl i,
   lap_eq (List.nth i cl 0%Rng :: List.skipn (S i) cl) (List.skipn i cl).
