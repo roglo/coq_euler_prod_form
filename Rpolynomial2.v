@@ -806,6 +806,38 @@ Declare Scope poly_scope.
 Delimit Scope poly_scope with pol.
 Notation "a * b" := (poly_mul a b) : poly_scope.
 
+Theorem lap_norm_idemp : ∀ la, lap_norm (lap_norm la) = lap_norm la.
+Proof.
+intros.
+unfold lap_norm.
+destruct la as [| a]; [ easy | cbn ].
+rewrite strip_0s_app; cbn.
+rewrite rev_involutive.
+remember (strip_0s (rev la)) as lb eqn:Hlb; symmetry in Hlb.
+destruct lb as [| b]. {
+  destruct (rng_eq_dec a 0%Rng) as [Haz| Haz]; [ easy | cbn ].
+  now destruct (rng_eq_dec a 0%Rng).
+}
+cbn.
+destruct (rng_eq_dec b 0%Rng) as [Hbz| Hbz]; [ cbn | easy ].
+subst b.
+exfalso; clear - Hlb.
+revert lb Hlb.
+induction la as [| a]; intros; [ easy | ].
+cbn in Hlb.
+rewrite strip_0s_app in Hlb.
+remember (strip_0s (rev la)) as lc eqn:Hlc in Hlb; symmetry in Hlc.
+destruct lc as [| c]. {
+  cbn in Hlb.
+  destruct (rng_eq_dec a 0%Rng) as [Haz| Haz]; [ easy | ].
+  now injection Hlb; intros.
+}
+cbn in Hlb.
+injection Hlb; clear Hlb; intros Hlb Hc.
+subst c.
+(* mmm.... faut voir... *)
+...
+
 Theorem lap_mul_norm_idemp_l : ∀ la lb,
   lap_norm (lap_norm la * lb)%lap = lap_norm (la * lb)%lap.
 Proof.
