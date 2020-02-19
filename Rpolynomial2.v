@@ -613,7 +613,6 @@ rewrite list_nth_lap_convol_mul_aux; [ idtac | assumption ].
 rewrite Nat.add_0_r; reflexivity.
 Qed.
 
-(*
 Theorem summation_mul_list_nth_lap_convol_mul : ∀ la lb lc k,
   (Σ (i = 0, k),
      List.nth i la 0 *
@@ -627,7 +626,7 @@ Theorem summation_mul_list_nth_lap_convol_mul : ∀ la lb lc k,
 Proof.
 intros la lb lc k.
 apply summation_compat; intros i (_, Hi).
-apply rng_mul_compat_l.
+f_equal.
 rewrite list_nth_lap_convol_mul; reflexivity.
 Qed.
 
@@ -645,12 +644,11 @@ intros la lb lc k.
 rewrite summation_rtl.
 apply summation_compat; intros i (_, Hi).
 rewrite Nat.add_0_r.
-apply rng_mul_compat_l.
+f_equal.
 rewrite Nat_sub_sub_distr; [ idtac | easy ].
 rewrite Nat.sub_diag.
 apply list_nth_lap_convol_mul; reflexivity.
 Qed.
-*)
 
 Theorem lap_mul_assoc : ∀ la lb lc,
   lap_norm (la * (lb * lc))%lap = lap_norm (la * lb * lc)%lap.
@@ -661,7 +659,6 @@ unfold lap_mul.
 apply list_nth_lap_eq; intros k.
 rewrite list_nth_lap_convol_mul; [ idtac | reflexivity ].
 rewrite list_nth_lap_convol_mul; [ idtac | reflexivity ].
-...
 rewrite summation_mul_list_nth_lap_convol_mul_2; symmetry.
 rewrite summation_mul_list_nth_lap_convol_mul; symmetry.
 rewrite <- summation_summation_mul_swap.
@@ -676,10 +673,78 @@ rewrite Nat.add_comm, Nat.sub_add_distr.
 reflexivity.
 Qed.
 
-Theorem lap_mul_shuffle0 : ∀ la lb lc,
-  lap_eq (lap_mul (lap_mul la lb) lc) (lap_mul (lap_mul la lc) lb).
+Theorem eq_lap_norm_eq_length : ∀ la lb,
+  lap_norm la = lap_norm lb
+  → length la = length lb
+  → la = lb.
+Proof.
+intros * Hll Hlen.
+unfold lap_norm in Hll.
+apply (f_equal (@rev α)) in Hll.
+do 2 rewrite rev_involutive in Hll.
+setoid_rewrite <- rev_length in Hlen.
+enough (H : rev la = rev lb). {
+  apply (f_equal (@rev α)) in H.
+  now do 2 rewrite rev_involutive in H.
+}
+remember (rev la) as l; clear la Heql; rename l into la.
+remember (rev lb) as l; clear lb Heql; rename l into lb.
+revert la Hll Hlen.
+induction lb as [| b]; intros. {
+  now apply length_zero_iff_nil in Hlen.
+}
+destruct la as [| a]; [ easy | ].
+cbn in Hll, Hlen.
+apply Nat.succ_inj in Hlen.
+destruct (rng_eq_dec a 0%Rng) as [Haz| Haz]. {
+  destruct (rng_eq_dec b 0%Rng) as [Hbz| Hbz]. {
+    subst a b; f_equal.
+    now apply IHlb.
+  }
+  exfalso; clear - Hbz Hll Hlen.
+  assert (H : length la ≤ length lb) by flia Hlen.
+  clear Hlen; rename H into Hlen.
+  induction la as [| a]; [ easy | ].
+  cbn in Hll.
+  destruct (rng_eq_dec a 0%Rng) as [Haz| Haz]. {
+    cbn in Hlen.
+    clear a Haz.
+    apply IHla; [ easy | flia Hlen ].
+  }
+  rewrite Hll in Hlen; cbn in Hlen.
+  flia Hlen.
+}
+destruct (rng_eq_dec b 0%Rng) as [Hbz| Hbz]. {
+  exfalso; clear b Hbz.
+  clear - Haz Hll Hlen.
+  assert (H : length lb ≤ length la) by flia Hlen.
+  clear Hlen; rename H into Hlen.
+  induction lb as [| b]; [ easy | ].
+  cbn in Hll.
+  destruct (rng_eq_dec b 0%Rng) as [Hbz| Hbz]. {
+    cbn in Hlen.
+    clear b Hbz.
+    apply IHlb; [ easy | flia Hlen ].
+  }
+  rewrite <- Hll in Hlen; cbn in Hlen.
+  flia Hlen.
+}
+easy.
+Qed.
+
+Theorem lap_mul_assoc' : ∀ la lb lc,
+  (la * (lb * lc))%lap = (la * lb * lc)%lap.
 Proof.
 intros la lb lc.
+specialize (lap_mul_assoc la lb lc) as H1.
+apply eq_lap_norm_eq_length; [ easy | ].
+...
+
+Theorem lap_mul_mul_swap : ∀ la lb lc,
+  lap_mul (lap_mul la lb) lc = lap_mul (lap_mul la lc) lb.
+Proof.
+intros la lb lc.
+...
 do 2 rewrite <- lap_mul_assoc.
 apply lap_mul_compat; [ reflexivity | apply lap_mul_comm ].
 Qed.
