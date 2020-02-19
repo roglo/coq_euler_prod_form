@@ -817,16 +817,18 @@ remember (lap p3) as lc.
 clear p1 Heqla.
 clear p2 Heqlb.
 clear p3 Heqlc.
+unfold poly_norm at 1 3.
+apply eq_poly_eq; cbn.
+Inspect 4.
+...
 induction la as [| a]. {
   cbn.
   rewrite lap_mul_0_l.
-  destruct lb as [| b]. {
-    unfold "*"%lap at 2.
-    rewrite lap_convol_mul_nil_l; cbn.
-    unfold poly_norm; cbn.
-    apply eq_poly_eq; cbn.
-    symmetry; apply lap_mul_0_l.
-  }
+  unfold poly_norm.
+  apply eq_poly_eq; cbn.
+  unfold "*"%lap at 1 3.
+  now do 2 rewrite lap_convol_mul_nil_l.
+}
 ...
 
 Theorem lap_mul_mul_swap : ∀ la lb lc,
