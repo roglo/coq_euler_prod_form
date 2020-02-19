@@ -8,8 +8,40 @@ Import List ListNotations.
 
 Require Import Misc Ring2 Rsummation.
 
-(* (lap : list as polynomial) *)
+(* definition of a polynomial *)
 
+Definition rng_eqb {A} {rng : ring A} (a b : A) :=
+  if rng_eq_dec a b then true else false.
+
+(* (lap : list as polynomial) *)
+Record poly {A} {rng : ring A} := mkpoly
+  { lap : list A;
+    lap_prop : rng_eqb (last lap 1%Rng) 0%Rng = false }.
+
+Theorem eq_poly_eq {A} {rng : ring A} : ∀ p1 p2, p1 = p2 ↔ lap p1 = lap p2.
+Proof.
+intros.
+split; [ now intros; subst p1 | ].
+intros Hll.
+destruct p1 as (la, lapr).
+destruct p2 as (lb, lbpr).
+cbn in Hll; subst la; f_equal.
+apply (Eqdep_dec.UIP_dec Bool.bool_dec).
+Qed.
+
+Theorem eq_poly_prop {A} {rng : ring A} : ∀ la,
+  rng_eqb (last la 1%Rng) 0%Rng = false ↔ last la 1%Rng ≠ 0%Rng.
+Proof.
+intros.
+unfold rng_eqb.
+now destruct (rng_eq_dec (last la 1%Rng) 0%Rng).
+Qed.
+
+...
+
+(* definition of a polynomial *)
+
+(* (lap : list as polynomial) *)
 Record poly {A} {rng : ring A} := mkpoly
   { lap : list A;
     lap_prop : last lap 1%Rng ≠ 0%Rng }.
@@ -776,7 +808,12 @@ destruct p1 as (la, lapr).
 destruct p2 as (lb, lbpr).
 cbn in Hll; subst la; f_equal.
 Check rng_eq_dec.
-enough (H : ∀ a b : α, {a ≠ b} + {a = b}).
+Print Nat.eqb.
+...
+
+Check (last lb 1%Rng =? 0%Rng).
+Check (last lb 1%Rng ≠ 0%Rng).
+Check (
 ...
 specialize (Eqdep_dec.UIP_dec H).
 
