@@ -164,7 +164,7 @@ Fixpoint lap_convol_mul {α} {r : ring α} al1 al2 i len :=
   end.
 
 Definition lap_mul {α} {R : ring α} la lb :=
-  lap_convol_mul la lb 0 (pred (length la + length lb)).
+  lap_convol_mul la lb 0 (length la + length lb - 1).
 
 Definition poly_mul {A} {rng : ring A} p1 p2 :=
   poly_norm (lap_mul (lap p1) (lap p2)).
@@ -598,7 +598,7 @@ now rewrite lap_convol_mul_comm, Nat.add_comm.
 Qed.
 
 Theorem list_nth_lap_convol_mul_aux : ∀ la lb n i len,
-  pred (List.length la + List.length lb) = (i + len)%nat
+  List.length la + List.length lb - 1 = (i + len)%nat
   → (List.nth n (lap_convol_mul la lb i len) 0%Rng =
      Σ (j = 0, n + i),
      List.nth j la 0 * List.nth (n + i - j) lb 0)%Rng.
@@ -621,19 +621,7 @@ induction len; intros.
 
    exfalso; apply H2; clear Hj H2.
    apply Nat.nle_gt in H1; subst i.
-   rewrite <- Nat.add_pred_l.
-    apply Nat.lt_le_pred in H1.
-    apply Nat.le_add_le_sub_l.
-    rewrite Nat.add_assoc.
-    apply Nat.add_le_mono_r.
-    rewrite Nat.add_comm.
-    eapply Nat.le_trans; eauto .
-    apply Nat.le_sub_le_add_l.
-    rewrite Nat.sub_diag.
-    apply Nat.le_0_l.
-
-    intros H; rewrite H in H1.
-    revert H1; apply Nat.nlt_0_r.
+   flia H1.
 
  simpl.
  destruct n; [ reflexivity | idtac ].
@@ -644,7 +632,7 @@ Qed.
 
 (* to be unified perhaps with list_nth_convol_mul below *)
 Theorem list_nth_lap_convol_mul : ∀ la lb i len,
-  len = pred (length la + length lb)
+  len = length la + length lb - 1
   → (List.nth i (lap_convol_mul la lb 0 len) 0 =
      Σ (j = 0, i), List.nth j la 0 * List.nth (i - j) lb 0)%Rng.
 Proof.
@@ -658,7 +646,7 @@ Theorem summation_mul_list_nth_lap_convol_mul : ∀ la lb lc k,
   (Σ (i = 0, k),
      List.nth i la 0 *
      List.nth (k - i)
-       (lap_convol_mul lb lc 0 (pred (length lb + length lc)))
+       (lap_convol_mul lb lc 0 (length lb + length lc - 1))
        0 =
    Σ (i = 0, k),
      List.nth i la 0 *
@@ -675,7 +663,7 @@ Theorem summation_mul_list_nth_lap_convol_mul_2 : ∀ la lb lc k,
    (Σ (i = 0, k),
       List.nth i lc 0 *
       List.nth (k - i)
-        (lap_convol_mul la lb 0 (pred (length la + length lb)))  0 =
+        (lap_convol_mul la lb 0 (length la + length lb - 1))  0 =
     Σ (i = 0, k),
       List.nth (k - i) lc 0 *
       Σ (j = 0, i),
@@ -827,7 +815,6 @@ Theorem lap_mul_norm_idemp_l : ∀ la lb,
 Proof.
 intros.
 unfold "*"%lap; cbn.
-remember (Init.Nat.pred _) as len eqn:Hlen.
 ...
 intros.
 unfold "*"%lap; cbn.
