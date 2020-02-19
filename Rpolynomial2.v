@@ -345,18 +345,154 @@ constructor; assumption.
 Qed.
 *)
 
-(*
 Theorem list_nth_lap_eq : ∀ α (r : ring α) la lb,
   (∀ i, (List.nth i la 0 = List.nth i lb 0)%Rng)
-  → la = lb.
+  → lap_norm la = lap_norm lb.
 Proof.
 intros α r la lb Hi.
+unfold lap_norm; f_equal.
 revert lb Hi.
-induction la as [| a]; intros.
- induction lb as [| b]; [ reflexivity | constructor ].
-  pose proof (Hi O) as H.
-  symmetry; assumption.
-
+induction la as [| a]; intros. {
+  induction lb as [| b]; [ reflexivity | ].
+  specialize (Hi 0) as H; cbn in H.
+  subst b; cbn.
+  rewrite strip_0s_app; cbn.
+  remember (strip_0s (rev lb)) as lc eqn:Hlc; symmetry in Hlc.
+  destruct lc as [| c]; [ now destruct (rng_eq_dec _ _) | ].
+  assert (H : lap_norm [] = lap_norm lb). {
+    unfold lap_norm; cbn.
+    cbn in IHlb.
+    change (rev [] = rev (strip_0s (rev lb))).
+    f_equal.
+    rewrite Hlc.
+    apply IHlb.
+    intros i; cbn; rewrite match_id.
+    now specialize (Hi (S i)); cbn in Hi.
+  }
+  cbn in H.
+  unfold lap_norm in H.
+  rewrite Hlc in H.
+  symmetry in H.
+  now apply List_eq_rev_nil in H.
+} {
+  cbn.
+  rewrite strip_0s_app.
+  remember (strip_0s (rev la)) as lc eqn:Hlc; symmetry in Hlc.
+  destruct lc as [| c]. {
+    assert (Hla : ∀ i, nth i la 0%Rng = 0%Rng). {
+      intros i.
+      clear - Hlc.
+      revert i.
+      induction la as [| a]; intros; [ now cbn; rewrite match_id | cbn ].
+      destruct i. {
+        cbn in Hlc.
+        rewrite strip_0s_app in Hlc; cbn in Hlc.
+        remember (strip_0s (rev la)) as lb eqn:Hlb; symmetry in Hlb.
+        destruct lb as [| b]; [ now destruct (rng_eq_dec a 0%Rng) | easy ].
+      }
+      apply IHla.
+      cbn in Hlc.
+      rewrite strip_0s_app in Hlc; cbn in Hlc.
+      remember (strip_0s (rev la)) as lb eqn:Hlb; symmetry in Hlb.
+      destruct lb as [| b]; [ now destruct (rng_eq_dec a 0%Rng) | easy ].
+    }
+    cbn.
+    destruct (rng_eq_dec a 0%Rng) as [Haz| Haz]. {
+      assert (Hlb : ∀ i, nth i lb 0%Rng = 0%Rng). {
+        intros.
+        rewrite <- Hi; cbn.
+        destruct i; [ easy | ].
+        apply Hla.
+      }
+      clear - Hlb.
+      induction lb as [| b]; [ easy | cbn ].
+      specialize (Hlb 0) as H1; cbn in H1; subst b.
+      rewrite strip_0s_app; cbn.
+      rewrite <- IHlb; [ now destruct (rng_eq_dec 0%Rng 0%Rng) | ].
+      intros i.
+      now specialize (Hlb (S i)).
+    }
+    destruct lb as [| b]; [ now specialize (Hi 0); cbn in Hi | cbn ].
+    rewrite strip_0s_app; cbn.
+    remember (strip_0s (rev lb)) as ld eqn:Hld; symmetry in Hld.
+    destruct ld as [| d]. {
+      destruct (rng_eq_dec b 0%Rng) as [Hbz| Hbz]. {
+        subst b.
+        now specialize (Hi 0).
+      }
+      f_equal.
+      now specialize (Hi 0).
+    }
+    specialize (IHla lb).
+    assert (H : ∀ i : nat, nth i la 0%Rng = nth i lb 0%Rng). {
+      intros i.
+      now specialize (Hi (S i)); cbn in Hi.
+    }
+    specialize (IHla H); clear H.
+    now rewrite Hld in IHla.
+  }
+  destruct lb as [| b]. {
+    specialize (IHla []).
+    assert (H : ∀ i : nat, nth i la 0%Rng = nth i [] 0%Rng). {
+      intros i; cbn; rewrite match_id.
+      now specialize (Hi (S i)).
+    }
+    now specialize (IHla H).
+  }
+  cbn.
+  rewrite strip_0s_app; cbn.
+  remember (strip_0s (rev lb)) as ld eqn:Hld; symmetry in Hld.
+  destruct ld as [| d]. {
+    destruct (rng_eq_dec b 0%Rng) as [Hbz| Hbz]. {
+      subst b.
+      specialize (IHla lb).
+      assert (H : ∀ i : nat, nth i la 0%Rng = nth i lb 0%Rng). {
+        intros i.
+        now specialize (Hi (S i)); cbn in Hi.
+      }
+      specialize (IHla H); clear H.
+      now rewrite Hld in IHla.
+    }
+    specialize (IHla lb).
+    assert (H : ∀ i : nat, nth i la 0%Rng = nth i lb 0%Rng). {
+      intros i.
+      now specialize (Hi (S i)); cbn in Hi.
+    }
+    specialize (IHla H); clear H.
+    now rewrite Hld in IHla.
+  }
+...
+      subst a.
+      clear - Hi Hla.
+      revert la Hi Hla.
+      induction lb as [| b]; intros; [ easy | ].
+      cbn.
+...
+    destruct (rng_eq_dec a 0%Rng) as [Haz| Haz]. {
+      subst a.
+      clear - Hlc Hi.
+      revert la Hlc Hi.
+      induction lb as [| b]; intros; [ easy | ].
+      specialize (Hi 0) as H1; cbn in H1; subst b; cbn.
+      rewrite strip_0s_app; cbn.
+      remember (strip_0s (rev lb)) as ld eqn:Hld; symmetry in Hld.
+      destruct ld as [| d]; [ now destruct (rng_eq_dec _ _) | ].
+      specialize (IHlb _ Hlc).
+      assert (H : ∀ i : nat, nth i (0%Rng :: la) 0%Rng = nth i lb 0%Rng). {
+        intros i; cbn.
+        destruct i. {
+          specialize (Hi 1) as H1.
+          cbn in H1; rewrite <- H1.
+          clear - Hi Hlc.
+          induction la as [| a]; [ easy | ].
+          cbn in Hlc; cbn.
+          rewrite strip_0s_app in Hlc.
+          remember (strip_0s (rev la)) as ld eqn:Hld; symmetry in Hld.
+          destruct ld as [| d]; [ | easy ].
+          cbn in Hlc.
+          now destruct (rng_eq_dec a 0%Rng).
+        }
+...
   apply IHlb; intros i.
   pose proof (Hi (S i)) as H; simpl in H; rewrite <- H.
   destruct i; reflexivity.
