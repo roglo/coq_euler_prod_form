@@ -743,25 +743,32 @@ now rewrite IHlen.
 Qed.
 
 Theorem lap_mul_assoc' : ∀ la lb lc,
-  la = lap_norm la
-  → lb = lap_norm lb
-  → lc = lap_norm lc
+  lap_norm la ≠ []
+  → lap_norm lb ≠ []
+  → lap_norm lc ≠ []
   → (la * (lb * lc))%lap = (la * lb * lc)%lap.
 Proof.
 intros * Hla Hlb Hlc.
-destruct (Nat.eq_dec (length la) 0) as [Haz| Haz]. {
-  apply length_zero_iff_nil in Haz.
-  subst la; clear Hla.
-...
-
 apply eq_lap_norm_eq_length; [ apply lap_mul_assoc | ].
 unfold "*"%lap.
 do 4 rewrite lap_convol_mul_length.
-destruct la as [| a]. {
-  cbn.
-  destruct lb as [| b]. {
-    cbn.
-    clear Hla Hlb.
+destruct la as [| a]; [ easy | ].
+destruct lb as [| b]; [ easy | ].
+destruct lc as [| c]; [ easy | ].
+cbn; flia.
+Qed.
+
+Declare Scope poly_scope.
+Delimit Scope poly_scope with pol.
+Notation "a * b" := (poly_mul a b) : poly_scope.
+
+Theorem poly_mul_assoc : ∀ p1 p2 p3,
+  (p1 * (p2 * p3))%pol = ((p1 * p2) * p3) %pol.
+Proof.
+intros.
+unfold "*"%pol; cbn.
+unfold lap_norm.
+cbn.
 ...
 
 Theorem lap_mul_mul_swap : ∀ la lb lc,
