@@ -765,19 +765,54 @@ Declare Scope poly_scope.
 Delimit Scope poly_scope with pol.
 Notation "a * b" := (poly_mul a b) : poly_scope.
 
-Theorem eq_poly_eq : ∀ la lb,
-  la = lb ↔ poly_norm la = poly_norm lb.
+Print poly.
+
+Theorem eq_poly_eq : ∀ p1 p2, p1 = p2 ↔ lap p1 = lap p2.
 Proof.
 intros.
+split; [ now intros; subst p1 | ].
+intros Hll.
+destruct p1 as (la, lapr).
+destruct p2 as (lb, lbpr).
+cbn in Hll; subst la; f_equal.
+specialize (Eqdep_dec.UIP_dec rng_eq_dec) as H1.
+specialize (H1 (last lb 1%Rng) 0%Rng).
+Check Eqdep_dec.UIP_dec.
+...
+Theorem lap_eq_dec {A} {rng : ring A} : ∀ la lb : list A, {la = lb} + {la ≠ lb}.
+Admitted.
+
+...
+
+specialize (Eqdep_dec.UIP_dec rng_eq_dec) as H1.
+...
+unfold poly_norm.
+split. {
+  intros Hll.
+  unfold poly_norm.
+Theorem lap_eq_dec {A} {rng : ring A} : ∀ la lb : list A, {la = lb} + {la ≠ lb}.
+Admitted.
+specialize (Eqdep_dec.UIP_dec lap_eq_dec) as H2.
+specialize (H2 la lb).
+
+
 split; [ now intros; subst la | ].
 intros Hll.
 unfold poly_norm in Hll.
 specialize (Eqdep_dec.UIP_dec rng_eq_dec) as H1.
+Theorem lap_eq_dec {A} {rng : ring A} : ∀ la lb : list A, {la = lb} + {la ≠ lb}.
+Admitted.
+specialize (Eqdep_dec.UIP_dec lap_eq_dec) as H2.
+specialize (H2 la lb).
+
+apply H2.
 ...
 destruct la as (la, lapr).
 destruct y as (y, yp).
 simpl in H; subst x; f_equal.
 apply UIP_nat.
+
+
   intros Hll.
   specialize (Eqdep_dec.UIP_dec rng_eq_dec) as H1.
 ...
