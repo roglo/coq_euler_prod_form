@@ -461,60 +461,13 @@ induction la as [| a]; intros. {
     specialize (IHla H); clear H.
     now rewrite Hld in IHla.
   }
-...
-      subst a.
-      clear - Hi Hla.
-      revert la Hi Hla.
-      induction lb as [| b]; intros; [ easy | ].
-      cbn.
-...
-    destruct (rng_eq_dec a 0%Rng) as [Haz| Haz]. {
-      subst a.
-      clear - Hlc Hi.
-      revert la Hlc Hi.
-      induction lb as [| b]; intros; [ easy | ].
-      specialize (Hi 0) as H1; cbn in H1; subst b; cbn.
-      rewrite strip_0s_app; cbn.
-      remember (strip_0s (rev lb)) as ld eqn:Hld; symmetry in Hld.
-      destruct ld as [| d]; [ now destruct (rng_eq_dec _ _) | ].
-      specialize (IHlb _ Hlc).
-      assert (H : ∀ i : nat, nth i (0%Rng :: la) 0%Rng = nth i lb 0%Rng). {
-        intros i; cbn.
-        destruct i. {
-          specialize (Hi 1) as H1.
-          cbn in H1; rewrite <- H1.
-          clear - Hi Hlc.
-          induction la as [| a]; [ easy | ].
-          cbn in Hlc; cbn.
-          rewrite strip_0s_app in Hlc.
-          remember (strip_0s (rev la)) as ld eqn:Hld; symmetry in Hld.
-          destruct ld as [| d]; [ | easy ].
-          cbn in Hlc.
-          now destruct (rng_eq_dec a 0%Rng).
-        }
-...
-  apply IHlb; intros i.
-  pose proof (Hi (S i)) as H; simpl in H; rewrite <- H.
-  destruct i; reflexivity.
-
- induction lb as [| b].
-  constructor.
-   pose proof (Hi O) as H.
-   assumption.
-
-   apply IHla; intros i.
-   pose proof (Hi (S i)) as H; simpl in H; rewrite H.
-   destruct i; reflexivity.
-
-  constructor.
-   pose proof (Hi O) as H.
-   assumption.
-
-   apply IHla; intros i.
-   pose proof (Hi (S i)) as H.
-   assumption.
+  specialize (Hi 0) as H1; cbn in H1; subst b.
+  do 2 rewrite app_comm_cons; f_equal.
+  rewrite <- Hld.
+  apply IHla.
+  now intros i; specialize (Hi (S i)).
+}
 Qed.
-*)
 
 Theorem lap_add_0_l {α} {r : ring α} : ∀ la, lap_add [] la = la.
 Proof. easy. Qed.
@@ -700,13 +653,13 @@ Qed.
 *)
 
 Theorem lap_mul_assoc : ∀ la lb lc,
-  lap_mul la (lap_mul lb lc) = lap_mul (lap_mul la lb) lc.
+  lap_norm (la * (lb * lc))%lap = lap_norm (la * lb * lc)%lap.
 Proof.
 intros la lb lc.
 symmetry; rewrite lap_mul_comm.
 unfold lap_mul.
-...
 apply list_nth_lap_eq; intros k.
+...
 rewrite list_nth_lap_convol_mul; [ idtac | reflexivity ].
 rewrite list_nth_lap_convol_mul; [ idtac | reflexivity ].
 rewrite summation_mul_list_nth_lap_convol_mul_2; symmetry.
