@@ -556,7 +556,6 @@ unfold lap_mul.
 now rewrite lap_convol_mul_comm, Nat.add_comm.
 Qed.
 
-(*
 Theorem list_nth_lap_convol_mul_aux : ∀ la lb n i len,
   pred (List.length la + List.length lb) = (i + len)%nat
   → (List.nth n (lap_convol_mul la lb i len) 0%Rng =
@@ -614,6 +613,7 @@ rewrite list_nth_lap_convol_mul_aux; [ idtac | assumption ].
 rewrite Nat.add_0_r; reflexivity.
 Qed.
 
+(*
 Theorem summation_mul_list_nth_lap_convol_mul : ∀ la lb lc k,
   (Σ (i = 0, k),
      List.nth i la 0 *
@@ -659,9 +659,9 @@ intros la lb lc.
 symmetry; rewrite lap_mul_comm.
 unfold lap_mul.
 apply list_nth_lap_eq; intros k.
+rewrite list_nth_lap_convol_mul; [ idtac | reflexivity ].
+rewrite list_nth_lap_convol_mul; [ idtac | reflexivity ].
 ...
-rewrite list_nth_lap_convol_mul; [ idtac | reflexivity ].
-rewrite list_nth_lap_convol_mul; [ idtac | reflexivity ].
 rewrite summation_mul_list_nth_lap_convol_mul_2; symmetry.
 rewrite summation_mul_list_nth_lap_convol_mul; symmetry.
 rewrite <- summation_summation_mul_swap.
