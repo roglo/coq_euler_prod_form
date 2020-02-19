@@ -749,6 +749,11 @@ Theorem lap_mul_assoc' : ∀ la lb lc,
   → (la * (lb * lc))%lap = (la * lb * lc)%lap.
 Proof.
 intros * Hla Hlb Hlc.
+destruct (Nat.eq_dec (length la) 0) as [Haz| Haz]. {
+  apply length_zero_iff_nil in Haz.
+  subst la; clear Hla.
+...
+
 apply eq_lap_norm_eq_length; [ apply lap_mul_assoc | ].
 unfold "*"%lap.
 do 4 rewrite lap_convol_mul_length.
@@ -756,8 +761,7 @@ destruct la as [| a]. {
   cbn.
   destruct lb as [| b]. {
     cbn.
-    induction lc as [| c]; [ easy | cbn ].
-(* ouais mais non c'est faux, ça *)
+    clear Hla Hlb.
 ...
 
 Theorem lap_mul_mul_swap : ∀ la lb lc,
