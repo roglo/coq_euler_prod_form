@@ -744,19 +744,24 @@ Qed.
 
 Theorem lap_mul_assoc' : ∀ la lb lc,
   lap_norm la ≠ []
-  → lap_norm lb ≠ []
-  → lap_norm lc ≠ []
-  → (la * (lb * lc))%lap = (la * lb * lc)%lap.
+  → lap_norm lb ≠ [] ∨ lap_norm lc ≠ []
+  → (la * (lb * lc))%lap = ((la * lb) * lc)%lap.
 Proof.
-intros * Hla Hlb Hlc.
+intros * Hla Hlbc.
 apply eq_lap_norm_eq_length; [ apply lap_mul_assoc | ].
 unfold "*"%lap.
 do 4 rewrite lap_convol_mul_length.
 destruct la as [| a]; [ easy | ].
-destruct lb as [| b]; [ easy | ].
-destruct lc as [| c]; [ easy | ].
-cbn; flia.
+destruct Hlbc as [Hlb| Hlc]. {
+  destruct lb as [| b]; [ easy | ].
+  cbn; flia.
+} {
+  destruct lc as [| c]; [ easy | ].
+  cbn; flia.
+}
 Qed.
+
+...
 
 Declare Scope poly_scope.
 Delimit Scope poly_scope with pol.
