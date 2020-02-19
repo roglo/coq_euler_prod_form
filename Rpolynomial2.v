@@ -761,19 +761,47 @@ destruct Hlbc as [Hlb| Hlc]. {
 }
 Qed.
 
-...
-
 Declare Scope poly_scope.
 Delimit Scope poly_scope with pol.
 Notation "a * b" := (poly_mul a b) : poly_scope.
+
+Theorem eq_poly_eq : ∀ la lb,
+  la = lb ↔ poly_norm la = poly_norm lb.
+Proof.
+intros.
+split; [ now intros; subst la | ].
+intros Hll.
+unfold poly_norm in Hll.
+specialize (Eqdep_dec.UIP_dec rng_eq_dec) as H1.
+...
+destruct la as (la, lapr).
+destruct y as (y, yp).
+simpl in H; subst x; f_equal.
+apply UIP_nat.
+  intros Hll.
+  specialize (Eqdep_dec.UIP_dec rng_eq_dec) as H1.
+...
 
 Theorem poly_mul_assoc : ∀ p1 p2 p3,
   (p1 * (p2 * p3))%pol = ((p1 * p2) * p3) %pol.
 Proof.
 intros.
-unfold "*"%pol; cbn.
-unfold lap_norm.
-cbn.
+unfold "*"%pol.
+remember (lap p1) as la.
+remember (lap p2) as lb.
+remember (lap p3) as lc.
+clear p1 Heqla.
+clear p2 Heqlb.
+clear p3 Heqlc.
+induction la as [| a]. {
+  cbn.
+  rewrite lap_mul_0_l.
+  destruct lb as [| b]. {
+    unfold "*"%lap at 2.
+    rewrite lap_convol_mul_nil_l; cbn.
+    unfold poly_norm; cbn.
+...
+apply eq_poly_eq.
 ...
 
 Theorem lap_mul_mul_swap : ∀ la lb lc,
