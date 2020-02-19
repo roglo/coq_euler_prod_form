@@ -37,19 +37,28 @@ unfold rng_eqb.
 now destruct (rng_eq_dec (last la 1%Rng) 0%Rng).
 Qed.
 
-...
-
+(*
 (* definition of a polynomial *)
 
 (* (lap : list as polynomial) *)
 Record poly {A} {rng : ring A} := mkpoly
   { lap : list A;
     lap_prop : last lap 1%Rng ≠ 0%Rng }.
+*)
 
 Arguments mkpoly {_} {_}.
 
-Definition lap_zero {α} {r : ring α} := mkpoly [] rng_1_neq_0.
-Definition lap_one {α} {r : ring α} := mkpoly [1%Rng] rng_1_neq_0.
+Theorem lap_1_0_prop {A} {rng : ring A} :
+  rng_eqb (last [] 1%Rng) 0%Rng = false.
+Proof.
+cbn.
+unfold rng_eqb.
+destruct (rng_eq_dec 1%Rng 0%Rng); [ | easy ].
+now apply rng_1_neq_0 in e.
+Qed.
+
+Definition lap_zero {α} {r : ring α} := mkpoly [] lap_1_0_prop.
+Definition lap_one {α} {r : ring α} := mkpoly [1%Rng] lap_1_0_prop.
 
 (* normalization *)
 
@@ -91,7 +100,7 @@ now rewrite List_last_app in IHla.
 Qed.
 
 Definition poly_norm {A} {rng : ring A} la :=
-  mkpoly (lap_norm la) (poly_norm_prop la).
+  mkpoly (lap_norm la) (proj2 (eq_poly_prop _) (poly_norm_prop la)).
 
 (**)
 Require Import ZArith.
@@ -797,75 +806,6 @@ Declare Scope poly_scope.
 Delimit Scope poly_scope with pol.
 Notation "a * b" := (poly_mul a b) : poly_scope.
 
-Print poly.
-
-Theorem eq_poly_eq : ∀ p1 p2, p1 = p2 ↔ lap p1 = lap p2.
-Proof.
-intros.
-split; [ now intros; subst p1 | ].
-intros Hll.
-destruct p1 as (la, lapr).
-destruct p2 as (lb, lbpr).
-cbn in Hll; subst la; f_equal.
-Check rng_eq_dec.
-Print Nat.eqb.
-...
-
-Check (last lb 1%Rng =? 0%Rng).
-Check (last lb 1%Rng ≠ 0%Rng).
-Check (
-...
-specialize (Eqdep_dec.UIP_dec H).
-
-specialize (Eqdep_dec.UIP_dec rng_eq_dec) as H1.
-specialize (H1 (last lb 1%Rng) 0%Rng).
-Check Eqdep_dec.UIP_dec.
-...
-apply Eqdep_dec.UIP_dec.
-intros x y.
-destruct (Nat.eq_dec x y) as [H1| H1]; [ now left | now right ].
-...
-Check Eqdep_dec.eq_dep_eq_dec.
-Check EqdepFacts.eq_dep_eq__UIP.
-...
-Theorem lap_eq_dec {A} {rng : ring A} : ∀ la lb : list A, {la = lb} + {la ≠ lb}.
-Admitted.
-
-...
-
-specialize (Eqdep_dec.UIP_dec rng_eq_dec) as H1.
-...
-unfold poly_norm.
-split. {
-  intros Hll.
-  unfold poly_norm.
-Theorem lap_eq_dec {A} {rng : ring A} : ∀ la lb : list A, {la = lb} + {la ≠ lb}.
-Admitted.
-specialize (Eqdep_dec.UIP_dec lap_eq_dec) as H2.
-specialize (H2 la lb).
-
-
-split; [ now intros; subst la | ].
-intros Hll.
-unfold poly_norm in Hll.
-specialize (Eqdep_dec.UIP_dec rng_eq_dec) as H1.
-Theorem lap_eq_dec {A} {rng : ring A} : ∀ la lb : list A, {la = lb} + {la ≠ lb}.
-Admitted.
-specialize (Eqdep_dec.UIP_dec lap_eq_dec) as H2.
-specialize (H2 la lb).
-
-apply H2.
-...
-destruct la as (la, lapr).
-destruct y as (y, yp).
-simpl in H; subst x; f_equal.
-apply UIP_nat.
-
-
-  intros Hll.
-  specialize (Eqdep_dec.UIP_dec rng_eq_dec) as H1.
-...
-
 Theorem poly_mul_assoc : ∀ p1 p2 p3,
   (p1 * (p2 * p3))%pol = ((p1 * p2) * p3) %pol.
 Proof.
@@ -884,8 +824,9 @@ induction la as [| a]. {
     unfold "*"%lap at 2.
     rewrite lap_convol_mul_nil_l; cbn.
     unfold poly_norm; cbn.
-...
-apply eq_poly_eq.
+    apply eq_poly_eq; cbn.
+    symmetry; apply lap_mul_0_l.
+  }
 ...
 
 Theorem lap_mul_mul_swap : ∀ la lb lc,
