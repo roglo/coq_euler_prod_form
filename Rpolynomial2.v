@@ -775,9 +775,21 @@ intros Hll.
 destruct p1 as (la, lapr).
 destruct p2 as (lb, lbpr).
 cbn in Hll; subst la; f_equal.
+Check rng_eq_dec.
+enough (H : ∀ a b : α, {a ≠ b} + {a = b}).
+...
+specialize (Eqdep_dec.UIP_dec H).
+
 specialize (Eqdep_dec.UIP_dec rng_eq_dec) as H1.
 specialize (H1 (last lb 1%Rng) 0%Rng).
 Check Eqdep_dec.UIP_dec.
+...
+apply Eqdep_dec.UIP_dec.
+intros x y.
+destruct (Nat.eq_dec x y) as [H1| H1]; [ now left | now right ].
+...
+Check Eqdep_dec.eq_dep_eq_dec.
+Check EqdepFacts.eq_dep_eq__UIP.
 ...
 Theorem lap_eq_dec {A} {rng : ring A} : ∀ la lb : list A, {la = lb} + {la ≠ lb}.
 Admitted.
