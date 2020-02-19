@@ -806,6 +806,42 @@ Declare Scope poly_scope.
 Delimit Scope poly_scope with pol.
 Notation "a * b" := (poly_mul a b) : poly_scope.
 
+Theorem lap_mul_norm_idemp_l : ∀ la lb,
+  lap_norm (lap_norm la * lb)%lap = lap_norm (la * lb)%lap.
+Proof.
+intros.
+unfold "*"%lap; cbn.
+remember (Init.Nat.pred _) as len eqn:Hlen.
+...
+intros.
+unfold "*"%lap; cbn.
+revert la.
+induction lb as [| b]; intros; cbn. {
+  now do 2 rewrite lap_convol_mul_nil_r.
+}
+rewrite <- Nat.add_succ_comm; cbn.
+rewrite <- Nat.add_succ_comm; cbn.
+unfold lap_norm in IHlb.
+...
+intros.
+unfold lap_norm.
+revert lb.
+induction la as [| a]; intros; [ easy | cbn ].
+rewrite strip_0s_app.
+remember (strip_0s (rev la)) as lc eqn:Hlc; symmetry in Hlc.
+destruct lc as [| c]. {
+  cbn.
+  destruct (rng_eq_dec a 0%Rng) as [Haz| Haz]. {
+    subst a; cbn.
+cbn in IHla.
+...
+rewrite IHla.
+unfold "*"%lap.
+unfold lap_norm.
+rewrite rev_length.
+Search (lap_convol_mul (rev _)).
+...
+
 Theorem poly_mul_assoc : ∀ p1 p2 p3,
   (p1 * (p2 * p3))%pol = ((p1 * p2) * p3) %pol.
 Proof.
@@ -819,7 +855,9 @@ clear p2 Heqlb.
 clear p3 Heqlc.
 unfold poly_norm at 1 3.
 apply eq_poly_eq; cbn.
-Inspect 4.
+Check Nat.add_mod_idemp_l.
+...
+rewrite lap_mul_norm_idemp_l.
 ...
 induction la as [| a]. {
   cbn.
