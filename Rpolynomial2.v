@@ -912,6 +912,22 @@ destruct i; [ easy | ].
 now apply IHla.
 Qed.
 
+Lemma lap_convol_mul_cons_with_0_l : ∀ a la lb i len,
+  (∀ i, nth i la 0%Rng = 0%Rng)
+  → lap_convol_mul (a :: la) lb i len = lap_convol_mul [a] lb i len.
+Proof.
+intros * Hla.
+revert i.
+induction len; intros; [ easy | ].
+cbn - [ summation ].
+f_equal; [ | apply IHlen ].
+apply summation_compat.
+intros j Hj.
+destruct j; [ easy | ].
+rewrite match_id.
+now rewrite Hla.
+Qed.
+
 Theorem lap_mul_norm_idemp_l : ∀ la lb,
   lap_norm (lap_norm la * lb)%lap = lap_norm (la * lb)%lap.
 Proof.
@@ -944,16 +960,21 @@ destruct lc as [| c]. {
   destruct lb as [| b]; [ easy | cbn ].
   rewrite Nat.sub_0_r, Nat.add_succ_r; cbn.
   do 2 rewrite strip_0s_app.
+  rewrite (lap_convol_mul_cons_with_0_l _ la). 2: {
+    intros i.
+    specialize (eq_strip_0s_nil _ Hlc) as H1.
+    destruct (lt_dec i (length la)) as [Hil| Hil]. {
+      specialize (H1 (length la - S i)).
+      rewrite <- rev_length in H1.
+      rewrite <- rev_nth in H1. {
+        now rewrite rev_involutive in H1.
+      }
+      now rewrite rev_length.
+    }
+    apply Nat.nlt_ge in Hil.
+    now rewrite nth_overflow.
+  }
 ...
-destruct la as [| a']; [ cbn; apply match_id | ].
-specialize (eq_strip_0s_nil _ Hlc) as H1.
-specialize (H1 (length la - S i)).
-rewrite rev_nth in H1.
-cbn in H1.
-apply eq_strip_0s_nil.
-
-...
-
 intros a' Ha'.
 destruct Ha' as [Ha'| Ha']; [ now subst a' | ].
 ...
