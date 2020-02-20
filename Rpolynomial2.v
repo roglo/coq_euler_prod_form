@@ -1003,6 +1003,38 @@ destruct (le_dec (length la) j) as [H1| H1]. {
 }
 Qed.
 
+Theorem lap_norm_cons_norm : ∀ a la lb i len,
+  length (a :: la) + length lb - 1 ≤ i + len
+  → lap_norm (lap_convol_mul (a :: lap_norm la) lb i len) =
+    lap_norm (lap_convol_mul (a :: la) lb i len).
+Proof.
+intros * Hlen.
+...
+intros * Hlen.
+revert i Hlen.
+induction len; intros; [ easy | ].
+cbn - [ summation nth ].
+do 2 rewrite strip_0s_app.
+remember (strip_0s (rev _)) as lc eqn:Hlc; symmetry in Hlc.
+remember (strip_0s (rev _)) as ld eqn:Hld in |-*; symmetry in Hld.
+cbn - [ summation nth ].
+destruct lc as [| c]. {
+  specialize (eq_strip_0s_nil _ Hlc) as H.
+  clear Hlc; rename H into Hlc.
+  destruct ld as [| d]. {
+    specialize (eq_strip_0s_nil _ Hld) as H.
+    clear Hld; rename H into Hld.
+    rewrite summation_split_first; [ symmetry | flia ].
+    rewrite summation_split_first; [ symmetry | flia ].
+    remember (nth 0 _ _) as x; cbn in Heqx; subst x.
+    rewrite Nat.sub_0_r.
+    rewrite all_0_summation_0. 2: {
+      intros j Hj.
+      destruct len. {
+        clear Hlc Hld.
+cbn in H1.
+...
+
 Theorem lap_mul_norm_idemp_l : ∀ la lb,
   lap_norm (lap_norm la * lb)%lap = lap_norm (la * lb)%lap.
 Proof.
@@ -1064,6 +1096,31 @@ rewrite fold_lap_norm.
 do 2 rewrite Nat.sub_0_r.
 clear c lc b lb Hlc Hd.
 rename d into lb.
+rewrite (lap_convol_mul_more (length la - length (lap_norm la))). 2: {
+  now cbn; rewrite Nat.sub_0_r.
+}
+rewrite (Nat.add_comm _ (length lb)).
+rewrite <- Nat.add_assoc.
+rewrite Nat.add_sub_assoc.
+rewrite (Nat.add_comm _ (length la)).
+rewrite Nat.add_sub.
+rewrite Nat.add_comm.
+...
+apply lap_norm_cons_norm.
+cbn.
+...
+revert a la.
+induction lb as [| b]; intros. {
+  cbn.
+  do 2 rewrite Nat.add_0_r.
+  induction la as [| a2]; [ easy | cbn ].
+  do 2 rewrite strip_0s_app; cbn.
+  remember (strip_0s (rev la)) as lc eqn:Hlc.
+  symmetry in Hlc.
+  destruct lc as [| c]. {
+    destruct (rng_eq_dec a2 0%Rng) as [Ha2z| Ha2z]. {
+      cbn.
+...
 induction la as [| a2]; [ easy | cbn ].
 do 2 rewrite strip_0s_app; cbn.
 remember (strip_0s (rev la)) as lc eqn:Hlc.
