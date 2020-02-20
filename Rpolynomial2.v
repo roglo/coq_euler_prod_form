@@ -1096,6 +1096,64 @@ destruct lb as [| b]. {
 }
 Qed.
 
+Theorem lap_convol_mul_app_rep_0_l : ∀ la lb i len n,
+  lap_norm (lap_convol_mul (la ++ repeat 0%Rng n) lb i len) =
+  lap_norm (lap_convol_mul la lb i len).
+Proof.
+intros.
+revert la i len.
+induction n; intros. {
+  now cbn; rewrite app_nil_r.
+}
+cbn.
+replace (0%Rng :: repeat 0%Rng n) with ([0%Rng] ++ repeat 0%Rng n) by easy.
+rewrite app_assoc.
+rewrite IHn; clear n IHn.
+revert la i.
+induction len; intros; [ easy | ].
+cbn - [ summation ].
+do 2 rewrite strip_0s_app.
+rewrite <- (rev_involutive (strip_0s _)).
+rewrite fold_lap_norm.
+rewrite <- (rev_involutive (strip_0s (rev _))).
+rewrite fold_lap_norm.
+rewrite IHlen.
+remember (rev (lap_norm _)) as lc eqn:Hlc; symmetry in Hlc.
+f_equal.
+destruct lc as [| c]. {
+  apply List_eq_rev_nil in Hlc.
+  f_equal; f_equal.
+  apply summation_compat.
+  intros j Hj.
+  f_equal; clear.
+  destruct (lt_dec j (length la)) as [Hjla| Hjla]. {
+    now rewrite app_nth1.
+  }
+  apply Nat.nlt_ge in Hjla.
+  rewrite (nth_overflow la); [ | easy ].
+  rewrite app_nth2; [ | easy ].
+  destruct (Nat.eq_dec j (length la)) as [Hjla2| Hjla2]. {
+    now rewrite Hjla2, Nat.sub_diag.
+  }
+  rewrite nth_overflow; [ easy | cbn; flia Hjla Hjla2 ].
+} {
+  f_equal; f_equal.
+  apply summation_compat.
+  intros j Hj.
+  f_equal; clear.
+  destruct (lt_dec j (length la)) as [Hjla| Hjla]. {
+    now rewrite app_nth1.
+  }
+  apply Nat.nlt_ge in Hjla.
+  rewrite (nth_overflow la); [ | easy ].
+  rewrite app_nth2; [ | easy ].
+  destruct (Nat.eq_dec j (length la)) as [Hjla2| Hjla2]. {
+    now rewrite Hjla2, Nat.sub_diag.
+  }
+  rewrite nth_overflow; [ easy | cbn; flia Hjla Hjla2 ].
+}
+Qed.
+
 Theorem lap_norm_cons_norm : ∀ a la lb i len,
   length (a :: la) + length lb - 1 ≤ i + len
   → lap_norm (lap_convol_mul (a :: lap_norm la) lb i len) =
@@ -1103,60 +1161,16 @@ Theorem lap_norm_cons_norm : ∀ a la lb i len,
 Proof.
 intros * Hlen.
 rewrite (lap_norm_repeat_0 la) at 2.
-...
-intros * Hlen.
-destruct len; [ easy | ].
-cbn - [ summation nth ].
-destruct len. {
-  cbn in Hlen; rewrite Nat.sub_0_r in Hlen.
-  cbn - [ summation nth ].
-  destruct (rng_eq_dec _ _) as [H1| H1]. {
-    destruct (rng_eq_dec _ _) as [H2| H2]; [ easy | exfalso ].
-    apply H2; clear H2.
-    apply all_0_summation_0.
-    intros j Hj.
-...
-rewrite summation_split_first.
-  rewrite all_0_summation_0. 2: {
-    intros j Hj.
-    destruct (le_dec (length lb) (i - j)) as [Hbij| Hbij]. {
-      rewrite (nth_overflow lb); [ | easy ].
-      apply rng_mul_0_r.
-    }
-    apply Nat.nle_gt in Hbij.
-    rewrite nth_overflow. 2: {
-enough (length (lap_norm la) ≤ length la).
-cbn.
-lia.
-    destruct (lt_dec j (length (a :: lap_norm la))) as [Hja| Hja]. {
-      rewrite (nth_overflow lb). 2: {
-        cbn in Hja.
-do 2 rewrite strip_0s_app.
-...
-intros * Hlen.
-revert i Hlen.
-induction len; intros; [ easy | ].
-cbn - [ summation nth ].
-do 2 rewrite strip_0s_app.
-remember (strip_0s (rev _)) as lc eqn:Hlc; symmetry in Hlc.
-remember (strip_0s (rev _)) as ld eqn:Hld in |-*; symmetry in Hld.
-cbn - [ summation nth ].
-destruct lc as [| c]. {
-  specialize (eq_strip_0s_nil _ Hlc) as H.
-  clear Hlc; rename H into Hlc.
-  destruct ld as [| d]. {
-    specialize (eq_strip_0s_nil _ Hld) as H.
-    clear Hld; rename H into Hld.
-    rewrite summation_split_first; [ symmetry | flia ].
-    rewrite summation_split_first; [ symmetry | flia ].
-    remember (nth 0 _ _) as x; cbn in Heqx; subst x.
-    rewrite Nat.sub_0_r.
-    rewrite all_0_summation_0. 2: {
-      intros j Hj.
-      destruct len. {
-        clear Hlc Hld.
-cbn in H1.
-...
+rewrite app_comm_cons.
+now rewrite lap_convol_mul_app_rep_0_l.
+Qed.
+
+Theorem lap_norm_length_le : ∀ la, length (lap_norm la) ≤ length la.
+Proof.
+intros.
+rewrite (lap_norm_repeat_0 la) at 2.
+rewrite app_length; flia.
+Qed.
 
 Theorem lap_mul_norm_idemp_l : ∀ la lb,
   lap_norm (lap_norm la * lb)%lap = lap_norm (la * lb)%lap.
@@ -1174,7 +1188,7 @@ destruct lc as [| c]. {
     rewrite lap_convol_mul_0_l; [ easy | ].
     intros i; cbn.
     destruct i; [ easy | ].
-    specialize (eq_strip_0s_nil _ Hlc) as H1.
+    specialize (proj1 (eq_strip_0s_nil _) Hlc) as H1.
     destruct (lt_dec i (length la)) as [Hil| Hil]. {
       specialize (H1 (length la - S i)).
       rewrite <- rev_length in H1.
@@ -1193,7 +1207,7 @@ destruct lc as [| c]. {
   rewrite fold_lap_norm.
   rewrite (lap_convol_mul_cons_with_0_l _ la). 2: {
     intros i.
-    specialize (eq_strip_0s_nil _ Hlc) as H1.
+    specialize (proj1 (eq_strip_0s_nil _) Hlc) as H1.
     destruct (lt_dec i (length la)) as [Hil| Hil]. {
       specialize (H1 (length la - S i)).
       rewrite <- rev_length in H1.
@@ -1224,79 +1238,16 @@ rewrite (lap_convol_mul_more (length la - length (lap_norm la))). 2: {
 }
 rewrite (Nat.add_comm _ (length lb)).
 rewrite <- Nat.add_assoc.
-rewrite Nat.add_sub_assoc.
+rewrite Nat.add_sub_assoc; [ | apply lap_norm_length_le ].
 rewrite (Nat.add_comm _ (length la)).
 rewrite Nat.add_sub.
 rewrite Nat.add_comm.
-...
 apply lap_norm_cons_norm.
-cbn.
-...
-revert a la.
-induction lb as [| b]; intros. {
-  cbn.
-  do 2 rewrite Nat.add_0_r.
-  induction la as [| a2]; [ easy | cbn ].
-  do 2 rewrite strip_0s_app; cbn.
-  remember (strip_0s (rev la)) as lc eqn:Hlc.
-  symmetry in Hlc.
-  destruct lc as [| c]. {
-    destruct (rng_eq_dec a2 0%Rng) as [Ha2z| Ha2z]. {
-      cbn.
-...
-induction la as [| a2]; [ easy | cbn ].
-do 2 rewrite strip_0s_app; cbn.
-remember (strip_0s (rev la)) as lc eqn:Hlc.
-symmetry in Hlc.
-destruct lc as [| c]. {
-  destruct (rng_eq_dec a2 0%Rng) as [Ha2z| Ha2z]. {
-    cbn.
-...
-intros.
-unfold "*"%lap; cbn.
-revert la.
-induction lb as [| b]; intros; cbn. {
-  now do 2 rewrite lap_convol_mul_nil_r.
-}
-rewrite <- Nat.add_succ_comm; cbn.
-rewrite <- Nat.add_succ_comm; cbn.
-unfold lap_norm in IHlb.
-destruct la as [| a]; [ easy | ].
-cbn.
-rewrite strip_0s_app.
-remember (strip_0s (rev la)) as lc eqn:Hlc; symmetry in Hlc.
-destruct lc as [| c]. {
-  cbn.
-  destruct (rng_eq_dec a 0%Rng) as [Haz| Haz]. {
-    subst a; cbn.
-    rewrite fold_lap_norm.
-    rewrite lap_convol_mul_nil_l; symmetry.
-    rewrite rng_mul_0_l, rng_add_0_l.
-    rewrite strip_0s_app; cbn.
-...
-  } {
-    cbn.
-    rewrite rng_add_0_r.
-    rewrite strip_0s_app; cbn.
-Print lap_convol_mul.
-...
-intros.
-unfold lap_norm.
-revert lb.
-induction la as [| a]; intros; [ easy | cbn ].
-rewrite strip_0s_app.
-remember (strip_0s (rev la)) as lc eqn:Hlc; symmetry in Hlc.
-destruct lc as [| c]. {
-  cbn.
-  destruct (rng_eq_dec a 0%Rng) as [Haz| Haz]. {
-    subst a; cbn.
-cbn in IHla.
-...
-rewrite IHla.
-unfold "*"%lap.
-unfold lap_norm.
-rewrite rev_length.
-Search (lap_convol_mul (rev _)).
+now cbn; rewrite Nat.sub_0_r.
+Qed.
+
+Inspect 1.
+
 ...
 
 Theorem poly_mul_assoc : ∀ p1 p2 p3,
