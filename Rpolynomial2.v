@@ -865,31 +865,102 @@ destruct lb as [| b]; [ easy | ].
 destruct lc as [| c]. {
   now destruct (lap_convol_mul _ _ _ _).
 }
-...
-
-intros * Hla Hlbc.
-apply eq_lap_norm_eq_length; [ apply lap_mul_assoc | ].
-unfold "*"%lap.
+cbn.
+do 4 (rewrite Nat.add_succ_r; cbn); f_equal.
+do 2 rewrite rng_add_0_r.
 do 4 rewrite lap_convol_mul_length.
-destruct la as [| a]; [ easy | ].
-destruct Hlbc as [Hlb| Hlc]. {
-  destruct lb as [| b]; [ easy | ].
-  cbn; flia.
-} {
-  destruct lc as [| c]; [ easy | ].
-  cbn; flia.
-}
+apply Nat.add_assoc.
 Qed.
 
 Declare Scope poly_scope.
 Delimit Scope poly_scope with pol.
 Notation "a * b" := (poly_mul a b) : poly_scope.
 
+Theorem lap_convol_mul_0_l : ∀ la lb i len,
+  (∀ i, nth i la 0%Rng = 0%Rng)
+  → lap_norm (lap_convol_mul la lb i len) = [].
+Proof.
+intros * Ha.
+revert i.
+induction len; intros; [ easy | ].
+cbn - [ summation ].
+rewrite strip_0s_app.
+remember (strip_0s (rev _)) as lc eqn:Hlc; symmetry in Hlc.
+destruct lc as [| c]. {
+  rewrite all_0_summation_0. 2: {
+    intros j Hj.
+    now rewrite Ha, rng_mul_0_l.
+  }
+  cbn.
+  now destruct (rng_eq_dec 0%Rng 0%Rng).
+}
+unfold lap_norm in IHlen.
+specialize (IHlen (S i)).
+rewrite Hlc in IHlen.
+now apply List_eq_rev_nil in IHlen.
+Qed.
+
+Theorem eq_strip_0s_nil : ∀ la,
+  strip_0s la = [] → ∀ i, nth i la 0%Rng = 0%Rng.
+Proof.
+intros * Hla *.
+revert i.
+induction la as [| a]; intros; [ now destruct i | cbn ].
+cbn in Hla.
+destruct (rng_eq_dec a 0%Rng) as [Haz| Haz]; [ | easy ].
+destruct i; [ easy | ].
+now apply IHla.
+Qed.
+
 Theorem lap_mul_norm_idemp_l : ∀ la lb,
   lap_norm (lap_norm la * lb)%lap = lap_norm (la * lb)%lap.
 Proof.
 intros.
 unfold "*"%lap; cbn.
+destruct la as [| a]; [ easy | cbn ].
+rewrite strip_0s_app.
+remember (strip_0s (rev la)) as lc eqn:Hlc; symmetry in Hlc.
+destruct lc as [| c]. {
+  cbn.
+  destruct (rng_eq_dec a 0%Rng) as [Haz| Haz]. {
+    cbn.
+    destruct lb as [| b]; [ easy | cbn ].
+    rewrite lap_convol_mul_0_l; [ easy | ].
+    intros i; cbn.
+    destruct i; [ easy | ].
+    specialize (eq_strip_0s_nil _ Hlc) as H1.
+    destruct (lt_dec i (length la)) as [Hil| Hil]. {
+      specialize (H1 (length la - S i)).
+      rewrite <- rev_length in H1.
+      rewrite <- rev_nth in H1. {
+        now rewrite rev_involutive in H1.
+      }
+      now rewrite rev_length.
+    }
+    apply Nat.nlt_ge in Hil.
+    now rewrite nth_overflow.
+  }
+  cbn.
+  destruct lb as [| b]; [ easy | cbn ].
+  rewrite Nat.sub_0_r, Nat.add_succ_r; cbn.
+  do 2 rewrite strip_0s_app.
+...
+destruct la as [| a']; [ cbn; apply match_id | ].
+specialize (eq_strip_0s_nil _ Hlc) as H1.
+specialize (H1 (length la - S i)).
+rewrite rev_nth in H1.
+cbn in H1.
+apply eq_strip_0s_nil.
+
+...
+
+intros a' Ha'.
+destruct Ha' as [Ha'| Ha']; [ now subst a' | ].
+...
+    rewrite Nat.add_succ_r; cbn.
+    rewrite Haz, rng_mul_0_l, rng_add_0_l.
+    rewrite strip_0s_app.
+    cbn.
 ...
 intros.
 unfold "*"%lap; cbn.
