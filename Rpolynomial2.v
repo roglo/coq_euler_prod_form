@@ -903,15 +903,28 @@ now apply List_eq_rev_nil in IHlen.
 Qed.
 
 Theorem eq_strip_0s_nil : ∀ la,
-  strip_0s la = [] → ∀ i, nth i la 0%Rng = 0%Rng.
+  strip_0s la = [] ↔ ∀ i, nth i la 0%Rng = 0%Rng.
 Proof.
-intros * Hla *.
-revert i.
-induction la as [| a]; intros; [ now destruct i | cbn ].
-cbn in Hla.
-destruct (rng_eq_dec a 0%Rng) as [Haz| Haz]; [ | easy ].
-destruct i; [ easy | ].
-now apply IHla.
+intros.
+split. {
+  intros Hla *.
+  revert i.
+  induction la as [| a]; intros; [ now destruct i | cbn ].
+  cbn in Hla.
+  destruct (rng_eq_dec a 0%Rng) as [Haz| Haz]; [ | easy ].
+  destruct i; [ easy | ].
+  now apply IHla.
+} {
+  intros Hla.
+  induction la as [| a]; [ easy | ].
+  cbn.
+  destruct (rng_eq_dec a 0%Rng) as [Haz| Haz]. {
+    apply IHla.
+    intros i.
+    now specialize (Hla (S i)).
+  }
+  now specialize (Hla 0).
+}
 Qed.
 
 Lemma lap_convol_mul_cons_with_0_l : ∀ a la lb i len,
@@ -1003,6 +1016,35 @@ destruct (le_dec (length la) j) as [H1| H1]. {
 }
 Qed.
 
+Theorem all_0_lap_norm_nil : ∀ la,
+  (∀ i, nth i la 0%Rng = 0%Rng)
+  → lap_norm la = [].
+Proof.
+intros * Hla.
+induction la as [| a]; [ easy | cbn ].
+rewrite strip_0s_app.
+remember (strip_0s (rev la)) as lb eqn:Hlb; symmetry in Hlb.
+destruct lb as [| b]. {
+  cbn.
+  destruct (rng_eq_dec a 0%Rng) as [H1| H1]; [ easy | exfalso ].
+  now specialize (Hla 0); cbn in Hla.
+}
+exfalso.
+assert (H : strip_0s (rev la) = []). {
+  clear - Hla.
+  apply eq_strip_0s_nil.
+  intros i.
+  destruct (lt_dec i (length la)) as [Hila| Hila]. {
+    rewrite rev_nth; [ | easy ].
+    specialize (Hla (S (length la - S i))).
+    now cbn in Hla.
+  }
+  apply Nat.nlt_ge in Hila.
+  rewrite nth_overflow; [ easy | now rewrite rev_length ].
+}
+now rewrite Hlb in H.
+Qed.
+
 Theorem lap_norm_repeat_0 : ∀ la,
   la = lap_norm la ++ repeat 0%Rng (length la - length (lap_norm la)).
 Proof.
@@ -1016,32 +1058,38 @@ destruct lb as [| b]. {
   destruct (rng_eq_dec a 0%Rng) as [Haz| Haz]. {
     cbn; subst a; f_equal.
     assert (H : lap_norm la = []). {
-      specialize (eq_strip_0s_nil _ Hlb) as H1.
-      clear - H1.
-      induction la as [| a]; [ easy | cbn ].
-      specialize (H1 (length la)) as H2.
-      cbn in H2.
-      rewrite app_nth2 in H2; [ | rewrite rev_length; flia ].
-      rewrite rev_length, Nat.sub_diag in H2.
-      cbn in H2; subst a.
-      rewrite strip_0s_app.
-      remember (strip_0s (rev la)) as lb eqn:Hlb; symmetry in Hlb.
-      destruct lb as [| b]. {
-        now cbn; destruct (rng_eq_dec 0%Rng 0%Rng).
+      apply all_0_lap_norm_nil.
+      intros i.
+      specialize (proj1 (eq_strip_0s_nil _) Hlb) as H1.
+      destruct (lt_dec i (length la)) as [Hila| Hila]. {
+        replace la with (rev (rev la)) by apply rev_involutive.
+        rewrite rev_nth; rewrite rev_length; [ | easy ].
+        apply H1.
       }
-      exfalso.
-      assert (H : strip_0s (rev la) = []). {
-        clear - H1.
-        induction la as [| a]; [ easy | cbn ].
-        rewrite strip_0s_app.
-        rewrite IHla. 2: {
-          intros i.
-          destruct (Nat.eq_dec i (S (length la))) as [Hila| Hila]. {
-            rewrite nth_overflow; [ easy | ].
-            rewrite rev_length; cbn.
-            now rewrite Hila.
-          }
-Search (nth _ _ _ = _).
+      apply Nat.nlt_ge in Hila.
+      now rewrite nth_overflow.
+    }
+    rewrite H in IHla; cbn in IHla.
+    now rewrite Nat.sub_0_r in IHla.
+  } {
+    cbn; f_equal.
+    assert (H : lap_norm la = []). {
+      apply all_0_lap_norm_nil.
+      intros i.
+      specialize (proj1 (eq_strip_0s_nil _) Hlb) as H1.
+      destruct (lt_dec i (length la)) as [Hila| Hila]. {
+        replace la with (rev (rev la)) by apply rev_involutive.
+        rewrite rev_nth; rewrite rev_length; [ | easy ].
+        apply H1.
+      }
+      apply Nat.nlt_ge in Hila.
+      now rewrite nth_overflow.
+    }
+    now rewrite H in IHla; cbn in IHla.
+  }
+} {
+  cbn.
+  rewrite rev_app_distr; cbn; f_equal.
 ...
 
 Theorem lap_norm_cons_norm : ∀ a la lb i len,
