@@ -950,25 +950,58 @@ rewrite Nat.add_succ_r.
 apply IHlen.
 Qed.
 
+Theorem lap_norm_app_0_r : ∀ la lb,
+  (∀ i, nth i lb 0%Rng = 0%Rng)
+  → lap_norm la = lap_norm (la ++ lb).
+Proof.
+intros * Hlb.
+unfold lap_norm; f_equal.
+induction la as [| a]. {
+  cbn; symmetry.
+  induction lb as [| b]; [ easy | cbn ].
+  rewrite strip_0s_app.
+  rewrite IHlb. 2: {
+    intros i.
+    now specialize (Hlb (S i)).
+  }
+  specialize (Hlb 0); cbn in Hlb; rewrite Hlb; cbn.
+  now destruct (rng_eq_dec 0%Rng 0%Rng).
+}
+cbn.
+do 2 rewrite strip_0s_app.
+now rewrite IHla.
+Qed.
+
 Theorem lap_convol_mul_more : ∀ n la lb i len,
   length la + length lb - 1 ≤ i + len
-  → lap_convol_mul la lb i len = lap_convol_mul la lb i (len + n).
+  → lap_norm (lap_convol_mul la lb i len) =
+    lap_norm (lap_convol_mul la lb i (len + n)).
 Proof.
-intros * Hlen.
-induction n; [ now rewrite Nat.add_0_r | ].
-rewrite Nat.add_succ_r; cbn - [ summation ].
+intros.
+induction n; [ rewrite Nat.add_0_r; reflexivity | idtac ].
+rewrite Nat.add_succ_r.
+rewrite lap_convol_mul_succ.
 rewrite IHn.
-...
-apply lap_eq_app_0s.
-constructor; [ idtac | constructor ].
-apply all_0_summation_0.
+apply lap_norm_app_0_r.
+intros j.
+rewrite all_0_summation_0. {
+  destruct j; [ easy | now destruct j ].
+}
+clear j.
 intros j (_, Hj).
 apply rng_mul_eq_0.
-destruct (le_dec (length la) j) as [H1| H1].
- left.
- rewrite List.nth_overflow; [ reflexivity | assumption ].
-
-...
+destruct (le_dec (length la) j) as [H1| H1]. {
+  now left; rewrite List.nth_overflow.
+} {
+  apply Nat.nle_gt in H1.
+  destruct (le_dec (length lb) (i + (len + n) - j)) as [H2| H2]. {
+    now right; rewrite nth_overflow.
+  } {
+    exfalso; apply H2; clear H2.
+    flia H H1.
+  }
+}
+Qed.
 
 Theorem lap_mul_norm_idemp_l : ∀ la lb,
   lap_norm (lap_norm la * lb)%lap = lap_norm (la * lb)%lap.
@@ -999,9 +1032,10 @@ destruct lc as [| c]. {
     now rewrite nth_overflow.
   }
   cbn.
-  destruct lb as [| b]; [ easy | cbn ].
-  rewrite Nat.sub_0_r, Nat.add_succ_r; cbn.
-  do 2 rewrite strip_0s_app.
+  destruct lb as [| b]; [ easy | ].
+  remember (b :: lb) as ld eqn:Hld; symmetry in Hld.
+  do 2 rewrite Nat.sub_0_r.
+  rewrite fold_lap_norm.
   rewrite (lap_convol_mul_cons_with_0_l _ la). 2: {
     intros i.
     specialize (eq_strip_0s_nil _ Hlc) as H1.
@@ -1016,16 +1050,21 @@ destruct lc as [| c]. {
     apply Nat.nlt_ge in Hil.
     now rewrite nth_overflow.
   }
-...
-rewrite (lap_convol_mul_more (length la)); [ | easy ].
-...
-intros a' Ha'.
-destruct Ha' as [Ha'| Ha']; [ now subst a' | ].
-...
-    rewrite Nat.add_succ_r; cbn.
-    rewrite Haz, rng_mul_0_l, rng_add_0_l.
-    rewrite strip_0s_app.
-    cbn.
+  rewrite Nat.add_comm.
+  apply lap_convol_mul_more; cbn.
+  now rewrite Nat.sub_0_r.
+}
+rewrite rev_app_distr; cbn.
+rewrite fold_lap_norm.
+destruct lb as [| b]; [ easy | ].
+remember (b :: lb) as d eqn:Hd.
+replace (rev lc ++ [c]) with (rev (c :: lc)) by easy.
+rewrite <- Hlc.
+rewrite fold_lap_norm.
+do 2 rewrite Nat.sub_0_r.
+clear c lc b lb Hlc Hd.
+rename d into lb.
+Search (lap_convol_mul (_ :: _)).
 ...
 intros.
 unfold "*"%lap; cbn.
