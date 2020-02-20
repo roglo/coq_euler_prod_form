@@ -164,7 +164,14 @@ Fixpoint lap_convol_mul {α} {r : ring α} al1 al2 i len :=
   end.
 
 Definition lap_mul {α} {R : ring α} la lb :=
-  lap_convol_mul la lb 0 (length la + length lb - 1).
+  match la with
+  | [] => []
+  | _ =>
+      match lb with
+      | [] => []
+      | _ => lap_convol_mul la lb 0 (length la + length lb - 1)
+      end
+  end.
 
 Definition poly_mul {A} {rng : ring A} p1 p2 :=
   poly_norm (lap_mul (lap p1) (lap p2)).
@@ -517,10 +524,10 @@ Theorem lap_add_0_r {α} {r : ring α} : ∀ la, lap_add la [] = la.
 Proof. intros; now destruct la. Qed.
 
 Theorem lap_mul_0_l {α} {r : ring α} : ∀ la, lap_norm (lap_mul [] la) = [].
-Proof. intros; apply lap_convol_mul_nil_l. Qed.
+Proof. easy. Qed.
 
-Theorem lap_mul_0_r : ∀ α (r : ring α) la, lap_norm (lap_mul la []) = [].
-Proof. intros α r la; apply lap_convol_mul_nil_r. Qed.
+Theorem lap_mul_0_r {α} {r : ring α} : ∀ la, lap_norm (lap_mul la []) = [].
+Proof. now intros; destruct la. Qed.
 
 Section lap.
 
@@ -592,9 +599,12 @@ Qed.
 
 Theorem lap_mul_comm : ∀ a b, lap_mul a b = lap_mul b a.
 Proof.
-intros a b.
+intros la lb.
 unfold lap_mul.
-now rewrite lap_convol_mul_comm, Nat.add_comm.
+destruct la as [| a]; [ now destruct lb | cbn ].
+rewrite <- Nat.add_succ_comm; cbn.
+rewrite (Nat.add_comm (length lb)).
+now rewrite lap_convol_mul_comm.
 Qed.
 
 Theorem list_nth_lap_convol_mul_aux : ∀ la lb n i len,
@@ -682,6 +692,56 @@ Qed.
 Theorem lap_mul_assoc : ∀ la lb lc,
   lap_norm (la * (lb * lc))%lap = lap_norm (la * lb * lc)%lap.
 Proof.
+intros la lb lc.
+symmetry; rewrite lap_mul_comm.
+unfold lap_mul.
+destruct lc as [| c]. {
+  destruct la as [| a]; [ easy | now destruct lb ].
+}
+destruct la as [| a]; [ easy | ].
+destruct lb as [| b]; [ easy | ].
+apply list_nth_lap_eq.
+intros i.
+remember (lap_convol_mul (a :: la) _ _ _) as ld eqn:Hld.
+remember (lap_convol_mul (b :: lb) _ _ _) as le eqn:Hle.
+symmetry in Hld, Hle.
+move b before a; move c before b.
+cbn in Hld.
+rewrite Nat.sub_0_r, <- Nat.add_succ_comm in Hld; cbn in Hld.
+destruct ld as [| d]; [ easy | ].
+rewrite rng_add_0_r in Hld.
+injection Hld; clear Hld; intros Hld Hd.
+cbn in Hle.
+rewrite Nat.sub_0_r, <- Nat.add_succ_comm in Hle; cbn in Hle.
+destruct le as [| e]; [ easy | ].
+rewrite rng_add_0_r in Hle.
+injection Hle; clear Hle; intros Hle He.
+move d before c; move e before d.
+rewrite list_nth_lap_convol_mul; [ idtac | reflexivity ].
+rewrite list_nth_lap_convol_mul; [ idtac | reflexivity ].
+Check summation_mul_list_nth_lap_convol_mul_2.
+Check summation_mul_list_nth_lap_convol_mul.
+...
+rewrite summation_mul_list_nth_lap_convol_mul_2; symmetry.
+rewrite summation_mul_list_nth_lap_convol_mul; symmetry.
+rewrite <- summation_summation_mul_swap.
+rewrite <- summation_summation_mul_swap.
+rewrite summation_summation_exch.
+rewrite summation_summation_shift.
+apply summation_compat; intros i Hi.
+apply summation_compat; intros j Hj.
+rewrite rng_mul_comm, rng_mul_assoc.
+rewrite Nat.add_comm, Nat.add_sub.
+rewrite Nat.add_comm, Nat.sub_add_distr.
+reflexivity.
+...
+do 4 rewrite Nat.sub_0_r.
+do 2 rewrite <- Nat.add_succ_comm; cbn.
+do 2 rewrite rng_add_0_r.
+do 2 rewrite <- Nat.add_succ_comm; cbn.
+do 2 rewrite rng_add_0_r.
+do 2 rewrite strip_0s_app; cbn.
+...
 intros la lb lc.
 symmetry; rewrite lap_mul_comm.
 unfold lap_mul.
