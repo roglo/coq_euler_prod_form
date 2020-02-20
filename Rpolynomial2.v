@@ -1269,16 +1269,8 @@ unfold poly_norm at 1 3.
 apply eq_poly_eq; cbn.
 rewrite lap_mul_norm_idemp_l.
 rewrite lap_mul_norm_idemp_r.
-...
-induction la as [| a]. {
-  cbn.
-  rewrite lap_mul_0_l.
-  unfold poly_norm.
-  apply eq_poly_eq; cbn.
-  unfold "*"%lap at 1 3.
-  now do 2 rewrite lap_convol_mul_nil_l.
-}
-...
+apply lap_mul_assoc.
+Qed.
 
 Theorem lap_mul_mul_swap : ∀ la lb lc,
   lap_norm (lap_mul (lap_mul la lb) lc) = lap_norm (lap_mul (lap_mul la lc) lb).
@@ -1288,19 +1280,7 @@ do 2 rewrite <- lap_mul_assoc.
 now rewrite (lap_mul_comm lb).
 Qed.
 
-Theorem lap_mul_mul_swap' : ∀ la lb lc,
-  lap_mul (lap_mul la lb) lc = lap_mul (lap_mul la lc) lb.
-Proof.
-intros la lb lc.
-apply eq_lap_norm_eq_length; [ apply lap_mul_mul_swap | ].
-unfold "*"%lap.
-do 4 rewrite lap_convol_mul_length.
-destruct la as [| a]. {
-  cbn.
-  destruct lb as [| b]. {
-    cbn.
-...
-
+(*
 Theorem lap_eq_skipn_succ : ∀ cl i,
   lap_eq (List.nth i cl 0%Rng :: List.skipn (S i) cl) (List.skipn i cl).
 Proof.
@@ -1346,6 +1326,7 @@ Fixpoint lap_convol_mul_add al1 al2 al3 i len :=
        (List.nth (i - j) al2 0 + List.nth (i - j) al3 0))%Rng ::
        lap_convol_mul_add al1 al2 al3 (S i) len1
   end.
+*)
 
 (* *)
 
@@ -1365,6 +1346,7 @@ induction k; intros.
  apply IHk.
 Qed.
 
+(*
 Theorem lap_convol_mul_lap_add : ∀ la lb lc i len,
   lap_eq
     (lap_convol_mul la (lap_add lb lc) i len)
@@ -1394,17 +1376,19 @@ rewrite <- summation_add_distr.
 apply summation_compat; intros j (_, Hj).
 rewrite rng_mul_add_distr_l; reflexivity.
 Qed.
+*)
 
 Theorem lap_mul_add_distr_l : ∀ la lb lc,
-  lap_eq (lap_mul la (lap_add lb lc))
-    (lap_add (lap_mul la lb) (lap_mul la lc)).
+  lap_mul la (lap_add lb lc) =
+     lap_add (lap_mul la lb) (lap_mul la lc).
 Proof.
 intros la lb lc.
 unfold lap_mul.
-remember (pred (length la + length (lap_add lb lc))) as labc.
-remember (pred (length la + length lb)) as lab.
-remember (pred (length la + length lc)) as lac.
+remember (length la + length (lap_add lb lc) - 1) as labc.
+remember (length la + length lb - 1) as lab.
+remember (length la + length lc - 1) as lac.
 rewrite Heqlabc.
+...
 rewrite lap_convol_mul_more with (n := (lab + lac)%nat).
 rewrite <- Heqlabc.
 symmetry.
@@ -1425,8 +1409,8 @@ reflexivity.
 Qed.
 
 Theorem lap_mul_add_distr_r : ∀ la lb lc,
-  lap_eq (lap_mul (lap_add la lb) lc)
-    (lap_add (lap_mul la lc) (lap_mul lb lc)).
+  lap_mul (lap_add la lb) lc =
+    lap_add (lap_mul la lc) (lap_mul lb lc).
 Proof.
 intros la lb lc.
 rewrite lap_mul_comm, lap_mul_add_distr_l, lap_mul_comm.
