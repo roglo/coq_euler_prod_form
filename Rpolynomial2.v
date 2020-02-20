@@ -1090,7 +1090,11 @@ destruct lb as [| b]. {
 } {
   cbn.
   rewrite rev_app_distr; cbn; f_equal.
-...
+  replace (rev lb ++ [b]) with (rev (b :: lb)) by easy.
+  rewrite <- Hlb.
+  now rewrite fold_lap_norm.
+}
+Qed.
 
 Theorem lap_norm_cons_norm : ∀ a la lb i len,
   length (a :: la) + length lb - 1 ≤ i + len
@@ -1098,7 +1102,6 @@ Theorem lap_norm_cons_norm : ∀ a la lb i len,
     lap_norm (lap_convol_mul (a :: la) lb i len).
 Proof.
 intros * Hlen.
-...
 rewrite (lap_norm_repeat_0 la) at 2.
 ...
 intros * Hlen.
