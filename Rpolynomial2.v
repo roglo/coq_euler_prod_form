@@ -1003,12 +1003,76 @@ destruct (le_dec (length la) j) as [H1| H1]. {
 }
 Qed.
 
+Theorem lap_norm_repeat_0 : ∀ la,
+  la = lap_norm la ++ repeat 0%Rng (length la - length (lap_norm la)).
+Proof.
+intros.
+induction la as [| a]; [ easy | ].
+cbn.
+rewrite strip_0s_app.
+remember (strip_0s (rev la)) as lb eqn:Hlb; symmetry in Hlb.
+destruct lb as [| b]. {
+  cbn.
+  destruct (rng_eq_dec a 0%Rng) as [Haz| Haz]. {
+    cbn; subst a; f_equal.
+    assert (H : lap_norm la = []). {
+      specialize (eq_strip_0s_nil _ Hlb) as H1.
+      clear - H1.
+      induction la as [| a]; [ easy | cbn ].
+      specialize (H1 (length la)) as H2.
+      cbn in H2.
+      rewrite app_nth2 in H2; [ | rewrite rev_length; flia ].
+      rewrite rev_length, Nat.sub_diag in H2.
+      cbn in H2; subst a.
+      rewrite strip_0s_app.
+      remember (strip_0s (rev la)) as lb eqn:Hlb; symmetry in Hlb.
+      destruct lb as [| b]. {
+        now cbn; destruct (rng_eq_dec 0%Rng 0%Rng).
+      }
+      exfalso.
+      assert (H : strip_0s (rev la) = []). {
+        clear - H1.
+        induction la as [| a]; [ easy | cbn ].
+        rewrite strip_0s_app.
+...
+
 Theorem lap_norm_cons_norm : ∀ a la lb i len,
   length (a :: la) + length lb - 1 ≤ i + len
   → lap_norm (lap_convol_mul (a :: lap_norm la) lb i len) =
     lap_norm (lap_convol_mul (a :: la) lb i len).
 Proof.
 intros * Hlen.
+...
+rewrite (lap_norm_repeat_0 la) at 2.
+...
+intros * Hlen.
+destruct len; [ easy | ].
+cbn - [ summation nth ].
+destruct len. {
+  cbn in Hlen; rewrite Nat.sub_0_r in Hlen.
+  cbn - [ summation nth ].
+  destruct (rng_eq_dec _ _) as [H1| H1]. {
+    destruct (rng_eq_dec _ _) as [H2| H2]; [ easy | exfalso ].
+    apply H2; clear H2.
+    apply all_0_summation_0.
+    intros j Hj.
+...
+rewrite summation_split_first.
+  rewrite all_0_summation_0. 2: {
+    intros j Hj.
+    destruct (le_dec (length lb) (i - j)) as [Hbij| Hbij]. {
+      rewrite (nth_overflow lb); [ | easy ].
+      apply rng_mul_0_r.
+    }
+    apply Nat.nle_gt in Hbij.
+    rewrite nth_overflow. 2: {
+enough (length (lap_norm la) ≤ length la).
+cbn.
+lia.
+    destruct (lt_dec j (length (a :: lap_norm la))) as [Hja| Hja]. {
+      rewrite (nth_overflow lb). 2: {
+        cbn in Hja.
+do 2 rewrite strip_0s_app.
 ...
 intros * Hlen.
 revert i Hlen.
