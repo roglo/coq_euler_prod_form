@@ -810,6 +810,9 @@ rewrite rev_involutive.
 now rewrite strip_0s_idemp.
 Qed.
 
+Theorem fold_lap_norm : ∀ la, rev (strip_0s (rev la)) = lap_norm la.
+Proof. easy. Qed.
+
 Theorem lap_mul_norm_idemp_l : ∀ la lb,
   lap_norm (lap_norm la * lb)%lap = lap_norm (la * lb)%lap.
 Proof.
@@ -825,6 +828,24 @@ induction lb as [| b]; intros; cbn. {
 rewrite <- Nat.add_succ_comm; cbn.
 rewrite <- Nat.add_succ_comm; cbn.
 unfold lap_norm in IHlb.
+destruct la as [| a]; [ easy | ].
+cbn.
+rewrite strip_0s_app.
+remember (strip_0s (rev la)) as lc eqn:Hlc; symmetry in Hlc.
+destruct lc as [| c]. {
+  cbn.
+  destruct (rng_eq_dec a 0%Rng) as [Haz| Haz]. {
+    subst a; cbn.
+    rewrite fold_lap_norm.
+    rewrite lap_convol_mul_nil_l; symmetry.
+    rewrite rng_mul_0_l, rng_add_0_l.
+    rewrite strip_0s_app; cbn.
+...
+  } {
+    cbn.
+    rewrite rng_add_0_r.
+    rewrite strip_0s_app; cbn.
+Print lap_convol_mul.
 ...
 intros.
 unfold lap_norm.
