@@ -285,7 +285,6 @@ unfold lap_norm; f_equal.
 cbn - [ summation ].
 rewrite rev_app_distr.
 cbn - [ strip_0s summation ].
-...
 revert la lb i.
 induction len; intros. {
   cbn - [ summation ].
@@ -324,7 +323,9 @@ induction la as [| a]; simpl.
 
  constructor; [ reflexivity | assumption ].
 Qed.
+*)
 
+(*
 Theorem lap_convol_mul_more : ∀ α (r : ring α) la lb i n,
   lap_convol_mul la lb i (length la + length lb - 1) =
   lap_convol_mul la lb i (length la + length lb - 1 + n).
@@ -714,7 +715,7 @@ rewrite Nat.sub_diag.
 apply list_nth_lap_convol_mul; reflexivity.
 Qed.
 
-Theorem lap_mul_assoc : ∀ la lb lc,
+Lemma lap_norm_mul_assoc : ∀ la lb lc,
   lap_norm (la * (lb * lc))%lap = lap_norm (la * lb * lc)%lap.
 Proof.
 intros la lb lc.
@@ -854,13 +855,11 @@ cbn.
 now rewrite IHlen.
 Qed.
 
-Theorem lap_mul_assoc' : ∀ la lb lc,
-  lap_norm la ≠ []
-  → lap_norm lb ≠ [] ∨ lap_norm lc ≠ []
-  → (la * (lb * lc))%lap = ((la * lb) * lc)%lap.
+Theorem lap_mul_assoc : ∀ la lb lc,
+  (la * (lb * lc))%lap = ((la * lb) * lc)%lap.
 Proof.
-intros * Hla Hlbc.
-apply eq_lap_norm_eq_length; [ apply lap_mul_assoc | ].
+intros.
+apply eq_lap_norm_eq_length; [ apply lap_norm_mul_assoc | ].
 unfold "*"%lap.
 destruct la as [| a]; [ easy | ].
 destruct lb as [| b]; [ easy | ].
@@ -1269,11 +1268,11 @@ unfold poly_norm at 1 3.
 apply eq_poly_eq; cbn.
 rewrite lap_mul_norm_idemp_l.
 rewrite lap_mul_norm_idemp_r.
-apply lap_mul_assoc.
+now rewrite lap_mul_assoc.
 Qed.
 
 Theorem lap_mul_mul_swap : ∀ la lb lc,
-  lap_norm (lap_mul (lap_mul la lb) lc) = lap_norm (lap_mul (lap_mul la lc) lb).
+  lap_mul (lap_mul la lb) lc = lap_mul (lap_mul la lc) lb.
 Proof.
 intros la lb lc.
 do 2 rewrite <- lap_mul_assoc.
@@ -1382,6 +1381,7 @@ Theorem lap_mul_add_distr_l : ∀ la lb lc,
   lap_norm (la * (lb + lc))%lap = lap_norm (la * lb + la * lc)%lap.
 Proof.
 intros la lb lc.
+...
 unfold lap_mul.
 destruct la as [| a]; [ easy | ].
 destruct lb as [| b]; [ easy | ].
