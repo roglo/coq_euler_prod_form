@@ -534,6 +534,25 @@ Section lap.
 Context {α : Type}.
 Context {r : ring α}.
 
+Theorem strip_0s_idemp : ∀ la, strip_0s (strip_0s la) = strip_0s la.
+Proof.
+intros.
+induction la as [| a]; [ easy | cbn ].
+destruct (rng_eq_dec a 0%Rng) as [Haz| Haz]; [ easy | cbn ].
+now destruct (rng_eq_dec a 0%Rng).
+Qed.
+
+Theorem lap_norm_idemp : ∀ la, lap_norm (lap_norm la) = lap_norm la.
+Proof.
+intros.
+unfold lap_norm.
+rewrite rev_involutive.
+now rewrite strip_0s_idemp.
+Qed.
+
+Theorem fold_lap_norm : ∀ la, rev (strip_0s (rev la)) = lap_norm la.
+Proof. easy. Qed.
+
 (* addition theorems *)
 
 Theorem lap_add_comm : ∀ al1 al2,
@@ -853,25 +872,6 @@ Qed.
 Declare Scope poly_scope.
 Delimit Scope poly_scope with pol.
 Notation "a * b" := (poly_mul a b) : poly_scope.
-
-Theorem strip_0s_idemp : ∀ la, strip_0s (strip_0s la) = strip_0s la.
-Proof.
-intros.
-induction la as [| a]; [ easy | cbn ].
-destruct (rng_eq_dec a 0%Rng) as [Haz| Haz]; [ easy | cbn ].
-now destruct (rng_eq_dec a 0%Rng).
-Qed.
-
-Theorem lap_norm_idemp : ∀ la, lap_norm (lap_norm la) = lap_norm la.
-Proof.
-intros.
-unfold lap_norm.
-rewrite rev_involutive.
-now rewrite strip_0s_idemp.
-Qed.
-
-Theorem fold_lap_norm : ∀ la, rev (strip_0s (rev la)) = lap_norm la.
-Proof. easy. Qed.
 
 Theorem lap_mul_norm_idemp_l : ∀ la lb,
   lap_norm (lap_norm la * lb)%lap = lap_norm (la * lb)%lap.
