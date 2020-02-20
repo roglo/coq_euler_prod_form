@@ -1246,9 +1246,13 @@ apply lap_norm_cons_norm.
 now cbn; rewrite Nat.sub_0_r.
 Qed.
 
-Inspect 1.
-
-...
+Theorem lap_mul_norm_idemp_r : ∀ la lb,
+  lap_norm (la * lap_norm lb)%lap = lap_norm (la * lb)%lap.
+Proof.
+intros.
+setoid_rewrite lap_mul_comm.
+apply lap_mul_norm_idemp_l.
+Qed.
 
 Theorem poly_mul_assoc : ∀ p1 p2 p3,
   (p1 * (p2 * p3))%pol = ((p1 * p2) * p3) %pol.
@@ -1263,9 +1267,8 @@ clear p2 Heqlb.
 clear p3 Heqlc.
 unfold poly_norm at 1 3.
 apply eq_poly_eq; cbn.
-Check Nat.add_mod_idemp_l.
-...
 rewrite lap_mul_norm_idemp_l.
+rewrite lap_mul_norm_idemp_r.
 ...
 induction la as [| a]. {
   cbn.
