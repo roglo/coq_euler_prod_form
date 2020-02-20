@@ -1064,7 +1064,13 @@ rewrite fold_lap_norm.
 do 2 rewrite Nat.sub_0_r.
 clear c lc b lb Hlc Hd.
 rename d into lb.
-Search (lap_convol_mul (_ :: _)).
+induction la as [| a2]; [ easy | cbn ].
+do 2 rewrite strip_0s_app; cbn.
+remember (strip_0s (rev la)) as lc eqn:Hlc.
+symmetry in Hlc.
+destruct lc as [| c]. {
+  destruct (rng_eq_dec a2 0%Rng) as [Ha2z| Ha2z]. {
+    cbn.
 ...
 intros.
 unfold "*"%lap; cbn.
