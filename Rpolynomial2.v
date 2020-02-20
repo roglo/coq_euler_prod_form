@@ -1034,6 +1034,14 @@ destruct lb as [| b]. {
         clear - H1.
         induction la as [| a]; [ easy | cbn ].
         rewrite strip_0s_app.
+        rewrite IHla. 2: {
+          intros i.
+          destruct (Nat.eq_dec i (S (length la))) as [Hila| Hila]. {
+            rewrite nth_overflow; [ easy | ].
+            rewrite rev_length; cbn.
+            now rewrite Hila.
+          }
+Search (nth _ _ _ = _).
 ...
 
 Theorem lap_norm_cons_norm : ∀ a la lb i len,
