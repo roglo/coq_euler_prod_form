@@ -719,6 +719,51 @@ destruct lc as [| c]. {
 }
 destruct la as [| a]; [ easy | ].
 destruct lb as [| b]; [ easy | ].
+move b before a; move c before b.
+remember (a :: la) as la' eqn:Hla'.
+remember (b :: lb) as lb' eqn:Hlb'.
+remember (c :: lc) as lc' eqn:Hlc'.
+apply list_nth_lap_eq; intros k.
+remember (lap_convol_mul la' lb' 0 (length la' + length lb' - 1)) as ld
+  eqn:Hld.
+remember (lap_convol_mul lb' lc' 0 (length lb' + length lc' - 1)) as le
+  eqn:Hle.
+symmetry in Hld, Hle.
+destruct ld as [| d]. {
+  destruct le as [| e]; [ easy | cbn ].
+  rewrite match_id.
+  move e before c.
+...
+}
+destruct le as [| e]. {
+  cbn; rewrite match_id.
+...
+}
+rewrite list_nth_lap_convol_mul; [ idtac | reflexivity ].
+rewrite list_nth_lap_convol_mul; [ idtac | reflexivity ].
+rewrite <- Hld, <- Hle.
+rewrite summation_mul_list_nth_lap_convol_mul_2; symmetry.
+rewrite summation_mul_list_nth_lap_convol_mul; symmetry.
+rewrite <- summation_summation_mul_swap.
+rewrite <- summation_summation_mul_swap.
+rewrite summation_summation_exch.
+rewrite summation_summation_shift.
+apply summation_compat; intros i Hi.
+apply summation_compat; intros j Hj.
+rewrite rng_mul_comm, rng_mul_assoc.
+rewrite Nat.add_comm, Nat.add_sub.
+rewrite Nat.add_comm, Nat.sub_add_distr.
+reflexivity.
+...
+
+intros la lb lc.
+symmetry; rewrite lap_mul_comm.
+unfold lap_mul.
+destruct lc as [| c]. {
+  destruct la as [| a]; [ easy | now destruct lb ].
+}
+destruct la as [| a]; [ easy | ].
+destruct lb as [| b]; [ easy | ].
 apply list_nth_lap_eq.
 intros i.
 remember (lap_convol_mul (a :: la) _ _ _) as ld eqn:Hld.
