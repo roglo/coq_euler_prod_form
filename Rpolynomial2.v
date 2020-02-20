@@ -1379,16 +1379,72 @@ Qed.
 *)
 
 Theorem lap_mul_add_distr_l : ∀ la lb lc,
-  lap_mul la (lap_add lb lc) =
-     lap_add (lap_mul la lb) (lap_mul la lc).
+  lap_norm (la * (lb + lc))%lap = lap_norm (la * lb + la * lc)%lap.
 Proof.
+intros la lb lc.
+unfold lap_mul.
+destruct la as [| a]; [ easy | ].
+destruct lb as [| b]; [ easy | ].
+destruct lc as [| c]; [ now cbn; rewrite lap_add_0_r | ].
+move b before a; move c before b.
+remember (a :: la) as la' eqn:Hla'.
+remember (b :: lb) as lb' eqn:Hlb'.
+remember (c :: lc) as lc' eqn:Hlc'.
+remember (lb' + lc')%lap as lbc eqn:Hlbc.
+symmetry in Hlbc.
+destruct lbc as [| bc]. {
+  now rewrite Hlb', Hlc' in Hlbc.
+}
+apply list_nth_lap_eq; intros k.
+remember (bc :: lbc) as lbc' eqn:Hlbc'.
+remember (lap_convol_mul la' lb' 0 (length la' + length lb' - 1)) as ld
+  eqn:Hld.
+remember (lap_convol_mul la' lc' 0 (length la' + length lc' - 1)) as le
+  eqn:Hle.
+remember (lap_convol_mul la' lbc' 0 (length la' + length lbc' - 1)) as lf
+  eqn:Hlf.
+symmetry in Hld, Hle, Hlf.
+destruct ld as [| d]. {
+...
+  destruct le as [| e]; [ easy | cbn ].
+  rewrite match_id.
+  move e before c.
+  apply eq_lap_convol_mul_nil in Hld.
+  apply Nat.sub_0_le in Hld.
+  remember (length la' + length lb') as len eqn:Hlen.
+  symmetry in Hlen.
+  destruct len. {
+    apply Nat.eq_add_0 in Hlen.
+    now subst la'.
+  }
+  destruct len; [ clear Hld | flia Hld ].
+  apply Nat.eq_add_1 in Hlen.
+  destruct Hlen as [Hlen| Hlen]; [ now rewrite Hlb' in Hlen | ].
+  now rewrite Hla' in Hlen.
+}
+destruct le as [| e]. {
+  cbn; rewrite match_id.
+  move d before c.
+  apply eq_lap_convol_mul_nil in Hle.
+  apply Nat.sub_0_le in Hle.
+  remember (length lb' + length lc') as len eqn:Hlen.
+  symmetry in Hlen.
+  destruct len. {
+    apply Nat.eq_add_0 in Hlen.
+    now subst lb'.
+  }
+  destruct len; [ clear Hle | flia Hle ].
+  apply Nat.eq_add_1 in Hlen.
+  destruct Hlen as [Hlen| Hlen]; [ now rewrite Hlc' in Hlen | ].
+  now rewrite Hlb' in Hlen.
+}
+...
 intros la lb lc.
 unfold lap_mul.
 remember (length la + length (lap_add lb lc) - 1) as labc.
 remember (length la + length lb - 1) as lab.
 remember (length la + length lc - 1) as lac.
 rewrite Heqlabc.
-...
 rewrite lap_convol_mul_more with (n := (lab + lac)%nat).
 rewrite <- Heqlabc.
 symmetry.
