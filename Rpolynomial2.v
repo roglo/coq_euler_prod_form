@@ -326,8 +326,8 @@ induction la as [| a]; simpl.
 Qed.
 
 Theorem lap_convol_mul_more : ∀ α (r : ring α) la lb i n,
-  lap_eq (lap_convol_mul la lb i (pred (length la + length lb)))
-    (lap_convol_mul la lb i (pred (length la + length lb) + n)).
+  lap_convol_mul la lb i (length la + length lb - 1) =
+  lap_convol_mul la lb i (length la + length lb - 1 + n).
 Proof.
 intros α r la lb i n.
 induction n; [ rewrite Nat.add_0_r; reflexivity | idtac ].
@@ -364,7 +364,9 @@ destruct (le_dec (length la) j) as [H1| H1].
    intros H; rewrite H in H1.
    revert H1; apply Nat.nlt_0_r.
 Qed.
+*)
 
+(*
 Instance lap_mul_morph {A} {rng : ring A} :
   Proper (lap_eq ==> lap_eq ==> lap_eq) lap_mul.
 Proof.
@@ -928,6 +930,46 @@ rewrite match_id.
 now rewrite Hla.
 Qed.
 
+Theorem lap_convol_mul_succ : ∀ la lb i len,
+  lap_convol_mul la lb i (S len) =
+  lap_convol_mul la lb i len ++
+    [Σ (j = 0, i + len),
+     List.nth j la 0 * List.nth (i + len - j) lb 0]%Rng.
+Proof.
+intros.
+cbn - [ summation ].
+revert i.
+induction len; intros. {
+  now rewrite Nat.add_0_r.
+}
+cbn - [ summation ].
+f_equal.
+specialize (IHlen (S i)).
+cbn - [ summation ] in IHlen.
+rewrite Nat.add_succ_r.
+apply IHlen.
+Qed.
+
+Theorem lap_convol_mul_more : ∀ n la lb i len,
+  length la + length lb - 1 ≤ i + len
+  → lap_convol_mul la lb i len = lap_convol_mul la lb i (len + n).
+Proof.
+intros * Hlen.
+induction n; [ now rewrite Nat.add_0_r | ].
+rewrite Nat.add_succ_r; cbn - [ summation ].
+rewrite IHn.
+...
+apply lap_eq_app_0s.
+constructor; [ idtac | constructor ].
+apply all_0_summation_0.
+intros j (_, Hj).
+apply rng_mul_eq_0.
+destruct (le_dec (length la) j) as [H1| H1].
+ left.
+ rewrite List.nth_overflow; [ reflexivity | assumption ].
+
+...
+
 Theorem lap_mul_norm_idemp_l : ∀ la lb,
   lap_norm (lap_norm la * lb)%lap = lap_norm (la * lb)%lap.
 Proof.
@@ -974,6 +1016,8 @@ destruct lc as [| c]. {
     apply Nat.nlt_ge in Hil.
     now rewrite nth_overflow.
   }
+...
+rewrite (lap_convol_mul_more (length la)); [ | easy ].
 ...
 intros a' Ha'.
 destruct Ha' as [Ha'| Ha']; [ now subst a' | ].
