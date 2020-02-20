@@ -553,6 +553,10 @@ Qed.
 Theorem fold_lap_norm : ∀ la, rev (strip_0s (rev la)) = lap_norm la.
 Proof. easy. Qed.
 
+Theorem eq_lap_convol_mul_nil : ∀ la lb i len,
+  lap_convol_mul la lb i len = [] → len = 0.
+Proof. now intros; induction len. Qed.
+
 (* addition theorems *)
 
 Theorem lap_add_comm : ∀ al1 al2,
@@ -733,85 +737,38 @@ destruct ld as [| d]. {
   destruct le as [| e]; [ easy | cbn ].
   rewrite match_id.
   move e before c.
-...
+  apply eq_lap_convol_mul_nil in Hld.
+  apply Nat.sub_0_le in Hld.
+  remember (length la' + length lb') as len eqn:Hlen.
+  symmetry in Hlen.
+  destruct len. {
+    apply Nat.eq_add_0 in Hlen.
+    now subst la'.
+  }
+  destruct len; [ clear Hld | flia Hld ].
+  apply Nat.eq_add_1 in Hlen.
+  destruct Hlen as [Hlen| Hlen]; [ now rewrite Hlb' in Hlen | ].
+  now rewrite Hla' in Hlen.
 }
 destruct le as [| e]. {
   cbn; rewrite match_id.
-...
+  move d before c.
+  apply eq_lap_convol_mul_nil in Hle.
+  apply Nat.sub_0_le in Hle.
+  remember (length lb' + length lc') as len eqn:Hlen.
+  symmetry in Hlen.
+  destruct len. {
+    apply Nat.eq_add_0 in Hlen.
+    now subst lb'.
+  }
+  destruct len; [ clear Hle | flia Hle ].
+  apply Nat.eq_add_1 in Hlen.
+  destruct Hlen as [Hlen| Hlen]; [ now rewrite Hlc' in Hlen | ].
+  now rewrite Hlb' in Hlen.
 }
 rewrite list_nth_lap_convol_mul; [ idtac | reflexivity ].
 rewrite list_nth_lap_convol_mul; [ idtac | reflexivity ].
 rewrite <- Hld, <- Hle.
-rewrite summation_mul_list_nth_lap_convol_mul_2; symmetry.
-rewrite summation_mul_list_nth_lap_convol_mul; symmetry.
-rewrite <- summation_summation_mul_swap.
-rewrite <- summation_summation_mul_swap.
-rewrite summation_summation_exch.
-rewrite summation_summation_shift.
-apply summation_compat; intros i Hi.
-apply summation_compat; intros j Hj.
-rewrite rng_mul_comm, rng_mul_assoc.
-rewrite Nat.add_comm, Nat.add_sub.
-rewrite Nat.add_comm, Nat.sub_add_distr.
-reflexivity.
-...
-
-intros la lb lc.
-symmetry; rewrite lap_mul_comm.
-unfold lap_mul.
-destruct lc as [| c]. {
-  destruct la as [| a]; [ easy | now destruct lb ].
-}
-destruct la as [| a]; [ easy | ].
-destruct lb as [| b]; [ easy | ].
-apply list_nth_lap_eq.
-intros i.
-remember (lap_convol_mul (a :: la) _ _ _) as ld eqn:Hld.
-remember (lap_convol_mul (b :: lb) _ _ _) as le eqn:Hle.
-symmetry in Hld, Hle.
-move b before a; move c before b.
-cbn in Hld.
-rewrite Nat.sub_0_r, <- Nat.add_succ_comm in Hld; cbn in Hld.
-destruct ld as [| d]; [ easy | ].
-rewrite rng_add_0_r in Hld.
-injection Hld; clear Hld; intros Hld Hd.
-cbn in Hle.
-rewrite Nat.sub_0_r, <- Nat.add_succ_comm in Hle; cbn in Hle.
-destruct le as [| e]; [ easy | ].
-rewrite rng_add_0_r in Hle.
-injection Hle; clear Hle; intros Hle He.
-move d before c; move e before d.
-rewrite list_nth_lap_convol_mul; [ idtac | reflexivity ].
-rewrite list_nth_lap_convol_mul; [ idtac | reflexivity ].
-Check summation_mul_list_nth_lap_convol_mul_2.
-Check summation_mul_list_nth_lap_convol_mul.
-...
-rewrite summation_mul_list_nth_lap_convol_mul_2; symmetry.
-rewrite summation_mul_list_nth_lap_convol_mul; symmetry.
-rewrite <- summation_summation_mul_swap.
-rewrite <- summation_summation_mul_swap.
-rewrite summation_summation_exch.
-rewrite summation_summation_shift.
-apply summation_compat; intros i Hi.
-apply summation_compat; intros j Hj.
-rewrite rng_mul_comm, rng_mul_assoc.
-rewrite Nat.add_comm, Nat.add_sub.
-rewrite Nat.add_comm, Nat.sub_add_distr.
-reflexivity.
-...
-do 4 rewrite Nat.sub_0_r.
-do 2 rewrite <- Nat.add_succ_comm; cbn.
-do 2 rewrite rng_add_0_r.
-do 2 rewrite <- Nat.add_succ_comm; cbn.
-do 2 rewrite rng_add_0_r.
-do 2 rewrite strip_0s_app; cbn.
-...
-intros la lb lc.
-symmetry; rewrite lap_mul_comm.
-unfold lap_mul.
-apply list_nth_lap_eq; intros k.
-rewrite list_nth_lap_convol_mul; [ idtac | reflexivity ].
-rewrite list_nth_lap_convol_mul; [ idtac | reflexivity ].
 rewrite summation_mul_list_nth_lap_convol_mul_2; symmetry.
 rewrite summation_mul_list_nth_lap_convol_mul; symmetry.
 rewrite <- summation_summation_mul_swap.
@@ -900,6 +857,16 @@ Theorem lap_mul_assoc' : ∀ la lb lc,
   → lap_norm lb ≠ [] ∨ lap_norm lc ≠ []
   → (la * (lb * lc))%lap = ((la * lb) * lc)%lap.
 Proof.
+intros * Hla Hlbc.
+apply eq_lap_norm_eq_length; [ apply lap_mul_assoc | ].
+unfold "*"%lap.
+destruct la as [| a]; [ easy | ].
+destruct lb as [| b]; [ easy | ].
+destruct lc as [| c]. {
+  now destruct (lap_convol_mul _ _ _ _).
+}
+...
+
 intros * Hla Hlbc.
 apply eq_lap_norm_eq_length; [ apply lap_mul_assoc | ].
 unfold "*"%lap.
