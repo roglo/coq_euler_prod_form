@@ -3360,18 +3360,19 @@ Record Zn n := mkZn
   { zn : nat;
     zn_prop : zn < n }.
 
-Theorem Zn_nz n (nz : n ≠ 0) : 0 < n.
-Proof. now apply Nat.neq_0_lt_0. Qed.
+Theorem Zn_nz n (n2 : 2 ≤ n) : 0 < n.
+Proof. apply (lt_le_trans _ 2); [ apply Nat.lt_0_succ | easy ]. Qed.
 
-Definition Zn_zero n nz := mkZn n 0 (Zn_nz n nz).
+Definition Zn_zero n n2 := mkZn n 0 (Zn_nz n n2).
+Definition Zn_one n := mkZn n 1.
 
-Print Zn_zero.
+Print Zn_one.
 
 ...
 
-Definition Zn_ring (n : nat) : ring (Zn n) :=
-  {| rng_zero := Zn_zero n;
-     rng_one := 1;
+Definition Zn_ring (n : nat) (n2 : 2 ≤ n) : ring (Zn n) :=
+  {| rng_zero := Zn_zero n n2;
+     rng_one := Zn_one n;
      rng_add a b := (a + b) mod n;
      rng_mul a b := (a * b) mod n;
      rng_opp a := (n - a mod n) mod n;
