@@ -3148,7 +3148,7 @@ Context {A : Type}.
 Context {rng : ring A}.
 
 Theorem xpow_0 : (ⓧ^0 = 1)%pol.
-Proof. easy. Qed.
+Proof. now apply eq_poly_eq. Qed.
 
 Theorem lap_convol_mul_succ_r : ∀ la lb i len,
   lap_convol_mul la lb i (S len) =
@@ -3156,6 +3156,7 @@ Theorem lap_convol_mul_succ_r : ∀ la lb i len,
   lap_convol_mul la lb (S i) len.
 Proof. easy. Qed.
 
+(*
 Theorem lap_xpow_from_convol_mul : ∀ a i,
   (repeat 0%Rng a ++ [1%Rng] =
    nth 0 (repeat 0%Rng a ++ [1%Rng]) 0%Rng
@@ -3193,8 +3194,10 @@ replace (S (i + 2)) with (S i + 2) by flia.
 replace (i + S a) with (S i + a) by flia.
 apply IHa.
 Qed.
+*)
 
 (* x^(a+1) = x * x^a *)
+(*
 Theorem lap_xpow_succ : ∀ a,
   (repeat 0%Rng (S a) ++ [1%Rng] =
    [0%Rng; 1%Rng] * (repeat 0%Rng a ++ [1%Rng]))%lap.
@@ -3208,7 +3211,9 @@ rewrite Nat.add_1_r; cbn.
 rewrite rng_mul_0_l, rng_add_0_l, rng_mul_1_l, rng_add_0_r.
 now specialize (lap_xpow_from_convol_mul a 0) as H1.
 Qed.
+*)
 
+(*
 Theorem xpow_add_r : ∀ a b,
   (ⓧ ^ (a + b) = ⓧ ^ a * ⓧ ^ b)%pol.
 Proof.
@@ -3220,7 +3225,9 @@ rewrite Nat.add_succ_comm, IHa; clear IHa.
 do 2 rewrite lap_xpow_succ.
 now rewrite rng_mul_comm, rng_mul_mul_swap.
 Qed.
+*)
 
+(*
 Theorem pol_pow_sub_1 (pr := polynomial_ring) : ∀ k,
   k ≠ 0
   → (ⓧ^k - 1 = (ⓧ - 1) * (Σ (i = 0, k - 1), ⓧ^(k-i-1))%Rng)%pol.
@@ -3259,6 +3266,7 @@ rewrite rng_sub_add; cbn.
 rewrite <- xpow_add_r.
 now rewrite Nat.add_1_r.
 Qed.
+*)
 
 (* http://math.univ-lille1.fr/~fricain/M1-ARITHMETIQUE/chap2.pdf *)
 
@@ -3348,25 +3356,32 @@ rewrite Nat.add_mod_idemp_r; [ | easy ].
 now rewrite Nat.mul_add_distr_l.
 Qed.
 
-Definition Zn_ring (n : nat) : ring nat :=
-  {| rng_zero := 0;
+Record Zn n (nz : n ≠ 0) := mkZn
+  { zn : nat;
+    zn_prop : zn < n }.
+
+Theorem Zn_nz n (nz : n ≠ 0) : 0 < n.
+Proof. now apply Nat.neq_0_lt_0. Qed.
+
+Definition Zn_zero n nz := mkZn n nz 0 (Zn_nz n nz).
+
+Print Zn_zero.
+
+...
+
+Definition Zn_ring (n : nat) : ring (Zn n) :=
+  {| rng_zero := Zn_zero n;
      rng_one := 1;
      rng_add a b := (a + b) mod n;
      rng_mul a b := (a * b) mod n;
      rng_opp a := (n - a mod n) mod n;
-     rng_eq a b := a ≡ b mod n;
-     rng_eq_refl _ := eq_refl;
-     rng_eq_sym _ _ H := eq_sym H;
-     rng_eq_trans _ _ _ H1 H2 := eq_trans H1 H2;
      rng_add_comm := Zn_ring_add_comm n;
      rng_add_assoc := Zn_ring_add_assoc n;
      rng_add_0_l := Zn_ring_add_0_l n;
      rng_add_opp_l := Zn_ring_add_opp_l n;
-     rng_add_compat_l := Zn_ring_add_compat_l n;
      rng_mul_comm := Zn_ring_mul_comm n;
      rng_mul_assoc := Zn_ring_mul_assoc n;
      rng_mul_1_l := Zn_ring_mul_1_l n;
-     rng_mul_compat_l := Zn_ring_mul_compat_l n;
      rng_mul_add_distr_l := Zn_ring_mul_add_distr_l n |}.
 
 Require Import ZArith.

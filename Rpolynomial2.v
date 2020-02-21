@@ -223,6 +223,19 @@ Fixpoint list_pad {α} n (zero : α) rem :=
   | S n1 => zero :: list_pad n1 zero rem
   end.
 
+Theorem xpow_norm {A} {rng : ring A} : ∀ i,
+  rng_eqb (last (repeat 0%Rng i ++ [1%Rng]) 1%Rng) 0%Rng = false.
+Proof.
+intros.
+rewrite List_last_app.
+unfold rng_eqb.
+destruct (rng_eq_dec 1 0) as [H| H]; [ | easy ].
+now apply rng_1_neq_0 in H.
+Qed.
+
+Definition xpow {α} {r : ring α} i :=
+  mkpoly (repeat 0%Rng i ++ [1%Rng]) (xpow_norm i).
+
 Declare Scope lap_scope.
 Delimit Scope lap_scope with lap.
 Notation "0" := [] : lap_scope.
@@ -243,6 +256,8 @@ Notation "- a" := (poly_opp a) : poly_scope.
 Notation "a + b" := (poly_add a b) : poly_scope.
 Notation "a - b" := (poly_sub a b) : poly_scope.
 Notation "a * b" := (poly_mul a b) : poly_scope.
+Notation "'ⓧ' ^ a" := (xpow a) (at level 30, format "'ⓧ' ^ a") : poly_scope.
+Notation "'ⓧ'" := (xpow 1) (at level 30, format "'ⓧ'") : poly_scope.
 
 (* *)
 
