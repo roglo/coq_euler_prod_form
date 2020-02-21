@@ -2387,12 +2387,87 @@ End poly.
 Theorem poly_1_neq_0 {A} {rng : ring A} : 1%pol ≠ 0%pol.
 Proof. easy. Qed.
 
-Theorem poly_eq_dec {A} {rng : ring A} : ∀ pa pb : poly _, {pa = pb} + {pa ≠ pb}.
+Fixpoint lap_eqb {A} {rng : ring A} la lb :=
+  match la with
+  | [] =>
+      match lb with
+      | [] => true
+      | _ :: _ => false
+      end
+  | a :: la' =>
+      match lb with
+      | [] => false
+      | b :: lb' => if rng_eq_dec a b then lap_eqb la' lb' else false
+      end
+  end.
+
+Theorem lap_eqb_eq {A} {rng : ring A} : ∀ la lb,
+  lap_eqb la lb = true ↔ la = lb.
+Proof.
+intros.
+revert lb.
+induction la as [| a]; intros; [ now destruct lb | ].
+destruct lb as [| b]; [ easy | cbn ].
+destruct (rng_eq_dec a b) as [Hab| Hab]. {
+  subst b.
+  split; intros Hll; [ now f_equal; apply IHla | ].
+  injection Hll; clear Hll; intros; subst lb.
+  now apply IHla.
+} {
+  split; intros Hll; [ easy | ].
+  now injection Hll; intros.
+}
+Qed.
+
+Theorem lap_eqb_neq {A} {rng : ring A} : ∀ la lb,
+  lap_eqb la lb = false ↔ la ≠ lb.
+Proof.
+intros.
+revert lb.
+induction la as [| a]; intros; [ now destruct lb | ].
+destruct lb as [| b]; [ easy | cbn ].
+destruct (rng_eq_dec a b) as [Hab| Hab]. {
+  subst b.
+  split; intros Hll. {
+    intros H.
+    injection H; clear H; intros; subst lb.
+    now apply IHla in Hll.
+  } {
+    apply IHla.
+    intros H; apply Hll.
+    now subst lb.
+  }
+} {
+  split; intros Hll; [ | easy ].
+  intros H; apply Hab.
+  now injection H; intros.
+}
+Qed.
+
+Lemma lap_eq_dec {A} {rng : ring A} : ∀ la lb : list A,
+  {la = lb} + {la ≠ lb}.
+Proof.
+intros.
+remember (lap_eqb la lb) as lab eqn:Hlab; symmetry in Hlab.
+destruct lab. {
+  now left; apply lap_eqb_eq.
+} {
+  now right; apply lap_eqb_neq.
+}
+Qed.
+
+Theorem poly_eq_dec {A} {rng : ring A} : ∀ pa pb : poly _,
+  {pa = pb} + {pa ≠ pb}.
 Proof.
 intros (la, lapr) (lb, lbpr).
-specialize (proj1 (eq_poly_prop _) lapr) as Hla.
-specialize (proj1 (eq_poly_prop _) lbpr) as Hlb.
-...
+destruct (lap_eq_dec la lb) as [Hll| Hll]. {
+  left; subst lb.
+  now apply eq_poly_eq.
+} {
+  right; intros H; apply Hll.
+  now injection H.
+}
+Qed.
 
 Definition polynomial_ring {α} {r : ring α} : ring (poly α) :=
   {| rng_zero := poly_zero;
@@ -2401,7 +2476,7 @@ Definition polynomial_ring {α} {r : ring α} : ring (poly α) :=
      rng_mul := poly_mul;
      rng_opp := poly_opp;
      rng_1_neq_0 := poly_1_neq_0;
-     rng_eq_dec := 42;
+     rng_eq_dec := poly_eq_dec;
      rng_add_comm := poly_add_comm;
      rng_add_assoc := poly_add_assoc;
      rng_add_0_l := poly_add_0_l;
@@ -2420,8 +2495,9 @@ Definition eval_lap {α} {R : ring α} la x :=
   (List.fold_right (λ c accu, accu * x + c) 0 la)%Rng.
 
 Definition eval_poly {α} {R : ring α} pol :=
-  eval_lap (al pol).
+  eval_lap (lap pol).
 
+(*
 Theorem lap_add_map : ∀ α β (Rα : ring α) (Rβ : ring β) (f : α → β) la lb,
   (∀ a b, (f (a + b) = f a + f b)%Rng)
   → (List.map f (la + lb) = List.map f la + List.map f lb)%lap.
@@ -2665,3 +2741,4 @@ induction k. {
   apply rng_mul_comm.
 }
 Qed.
+*)
