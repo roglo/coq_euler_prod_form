@@ -3356,14 +3356,14 @@ rewrite Nat.add_mod_idemp_r; [ | easy ].
 now rewrite Nat.mul_add_distr_l.
 Qed.
 
-Record Zn n (nz : n ≠ 0) := mkZn
+Record Zn n := mkZn
   { zn : nat;
     zn_prop : zn < n }.
 
 Theorem Zn_nz n (nz : n ≠ 0) : 0 < n.
 Proof. now apply Nat.neq_0_lt_0. Qed.
 
-Definition Zn_zero n nz := mkZn n nz 0 (Zn_nz n nz).
+Definition Zn_zero n nz := mkZn n 0 (Zn_nz n nz).
 
 Print Zn_zero.
 
