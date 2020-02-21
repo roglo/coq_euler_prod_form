@@ -3366,40 +3366,22 @@ Class Zn (n : nat2) := mkZn
 
 Arguments zn {_} Zn%nat.
 
-Theorem Zn_zero_prop {n} : 0 < n2 n.
+Theorem Zn_prop {n : nat2} : ∀ op, op mod n2 n < n2 n.
 Proof.
+intros.
+apply Nat.mod_upper_bound, Nat.neq_0_lt_0.
 destruct n as (nn, np); cbn.
 apply (lt_le_trans _ 2); [ apply Nat.lt_0_succ | easy ].
 Qed.
 
-Theorem Zn_one_prop {n} : 1 < n2 n.
-Proof.
-destruct n as (nn, np); cbn.
-apply (lt_le_trans _ 2); [ apply Nat.lt_succ_diag_r | easy ].
-Qed.
-
-Definition Zn_zero {n : nat2} := mkZn n 0 Zn_zero_prop.
-Definition Zn_one {n : nat2} := mkZn n 1 Zn_one_prop.
-
-Theorem Zn_add_prop {n : nat2} : ∀ a b,
-  (@zn n a + @zn n b) mod n2 n < n2 n.
-Proof.
-intros.
-apply Nat.mod_upper_bound, Nat.neq_0_lt_0, Zn_zero_prop.
-Qed.
+Definition Zn_zero {n : nat2} := mkZn n (0 mod n2 n) (Zn_prop 0).
+Definition Zn_one {n : nat2} := mkZn n (1 mod n2 n) (Zn_prop 1).
 
 Definition Zn_add {n : nat2} (a b : Zn n) :=
-  mkZn n ((zn a + zn b) mod n2 n) (Zn_add_prop a b).
-
-Theorem Zn_mul_prop {n : nat2} : ∀ a b,
-  (@zn n a * @zn n b) mod n2 n < n2 n.
-Proof.
-intros.
-apply Nat.mod_upper_bound, Nat.neq_0_lt_0, Zn_zero_prop.
-Qed.
+  mkZn n ((zn a + zn b) mod n2 n) (Zn_prop (@zn n a + @zn n b)).
 
 Definition Zn_mul {n : nat2} (a b : Zn n) :=
-  mkZn n ((zn a * zn b) mod n2 n) (Zn_mul_prop a b).
+  mkZn n ((zn a * zn b) mod n2 n) (Zn_prop (@zn n a * @zn n b)).
 
 ...
 
