@@ -1315,6 +1315,7 @@ induction len; intros.
   destruct j; [ exfalso; revert Hj; apply Nat.nle_succ_0 | idtac ].
   destruct j; rewrite rng_mul_0_l; reflexivity.
 Qed.
+*)
 
 Fixpoint lap_convol_mul_add al1 al2 al3 i len :=
   match len with
@@ -1325,7 +1326,6 @@ Fixpoint lap_convol_mul_add al1 al2 al3 i len :=
        (List.nth (i - j) al2 0 + List.nth (i - j) al3 0))%Rng ::
        lap_convol_mul_add al1 al2 al3 (S i) len1
   end.
-*)
 
 (* *)
 
@@ -1345,23 +1345,22 @@ induction k; intros.
  apply IHk.
 Qed.
 
-(*
 Theorem lap_convol_mul_lap_add : ∀ la lb lc i len,
-  lap_eq
+  eq
     (lap_convol_mul la (lap_add lb lc) i len)
     (lap_convol_mul_add la lb lc i len).
 Proof.
 intros la lb lc i len.
 revert la lb lc i.
 induction len; intros; [ reflexivity | simpl ].
-constructor; [ idtac | apply IHlen ].
+rewrite IHlen; f_equal.
 apply summation_compat; intros j (_, Hj).
-apply rng_mul_compat_l.
+f_equal.
 rewrite list_nth_add; reflexivity.
 Qed.
 
 Theorem lap_add_lap_convol_mul : ∀ la lb lc i len,
-   lap_eq
+  eq
      (lap_add
         (lap_convol_mul la lb i len)
         (lap_convol_mul la lc i len))
@@ -1370,18 +1369,49 @@ Proof.
 intros la lb lc i len.
 revert la lb lc i.
 induction len; intros; [ reflexivity | simpl ].
-constructor; [ idtac | apply IHlen ].
+rewrite IHlen; f_equal.
 rewrite <- summation_add_distr.
 apply summation_compat; intros j (_, Hj).
 rewrite rng_mul_add_distr_l; reflexivity.
 Qed.
+
+(*
+Theorem my_eq_dep_eq_on__UIP_on : ∀ U (x y : U) (p1 : x = y),
+  EqdepFacts.Eq_dep_eq_on U (λ z, x = z) x eq_refl
+  → EqdepFacts.UIP_on_ U x y p1.
+Proof.
+intros * eq_dep_eq; red.
+intros p2.
+apply EqdepFacts.eq_indd with (x := x) (y := y); [ | apply p1 ].
+Print EqdepFacts.eq_dep_eq_on__UIP_on.
+Show Proof.
+    intro eq_dep_eq; red.
+    elim p1 using eq_indd.
+    intros; apply eq_dep_eq.
+    elim p2 using eq_indd.
+    apply eq_dep_intro.
+
+About EqdepFacts.eq_dep_eq_on__UIP_on.
+...
+
+Definition my_eq_dep_eq__UIP U (eq_dep_eq : EqdepFacts.Eq_dep_eq U) x y p1 :=
+  EqdepFacts.eq_dep_eq_on__UIP_on U x y p1 (eq_dep_eq (λ z, x = z) x eq_refl).
+
+Theorem my_UIP_dec : ∀ A, (∀ x y : A, {x = y} + {x ≠ y}) →
+  ∀ (x y : A) (p1 p2 : x = y), p1 = p2.
+Proof.
+intros * eq_dec *.
+apply (my_eq_dep_eq__UIP _ (Eqdep_dec.eq_dep_eq_dec eq_dec)).
+Qed.
+
+Check Eqdep_dec.UIP_dec.
+...
 *)
 
 Theorem lap_mul_add_distr_l : ∀ la lb lc,
   lap_norm (la * (lb + lc))%lap = lap_norm (la * lb + la * lc)%lap.
 Proof.
 intros la lb lc.
-...
 unfold lap_mul.
 destruct la as [| a]; [ easy | ].
 destruct lb as [| b]; [ easy | ].
@@ -1390,54 +1420,40 @@ move b before a; move c before b.
 remember (a :: la) as la' eqn:Hla'.
 remember (b :: lb) as lb' eqn:Hlb'.
 remember (c :: lc) as lc' eqn:Hlc'.
-remember (lb' + lc')%lap as lbc eqn:Hlbc.
-symmetry in Hlbc.
+remember (length la' + length (lap_add lb' lc') - 1) as labc.
+remember (length la' + length lb' - 1) as lab.
+remember (length la' + length lc' - 1) as lac.
+rewrite Heqlabc.
+remember (lb' + lc')%lap as lbc.
+symmetry in Heqlbc.
 destruct lbc as [| bc]. {
-  now rewrite Hlb', Hlc' in Hlbc.
+  cbn.
+  now subst lb' lc'.
 }
-apply list_nth_lap_eq; intros k.
-remember (bc :: lbc) as lbc' eqn:Hlbc'.
-remember (lap_convol_mul la' lb' 0 (length la' + length lb' - 1)) as ld
-  eqn:Hld.
-remember (lap_convol_mul la' lc' 0 (length la' + length lc' - 1)) as le
-  eqn:Hle.
-remember (lap_convol_mul la' lbc' 0 (length la' + length lbc' - 1)) as lf
-  eqn:Hlf.
-symmetry in Hld, Hle, Hlf.
-destruct ld as [| d]. {
+rewrite <- Heqlbc in Heqlabc |-*.
+rewrite lap_convol_mul_more with (n := (lab + lac)%nat); [ | flia ].
+rewrite <- Heqlabc.
+symmetry.
+rewrite Heqlab.
+rewrite lap_convol_mul_more with (n := (labc + lac)%nat). 2: {
+  subst; flia.
+}
+rewrite <- Heqlab.
+rewrite lap_add_comm.
+rewrite Heqlac.
+rewrite lap_convol_mul_more with (n := (labc + lab)%nat). 2: {
+  subst; flia.
+}
+rewrite <- Heqlac.
+rewrite Nat.add_comm.
+rewrite lap_add_comm.
+rewrite Nat.add_assoc, Nat.add_shuffle0, Nat.add_comm, Nat.add_assoc.
+symmetry.
+rewrite lap_convol_mul_lap_add.
+Check lap_add_lap_convol_mul.
 ...
-  destruct le as [| e]; [ easy | cbn ].
-  rewrite match_id.
-  move e before c.
-  apply eq_lap_convol_mul_nil in Hld.
-  apply Nat.sub_0_le in Hld.
-  remember (length la' + length lb') as len eqn:Hlen.
-  symmetry in Hlen.
-  destruct len. {
-    apply Nat.eq_add_0 in Hlen.
-    now subst la'.
-  }
-  destruct len; [ clear Hld | flia Hld ].
-  apply Nat.eq_add_1 in Hlen.
-  destruct Hlen as [Hlen| Hlen]; [ now rewrite Hlb' in Hlen | ].
-  now rewrite Hla' in Hlen.
-}
-destruct le as [| e]. {
-  cbn; rewrite match_id.
-  move d before c.
-  apply eq_lap_convol_mul_nil in Hle.
-  apply Nat.sub_0_le in Hle.
-  remember (length lb' + length lc') as len eqn:Hlen.
-  symmetry in Hlen.
-  destruct len. {
-    apply Nat.eq_add_0 in Hlen.
-    now subst lb'.
-  }
-  destruct len; [ clear Hle | flia Hle ].
-  apply Nat.eq_add_1 in Hlen.
-  destruct Hlen as [Hlen| Hlen]; [ now rewrite Hlc' in Hlen | ].
-  now rewrite Hlb' in Hlen.
-}
+rewrite lap_add_lap_convol_mul.
+reflexivity.
 ...
 intros la lb lc.
 unfold lap_mul.
