@@ -3356,25 +3356,58 @@ rewrite Nat.add_mod_idemp_r; [ | easy ].
 now rewrite Nat.mul_add_distr_l.
 Qed.
 
-Record Zn n := mkZn
+Record nat2 := mknat2
+  { n2 : nat;
+    n2_prop : 2 ≤ n2 }.
+
+Class Zn (n : nat2) := mkZn
   { zn : nat;
-    zn_prop : zn < n }.
+    zn_prop : zn < n2 n }.
 
-Theorem Zn_nz n (n2 : 2 ≤ n) : 0 < n.
-Proof. apply (lt_le_trans _ 2); [ apply Nat.lt_0_succ | easy ]. Qed.
+Arguments zn {_} Zn%nat.
 
-Definition Zn_zero n n2 := mkZn n 0 (Zn_nz n n2).
-Definition Zn_one n := mkZn n 1.
+Theorem Zn_zero_prop {n} : 0 < n2 n.
+Proof.
+destruct n as (nn, np); cbn.
+apply (lt_le_trans _ 2); [ apply Nat.lt_0_succ | easy ].
+Qed.
 
-Print Zn_one.
+Theorem Zn_one_prop {n} : 1 < n2 n.
+Proof.
+destruct n as (nn, np); cbn.
+apply (lt_le_trans _ 2); [ apply Nat.lt_succ_diag_r | easy ].
+Qed.
+
+Definition Zn_zero {n : nat2} := mkZn n 0 Zn_zero_prop.
+Definition Zn_one {n : nat2} := mkZn n 1 Zn_one_prop.
+
+Theorem Zn_add_prop {n : nat2} : ∀ a b,
+  (@zn n a + @zn n b) mod n2 n < n2 n.
+Proof.
+intros.
+apply Nat.mod_upper_bound, Nat.neq_0_lt_0, Zn_zero_prop.
+Qed.
+
+Definition Zn_add {n : nat2} (a b : Zn n) :=
+  mkZn n ((zn a + zn b) mod n2 n) (Zn_add_prop a b).
+
+Theorem Zn_mul_prop {n : nat2} : ∀ a b,
+  (@zn n a * @zn n b) mod n2 n < n2 n.
+Proof.
+intros.
+apply Nat.mod_upper_bound, Nat.neq_0_lt_0, Zn_zero_prop.
+Qed.
+
+Definition Zn_mul {n : nat2} (a b : Zn n) :=
+  mkZn n ((zn a * zn b) mod n2 n) (Zn_mul_prop a b).
 
 ...
 
-Definition Zn_ring (n : nat) (n2 : 2 ≤ n) : ring (Zn n) :=
-  {| rng_zero := Zn_zero n n2;
-     rng_one := Zn_one n;
-     rng_add a b := (a + b) mod n;
-     rng_mul a b := (a * b) mod n;
+Definition Zn_ring (n : nat2) : ring (Zn n) :=
+  {| rng_zero := Zn_zero;
+     rng_one := Zn_one;
+     rng_add := Zn_add;
+     rng_mul := Zn_mul;
      rng_opp a := (n - a mod n) mod n;
      rng_add_comm := Zn_ring_add_comm n;
      rng_add_assoc := Zn_ring_add_assoc n;
