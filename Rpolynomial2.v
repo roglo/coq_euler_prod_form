@@ -238,6 +238,7 @@ Definition list_nth_def_0 {α} {R : ring α} n l := List.nth n l 0%Rng.
 Declare Scope poly_scope.
 Delimit Scope poly_scope with pol.
 Notation "0" := poly_zero : poly_scope.
+Notation "1" := poly_one : poly_scope.
 Notation "- a" := (poly_opp a) : poly_scope.
 Notation "a + b" := (poly_add a b) : poly_scope.
 Notation "a - b" := (poly_sub a b) : poly_scope.
@@ -536,11 +537,38 @@ induction la as [| a]; intros. {
 }
 Qed.
 
+Theorem fold_lap_norm {A} {rng : ring A} :
+  ∀ la, rev (strip_0s (rev la)) = lap_norm la.
+Proof. easy. Qed.
+
 Theorem lap_add_0_l {α} {r : ring α} : ∀ la, lap_add [] la = la.
 Proof. easy. Qed.
 
 Theorem lap_add_0_r {α} {r : ring α} : ∀ la, lap_add la [] = la.
 Proof. intros; now destruct la. Qed.
+
+Theorem poly_add_0_l {α} {r : ring α} : ∀ p, (0 + p)%pol = p.
+Proof.
+intros (la, lapr).
+apply eq_poly_eq; cbn.
+apply eq_poly_prop in lapr.
+induction la as [| a]; [ easy | cbn ].
+rewrite strip_0s_app.
+rewrite <- (rev_involutive (strip_0s _)).
+rewrite IHla; cbn. {
+  remember (rev la) as lb eqn:Hlb; symmetry in Hlb.
+  destruct lb as [| b]. {
+    apply List_eq_rev_nil in Hlb; subst la.
+    now destruct (rng_eq_dec a 0).
+  }
+  cbn.
+  rewrite rev_app_distr; cbn; f_equal.
+  now rewrite <- rev_involutive, Hlb.
+} {
+  destruct la as [| a2]; [ | easy ].
+  apply rng_1_neq_0.
+}
+Qed.
 
 Theorem lap_mul_0_l {α} {r : ring α} : ∀ la, lap_norm (lap_mul [] la) = [].
 Proof. easy. Qed.
@@ -569,9 +597,6 @@ rewrite rev_involutive.
 now rewrite strip_0s_idemp.
 Qed.
 
-Theorem fold_lap_norm : ∀ la, rev (strip_0s (rev la)) = lap_norm la.
-Proof. easy. Qed.
-
 Theorem eq_lap_convol_mul_nil : ∀ la lb i len,
   lap_convol_mul la lb i len = [] → len = 0.
 Proof. now intros; induction len. Qed.
@@ -595,6 +620,43 @@ unfold "+"%pol.
 now rewrite lap_add_comm.
 Qed.
 
+Theorem lap_add_norm_idemp_l : ∀ la lb,
+  lap_norm (lap_norm la + lb)%lap = lap_norm (la + lb)%lap.
+Proof.
+intros.
+unfold lap_norm; f_equal.
+revert la.
+induction lb as [| b]; intros. {
+  do 2 rewrite lap_add_0_r.
+  now rewrite rev_involutive, strip_0s_idemp.
+}
+cbn.
+destruct la as [| a]; [ easy | cbn ].
+do 2 rewrite strip_0s_app; cbn.
+rewrite <- IHlb.
+remember (strip_0s (rev la)) as lc eqn:Hlc; symmetry in Hlc.
+destruct lc as [| c]. {
+  cbn.
+  destruct (rng_eq_dec a 0) as [Haz| Haz]. {
+    subst a; rewrite rng_add_0_l; cbn.
+    now rewrite strip_0s_app.
+  }
+  cbn.
+  now rewrite strip_0s_app.
+}
+cbn.
+rewrite rev_app_distr; cbn.
+now rewrite strip_0s_app.
+Qed.
+
+Theorem lap_add_norm_idemp_r : ∀ la lb,
+  lap_norm (la + lap_norm lb)%lap = lap_norm (la + lb)%lap.
+Proof.
+intros.
+rewrite lap_add_comm, lap_add_norm_idemp_l.
+now rewrite lap_add_comm.
+Qed.
+
 Theorem lap_add_assoc : ∀ al1 al2 al3,
   lap_add al1 (lap_add al2 al3) = lap_add (lap_add al1 al2) al3.
 Proof.
@@ -613,6 +675,17 @@ Proof.
 intros la lb lc.
 do 2 rewrite <- lap_add_assoc.
 now rewrite (lap_add_comm lb).
+Qed.
+
+Theorem poly_add_assoc : ∀ pa pb pc,
+  (pa + (pb + pc) = (pa + pb) + pc)%pol.
+Proof.
+intros (la, lapr) (lb, lbpr) (lc, lcpr).
+apply eq_poly_eq.
+cbn - [ lap_norm ].
+rewrite lap_add_norm_idemp_l.
+rewrite lap_add_norm_idemp_r.
+now rewrite lap_add_assoc.
 Qed.
 
 (*
@@ -654,6 +727,13 @@ destruct la as [| a]; [ now destruct lb | cbn ].
 rewrite <- Nat.add_succ_comm; cbn.
 rewrite (Nat.add_comm (length lb)).
 now rewrite lap_convol_mul_comm.
+Qed.
+
+Theorem poly_mul_comm : ∀ pa pb, (pa * pb)%pol = (pb * pa)%pol.
+Proof.
+intros.
+apply eq_poly_eq; cbn.
+now rewrite lap_mul_comm.
 Qed.
 
 Theorem list_nth_lap_convol_mul_aux : ∀ la lb n i len,
@@ -1237,43 +1317,6 @@ destruct i; [ easy | ].
 apply IHla.
 Qed.
 
-Theorem lap_add_norm_idemp_l : ∀ la lb,
-  lap_norm (lap_norm la + lb)%lap = lap_norm (la + lb)%lap.
-Proof.
-intros.
-unfold lap_norm; f_equal.
-revert la.
-induction lb as [| b]; intros. {
-  do 2 rewrite lap_add_0_r.
-  now rewrite rev_involutive, strip_0s_idemp.
-}
-cbn.
-destruct la as [| a]; [ easy | cbn ].
-do 2 rewrite strip_0s_app; cbn.
-rewrite <- IHlb.
-remember (strip_0s (rev la)) as lc eqn:Hlc; symmetry in Hlc.
-destruct lc as [| c]. {
-  cbn.
-  destruct (rng_eq_dec a 0) as [Haz| Haz]. {
-    subst a; rewrite rng_add_0_l; cbn.
-    now rewrite strip_0s_app.
-  }
-  cbn.
-  now rewrite strip_0s_app.
-}
-cbn.
-rewrite rev_app_distr; cbn.
-now rewrite strip_0s_app.
-Qed.
-
-Theorem lap_add_norm_idemp_r : ∀ la lb,
-  lap_norm (la + lap_norm lb)%lap = lap_norm (la + lb)%lap.
-Proof.
-intros.
-rewrite lap_add_comm, lap_add_norm_idemp_l.
-now rewrite lap_add_comm.
-Qed.
-
 Theorem lap_mul_norm_idemp_l : ∀ la lb,
   lap_norm (lap_norm la * lb)%lap = lap_norm (la * lb)%lap.
 Proof.
@@ -1675,6 +1718,42 @@ Proof.
 intros la.
 rewrite lap_mul_comm.
 apply lap_mul_1_l.
+Qed.
+
+Theorem poly_mul_1_l : ∀ p, (1 * p)%pol = p.
+Proof.
+intros (la, lapr).
+unfold "*"%pol.
+rewrite lap_mul_1_l; cbn.
+apply eq_poly_eq; cbn.
+unfold rng_eqb in lapr.
+unfold lap_norm.
+destruct (rng_eq_dec (last la 1%Rng) 0) as [Hlaz| Hlaz]; [ easy | ].
+clear lapr.
+induction la as [| a]; [ easy | cbn ].
+rewrite strip_0s_app.
+remember (strip_0s (rev la)) as lb eqn:Hlb; symmetry in Hlb.
+destruct lb as [| b]. {
+  specialize (proj1 (eq_strip_0s_rev_nil _) Hlb) as H1.
+  cbn; clear Hlb.
+  destruct (rng_eq_dec a 0) as [Haz| Haz]. {
+    exfalso; subst a.
+    cbn in IHla.
+    destruct la as [| a]; [ easy | ].
+    remember (a :: la) as lb; cbn in Hlaz; subst lb.
+    now specialize (IHla Hlaz).
+  }
+  cbn in IHla |-*.
+  rewrite <- IHla; [ easy | ].
+  cbn in Hlaz.
+  destruct la as [| a2]; [ | easy ].
+  intros; apply rng_1_neq_0.
+}
+cbn.
+rewrite rev_app_distr; cbn; f_equal.
+apply IHla.
+cbn in Hlaz.
+now destruct la.
 Qed.
 
 (*
@@ -2305,6 +2384,14 @@ Qed.
 End poly.
 *)
 
+Theorem poly_1_neq_0 {A} {rng : ring A} : 1%pol ≠ 0%pol.
+Proof. easy. Qed.
+
+Theorem poly_eq_dec {A} {rng : ring A} : ∀ pa pb : poly _, {pa = pb} + {pa ≠ pb}.
+Proof.
+intros (la, lapr) (lb, lbpr).
+specialize (proj1 (eq_poly_prop _) lapr) as Hla.
+specialize (proj1 (eq_poly_prop _) lbpr) as Hlb.
 ...
 
 Definition polynomial_ring {α} {r : ring α} : ring (poly α) :=
@@ -2313,6 +2400,8 @@ Definition polynomial_ring {α} {r : ring α} : ring (poly α) :=
      rng_add := poly_add;
      rng_mul := poly_mul;
      rng_opp := poly_opp;
+     rng_1_neq_0 := poly_1_neq_0;
+     rng_eq_dec := 42;
      rng_add_comm := poly_add_comm;
      rng_add_assoc := poly_add_assoc;
      rng_add_0_l := poly_add_0_l;
