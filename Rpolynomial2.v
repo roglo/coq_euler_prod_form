@@ -1191,6 +1191,33 @@ destruct lc as [| c]. {
     cbn.
     rewrite rng_add_0_l.
     do 2 rewrite strip_0s_app; cbn.
+    assert (H : ∀ i, nth i la 0%Rng = 0%Rng). {
+      intros.
+      destruct (lt_dec i (length la)) as [Hila| Hila]. {
+        specialize (proj1 (eq_strip_0s_nil _) Hlc (length la - S i)) as H.
+        rewrite <- rev_length in H.
+        rewrite <- rev_nth in H; [ | now rewrite rev_length ].
+        now rewrite rev_involutive in H.
+      }
+      apply Nat.nlt_ge in Hila.
+      now apply nth_overflow.
+    }
+    clear Hlc; rename H into Hla.
+...
+    revert lb.
+    induction la as [| a]; intros; [ easy | cbn ].
+    destruct lb as [| b2]. {
+      rewrite (proj2 (eq_strip_0s_nil (rev (a :: la)))); [ easy | ].
+      intros i.
+      destruct (lt_dec i (length (a :: la))) as [Hila| Hila]. {
+        specialize (Hla (length (a :: la) - S i)).
+        now rewrite <- rev_nth in Hla.
+      }
+      apply Nat.nlt_ge in Hila.
+      apply nth_overflow.
+      now rewrite rev_length.
+    }
+    cbn.
 ...
 
 Theorem lap_mul_norm_idemp_l : ∀ la lb,
