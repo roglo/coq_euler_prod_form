@@ -901,6 +901,25 @@ rewrite Hlc in IHlen.
 now apply List_eq_rev_nil in IHlen.
 Qed.
 
+Theorem all_0_all_rev_0 : ∀ la,
+  (∀ i, nth i la 0%Rng = 0%Rng)
+  ↔ (∀ i, nth i (rev la) 0%Rng = 0%Rng).
+Proof.
+intros *.
+split; intros H i. {
+  destruct (lt_dec i (length la)) as [Hila| Hila]. {
+    rewrite rev_nth; [ apply H | easy ].
+  }
+  apply nth_overflow; rewrite rev_length; flia Hila.
+} {
+  destruct (lt_dec i (length la)) as [Hila| Hila]. {
+    rewrite <- (rev_involutive la).
+    rewrite rev_nth; [ apply H | now rewrite rev_length ].
+  }
+  apply nth_overflow; flia Hila.
+}
+Qed.
+
 Theorem eq_strip_0s_nil : ∀ la,
   strip_0s la = [] ↔ ∀ i, nth i la 0%Rng = 0%Rng.
 Proof.
@@ -915,14 +934,27 @@ split. {
   now apply IHla.
 } {
   intros Hla.
-  induction la as [| a]; [ easy | ].
-  cbn.
+  induction la as [| a]; [ easy | cbn ].
   destruct (rng_eq_dec a 0%Rng) as [Haz| Haz]. {
     apply IHla.
     intros i.
     now specialize (Hla (S i)).
   }
   now specialize (Hla 0).
+}
+Qed.
+
+Theorem eq_strip_0s_rev_nil : ∀ la,
+  strip_0s (rev la) = [] ↔ ∀ i, nth i la 0%Rng = 0%Rng.
+Proof.
+intros.
+split; intros Hla. {
+  apply all_0_all_rev_0.
+  now apply eq_strip_0s_nil.
+} {
+  apply eq_strip_0s_nil.
+  apply all_0_all_rev_0.
+  now rewrite rev_involutive.
 }
 Qed.
 
@@ -1191,18 +1223,37 @@ destruct lc as [| c]. {
     cbn.
     rewrite rng_add_0_l.
     do 2 rewrite strip_0s_app; cbn.
-    assert (H : ∀ i, nth i la 0%Rng = 0%Rng). {
-      intros.
-      destruct (lt_dec i (length la)) as [Hila| Hila]. {
-        specialize (proj1 (eq_strip_0s_nil _) Hlc (length la - S i)) as H.
-        rewrite <- rev_length in H.
-        rewrite <- rev_nth in H; [ | now rewrite rev_length ].
-        now rewrite rev_involutive in H.
+    specialize (proj1 (eq_strip_0s_rev_nil _) Hlc) as Hla.
+    clear Hlc.
+    remember (strip_0s (rev lb)) as lc eqn:Hlc; symmetry in Hlc.
+    remember (strip_0s (rev (la + lb)%lap)) as ld eqn:Hld; symmetry in Hld.
+    destruct lc as [| c]. {
+      destruct ld as [| d]; [ easy | exfalso ].
+      specialize (proj1 (eq_strip_0s_rev_nil _) Hlc) as Hlb.
+      move Hlb before Hla; clear Hlc.
+      assert (H : strip_0s (rev (la + lb)%lap) = []). {
+        apply eq_strip_0s_rev_nil.
+        intros i.
+        clear d b ld Hld.
+        revert i lb Hlb.
+        induction la as [| a]; intros; [ apply Hlb | cbn ].
+        destruct lb as [| b]; [ apply Hla | cbn ].
+        destruct i. {
+          specialize (Hla 0); cbn in Hla.
+          specialize (Hlb 0); cbn in Hlb.
+          subst a b.
+          apply rng_add_0_l.
+        }
+        apply IHla; intros j. {
+          now specialize (Hla (S j)).
+        } {
+          now specialize (Hlb (S j)).
+        }
       }
-      apply Nat.nlt_ge in Hila.
-      now apply nth_overflow.
+      now rewrite H in Hld.
     }
-    clear Hlc; rename H into Hla.
+    destruct ld as [| d]. {
+      exfalso.
 ...
     revert lb.
     induction la as [| a]; intros; [ easy | cbn ].

@@ -34,6 +34,8 @@ Notation "- a" := (rng_opp a) : ring_scope.
 Notation "0" := rng_zero : ring_scope.
 Notation "1" := rng_one : ring_scope.
 
+Arguments rng_eq_dec {_} {_} _%Rng _%Rng.
+
 Fixpoint rng_power {A} {R : ring A} a n :=
   match n with
   | O => 1%Rng
