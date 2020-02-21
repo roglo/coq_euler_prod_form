@@ -1203,6 +1203,21 @@ rewrite (lap_norm_repeat_0 la) at 2.
 rewrite app_length; flia.
 Qed.
 
+Theorem nth_lap_add : ∀ i la lb,
+  nth i (la + lb)%lap 0%Rng = (nth i la 0 + nth i lb 0)%Rng.
+Proof.
+intros.
+revert i lb.
+induction la as [| a]; intros; cbn. {
+  now rewrite match_id, rng_add_0_l.
+}
+destruct lb as [| b]; cbn. {
+  now rewrite match_id, rng_add_0_r.
+}
+destruct i; [ easy | ].
+apply IHla.
+Qed.
+
 Theorem lap_add_norm_idemp_l : ∀ la lb,
   lap_norm (lap_norm la + lb)%lap = lap_norm (la + lb)%lap.
 Proof.
@@ -1254,6 +1269,38 @@ destruct lc as [| c]. {
     }
     destruct ld as [| d]. {
       exfalso.
+      specialize (proj1 (eq_strip_0s_rev_nil _) Hld) as H1.
+      assert (H : strip_0s (rev lb) = []). {
+        apply eq_strip_0s_rev_nil.
+        intros i.
+        clear c b lc Hlc Hld.
+        destruct (lt_dec i (length lb)) as [Hilb| Hilb]. {
+          specialize (Hla i).
+          specialize (H1 i).
+          rewrite nth_lap_add in H1.
+          now rewrite Hla, rng_add_0_l in H1.
+        }
+        apply nth_overflow; flia Hilb.
+      }
+      now rewrite H in Hlc.
+    }
+...
+        revert i lb Hlb.
+        induction la as [| a]; intros; [ apply Hlb | cbn ].
+        destruct lb as [| b]; [ apply Hla | cbn ].
+        destruct i. {
+          specialize (Hla 0); cbn in Hla.
+          specialize (Hlb 0); cbn in Hlb.
+          subst a b.
+          apply rng_add_0_l.
+        }
+        apply IHla; intros j. {
+          now specialize (Hla (S j)).
+        } {
+          now specialize (Hlb (S j)).
+        }
+      }
+      now rewrite H in Hld.
 ...
     revert lb.
     induction la as [| a]; intros; [ easy | cbn ].
