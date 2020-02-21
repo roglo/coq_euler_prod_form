@@ -3374,14 +3374,13 @@ destruct n as (nn, np); cbn.
 apply (lt_le_trans _ 2); [ apply Nat.lt_0_succ | easy ].
 Qed.
 
-Definition Zn_zero {n : nat2} := mkZn n (0 mod n2 n) (Zn_prop 0).
-Definition Zn_one {n : nat2} := mkZn n (1 mod n2 n) (Zn_prop 1).
+Definition Zn_op (n : nat2) x := mkZn n (x mod n2 n) (Zn_prop x).
 
-Definition Zn_add {n : nat2} (a b : Zn n) :=
-  mkZn n ((zn a + zn b) mod n2 n) (Zn_prop (@zn n a + @zn n b)).
-
-Definition Zn_mul {n : nat2} (a b : Zn n) :=
-  mkZn n ((zn a * zn b) mod n2 n) (Zn_prop (@zn n a * @zn n b)).
+Definition Zn_zero {n : nat2} := Zn_op n 0.
+Definition Zn_one {n : nat2} := Zn_op n 1.
+Definition Zn_add {n : nat2} (a b : Zn n) := Zn_op n (zn a + zn b).
+Definition Zn_mul {n : nat2} (a b : Zn n) := Zn_op n (zn a * zn b).
+Definition Zn_opp {n : nat2} (a : Zn n) := Zn_op n (n2 n - zn a).
 
 ...
 
@@ -3390,7 +3389,7 @@ Definition Zn_ring (n : nat2) : ring (Zn n) :=
      rng_one := Zn_one;
      rng_add := Zn_add;
      rng_mul := Zn_mul;
-     rng_opp a := (n - a mod n) mod n;
+     rng_opp := Zn_opp;
      rng_add_comm := Zn_ring_add_comm n;
      rng_add_assoc := Zn_ring_add_assoc n;
      rng_add_0_l := Zn_ring_add_0_l n;
