@@ -1222,6 +1222,28 @@ Theorem lap_add_norm_idemp_l : ∀ la lb,
   lap_norm (lap_norm la + lb)%lap = lap_norm (la + lb)%lap.
 Proof.
 intros.
+unfold lap_norm; f_equal.
+revert lb.
+induction la as [| a]; intros; [ easy | cbn ].
+destruct lb as [| b]. {
+  rewrite lap_add_0_r.
+  rewrite rev_involutive.
+  now rewrite strip_0s_idemp.
+}
+rewrite strip_0s_app.
+remember (strip_0s (rev la)) as lc eqn:Hlc; symmetry in Hlc.
+destruct lc as [| c]. {
+  cbn.
+  destruct (rng_eq_dec a 0) as [Haz| Haz]. {
+    subst a; cbn.
+    rewrite rng_add_0_l.
+    cbn in IHla.
+    specialize (proj1 (eq_strip_0s_rev_nil _) Hlc) as H1.
+    clear - H1.
+    induction la as [| a]; [ easy | cbn ].
+    destruct lb as [| b2]. {
+...
+intros.
 unfold "*"%lap; cbn.
 destruct la as [| a]; [ easy | cbn ].
 rewrite strip_0s_app.
@@ -1284,6 +1306,22 @@ destruct lc as [| c]. {
       }
       now rewrite H in Hlc.
     }
+...
+    induction la as [| a]. {
+      cbn in Hld.
+      rewrite Hlc in Hld.
+      now injection Hld; clear Hld; intros; subst c lc.
+    }
+    apply IHla. {
+      intros i.
+      now specialize (Hla (S i)).
+    } {
+      cbn in Hld.
+      destruct lb as [| b2]. {
+        specialize (proj2 (eq_strip_0s_rev_nil _) Hla) as H1.
+        now rewrite H1 in Hld.
+      }
+      cbn in Hld |-*.
 ...
         revert i lb Hlb.
         induction la as [| a]; intros; [ apply Hlb | cbn ].
