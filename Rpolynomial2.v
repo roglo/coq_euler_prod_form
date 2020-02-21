@@ -1171,6 +1171,28 @@ rewrite (lap_norm_repeat_0 la) at 2.
 rewrite app_length; flia.
 Qed.
 
+Theorem lap_add_norm_idemp_l : ∀ la lb,
+  lap_norm (lap_norm la + lb)%lap = lap_norm (la + lb)%lap.
+Proof.
+intros.
+unfold "*"%lap; cbn.
+destruct la as [| a]; [ easy | cbn ].
+rewrite strip_0s_app.
+remember (strip_0s (rev la)) as lc eqn:Hlc; symmetry in Hlc.
+destruct lc as [| c]. {
+  cbn.
+  destruct (rng_eq_dec a 0%Rng) as [Haz| Haz]. {
+    subst a; cbn.
+    destruct lb as [| b]. {
+      cbn.
+      rewrite strip_0s_app, Hlc; cbn.
+      now destruct (rng_eq_dec 0%Rng 0%Rng).
+    }
+    cbn.
+    rewrite rng_add_0_l.
+    do 2 rewrite strip_0s_app; cbn.
+...
+
 Theorem lap_mul_norm_idemp_l : ∀ la lb,
   lap_norm (lap_norm la * lb)%lap = lap_norm (la * lb)%lap.
 Proof.
@@ -1431,27 +1453,27 @@ destruct lbc as [| bc]. {
   now subst lb' lc'.
 }
 rewrite <- Heqlbc in Heqlabc |-*.
-rewrite lap_convol_mul_more with (n := (lab + lac)%nat); [ | flia ].
+rewrite lap_convol_mul_more with (n := (lab + lac)%nat). 2: {
+  subst; flia.
+}
 rewrite <- Heqlabc.
 symmetry.
 rewrite Heqlab.
-rewrite lap_convol_mul_more with (n := (labc + lac)%nat). 2: {
-  subst; flia.
-}
+rewrite <- lap_add_norm_idemp_l.
+rewrite lap_convol_mul_more with (n := (labc + lac)%nat); [ | flia ].
 rewrite <- Heqlab.
+rewrite lap_add_norm_idemp_l.
 rewrite lap_add_comm.
+rewrite <- lap_add_norm_idemp_l.
 rewrite Heqlac.
-rewrite lap_convol_mul_more with (n := (labc + lab)%nat). 2: {
-  subst; flia.
-}
+rewrite lap_convol_mul_more with (n := (labc + lab)%nat); [ | flia ].
+rewrite lap_add_norm_idemp_l.
 rewrite <- Heqlac.
 rewrite Nat.add_comm.
 rewrite lap_add_comm.
 rewrite Nat.add_assoc, Nat.add_shuffle0, Nat.add_comm, Nat.add_assoc.
 symmetry.
 rewrite lap_convol_mul_lap_add.
-Check lap_add_lap_convol_mul.
-...
 rewrite lap_add_lap_convol_mul.
 reflexivity.
 ...
