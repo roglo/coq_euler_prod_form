@@ -3388,6 +3388,39 @@ Context {rng : ring A}.
 
 Example xk_1 : ∀ k, degree (ⓧ^k - 1)%pol = k.
 Proof.
+intros; cbn.
+destruct (rng_eq_dec (-1%Rng) 0) as [H10|H10]; [ | clear H10 ]. {
+  cbn in H10.
+  apply (f_equal rng_opp) in H10.
+  rewrite rng_opp_involutive in H10.
+  rewrite rng_opp_0 in H10.
+  now apply rng_1_neq_0 in H10.
+}
+cbn.
+rewrite rev_length.
+destruct k. {
+  cbn.
+  rewrite fold_rng_sub.
+  rewrite rng_add_opp_r.
+  now destruct (rng_eq_dec 0 0).
+}
+cbn.
+rewrite lap_add_0_r.
+rewrite rng_add_0_l.
+rewrite strip_0s_app.
+remember (strip_0s _) as la eqn:Hla; symmetry in Hla.
+destruct la as [| a]. {
+  cbn.
+  specialize (proj1 (eq_strip_0s_rev_nil _) Hla k) as H1.
+  rewrite app_nth2 in H1. 2: {
+    rewrite repeat_length.
+    now unfold "≥".
+  }
+  rewrite repeat_length, Nat.sub_diag in H1.
+  now apply rng_1_neq_0 in H1.
+}
+cbn.
+...
 intros.
 induction k. {
   cbn.
