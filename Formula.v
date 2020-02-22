@@ -3356,6 +3356,12 @@ rewrite Nat.add_mod_idemp_r; [ | easy ].
 now rewrite Nat.mul_add_distr_l.
 Qed.
 
+Theorem lt_unique : ∀ a b (lt_ab1 lt_ab2 : a < b), lt_ab1 = lt_ab2.
+Proof.
+intros.
+apply (le_unique (S a) b lt_ab1 lt_ab2).
+Qed.
+
 Record nat2 := mknat2
   { n2 : nat;
     n2_prop : 2 ≤ n2 }.
@@ -3365,6 +3371,15 @@ Class Zn (n : nat2) := mkZn
     zn_prop : zn < n2 n }.
 
 Arguments zn {_} Zn%nat.
+
+Theorem eq_Zn_eq n : ∀ a b : Zn n, zn a = zn b → a = b.
+Proof.
+intros (a, apr) (b, bpr) Hab.
+cbn in Hab.
+subst b.
+specialize (lt_unique a (n2 n) apr bpr) as H1.
+now subst bpr.
+Qed.
 
 Theorem Zn_prop {n : nat2} : ∀ op, op mod n2 n < n2 n.
 Proof.
@@ -3387,21 +3402,6 @@ Proof.
 intros.
 unfold Zn_add.
 now rewrite Nat.add_comm.
-Qed.
-
-Theorem lt_unique : ∀ a b (lt_ab1 lt_ab2 : a < b), lt_ab1 = lt_ab2.
-Proof.
-intros.
-apply (le_unique (S a) b lt_ab1 lt_ab2).
-Qed.
-
-Theorem eq_Zn_eq n : ∀ a b : Zn n, zn a = zn b → a = b.
-Proof.
-intros (a, apr) (b, bpr) Hab.
-cbn in Hab.
-subst b.
-specialize (lt_unique a (n2 n) apr bpr) as H1.
-now subst bpr.
 Qed.
 
 Theorem Zn_add_assoc n : ∀ a b c : Zn n,
@@ -3435,7 +3435,67 @@ Qed.
 Theorem Zn_add_opp_l n : ∀ a : Zn n, Zn_add (Zn_opp a) a = Zn_zero.
 Proof.
 intros.
-...
+destruct (Nat.eq_dec (n2 n) 0) as [Hnz| Hnz]. {
+  destruct n as (n, npr); cbn in Hnz.
+  flia npr Hnz.
+}
+apply eq_Zn_eq; cbn.
+rewrite Nat.add_mod_idemp_l; [ | easy ].
+rewrite Nat.sub_add; [ | now destruct a; apply Nat.lt_le_incl ].
+rewrite Nat.mod_0_l; [ | easy ].
+now apply Nat.mod_same.
+Qed.
+
+Theorem Zn_mul_comm n : ∀ a b : Zn n, Zn_mul a b = Zn_mul b a.
+Proof.
+intros.
+unfold Zn_mul.
+now rewrite Nat.mul_comm.
+Qed.
+
+Theorem Zn_mul_assoc n : ∀ a b c : Zn n,
+  Zn_mul a (Zn_mul b c) = Zn_mul (Zn_mul a b) c.
+Proof.
+intros.
+destruct (Nat.eq_dec (n2 n) 0) as [Hnz| Hnz]. {
+  destruct n as (n, npr); cbn in Hnz.
+  flia npr Hnz.
+}
+apply eq_Zn_eq; cbn.
+rewrite Nat.mul_mod_idemp_r; [ | easy ].
+rewrite Nat.mul_mod_idemp_l; [ | easy ].
+now rewrite Nat.mul_assoc.
+Qed.
+
+Theorem Zn_mul_1_l n : ∀ a : Zn n, Zn_mul Zn_one a = a.
+Proof.
+intros.
+destruct (le_dec (n2 n) 1) as [Hn1| Hn1]. {
+  destruct n as (n, npr); cbn in Hn1.
+  flia npr Hn1.
+}
+apply Nat.nle_gt in Hn1.
+apply eq_Zn_eq; cbn.
+rewrite Nat.mod_1_l; [ | easy ].
+rewrite Nat.mul_1_l.
+apply Nat.mod_small.
+now destruct a.
+Qed.
+
+Theorem Zn_mul_add_distr_l n : ∀ a b c : Zn n,
+  Zn_mul a (Zn_add b c) = Zn_add (Zn_mul a b) (Zn_mul a c).
+Proof.
+intros.
+destruct (Nat.eq_dec (n2 n) 0) as [Hnz| Hnz]. {
+  destruct n as (n, npr); cbn in Hnz.
+  flia npr Hnz.
+}
+apply eq_Zn_eq; cbn.
+rewrite Nat.mul_mod_idemp_r; [ | easy ].
+rewrite Nat.add_mod_idemp_l; [ | easy ].
+rewrite Nat.add_mod_idemp_r; [ | easy ].
+now rewrite Nat.mul_add_distr_l.
+Qed.
 
 Definition Zn_ring (n : nat2) : ring (Zn n) :=
   {| rng_zero := Zn_zero;
@@ -3443,14 +3503,17 @@ Definition Zn_ring (n : nat2) : ring (Zn n) :=
      rng_add := Zn_add;
      rng_mul := Zn_mul;
      rng_opp := Zn_opp;
+     rng_1_neq_0 := 42;
      rng_add_comm := Zn_add_comm n;
      rng_add_assoc := Zn_add_assoc n;
      rng_add_0_l := Zn_add_0_l n;
-     rng_add_opp_l := 42;
-     rng_mul_comm := Zn_ring_mul_comm n;
-     rng_mul_assoc := Zn_ring_mul_assoc n;
-     rng_mul_1_l := Zn_ring_mul_1_l n;
-     rng_mul_add_distr_l := Zn_ring_mul_add_distr_l n |}.
+     rng_add_opp_l := Zn_add_opp_l n;
+     rng_mul_comm := Zn_mul_comm n;
+     rng_mul_assoc := Zn_mul_assoc n;
+     rng_mul_1_l := Zn_mul_1_l n;
+     rng_mul_add_distr_l := Zn_mul_add_distr_l n |}.
+
+...
 
 Require Import ZArith.
 
