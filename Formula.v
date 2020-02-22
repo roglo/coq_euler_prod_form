@@ -3362,13 +3362,13 @@ intros.
 apply (le_unique (S a) b lt_ab1 lt_ab2).
 Qed.
 
-Record nat2 := mknat2
+Class nat2 := mknat2
   { n2 : nat;
     n2_prop : 2 ≤ n2 }.
 
 Class Zn (n : nat2) := mkZn
   { zn : nat;
-    zn_prop : zn < n2 n }.
+    zn_prop : zn < n2 }.
 
 Arguments zn {_} Zn%nat.
 
@@ -3377,11 +3377,11 @@ Proof.
 intros (a, apr) (b, bpr) Hab.
 cbn in Hab.
 subst b.
-specialize (lt_unique a (n2 n) apr bpr) as H1.
+specialize (lt_unique a n2 apr bpr) as H1.
 now subst bpr.
 Qed.
 
-Theorem Zn_prop {n : nat2} : ∀ op, op mod n2 n < n2 n.
+Theorem Zn_prop {n : nat2} : ∀ op, op mod n2 < n2.
 Proof.
 intros.
 apply Nat.mod_upper_bound, Nat.neq_0_lt_0.
@@ -3389,13 +3389,13 @@ destruct n as (nn, np); cbn.
 apply (lt_le_trans _ 2); [ apply Nat.lt_0_succ | easy ].
 Qed.
 
-Definition Zn_x (n : nat2) x := mkZn n (x mod n2 n) (Zn_prop x).
+Definition Zn_x (n : nat2) x := mkZn n (x mod n2) (Zn_prop x).
 
 Definition Zn_zero {n : nat2} := Zn_x n 0.
 Definition Zn_one {n : nat2} := Zn_x n 1.
 Definition Zn_add {n : nat2} (a b : Zn n) := Zn_x n (zn a + zn b).
 Definition Zn_mul {n : nat2} (a b : Zn n) := Zn_x n (zn a * zn b).
-Definition Zn_opp {n : nat2} (a : Zn n) := Zn_x n (n2 n - zn a).
+Definition Zn_opp {n : nat2} (a : Zn n) := Zn_x n (n2 - zn a).
 
 Theorem Zn_add_comm n : ∀ a b : Zn n, Zn_add a b = Zn_add b a.
 Proof.
@@ -3408,7 +3408,7 @@ Theorem Zn_add_assoc n : ∀ a b c : Zn n,
   Zn_add a (Zn_add b c) = Zn_add (Zn_add a b) c.
 Proof.
 intros.
-destruct (Nat.eq_dec (n2 n) 0) as [Hnz| Hnz]. {
+destruct (Nat.eq_dec n2 0) as [Hnz| Hnz]. {
   destruct n as (n, npr); cbn in Hnz.
   flia npr Hnz.
 }
@@ -3421,7 +3421,7 @@ Qed.
 Theorem Zn_add_0_l n : ∀ a : Zn n, Zn_add Zn_zero a = a.
 Proof.
 intros.
-destruct (Nat.eq_dec (n2 n) 0) as [Hnz| Hnz]. {
+destruct (Nat.eq_dec n2 0) as [Hnz| Hnz]. {
   destruct n as (n, npr); cbn in Hnz.
   flia npr Hnz.
 }
@@ -3435,7 +3435,7 @@ Qed.
 Theorem Zn_add_opp_l n : ∀ a : Zn n, Zn_add (Zn_opp a) a = Zn_zero.
 Proof.
 intros.
-destruct (Nat.eq_dec (n2 n) 0) as [Hnz| Hnz]. {
+destruct (Nat.eq_dec n2 0) as [Hnz| Hnz]. {
   destruct n as (n, npr); cbn in Hnz.
   flia npr Hnz.
 }
@@ -3457,7 +3457,7 @@ Theorem Zn_mul_assoc n : ∀ a b c : Zn n,
   Zn_mul a (Zn_mul b c) = Zn_mul (Zn_mul a b) c.
 Proof.
 intros.
-destruct (Nat.eq_dec (n2 n) 0) as [Hnz| Hnz]. {
+destruct (Nat.eq_dec n2 0) as [Hnz| Hnz]. {
   destruct n as (n, npr); cbn in Hnz.
   flia npr Hnz.
 }
@@ -3470,7 +3470,7 @@ Qed.
 Theorem Zn_mul_1_l n : ∀ a : Zn n, Zn_mul Zn_one a = a.
 Proof.
 intros.
-destruct (le_dec (n2 n) 1) as [Hn1| Hn1]. {
+destruct (le_dec n2 1) as [Hn1| Hn1]. {
   destruct n as (n, npr); cbn in Hn1.
   flia npr Hn1.
 }
@@ -3486,7 +3486,7 @@ Theorem Zn_mul_add_distr_l n : ∀ a b c : Zn n,
   Zn_mul a (Zn_add b c) = Zn_add (Zn_mul a b) (Zn_mul a c).
 Proof.
 intros.
-destruct (Nat.eq_dec (n2 n) 0) as [Hnz| Hnz]. {
+destruct (Nat.eq_dec n2 0) as [Hnz| Hnz]. {
   destruct n as (n, npr); cbn in Hnz.
   flia npr Hnz.
 }
@@ -3497,13 +3497,40 @@ rewrite Nat.add_mod_idemp_r; [ | easy ].
 now rewrite Nat.mul_add_distr_l.
 Qed.
 
+Theorem Zn_1_neq_0 {n : nat2} : Zn_one ≠ Zn_zero.
+Proof.
+destruct (le_dec n2 1) as [Hn1| Hn1]. {
+  destruct n as (n, npr); cbn in Hn1.
+  flia npr Hn1.
+}
+apply Nat.nle_gt in Hn1.
+intros H10.
+injection H10; intros H.
+rewrite Nat.mod_1_l in H; [ | easy ].
+rewrite Nat.mod_0_l in H; [ easy | flia Hn1 ].
+Qed.
+
+Theorem Zn_eq_dec {n : nat2} : ∀ a b : Zn n, {a = b} + {a ≠ b}.
+Proof.
+intros (a, apr) (b, bpr).
+destruct (Nat.eq_dec a b) as [Hab| Hab]. {
+  left; subst b.
+  now apply eq_Zn_eq.
+} {
+  right.
+  intros H; apply Hab.
+  now injection H.
+}
+Qed.
+
 Definition Zn_ring (n : nat2) : ring (Zn n) :=
   {| rng_zero := Zn_zero;
      rng_one := Zn_one;
      rng_add := Zn_add;
      rng_mul := Zn_mul;
      rng_opp := Zn_opp;
-     rng_1_neq_0 := 42;
+     rng_1_neq_0 := Zn_1_neq_0;
+     rng_eq_dec := Zn_eq_dec;
      rng_add_comm := Zn_add_comm n;
      rng_add_assoc := Zn_add_assoc n;
      rng_add_0_l := Zn_add_0_l n;
@@ -3513,7 +3540,9 @@ Definition Zn_ring (n : nat2) : ring (Zn n) :=
      rng_mul_1_l := Zn_mul_1_l n;
      rng_mul_add_distr_l := Zn_mul_add_distr_l n |}.
 
-...
+Canonical Structure Zn_ring.
+
+(*
 
 Require Import ZArith.
 
@@ -3546,6 +3575,7 @@ Definition Z_ring : ring Z :=
      rng_mul_add_distr_l := Z.mul_add_distr_l |}.
 
 Canonical Structure Z_ring.
+*)
 
 (*
 Canonical Structure Zn_ring.
@@ -3570,6 +3600,8 @@ Warning: Projection value has no head constant:
 End In_ring_A.
 
 (* degree of a polynomial *)
+
+...
 
 Inductive lap_has_degree {A} {rng : ring A} : list A → nat → Prop :=
   | Has_degree_nil : lap_has_degree [] 0
