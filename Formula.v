@@ -3596,12 +3596,43 @@ End In_ring_A.
 
 Definition degree {A} {rng : ring A} pol := length (lap pol) - 1.
 
-Example Z_2_lt_7 (n := mkn 7) : 2 < n2.
-Proof. cbn; flia. Qed.
-Example Z_3_lt_7 (n := mkn 7) : 3 < n2.
-Proof. cbn; flia. Qed.
+Example Z_2_lt_7 (n := mkn 7) : 3 < n2.
+Proof.
+cbn.
+apply -> Nat.succ_lt_mono.
+apply -> Nat.succ_lt_mono.
+apply -> Nat.succ_lt_mono.
+apply Nat.lt_0_succ.
+Show Proof.
+Abort.
+
+Definition Z_2_lt_7 (n := mkn 7) : 2 < n2 :=
+  proj1 (Nat.succ_lt_mono 1 6)
+    (proj1 (Nat.succ_lt_mono 0 5) (Nat.lt_0_succ 4)).
+
+Definition Z_3_lt_7 (n := mkn 7) : 3 < n2 :=
+  proj1 (Nat.succ_lt_mono 2 6)
+    (proj1 (Nat.succ_lt_mono 1 5)
+       (proj1 (Nat.succ_lt_mono 0 4) (Nat.lt_0_succ 3))).
+
 Definition Z_2_mod_7 := mkZn (mkn 7) 2 Z_2_lt_7.
 Definition Z_3_mod_7 := mkZn (mkn 7) 3 Z_3_lt_7.
+
+Check (λ n, proj1 (Nat.succ_lt_mono 0 (S n)) (Nat.lt_0_succ n)).
+Check (λ n, proj1 (Nat.succ_lt_mono 1 (S (S n))) (proj1 (Nat.succ_lt_mono 0 (S n)) (Nat.lt_0_succ n))).
+
+Print Nat.succ_lt_mono.
+
+(*
+Fixpoint glop n k :=
+  match k with
+  | 0 => proj1 (Nat.succ_lt_mono 0 (S n)) (Nat.lt_0_succ n)
+  | 1 => proj1 (Nat.succ_lt_mono 1 (S (S n))) (glop n 0)
+  | _ => proj1 (Nat.succ_lt_mono 0 (S n)) (Nat.lt_0_succ n)
+  end.
+Print glop.
+  proj1 (Nat.succ_lt_mono 0 (S n)) (Nat.lt_0_succ n).
+*)
 
 Theorem Z_3_mod_7_ne_0 (rng := Zn_ring (mkn 7)) :
   rng_eqb Z_3_mod_7 0%Rng = false.
