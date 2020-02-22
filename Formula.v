@@ -3374,14 +3374,67 @@ destruct n as (nn, np); cbn.
 apply (lt_le_trans _ 2); [ apply Nat.lt_0_succ | easy ].
 Qed.
 
-Definition Zn_op (n : nat2) x := mkZn n (x mod n2 n) (Zn_prop x).
+Definition Zn_x (n : nat2) x := mkZn n (x mod n2 n) (Zn_prop x).
 
-Definition Zn_zero {n : nat2} := Zn_op n 0.
-Definition Zn_one {n : nat2} := Zn_op n 1.
-Definition Zn_add {n : nat2} (a b : Zn n) := Zn_op n (zn a + zn b).
-Definition Zn_mul {n : nat2} (a b : Zn n) := Zn_op n (zn a * zn b).
-Definition Zn_opp {n : nat2} (a : Zn n) := Zn_op n (n2 n - zn a).
+Definition Zn_zero {n : nat2} := Zn_x n 0.
+Definition Zn_one {n : nat2} := Zn_x n 1.
+Definition Zn_add {n : nat2} (a b : Zn n) := Zn_x n (zn a + zn b).
+Definition Zn_mul {n : nat2} (a b : Zn n) := Zn_x n (zn a * zn b).
+Definition Zn_opp {n : nat2} (a : Zn n) := Zn_x n (n2 n - zn a).
 
+Theorem Zn_add_comm n : ∀ a b : Zn n, Zn_add a b = Zn_add b a.
+Proof.
+intros.
+unfold Zn_add.
+now rewrite Nat.add_comm.
+Qed.
+
+Theorem lt_unique : ∀ a b (lt_ab1 lt_ab2 : a < b), lt_ab1 = lt_ab2.
+Proof.
+intros.
+apply (le_unique (S a) b lt_ab1 lt_ab2).
+Qed.
+
+Theorem eq_Zn_eq n : ∀ a b : Zn n, zn a = zn b → a = b.
+Proof.
+intros (a, apr) (b, bpr) Hab.
+cbn in Hab.
+subst b.
+specialize (lt_unique a (n2 n) apr bpr) as H1.
+now subst bpr.
+Qed.
+
+Theorem Zn_add_assoc n : ∀ a b c : Zn n,
+  Zn_add a (Zn_add b c) = Zn_add (Zn_add a b) c.
+Proof.
+intros.
+destruct (Nat.eq_dec (n2 n) 0) as [Hnz| Hnz]. {
+  destruct n as (n, npr); cbn in Hnz.
+  flia npr Hnz.
+}
+apply eq_Zn_eq; cbn.
+rewrite Nat.add_mod_idemp_r; [ | easy ].
+rewrite Nat.add_mod_idemp_l; [ | easy ].
+now rewrite Nat.add_assoc.
+Qed.
+
+Theorem Zn_add_0_l n : ∀ a : Zn n, Zn_add Zn_zero a = a.
+Proof.
+intros.
+destruct (Nat.eq_dec (n2 n) 0) as [Hnz| Hnz]. {
+  destruct n as (n, npr); cbn in Hnz.
+  flia npr Hnz.
+}
+apply eq_Zn_eq; cbn.
+rewrite Nat.mod_0_l; [ | easy ].
+rewrite Nat.add_0_l.
+apply Nat.mod_small.
+now destruct a.
+Qed.
+
+Theorem Zn_add_opp_l n : ∀ a : Zn n, Zn_add (Zn_opp a) a = Zn_zero.
+Proof.
+intros.
 ...
 
 Definition Zn_ring (n : nat2) : ring (Zn n) :=
@@ -3390,10 +3443,10 @@ Definition Zn_ring (n : nat2) : ring (Zn n) :=
      rng_add := Zn_add;
      rng_mul := Zn_mul;
      rng_opp := Zn_opp;
-     rng_add_comm := Zn_ring_add_comm n;
-     rng_add_assoc := Zn_ring_add_assoc n;
-     rng_add_0_l := Zn_ring_add_0_l n;
-     rng_add_opp_l := Zn_ring_add_opp_l n;
+     rng_add_comm := Zn_add_comm n;
+     rng_add_assoc := Zn_add_assoc n;
+     rng_add_0_l := Zn_add_0_l n;
+     rng_add_opp_l := 42;
      rng_mul_comm := Zn_ring_mul_comm n;
      rng_mul_assoc := Zn_ring_mul_assoc n;
      rng_mul_1_l := Zn_ring_mul_1_l n;
