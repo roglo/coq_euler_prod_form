@@ -297,6 +297,14 @@ intros a b; split; intros H.
  rewrite H; reflexivity.
 Qed.
 
+Theorem rng_opp_involutive : ∀ x, (- - x)%Rng = x.
+Proof.
+intros.
+symmetry.
+apply rng_add_move_0_r.
+apply rng_add_opp_r.
+Qed.
+
 Theorem rng_add_add_swap : ∀ n m p, (n + m + p = n + p + m)%Rng.
 Proof.
 intros n m p; simpl.

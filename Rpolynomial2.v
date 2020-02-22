@@ -229,7 +229,6 @@ Definition xpow {α} {r : ring α} i :=
 
 Declare Scope lap_scope.
 Delimit Scope lap_scope with lap.
-Notation "0" := [] : lap_scope.
 Notation "1" := [1%Rng] : lap_scope.
 Notation "- a" := (lap_opp a) : lap_scope.
 Notation "a + b" := (lap_add a b) : lap_scope.
