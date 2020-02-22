@@ -3596,28 +3596,23 @@ End In_ring_A.
 
 Definition degree {A} {rng : ring A} pol := length (lap pol) - 1.
 
+Example Z_2_lt_7 (n := mkn 7) : 2 < n2.
+Proof. cbn; flia. Qed.
 Example Z_3_lt_7 (n := mkn 7) : 3 < n2.
 Proof. cbn; flia. Qed.
+Definition Z_2_mod_7 := mkZn (mkn 7) 2 Z_2_lt_7.
 Definition Z_3_mod_7 := mkZn (mkn 7) 3 Z_3_lt_7.
-Print Z_3_mod_7.
 
-Theorem pouet {rng : ring (Zn (mkn 7))} :
-  rng_eqb (last [Z_3_mod_7] 1%Rng) 0%Rng = false.
+Theorem Z_3_mod_7_ne_0 (rng := Zn_ring (mkn 7)) :
+  rng_eqb Z_3_mod_7 0%Rng = false.
 Proof.
 unfold rng_eqb; cbn.
-destruct (rng_eq_dec Z_3_mod_7 0) as [H3z| H3z]; [ exfalso | easy ].
-unfold Z_3_mod_7 in H3z.
-apply eq_Zn_eq in H3z.
-cbn in H3z.
-unfold mkn in H3z.
-cbn in H3z.
-unfold mkn in rng.
-cbn in rng.
-unfold rng_zero in H3z.
-Set Printing All.
-...
+now destruct (rng_eq_dec Z_3_mod_7 0).
+Qed.
 
-Compute (degree (mkpoly [Z_3_mod_7; Z_3_mod_7] pouet)).
+Compute (degree (mkpoly [Z_3_mod_7; Z_2_mod_7; Z_3_mod_7] Z_3_mod_7_ne_0)).
+Compute (mkpoly [Z_3_mod_7; Z_2_mod_7; Z_3_mod_7] Z_3_mod_7_ne_0).
+
 ...
 
 (* pas vraiment pratique... *)
