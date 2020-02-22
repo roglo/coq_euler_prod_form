@@ -3596,17 +3596,22 @@ End In_ring_A.
 
 Definition degree {A} {rng : ring A} pol := length (lap pol) - 1.
 
-Definition lt_succ_add a b := proj1 (Nat.succ_lt_mono b (a + b)).
+Definition lt_succ_add a b := proj1 (Nat.succ_lt_mono b (1 + a + b)).
 
-Definition Z_2_lt_7 (n := mkn 7) : 2 < n2 :=
+Definition Z_2_lt_7 : 2 < 7 :=
   let m := 4 in
-  let f := lt_succ_add (1 + m) in
+  let f := lt_succ_add m in
   f 1 (f 0 (Nat.lt_0_succ m)).
 
-Definition Z_3_lt_7 (n := mkn 7) : 3 < n2 :=
+Definition Z_3_lt_7 : 3 < 7 :=
   let m := 3 in
-  let f := lt_succ_add (1 + m) in
+  let f := lt_succ_add m in
   f 2 (f 1 (f 0 (Nat.lt_0_succ m))).
+
+Definition Z_4_lt_7 : 4 < 7 :=
+  let m := 2 in
+  let f := lt_succ_add m in
+  f 3 (f 2 (f 1 (f 0 (Nat.lt_0_succ m)))).
 
 Definition Z_2_mod_7 := mkZn (mkn 7) 2 Z_2_lt_7.
 Definition Z_3_mod_7 := mkZn (mkn 7) 3 Z_3_lt_7.
