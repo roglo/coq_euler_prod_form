@@ -3613,22 +3613,19 @@ Definition Z_4_lt_7 : 4 < 7 :=
   let f := lt_succ_add m in
   f 3 (f 2 (f 1 (f 0 (Nat.lt_0_succ m)))).
 
-Definition Z_2_mod_7 := mkZn (mkn 7) 2 Z_2_lt_7.
-Definition Z_3_mod_7 := mkZn (mkn 7) 3 Z_3_lt_7.
+Definition Z_2_m_7 := mkZn (mkn 7) 2 Z_2_lt_7.
+Definition Z_3_m_7 := mkZn (mkn 7) 3 Z_3_lt_7.
+Definition Z_4_m_7 := mkZn (mkn 7) 4 Z_4_lt_7.
 
-Theorem Z_3_mod_7_ne_0 (rng := Zn_ring (mkn 7)) :
-  rng_eqb Z_3_mod_7 0%Rng = false.
+Theorem Z_3_m_7_ne_0 (rng := Zn_ring (mkn 7)) :
+  rng_eqb Z_3_m_7 0%Rng = false.
 Proof.
 unfold rng_eqb; cbn.
-now destruct (rng_eq_dec Z_3_mod_7 0).
+now destruct (rng_eq_dec Z_3_m_7 0).
 Qed.
 
-Compute (degree (mkpoly [Z_3_mod_7; Z_2_mod_7; Z_3_mod_7] Z_3_mod_7_ne_0)).
-Compute (mkpoly [Z_3_mod_7; Z_2_mod_7; Z_3_mod_7] Z_3_mod_7_ne_0).
-
-...
-
-(* pas vraiment pratique... *)
+Compute (degree (mkpoly [Z_3_m_7; Z_2_m_7; Z_3_m_7] Z_3_m_7_ne_0)).
+Compute (mkpoly [Z_3_m_7; Z_2_m_7; Z_3_m_7] Z_3_m_7_ne_0).
 
 ...
 
