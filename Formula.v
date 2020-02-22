@@ -3613,7 +3613,8 @@ Arguments zn : clear implicits.
 Show.
 unfold mkn in H3z.
 cbn in H3z.
-Set Printing All.
+unfold mkn in rng.
+cbn in rng.
 ...
 
 Compute (degree (mkpoly [Z_3_mod_7; Z_3_mod_7] pouet)).
