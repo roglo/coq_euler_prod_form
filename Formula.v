@@ -3362,13 +3362,12 @@ intros.
 apply (le_unique (S a) b lt_ab1 lt_ab2).
 Qed.
 
-Class nat2 := mknat2
-  { n2 : nat;
-    n2_prop : 2 ≤ n2 }.
+(* representing a natural greater or equal to 2 *)
+Class nat2 := mknat2 { number_minus_2 : nat }.
+Definition n2 {n : nat2} := number_minus_2 + 2.
+Definition mkn n := mknat2 (n - 2).
 
-Class Zn (n : nat2) := mkZn
-  { zn : nat;
-    zn_prop : zn < n2 }.
+Class Zn (n : nat2) := mkZn { zn : nat; zn_prop : zn < n2 }.
 
 Arguments zn {_} Zn%nat.
 
@@ -3385,8 +3384,8 @@ Theorem Zn_prop {n : nat2} : ∀ op, op mod n2 < n2.
 Proof.
 intros.
 apply Nat.mod_upper_bound, Nat.neq_0_lt_0.
-destruct n as (nn, np); cbn.
-apply (lt_le_trans _ 2); [ apply Nat.lt_0_succ | easy ].
+apply (lt_le_trans _ 2); [ apply Nat.lt_0_succ | ].
+unfold n2; flia.
 Qed.
 
 Definition Zn_x (n : nat2) x := mkZn n (x mod n2) (Zn_prop x).
@@ -3409,8 +3408,7 @@ Theorem Zn_add_assoc n : ∀ a b c : Zn n,
 Proof.
 intros.
 destruct (Nat.eq_dec n2 0) as [Hnz| Hnz]. {
-  destruct n as (n, npr); cbn in Hnz.
-  flia npr Hnz.
+  now unfold n2 in Hnz; rewrite Nat.add_comm in Hnz.
 }
 apply eq_Zn_eq; cbn.
 rewrite Nat.add_mod_idemp_r; [ | easy ].
@@ -3422,8 +3420,7 @@ Theorem Zn_add_0_l n : ∀ a : Zn n, Zn_add Zn_zero a = a.
 Proof.
 intros.
 destruct (Nat.eq_dec n2 0) as [Hnz| Hnz]. {
-  destruct n as (n, npr); cbn in Hnz.
-  flia npr Hnz.
+  now unfold n2 in Hnz; rewrite Nat.add_comm in Hnz.
 }
 apply eq_Zn_eq; cbn.
 rewrite Nat.mod_0_l; [ | easy ].
@@ -3436,8 +3433,7 @@ Theorem Zn_add_opp_l n : ∀ a : Zn n, Zn_add (Zn_opp a) a = Zn_zero.
 Proof.
 intros.
 destruct (Nat.eq_dec n2 0) as [Hnz| Hnz]. {
-  destruct n as (n, npr); cbn in Hnz.
-  flia npr Hnz.
+  now unfold n2 in Hnz; rewrite Nat.add_comm in Hnz.
 }
 apply eq_Zn_eq; cbn.
 rewrite Nat.add_mod_idemp_l; [ | easy ].
@@ -3458,8 +3454,7 @@ Theorem Zn_mul_assoc n : ∀ a b c : Zn n,
 Proof.
 intros.
 destruct (Nat.eq_dec n2 0) as [Hnz| Hnz]. {
-  destruct n as (n, npr); cbn in Hnz.
-  flia npr Hnz.
+  now unfold n2 in Hnz; rewrite Nat.add_comm in Hnz.
 }
 apply eq_Zn_eq; cbn.
 rewrite Nat.mul_mod_idemp_r; [ | easy ].
@@ -3471,8 +3466,7 @@ Theorem Zn_mul_1_l n : ∀ a : Zn n, Zn_mul Zn_one a = a.
 Proof.
 intros.
 destruct (le_dec n2 1) as [Hn1| Hn1]. {
-  destruct n as (n, npr); cbn in Hn1.
-  flia npr Hn1.
+  unfold n2 in Hn1; flia Hn1.
 }
 apply Nat.nle_gt in Hn1.
 apply eq_Zn_eq; cbn.
@@ -3487,8 +3481,7 @@ Theorem Zn_mul_add_distr_l n : ∀ a b c : Zn n,
 Proof.
 intros.
 destruct (Nat.eq_dec n2 0) as [Hnz| Hnz]. {
-  destruct n as (n, npr); cbn in Hnz.
-  flia npr Hnz.
+  unfold n2 in Hnz; flia Hnz.
 }
 apply eq_Zn_eq; cbn.
 rewrite Nat.mul_mod_idemp_r; [ | easy ].
@@ -3500,8 +3493,7 @@ Qed.
 Theorem Zn_1_neq_0 {n : nat2} : Zn_one ≠ Zn_zero.
 Proof.
 destruct (le_dec n2 1) as [Hn1| Hn1]. {
-  destruct n as (n, npr); cbn in Hn1.
-  flia npr Hn1.
+  unfold n2 in Hn1; flia Hn1.
 }
 apply Nat.nle_gt in Hn1.
 intros H10.
@@ -3601,22 +3593,26 @@ End In_ring_A.
 
 (* degree of a polynomial *)
 
+Definition degree {A} {rng : ring A} pol := length (lap pol) - 1.
+
+Example arghh (n := mkn 7) : 3 < n2.
+Proof. cbn; flia. Qed.
+Definition glop := mkZn (mkn 7) 3 arghh.
+Print glop.
+
+Theorem pouet {rng : ring (Zn (mkn 7))} : rng_eqb (last [glop] 1%Rng) 0%Rng = false.
+Proof.
+unfold glop, rng_eqb; cbn.
+destruct rng_zero.
+Admitted.
+
+Compute (degree (mkpoly [glop] pouet)).
+
+(* pas vraiment pratique... *)
+
 ...
 
-Inductive lap_has_degree {A} {rng : ring A} : list A → nat → Prop :=
-  | Has_degree_nil : lap_has_degree [] 0
-  | Has_degree : ∀ la a n,
-      (a ≠ 0)%Rng
-      → n = length la
-      → lap_has_degree (la ++ [a]) n
-  | Has_smaller_degree : ∀ la n,
-      lap_has_degree la n
-      → lap_has_degree (la ++ [0%Rng]) n.
-
-Definition poly_has_degree {A} {rng : ring A} pol n :=
-  lap_has_degree (al pol) n.
-
-Example degree_5x2_4x_3 (rng' := Zn_ring 7) : lap_has_degree [3; 4; 5] 2.
+Example degree_5x2_4x_3 (rng' := Zn_ring (mkn 7)) : degree (mkpoly [3; 4; 5] pouet) = 2.
 Proof.
 assert (H : [3; 4; 5] ≠ []) by easy.
 specialize (app_removelast_last 0 H) as H1; clear H.
