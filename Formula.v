@@ -2238,6 +2238,9 @@ Check @lim_ζ_times_product_on_primes.
 Theorem ζ_Euler_product_eq : ...
 *)
 
+(* now, experiments with primes...
+   nothing to do with the above *)
+
 Require Import Totient QuadRes.
 
 Theorem prime_pow_φ : ∀ p, prime p →
@@ -2248,7 +2251,6 @@ rewrite (prime_φ p); [ | easy ].
 destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
 unfold φ.
 unfold coprimes.
-(**)
 rewrite (filter_ext_in _ (λ d, negb (d mod p =? 0))). 2: {
   intros a Ha.
   apply in_seq in Ha.
@@ -3156,205 +3158,7 @@ Theorem lap_convol_mul_succ_r : ∀ la lb i len,
   lap_convol_mul la lb (S i) len.
 Proof. easy. Qed.
 
-(*
-Theorem lap_xpow_from_convol_mul : ∀ a i,
-  (repeat 0%Rng a ++ [1%Rng] =
-   nth 0 (repeat 0%Rng a ++ [1%Rng]) 0%Rng
-   :: lap_convol_mul [0%Rng; 1%Rng]
-        (repeat 0%Rng (i + a) ++ [1%Rng]) (i + 2) a)%lap.
-Proof.
-intros.
-revert i.
-induction a; intros; [ easy | ].
-cbn - [ summation ].
-apply lap_eq_cons; [ easy | ].
-rewrite summation_split_first; [ | flia ].
-rewrite rng_mul_0_l, rng_add_0_l.
-rewrite summation_split_first; [ | flia ].
-rewrite rng_mul_1_l.
-rewrite all_0_summation_0. 2: {
-  intros j Hj.
-  destruct j; [ easy | ].
-  destruct j; [ flia Hj | ].
-  rewrite match_id.
-  apply rng_mul_0_l.
-}
-replace (i + 2 - 1) with (i + 1) by flia.
-rewrite rng_add_0_r.
-rewrite Nat.add_1_r.
-replace (i + S a) with (S (i + a)) at 1 by flia.
-cbn.
-replace (nth i _ _) with (nth 0 (repeat 0%Rng a ++ [1%Rng]) 0%Rng). 2: {
-  clear.
-  revert a.
-  induction i; intros; [ easy | cbn ].
-  apply IHi.
-}
-replace (S (i + 2)) with (S i + 2) by flia.
-replace (i + S a) with (S i + a) by flia.
-apply IHa.
-Qed.
-*)
-
-(* x^(a+1) = x * x^a *)
-(*
-Theorem lap_xpow_succ : ∀ a,
-  (repeat 0%Rng (S a) ++ [1%Rng] =
-   [0%Rng; 1%Rng] * (repeat 0%Rng a ++ [1%Rng]))%lap.
-Proof.
-intros.
-unfold "*"%lap; cbn.
-rewrite rng_mul_0_l, rng_add_0_l.
-apply lap_eq_cons; [ easy | ].
-rewrite app_length, repeat_length; cbn.
-rewrite Nat.add_1_r; cbn.
-rewrite rng_mul_0_l, rng_add_0_l, rng_mul_1_l, rng_add_0_r.
-now specialize (lap_xpow_from_convol_mul a 0) as H1.
-Qed.
-*)
-
-(*
-Theorem xpow_add_r : ∀ a b,
-  (ⓧ ^ (a + b) = ⓧ ^ a * ⓧ ^ b)%pol.
-Proof.
-intros.
-unfold poly_eq; cbn.
-revert b.
-induction a; intros; [ now rewrite lap_mul_1_l | ].
-rewrite Nat.add_succ_comm, IHa; clear IHa.
-do 2 rewrite lap_xpow_succ.
-now rewrite rng_mul_comm, rng_mul_mul_swap.
-Qed.
-*)
-
-(*
-Theorem pol_pow_sub_1 (pr := polynomial_ring) : ∀ k,
-  k ≠ 0
-  → (ⓧ^k - 1 = (ⓧ - 1) * (Σ (i = 0, k - 1), ⓧ^(k-i-1))%Rng)%pol.
-Proof.
-intros * Hkz.
-subst pr.
-destruct k; [ easy | clear Hkz ].
-rewrite Nat.sub_succ, (Nat.sub_0_r k).
-induction k. {
-  cbn.
-  rewrite xpow_0.
-  now rewrite poly_mul_1_r.
-}
-rewrite summation_split_last; [ | flia ].
-replace (S (S k) - S k - 1) with 0 by flia.
-rewrite xpow_0.
-rewrite (summation_compat _ (λ i, (ⓧ^(1 + (S k - i - 1)))%pol)). 2: {
-  intros i Hi.
-  now replace (S (S k) - i - 1) with (1 + (S k - i - 1)) by flia Hi.
-}
-rewrite (summation_compat _ (λ i, (ⓧ^1 * ⓧ^(S k - i - 1))%pol)). 2: {
-  intros i Hi.
-  now rewrite xpow_add_r.
-}
-rewrite <- rng_mul_summation_distr_l.
-rewrite rng_mul_add_distr_l, rng_mul_assoc, rng_mul_mul_swap.
-rewrite <- IHk; cbn.
-rewrite rng_mul_1_r.
-unfold poly_sub.
-rewrite rng_mul_add_distr_r; cbn.
-rewrite rng_mul_opp_l, rng_mul_1_l.
-do 3 rewrite fold_rng_sub; cbn.
-rewrite rng_add_assoc; cbn.
-do 3 rewrite fold_rng_sub.
-rewrite rng_sub_add; cbn.
-rewrite <- xpow_add_r.
-now rewrite Nat.add_1_r.
-Qed.
-*)
-
 (* http://math.univ-lille1.fr/~fricain/M1-ARITHMETIQUE/chap2.pdf *)
-
-Theorem Zn_ring_add_comm n : ∀ a b, (a + b) mod n ≡ ((b + a) mod n) mod n.
-Proof. now intros; rewrite Nat.add_comm. Qed.
-
-Theorem Zn_ring_add_assoc n : ∀ a b c,
-  (a + (b + c) mod n) mod n ≡ (((a + b) mod n + c) mod n) mod n.
-Proof.
-intros.
-destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
-rewrite Nat.add_mod_idemp_r; [ | easy ].
-rewrite Nat.add_mod_idemp_l; [ | easy ].
-now rewrite Nat.add_assoc.
-Qed.
-
-Theorem Zn_ring_add_0_l n : ∀ a, (0 + a) mod n ≡ a mod n.
-Proof.
-intros.
-destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
-rewrite Nat.mod_mod; [ | easy ].
-now rewrite Nat.add_0_l.
-Qed.
-
-Theorem Zn_ring_add_opp_l n : ∀ a,
-  ((n - a mod n) mod n + a) mod n ≡ 0 mod n.
-Proof.
-intros.
-destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
-rewrite Nat.add_mod_idemp_l; [ | easy ].
-rewrite <- Nat.add_mod_idemp_r; [ | easy ].
-rewrite Nat.sub_add. 2: {
-  now apply Nat.lt_le_incl, Nat.mod_upper_bound.
-}
-now rewrite Nat.mod_same.
-Qed.
-
-Theorem Zn_ring_add_compat_l n : ∀ a b c,
-  a ≡ b mod n → (c + a) mod n ≡ ((c + b) mod n) mod n.
-Proof.
-intros * Hab.
-destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
-rewrite <- Nat.add_mod_idemp_r; [ | easy ].
-rewrite Hab.
-now rewrite Nat.add_mod_idemp_r.
-Qed.
-
-Theorem Zn_ring_mul_comm n : ∀ a b, (a * b) mod n ≡ ((b * a) mod n) mod n.
-Proof. now intros; rewrite Nat.mul_comm. Qed.
-
-Theorem Zn_ring_mul_assoc n : ∀ a b c,
-  (a * ((b * c) mod n)) mod n ≡ (((a * b) mod n * c) mod n) mod n.
-Proof.
-intros.
-destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
-rewrite Nat.mul_mod_idemp_r; [ | easy ].
-rewrite Nat.mul_mod_idemp_l; [ | easy ].
-now rewrite Nat.mul_assoc.
-Qed.
-
-Theorem Zn_ring_mul_1_l n : ∀ a, (1 * a) mod n ≡ a mod n.
-Proof.
-intros.
-destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
-rewrite Nat.mod_mod; [ | easy ].
-now rewrite Nat.mul_1_l.
-Qed.
-
-Theorem Zn_ring_mul_compat_l n : ∀ a b c,
-  a ≡ b mod n → (c * a) mod n ≡ ((c * b) mod n) mod n.
-Proof.
-intros * Hab.
-destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
-rewrite <- Nat.mul_mod_idemp_r; [ | easy ].
-rewrite Hab.
-now rewrite Nat.mul_mod_idemp_r.
-Qed.
-
-Theorem Zn_ring_mul_add_distr_l n : ∀ a b c,
-  (a * ((b + c) mod n)) mod n ≡ (((a * b) mod n + (a * c) mod n) mod n) mod n.
-Proof.
-intros.
-destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
-rewrite Nat.mul_mod_idemp_r; [ | easy ].
-rewrite Nat.add_mod_idemp_l; [ | easy ].
-rewrite Nat.add_mod_idemp_r; [ | easy ].
-now rewrite Nat.mul_add_distr_l.
-Qed.
 
 Theorem lt_unique : ∀ a b (lt_ab1 lt_ab2 : a < b), lt_ab1 = lt_ab2.
 Proof.
@@ -3534,61 +3338,6 @@ Definition Zn_ring (n : nat2) : ring (Zn n) :=
      rng_mul_add_distr_l := Zn_mul_add_distr_l n |}.
 
 Canonical Structure Zn_ring.
-
-(*
-
-Require Import ZArith.
-
-Theorem Z_mul_compat_l : ∀ a b c, a = b → (c * a = c * b)%Z.
-Proof.
-intros * Hab.
-destruct (Z.eq_dec c 0%Z) as [Hzc| Hzc]; [ now subst c | ].
-now apply Z.mul_cancel_l.
-Qed.
-
-Definition Z_ring : ring Z :=
-  {| rng_zero := 0%Z;
-     rng_one := 1%Z;
-     rng_add a b := (a + b)%Z;
-     rng_mul a b := (a * b)%Z;
-     rng_opp a := (- a)%Z;
-     rng_eq a b := a = b;
-     rng_eq_refl _ := eq_refl;
-     rng_eq_sym _ _ H := eq_sym H;
-     rng_eq_trans _ _ _ H1 H2 := eq_trans H1 H2;
-     rng_add_comm := Z.add_comm;
-     rng_add_assoc := Z.add_assoc;
-     rng_add_0_l := Z.add_0_l;
-     rng_add_opp_l := Z.add_opp_diag_l;
-     rng_add_compat_l a b c := proj2 (Z.add_cancel_l a b c);
-     rng_mul_comm := Z.mul_comm;
-     rng_mul_assoc := Z.mul_assoc;
-     rng_mul_1_l := Z.mul_1_l;
-     rng_mul_compat_l := Z_mul_compat_l;
-     rng_mul_add_distr_l := Z.mul_add_distr_l |}.
-
-Canonical Structure Z_ring.
-*)
-
-(*
-Canonical Structure Zn_ring.
-Warning: Projection value has no head constant: λ a b : nat, (a + b) mod n in canonical instance
-Zn_ring of rng_add, ignoring it. [projection-no-head-constant,typechecker]
-Warning: Projection value has no head constant: λ a b : nat, (a * b) mod n in canonical instance
-Zn_ring of rng_mul, ignoring it. [projection-no-head-constant,typechecker]
-Warning: Projection value has no head constant: λ a : nat, (n - a mod n) mod n in canonical instance
-Zn_ring of rng_opp, ignoring it. [projection-no-head-constant,typechecker]
-Warning: Projection value has no head constant: λ a b : nat, a ≡ b mod n in canonical instance Zn_ring of rng_eq,
-ignoring it. [projection-no-head-constant,typechecker]
-Warning: Projection value has no head constant: λ a : nat, eq_refl in canonical instance Zn_ring of rng_eq_refl,
-ignoring it. [projection-no-head-constant,typechecker]
-Warning: Projection value has no head constant: λ (a b : nat) (H : (λ a0 b0 : nat, a0 ≡ b0 mod n) a b), eq_sym H
-in canonical instance Zn_ring of rng_eq_sym, ignoring it. [projection-no-head-constant,typechecker]
-Warning: Projection value has no head constant:
-λ (a b c : nat) (H1 : (λ a0 b0 : nat, a0 ≡ b0 mod n) a b) (H2 : (λ a0 b0 : nat, a0 ≡ b0 mod n) b c),
-  eq_trans H1 H2 in canonical instance Zn_ring of rng_eq_trans, ignoring it.
-[projection-no-head-constant,typechecker]
-*)
 
 End In_ring_A.
 
