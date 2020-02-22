@@ -3609,12 +3609,12 @@ destruct (rng_eq_dec Z_3_mod_7 0) as [H3z| H3z]; [ exfalso | easy ].
 unfold Z_3_mod_7 in H3z.
 apply eq_Zn_eq in H3z.
 cbn in H3z.
-Set Printing Implicit.
 unfold mkn in H3z.
 cbn in H3z.
 unfold mkn in rng.
 cbn in rng.
-Check (@zn {| number_minus_2 := 5 |} 0%Rng).
+unfold rng_zero in H3z.
+Set Printing All.
 ...
 
 Compute (degree (mkpoly [Z_3_mod_7; Z_3_mod_7] pouet)).
