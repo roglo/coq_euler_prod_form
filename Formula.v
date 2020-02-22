@@ -3347,24 +3347,24 @@ Definition degree {A} {rng : ring A} pol := length (lap pol) - 1.
 
 Definition lt_succ_add a b := proj1 (Nat.succ_lt_mono b (1 + a + b)).
 
-Definition Z_2_lt_7 : 2 < 7 :=
+Definition lt2_7 : 2 < 7 :=
   let m := 4 in
   let f := lt_succ_add m in
   f 1 (f 0 (Nat.lt_0_succ m)).
 
-Definition Z_3_lt_7 : 3 < 7 :=
+Definition lt3_7 : 3 < 7 :=
   let m := 3 in
   let f := lt_succ_add m in
   f 2 (f 1 (f 0 (Nat.lt_0_succ m))).
 
-Definition Z_4_lt_7 : 4 < 7 :=
+Definition lt4_7 : 4 < 7 :=
   let m := 2 in
   let f := lt_succ_add m in
   f 3 (f 2 (f 1 (f 0 (Nat.lt_0_succ m)))).
 
-Definition m7_2 := mkZn (mkn 7) 2 Z_2_lt_7.
-Definition m7_3 := mkZn (mkn 7) 3 Z_3_lt_7.
-Definition m7_4 := mkZn (mkn 7) 4 Z_4_lt_7.
+Definition m7_2 := mkZn (mkn 7) 2 lt2_7.
+Definition m7_3 := mkZn (mkn 7) 3 lt3_7.
+Definition m7_4 := mkZn (mkn 7) 4 lt4_7.
 
 Theorem m7_3_ne_0 (rng := Zn_ring (mkn 7)) : rng_eqb m7_3 0%Rng = false.
 Proof.
