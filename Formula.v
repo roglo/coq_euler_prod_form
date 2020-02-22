@@ -3371,9 +3371,10 @@ Class Zn (n : nat2) := mkZn { zn : nat; zn_prop : zn < n2 }.
 
 Arguments zn {_} Zn%nat.
 
-Theorem eq_Zn_eq n : ∀ a b : Zn n, zn a = zn b → a = b.
+Theorem eq_Zn_eq n : ∀ a b : Zn n, zn a = zn b ↔ a = b.
 Proof.
-intros (a, apr) (b, bpr) Hab.
+intros (a, apr) (b, bpr).
+split; intros Hab; [ | now rewrite Hab ].
 cbn in Hab.
 subst b.
 specialize (lt_unique a n2 apr bpr) as H1.
@@ -3595,18 +3596,28 @@ End In_ring_A.
 
 Definition degree {A} {rng : ring A} pol := length (lap pol) - 1.
 
-Example arghh (n := mkn 7) : 3 < n2.
+Example Z_3_lt_7 (n := mkn 7) : 3 < n2.
 Proof. cbn; flia. Qed.
-Definition glop := mkZn (mkn 7) 3 arghh.
-Print glop.
+Definition Z_3_mod_7 := mkZn (mkn 7) 3 Z_3_lt_7.
+Print Z_3_mod_7.
 
-Theorem pouet {rng : ring (Zn (mkn 7))} : rng_eqb (last [glop] 1%Rng) 0%Rng = false.
+Theorem pouet {rng : ring (Zn (mkn 7))} :
+  rng_eqb (last [Z_3_mod_7] 1%Rng) 0%Rng = false.
 Proof.
-unfold glop, rng_eqb; cbn.
-destruct rng_zero.
-Admitted.
+unfold rng_eqb; cbn.
+destruct (rng_eq_dec Z_3_mod_7 0) as [H3z| H3z]; [ exfalso | easy ].
+unfold Z_3_mod_7 in H3z.
+apply eq_Zn_eq in H3z.
+cbn in H3z.
+Arguments zn : clear implicits.
+Show.
+unfold mkn in H3z.
+cbn in H3z.
+Set Printing All.
+...
 
-Compute (degree (mkpoly [glop] pouet)).
+Compute (degree (mkpoly [Z_3_mod_7; Z_3_mod_7] pouet)).
+...
 
 (* pas vraiment pratique... *)
 
