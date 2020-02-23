@@ -3389,6 +3389,7 @@ Context {rng : ring A}.
 Example xk_1 : ∀ k, degree (ⓧ^k - 1)%pol = k.
 Proof.
 intros; cbn.
+rewrite rev_length.
 destruct (rng_eq_dec (-1%Rng) 0) as [H10|H10]; [ | clear H10 ]. {
   cbn in H10.
   apply (f_equal rng_opp) in H10.
@@ -3397,7 +3398,6 @@ destruct (rng_eq_dec (-1%Rng) 0) as [H10|H10]; [ | clear H10 ]. {
   now apply rng_1_neq_0 in H10.
 }
 cbn.
-rewrite rev_length.
 destruct k. {
   cbn.
   rewrite fold_rng_sub.
@@ -3420,6 +3420,9 @@ destruct la as [| a]. {
   now apply rng_1_neq_0 in H1.
 }
 cbn.
+rewrite Nat.sub_0_r.
+rewrite app_length; cbn.
+rewrite Nat.add_comm; cbn; f_equal.
 ...
 intros.
 induction k. {
