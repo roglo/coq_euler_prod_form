@@ -3505,7 +3505,10 @@ Compute (let r := Z_ring in poly_divrem_by_x_sub_a (mkpoly [1; 2; 1]%Z glop) 1%Z
 Compute (let r := Z_ring in lap_divrem_by_x_sub_a [1;2;1]%Z 1%Z).
 (**)
 
-...
+Section In_ring_A2.
+
+Context {A : Type}.
+Context {rng : ring A}.
 
 Lemma rem_is_eval_a : ∀ la a, (lap_rem_by_x_sub_a la a = eval_lap la a)%Rng.
 Proof.
@@ -3532,6 +3535,7 @@ Proof.
 intros * Hq Hr.
 cbn.
 rewrite rng_add_0_r.
+...
 rewrite lap_add_0_r.
 unfold lap_quot_by_x_sub_a in Hq.
 unfold lap_rem_by_x_sub_a in Hr.
