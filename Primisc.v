@@ -1266,6 +1266,7 @@ Check (let r := Z_ring in mkpoly [1; 2; 1]%Z glop).
 Compute (let r := Z_ring in poly_divrem_by_x_sub_a (mkpoly [1; 2; 1]%Z glop) 1%Z).
 (* x2+2x+1 = (x-1)(x+3)+4 *)
 Compute (let r := Z_ring in lap_divrem_by_x_sub_a [1;2;1]%Z 1%Z).
+Compute (let r := Z_ring in lap_divrem_by_x_sub_a [1;-2;1]%Z 1%Z).
 (**)
 
 Section In_ring_A2.
@@ -1293,7 +1294,7 @@ Qed.
 Lemma lap_div_rem_x_sub_a : ∀ la a q r,
   q = lap_quot_by_x_sub_a la a
   → r = lap_rem_by_x_sub_a la a
-  → (la = [(-a)%Rng; 1%Rng] * q + [r])%lap.
+  → (la = [(-a)%Rng; 1%Rng] * q + lap_norm [r])%lap.
 Proof.
 intros * Hq Hr.
 cbn.
@@ -1305,21 +1306,23 @@ unfold lap_quot_by_x_sub_a in Hq.
 unfold lap_rem_by_x_sub_a in Hr.
 remember (lap_divrem_by_x_sub_a la a) as qr eqn:Hqr.
 subst q r.
+(*
 unfold lap_divrem_by_x_sub_a in Hqr.
+*)
 revert a qr Hqr.
 induction la as [| b]; intros. {
   cbn in Hqr.
   subst qr; cbn.
-... (* aïe aïe aïe *)
-  rewrite rng_mul_0_r, rng_add_0_l.
-  now constructor.
+  now destruct (rng_eq_dec 0 0).
 }
 cbn in Hqr.
+rewrite fold_lap_divrem_by_x_sub_a in Hqr.
 remember
   (fold_right
      (λ ai bl, match bl with [] => ai | b :: _ => (ai + a * b)%Rng end :: bl)
      [] la) as qr' eqn:Hqr'.
 specialize (IHla _ qr' Hqr').
+...
 apply lap_eq_cons. {
   destruct qr' as [| c]. {
     subst qr; cbn.
