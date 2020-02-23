@@ -3448,10 +3448,39 @@ Definition lap_quot_by_x_sub_a la a :=
 Definition lap_rem_by_x_sub_a la a :=
   hd 0%Rng (lap_divrem_by_x_sub_a la a).
 
+Theorem fold_lap_divrem_by_x_sub_a : ∀ la a,
+  fold_right
+    (λ ai bl, match bl with [] => ai | b :: _ => (ai + a * b)%Rng end :: bl)
+    [] la = lap_divrem_by_x_sub_a la a.
+Proof. easy. Qed.
+
+Theorem glop : ∀ a pol,
+  rng_eqb (last (lap_quot_by_x_sub_a (lap pol) a) 1%Rng) 0%Rng = false.
+Proof.
+intros a (la, lapr).
+apply eq_poly_prop; cbn.
+apply eq_poly_prop in lapr.
+induction la as [| a2]; [ apply rng_1_neq_0 | ].
+unfold lap_quot_by_x_sub_a.
+unfold lap_divrem_by_x_sub_a; cbn.
+rewrite fold_lap_divrem_by_x_sub_a.
+unfold lap_quot_by_x_sub_a in IHla.
+cbn in lapr.
+destruct la as [| a3]; [ apply rng_1_neq_0 | ].
+specialize (IHla lapr).
+...
+remember (lap_divrem_by_x_sub_a (a3 :: la) a) as lb eqn:Hlb.
+clear - IHla.
+induction lb as [| b]; [ apply rng_1_neq_0 | ].
+cbn in IHla; cbn.
+destruct lb as [| b2]. {
+  cbn in IHlb.
 ...
 
 Definition poly_divrem_by_x_sub_a pol a :=
-  ({| al := lap_quot_by_x_sub_a (al pol) a |}, lap_rem_by_x_sub_a (al pol) a).
+  (mkpoly (lap_quot_by_x_sub_a (lap pol) a), lap_rem_by_x_sub_a (lap pol) a).
+
+Inspect 1.
 
 Definition poly_quot_by_x_sub_a pol a :=
   {| al := lap_quot_by_x_sub_a (al pol) a |}.
