@@ -3423,30 +3423,15 @@ cbn.
 rewrite Nat.sub_0_r.
 rewrite app_length; cbn.
 rewrite Nat.add_comm; cbn; f_equal.
-...
-intros.
-induction k. {
-  cbn.
-  destruct (rng_eq_dec (-1%Rng) 0) as [H10|H10]; [ | clear H10 ]. {
-    cbn in H10.
-    apply (f_equal rng_opp) in H10.
-    rewrite rng_opp_involutive in H10.
-    rewrite rng_opp_0 in H10.
-    now apply rng_1_neq_0 in H10.
-  }
-  cbn.
-  rewrite fold_rng_sub, rng_add_opp_r.
-  now destruct (rng_eq_dec 0 0).
+rewrite rev_app_distr in Hla.
+cbn - [ "++" ] in Hla.
+rewrite app_nil_l in Hla.
+cbn in Hla.
+destruct (rng_eq_dec 1 0) as [H1| H1]. {
+  now apply rng_1_neq_0 in H1.
 }
-...
-
-intros * H1n0 Hkz.
-destruct k; [ easy | clear Hkz ].
-unfold poly_has_degree; cbn.
-rewrite lap_add_0_r.
-rewrite app_comm_cons.
-constructor; [ easy | cbn ].
-now rewrite repeat_length.
+injection Hla; clear Hla; intros; subst a la.
+now rewrite rev_length, repeat_length.
 Qed.
 
 Definition is_polynomial_root pol x :=
@@ -3462,6 +3447,8 @@ Definition lap_quot_by_x_sub_a la a :=
 
 Definition lap_rem_by_x_sub_a la a :=
   hd 0%Rng (lap_divrem_by_x_sub_a la a).
+
+...
 
 Definition poly_divrem_by_x_sub_a pol a :=
   ({| al := lap_quot_by_x_sub_a (al pol) a |}, lap_rem_by_x_sub_a (al pol) a).
