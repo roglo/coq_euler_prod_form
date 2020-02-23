@@ -104,9 +104,9 @@ Proof. easy. Qed.
 Definition Z_ring : ring Z :=
   {| rng_zero := 0%Z;
      rng_one := 1%Z;
-     rng_add a b := (a + b)%Z;
-     rng_mul a b := (a * b)%Z;
-     rng_opp a := (- a)%Z;
+     rng_add := Z.add;
+     rng_mul := Z.mul;
+     rng_opp := Z.opp;
      rng_1_neq_0 := Z_1_neq_0;
      rng_eq_dec := Z.eq_dec;
      rng_add_comm := Z.add_comm;
@@ -120,19 +120,6 @@ Definition Z_ring : ring Z :=
 
 (* allows to use ring theorems on Z *)
 Canonical Structure Z_ring.
-(*
-Warning: Projection value has no head constant: λ a b : Z, (a + b)%Z in
-canonical instance Z_ring of rng_add, ignoring it.
-[projection-no-head-constant,typechecker]
-Warning: Projection value has no head constant: λ a b : Z, (a * b)%Z in
-canonical instance Z_ring of rng_mul, ignoring it.
-[projection-no-head-constant,typechecker]
-Warning: Projection value has no head constant: λ a : Z, (- a)%Z in canonical
-instance Z_ring of rng_opp, ignoring it.
-[projection-no-head-constant,typechecker]
-
-what does that mean?
-*)
 
 (*
 Compute (@lap_norm Z Z_ring [3; 4; 0; 5; 0; 0; 0]%Z).
