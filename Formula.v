@@ -3454,7 +3454,7 @@ Theorem fold_lap_divrem_by_x_sub_a : ∀ la a,
     [] la = lap_divrem_by_x_sub_a la a.
 Proof. easy. Qed.
 
-Theorem glop : ∀ a pol,
+Theorem last_lap_quot_neq_0 : ∀ a pol,
   rng_eqb (last (lap_quot_by_x_sub_a (lap pol) a) 1%Rng) 0%Rng = false.
 Proof.
 intros a (la, lapr).
@@ -3468,27 +3468,34 @@ unfold lap_quot_by_x_sub_a in IHla.
 cbn in lapr.
 destruct la as [| a3]; [ apply rng_1_neq_0 | ].
 specialize (IHla lapr).
-...
-remember (lap_divrem_by_x_sub_a (a3 :: la) a) as lb eqn:Hlb.
-clear - IHla.
+remember (a3 :: la) as lb eqn:Hlb.
+clear a2 a3 la Hlb.
 induction lb as [| b]; [ apply rng_1_neq_0 | ].
-cbn in IHla; cbn.
-destruct lb as [| b2]. {
-  cbn in IHlb.
-...
+cbn in IHla.
+rewrite fold_lap_divrem_by_x_sub_a in IHla.
+cbn in lapr.
+destruct lb as [| b2]; [ easy | ].
+specialize (IHlb lapr).
+remember (b2 :: lb) as lc eqn:Hlc; symmetry in Hlc.
+cbn; rewrite fold_lap_divrem_by_x_sub_a.
+remember (lap_divrem_by_x_sub_a lc a) as ld eqn:Hld.
+symmetry in Hld.
+destruct ld as [| d]; [ now rewrite <- Hlc in Hld | easy ].
+Qed.
 
 Definition poly_divrem_by_x_sub_a pol a :=
-  (mkpoly (lap_quot_by_x_sub_a (lap pol) a), lap_rem_by_x_sub_a (lap pol) a).
-
-Inspect 1.
+  (mkpoly (lap_quot_by_x_sub_a (lap pol) a) (last_lap_quot_neq_0 a pol),
+   lap_rem_by_x_sub_a (lap pol) a).
 
 Definition poly_quot_by_x_sub_a pol a :=
-  {| al := lap_quot_by_x_sub_a (al pol) a |}.
+  mkpoly (lap_quot_by_x_sub_a (lap pol) a) (last_lap_quot_neq_0 a pol).
 
-(*
+(**)
+Require Import ZArith.
+...
 Compute (let r := Z_ring in poly_divrem_by_x_sub_a {| al := [1;2;1]%Z |} 1%Z).
 Compute (let r := Z_ring in lap_divrem_by_x_sub_a [1;2;1]%Z 1%Z).
-*)
+(**)
 
 Lemma rem_is_eval_a : ∀ la a, (lap_rem_by_x_sub_a la a = eval_lap la a)%Rng.
 Proof.
