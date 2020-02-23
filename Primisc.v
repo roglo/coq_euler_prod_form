@@ -1306,11 +1306,11 @@ unfold lap_rem_by_x_sub_a in Hr.
 remember (lap_divrem_by_x_sub_a la a) as qr eqn:Hqr.
 subst q r.
 unfold lap_divrem_by_x_sub_a in Hqr.
-...
 revert a qr Hqr.
 induction la as [| b]; intros. {
   cbn in Hqr.
   subst qr; cbn.
+... (* aïe aïe aïe *)
   rewrite rng_mul_0_r, rng_add_0_l.
   now constructor.
 }
