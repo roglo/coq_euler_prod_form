@@ -3535,13 +3535,15 @@ Proof.
 intros * Hq Hr.
 cbn.
 rewrite rng_add_0_r.
-...
+(*
 rewrite lap_add_0_r.
+*)
 unfold lap_quot_by_x_sub_a in Hq.
 unfold lap_rem_by_x_sub_a in Hr.
 remember (lap_divrem_by_x_sub_a la a) as qr eqn:Hqr.
 subst q r.
 unfold lap_divrem_by_x_sub_a in Hqr.
+...
 revert a qr Hqr.
 induction la as [| b]; intros. {
   cbn in Hqr.
