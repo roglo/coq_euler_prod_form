@@ -1,8 +1,7 @@
 (* experiments with primes... *)
 
 Set Nested Proofs Allowed.
-Require Import Utf8 Arith (*Psatz*) Setoid Morphisms.
-Require Import Sorting.Permutation SetoidList.
+Require Import Utf8 Arith.
 Import List List.ListNotations.
 Require Import Misc Primes.
 Require Import Totient QuadRes.
