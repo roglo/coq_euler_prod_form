@@ -118,7 +118,7 @@ Definition Z_ring : ring Z :=
      rng_mul_1_l := Z.mul_1_l;
      rng_mul_add_distr_l := Z.mul_add_distr_l |}.
 
-(* allows to use ring theorems on polynomials *)
+(* allows to use ring theorems on Z *)
 Canonical Structure Z_ring.
 (*
 Warning: Projection value has no head constant: λ a b : Z, (a + b)%Z in
