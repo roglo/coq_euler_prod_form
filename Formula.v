@@ -3490,12 +3490,22 @@ Definition poly_divrem_by_x_sub_a pol a :=
 Definition poly_quot_by_x_sub_a pol a :=
   mkpoly (lap_quot_by_x_sub_a (lap pol) a) (last_lap_quot_neq_0 a pol).
 
+End In_ring_A.
+
 (**)
 Require Import ZArith.
-...
-Compute (let r := Z_ring in poly_divrem_by_x_sub_a {| al := [1;2;1]%Z |} 1%Z).
+Example glop (r := Z_ring) :
+  rng_eqb (last [1%Z; 2%Z; 1%Z] 1%Rng) 0%Rng = false.
+Proof.
+now apply eq_poly_prop.
+Qed.
+Check (let r := Z_ring in mkpoly [1; 2; 1]%Z glop).
+Compute (let r := Z_ring in poly_divrem_by_x_sub_a (mkpoly [1; 2; 1]%Z glop) 1%Z).
+(* x2+2x+1 = (x-1)(x+3)+4 *)
 Compute (let r := Z_ring in lap_divrem_by_x_sub_a [1;2;1]%Z 1%Z).
 (**)
+
+...
 
 Lemma rem_is_eval_a : ∀ la a, (lap_rem_by_x_sub_a la a = eval_lap la a)%Rng.
 Proof.

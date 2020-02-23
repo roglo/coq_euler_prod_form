@@ -118,6 +118,22 @@ Definition Z_ring : ring Z :=
      rng_mul_1_l := Z.mul_1_l;
      rng_mul_add_distr_l := Z.mul_add_distr_l |}.
 
+(* allows to use ring theorems on polynomials *)
+Canonical Structure Z_ring.
+(*
+Warning: Projection value has no head constant: λ a b : Z, (a + b)%Z in
+canonical instance Z_ring of rng_add, ignoring it.
+[projection-no-head-constant,typechecker]
+Warning: Projection value has no head constant: λ a b : Z, (a * b)%Z in
+canonical instance Z_ring of rng_mul, ignoring it.
+[projection-no-head-constant,typechecker]
+Warning: Projection value has no head constant: λ a : Z, (- a)%Z in canonical
+instance Z_ring of rng_opp, ignoring it.
+[projection-no-head-constant,typechecker]
+
+what does that mean?
+*)
+
 (*
 Compute (@lap_norm Z Z_ring [3; 4; 0; 5; 0; 0; 0]%Z).
 *)
