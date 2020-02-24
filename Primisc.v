@@ -1291,6 +1291,7 @@ rewrite <- IHla.
 now rewrite rng_add_comm, rng_mul_comm.
 Qed.
 
+(*
 Lemma lap_div_rem_x_sub_a : ∀ la a q r,
   q = lap_quot_by_x_sub_a la a
   → r = lap_rem_by_x_sub_a la a
@@ -1377,7 +1378,9 @@ apply lap_eq_cons. {
   rewrite lap_convol_mul_cons_succ; [ easy | cbn; flia ].
 }
 Qed.
+*)
 
+(*
 Lemma lap_div_by_x_sub_a : ∀ la a,
   (la = [-a; 1]%Rng * lap_quot_by_x_sub_a la a + [eval_lap la a])%lap.
 Proof.
@@ -1385,17 +1388,22 @@ intros.
 rewrite <- rem_is_eval_a.
 now apply lap_div_rem_x_sub_a.
 Qed.
+*)
 
+(*
 Lemma al_mkpol : ∀ la, (al (mkpol la) = la)%lap.
 Proof. now intros. Qed.
 
 Lemma mkpol_eq : ∀ la lb, (la = lb)%lap → (mkpol la = mkpol lb)%pol.
 Proof. now intros * Hll. Qed.
+*)
+
+...
 
 Theorem poly_div_rem_by_x_sub_a : ∀ pol a,
   (pol =
-   mkpol [- a; 1]%Rng * poly_quot_by_x_sub_a pol a +
-   mkpol [eval_poly pol a])%pol.
+   mkpoly [- a; 1]%Rng * poly_quot_by_x_sub_a pol a +
+   mkpoly [eval_poly pol a])%pol.
 Proof.
 intros (la) a.
 unfold "+"%pol.
