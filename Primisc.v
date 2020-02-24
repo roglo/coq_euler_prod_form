@@ -1331,6 +1331,20 @@ destruct qr' as [| b2]. {
   now rewrite IHla.
 }
 cbn in IHla.
+rewrite Hqr; cbn.
+rewrite strip_0s_app.
+remember (strip_0s (rev la)) as lb eqn:Hlb.
+symmetry in Hlb.
+destruct lb as [| b3]. {
+  cbn.
+  destruct (rng_eq_dec b 0) as [Hbz| Hbz]. {
+    exfalso.
+    subst b.
+    rewrite rng_add_0_l in Hqr.
+...
+rewrite Hqr, <- Hqr'.
+cbn.
+rewrite strip_0s_app.
 ...
 apply lap_eq_cons. {
   destruct qr' as [| c]. {
