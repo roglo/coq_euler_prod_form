@@ -1257,13 +1257,13 @@ End In_ring_A.
 
 (**)
 Require Import ZArith.
-Example glop (r := Z_ring) :
+Example ex_pol1 (r := Z_ring) :
   rng_eqb (last [1%Z; 2%Z; 1%Z] 1%Rng) 0%Rng = false.
 Proof.
 now apply eq_poly_prop.
 Qed.
-Check (let r := Z_ring in mkpoly [1; 2; 1]%Z glop).
-Compute (let r := Z_ring in poly_divrem_by_x_sub_a (mkpoly [1; 2; 1]%Z glop) 1%Z).
+Check (let r := Z_ring in mkpoly [1; 2; 1]%Z ex_pol1).
+Compute (let r := Z_ring in poly_divrem_by_x_sub_a (mkpoly [1; 2; 1]%Z ex_pol1) 1%Z).
 (* x2+2x+1 = (x-1)(x+3)+4 *)
 Compute (let r := Z_ring in lap_divrem_by_x_sub_a [1;2;1]%Z 1%Z).
 Compute (let r := Z_ring in lap_divrem_by_x_sub_a [1;-2;1]%Z 1%Z).
@@ -1478,8 +1478,7 @@ rewrite Nat.sub_0_r.
 Abort.
 *)
 
-...
-
+(*
 Theorem glop : ∀ la roots n,
   (∀ a b, (a * b = 0)%Rng → (a = 0)%Rng ∨ (b = 0)%Rng)
   → n ≠ 0
@@ -1657,6 +1656,7 @@ destruct (eq_dec x z) as [Hxz| Hxz]. {
   now right; apply IHl.
 }
 Qed.
+*)
 
 (*
 Theorem prim_roots'_are_prim_roots :
@@ -1721,6 +1721,7 @@ Theorem glop : ∀ p, prime p → ∃ a, is_prim_root p a = true.
 Proof.
 intros * Hp.
 unfold is_prim_root.
+...
 enough (H : ∃ a, length (prim_root_cycle p a) = p - 1). {
   destruct H as (a, H); exists a.
   now apply Nat.eqb_eq in H.
