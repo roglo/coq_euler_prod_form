@@ -1341,6 +1341,13 @@ destruct lb as [| b3]. {
     exfalso.
     subst b.
     rewrite rng_add_0_l in Hqr.
+    destruct (rng_eq_dec b2 0) as [Hb2z| Hb2z]. {
+      subst b2; cbn in IHla; rewrite lap_add_0_r in IHla.
+      unfold lap_norm in IHla.
+      rewrite Hlb in IHla; cbn in IHla.
+      destruct qr'; [ | easy ].
+      clear IHla qr Hqr.
+      (* mouais, rien à en tirer *)
 ...
 rewrite Hqr, <- Hqr'.
 cbn.
