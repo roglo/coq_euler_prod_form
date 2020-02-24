@@ -1317,11 +1317,17 @@ induction la as [| b]; intros. {
 }
 cbn in Hqr.
 rewrite fold_lap_divrem_by_x_sub_a in Hqr.
-remember
-  (fold_right
-     (λ ai bl, match bl with [] => ai | b :: _ => (ai + a * b)%Rng end :: bl)
-     [] la) as qr' eqn:Hqr'.
+remember (lap_divrem_by_x_sub_a la a) as qr' eqn:Hqr'.
 specialize (IHla _ qr' Hqr').
+symmetry in Hqr'.
+destruct qr' as [| b2]. {
+  subst qr; cbn.
+  cbn in IHla.
+  destruct (rng_eq_dec 0 0) as [H| H]; [ | easy ].
+  cbn in IHla.
+  subst la; cbn in Hqr'.
+  destruct (rng_eq_dec b 0) as [Hbz| Hbz]. {
+    (* ah bin non, tiens *)
 ...
 apply lap_eq_cons. {
   destruct qr' as [| c]. {
