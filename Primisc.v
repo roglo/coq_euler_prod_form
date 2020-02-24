@@ -1398,8 +1398,7 @@ Lemma mkpol_eq : ∀ la lb, (la = lb)%lap → (mkpol la = mkpol lb)%pol.
 Proof. now intros * Hll. Qed.
 *)
 
-...
-
+(*
 Theorem poly_div_rem_by_x_sub_a : ∀ pol a,
   (pol =
    mkpoly [- a; 1]%Rng * poly_quot_by_x_sub_a pol a +
@@ -1477,6 +1476,9 @@ unfold lap_divrem_by_x_sub_a; cbn.
 rewrite Nat.sub_0_r.
 (* seems difficult to prove *)
 Abort.
+*)
+
+...
 
 Theorem glop : ∀ la roots n,
   (∀ a b, (a * b = 0)%Rng → (a = 0)%Rng ∨ (b = 0)%Rng)
