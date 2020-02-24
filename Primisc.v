@@ -1294,7 +1294,7 @@ Qed.
 Lemma lap_div_rem_x_sub_a : ∀ la a q r,
   q = lap_quot_by_x_sub_a la a
   → r = lap_rem_by_x_sub_a la a
-  → (la = [(-a)%Rng; 1%Rng] * q + lap_norm [r])%lap.
+  → (lap_norm la = [(-a)%Rng; 1%Rng] * q + lap_norm [r])%lap.
 Proof.
 intros * Hq Hr.
 cbn.
@@ -1323,11 +1323,14 @@ symmetry in Hqr'.
 destruct qr' as [| b2]. {
   subst qr; cbn.
   cbn in IHla.
-  destruct (rng_eq_dec 0 0) as [H| H]; [ | easy ].
+  destruct (rng_eq_dec 0 0) as [H| H]; [ clear H | easy ].
   cbn in IHla.
-  subst la; cbn in Hqr'.
-  destruct (rng_eq_dec b 0) as [Hbz| Hbz]. {
-    (* ah bin non, tiens *)
+  unfold lap_norm in IHla.
+  apply List_eq_rev_nil in IHla.
+  rewrite strip_0s_app.
+  now rewrite IHla.
+}
+cbn in IHla.
 ...
 apply lap_eq_cons. {
   destruct qr' as [| c]. {
