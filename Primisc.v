@@ -1729,6 +1729,7 @@ Compute (map (λ i, Nat_pow_mod i 6 43) (seq 1 42)).
 Compute (map (λ i, Nat_pow_mod i 7 43) (seq 1 42)).
 Compute (map (λ i, Nat_pow_mod i 2 43) (seq 1 42)).
 Compute (map (λ i, (i, Nat_pow_mod i 3 43)) (seq 1 42)).
+Compute (prim_root_cycle 43 2).
 ...
 enough (H : ∃ a, length (prim_root_cycle p a) = p - 1). {
   destruct H as (a, H); exists a.
