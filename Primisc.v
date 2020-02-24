@@ -1721,6 +1721,14 @@ Theorem glop : ∀ p, prime p → ∃ a, is_prim_root p a = true.
 Proof.
 intros * Hp.
 unfold is_prim_root.
+Check Nat_pow_mod.
+Search Nat_pow_mod.
+Compute (map (λ i, Nat_pow_mod i 21 43) (seq 1 42)).
+Compute (map (λ i, Nat_pow_mod i 14 43) (seq 1 42)).
+Compute (map (λ i, Nat_pow_mod i 6 43) (seq 1 42)).
+Compute (map (λ i, Nat_pow_mod i 7 43) (seq 1 42)).
+Compute (map (λ i, Nat_pow_mod i 2 43) (seq 1 42)).
+Compute (map (λ i, (i, Nat_pow_mod i 3 43)) (seq 1 42)).
 ...
 enough (H : ∃ a, length (prim_root_cycle p a) = p - 1). {
   destruct H as (a, H); exists a.
