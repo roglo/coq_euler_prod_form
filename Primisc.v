@@ -1728,7 +1728,12 @@ Compute (map (λ i, Nat_pow_mod i 14 43) (seq 1 42)).
 Compute (map (λ i, Nat_pow_mod i 6 43) (seq 1 42)).
 Compute (map (λ i, Nat_pow_mod i 7 43) (seq 1 42)).
 Compute (map (λ i, Nat_pow_mod i 2 43) (seq 1 42)).
-Compute (map (λ i, (i, Nat_pow_mod i 3 43)) (seq 1 42)).
+Compute (map (λ i, Nat_pow_mod i 11 43) (seq 1 42)).
+Compute (map (λ i, Nat_pow_mod i 2 3) (seq 1 2)).
+Compute (map (λ i, Nat_pow_mod i 2 5) (seq 1 4)).
+Compute (map (λ i, Nat_pow_mod i 4 5) (seq 1 4)).
+Compute (map (λ i, Nat_pow_mod i 2 7) (seq 1 6)).
+Compute (map (λ i, Nat_pow_mod i 3 7) (seq 1 6)).
 Compute (prim_root_cycle 43 2).
 ...
 enough (H : ∃ a, length (prim_root_cycle p a) = p - 1). {
