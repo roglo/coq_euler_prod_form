@@ -1,5 +1,7 @@
 Formula.vio: Formula.v Misc.vio Primes.vio
 Formula.vo Formula.glob Formula.v.beautified Formula.required_vo: Formula.v Misc.vo Primes.vo
+FourSquareLag.vio: FourSquareLag.v Misc.vio Primes.vio
+FourSquareLag.vo FourSquareLag.glob FourSquareLag.v.beautified FourSquareLag.required_vo: FourSquareLag.v Misc.vo Primes.vo
 Misc.vio: Misc.v 
 Misc.vo Misc.glob Misc.v.beautified Misc.required_vo: Misc.v 
 Primes.vio: Primes.v Misc.vio
