@@ -1734,7 +1734,13 @@ Compute (map (λ i, Nat_pow_mod i 2 5) (seq 1 4)).
 Compute (map (λ i, Nat_pow_mod i 4 5) (seq 1 4)).
 Compute (map (λ i, Nat_pow_mod i 2 7) (seq 1 6)).
 Compute (map (λ i, Nat_pow_mod i 3 7) (seq 1 6)).
-Compute (let p := 11 in map (λ i, Nat_pow_mod i 2 p) (seq 1 (p - 1).
+Compute (let p := 11 in let d := 2 in map (λ i, Nat_pow_mod i d p) (seq 1 (p - 1))).
+Compute (let p := 11 in let d := 5 in map (λ i, Nat_pow_mod i d p) (seq 1 (p - 1))).
+Compute (let p := 13 in let d := 2 in map (λ i, Nat_pow_mod i d p) (seq 1 (p - 1))).
+Compute (let p := 13 in let d := 3 in map (λ i, Nat_pow_mod i d p) (seq 1 (p - 1))).
+Compute (let p := 13 in let d := 4 in map (λ i, Nat_pow_mod i d p) (seq 1 (p - 1))).
+Compute (let p := 13 in let d := 6 in map (λ i, Nat_pow_mod i d p) (seq 1 (p - 1))).
+Compute (let p := 13 in let d := 12 in map (λ i, Nat_pow_mod i d p) (seq 1 (p - 1))).
 Compute (prim_root_cycle 43 2).
 ...
 enough (H : ∃ a, length (prim_root_cycle p a) = p - 1). {
