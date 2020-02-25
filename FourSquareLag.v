@@ -94,10 +94,14 @@ assert
    → (p - (b ^ 2 + 1) mod p) ≢ (p - (b' ^ 2 + 1) mod p) mod p). {
   intros * Hb Hb' Hbb.
   intros H.
-  destruct (lt_dec b' b) as [Hbb'| Hbb']. {
+  remember ((b ^ 2 + 1) mod p) as b1 eqn:Hb1.
+  remember ((b' ^ 2 + 1) mod p) as b'1 eqn:Hb'1.
+  destruct (lt_dec b1 b'1) as [Hbb'| Hbb']. {
     apply Nat_eq_mod_sub_0 in H.
-Search (_ - (_ - _)).
-    rewrite Nat_sub_sub_assoc in H.
-Search (_ - _ - (_ - _)).
-Search ((_ mod _ - _) mod _).
+    replace (p - b1 - (p - b'1)) with (b'1 - b1) in H. 2: {
+      assert (Hpz : p ≠ 0) by now intros Hpz; subst p.
+      specialize (Nat.mod_upper_bound (b' ^ 2 + 1) p Hpz) as H1.
+      rewrite <- Hb'1 in H1.
+      flia Hbb' H1.
+    }
 ...
