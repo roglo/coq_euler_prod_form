@@ -1717,6 +1717,23 @@ split. {
 ...
 *)
 
+(* nothing to do : Théorème des quatre carrés de Lagrange *)
+
+Lemma odd_prime_equal_sum_two_squares_plus_one : ∀ p,
+  prime p → p mod 2 = 1 → ∃ a b, Nat.divide p (a ^ 2 + b ^ 2 + 1).
+Proof.
+intros * Hp Hp2.
+assert
+  (Ha :
+   ∀ a a',
+   0 ≤ a ≤ (p - 1) / 2
+   → 0 ≤ a' ≤ (p - 1) / 2
+   → a ≠ a'
+   → a ^ 2 ≢ a' ^ 2 mod p). {
+  intros * Ha Ha' Haa.
+  intros H; apply Haa; clear Haa; rename H into Haa.
+...
+
 Theorem glop : ∀ p, prime p → ∃ a, is_prim_root p a = true.
 Proof.
 intros * Hp.
