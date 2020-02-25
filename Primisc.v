@@ -1731,7 +1731,18 @@ assert
    → a ≠ a'
    → a ^ 2 ≢ a' ^ 2 mod p). {
   intros * Ha Ha' Haa.
-  intros H; apply Haa; clear Haa; rename H into Haa.
+  destruct (lt_dec a' a) as [Haa'| Haa']. {
+    intros H1.
+    apply Nat_eq_mod_sub_0 in H1.
+    rewrite Nat_pow_sub_pow in H1; [ | easy | flia Haa' ].
+    cbn in H1.
+    do 3 rewrite Nat.mul_1_r in H1.
+    rewrite Nat.add_0_r in H1.
+    apply Nat.mod_divide in H1; [ | now intros H2; subst p ].
+    specialize (Nat.gauss _ _ _ H1) as H2.
+    assert (H : Nat.gcd p (a - a') = 1). {
+      apply eq_gcd_prime_small_1; [ easy | ].
+      split; [ flia Haa' | ].
 ...
 
 Theorem glop : ∀ p, prime p → ∃ a, is_prim_root p a = true.
