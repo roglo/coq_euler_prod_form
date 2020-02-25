@@ -85,4 +85,19 @@ assert
     now apply between_half_prime_square_diff.
   }
 }
+assert
+  (Hb :
+   ∀ b b',
+   0 ≤ b ≤ (p - 1) / 2
+   → 0 ≤ b' ≤ (p - 1) / 2
+   → b ≠ b'
+   → (p - (b ^ 2 + 1) mod p) ≢ (p - (b' ^ 2 + 1) mod p) mod p). {
+  intros * Hb Hb' Hbb.
+  intros H.
+  destruct (lt_dec b' b) as [Hbb'| Hbb']. {
+    apply Nat_eq_mod_sub_0 in H.
+Search (_ - (_ - _)).
+    rewrite Nat_sub_sub_assoc in H.
+Search (_ - _ - (_ - _)).
+Search ((_ mod _ - _) mod _).
 ...
