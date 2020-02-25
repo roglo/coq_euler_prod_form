@@ -1743,6 +1743,33 @@ assert
     assert (H : Nat.gcd p (a - a') = 1). {
       apply eq_gcd_prime_small_1; [ easy | ].
       split; [ flia Haa' | ].
+      destruct Ha as (_, Ha).
+      destruct Ha' as (_, Ha').
+      apply (Nat.mul_le_mono_l _ _ 2) in Ha.
+      apply (Nat.mul_le_mono_l _ _ 2) in Ha'.
+      rewrite <- Nat.divide_div_mul_exact in Ha; [ | easy | ]. 2: {
+        specialize (Nat.div_mod p 2 (Nat.neq_succ_0 _)) as H3.
+        rewrite Hp2 in H3.
+        rewrite H3, Nat.add_sub.
+        apply Nat.divide_factor_l.
+      }
+      rewrite (Nat.mul_comm _ (p - 1)), Nat.div_mul in Ha; [ | easy ].
+      rewrite <- Nat.divide_div_mul_exact in Ha'; [ | easy | ]. 2: {
+        specialize (Nat.div_mod p 2 (Nat.neq_succ_0 _)) as H3.
+        rewrite Hp2 in H3.
+        rewrite H3, Nat.add_sub.
+        apply Nat.divide_factor_l.
+      }
+      rewrite (Nat.mul_comm _ (p - 1)), Nat.div_mul in Ha'; [ | easy ].
+      flia Ha Ha' Haa.
+    }
+    specialize (H2 H); clear H.
+    destruct H2 as (k, Hk).
+    destruct k. {
+      apply Nat.eq_add_0 in Hk.
+      now destruct Hk; subst a a'.
+    }
+    cbn in Hk.
 ...
 
 Theorem glop : ∀ p, prime p → ∃ a, is_prim_root p a = true.
