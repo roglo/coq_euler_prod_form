@@ -148,9 +148,10 @@ destruct (Nat.eq_dec b 0) as [Hbz| Hbz]. {
   split; [ flia H1 | flia H2 ].
 }
 destruct la as [| x2]. {
-  specialize (IHb a (λ i, if Nat.eq_dec i x1 then 0 else f i) Hba).
+...
+  specialize (IHb a (λ i, if Nat.eq_dec i x1 then b - 1 else f i) Hba).
   cbn in IHb.
-  assert (H : ∀ x, x < a → (if Nat.eq_dec x x1 then 0 else f x) < b). {
+  assert (H : ∀ x, x < a → (if Nat.eq_dec x x1 then b - 1 else f x) < b). {
     intros x Hx.
     destruct (Nat.eq_dec x x1) as [Hxx| Hxx]; [ flia Hbz | ].
     specialize (Hf x).
