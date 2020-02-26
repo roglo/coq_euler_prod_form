@@ -101,6 +101,41 @@ assert (Hpz : p ≠ 0) by now intros H; subst p.
     flia Hb Hb' Hk Hpge2.
 Qed.
 
+Theorem pigeonhole : ∀ a b f,
+  0 < b < a
+  → (∀ x, x < a → f x < b)
+  → ∃ x x' y, x < a ∧ x' < a ∧ x <> x' ∧ f x = y ∧ f x' = y.
+Proof.
+intros * Hba Hf.
+revert a Hba Hf.
+induction b; intros; [ flia Hba | ].
+destruct b. {
+  exists 0, 1, 0.
+  split; [ flia Hba | ].
+  split; [ easy | ].
+  split; [ easy | ].
+  split. {
+    specialize (Hf 0).
+    assert (H : 0 < a) by flia Hba.
+    specialize (Hf H); clear H.
+    flia Hf.
+  } {
+    specialize (Hf 1).
+    assert (H : 1 < a) by flia Hba.
+    specialize (Hf H); clear H.
+    flia Hf.
+  }
+}
+...
+specialize (IHb (a - 1)) as H1.
+assert (H : 0 < S b < a - 1) by flia Hba.
+specialize (IHb H); clear H.
+assert (H : ∀ x : nat, x < a - 1 → f x < S b). {
+  intros x Hx.
+  assert (H : x < a) by flia Hx.
+  specialize (Hf x H) as H1.
+...
+
 Lemma odd_prime_equal_sum_two_squares_plus_one : ∀ p,
   prime p → p mod 2 = 1 → ∃ a b, Nat.divide p (a ^ 2 + b ^ 2 + 1).
 Proof.
@@ -183,4 +218,5 @@ assert
     flia Hbb Hbb'.
   }
 }
+(* pigeonhole *)
 ...
