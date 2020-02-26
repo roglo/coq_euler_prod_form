@@ -2,6 +2,7 @@
 
 Set Nested Proofs Allowed.
 Require Import Utf8 Arith.
+Import List List.ListNotations.
 Require Import Misc Primes.
 
 Lemma le_half_prime_square_diff : ∀ p a a',
@@ -111,6 +112,102 @@ revert a f Hba Hf.
 induction b; intros; [ now specialize (Hf 0 Hba) | ].
 destruct a; [ flia Hba | ].
 apply Nat.succ_lt_mono in Hba.
+remember (filter (λ i, f i =? b) (seq 0 a)) as la eqn:Hla.
+symmetry in Hla.
+destruct la as [| x1]. {
+  assert (H : ∀ x, x < a → f x < b). {
+    intros x Hx.
+    destruct (Nat.eq_dec (f x) b) as [Hfxb| Hfxb]. {
+      specialize (List_filter_nil _ _ Hla x) as H1.
+      assert (H : x ∈ seq 0 a). {
+        apply in_seq.
+        split; [ flia | easy ].
+      }
+      specialize (H1 H); clear H; cbn in H1.
+      now apply Nat.eqb_neq in H1.
+    }
+    assert (H : x < S a) by flia Hx.
+    specialize (Hf x H); clear H.
+    flia Hf Hfxb.
+  }
+  specialize (IHb a f Hba H); clear H.
+  destruct IHb as (x & x' & y & Hxxy).
+  exists x, x', y.
+  split; [ flia Hxxy | ].
+  split; [ flia Hxxy | easy ].
+}
+destruct (Nat.eq_dec b 0) as [Hbz| Hbz]. {
+  subst b.
+  destruct a; [ flia Hba | ].
+  specialize (Hf 0 (Nat.lt_0_succ _)) as H1.
+  specialize (Hf (S a) (Nat.lt_succ_diag_r _)) as H2.
+  exists 0, (S a), 0.
+  split; [ flia | ].
+  split; [ flia | ].
+  split; [ easy | ].
+  split; [ flia H1 | flia H2 ].
+}
+destruct la as [| x2]. {
+  specialize (IHb a (λ i, if Nat.eq_dec i x1 then 0 else f i) Hba).
+  cbn in IHb.
+  assert (H : ∀ x, x < a → (if Nat.eq_dec x x1 then 0 else f x) < b). {
+    intros x Hx.
+    destruct (Nat.eq_dec x x1) as [Hxx| Hxx]; [ flia Hbz | ].
+    specialize (Hf x).
+    assert (H : x < S a) by flia Hx.
+    specialize (Hf H); clear H.
+    enough (H : f x <> b) by flia Hf H.
+    intros H; apply Hxx; clear Hxx.
+    assert (H1 : x ∈ filter (λ i, f i =? b) (seq 0 a)). {
+      apply filter_In.
+      split. {
+        apply in_seq; cbn; flia Hx.
+      }
+      now apply Nat.eqb_eq.
+    }
+    rewrite Hla in H1.
+    now destruct H1.
+  }
+  specialize (IHb H); clear H.
+  destruct IHb as (x & x' & y & Hxxy).
+  destruct (Nat.eq_dec x x1) as [Hxx1| Hxx1]. {
+    destruct (Nat.eq_dec x' x1) as [Hx'x1| Hx'x1]. {
+      flia Hxx1 Hx'x1 Hxxy.
+    }
+    subst x1.
+    clear Hx'x1.
+...
+f x' = 0
+f x = b
+...
+  exists x, x', y.
+  split; [ flia Hxxy | ].
+  split; [ flia Hxxy | ].
+  split; [ easy | ].
+  destruct (Nat.eq_dec x x1) as [Hxx1| Hxx1]. {
+    destruct (Nat.eq_dec x' x1) as [Hx'x1| Hx'x1]. {
+      flia Hxx1 Hx'x1 Hxxy.
+    }
+    subst x.
+f x1 = b
+f x' = 0
+
+...
+specialize (proj(filter_In x (seq 0 a))
+Search filter.
+filter_In: ∀ (A : Type) (f : A → bool) (x : A) (l : list A), x ∈ filter f l ↔ x ∈ l ∧ f x = true
+...
+    clear - Hla H Hba.
+    revert b H Hba Hla.
+    induction a; intros; [ easy | ].
+    cbn in Hla.
+    remember (f 0 =? b) as b1 eqn:Hb1; symmetry in Hb1.
+    destruct b1. {
+      injection Hla; clear Hla; intros Ha Hx1; subst x1.
+      apply Nat.eqb_eq in Hb1.
+
+      apply IHa.
+...
 destruct (Nat.eq_dec b 0) as [Hbz| Hbz]. {
   admit.
 }
