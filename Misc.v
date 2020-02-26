@@ -752,7 +752,28 @@ rewrite <- Nat.pow_add_r.
 f_equal; flia Hi.
 Qed.
 
-(* could be a corollary of Nat_pow_sub_pow *)
+Theorem Nat_sqr_sub_sqr : ∀ a b, a ^ 2 - b ^ 2 = (a + b) * (a - b).
+Proof.
+intros.
+destruct (lt_dec a b) as [Hab| Hba]. {
+  rewrite (proj2 (Nat.sub_0_le _ _)). 2: {
+    now apply Nat.pow_le_mono_l, Nat.lt_le_incl.
+  }
+  rewrite (proj2 (Nat.sub_0_le _ _)). 2: {
+    now apply Nat.lt_le_incl.
+  }
+  now rewrite Nat.mul_0_r.
+}
+apply Nat.nlt_ge in Hba.
+rewrite Nat.mul_add_distr_r.
+rewrite Nat.mul_sub_distr_l.
+rewrite Nat.mul_sub_distr_l.
+rewrite Nat.add_sub_assoc; [ | now apply Nat.mul_le_mono_l ].
+rewrite (Nat.mul_comm b).
+rewrite Nat.sub_add; [ | now apply Nat.mul_le_mono_l ].
+now do 2 rewrite Nat.pow_2_r.
+Qed.
+
 Theorem Nat_sqr_sub_1 : ∀ a, a ^ 2 - 1 = (a + 1) * (a - 1).
 Proof.
 intros.
