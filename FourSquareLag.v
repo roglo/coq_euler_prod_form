@@ -13,8 +13,8 @@ Require Import Totient QuadRes.
 Lemma between_half_prime_square_diff : ∀ p a a',
    prime p
    → p mod 2 = 1
-   → 0 ≤ a ≤ (p - 1) / 2
-   → 0 ≤ a' ≤ (p - 1) / 2
+   → a ≤ (p - 1) / 2
+   → a' ≤ (p - 1) / 2
    → a' < a
    → a ^ 2 ≢  a' ^ 2 mod p.
 Proof.
@@ -27,8 +27,6 @@ do 3 rewrite Nat.mul_1_r in H1.
 rewrite Nat.add_0_r in H1.
 apply Nat.mod_divide in H1; [ | now intros H2; subst p ].
 specialize (Nat.gauss _ _ _ H1) as H2.
-destruct Ha as (_, Ha).
-destruct Ha' as (_, Ha').
 apply (Nat.mul_le_mono_l _ _ 2) in Ha.
 apply (Nat.mul_le_mono_l _ _ 2) in Ha'.
 rewrite <- Nat.divide_div_mul_exact in Ha; [ | easy | ]. 2: {
@@ -70,8 +68,8 @@ intros * Hp Hp2.
 assert
   (Ha :
    ∀ a a',
-   0 ≤ a ≤ (p - 1) / 2
-   → 0 ≤ a' ≤ (p - 1) / 2
+   a ≤ (p - 1) / 2
+   → a' ≤ (p - 1) / 2
    → a ≠ a'
    → a ^ 2 ≢ a' ^ 2 mod p). {
   intros * Ha Ha' Haa.
@@ -88,20 +86,49 @@ assert
 assert
   (Hb :
    ∀ b b',
-   0 ≤ b ≤ (p - 1) / 2
-   → 0 ≤ b' ≤ (p - 1) / 2
+   b ≤ (p - 1) / 2
+   → b' ≤ (p - 1) / 2
    → b ≠ b'
    → (p - (b ^ 2 + 1) mod p) ≢ (p - (b' ^ 2 + 1) mod p) mod p). {
-  intros * Hb Hb' Hbb.
-  intros H.
+  intros * Hb Hb' Hbb H.
+  assert (Hpz : p ≠ 0) by now (intros H1; subst p).
   remember ((b ^ 2 + 1) mod p) as b1 eqn:Hb1.
   remember ((b' ^ 2 + 1) mod p) as b'1 eqn:Hb'1.
   destruct (lt_dec b1 b'1) as [Hbb'| Hbb']. {
     apply Nat_eq_mod_sub_0 in H.
     replace (p - b1 - (p - b'1)) with (b'1 - b1) in H. 2: {
-      assert (Hpz : p ≠ 0) by now intros Hpz; subst p.
       specialize (Nat.mod_upper_bound (b' ^ 2 + 1) p Hpz) as H1.
       rewrite <- Hb'1 in H1.
       flia Hbb' H1.
     }
+    apply Nat.mod_divide in H; [ | easy ].
+    destruct H as (k, Hk).
+    destruct k; [ flia Hk Hbb' | ].
+    apply Nat.add_sub_eq_nz in Hk. 2: {
+      now apply Nat.neq_mul_0.
+    }
+    specialize (Nat.mod_upper_bound (b' ^ 2 + 1) p Hpz) as H1.
+    rewrite <- Hb'1, <- Hk in H1.
+    flia H1.
+  }
+  destruct (lt_dec b'1 b1) as [Hbb'1| Hbb'1]. {
+    symmetry in H.
+    apply Nat_eq_mod_sub_0 in H.
+    replace (p - b'1 - (p - b1)) with (b1 - b'1) in H. 2: {
+      specialize (Nat.mod_upper_bound (b ^ 2 + 1) p Hpz) as H1.
+      rewrite <- Hb1 in H1.
+      flia Hbb' H1.
+    }
+    apply Nat.mod_divide in H; [ | easy ].
+    destruct H as (k, Hk).
+    destruct k; [ flia Hk Hbb'1 | ].
+    apply Nat.add_sub_eq_nz in Hk. 2: {
+      now apply Nat.neq_mul_0.
+    }
+    specialize (Nat.mod_upper_bound (b ^ 2 + 1) p Hpz) as H1.
+    rewrite <- Hb1, <- Hk in H1.
+    flia H1.
+  }
+  replace b'1 with b1 in * by flia Hbb' Hbb'1.
+  clear Hbb' Hbb'1 H.
 ...
