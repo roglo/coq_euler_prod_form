@@ -107,6 +107,8 @@ Theorem pigeonhole : ∀ a b f,
   → ∃ x x' y, x < a ∧ x' < a ∧ x <> x' ∧ f x = y ∧ f x' = y.
 Proof.
 intros * Hba Hf.
+...
+intros * Hba Hf.
 remember (a - S b) as len eqn:Hlen; symmetry in Hlen.
 replace a with (len + S b) in * by flia Hlen Hba.
 clear a Hba Hlen.
