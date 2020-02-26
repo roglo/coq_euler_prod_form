@@ -112,16 +112,16 @@ revert a f Hba Hf.
 induction b; intros; [ now specialize (Hf 0 Hba) | ].
 destruct a; [ flia Hba | ].
 apply Nat.succ_lt_mono in Hba.
-remember (filter (λ i, f i =? b) (seq 0 a)) as la eqn:Hla.
+remember (filter (λ i, f i =? b) (seq 0 (S a))) as la eqn:Hla.
 symmetry in Hla.
 destruct la as [| x1]. {
   assert (H : ∀ x, x < a → f x < b). {
     intros x Hx.
     destruct (Nat.eq_dec (f x) b) as [Hfxb| Hfxb]. {
       specialize (List_filter_nil _ _ Hla x) as H1.
-      assert (H : x ∈ seq 0 a). {
+      assert (H : x ∈ seq 0 (S a)). {
         apply in_seq.
-        split; [ flia | easy ].
+        flia Hx.
       }
       specialize (H1 H); clear H; cbn in H1.
       now apply Nat.eqb_neq in H1.
@@ -148,7 +148,6 @@ destruct (Nat.eq_dec b 0) as [Hbz| Hbz]. {
   split; [ flia H1 | flia H2 ].
 }
 destruct la as [| x2]. {
-...
   specialize (IHb a (λ i, if lt_dec i x1 then f i else f (i + 1)) Hba).
   cbn in IHb.
   assert (H : ∀ x, x < a → (if lt_dec x x1 then f x else f (x + 1)) < b). {
@@ -156,7 +155,7 @@ destruct la as [| x2]. {
     destruct (lt_dec x x1) as [Hxx| Hxx]. {
       assert (Hxb : f x ≠ b). {
         intros Hxb.
-        assert (H : x ∈ filter (λ i, f i =? b) (seq 0 a)). {
+        assert (H : x ∈ filter (λ i, f i =? b) (seq 0 (S a))). {
           apply filter_In.
           split; [ apply in_seq; cbn; flia Hx | ].
           now apply Nat.eqb_eq.
@@ -170,9 +169,20 @@ destruct la as [| x2]. {
       flia Hf Hxb.
     }
     apply Nat.nlt_ge in Hxx.
-    (* mmm... not sure *)
-...
-... suite ok
+    specialize (Hf (x + 1)).
+    assert (H : x + 1 < S a) by flia Hx.
+    specialize (Hf H); clear H.
+    assert (Hxb : f (x + 1) ≠ b). {
+      intros Hxb.
+      assert (H : x + 1 ∈ filter (λ i, f i =? b) (seq 0 (S a))). {
+        apply filter_In.
+        split; [ apply in_seq; cbn; flia Hx | ].
+        now apply Nat.eqb_eq.
+      }
+      rewrite Hla in H.
+      destruct H as [H| H]; [ flia Hxx H| easy ].
+    }
+    flia Hf Hxb.
   }
   specialize (IHb H); clear H.
   destruct IHb as (x & x' & y & Hxxy).
@@ -204,6 +214,7 @@ destruct la as [| x2]. {
   split; [ | easy ].
   flia Hxxy.
 }
+exists x1, x2, b.
 ...
 
 Lemma odd_prime_equal_sum_two_squares_plus_one : ∀ p,
