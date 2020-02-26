@@ -111,10 +111,27 @@ revert a f Hba Hf.
 induction b; intros; [ now specialize (Hf 0 Hba) | ].
 destruct a; [ flia Hba | ].
 apply Nat.succ_lt_mono in Hba.
-specialize (IHb a f Hba).
-...
-assert (H : ∀ x, x < a → f x < b). {
+destruct (Nat.eq_dec b 0) as [Hbz| Hbz]. {
+  admit.
+}
+specialize (IHb a (λ i, if Nat.eq_dec (f i) b then 0 else f i) Hba).
+cbn in IHb.
+assert (H : ∀ x, x < a → (if Nat.eq_dec (f x) b then 0 else f x) < b). {
   intros x Hx.
+  destruct (Nat.eq_dec (f x) b) as [Hfb| Hfb]; [ flia Hbz | ].
+  specialize (Hf x).
+  assert (H : x < S a) by flia Hx.
+  specialize (Hf H); clear H.
+  flia Hf Hfb.
+}
+specialize (IHb H); clear H.
+destruct IHb as (x & x' & y & Hxxy).
+destruct (Nat.eq_dec (f x) b) as [Hfxb| Hfxb]. {
+  destruct (Nat.eq_dec (f x') b) as [Hfx'b| Hfx'b]. {
+    exists x, x', b.
+    split; [ flia Hxxy | ].
+    split; [ flia Hxxy | easy ].
+  }
 ...
 
 Lemma odd_prime_equal_sum_two_squares_plus_one : ∀ p,
