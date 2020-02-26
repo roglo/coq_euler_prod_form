@@ -153,6 +153,10 @@ destruct la as [| x2]. {
   assert (H : ∀ x, x < a → (if lt_dec x x1 then f x else f (x + 1)) < b). {
     intros x Hx.
     destruct (lt_dec x x1) as [Hxx| Hxx]. {
+      assert (H : f x <> b).
+...
+Search filter.
+filter_In: ∀ (A : Type) (f : A → bool) (x : A) (l : list A), x ∈ filter f l ↔ x ∈ l ∧ f x = true
 ...
     }
     apply Nat.nlt_ge in Hxx.
