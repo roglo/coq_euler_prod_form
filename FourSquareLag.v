@@ -131,4 +131,6 @@ assert
   }
   replace b'1 with b1 in * by flia Hbb' Hbb'1.
   clear Hbb' Hbb'1 H.
+  rewrite Hb'1 in Hb1.
+Search (_ mod _ = _ mod _ → _).
 ...
