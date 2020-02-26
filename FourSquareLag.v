@@ -107,7 +107,61 @@ Theorem pigeonhole : ∀ a b f,
   → ∃ x x' y, x < a ∧ x' < a ∧ x <> x' ∧ f x = y ∧ f x' = y.
 Proof.
 intros * Hba Hf.
-revert a Hba Hf.
+remember (a - S b) as len eqn:Hlen; symmetry in Hlen.
+replace a with (len + S b) in * by flia Hlen Hba.
+clear a Hba Hlen.
+revert b f Hf.
+induction len; intros. {
+  cbn in Hf; cbn.
+  revert f Hf.
+  induction b; intros. {
+    specialize (Hf 0 (Nat.lt_0_succ _)).
+    flia Hf.
+  }
+  destruct b. {
+    exists 0, 1, 0.
+    split; [ flia | ].
+    split; [ flia | ].
+    split; [ easy | ].
+    split. {
+      specialize (Hf 0).
+      assert (H : 0 < 2) by flia.
+      specialize (Hf H); clear H.
+      flia Hf.
+    } {
+      specialize (Hf 1).
+      assert (H : 1 < 2) by flia.
+      specialize (Hf H); clear H.
+      flia Hf.
+    }
+  }
+  specialize (IHb (λ i, f i - 1)).
+  cbn in IHb.
+  assert (H : ∀ x, x < S (S b) → f x - 1 < S b). {
+    intros x Hx.
+    specialize (Hf x).
+    assert (H : x < S (S (S b))) by flia Hx.
+    specialize (Hf H).
+    flia Hf.
+  }
+  specialize (IHb H); clear H.
+  destruct IHb as (x & x' & y & Hxxy).
+  destruct (Nat.eq_dec (f x) 0) as [Hfxz| Hfxz]. {
+    rewrite Hfxz in Hxxy.
+    cbn in Hxxy.
+...
+  exists x, x', (f x).
+  split; [ flia Hxxy | ].
+  split; [ flia Hxxy | ].
+  split; [ easy | ].
+  split; [ easy | ].
+...
+  flia Hxxy.
+  split. {
+    flia Hxxy.
+...
+intros * Hba Hf.
+revert a f Hba Hf.
 induction b; intros; [ flia Hba | ].
 destruct b. {
   exists 0, 1, 0.
@@ -126,14 +180,21 @@ destruct b. {
     flia Hf.
   }
 }
-...
-specialize (IHb (a - 1)) as H1.
+specialize (IHb (a - 1) (λ i, f i - 1)).
+cbn in IHb.
 assert (H : 0 < S b < a - 1) by flia Hba.
 specialize (IHb H); clear H.
-assert (H : ∀ x : nat, x < a - 1 → f x < S b). {
+assert (H : ∀ x : nat, x < a - 1 → f x - 1 < S b). {
   intros x Hx.
   assert (H : x < a) by flia Hx.
   specialize (Hf x H) as H1.
+  flia H1.
+}
+specialize (IHb H); clear H.
+destruct IHb as (x & x' & y & Hxy).
+exists x, x', (y + 1).
+destruct (Nat.eq_dec (f x) 0) as [Hxz| Hxz]. {
+  rewrite Hxz in Hxy; cbn in Hxy.
 ...
 
 Lemma odd_prime_equal_sum_two_squares_plus_one : ∀ p,
