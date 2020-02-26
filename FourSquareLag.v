@@ -107,6 +107,14 @@ Theorem pigeonhole : ∀ a b f,
   → ∃ x x' y, x < a ∧ x' < a ∧ x <> x' ∧ f x = y ∧ f x' = y.
 Proof.
 intros * Hba Hf.
+revert a f Hba Hf.
+induction b; intros; [ now specialize (Hf 0 Hba) | ].
+destruct a; [ flia Hba | ].
+apply Nat.succ_lt_mono in Hba.
+specialize (IHb a f Hba).
+...
+assert (H : ∀ x, x < a → f x < b). {
+  intros x Hx.
 ...
 
 Lemma odd_prime_equal_sum_two_squares_plus_one : ∀ p,
