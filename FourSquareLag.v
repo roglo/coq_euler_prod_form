@@ -148,18 +148,29 @@ destruct (Nat.eq_dec b 0) as [Hbz| Hbz]. {
   split; [ flia H1 | flia H2 ].
 }
 destruct la as [| x2]. {
+...
   specialize (IHb a (λ i, if lt_dec i x1 then f i else f (i + 1)) Hba).
   cbn in IHb.
   assert (H : ∀ x, x < a → (if lt_dec x x1 then f x else f (x + 1)) < b). {
     intros x Hx.
     destruct (lt_dec x x1) as [Hxx| Hxx]. {
-      assert (H : f x <> b).
-...
-Search filter.
-filter_In: ∀ (A : Type) (f : A → bool) (x : A) (l : list A), x ∈ filter f l ↔ x ∈ l ∧ f x = true
-...
+      assert (Hxb : f x ≠ b). {
+        intros Hxb.
+        assert (H : x ∈ filter (λ i, f i =? b) (seq 0 a)). {
+          apply filter_In.
+          split; [ apply in_seq; cbn; flia Hx | ].
+          now apply Nat.eqb_eq.
+        }
+        rewrite Hla in H.
+        destruct H as [H| H]; [ flia Hxx H| easy ].
+      }
+      specialize (Hf x).
+      assert (H : x < S a) by flia Hx.
+      specialize (Hf H); clear H.
+      flia Hf Hxb.
     }
     apply Nat.nlt_ge in Hxx.
+    (* mmm... not sure *)
 ...
 ... suite ok
   }
