@@ -148,88 +148,47 @@ destruct (Nat.eq_dec b 0) as [Hbz| Hbz]. {
   split; [ flia H1 | flia H2 ].
 }
 destruct la as [| x2]. {
-...
-  specialize (IHb a (λ i, if Nat.eq_dec i x1 then b - 1 else f i) Hba).
+  specialize (IHb a (λ i, if lt_dec i x1 then f i else f (i + 1)) Hba).
   cbn in IHb.
-  assert (H : ∀ x, x < a → (if Nat.eq_dec x x1 then b - 1 else f x) < b). {
+  assert (H : ∀ x, x < a → (if lt_dec x x1 then f x else f (x + 1)) < b). {
     intros x Hx.
-    destruct (Nat.eq_dec x x1) as [Hxx| Hxx]; [ flia Hbz | ].
-    specialize (Hf x).
-    assert (H : x < S a) by flia Hx.
-    specialize (Hf H); clear H.
-    enough (H : f x <> b) by flia Hf H.
-    intros H; apply Hxx; clear Hxx.
-    assert (H1 : x ∈ filter (λ i, f i =? b) (seq 0 a)). {
-      apply filter_In.
-      split. {
-        apply in_seq; cbn; flia Hx.
-      }
-      now apply Nat.eqb_eq.
+    destruct (lt_dec x x1) as [Hxx| Hxx]. {
+...
     }
-    rewrite Hla in H1.
-    now destruct H1.
+    apply Nat.nlt_ge in Hxx.
+...
+... suite ok
   }
   specialize (IHb H); clear H.
   destruct IHb as (x & x' & y & Hxxy).
-  destruct (Nat.eq_dec x x1) as [Hxx1| Hxx1]. {
-    destruct (Nat.eq_dec x' x1) as [Hx'x1| Hx'x1]. {
-      flia Hxx1 Hx'x1 Hxxy.
+  destruct (lt_dec x x1) as [Hxx1| Hxx1]. {
+    destruct (lt_dec x' x1) as [Hx'x1| Hx'x1]. {
+      exists x, x', y.
+      split; [ flia Hxxy | ].
+      split; [ flia Hxxy | easy ].
     }
-    subst x1.
-    clear Hx'x1.
-...
-f x' = 0
-f x = b
-...
-  exists x, x', y.
-  split; [ flia Hxxy | ].
-  split; [ flia Hxxy | ].
-  split; [ easy | ].
-  destruct (Nat.eq_dec x x1) as [Hxx1| Hxx1]. {
-    destruct (Nat.eq_dec x' x1) as [Hx'x1| Hx'x1]. {
-      flia Hxx1 Hx'x1 Hxxy.
-    }
-    subst x.
-f x1 = b
-f x' = 0
-
-...
-specialize (proj(filter_In x (seq 0 a))
-Search filter.
-filter_In: ∀ (A : Type) (f : A → bool) (x : A) (l : list A), x ∈ filter f l ↔ x ∈ l ∧ f x = true
-...
-    clear - Hla H Hba.
-    revert b H Hba Hla.
-    induction a; intros; [ easy | ].
-    cbn in Hla.
-    remember (f 0 =? b) as b1 eqn:Hb1; symmetry in Hb1.
-    destruct b1. {
-      injection Hla; clear Hla; intros Ha Hx1; subst x1.
-      apply Nat.eqb_eq in Hb1.
-
-      apply IHa.
-...
-destruct (Nat.eq_dec b 0) as [Hbz| Hbz]. {
-  admit.
-}
-specialize (IHb a (λ i, if Nat.eq_dec (f i) b then 0 else f i) Hba).
-cbn in IHb.
-assert (H : ∀ x, x < a → (if Nat.eq_dec (f x) b then 0 else f x) < b). {
-  intros x Hx.
-  destruct (Nat.eq_dec (f x) b) as [Hfb| Hfb]; [ flia Hbz | ].
-  specialize (Hf x).
-  assert (H : x < S a) by flia Hx.
-  specialize (Hf H); clear H.
-  flia Hf Hfb.
-}
-specialize (IHb H); clear H.
-destruct IHb as (x & x' & y & Hxxy).
-destruct (Nat.eq_dec (f x) b) as [Hfxb| Hfxb]. {
-  destruct (Nat.eq_dec (f x') b) as [Hfx'b| Hfx'b]. {
-    exists x, x', b.
+    apply Nat.nlt_ge in Hx'x1.
+    exists x, (x' + 1), y.
     split; [ flia Hxxy | ].
-    split; [ flia Hxxy | easy ].
+    split; [ flia Hxxy | ].
+    split; [ | easy ].
+    flia Hxx1 Hx'x1.
   }
+  apply Nat.nlt_ge in Hxx1.
+  destruct (lt_dec x' x1) as [Hx'x1| Hx'x1]. {
+    exists (x + 1), x', y.
+    split; [ flia Hxxy | ].
+    split; [ flia Hxxy | ].
+    split; [ | easy ].
+    flia Hxx1 Hx'x1.
+  }
+  apply Nat.nlt_ge in Hx'x1.
+  exists (x + 1), (x' + 1), y.
+  split; [ flia Hxxy | ].
+  split; [ flia Hxxy | ].
+  split; [ | easy ].
+  flia Hxxy.
+}
 ...
 
 Lemma odd_prime_equal_sum_two_squares_plus_one : ∀ p,
