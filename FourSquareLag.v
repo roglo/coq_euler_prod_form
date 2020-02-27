@@ -63,43 +63,43 @@ Lemma le_half_prime_succ_square_diff : ∀ p b b',
 Proof.
 intros * Hp Hp2 Hb Hb' Hbb' Hb1.
 assert (Hpz : p ≠ 0) by now intros H; subst p.
-    apply Nat_eq_mod_sub_0 in Hb1.
-    replace (b' ^ 2 + 1 - (b ^ 2 + 1)) with (b' ^ 2 - b ^ 2) in Hb1 by flia.
-    rewrite Nat_sqr_sub_sqr, Nat.mul_comm in Hb1.
-    apply Nat.mod_divide in Hb1; [ | easy ].
-    specialize (Nat.gauss _ _ _ Hb1) as H2.
-    apply (Nat.mul_le_mono_l _ _ 2) in Hb.
-    apply (Nat.mul_le_mono_l _ _ 2) in Hb'.
-    rewrite <- Nat.divide_div_mul_exact in Hb; [ | easy | ]. 2: {
-      specialize (Nat.div_mod p 2 (Nat.neq_succ_0 _)) as H3.
-      rewrite Hp2 in H3.
-      rewrite H3, Nat.add_sub.
-      apply Nat.divide_factor_l.
-    }
-    rewrite (Nat.mul_comm _ (p - 1)), Nat.div_mul in Hb; [ | easy ].
-    rewrite <- Nat.divide_div_mul_exact in Hb'; [ | easy | ]. 2: {
-      specialize (Nat.div_mod p 2 (Nat.neq_succ_0 _)) as H3.
-      rewrite Hp2 in H3.
-      rewrite H3, Nat.add_sub.
-      apply Nat.divide_factor_l.
-    }
-    rewrite (Nat.mul_comm _ (p - 1)), Nat.div_mul in Hb'; [ | easy ].
-    assert (H : Nat.gcd p (b' - b) = 1). {
-      apply eq_gcd_prime_small_1; [ easy | ].
-      split; [ flia Hbb' | ].
-      flia Hb Hb' Hbb'.
-    }
-    specialize (H2 H); clear H.
-    destruct H2 as (k, Hk).
-    destruct k. {
-      apply Nat.eq_add_0 in Hk.
-      now destruct Hk; subst b b'.
-    }
-    cbn in Hk.
-    apply (f_equal (Nat.mul 2)) in Hk.
-    do 2 rewrite Nat.mul_add_distr_l in Hk.
-    specialize (prime_ge_2 _ Hp) as Hpge2.
-    flia Hb Hb' Hk Hpge2.
+apply Nat_eq_mod_sub_0 in Hb1.
+replace (b' ^ 2 + 1 - (b ^ 2 + 1)) with (b' ^ 2 - b ^ 2) in Hb1 by flia.
+rewrite Nat_sqr_sub_sqr, Nat.mul_comm in Hb1.
+apply Nat.mod_divide in Hb1; [ | easy ].
+specialize (Nat.gauss _ _ _ Hb1) as H2.
+apply (Nat.mul_le_mono_l _ _ 2) in Hb.
+apply (Nat.mul_le_mono_l _ _ 2) in Hb'.
+rewrite <- Nat.divide_div_mul_exact in Hb; [ | easy | ]. 2: {
+  specialize (Nat.div_mod p 2 (Nat.neq_succ_0 _)) as H3.
+  rewrite Hp2 in H3.
+  rewrite H3, Nat.add_sub.
+  apply Nat.divide_factor_l.
+}
+rewrite (Nat.mul_comm _ (p - 1)), Nat.div_mul in Hb; [ | easy ].
+rewrite <- Nat.divide_div_mul_exact in Hb'; [ | easy | ]. 2: {
+  specialize (Nat.div_mod p 2 (Nat.neq_succ_0 _)) as H3.
+  rewrite Hp2 in H3.
+  rewrite H3, Nat.add_sub.
+  apply Nat.divide_factor_l.
+}
+rewrite (Nat.mul_comm _ (p - 1)), Nat.div_mul in Hb'; [ | easy ].
+assert (H : Nat.gcd p (b' - b) = 1). {
+  apply eq_gcd_prime_small_1; [ easy | ].
+  split; [ flia Hbb' | ].
+  flia Hb Hb' Hbb'.
+}
+specialize (H2 H); clear H.
+destruct H2 as (k, Hk).
+destruct k. {
+  apply Nat.eq_add_0 in Hk.
+  now destruct Hk; subst b b'.
+}
+cbn in Hk.
+apply (f_equal (Nat.mul 2)) in Hk.
+do 2 rewrite Nat.mul_add_distr_l in Hk.
+specialize (prime_ge_2 _ Hp) as Hpge2.
+flia Hb Hb' Hk Hpge2.
 Qed.
 
 Theorem pigeonhole : ∀ a b f,
@@ -324,7 +324,21 @@ assert
   }
 }
 (* pigeonhole *)
-Check pigeonhole.
+assert (Hpz : p ≠ 0) by now (intros H1; subst p).
+specialize (pigeonhole (p + 1) p) as H1.
 set (u := (p - 1) / 2) in *.
-specialize (pigeonhole (u + 1) (p - (u + 1))) as H1.
+set
+  (f i :=
+     if le_dec i u then (i ^ 2) mod p
+     else (p - ((i - u) ^ 2 + 1) mod p) mod p).
+specialize (H1 f).
+assert (H : p < p + 1) by flia.
+specialize (H1 H); clear H.
+assert (H : ∀ x, x < p + 1 → f x < p). {
+  intros x Hx.
+  unfold f; cbn - [ "/" ].
+  destruct (le_dec x u); now apply Nat.mod_upper_bound.
+}
+specialize (H1 H); clear H.
+destruct H1 as (x & x' & y & Hxxy).
 ...
