@@ -349,8 +349,20 @@ destruct (le_dec x u) as [Hxu| Hxu]. {
   }
   apply Nat.nle_gt in Hx'u.
   rewrite <- Hfx' in Hfx.
-  destruct (le_dec p (x ^ 2 + ((x' - u) ^ 2 + 1) mod p)) as [Hpx| Hpx]. {
-    exists x, (x' - u).
+clear - Hfx Hpz.
+remember (x' - u) as x''.
+clear u x' Heqx''.
+rename x'' into x'.
+Theorem glop : ∀ p a b,
+  p ≠ 0
+  → a ≡ (p - b) mod p
+  → Nat.divide p (a + b).
+Admitted.
+specialize (glop _ _ _ Hpz Hfx) as H1.
+(* mmm... faut voir... *)
+...
+  destruct (le_dec p (x ^ 2 + (x' ^ 2 + 1) mod p)) as [Hpx| Hpx]. {
+    exists x, x'.
     apply Nat_eq_mod_sub_0 in Hfx.
     rewrite Nat_sub_sub_assoc in Hfx. 2: {
       split; [ | easy ].
@@ -367,7 +379,7 @@ destruct (le_dec x u) as [Hxu| Hxu]. {
     symmetry in Hfx.
     apply Nat_eq_mod_sub_0 in Hfx.
     rewrite Nat_sub_sub_swap, <- Nat.sub_add_distr in Hfx.
-    remember (x ^ 2 + ((x' - u) ^ 2 + 1) mod p) as v eqn:Hv.
+    remember (x ^ 2 + (x' ^ 2 + 1) mod p) as v eqn:Hv.
     move Hfx at bottom.
     destruct (Nat.eq_dec v 0) as [Hvz| Hvz]. 2: {
       destruct v; [ easy | ].
@@ -378,7 +390,7 @@ destruct (le_dec x u) as [Hxu| Hxu]. {
     symmetry in Hv.
     apply Nat.eq_add_0 in Hv.
     destruct Hv as (Hxz, Hx'uz).
-    exists 0, (x' - u).
+    exists 0, x'.
     cbn - [ "/" ].
     rewrite Nat.mul_1_r.
     rewrite Nat.pow_2_r in Hx'uz.
