@@ -325,4 +325,6 @@ assert
 }
 (* pigeonhole *)
 Check pigeonhole.
+set (u := (p - 1) / 2) in *.
+specialize (pigeonhole (u + 1) (p - (u + 1))) as H1.
 ...
