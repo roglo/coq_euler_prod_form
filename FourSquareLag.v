@@ -215,7 +215,31 @@ destruct la as [| x2]. {
   flia Hxxy.
 }
 exists x1, x2, b.
-...
+assert (Hx1 : x1 ∈ x1 :: x2 :: la) by now left.
+assert (Hx2 : x2 ∈ x1 :: x2 :: la) by now right; left.
+rewrite <- Hla in Hx1.
+rewrite <- Hla in Hx2.
+apply filter_In in Hx1.
+apply filter_In in Hx2.
+destruct Hx1 as (Hx1, Hfx1).
+destruct Hx2 as (Hx2, Hfx2).
+apply in_seq in Hx1.
+apply in_seq in Hx2.
+split; [ flia Hx1 | ].
+split; [ flia Hx2 | ].
+apply Nat.eqb_eq in Hfx1.
+apply Nat.eqb_eq in Hfx2.
+split; [ | easy ].
+assert (Hnd : NoDup (x1 :: x2 :: la)). {
+  rewrite <- Hla.
+  apply NoDup_filter.
+  apply seq_NoDup.
+}
+apply NoDup_cons_iff in Hnd.
+destruct Hnd as (Hxx, Hnd).
+intros H; apply Hxx; clear Hxx; rename H into Hxx.
+now subst x2; left.
+Qed.
 
 Lemma odd_prime_equal_sum_two_squares_plus_one : ∀ p,
   prime p → p mod 2 = 1 → ∃ a b, Nat.divide p (a ^ 2 + b ^ 2 + 1).
@@ -300,4 +324,5 @@ assert
   }
 }
 (* pigeonhole *)
+Check pigeonhole.
 ...
