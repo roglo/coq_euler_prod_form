@@ -471,4 +471,29 @@ Proof.
 intros * Hba Hf Hpf.
 split. {
   unfold pigeonhole_fun in Hpf.
+  assert (Haz : a ≠ 0) by flia Hba.
+  clear - Haz Hpf.
+  destruct a; [ easy | clear Haz ].
+  destruct a. {
+    cbn in Hpf.
+    injection Hpf; clear Hpf; intros; subst x; flia.
+  }
+  destruct a. {
+    cbn in Hpf.
+    remember (f 1 =? f 0) as b eqn:Hb; symmetry in Hb.
+    destruct b; injection Hpf; clear Hpf; intros; subst x; flia.
+  }
+  destruct a. {
+    cbn in Hpf.
+    remember (f 1 =? f 0) as b eqn:Hb; symmetry in Hb.
+    destruct b. {
+      injection Hpf; clear Hpf; intros; subst x; flia.
+    }
+    remember (f 2 =? f 0) as b2 eqn:Hb2; symmetry in Hb2.
+    destruct b2. {
+      injection Hpf; clear Hpf; intros; subst x; flia.
+    }
+    remember (f 2 =? f 1) as b21 eqn:Hb21; symmetry in Hb21.
+    destruct b21; injection Hpf; clear Hpf; intros; subst x; flia.
+  }
 ...
