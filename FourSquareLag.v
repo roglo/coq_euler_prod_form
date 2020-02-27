@@ -105,7 +105,7 @@ Qed.
 Theorem pigeonhole : ∀ a b f,
   b < a
   → (∀ x, x < a → f x < b)
-  → ∃ x x' y, x < a ∧ x' < a ∧ x <> x' ∧ f x = y ∧ f x' = y.
+  → ∃ x x' y, x < a ∧ x' < a ∧ x ≠ x' ∧ f x = y ∧ f x' = y.
 Proof.
 intros * Hba Hf.
 revert a f Hba Hf.
