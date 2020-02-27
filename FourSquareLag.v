@@ -348,10 +348,10 @@ destruct (le_dec x u) as [Hxu| Hxu]. {
     now rewrite Hfx, Hfx' in H1.
   }
   apply Nat.nle_gt in Hx'u.
-  exists x, (x' - u).
   rewrite <- Hfx' in Hfx.
-  apply Nat_eq_mod_sub_0 in Hfx.
   destruct (le_dec p (x ^ 2 + ((x' - u) ^ 2 + 1) mod p)) as [Hpx| Hpx]. {
+    exists x, (x' - u).
+    apply Nat_eq_mod_sub_0 in Hfx.
     rewrite Nat_sub_sub_assoc in Hfx. 2: {
       split; [ | easy ].
       now apply Nat.lt_le_incl, Nat.mod_upper_bound.
@@ -364,5 +364,28 @@ destruct (le_dec x u) as [Hxu| Hxu]. {
     now apply Nat.mod_divide in Hfx.
   } {
     apply Nat.nle_gt in Hpx.
-    (* the expression inside the "mod p" in Hfx is zero! *)
+    symmetry in Hfx.
+    apply Nat_eq_mod_sub_0 in Hfx.
+    rewrite Nat_sub_sub_swap, <- Nat.sub_add_distr in Hfx.
+    remember (x ^ 2 + ((x' - u) ^ 2 + 1) mod p) as v eqn:Hv.
+    move Hfx at bottom.
+    destruct (Nat.eq_dec v 0) as [Hvz| Hvz]. 2: {
+      destruct v; [ easy | ].
+      rewrite Nat.mod_small in Hfx; [ | flia Hpx ].
+      flia Hpx Hfx.
+    }
+    move Hvz at top; subst v.
+    symmetry in Hv.
+    apply Nat.eq_add_0 in Hv.
+    destruct Hv as (Hxz, Hx'uz).
+    exists 0, (x' - u).
+    cbn - [ "/" ].
+    rewrite Nat.mul_1_r.
+    rewrite Nat.pow_2_r in Hx'uz.
+    now apply Nat.mod_divide in Hx'uz.
+  }
+}
+apply Nat.nle_gt in Hxu.
+destruct (le_dec x' u) as [Hx'u| Hx'u]. {
+  (* same as above by inverting x and x'; lemma required *)
 ...
