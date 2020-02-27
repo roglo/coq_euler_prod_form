@@ -452,27 +452,26 @@ Qed.
 
 Fixpoint find_dup (la : list (nat * nat)) :=
   match la with
-  | [] => (0, 0)
+  | [] => None
   | (n, a) :: la' =>
       match find (λ nb, snd nb =? a) la' with
       | None => find_dup la'
-      | Some (n', _) => (n, n')
+      | Some (n', _) => Some (n, n')
       end
   end.
 
 Definition pigeonhole_fun a (f : nat → nat) :=
-  find_dup (List.map (λ n, (n, f n)) (seq 0 a)).
+  match find_dup (List.map (λ n, (n, f n)) (seq 0 a)) with
+  | Some (n, n') => (n, n')
+  | None => (0, 0)
+  end.
 
 Theorem find_dup_prop : ∀ x x' la,
-  find_dup la = (x, x')
-  → x ≠ x'
+  find_dup la = Some (x, x')
   → ∃ y, (x, y) ∈ la ∧ (x', y) ∈ la.
 Proof.
-intros * Hfd Hxx.
-induction la as [| a]. {
-  cbn in Hfd.
-  now injection Hfd; intros; subst x x'.
-}
+intros * Hfd.
+induction la as [| a]; [ easy | ].
 cbn in Hfd.
 destruct a as (n, a).
 remember (find (λ nb, snd nb =? a) la) as r eqn:Hr.
@@ -502,13 +501,32 @@ Proof.
 intros * Hba Hf Hpf.
 split. {
   unfold pigeonhole_fun in Hpf.
-  specialize (find_dup_prop _ _ _ Hpf) as H.
-...
-  specialize (find_dup_prop _ _ _ Hpf) as (y & Hxy & Hx'y).
-apply in_map_iff in Hxy.
-apply in_map_iff in Hx'y.
-destruct Hxy as (x1 & Hx1 & Hx1a).
-destruct Hx'y as (x'1 & Hx'1 & Hx'1a).
-injection Hx1; clear Hx1; intros; subst x1 y.
-injection Hx'1; clear Hx'1; intros Hy Hx'1; subst x'1.
+  remember (find_dup _) as fd eqn:Hfd.
+  symmetry in Hfd.
+  destruct fd as [(n, n') |]. {
+    injection Hpf; clear Hpf; intros; subst n n'.
+    specialize (find_dup_prop _ _ _ Hfd) as (y & Hxy & Hx'y).
+    apply in_map_iff in Hxy.
+    destruct Hxy as (x1 & Hx1 & Hx1a).
+    injection Hx1; clear Hx1; intros; subst x1 y.
+    now apply in_seq in Hx1a.
+  } {
+    injection Hpf; clear Hpf; intros; subst; flia Hba.
+  }
+}
+split. {
+  unfold pigeonhole_fun in Hpf.
+  remember (find_dup _) as fd eqn:Hfd.
+  symmetry in Hfd.
+  destruct fd as [(n, n') |]. {
+    injection Hpf; clear Hpf; intros; subst n n'.
+    specialize (find_dup_prop _ _ _ Hfd) as (y & Hxy & Hx'y).
+    apply in_map_iff in Hx'y.
+    destruct Hx'y as (x1 & Hx1 & Hx1a).
+    injection Hx1; clear Hx1; intros; subst x1 y.
+    now apply in_seq in Hx1a.
+  } {
+    injection Hpf; clear Hpf; intros; subst; flia Hba.
+  }
+}
 ...
