@@ -466,7 +466,7 @@ Definition pigeonhole_fun a (f : nat → nat) :=
   | None => (0, 0)
   end.
 
-Theorem find_dup_prop : ∀ x x' la,
+Theorem find_dup_some : ∀ x x' la,
   find_dup la = Some (x, x')
   → ∃ y la1 la2 la3,
      la = la1 ++ (x, y) :: la2 ++ (x', y) :: la3.
@@ -494,6 +494,44 @@ destruct r as [(n', b)| ]. {
 }
 Qed.
 
+Theorem find_dup_none : ∀ la,
+  find_dup la = None → NoDup (map snd la).
+Proof.
+intros * Hnd.
+induction la as [| a]; [ constructor | cbn ].
+constructor. {
+  cbn in Hnd.
+  destruct a as (n, a).
+  remember (find _ _) as b eqn:Hb; symmetry in Hb.
+  destruct b; [ now destruct p | ].
+  specialize (find_none _ _ Hb) as H1; cbn in H1; cbn.
+  intros Ha.
+  specialize (IHla Hnd).
+  clear - IHla H1 Ha.
+  induction la as [ | b]; [ easy | ].
+  cbn in Ha.
+  cbn in IHla.
+  destruct Ha as [Ha| Ha]. {
+    subst a.
+    specialize (H1 b (or_introl eq_refl)).
+    now apply Nat.eqb_neq in H1.
+  } {
+    apply NoDup_cons_iff in IHla.
+    destruct IHla as (Hn, Hnd).
+    specialize (IHla0 Hnd).
+    apply IHla0; [ | easy ].
+    intros x Hx.
+    now apply H1; right.
+  }
+} {
+  apply IHla.
+  cbn in Hnd.
+  destruct a as (n, a).
+  remember (find _ _) as b eqn:Hb; symmetry in Hb.
+  destruct b; [ now destruct p | easy ].
+}
+Qed.
+
 Theorem pigeonhole' : ∀ a b f x x',
   b < a
   → (∀ x, x < a → f x < b)
@@ -506,7 +544,7 @@ remember (find_dup _) as fd eqn:Hfd.
 symmetry in Hfd.
 destruct fd as [(n, n') |]. {
   injection Hpf; clear Hpf; intros; subst n n'.
-  specialize (find_dup_prop _ _ _ Hfd) as (y & la1 & la2 & la3 & Hll).
+  specialize (find_dup_some _ _ _ Hfd) as (y & la1 & la2 & la3 & Hll).
   assert (Hxy : (x, y) ∈ map (λ n, (n, f n)) (seq 0 a)). {
     rewrite Hll.
     apply in_app_iff.
@@ -530,65 +568,20 @@ destruct fd as [(n, n') |]. {
   split; [ easy | ].
   split; [ easy | ].
   split; [ | easy ].
-Search map.
-...
-split. {
-  unfold pigeonhole_fun in Hpf.
-  remember (find_dup _) as fd eqn:Hfd.
-  symmetry in Hfd.
-  destruct fd as [(n, n') |]. {
-    injection Hpf; clear Hpf; intros; subst n n'.
-    specialize (find_dup_prop _ _ _ Hfd) as (y & la1 & la2 & la3 & Hll).
-    assert (H : (x, y) ∈ map (λ n, (n, f n)) (seq 0 a)). {
-      rewrite Hll.
-      apply in_app_iff.
-      now right; left.
-    }
-    apply in_map_iff in H.
-    destruct H as (z & Hzz & Hz).
-    injection Hzz; intros; subst z y.
-    now apply in_seq in Hz.
-  } {
-    injection Hpf; clear Hpf; intros; subst; flia Hba.
+  clear - Hll.
+  assert (H : NoDup (map (λ n, (n, f n)) (seq 0 a))). {
+    apply FinFun.Injective_map_NoDup; [ | apply seq_NoDup ].
+    intros b c Hbc.
+    now injection Hbc.
   }
-}
-split. {
-  unfold pigeonhole_fun in Hpf.
-  remember (find_dup _) as fd eqn:Hfd.
-  symmetry in Hfd.
-  destruct fd as [(n, n') |]. {
-    injection Hpf; clear Hpf; intros; subst n n'.
-    specialize (find_dup_prop _ _ _ Hfd) as (y & la1 & la2 & la3 & Hll).
-    assert (H : (x', y) ∈ map (λ n, (n, f n)) (seq 0 a)). {
-      rewrite Hll.
-      apply in_app_iff.
-      right; right.
-      apply in_app_iff.
-      now right; left.
-    }
-    apply in_map_iff in H.
-    destruct H as (z & Hzz & Hz).
-    injection Hzz; intros; subst z y.
-    now apply in_seq in Hz.
-  } {
-    injection Hpf; clear Hpf; intros; subst; flia Hba.
-  }
-}
-split. {
-  unfold pigeonhole_fun in Hpf.
-  remember (find_dup _) as fd eqn:Hfd.
-  symmetry in Hfd.
-  destruct fd as [(n, n') |]. {
-    injection Hpf; clear Hpf; intros; subst n n'.
-    specialize (find_dup_prop _ _ _ Hfd) as (y & la1 & la2 & la3 & Hll).
-...
-    specialize (find_dup_prop _ _ _ Hfd) as (y & Hxy & Hx'y).
-    apply in_map_iff in Hx'y.
-    destruct Hx'y as (x1 & Hx1 & Hx1a).
-    injection Hx1; clear Hx1; intros; subst x1 y.
-    now apply in_seq in Hx1a.
-  } {
-    injection Hpf; clear Hpf; intros; subst; flia Hba.
-  }
-
+  rewrite Hll in H.
+  apply NoDup_remove_2 in H.
+  intros Hxx; apply H; subst x'.
+  apply in_app_iff; right.
+  now apply in_app_iff; right; left.
+} {
+  apply find_dup_none in Hfd.
+  rewrite map_map in Hfd.
+  cbn in Hfd.
+  exfalso; clear x x' Hpf.
 ...
