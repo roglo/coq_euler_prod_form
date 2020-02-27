@@ -241,13 +241,13 @@ intros H; apply Hxx; clear Hxx; rename H into Hxx.
 now subst x2; left.
 Qed.
 
-Theorem Nat_eq_mod_divide_sum : ∀ p a b,
-  p ≠ 0
-  → a ≡ (p - b mod p) mod p
-  → Nat.divide p (a + b).
+Theorem Nat_eq_mod_divide_sum : ∀ n a b,
+  n ≠ 0
+  → a ≡ (n - b mod n) mod n
+  → Nat.divide n (a + b).
 Proof.
-intros * Hpz Hab.
-destruct (le_dec p (a + b mod p)) as [Hpx| Hpx]. {
+intros * Hnz Hab.
+destruct (le_dec n (a + b mod n)) as [Hpx| Hpx]. {
   apply Nat_eq_mod_sub_0 in Hab.
   rewrite Nat_sub_sub_assoc in Hab. 2: {
     split; [ | easy ].
@@ -263,7 +263,7 @@ destruct (le_dec p (a + b mod p)) as [Hpx| Hpx]. {
   symmetry in Hab.
   apply Nat_eq_mod_sub_0 in Hab.
   rewrite Nat_sub_sub_swap, <- Nat.sub_add_distr in Hab.
-  remember (a + b mod p) as v eqn:Hv.
+  remember (a + b mod n) as v eqn:Hv.
   move Hab at bottom.
   destruct (Nat.eq_dec v 0) as [Hvz| Hvz]. 2: {
     destruct v; [ easy | ].
@@ -368,7 +368,7 @@ set (u := (p - 1) / 2) in *.
 set
   (f i :=
      if le_dec i u then (i ^ 2) mod p
-     else (p - ((i - u) ^ 2 + 1) mod p) mod p).
+     else (p - ((i - (u + 1)) ^ 2 + 1) mod p) mod p).
 specialize (H1 f).
 assert (H : p < p + 1) by flia.
 specialize (H1 H); clear H.
@@ -389,19 +389,51 @@ destruct (le_dec x u) as [Hxu| Hxu]. {
   rewrite <- Hfx' in Hfx.
   specialize (Nat_eq_mod_divide_sum _ _ _ Hpz Hfx) as H1.
   rewrite Nat.add_assoc in H1.
-  now exists x, (x' - u).
+  now exists x, (x' - (u + 1)).
 }
 apply Nat.nle_gt in Hxu.
 destruct (le_dec x' u) as [Hx'u| Hx'u]. {
   rewrite <- Hfx in Hfx'.
   specialize (Nat_eq_mod_divide_sum p _ _ Hpz Hfx') as H1.
   rewrite Nat.add_assoc in H1.
-  now exists x', (x - u).
+  now exists x', (x - (u + 1)).
 }
 apply Nat.nle_gt in Hx'u.
-specialize (Hb (x - u) (x' - u)) as H1.
+specialize (Hb (x - (u + 1)) (x' - (u + 1))) as H1.
 rewrite Hfx, Hfx' in H1.
 exfalso; apply H1; [ | | | easy ]. {
-  apply (Nat.add_le_mono_r _ _ u).
-  rewrite Nat.sub_add; [ | now apply Nat.lt_le_incl ].
-...
+  apply (Nat.add_le_mono_r _ _ (u + 1)).
+  rewrite Nat.sub_add; [ | flia Hxu ].
+  replace (u + (u + 1)) with (2 * u + 1) by flia.
+  unfold u.
+  rewrite <- Nat.divide_div_mul_exact; [ | easy | ]. 2: {
+    apply Nat.mod_divide; [ easy | ].
+    specialize (Nat.div_mod p 2 (Nat.neq_succ_0 _)) as H2.
+    rewrite Hp2 in H2.
+    rewrite H2, Nat.add_sub, Nat.mul_comm.
+    now apply Nat.mod_mul.
+  }
+  rewrite Nat.mul_comm, Nat.div_mul; [ | easy ].
+  flia Hxp.
+} {
+  apply (Nat.add_le_mono_r _ _ (u + 1)).
+  rewrite Nat.sub_add; [ | flia Hx'u ].
+  replace (u + (u + 1)) with (2 * u + 1) by flia.
+  unfold u.
+  rewrite <- Nat.divide_div_mul_exact; [ | easy | ]. 2: {
+    apply Nat.mod_divide; [ easy | ].
+    specialize (Nat.div_mod p 2 (Nat.neq_succ_0 _)) as H2.
+    rewrite Hp2 in H2.
+    rewrite H2, Nat.add_sub, Nat.mul_comm.
+    now apply Nat.mod_mul.
+  }
+  rewrite Nat.mul_comm, Nat.div_mul; [ | easy ].
+  flia Hx'p.
+} {
+  intros H; apply Hxx'.
+  apply (Nat.add_cancel_r _ _ (u + 1)) in H.
+  rewrite Nat.sub_add in H; [ | flia Hxu ].
+  rewrite Nat.sub_add in H; [ | flia Hx'u ].
+  easy.
+}
+Qed.
