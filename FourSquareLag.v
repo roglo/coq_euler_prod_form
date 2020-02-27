@@ -485,19 +485,13 @@ destruct r as [(n', b)| ]. {
   apply Nat.eqb_eq in Hba; subst b.
   apply in_split in Hx'la.
   destruct Hx'la as (l1 & l2 & Hll).
-...
-  exists a.
-  split; [ now left | ].
-  apply find_some in Hr.
-  destruct Hr as (Hxb, Hb).
-  cbn in Hb.
-  apply Nat.eqb_eq in Hb; subst b.
-  now right.
+  exists l1, l2.
+  now rewrite Hll.
+} {
+  specialize (IHla Hfd).
+  destruct IHla as (y & la1 & la2 & la3 & Hll).
+  now exists y, ((n, a) :: la1), la2, la3; rewrite Hll.
 }
-specialize (IHla Hfd).
-destruct IHla as (y & Hxy & Hx'y).
-exists y.
-now split; right.
 Qed.
 
 Theorem pigeonhole' : ∀ a b f x x',
@@ -513,11 +507,16 @@ split. {
   symmetry in Hfd.
   destruct fd as [(n, n') |]. {
     injection Hpf; clear Hpf; intros; subst n n'.
-    specialize (find_dup_prop _ _ _ Hfd) as (y & Hxy & Hx'y).
-    apply in_map_iff in Hxy.
-    destruct Hxy as (x1 & Hx1 & Hx1a).
-    injection Hx1; clear Hx1; intros; subst x1 y.
-    now apply in_seq in Hx1a.
+    specialize (find_dup_prop _ _ _ Hfd) as (y & la1 & la2 & la3 & Hll).
+    assert (H : (x, y) ∈ map (λ n, (n, f n)) (seq 0 a)). {
+      rewrite Hll.
+      apply in_app_iff.
+      now right; left.
+    }
+    apply in_map_iff in H.
+    destruct H as (z & Hzz & Hz).
+    injection Hzz; intros; subst z y.
+    now apply in_seq in Hz.
   } {
     injection Hpf; clear Hpf; intros; subst; flia Hba.
   }
@@ -528,11 +527,18 @@ split. {
   symmetry in Hfd.
   destruct fd as [(n, n') |]. {
     injection Hpf; clear Hpf; intros; subst n n'.
-    specialize (find_dup_prop _ _ _ Hfd) as (y & Hxy & Hx'y).
-    apply in_map_iff in Hx'y.
-    destruct Hx'y as (x1 & Hx1 & Hx1a).
-    injection Hx1; clear Hx1; intros; subst x1 y.
-    now apply in_seq in Hx1a.
+    specialize (find_dup_prop _ _ _ Hfd) as (y & la1 & la2 & la3 & Hll).
+    assert (H : (x', y) ∈ map (λ n, (n, f n)) (seq 0 a)). {
+      rewrite Hll.
+      apply in_app_iff.
+      right; right.
+      apply in_app_iff.
+      now right; left.
+    }
+    apply in_map_iff in H.
+    destruct H as (z & Hzz & Hz).
+    injection Hzz; intros; subst z y.
+    now apply in_seq in Hz.
   } {
     injection Hpf; clear Hpf; intros; subst; flia Hba.
   }
@@ -543,6 +549,7 @@ split. {
   symmetry in Hfd.
   destruct fd as [(n, n') |]. {
     injection Hpf; clear Hpf; intros; subst n n'.
+    specialize (find_dup_prop _ _ _ Hfd) as (y & la1 & la2 & la3 & Hll).
 ...
     specialize (find_dup_prop _ _ _ Hfd) as (y & Hxy & Hx'y).
     apply in_map_iff in Hx'y.
