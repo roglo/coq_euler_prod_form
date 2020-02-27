@@ -241,6 +241,44 @@ intros H; apply Hxx; clear Hxx; rename H into Hxx.
 now subst x2; left.
 Qed.
 
+Theorem Nat_eq_mod_divide_sum : ∀ p a b,
+  p ≠ 0
+  → a ≡ (p - b mod p) mod p
+  → Nat.divide p (a + b).
+Proof.
+intros * Hpz Hab.
+destruct (le_dec p (a + b mod p)) as [Hpx| Hpx]. {
+  apply Nat_eq_mod_sub_0 in Hab.
+  rewrite Nat_sub_sub_assoc in Hab. 2: {
+    split; [ | easy ].
+    now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+  }
+  rewrite <- (Nat.mod_add _ 1) in Hab; [ | easy ].
+  rewrite Nat.mul_1_l in Hab.
+  rewrite Nat.sub_add in Hab; [ | easy ].
+  rewrite Nat.add_mod_idemp_r in Hab; [ | easy ].
+  now apply Nat.mod_divide in Hab.
+} {
+  apply Nat.nle_gt in Hpx.
+  symmetry in Hab.
+  apply Nat_eq_mod_sub_0 in Hab.
+  rewrite Nat_sub_sub_swap, <- Nat.sub_add_distr in Hab.
+  remember (a + b mod p) as v eqn:Hv.
+  move Hab at bottom.
+  destruct (Nat.eq_dec v 0) as [Hvz| Hvz]. 2: {
+    destruct v; [ easy | ].
+    rewrite Nat.mod_small in Hab; [ | flia Hpx ].
+    flia Hpx Hab.
+  }
+  move Hvz at top; subst v.
+  symmetry in Hv.
+  apply Nat.eq_add_0 in Hv.
+  destruct Hv as (Hxz, Hx'uz).
+  subst a; cbn.
+  now apply Nat.mod_divide in Hx'uz.
+}
+Qed.
+
 Lemma odd_prime_equal_sum_two_squares_plus_one : ∀ p,
   prime p → p mod 2 = 1 → ∃ a b, Nat.divide p (a ^ 2 + b ^ 2 + 1).
 Proof.
@@ -349,55 +387,21 @@ destruct (le_dec x u) as [Hxu| Hxu]. {
   }
   apply Nat.nle_gt in Hx'u.
   rewrite <- Hfx' in Hfx.
-clear - Hfx Hpz.
-remember (x' - u) as x''.
-clear u x' Heqx''.
-rename x'' into x'.
-Theorem glop : ∀ p a b,
-  p ≠ 0
-  → a ≡ (p - b) mod p
-  → Nat.divide p (a + b).
-Admitted.
-specialize (glop _ _ _ Hpz Hfx) as H1.
-(* mmm... faut voir... *)
-...
-  destruct (le_dec p (x ^ 2 + (x' ^ 2 + 1) mod p)) as [Hpx| Hpx]. {
-    exists x, x'.
-    apply Nat_eq_mod_sub_0 in Hfx.
-    rewrite Nat_sub_sub_assoc in Hfx. 2: {
-      split; [ | easy ].
-      now apply Nat.lt_le_incl, Nat.mod_upper_bound.
-    }
-    rewrite <- (Nat.mod_add _ 1) in Hfx; [ | easy ].
-    rewrite Nat.mul_1_l in Hfx.
-    rewrite Nat.sub_add in Hfx; [ | easy ].
-    rewrite Nat.add_mod_idemp_r in Hfx; [ | easy ].
-    rewrite Nat.add_assoc in Hfx.
-    now apply Nat.mod_divide in Hfx.
-  } {
-    apply Nat.nle_gt in Hpx.
-    symmetry in Hfx.
-    apply Nat_eq_mod_sub_0 in Hfx.
-    rewrite Nat_sub_sub_swap, <- Nat.sub_add_distr in Hfx.
-    remember (x ^ 2 + (x' ^ 2 + 1) mod p) as v eqn:Hv.
-    move Hfx at bottom.
-    destruct (Nat.eq_dec v 0) as [Hvz| Hvz]. 2: {
-      destruct v; [ easy | ].
-      rewrite Nat.mod_small in Hfx; [ | flia Hpx ].
-      flia Hpx Hfx.
-    }
-    move Hvz at top; subst v.
-    symmetry in Hv.
-    apply Nat.eq_add_0 in Hv.
-    destruct Hv as (Hxz, Hx'uz).
-    exists 0, x'.
-    cbn - [ "/" ].
-    rewrite Nat.mul_1_r.
-    rewrite Nat.pow_2_r in Hx'uz.
-    now apply Nat.mod_divide in Hx'uz.
-  }
+  specialize (Nat_eq_mod_divide_sum _ _ _ Hpz Hfx) as H1.
+  rewrite Nat.add_assoc in H1.
+  now exists x, (x' - u).
 }
 apply Nat.nle_gt in Hxu.
 destruct (le_dec x' u) as [Hx'u| Hx'u]. {
-  (* same as above by inverting x and x'; lemma required *)
+  rewrite <- Hfx in Hfx'.
+  specialize (Nat_eq_mod_divide_sum p _ _ Hpz Hfx') as H1.
+  rewrite Nat.add_assoc in H1.
+  now exists x', (x - u).
+}
+apply Nat.nle_gt in Hx'u.
+specialize (Hb (x - u) (x' - u)) as H1.
+rewrite Hfx, Hfx' in H1.
+exfalso; apply H1; [ | | | easy ]. {
+  apply (Nat.add_le_mono_r _ _ u).
+  rewrite Nat.sub_add; [ | now apply Nat.lt_le_incl ].
 ...
