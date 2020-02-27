@@ -447,7 +447,8 @@ exfalso; apply H1; [ | | | easy ]. {
 }
 Qed.
 
-(* constructive version of pigeonhole *)
+(* trying to restart those proofs with a
+   constructive version of pigeonhole *)
 
 Fixpoint find_dup (la : list (nat * nat)) :=
   match la with
