@@ -468,7 +468,8 @@ Definition pigeonhole_fun a (f : nat → nat) :=
 
 Theorem find_dup_prop : ∀ x x' la,
   find_dup la = Some (x, x')
-  → ∃ y, (x, y) ∈ la ∧ (x', y) ∈ la.
+  → ∃ y la1 la2 la3,
+     la = la1 ++ (x, y) :: la2 ++ (x', y) :: la3.
 Proof.
 intros * Hfd.
 induction la as [| a]; [ easy | ].
@@ -478,6 +479,13 @@ remember (find (λ nb, snd nb =? a) la) as r eqn:Hr.
 symmetry in Hr.
 destruct r as [(n', b)| ]. {
   injection Hfd; clear Hfd; intros; subst n n'.
+  exists b, []; cbn.
+  apply find_some in Hr; cbn in Hr.
+  destruct Hr as (Hx'la, Hba).
+  apply Nat.eqb_eq in Hba; subst b.
+  apply in_split in Hx'la.
+  destruct Hx'la as (l1 & l2 & Hll).
+...
   exists a.
   split; [ now left | ].
   apply find_some in Hr.
@@ -529,4 +537,20 @@ split. {
     injection Hpf; clear Hpf; intros; subst; flia Hba.
   }
 }
+split. {
+  unfold pigeonhole_fun in Hpf.
+  remember (find_dup _) as fd eqn:Hfd.
+  symmetry in Hfd.
+  destruct fd as [(n, n') |]. {
+    injection Hpf; clear Hpf; intros; subst n n'.
+...
+    specialize (find_dup_prop _ _ _ Hfd) as (y & Hxy & Hx'y).
+    apply in_map_iff in Hx'y.
+    destruct Hx'y as (x1 & Hx1 & Hx1a).
+    injection Hx1; clear Hx1; intros; subst x1 y.
+    now apply in_seq in Hx1a.
+  } {
+    injection Hpf; clear Hpf; intros; subst; flia Hba.
+  }
+
 ...
