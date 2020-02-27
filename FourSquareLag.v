@@ -463,6 +463,36 @@ Fixpoint find_dup (la : list (nat * nat)) :=
 Definition pigeonhole_fun a (f : nat → nat) :=
   find_dup (List.map (λ n, (n, f n)) (seq 0 a)).
 
+Theorem find_dup_prop : ∀ x x' la,
+  find_dup la = (x, x')
+  → x ≠ x'
+  → ∃ y, (x, y) ∈ la ∧ (x', y) ∈ la.
+Proof.
+intros * Hfd Hxx.
+induction la as [| a]. {
+  cbn in Hfd.
+  now injection Hfd; intros; subst x x'.
+}
+cbn in Hfd.
+destruct a as (n, a).
+remember (find (λ nb, snd nb =? a) la) as r eqn:Hr.
+symmetry in Hr.
+destruct r as [(n', b)| ]. {
+  injection Hfd; clear Hfd; intros; subst n n'.
+  exists a.
+  split; [ now left | ].
+  apply find_some in Hr.
+  destruct Hr as (Hxb, Hb).
+  cbn in Hb.
+  apply Nat.eqb_eq in Hb; subst b.
+  now right.
+}
+specialize (IHla Hfd).
+destruct IHla as (y & Hxy & Hx'y).
+exists y.
+now split; right.
+Qed.
+
 Theorem pigeonhole' : ∀ a b f x x',
   b < a
   → (∀ x, x < a → f x < b)
@@ -472,29 +502,13 @@ Proof.
 intros * Hba Hf Hpf.
 split. {
   unfold pigeonhole_fun in Hpf.
-  assert (Haz : a ≠ 0) by flia Hba.
-  clear - Haz Hpf.
-  destruct a; [ easy | clear Haz ].
-  destruct a. {
-    cbn in Hpf.
-    injection Hpf; clear Hpf; intros; subst x; flia.
-  }
-  destruct a. {
-    cbn in Hpf.
-    remember (f 1 =? f 0) as b eqn:Hb; symmetry in Hb.
-    destruct b; injection Hpf; clear Hpf; intros; subst x; flia.
-  }
-  destruct a. {
-    cbn in Hpf.
-    remember (f 1 =? f 0) as b eqn:Hb; symmetry in Hb.
-    destruct b. {
-      injection Hpf; clear Hpf; intros; subst x; flia.
-    }
-    remember (f 2 =? f 0) as b2 eqn:Hb2; symmetry in Hb2.
-    destruct b2. {
-      injection Hpf; clear Hpf; intros; subst x; flia.
-    }
-    remember (f 2 =? f 1) as b21 eqn:Hb21; symmetry in Hb21.
-    destruct b21; injection Hpf; clear Hpf; intros; subst x; flia.
-  }
+  specialize (find_dup_prop _ _ _ Hpf) as H.
+...
+  specialize (find_dup_prop _ _ _ Hpf) as (y & Hxy & Hx'y).
+apply in_map_iff in Hxy.
+apply in_map_iff in Hx'y.
+destruct Hxy as (x1 & Hx1 & Hx1a).
+destruct Hx'y as (x'1 & Hx'1 & Hx'1a).
+injection Hx1; clear Hx1; intros; subst x1 y.
+injection Hx'1; clear Hx'1; intros Hy Hx'1; subst x'1.
 ...
