@@ -501,6 +501,37 @@ Theorem pigeonhole' : ∀ a b f x x',
   → x < a ∧ x' < a ∧ x ≠ x' ∧ f x = f x'.
 Proof.
 intros * Hba Hf Hpf.
+unfold pigeonhole_fun in Hpf.
+remember (find_dup _) as fd eqn:Hfd.
+symmetry in Hfd.
+destruct fd as [(n, n') |]. {
+  injection Hpf; clear Hpf; intros; subst n n'.
+  specialize (find_dup_prop _ _ _ Hfd) as (y & la1 & la2 & la3 & Hll).
+  assert (Hxy : (x, y) ∈ map (λ n, (n, f n)) (seq 0 a)). {
+    rewrite Hll.
+    apply in_app_iff.
+    now right; left.
+  }
+  apply in_map_iff in Hxy.
+  destruct Hxy as (z & Hxy & Hz).
+  injection Hxy; clear Hxy; intros; subst z y.
+  assert (Hxy : (x', f x) ∈ map (λ n, (n, f n)) (seq 0 a)). {
+    rewrite Hll.
+    apply in_app_iff.
+    right; right.
+    apply in_app_iff.
+    now right; left.
+  }
+  apply in_map_iff in Hxy.
+  destruct Hxy as (z & Hxy & Hz').
+  injection Hxy; clear Hxy; intros Hff H1; subst z.
+  apply in_seq in Hz.
+  apply in_seq in Hz'.
+  split; [ easy | ].
+  split; [ easy | ].
+  split; [ | easy ].
+Search map.
+...
 split. {
   unfold pigeonhole_fun in Hpf.
   remember (find_dup _) as fd eqn:Hfd.
