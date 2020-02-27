@@ -584,4 +584,16 @@ destruct fd as [(n, n') |]. {
   rewrite map_map in Hfd.
   cbn in Hfd.
   exfalso; clear x x' Hpf.
+  revert b Hba Hf.
+  induction a; intros; [ easy | ].
+  rewrite <- Nat.add_1_r in Hfd.
+  rewrite seq_app in Hfd; cbn in Hfd.
+  rewrite map_app in Hfd.
+  cbn in Hfd.
+  specialize (NoDup_remove_1 _ _ _ Hfd) as H1.
+  rewrite app_nil_r in H1.
+  specialize (IHa H1); clear H1.
+  destruct (Nat.eq_dec b a) as [Hab| Hab]. {
+    subst b.
+    clear Hba.
 ...
