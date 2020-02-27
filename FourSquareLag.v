@@ -102,6 +102,8 @@ specialize (prime_ge_2 _ Hp) as Hpge2.
 flia Hb Hb' Hk Hpge2.
 Qed.
 
+(* classical version of pigeonhole *)
+
 Theorem pigeonhole : ∀ a b f,
   b < a
   → (∀ x, x < a → f x < b)
@@ -369,6 +371,13 @@ set
   (f i :=
      if le_dec i u then (i ^ 2) mod p
      else (p - ((i - (u + 1)) ^ 2 + 1) mod p) mod p).
+(*
+enough (p = 43).
+subst p.
+Compute (List.map (λ n, (n, f n)) (seq 0 43)).
+Compute (pigeonhole_fun 43 f).
+Compute (43 - ((38 - 22) ^ 2 + 1) mod 43).
+*)
 specialize (H1 f).
 assert (H : p < p + 1) by flia.
 specialize (H1 H); clear H.
@@ -437,3 +446,29 @@ exfalso; apply H1; [ | | | easy ]. {
   easy.
 }
 Qed.
+
+(* constructive version of pigeonhole *)
+
+Fixpoint find_dup (la : list (nat * nat)) :=
+  match la with
+  | [] => (0, 0)
+  | (n, a) :: la' =>
+      match find (λ nb, snd nb =? a) la' with
+      | None => find_dup la'
+      | Some (n', _) => (n, n')
+      end
+  end.
+
+Definition pigeonhole_fun a (f : nat → nat) :=
+  find_dup (List.map (λ n, (n, f n)) (seq 0 a)).
+
+Theorem pigeonhole' : ∀ a b f x x',
+  b < a
+  → (∀ x, x < a → f x < b)
+  → pigeonhole_fun a f = (x, x')
+  → x < a ∧ x' < a ∧ x ≠ x' ∧ f x = f x'.
+Proof.
+intros * Hba Hf Hpf.
+split. {
+  unfold pigeonhole_fun in Hpf.
+...
