@@ -340,5 +340,29 @@ assert (H : ∀ x, x < p + 1 → f x < p). {
   destruct (le_dec x u); now apply Nat.mod_upper_bound.
 }
 specialize (H1 H); clear H.
-destruct H1 as (x & x' & y & Hxxy).
+destruct H1 as (x & x' & y & Hxp & Hx'p & Hxx' & Hfx & Hfx').
+unfold f in Hfx, Hfx'.
+destruct (le_dec x u) as [Hxu| Hxu]. {
+  destruct (le_dec x' u) as [Hx'u| Hx'u]. {
+    specialize (Ha x x' Hxu Hx'u Hxx') as H1.
+    now rewrite Hfx, Hfx' in H1.
+  }
+  apply Nat.nle_gt in Hx'u.
+  exists x, (x' - u).
+  rewrite <- Hfx' in Hfx.
+  apply Nat_eq_mod_sub_0 in Hfx.
+  destruct (le_dec p (x ^ 2 + ((x' - u) ^ 2 + 1) mod p)) as [Hpx| Hpx]. {
+    rewrite Nat_sub_sub_assoc in Hfx. 2: {
+      split; [ | easy ].
+      now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+    }
+    rewrite <- (Nat.mod_add _ 1) in Hfx; [ | easy ].
+    rewrite Nat.mul_1_l in Hfx.
+    rewrite Nat.sub_add in Hfx; [ | easy ].
+    rewrite Nat.add_mod_idemp_r in Hfx; [ | easy ].
+    rewrite Nat.add_assoc in Hfx.
+    now apply Nat.mod_divide in Hfx.
+  } {
+    apply Nat.nle_gt in Hpx.
+    (* the expression inside the "mod p" in Hfx is zero! *)
 ...
