@@ -718,17 +718,34 @@ destruct fd as [(n, n') |]. {
   apply filter_In in Hx2.
   destruct Hx1 as (Hx1, Hfx1).
   destruct Hx2 as (Hx2, Hfx2).
-(*
-  apply in_seq in Hx1.
-  apply in_seq in Hx2.
-  cbn in Hx1, Hx2.
-*)
   apply Nat.eqb_eq in Hfx1.
   apply Nat.eqb_eq in Hfx2.
-(*
-  destruct Hx1 as (_, Hx1).
-  destruct Hx2 as (_, Hx2).
-*)
+  assert (H : x1 ≠ x2). {
+    intros H; subst x2.
+    clear - Hla.
+Search (filter _ (seq _ _)).
+Search (filter _ _ = _ :: _).
+...
+    induction a. {
+      cbn in Hla.
+      now destruct (f 0 =? b).
+    }
+    rewrite <- Nat.add_1_r in Hla.
+    rewrite seq_app in Hla.
+    rewrite Nat.add_0_l in Hla.
+    rewrite filter_app in Hla.
+    cbn in Hla.
+    remember (f 0 =? b) as c eqn:Hc; symmetry in Hc.
+    destruct c. {
+      cbn in Hla.
+      injection Hla; clear Hla; intros Hla H; subst x1.
+      remember (f (S a) =? b) as d eqn:Hd; symmetry in Hd.
+      destruct d. {
+
+
+Search (filter _ _ = _ :: _).
+
+  clear - Hfd Hx1 Hx2 Hfx1 Hfx2.
 ...
   assert (Hnd : NoDup (x1 :: x2 :: la)). {
     rewrite <- Hla.
