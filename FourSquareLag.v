@@ -723,29 +723,13 @@ destruct fd as [(n, n') |]. {
   assert (H : x1 ≠ x2). {
     intros H; subst x2.
     clear - Hla.
-Search (filter _ (seq _ _)).
-Search (filter _ _ = _ :: _).
-...
-    induction a. {
-      cbn in Hla.
-      now destruct (f 0 =? b).
-    }
-    rewrite <- Nat.add_1_r in Hla.
-    rewrite seq_app in Hla.
-    rewrite Nat.add_0_l in Hla.
-    rewrite filter_app in Hla.
-    cbn in Hla.
-    remember (f 0 =? b) as c eqn:Hc; symmetry in Hc.
-    destruct c. {
-      cbn in Hla.
-      injection Hla; clear Hla; intros Hla H; subst x1.
-      remember (f (S a) =? b) as d eqn:Hd; symmetry in Hd.
-      destruct d. {
-
-
-Search (filter _ _ = _ :: _).
-
-  clear - Hfd Hx1 Hx2 Hfx1 Hfx2.
+    specialize (seq_NoDup (S a) 0) as H1.
+    specialize (NoDup_filter (λ i, f i =? b) _ H1) as H2.
+    rewrite Hla in H2.
+    apply NoDup_cons_iff in H2.
+    destruct H2 as (H2, _); apply H2.
+    now left.
+  }
 ...
   assert (Hnd : NoDup (x1 :: x2 :: la)). {
     rewrite <- Hla.
