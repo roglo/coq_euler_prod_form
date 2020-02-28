@@ -438,7 +438,7 @@ destruct (le_dec n (a + b mod n)) as [Hpx| Hpx]. {
 }
 Qed.
 
-Lemma odd_prime_equal_sum_two_squares_plus_one : ∀ p,
+Lemma odd_prime_divides_sum_two_squares_plus_one : ∀ p,
   prime p → p mod 2 = 1 → ∃ a b, Nat.divide p (a ^ 2 + b ^ 2 + 1).
 Proof.
 intros * Hp Hp2.
@@ -596,3 +596,5 @@ exfalso; apply H1; [ | | | easy ]. {
   easy.
 }
 Qed.
+
+Inspect 1.
