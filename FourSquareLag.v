@@ -585,51 +585,60 @@ destruct fd as [(n, n') |]. {
   cbn in Hfd.
   exfalso; clear x x' Hpf.
 (**)
-  revert f a Hba Hf Hfd.
+  revert a f Hba Hf Hfd.
   induction b; intros; [ now specialize (Hf _ Hba) | ].
   destruct a; [ flia Hba | ].
   apply Nat.succ_lt_mono in Hba.
-...
   remember (filter (λ i, f i =? b) (seq 0 (S a))) as la eqn:Hla.
   symmetry in Hla.
   destruct la as [| x1]. {
     assert (H : ∀ x, x < a → f x < b). {
-    intros x Hx.
-    destruct (Nat.eq_dec (f x) b) as [Hfxb| Hfxb]. {
-      specialize (List_filter_nil _ _ Hla x) as H1.
-      assert (H : x ∈ seq 0 (S a)). {
-        apply in_seq.
-        flia Hx.
+      intros x Hx.
+      destruct (Nat.eq_dec (f x) b) as [Hfxb| Hfxb]. {
+        specialize (List_filter_nil _ _ Hla x) as H1.
+        assert (H : x ∈ seq 0 (S a)). {
+          apply in_seq.
+          flia Hx.
+        }
+        specialize (H1 H); clear H; cbn in H1.
+        now apply Nat.eqb_neq in H1.
       }
-      specialize (H1 H); clear H; cbn in H1.
-      now apply Nat.eqb_neq in H1.
+      assert (H : x < S a) by flia Hx.
+      specialize (Hf x H); clear H.
+      flia Hf Hfxb.
     }
-    assert (H : x < S a) by flia Hx.
-    specialize (Hf x H); clear H.
-    flia Hf Hfxb.
+    specialize (IHb a f Hba H); clear H.
+    rewrite <- Nat.add_1_r in Hfd.
+    rewrite seq_app in Hfd; cbn in Hfd.
+    rewrite map_app in Hfd; cbn in Hfd.
+    specialize (NoDup_remove_1 _ _ _ Hfd) as H1.
+    now rewrite app_nil_r in H1.
   }
-  specialize (IHb a f Hba H); clear H.
-  destruct IHb as (x & x' & y & Hxxy).
-  exists x, x', y.
-  split; [ flia Hxxy | ].
-  split; [ flia Hxxy | easy ].
-}
-destruct (Nat.eq_dec b 0) as [Hbz| Hbz]. {
-  subst b.
-  destruct a; [ flia Hba | ].
-  specialize (Hf 0 (Nat.lt_0_succ _)) as H1.
-  specialize (Hf (S a) (Nat.lt_succ_diag_r _)) as H2.
-  exists 0, (S a), 0.
-  split; [ flia | ].
-  split; [ flia | ].
-  split; [ easy | ].
-  split; [ flia H1 | flia H2 ].
-}
-destruct la as [| x2]. {
-  specialize (IHb a (λ i, if lt_dec i x1 then f i else f (i + 1)) Hba).
-  cbn in IHb.
-  assert (H : ∀ x, x < a → (if lt_dec x x1 then f x else f (x + 1)) < b). {
-    intros x Hx.
+  destruct (Nat.eq_dec b 0) as [Hbz| Hbz]. {
+    subst b.
+    destruct a; [ flia Hba | ].
+    specialize (Hf a) as H1.
+    assert (H : a < S (S a)) by flia.
+    specialize (H1 H); clear H.
+    specialize (Hf (S a) (Nat.lt_succ_diag_r _)) as H2.
+    apply Nat.lt_1_r in H1.
+    apply Nat.lt_1_r in H2.
+    do 2 rewrite <- Nat.add_1_r in Hfd.
+    do 2 rewrite seq_app in Hfd; cbn in Hfd.
+    rewrite <- app_assoc in Hfd.
+    do 2 rewrite map_app in Hfd.
+    cbn in Hfd.
+    apply NoDup_remove_2 in Hfd.
+    apply Hfd.
+    apply in_app_iff; right.
+    now rewrite H1, Nat.add_1_r, H2; left.
+  }
+  destruct la as [| x2]. {
+    specialize (IHb a (λ i, if lt_dec i x1 then f i else f (i + 1)) Hba).
+    cbn in IHb.
+    assert (H : ∀ x, x < a → (if lt_dec x x1 then f x else f (x + 1)) < b). {
+      intros x Hx.
+...
     destruct (lt_dec x x1) as [Hxx| Hxx]. {
       assert (Hxb : f x ≠ b). {
         intros Hxb.
