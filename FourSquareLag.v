@@ -438,6 +438,69 @@ destruct (le_dec n (a + b mod n)) as [Hpx| Hpx]. {
 }
 Qed.
 
+Lemma odd_prime_sum_two_squares_plus_one_lt : ∀ x x' p (u := (p - 1) / 2) k,
+  prime p
+  → p mod 2 = 1
+  → x' < p + 1
+  → x ≤ u
+  → u < x'
+  → x ^ 2 + (x' - (u + 1)) ^ 2 + 1 = k * p
+  → k < p.
+Proof.
+intros * Hp Hp2 Hx'p Hxu Hx'u Hk.
+assert (Hpz : p ≠ 0) by now (intros H1; subst p).
+  apply (Nat.mul_lt_mono_pos_r p); [ flia Hpz | ].
+  rewrite <- Hk.
+  apply (le_lt_trans _ (u ^ 2 + u ^ 2 + 1)). {
+    apply Nat.add_le_mono_r.
+    apply Nat.add_le_mono; [ now apply Nat.pow_le_mono_l | ].
+    apply Nat.pow_le_mono_l.
+    apply (Nat.add_le_mono_r _ _ (u + 1)).
+    rewrite Nat.sub_add; [ | flia Hx'u ].
+    rewrite Nat.add_assoc.
+    replace (u + u) with (2 * u) by flia.
+    unfold u.
+    rewrite <- Nat.divide_div_mul_exact; [ | easy | ]. 2: {
+      apply Nat.mod_divide; [ easy | ].
+      specialize (Nat.div_mod p 2 (Nat.neq_succ_0 _)) as H2.
+      rewrite Hp2 in H2.
+      rewrite H2, Nat.add_sub, Nat.mul_comm.
+      now apply Nat.mod_mul.
+    }
+    rewrite Nat.mul_comm, Nat.div_mul; [ | easy ].
+    flia Hx'p.
+  } {
+    specialize (prime_ge_2 p Hp) as H2p.
+    specialize (Nat.div_mod (p - 1) 2 (Nat.neq_succ_0 _)) as H1.
+    assert (H : (p - 1) mod 2 = 0). {
+      specialize (Nat.div_mod p 2 (Nat.neq_succ_0 _)) as H.
+      rewrite H, Hp2, Nat.add_sub, Nat.mul_comm.
+      now apply Nat.mod_mul.
+    }
+    rewrite H, Nat.add_0_r in H1; clear H.
+    assert (H : p = 2 * u + 1). {
+      unfold u.
+      rewrite <- H1.
+      rewrite Nat.sub_add; [ easy | flia H2p ].
+    }
+    rewrite H.
+    rewrite Nat.mul_add_distr_r, Nat.mul_1_l.
+    rewrite Nat.mul_add_distr_l, Nat.mul_1_r.
+    replace (u ^ 2 + u ^ 2) with (2 * u ^ 2) by flia.
+    rewrite Nat.pow_2_r.
+    rewrite Nat.add_assoc.
+    apply Nat.add_lt_mono_r.
+    rewrite Nat.mul_shuffle0.
+    do 2 rewrite Nat.mul_assoc.
+    enough (Hu : 0 < u) by flia Hu.
+    unfold u.
+    apply (Nat.mul_lt_mono_pos_r 2); [ flia | ].
+    rewrite Nat.mul_0_l.
+    rewrite Nat.mul_comm, <- H1.
+    flia H2p.
+  }
+Qed.
+
 Lemma odd_prime_divides_sum_two_squares_plus_one : ∀ p,
   prime p → p mod 2 = 1 → ∃ a b n, n < p ∧ a ^ 2 + b ^ 2 + 1 = n * p.
 Proof.
@@ -552,56 +615,7 @@ destruct (le_dec x u) as [Hxu| Hxu]. {
   destruct H1 as (k, Hk).
   exists x, (x' - (u + 1)), k.
   split; [ | easy ].
-  apply (Nat.mul_lt_mono_pos_r p); [ flia Hpz | ].
-  rewrite <- Hk.
-  apply (le_lt_trans _ (u ^ 2 + u ^ 2 + 1)). {
-    apply Nat.add_le_mono_r.
-    apply Nat.add_le_mono; [ now apply Nat.pow_le_mono_l | ].
-    apply Nat.pow_le_mono_l.
-    apply (Nat.add_le_mono_r _ _ (u + 1)).
-    rewrite Nat.sub_add; [ | flia Hx'u ].
-    rewrite Nat.add_assoc.
-    replace (u + u) with (2 * u) by flia.
-    unfold u.
-    rewrite <- Nat.divide_div_mul_exact; [ | easy | ]. 2: {
-      apply Nat.mod_divide; [ easy | ].
-      specialize (Nat.div_mod p 2 (Nat.neq_succ_0 _)) as H2.
-      rewrite Hp2 in H2.
-      rewrite H2, Nat.add_sub, Nat.mul_comm.
-      now apply Nat.mod_mul.
-    }
-    rewrite Nat.mul_comm, Nat.div_mul; [ | easy ].
-    flia Hx'p.
-  } {
-    specialize (prime_ge_2 p Hp) as H2p.
-    specialize (Nat.div_mod (p - 1) 2 (Nat.neq_succ_0 _)) as H1.
-    assert (H : (p - 1) mod 2 = 0). {
-      specialize (Nat.div_mod p 2 (Nat.neq_succ_0 _)) as H.
-      rewrite H, Hp2, Nat.add_sub, Nat.mul_comm.
-      now apply Nat.mod_mul.
-    }
-    rewrite H, Nat.add_0_r in H1; clear H.
-    assert (H : p = 2 * u + 1). {
-      unfold u.
-      rewrite <- H1.
-      rewrite Nat.sub_add; [ easy | flia H2p ].
-    }
-    rewrite H.
-    rewrite Nat.mul_add_distr_r, Nat.mul_1_l.
-    rewrite Nat.mul_add_distr_l, Nat.mul_1_r.
-    replace (u ^ 2 + u ^ 2) with (2 * u ^ 2) by flia.
-    rewrite Nat.pow_2_r.
-    rewrite Nat.add_assoc.
-    apply Nat.add_lt_mono_r.
-    rewrite Nat.mul_shuffle0.
-    do 2 rewrite Nat.mul_assoc.
-    enough (Hu : 0 < u) by flia Hu.
-    unfold u.
-    apply (Nat.mul_lt_mono_pos_r 2); [ flia | ].
-    rewrite Nat.mul_0_l.
-    rewrite Nat.mul_comm, <- H1.
-    flia H2p.
-  }
+  now apply (odd_prime_sum_two_squares_plus_one_lt x x').
 }
 apply Nat.nle_gt in Hxu.
 destruct (le_dec x' u) as [Hx'u| Hx'u]. {
@@ -611,7 +625,7 @@ destruct (le_dec x' u) as [Hx'u| Hx'u]. {
   destruct H1 as (k, Hk).
   exists x', (x - (u + 1)), k.
   split; [ | easy ].
-...
+  now apply (odd_prime_sum_two_squares_plus_one_lt x' x).
 }
 apply Nat.nle_gt in Hx'u.
 specialize (Hb (x - (u + 1)) (x' - (u + 1))) as H1.
