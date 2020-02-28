@@ -439,7 +439,7 @@ destruct (le_dec n (a + b mod n)) as [Hpx| Hpx]. {
 Qed.
 
 Lemma odd_prime_divides_sum_two_squares_plus_one : ∀ p,
-  prime p → p mod 2 = 1 → ∃ a b, Nat.divide p (a ^ 2 + b ^ 2 + 1).
+  prime p → p mod 2 = 1 → ∃ a b n, n < p ∧ a ^ 2 + b ^ 2 + 1 = n * p.
 Proof.
 intros * Hp Hp2.
 assert
@@ -549,6 +549,67 @@ destruct (le_dec x u) as [Hxu| Hxu]. {
   apply Nat.nle_gt in Hx'u.
   specialize (Nat_eq_mod_divide_sum p _ _ Hpz Hfxx) as H1.
   rewrite Nat.add_assoc in H1.
+  destruct H1 as (k, Hk).
+  exists x, (x' - (u + 1)), k.
+  split; [ | easy ].
+  apply (Nat.mul_lt_mono_pos_r p); [ flia Hpz | ].
+  rewrite <- Hk.
+  apply (le_lt_trans _ (u ^ 2 + u ^ 2 + 1)). {
+    apply Nat.add_le_mono_r.
+    apply Nat.add_le_mono; [ now apply Nat.pow_le_mono_l | ].
+    apply Nat.pow_le_mono_l.
+    apply (Nat.add_le_mono_r _ _ (u + 1)).
+    rewrite Nat.sub_add; [ | flia Hx'u ].
+    rewrite Nat.add_assoc.
+    replace (u + u) with (2 * u) by flia.
+    unfold u.
+    rewrite <- Nat.divide_div_mul_exact; [ | easy | ]. 2: {
+      apply Nat.mod_divide; [ easy | ].
+      specialize (Nat.div_mod p 2 (Nat.neq_succ_0 _)) as H2.
+      rewrite Hp2 in H2.
+      rewrite H2, Nat.add_sub, Nat.mul_comm.
+      now apply Nat.mod_mul.
+    }
+    rewrite Nat.mul_comm, Nat.div_mul; [ | easy ].
+    flia Hx'p.
+  } {
+...
+    replace (u ^ 2 + u ^ 2) with (2 * u ^ 2) by flia.
+    unfold u.
+    specialize (Nat.div_mod (p - 1) 2 (Nat.neq_succ_0 _)) as H1.
+    assert (H : (p - 1) mod 2 = 0). {
+      specialize (Nat.div_mod p 2 (Nat.neq_succ_0 _)) as H.
+      rewrite H, Hp2, Nat.add_sub, Nat.mul_comm.
+      now apply Nat.mod_mul.
+    }
+    rewrite H, Nat.add_0_r in H1; clear H.
+    rewrite Nat.pow_2_r, Nat.mul_assoc.
+    rewrite <- H1, Nat.mul_comm.
+    rewrite H1 at 1.
+    rewrite (Nat.mul_comm 2).
+    rewrite Nat.div_mul; [ | easy ].
+    specialize (prime_ge_2 p Hp) as H2p.
+    apply (lt_trans _ ((p - 1) * (p - 1) + 1)). {
+      apply Nat.add_lt_mono_r.
+      apply Nat.mul_lt_mono_pos_r; [ flia H2p | ].
+      apply (Nat.mul_lt_mono_pos_l 2); [ flia | ].
+      rewrite <- H1.
+      flia H2p.
+    } {
+      rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
+      rewrite Nat.mul_sub_distr_r, Nat.mul_1_l.
+      rewrite Nat_sub_sub_assoc. 2: {
+        split; [ flia H2p | ].
+        etransitivity; [ | apply Nat.le_add_r ].
+        apply Nat.le_add_le_sub_r.
+        now apply Nat.add_le_mul.
+      }
+      rewrite <- Nat_sub_sub_distr.
+...
+        rewrite <- Nat.add_sub_swap.
+        replace p with (p * 1) at 4 by apply Nat.mul_1_r.
+        rewrite <- Nat.mul_sub_distr_l.
+...
   now exists x, (x' - (u + 1)).
 }
 apply Nat.nle_gt in Hxu.
