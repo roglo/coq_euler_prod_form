@@ -102,346 +102,7 @@ specialize (prime_ge_2 _ Hp) as Hpge2.
 flia Hb Hb' Hk Hpge2.
 Qed.
 
-(* classical version of pigeonhole *)
-
-Theorem pigeonhole : ∀ a b f,
-  b < a
-  → (∀ x, x < a → f x < b)
-  → ∃ x x' y, x < a ∧ x' < a ∧ x ≠ x' ∧ f x = y ∧ f x' = y.
-Proof.
-intros * Hba Hf.
-revert a f Hba Hf.
-induction b; intros; [ now specialize (Hf 0 Hba) | ].
-destruct a; [ flia Hba | ].
-apply Nat.succ_lt_mono in Hba.
-remember (filter (λ i, f i =? b) (seq 0 (S a))) as la eqn:Hla.
-symmetry in Hla.
-destruct la as [| x1]. {
-  assert (H : ∀ x, x < a → f x < b). {
-    intros x Hx.
-    destruct (Nat.eq_dec (f x) b) as [Hfxb| Hfxb]. {
-      specialize (List_filter_nil _ _ Hla x) as H1.
-      assert (H : x ∈ seq 0 (S a)). {
-        apply in_seq.
-        flia Hx.
-      }
-      specialize (H1 H); clear H; cbn in H1.
-      now apply Nat.eqb_neq in H1.
-    }
-    assert (H : x < S a) by flia Hx.
-    specialize (Hf x H); clear H.
-    flia Hf Hfxb.
-  }
-  specialize (IHb a f Hba H); clear H.
-  destruct IHb as (x & x' & y & Hxxy).
-  exists x, x', y.
-  split; [ flia Hxxy | ].
-  split; [ flia Hxxy | easy ].
-}
-destruct (Nat.eq_dec b 0) as [Hbz| Hbz]. {
-  subst b.
-  destruct a; [ flia Hba | ].
-  specialize (Hf 0 (Nat.lt_0_succ _)) as H1.
-  specialize (Hf (S a) (Nat.lt_succ_diag_r _)) as H2.
-  exists 0, (S a), 0.
-  split; [ flia | ].
-  split; [ flia | ].
-  split; [ easy | ].
-  split; [ flia H1 | flia H2 ].
-}
-destruct la as [| x2]. {
-  specialize (IHb a (λ i, if lt_dec i x1 then f i else f (i + 1)) Hba).
-  cbn in IHb.
-  assert (H : ∀ x, x < a → (if lt_dec x x1 then f x else f (x + 1)) < b). {
-    intros x Hx.
-    destruct (lt_dec x x1) as [Hxx| Hxx]. {
-      assert (Hxb : f x ≠ b). {
-        intros Hxb.
-        assert (H : x ∈ filter (λ i, f i =? b) (seq 0 (S a))). {
-          apply filter_In.
-          split; [ apply in_seq; cbn; flia Hx | ].
-          now apply Nat.eqb_eq.
-        }
-        rewrite Hla in H.
-        destruct H as [H| H]; [ flia Hxx H| easy ].
-      }
-      specialize (Hf x).
-      assert (H : x < S a) by flia Hx.
-      specialize (Hf H); clear H.
-      flia Hf Hxb.
-    }
-    apply Nat.nlt_ge in Hxx.
-    specialize (Hf (x + 1)).
-    assert (H : x + 1 < S a) by flia Hx.
-    specialize (Hf H); clear H.
-    assert (Hxb : f (x + 1) ≠ b). {
-      intros Hxb.
-      assert (H : x + 1 ∈ filter (λ i, f i =? b) (seq 0 (S a))). {
-        apply filter_In.
-        split; [ apply in_seq; cbn; flia Hx | ].
-        now apply Nat.eqb_eq.
-      }
-      rewrite Hla in H.
-      destruct H as [H| H]; [ flia Hxx H| easy ].
-    }
-    flia Hf Hxb.
-  }
-  specialize (IHb H); clear H.
-  destruct IHb as (x & x' & y & Hxxy).
-  destruct (lt_dec x x1) as [Hxx1| Hxx1]. {
-    destruct (lt_dec x' x1) as [Hx'x1| Hx'x1]. {
-      exists x, x', y.
-      split; [ flia Hxxy | ].
-      split; [ flia Hxxy | easy ].
-    }
-    apply Nat.nlt_ge in Hx'x1.
-    exists x, (x' + 1), y.
-    split; [ flia Hxxy | ].
-    split; [ flia Hxxy | ].
-    split; [ | easy ].
-    flia Hxx1 Hx'x1.
-  }
-  apply Nat.nlt_ge in Hxx1.
-  destruct (lt_dec x' x1) as [Hx'x1| Hx'x1]. {
-    exists (x + 1), x', y.
-    split; [ flia Hxxy | ].
-    split; [ flia Hxxy | ].
-    split; [ | easy ].
-    flia Hxx1 Hx'x1.
-  }
-  apply Nat.nlt_ge in Hx'x1.
-  exists (x + 1), (x' + 1), y.
-  split; [ flia Hxxy | ].
-  split; [ flia Hxxy | ].
-  split; [ | easy ].
-  flia Hxxy.
-}
-exists x1, x2, b.
-assert (Hx1 : x1 ∈ x1 :: x2 :: la) by now left.
-assert (Hx2 : x2 ∈ x1 :: x2 :: la) by now right; left.
-rewrite <- Hla in Hx1.
-rewrite <- Hla in Hx2.
-apply filter_In in Hx1.
-apply filter_In in Hx2.
-destruct Hx1 as (Hx1, Hfx1).
-destruct Hx2 as (Hx2, Hfx2).
-apply in_seq in Hx1.
-apply in_seq in Hx2.
-split; [ flia Hx1 | ].
-split; [ flia Hx2 | ].
-apply Nat.eqb_eq in Hfx1.
-apply Nat.eqb_eq in Hfx2.
-split; [ | easy ].
-assert (Hnd : NoDup (x1 :: x2 :: la)). {
-  rewrite <- Hla.
-  apply NoDup_filter.
-  apply seq_NoDup.
-}
-apply NoDup_cons_iff in Hnd.
-destruct Hnd as (Hxx, Hnd).
-intros H; apply Hxx; clear Hxx; rename H into Hxx.
-now subst x2; left.
-Qed.
-
-Theorem Nat_eq_mod_divide_sum : ∀ n a b,
-  n ≠ 0
-  → a ≡ (n - b mod n) mod n
-  → Nat.divide n (a + b).
-Proof.
-intros * Hnz Hab.
-destruct (le_dec n (a + b mod n)) as [Hpx| Hpx]. {
-  apply Nat_eq_mod_sub_0 in Hab.
-  rewrite Nat_sub_sub_assoc in Hab. 2: {
-    split; [ | easy ].
-    now apply Nat.lt_le_incl, Nat.mod_upper_bound.
-  }
-  rewrite <- (Nat.mod_add _ 1) in Hab; [ | easy ].
-  rewrite Nat.mul_1_l in Hab.
-  rewrite Nat.sub_add in Hab; [ | easy ].
-  rewrite Nat.add_mod_idemp_r in Hab; [ | easy ].
-  now apply Nat.mod_divide in Hab.
-} {
-  apply Nat.nle_gt in Hpx.
-  symmetry in Hab.
-  apply Nat_eq_mod_sub_0 in Hab.
-  rewrite Nat_sub_sub_swap, <- Nat.sub_add_distr in Hab.
-  remember (a + b mod n) as v eqn:Hv.
-  move Hab at bottom.
-  destruct (Nat.eq_dec v 0) as [Hvz| Hvz]. 2: {
-    destruct v; [ easy | ].
-    rewrite Nat.mod_small in Hab; [ | flia Hpx ].
-    flia Hpx Hab.
-  }
-  move Hvz at top; subst v.
-  symmetry in Hv.
-  apply Nat.eq_add_0 in Hv.
-  destruct Hv as (Hxz, Hx'uz).
-  subst a; cbn.
-  now apply Nat.mod_divide in Hx'uz.
-}
-Qed.
-
-Lemma odd_prime_equal_sum_two_squares_plus_one : ∀ p,
-  prime p → p mod 2 = 1 → ∃ a b, Nat.divide p (a ^ 2 + b ^ 2 + 1).
-Proof.
-intros * Hp Hp2.
-assert
-  (Ha :
-   ∀ a a',
-   a ≤ (p - 1) / 2
-   → a' ≤ (p - 1) / 2
-   → a ≠ a'
-   → a ^ 2 ≢ a' ^ 2 mod p). {
-  intros * Ha Ha' Haa.
-  destruct (lt_dec a' a) as [Haa'| Haa']. {
-    now apply le_half_prime_square_diff.
-  } {
-    assert (H : a < a') by flia Haa Haa'.
-    intros H1.
-    symmetry in H1.
-    revert H1.
-    now apply le_half_prime_square_diff.
-  }
-}
-assert
-  (Hb :
-   ∀ b b',
-   b ≤ (p - 1) / 2
-   → b' ≤ (p - 1) / 2
-   → b ≠ b'
-   → (p - (b ^ 2 + 1) mod p) ≢ (p - (b' ^ 2 + 1) mod p) mod p). {
-  intros * Hb Hb' Hbb H.
-  assert (Hpz : p ≠ 0) by now (intros H1; subst p).
-  remember ((b ^ 2 + 1) mod p) as b1 eqn:Hb1.
-  remember ((b' ^ 2 + 1) mod p) as b'1 eqn:Hb'1.
-  destruct (lt_dec b1 b'1) as [Hbb'| Hbb']. {
-    apply Nat_eq_mod_sub_0 in H.
-    replace (p - b1 - (p - b'1)) with (b'1 - b1) in H. 2: {
-      specialize (Nat.mod_upper_bound (b' ^ 2 + 1) p Hpz) as H1.
-      rewrite <- Hb'1 in H1.
-      flia Hbb' H1.
-    }
-    apply Nat.mod_divide in H; [ | easy ].
-    destruct H as (k, Hk).
-    destruct k; [ flia Hk Hbb' | ].
-    apply Nat.add_sub_eq_nz in Hk. 2: {
-      now apply Nat.neq_mul_0.
-    }
-    specialize (Nat.mod_upper_bound (b' ^ 2 + 1) p Hpz) as H1.
-    rewrite <- Hb'1, <- Hk in H1.
-    flia H1.
-  }
-  destruct (lt_dec b'1 b1) as [Hbb'1| Hbb'1]. {
-    symmetry in H.
-    apply Nat_eq_mod_sub_0 in H.
-    replace (p - b'1 - (p - b1)) with (b1 - b'1) in H. 2: {
-      specialize (Nat.mod_upper_bound (b ^ 2 + 1) p Hpz) as H1.
-      rewrite <- Hb1 in H1.
-      flia Hbb' H1.
-    }
-    apply Nat.mod_divide in H; [ | easy ].
-    destruct H as (k, Hk).
-    destruct k; [ flia Hk Hbb'1 | ].
-    apply Nat.add_sub_eq_nz in Hk. 2: {
-      now apply Nat.neq_mul_0.
-    }
-    specialize (Nat.mod_upper_bound (b ^ 2 + 1) p Hpz) as H1.
-    rewrite <- Hb1, <- Hk in H1.
-    flia H1.
-  }
-  replace b'1 with b1 in * by flia Hbb' Hbb'1.
-  clear Hbb' Hbb'1 H.
-  rewrite Hb'1 in Hb1.
-  destruct (lt_dec b b') as [Hbb'| Hbb']. {
-    revert Hb1.
-    now apply le_half_prime_succ_square_diff.
-  } {
-    symmetry in Hb1.
-    revert Hb1.
-    apply le_half_prime_succ_square_diff; try easy.
-    apply Nat.nlt_ge in Hbb'.
-    flia Hbb Hbb'.
-  }
-}
 (* pigeonhole *)
-assert (Hpz : p ≠ 0) by now (intros H1; subst p).
-specialize (pigeonhole (p + 1) p) as H1.
-set (u := (p - 1) / 2) in *.
-set
-  (f i :=
-     if le_dec i u then (i ^ 2) mod p
-     else (p - ((i - (u + 1)) ^ 2 + 1) mod p) mod p).
-specialize (H1 f).
-assert (H : p < p + 1) by flia.
-specialize (H1 H); clear H.
-assert (H : ∀ x, x < p + 1 → f x < p). {
-  intros x Hx.
-  unfold f; cbn - [ "/" ].
-  destruct (le_dec x u); now apply Nat.mod_upper_bound.
-}
-specialize (H1 H); clear H.
-destruct H1 as (x & x' & y & Hxp & Hx'p & Hxx' & Hfx & Hfx').
-unfold f in Hfx, Hfx'.
-destruct (le_dec x u) as [Hxu| Hxu]. {
-  destruct (le_dec x' u) as [Hx'u| Hx'u]. {
-    specialize (Ha x x' Hxu Hx'u Hxx') as H1.
-    now rewrite Hfx, Hfx' in H1.
-  }
-  apply Nat.nle_gt in Hx'u.
-  rewrite <- Hfx' in Hfx.
-  specialize (Nat_eq_mod_divide_sum _ _ _ Hpz Hfx) as H1.
-  rewrite Nat.add_assoc in H1.
-  now exists x, (x' - (u + 1)).
-}
-apply Nat.nle_gt in Hxu.
-destruct (le_dec x' u) as [Hx'u| Hx'u]. {
-  rewrite <- Hfx in Hfx'.
-  specialize (Nat_eq_mod_divide_sum p _ _ Hpz Hfx') as H1.
-  rewrite Nat.add_assoc in H1.
-  now exists x', (x - (u + 1)).
-}
-apply Nat.nle_gt in Hx'u.
-specialize (Hb (x - (u + 1)) (x' - (u + 1))) as H1.
-rewrite Hfx, Hfx' in H1.
-exfalso; apply H1; [ | | | easy ]. {
-  apply (Nat.add_le_mono_r _ _ (u + 1)).
-  rewrite Nat.sub_add; [ | flia Hxu ].
-  replace (u + (u + 1)) with (2 * u + 1) by flia.
-  unfold u.
-  rewrite <- Nat.divide_div_mul_exact; [ | easy | ]. 2: {
-    apply Nat.mod_divide; [ easy | ].
-    specialize (Nat.div_mod p 2 (Nat.neq_succ_0 _)) as H2.
-    rewrite Hp2 in H2.
-    rewrite H2, Nat.add_sub, Nat.mul_comm.
-    now apply Nat.mod_mul.
-  }
-  rewrite Nat.mul_comm, Nat.div_mul; [ | easy ].
-  flia Hxp.
-} {
-  apply (Nat.add_le_mono_r _ _ (u + 1)).
-  rewrite Nat.sub_add; [ | flia Hx'u ].
-  replace (u + (u + 1)) with (2 * u + 1) by flia.
-  unfold u.
-  rewrite <- Nat.divide_div_mul_exact; [ | easy | ]. 2: {
-    apply Nat.mod_divide; [ easy | ].
-    specialize (Nat.div_mod p 2 (Nat.neq_succ_0 _)) as H2.
-    rewrite Hp2 in H2.
-    rewrite H2, Nat.add_sub, Nat.mul_comm.
-    now apply Nat.mod_mul.
-  }
-  rewrite Nat.mul_comm, Nat.div_mul; [ | easy ].
-  flia Hx'p.
-} {
-  intros H; apply Hxx'.
-  apply (Nat.add_cancel_r _ _ (u + 1)) in H.
-  rewrite Nat.sub_add in H; [ | flia Hxu ].
-  rewrite Nat.sub_add in H; [ | flia Hx'u ].
-  easy.
-}
-Qed.
-
-(* trying to restart those proofs with a
-   constructive version of pigeonhole *)
 
 Fixpoint find_dup (la : list (nat * nat)) :=
   match la with
@@ -525,7 +186,7 @@ constructor. {
 }
 Qed.
 
-Theorem pigeonhole' : ∀ a b f x x',
+Theorem pigeonhole : ∀ a b f x x',
   b < a
   → (∀ x, x < a → f x < b)
   → pigeonhole_fun a f = (x, x')
@@ -738,3 +399,257 @@ destruct fd as [(n, n') |]. {
   now apply H2.
 }
 Qed.
+
+Theorem Nat_eq_mod_divide_sum : ∀ n a b,
+  n ≠ 0
+  → a ≡ (n - b mod n) mod n
+  → Nat.divide n (a + b).
+Proof.
+intros * Hnz Hab.
+destruct (le_dec n (a + b mod n)) as [Hpx| Hpx]. {
+  apply Nat_eq_mod_sub_0 in Hab.
+  rewrite Nat_sub_sub_assoc in Hab. 2: {
+    split; [ | easy ].
+    now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+  }
+  rewrite <- (Nat.mod_add _ 1) in Hab; [ | easy ].
+  rewrite Nat.mul_1_l in Hab.
+  rewrite Nat.sub_add in Hab; [ | easy ].
+  rewrite Nat.add_mod_idemp_r in Hab; [ | easy ].
+  now apply Nat.mod_divide in Hab.
+} {
+  apply Nat.nle_gt in Hpx.
+  symmetry in Hab.
+  apply Nat_eq_mod_sub_0 in Hab.
+  rewrite Nat_sub_sub_swap, <- Nat.sub_add_distr in Hab.
+  remember (a + b mod n) as v eqn:Hv.
+  move Hab at bottom.
+  destruct (Nat.eq_dec v 0) as [Hvz| Hvz]. 2: {
+    destruct v; [ easy | ].
+    rewrite Nat.mod_small in Hab; [ | flia Hpx ].
+    flia Hpx Hab.
+  }
+  move Hvz at top; subst v.
+  symmetry in Hv.
+  apply Nat.eq_add_0 in Hv.
+  destruct Hv as (Hxz, Hx'uz).
+  subst a; cbn.
+  now apply Nat.mod_divide in Hx'uz.
+}
+Qed.
+
+Lemma odd_prime_divides_sum_two_squares_plus_one : ∀ p,
+  prime p → p mod 2 = 1 → ∃ a b n, n < p ∧ a ^ 2 + b ^ 2 + 1 = n * p.
+Proof.
+intros * Hp Hp2.
+assert
+  (Ha :
+   ∀ a a',
+   a ≤ (p - 1) / 2
+   → a' ≤ (p - 1) / 2
+   → a ≠ a'
+   → a ^ 2 ≢ a' ^ 2 mod p). {
+  intros * Ha Ha' Haa.
+  destruct (lt_dec a' a) as [Haa'| Haa']. {
+    now apply le_half_prime_square_diff.
+  } {
+    assert (H : a < a') by flia Haa Haa'.
+    intros H1.
+    symmetry in H1.
+    revert H1.
+    now apply le_half_prime_square_diff.
+  }
+}
+assert
+  (Hb :
+   ∀ b b',
+   b ≤ (p - 1) / 2
+   → b' ≤ (p - 1) / 2
+   → b ≠ b'
+   → (p - (b ^ 2 + 1) mod p) ≢ (p - (b' ^ 2 + 1) mod p) mod p). {
+  intros * Hb Hb' Hbb H.
+  assert (Hpz : p ≠ 0) by now (intros H1; subst p).
+  remember ((b ^ 2 + 1) mod p) as b1 eqn:Hb1.
+  remember ((b' ^ 2 + 1) mod p) as b'1 eqn:Hb'1.
+  destruct (lt_dec b1 b'1) as [Hbb'| Hbb']. {
+    apply Nat_eq_mod_sub_0 in H.
+    replace (p - b1 - (p - b'1)) with (b'1 - b1) in H. 2: {
+      specialize (Nat.mod_upper_bound (b' ^ 2 + 1) p Hpz) as H1.
+      rewrite <- Hb'1 in H1.
+      flia Hbb' H1.
+    }
+    apply Nat.mod_divide in H; [ | easy ].
+    destruct H as (k, Hk).
+    destruct k; [ flia Hk Hbb' | ].
+    apply Nat.add_sub_eq_nz in Hk. 2: {
+      now apply Nat.neq_mul_0.
+    }
+    specialize (Nat.mod_upper_bound (b' ^ 2 + 1) p Hpz) as H1.
+    rewrite <- Hb'1, <- Hk in H1.
+    flia H1.
+  }
+  destruct (lt_dec b'1 b1) as [Hbb'1| Hbb'1]. {
+    symmetry in H.
+    apply Nat_eq_mod_sub_0 in H.
+    replace (p - b'1 - (p - b1)) with (b1 - b'1) in H. 2: {
+      specialize (Nat.mod_upper_bound (b ^ 2 + 1) p Hpz) as H1.
+      rewrite <- Hb1 in H1.
+      flia Hbb' H1.
+    }
+    apply Nat.mod_divide in H; [ | easy ].
+    destruct H as (k, Hk).
+    destruct k; [ flia Hk Hbb'1 | ].
+    apply Nat.add_sub_eq_nz in Hk. 2: {
+      now apply Nat.neq_mul_0.
+    }
+    specialize (Nat.mod_upper_bound (b ^ 2 + 1) p Hpz) as H1.
+    rewrite <- Hb1, <- Hk in H1.
+    flia H1.
+  }
+  replace b'1 with b1 in * by flia Hbb' Hbb'1.
+  clear Hbb' Hbb'1 H.
+  rewrite Hb'1 in Hb1.
+  destruct (lt_dec b b') as [Hbb'| Hbb']. {
+    revert Hb1.
+    now apply le_half_prime_succ_square_diff.
+  } {
+    symmetry in Hb1.
+    revert Hb1.
+    apply le_half_prime_succ_square_diff; try easy.
+    apply Nat.nlt_ge in Hbb'.
+    flia Hbb Hbb'.
+  }
+}
+(* pigeonhole *)
+assert (Hpz : p ≠ 0) by now (intros H1; subst p).
+specialize (pigeonhole (p + 1) p) as H1.
+set (u := (p - 1) / 2) in *.
+set
+  (f i :=
+     if le_dec i u then (i ^ 2) mod p
+     else (p - ((i - (u + 1)) ^ 2 + 1) mod p) mod p).
+specialize (H1 f).
+remember (pigeonhole_fun (p + 1) f) as xx eqn:Hxx.
+symmetry in Hxx.
+destruct xx as (x, x').
+assert (H : p < p + 1) by flia.
+specialize (H1 x x' H); clear H.
+assert (H : ∀ x, x < p + 1 → f x < p). {
+  intros x1 Hx.
+  unfold f; cbn - [ "/" ].
+  destruct (le_dec x1 u); now apply Nat.mod_upper_bound.
+}
+specialize (H1 H eq_refl); clear H.
+destruct H1 as (Hxp & Hx'p & Hxx' & Hfxx).
+unfold f in Hfxx.
+destruct (le_dec x u) as [Hxu| Hxu]. {
+  destruct (le_dec x' u) as [Hx'u| Hx'u]. {
+    now specialize (Ha x x' Hxu Hx'u Hxx') as H1.
+  }
+  apply Nat.nle_gt in Hx'u.
+  specialize (Nat_eq_mod_divide_sum p _ _ Hpz Hfxx) as H1.
+  rewrite Nat.add_assoc in H1.
+  destruct H1 as (k, Hk).
+  exists x, (x' - (u + 1)), k.
+  split; [ | easy ].
+  apply (Nat.mul_lt_mono_pos_r p); [ flia Hpz | ].
+  rewrite <- Hk.
+  apply (le_lt_trans _ (u ^ 2 + u ^ 2 + 1)). {
+    apply Nat.add_le_mono_r.
+    apply Nat.add_le_mono; [ now apply Nat.pow_le_mono_l | ].
+    apply Nat.pow_le_mono_l.
+    apply (Nat.add_le_mono_r _ _ (u + 1)).
+    rewrite Nat.sub_add; [ | flia Hx'u ].
+    rewrite Nat.add_assoc.
+    replace (u + u) with (2 * u) by flia.
+    unfold u.
+    rewrite <- Nat.divide_div_mul_exact; [ | easy | ]. 2: {
+      apply Nat.mod_divide; [ easy | ].
+      specialize (Nat.div_mod p 2 (Nat.neq_succ_0 _)) as H2.
+      rewrite Hp2 in H2.
+      rewrite H2, Nat.add_sub, Nat.mul_comm.
+      now apply Nat.mod_mul.
+    }
+    rewrite Nat.mul_comm, Nat.div_mul; [ | easy ].
+    flia Hx'p.
+  } {
+    specialize (prime_ge_2 p Hp) as H2p.
+    specialize (Nat.div_mod (p - 1) 2 (Nat.neq_succ_0 _)) as H1.
+    assert (H : (p - 1) mod 2 = 0). {
+      specialize (Nat.div_mod p 2 (Nat.neq_succ_0 _)) as H.
+      rewrite H, Hp2, Nat.add_sub, Nat.mul_comm.
+      now apply Nat.mod_mul.
+    }
+    rewrite H, Nat.add_0_r in H1; clear H.
+    assert (H : p = 2 * u + 1). {
+      unfold u.
+      rewrite <- H1.
+      rewrite Nat.sub_add; [ easy | flia H2p ].
+    }
+    rewrite H.
+    rewrite Nat.mul_add_distr_r, Nat.mul_1_l.
+    rewrite Nat.mul_add_distr_l, Nat.mul_1_r.
+    replace (u ^ 2 + u ^ 2) with (2 * u ^ 2) by flia.
+    rewrite Nat.pow_2_r.
+    rewrite Nat.add_assoc.
+    apply Nat.add_lt_mono_r.
+    rewrite Nat.mul_shuffle0.
+    do 2 rewrite Nat.mul_assoc.
+    enough (Hu : 0 < u) by flia Hu.
+    unfold u.
+    apply (Nat.mul_lt_mono_pos_r 2); [ flia | ].
+    rewrite Nat.mul_0_l.
+    rewrite Nat.mul_comm, <- H1.
+    flia H2p.
+  }
+}
+apply Nat.nle_gt in Hxu.
+destruct (le_dec x' u) as [Hx'u| Hx'u]. {
+  symmetry in Hfxx.
+  specialize (Nat_eq_mod_divide_sum p _ _ Hpz Hfxx) as H1.
+  rewrite Nat.add_assoc in H1.
+  destruct H1 as (k, Hk).
+  exists x', (x - (u + 1)), k.
+  split; [ | easy ].
+...
+}
+apply Nat.nle_gt in Hx'u.
+specialize (Hb (x - (u + 1)) (x' - (u + 1))) as H1.
+exfalso; apply H1; [ | | | easy ]. {
+  apply (Nat.add_le_mono_r _ _ (u + 1)).
+  rewrite Nat.sub_add; [ | flia Hxu ].
+  replace (u + (u + 1)) with (2 * u + 1) by flia.
+  unfold u.
+  rewrite <- Nat.divide_div_mul_exact; [ | easy | ]. 2: {
+    apply Nat.mod_divide; [ easy | ].
+    specialize (Nat.div_mod p 2 (Nat.neq_succ_0 _)) as H2.
+    rewrite Hp2 in H2.
+    rewrite H2, Nat.add_sub, Nat.mul_comm.
+    now apply Nat.mod_mul.
+  }
+  rewrite Nat.mul_comm, Nat.div_mul; [ | easy ].
+  flia Hxp.
+} {
+  apply (Nat.add_le_mono_r _ _ (u + 1)).
+  rewrite Nat.sub_add; [ | flia Hx'u ].
+  replace (u + (u + 1)) with (2 * u + 1) by flia.
+  unfold u.
+  rewrite <- Nat.divide_div_mul_exact; [ | easy | ]. 2: {
+    apply Nat.mod_divide; [ easy | ].
+    specialize (Nat.div_mod p 2 (Nat.neq_succ_0 _)) as H2.
+    rewrite Hp2 in H2.
+    rewrite H2, Nat.add_sub, Nat.mul_comm.
+    now apply Nat.mod_mul.
+  }
+  rewrite Nat.mul_comm, Nat.div_mul; [ | easy ].
+  flia Hx'p.
+} {
+  intros H; apply Hxx'.
+  apply (Nat.add_cancel_r _ _ (u + 1)) in H.
+  rewrite Nat.sub_add in H; [ | flia Hxu ].
+  rewrite Nat.sub_add in H; [ | flia Hx'u ].
+  easy.
+}
+Qed.
+
+Inspect 1.
