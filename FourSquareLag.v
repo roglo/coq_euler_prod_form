@@ -730,29 +730,19 @@ destruct fd as [(n, n') |]. {
     destruct H2 as (H2, _); apply H2.
     now left.
   }
-...
-  assert (Hnd : NoDup (x1 :: x2 :: la)). {
-    rewrite <- Hla.
-    apply NoDup_filter.
-    apply seq_NoDup.
-  }
-  apply NoDup_cons_iff in Hnd.
-  destruct Hnd as (Hxx, Hnd).
-
-  intros H; apply Hxx; clear Hxx; rename H into Hxx.
-  now subst x2; left.
+  clear - Hfd Hx1 Hx2 H Hfx1 Hfx2.
+  remember (seq 0 (S a)) as l; clear a Heql.
+  apply H; clear H.
+  specialize (proj1 (NoDup_map_iff 0 l (λ x, f x)) Hfd) as H1.
+  cbn in H1.
+  apply (In_nth _ _ 0) in Hx1.
+  apply (In_nth _ _ 0) in Hx2.
+  destruct Hx1 as (n1 & Hn1 & Hx1).
+  destruct Hx2 as (n2 & Hn2 & Hx2).
+  specialize (H1 _ _ Hn1 Hn2) as H2.
+  rewrite Hx1, Hx2, Hfx1, Hfx2 in H2.
+  rewrite <- Hx1, <- Hx2.
+  f_equal.
+  now apply H2.
+}
 Qed.
-...
-  revert f b Hba Hf Hfd.
-  induction a; intros; [ easy | ].
-  rewrite <- Nat.add_1_r in Hfd.
-  rewrite seq_app in Hfd; cbn in Hfd.
-  rewrite map_app in Hfd; cbn in Hfd.
-  specialize (NoDup_remove_1 _ _ _ Hfd) as H1.
-  rewrite app_nil_r in H1.
-...
-  specialize (IHa H1).
-  destruct (Nat.eq_dec b a) as [Hab| Hab]. {
-    subst b.
-    clear Hba.
-...
