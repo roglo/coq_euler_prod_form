@@ -638,11 +638,29 @@ destruct fd as [(n, n') |]. {
     cbn in IHb.
     assert (H : ∀ x, x < a → (if lt_dec x x1 then f x else f (x + 1)) < b). {
       intros x Hx.
-...
-    destruct (lt_dec x x1) as [Hxx| Hxx]. {
-      assert (Hxb : f x ≠ b). {
+      destruct (lt_dec x x1) as [Hxx| Hxx]. {
+        assert (Hxb : f x ≠ b). {
+          intros Hxb.
+          assert (H : x ∈ filter (λ i, f i =? b) (seq 0 (S a))). {
+            apply filter_In.
+            split; [ apply in_seq; cbn; flia Hx | ].
+            now apply Nat.eqb_eq.
+          }
+          rewrite Hla in H.
+          destruct H as [H| H]; [ flia Hxx H| easy ].
+        }
+      specialize (Hf x).
+        assert (H : x < S a) by flia Hx.
+        specialize (Hf H); clear H.
+        flia Hf Hxb.
+      }
+      apply Nat.nlt_ge in Hxx.
+      specialize (Hf (x + 1)).
+      assert (H : x + 1 < S a) by flia Hx.
+      specialize (Hf H); clear H.
+      assert (Hxb : f (x + 1) ≠ b). {
         intros Hxb.
-        assert (H : x ∈ filter (λ i, f i =? b) (seq 0 (S a))). {
+        assert (H : x + 1 ∈ filter (λ i, f i =? b) (seq 0 (S a))). {
           apply filter_In.
           split; [ apply in_seq; cbn; flia Hx | ].
           now apply Nat.eqb_eq.
@@ -650,82 +668,78 @@ destruct fd as [(n, n') |]. {
         rewrite Hla in H.
         destruct H as [H| H]; [ flia Hxx H| easy ].
       }
-      specialize (Hf x).
-      assert (H : x < S a) by flia Hx.
-      specialize (Hf H); clear H.
       flia Hf Hxb.
     }
-    apply Nat.nlt_ge in Hxx.
-    specialize (Hf (x + 1)).
-    assert (H : x + 1 < S a) by flia Hx.
-    specialize (Hf H); clear H.
-    assert (Hxb : f (x + 1) ≠ b). {
-      intros Hxb.
-      assert (H : x + 1 ∈ filter (λ i, f i =? b) (seq 0 (S a))). {
-        apply filter_In.
-        split; [ apply in_seq; cbn; flia Hx | ].
-        now apply Nat.eqb_eq.
+    specialize (IHb H); clear H.
+    apply IHb; clear - Hfd.
+    specialize (proj1 (NoDup_map_iff 0 _ _) Hfd) as H1.
+    apply (NoDup_map_iff 0).
+    intros x x' Hx Hx' Hxx.
+    rewrite seq_length in Hx, Hx', H1.
+    rewrite seq_nth in Hxx; [ | easy ].
+    rewrite seq_nth in Hxx; [ cbn | easy ].
+    cbn in Hxx.
+    destruct (lt_dec x x1) as [Hxx1| Hxx1]. {
+      destruct (lt_dec x' x1) as [Hx'x1| Hx'x1]. {
+        apply H1; [ flia Hx | flia Hx' | ].
+        rewrite seq_nth; [ | flia Hx ].
+        rewrite seq_nth; [ easy | flia Hx' ].
+      } {
+        apply Nat.nlt_ge in Hx'x1.
+        assert (H : x = x' + 1). {
+          apply H1; [ flia Hx | flia Hx' | ].
+          rewrite seq_nth; [ | flia Hx ].
+          rewrite seq_nth; [ easy | flia Hx' ].
+        }
+        flia Hxx1 Hx'x1 H.
       }
-      rewrite Hla in H.
-      destruct H as [H| H]; [ flia Hxx H| easy ].
     }
-    flia Hf Hxb.
-  }
-  specialize (IHb H); clear H.
-  destruct IHb as (x & x' & y & Hxxy).
-  destruct (lt_dec x x1) as [Hxx1| Hxx1]. {
+    apply Nat.nlt_ge in Hxx1.
     destruct (lt_dec x' x1) as [Hx'x1| Hx'x1]. {
-      exists x, x', y.
-      split; [ flia Hxxy | ].
-      split; [ flia Hxxy | easy ].
+      assert (H : x + 1 = x'). {
+        apply H1; [ flia Hx | flia Hx' | ].
+        rewrite seq_nth; [ | flia Hx ].
+        rewrite seq_nth; [ easy | flia Hx' ].
+      }
+      flia Hxx1 Hx'x1 H.
+    } {
+      apply Nat.nlt_ge in Hx'x1.
+      apply (Nat.add_cancel_r _ _ 1).
+      apply H1; [ flia Hx | flia Hx' | ].
+      rewrite seq_nth; [ | flia Hx ].
+      rewrite seq_nth; [ easy | flia Hx' ].
     }
-    apply Nat.nlt_ge in Hx'x1.
-    exists x, (x' + 1), y.
-    split; [ flia Hxxy | ].
-    split; [ flia Hxxy | ].
-    split; [ | easy ].
-    flia Hxx1 Hx'x1.
   }
-  apply Nat.nlt_ge in Hxx1.
-  destruct (lt_dec x' x1) as [Hx'x1| Hx'x1]. {
-    exists (x + 1), x', y.
-    split; [ flia Hxxy | ].
-    split; [ flia Hxxy | ].
-    split; [ | easy ].
-    flia Hxx1 Hx'x1.
+  assert (Hx1 : x1 ∈ x1 :: x2 :: la) by now left.
+  assert (Hx2 : x2 ∈ x1 :: x2 :: la) by now right; left.
+  rewrite <- Hla in Hx1.
+  rewrite <- Hla in Hx2.
+  apply filter_In in Hx1.
+  apply filter_In in Hx2.
+  destruct Hx1 as (Hx1, Hfx1).
+  destruct Hx2 as (Hx2, Hfx2).
+(*
+  apply in_seq in Hx1.
+  apply in_seq in Hx2.
+  cbn in Hx1, Hx2.
+*)
+  apply Nat.eqb_eq in Hfx1.
+  apply Nat.eqb_eq in Hfx2.
+(*
+  destruct Hx1 as (_, Hx1).
+  destruct Hx2 as (_, Hx2).
+*)
+...
+  assert (Hnd : NoDup (x1 :: x2 :: la)). {
+    rewrite <- Hla.
+    apply NoDup_filter.
+    apply seq_NoDup.
   }
-  apply Nat.nlt_ge in Hx'x1.
-  exists (x + 1), (x' + 1), y.
-  split; [ flia Hxxy | ].
-  split; [ flia Hxxy | ].
-  split; [ | easy ].
-  flia Hxxy.
-}
-exists x1, x2, b.
-assert (Hx1 : x1 ∈ x1 :: x2 :: la) by now left.
-assert (Hx2 : x2 ∈ x1 :: x2 :: la) by now right; left.
-rewrite <- Hla in Hx1.
-rewrite <- Hla in Hx2.
-apply filter_In in Hx1.
-apply filter_In in Hx2.
-destruct Hx1 as (Hx1, Hfx1).
-destruct Hx2 as (Hx2, Hfx2).
-apply in_seq in Hx1.
-apply in_seq in Hx2.
-split; [ flia Hx1 | ].
-split; [ flia Hx2 | ].
-apply Nat.eqb_eq in Hfx1.
-apply Nat.eqb_eq in Hfx2.
-split; [ | easy ].
-assert (Hnd : NoDup (x1 :: x2 :: la)). {
-  rewrite <- Hla.
-  apply NoDup_filter.
-  apply seq_NoDup.
-}
-apply NoDup_cons_iff in Hnd.
-destruct Hnd as (Hxx, Hnd).
-intros H; apply Hxx; clear Hxx; rename H into Hxx.
-now subst x2; left.
+  apply NoDup_cons_iff in Hnd.
+  destruct Hnd as (Hxx, Hnd).
+
+  intros H; apply Hxx; clear Hxx; rename H into Hxx.
+  now subst x2; left.
 Qed.
 ...
   revert f b Hba Hf Hfd.
