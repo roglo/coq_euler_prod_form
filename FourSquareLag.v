@@ -573,9 +573,7 @@ destruct (le_dec x u) as [Hxu| Hxu]. {
     rewrite Nat.mul_comm, Nat.div_mul; [ | easy ].
     flia Hx'p.
   } {
-...
-    replace (u ^ 2 + u ^ 2) with (2 * u ^ 2) by flia.
-    unfold u.
+    specialize (prime_ge_2 p Hp) as H2p.
     specialize (Nat.div_mod (p - 1) 2 (Nat.neq_succ_0 _)) as H1.
     assert (H : (p - 1) mod 2 = 0). {
       specialize (Nat.div_mod p 2 (Nat.neq_succ_0 _)) as H.
@@ -583,41 +581,37 @@ destruct (le_dec x u) as [Hxu| Hxu]. {
       now apply Nat.mod_mul.
     }
     rewrite H, Nat.add_0_r in H1; clear H.
-    rewrite Nat.pow_2_r, Nat.mul_assoc.
-    rewrite <- H1, Nat.mul_comm.
-    rewrite H1 at 1.
-    rewrite (Nat.mul_comm 2).
-    rewrite Nat.div_mul; [ | easy ].
-    specialize (prime_ge_2 p Hp) as H2p.
-    apply (lt_trans _ ((p - 1) * (p - 1) + 1)). {
-      apply Nat.add_lt_mono_r.
-      apply Nat.mul_lt_mono_pos_r; [ flia H2p | ].
-      apply (Nat.mul_lt_mono_pos_l 2); [ flia | ].
+    assert (H : p = 2 * u + 1). {
+      unfold u.
       rewrite <- H1.
-      flia H2p.
-    } {
-      rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
-      rewrite Nat.mul_sub_distr_r, Nat.mul_1_l.
-      rewrite Nat_sub_sub_assoc. 2: {
-        split; [ flia H2p | ].
-        etransitivity; [ | apply Nat.le_add_r ].
-        apply Nat.le_add_le_sub_r.
-        now apply Nat.add_le_mul.
-      }
-      rewrite <- Nat_sub_sub_distr.
-...
-        rewrite <- Nat.add_sub_swap.
-        replace p with (p * 1) at 4 by apply Nat.mul_1_r.
-        rewrite <- Nat.mul_sub_distr_l.
-...
-  now exists x, (x' - (u + 1)).
+      rewrite Nat.sub_add; [ easy | flia H2p ].
+    }
+    rewrite H.
+    rewrite Nat.mul_add_distr_r, Nat.mul_1_l.
+    rewrite Nat.mul_add_distr_l, Nat.mul_1_r.
+    replace (u ^ 2 + u ^ 2) with (2 * u ^ 2) by flia.
+    rewrite Nat.pow_2_r.
+    rewrite Nat.add_assoc.
+    apply Nat.add_lt_mono_r.
+    rewrite Nat.mul_shuffle0.
+    do 2 rewrite Nat.mul_assoc.
+    enough (Hu : 0 < u) by flia Hu.
+    unfold u.
+    apply (Nat.mul_lt_mono_pos_r 2); [ flia | ].
+    rewrite Nat.mul_0_l.
+    rewrite Nat.mul_comm, <- H1.
+    flia H2p.
+  }
 }
 apply Nat.nle_gt in Hxu.
 destruct (le_dec x' u) as [Hx'u| Hx'u]. {
   symmetry in Hfxx.
   specialize (Nat_eq_mod_divide_sum p _ _ Hpz Hfxx) as H1.
   rewrite Nat.add_assoc in H1.
-  now exists x', (x - (u + 1)).
+  destruct H1 as (k, Hk).
+  exists x', (x - (u + 1)), k.
+  split; [ | easy ].
+...
 }
 apply Nat.nle_gt in Hx'u.
 specialize (Hb (x - (u + 1)) (x' - (u + 1))) as H1.
