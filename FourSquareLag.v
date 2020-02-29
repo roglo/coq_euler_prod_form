@@ -501,6 +501,24 @@ assert (Hpz : p ≠ 0) by now (intros H1; subst p).
   }
 Qed.
 
+Definition resolve_sum_a2_b2_1 p :=
+  let u := (p - 1) / 2 in
+  let f i :=
+    if le_dec i u then (i ^ 2) mod p
+    else (p - ((i - (u + 1)) ^ 2 + 1) mod p) mod p
+  in
+  let (x, x') := pigeonhole_fun (p + 1) f in
+  if le_dec x u then (x, x' - (u + 1))
+  else (x', x - (u + 1)).
+
+Definition check_resolve_a2_b2_1 p :=
+  let (a, b) := resolve_sum_a2_b2_1 p in
+  (p, a ^ 2 + b ^ 2 + 1, a, b).
+
+Compute (map check_resolve_a2_b2_1 (Primes.firstn_primes' 20)).
+
+...
+
 Lemma odd_prime_divides_sum_two_squares_plus_one : ∀ p,
   prime p → p mod 2 = 1 → ∃ a b n, n < p ∧ a ^ 2 + b ^ 2 + 1 = n * p.
 Proof.
