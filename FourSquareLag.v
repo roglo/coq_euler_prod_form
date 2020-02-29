@@ -501,7 +501,7 @@ assert (Hpz : p ≠ 0) by now (intros H1; subst p).
   }
 Qed.
 
-Definition resolve_sum_a2_b2_1 p :=
+Definition resolve_a2_b2_1 p :=
   let u := (p - 1) / 2 in
   let f i :=
     if le_dec i u then (i ^ 2) mod p
@@ -512,7 +512,7 @@ Definition resolve_sum_a2_b2_1 p :=
   else (x', x - (u + 1)).
 
 Definition check_resolve_a2_b2_1 p :=
-  let (a, b) := resolve_sum_a2_b2_1 p in
+  let (a, b) := resolve_a2_b2_1 p in
   (p, a ^ 2 + b ^ 2 + 1, a, b).
 
 Compute (map check_resolve_a2_b2_1 (Primes.firstn_primes' 20)).
