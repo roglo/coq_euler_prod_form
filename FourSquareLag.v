@@ -508,12 +508,15 @@ Definition resolve_a2_b2_1 p :=
     else (p - ((i - (u + 1)) ^ 2 + 1) mod p) mod p
   in
   let (x, x') := pigeonhole_fun (p + 1) f in
-  if le_dec x u then (x, x' - (u + 1))
-  else (x', x - (u + 1)).
+  let (a, b) :=
+    if le_dec x u then (x, x' - (u + 1))
+    else (x', x - (u + 1))
+  in
+  (a, b, (a ^ 2 + b ^ 2 + 1) / p).
 
 Definition check_resolve_a2_b2_1 p :=
-  let (a, b) := resolve_a2_b2_1 p in
-  (p, a ^ 2 + b ^ 2 + 1, a, b).
+  let '(a, b, n) := resolve_a2_b2_1 p in
+  (p, n, a, b).
 
 Compute (map check_resolve_a2_b2_1 (Primes.firstn_primes' 20)).
 
