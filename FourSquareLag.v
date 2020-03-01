@@ -520,12 +520,13 @@ Definition check_resolve_a2_b2_1 p :=
 
 Compute (map check_resolve_a2_b2_1 (Primes.firstn_primes' 20)).
 
-...
-
-Lemma odd_prime_divides_sum_two_squares_plus_one : ∀ p,
-  prime p → p mod 2 = 1 → ∃ a b n, n < p ∧ a ^ 2 + b ^ 2 + 1 = n * p.
+Lemma odd_prime_divides_sum_two_squares_plus_one : ∀ p a b n,
+  prime p
+  → p mod 2 = 1
+  → resolve_a2_b2_1 p = (a, b, n)
+  → n < p ∧ a ^ 2 + b ^ 2 + 1 = n * p.
 Proof.
-intros * Hp Hp2.
+intros p aa bb n Hp Hp2 Hr.
 assert
   (Ha :
    ∀ a a',
@@ -605,28 +606,31 @@ assert
   }
 }
 (* pigeonhole *)
+unfold resolve_a2_b2_1 in Hr.
 assert (Hpz : p ≠ 0) by now (intros H1; subst p).
-specialize (pigeonhole (p + 1) p) as H1.
 set (u := (p - 1) / 2) in *.
 set
   (f i :=
      if le_dec i u then (i ^ 2) mod p
-     else (p - ((i - (u + 1)) ^ 2 + 1) mod p) mod p).
-specialize (H1 f).
+     else (p - ((i - (u + 1)) ^ 2 + 1) mod p) mod p) in Hr.
 remember (pigeonhole_fun (p + 1) f) as xx eqn:Hxx.
 symmetry in Hxx.
 destruct xx as (x, x').
+specialize (pigeonhole (p + 1) p f x x') as H1.
 assert (H : p < p + 1) by flia.
-specialize (H1 x x' H); clear H.
+specialize (H1 H); clear H.
 assert (H : ∀ x, x < p + 1 → f x < p). {
   intros x1 Hx.
   unfold f; cbn - [ "/" ].
   destruct (le_dec x1 u); now apply Nat.mod_upper_bound.
 }
-specialize (H1 H eq_refl); clear H.
+specialize (H1 H Hxx); clear H.
 destruct H1 as (Hxp & Hx'p & Hxx' & Hfxx).
 unfold f in Hfxx.
 destruct (le_dec x u) as [Hxu| Hxu]. {
+  injection Hr; clear Hr; intros Hn Hbb Haa.
+  rewrite Haa, Hbb in Hn.
+  do 2 rewrite Nat.mul_1_r, <- Nat.pow_2_r in Hn.
   destruct (le_dec x' u) as [Hx'u| Hx'u]. {
     now specialize (Ha x x' Hxu Hx'u Hxx') as H1.
   }
@@ -634,18 +638,27 @@ destruct (le_dec x u) as [Hxu| Hxu]. {
   specialize (Nat_eq_mod_divide_sum p _ _ Hpz Hfxx) as H1.
   rewrite Nat.add_assoc in H1.
   destruct H1 as (k, Hk).
-  exists x, (x' - (u + 1)), k.
+  rewrite Haa, Hbb in Hk.
+  rewrite Hk, Nat.div_mul in Hn; [ | easy ].
+  subst k.
   split; [ | easy ].
+  rewrite <- Haa, <- Hbb in Hk.
   now apply (odd_prime_sum_two_squares_plus_one_lt x x').
 }
 apply Nat.nle_gt in Hxu.
 destruct (le_dec x' u) as [Hx'u| Hx'u]. {
+  injection Hr; clear Hr; intros Hn Hbb Haa.
+  rewrite Haa, Hbb in Hn.
+  do 2 rewrite Nat.mul_1_r, <- Nat.pow_2_r in Hn.
   symmetry in Hfxx.
   specialize (Nat_eq_mod_divide_sum p _ _ Hpz Hfxx) as H1.
   rewrite Nat.add_assoc in H1.
   destruct H1 as (k, Hk).
-  exists x', (x - (u + 1)), k.
+  rewrite Haa, Hbb in Hk.
+  rewrite Hk, Nat.div_mul in Hn; [ | easy ].
+  subst k.
   split; [ | easy ].
+  rewrite <- Haa, <- Hbb in Hk.
   now apply (odd_prime_sum_two_squares_plus_one_lt x' x).
 }
 apply Nat.nle_gt in Hx'u.
