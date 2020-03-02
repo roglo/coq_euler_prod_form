@@ -752,7 +752,7 @@ destruct m as (m, Hm); cbn.
 cbn in Hmx.
 destruct m as (m, (((x1, x2), x3), x4)).
 cbn in Hmx; cbn.
-destruct (Nat.eq_dec m 0) as [Hmz| Hmz]; [ easy | ].
+destruct Hm as (Hmz, Hm).
 specialize (Nat.div_mod x1 m Hmz) as Hx1.
 specialize (Nat.div_mod x2 m Hmz) as Hx2.
 specialize (Nat.div_mod x3 m Hmz) as Hx3.
@@ -844,7 +844,7 @@ assert (Hym : (sqr_y1 + sqr_y2 + sqr_y3 + sqr_y4) mod m = 0). {
   rewrite Nat.add_mod_idemp_r; [ | easy ].
   rewrite Nat.add_comm.
   do 2 rewrite Nat.add_assoc.
-  rewrite (proj2 Hm).
+  rewrite Hm.
   rewrite Nat.mul_comm.
   now apply Nat.mod_mul.
 }
@@ -868,4 +868,6 @@ assert (Hrm : r ≤ m). {
   replace (2 ^ 2) with 4 by easy.
   flia.
 }
+destruct (Nat.eq_dec r m) as [Hrme| Hrme]. {
+  subst r; clear Hrm.
 ...
