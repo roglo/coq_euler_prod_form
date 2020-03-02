@@ -859,4 +859,13 @@ assert (Hrm : r ≤ m). {
     now apply Nat.add_le_mono.
   }
   unfold v.
+  specialize (Nat.div_mod m 2 (Nat.neq_succ_0 _)) as H1.
+  replace (_ + _ + _ + _) with (4 * (m / 2) ^ 2) by flia.
+  rewrite <- Nat.pow_2_r.
+  rewrite H1 at 2.
+  rewrite Nat_sqr_add.
+  rewrite Nat.pow_mul_l.
+  replace (2 ^ 2) with 4 by easy.
+  flia.
+}
 ...
