@@ -524,7 +524,7 @@ Lemma odd_prime_divides_sum_two_squares_plus_one : ∀ p a b n,
   prime p
   → p mod 2 = 1
   → resolve_a2_b2_1 p = (a, b, n)
-  → n < p ∧ a ^ 2 + b ^ 2 + 1 = n * p.
+  → 0 < n < p ∧ a ^ 2 + b ^ 2 + 1 = n * p.
 Proof.
 intros p aa bb n Hp Hp2 Hr.
 assert
@@ -643,6 +643,10 @@ destruct (le_dec x u) as [Hxu| Hxu]. {
   subst k.
   split; [ | easy ].
   rewrite <- Haa, <- Hbb in Hk.
+  split. {
+    destruct n; [ | flia Hk ].
+    now rewrite Nat.add_1_r in Hk.
+  }
   now apply (odd_prime_sum_two_squares_plus_one_lt x x').
 }
 apply Nat.nle_gt in Hxu.
@@ -702,20 +706,20 @@ Qed.
 
 Check Euler_s_four_square_identity.
 
+Definition four_square_sol p :=
+  { mx &
+    let '(m, (x1, x2, x3, x4)) := mx in
+    m ≠ 0 ∧
+    x1 ^ 2 + x2 ^ 2 + x3 ^ 2 + x4 ^ 2 = m * p }.
+
 Theorem four_square_multiple : ∀ p,
   prime p
-  → { mx |
-      let '(m, x1, x2, x3, x4) := mx in
-      x1 ^ 2 + x2 ^ 2 + x3 ^ 2 + x4 ^ 2 = m * p }.
-(*
-  → ∃ m x1 x2 x3 x4,
-     x1 ^ 2 + x2 ^ 2 + x3 ^ 2 + x4 ^ 2 = m * p.
-*)
+  → four_square_sol p.
 Proof.
 intros p Hp.
 destruct (Nat.eq_dec p 2) as [Hp2| Hpn2]. {
   subst p.
-  now exists (1, 1, 1, 0, 0).
+  now exists (1, (1, 1, 0, 0)).
 }
 specialize (odd_prime p Hp Hpn2) as Hp2.
 remember (resolve_a2_b2_1 p) as abn eqn:Hres.
@@ -724,8 +728,28 @@ destruct abn as ((a, b), n).
 specialize (odd_prime_divides_sum_two_squares_plus_one p a b n Hp Hp2) as H1.
 specialize (H1 Hres).
 destruct H1 as (Hnp, Hsum).
-exists (n, a, b, 1, 0).
-now rewrite Nat.pow_1_l, Nat.add_0_r.
+exists (n, (a, b, 1, 0)).
+rewrite Nat.pow_1_l, Nat.add_0_r.
+...
 Qed.
 
+Definition best_four_square_sol p :=
+  { mx : four_square_sol p &
+    ∀ nx : four_square_sol p, fst (projT1 mx) ≤ fst (projT1 nx) }.
+
+Theorem glop : ∀ p (mx : best_four_square_sol p),
+  prime p
+  → fst (projT1 (projT1 mx)) = 1.
+Proof.
+intros * Hp.
+assert (Hpz : p ≠ 0) by now (intros H; subst p).
+destruct mx as (m, Hmx); cbn.
+destruct m as (m, Hm); cbn.
+cbn in Hmx.
+destruct m as (m, (((x1, x2), x3), x4)).
+cbn in Hmx; cbn.
+destruct (Nat.eq_dec m 0) as [Hmz| Hmz]. {
+  subst m.
+...
+specialize (Nat.div_mod x1 m) as H1.
 ...
