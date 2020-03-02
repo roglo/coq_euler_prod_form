@@ -757,11 +757,33 @@ specialize (Nat.div_mod x1 m Hmz) as H1.
 specialize (Nat.div_mod x2 m Hmz) as H2.
 specialize (Nat.div_mod x3 m Hmz) as H3.
 specialize (Nat.div_mod x4 m Hmz) as H4.
-set (u := (p - 1) / 2).
-...
-(* ah bin non, ça va pas, ça, c'est des entiers naturels *)
-set (y1 := if le_dec (x1 mod m) u then x1 mod m else x1 mod m - m).
-set (y2 := if le_dec (x2 mod m) u then x2 mod m else x2 mod m - m).
-set (y3 := if le_dec (x3 mod m) u then x3 mod m else x3 mod m - m).
-set (y4 := if le_dec (x4 mod m) u then x4 mod m else x4 mod m - m).
+set (v := (m + 1) / 2).
+set
+  (sqr_y1 :=
+     if le_dec (x1 mod m) v then (x1 mod m) ^ 2 else (m - x1 mod m) ^ 2).
+set
+  (sqr_y2 :=
+     if le_dec (x2 mod m) v then (x2 mod m) ^ 2 else (m - x2 mod m) ^ 2).
+set
+  (sqr_y3 :=
+     if le_dec (x3 mod m) v then (x3 mod m) ^ 2 else (m - x3 mod m) ^ 2).
+set
+  (sqr_y4 :=
+     if le_dec (x4 mod m) v then (x4 mod m) ^ 2 else (m - x4 mod m) ^ 2).
+assert (Hy : (sqr_y1 + sqr_y2 + sqr_y3 + sqr_y4) mod m = 0). {
+  assert (Hy1 : sqr_y1 ≤ v ^ 2). {
+    unfold sqr_y1.
+    destruct (le_dec (x1 mod m) v) as [Hx1v| Hx1v]. {
+      now apply Nat.pow_le_mono_l.
+    } {
+      apply Nat.nle_gt in Hx1v.
+      apply Nat.pow_le_mono_l.
+      apply (Nat.add_le_mono_r _ _ (x1 mod m)).
+      rewrite Nat.sub_add. 2: {
+        now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+      }
+      transitivity (v + v). 2: {
+        now apply Nat.add_le_mono_l, Nat.lt_le_incl.
+      }
+      unfold v.
 ...
