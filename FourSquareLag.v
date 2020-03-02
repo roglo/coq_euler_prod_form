@@ -757,7 +757,7 @@ specialize (Nat.div_mod x1 m Hmz) as H1.
 specialize (Nat.div_mod x2 m Hmz) as H2.
 specialize (Nat.div_mod x3 m Hmz) as H3.
 specialize (Nat.div_mod x4 m Hmz) as H4.
-set (v := (m + 1) / 2).
+set (v := m / 2).
 set
   (sqr_y1 :=
      if le_dec (x1 mod m) v then (x1 mod m) ^ 2 else (m - x1 mod m) ^ 2).
