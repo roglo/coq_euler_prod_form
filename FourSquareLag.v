@@ -763,33 +763,44 @@ set (sqr_y1 := f x1).
 set (sqr_y2 := f x2).
 set (sqr_y3 := f x3).
 set (sqr_y4 := f x4).
-assert (Hy : (sqr_y1 + sqr_y2 + sqr_y3 + sqr_y4) mod m = 0). {
-  assert (Hx : ∀ x, f x ≤ v ^ 2). {
-    intros; unfold f.
-    destruct (le_dec (x mod m) v) as [Hx1v| Hx1v]. {
-      now apply Nat.pow_le_mono_l.
-    } {
-      apply Nat.nle_gt in Hx1v.
-      apply Nat.pow_le_mono_l.
-      apply (Nat.add_le_mono_r _ _ (x mod m)).
-      rewrite Nat.sub_add. 2: {
-        now apply Nat.lt_le_incl, Nat.mod_upper_bound.
-      }
-      transitivity (v + (v + 1)). 2: {
-        apply Nat.add_le_mono_l.
-        now rewrite Nat.add_1_r.
-      }
-      replace (v + (v + 1)) with (2 * v + 1) by flia.
-      unfold v.
-      specialize (Nat.div_mod m 2 (Nat.neq_succ_0 _)) as H1.
-      rewrite H1 at 1.
-      apply Nat.add_le_mono_l.
-      apply lt_n_Sm_le.
-      now apply Nat.mod_upper_bound.
+assert (Hx : ∀ x, f x ≤ v ^ 2). {
+  intros; unfold f.
+  destruct (le_dec (x mod m) v) as [Hx1v| Hx1v]. {
+    now apply Nat.pow_le_mono_l.
+  } {
+    apply Nat.nle_gt in Hx1v.
+    apply Nat.pow_le_mono_l.
+    apply (Nat.add_le_mono_r _ _ (x mod m)).
+    rewrite Nat.sub_add. 2: {
+      now apply Nat.lt_le_incl, Nat.mod_upper_bound.
     }
+    transitivity (v + (v + 1)). 2: {
+      apply Nat.add_le_mono_l.
+      now rewrite Nat.add_1_r.
+    }
+    replace (v + (v + 1)) with (2 * v + 1) by flia.
+    unfold v.
+    specialize (Nat.div_mod m 2 (Nat.neq_succ_0 _)) as H1.
+    rewrite H1 at 1.
+    apply Nat.add_le_mono_l.
+    apply lt_n_Sm_le.
+    now apply Nat.mod_upper_bound.
   }
-  assert (Hy1 : sqr_y1 ≤ v ^ 2) by apply Hx.
-  assert (Hy2 : sqr_y2 ≤ v ^ 2) by apply Hx.
-  assert (Hy3 : sqr_y3 ≤ v ^ 2) by apply Hx.
-  assert (Hy4 : sqr_y4 ≤ v ^ 2) by apply Hx.
+}
+assert (Hy1 : sqr_y1 ≤ v ^ 2) by apply Hx.
+assert (Hy2 : sqr_y2 ≤ v ^ 2) by apply Hx.
+assert (Hy3 : sqr_y3 ≤ v ^ 2) by apply Hx.
+assert (Hy4 : sqr_y4 ≤ v ^ 2) by apply Hx.
+assert (Hy : (sqr_y1 + sqr_y2 + sqr_y3 + sqr_y4) mod m = 0). {
+  rewrite <- Nat.add_mod_idemp_r; [ | easy ].
+  replace (sqr_y4 mod m) with (x4 ^ 2 mod m). 2: {
+    unfold sqr_y4, f.
+    destruct (le_dec (x4 mod m) v) as [Hx4v| Hx4v]. {
+      now rewrite Nat_mod_pow_mod.
+    } {
+      rewrite Nat_sqr_sub.
+      symmetry.
+      rewrite <- (Nat.mod_add _ (2 * (x4 mod m))); [ | easy ].
+      rewrite Nat.mul_shuffle0.
+      rewrite Nat.sub_add. 2: {
 ...
