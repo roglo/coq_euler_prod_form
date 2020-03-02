@@ -644,7 +644,7 @@ destruct (le_dec x u) as [Hxu| Hxu]. {
   split; [ | easy ].
   rewrite <- Haa, <- Hbb in Hk.
   split. {
-    destruct n; [ | flia Hk ].
+    destruct n; [ | flia ].
     now rewrite Nat.add_1_r in Hk.
   }
   now apply (odd_prime_sum_two_squares_plus_one_lt x x').
@@ -663,6 +663,10 @@ destruct (le_dec x' u) as [Hx'u| Hx'u]. {
   subst k.
   split; [ | easy ].
   rewrite <- Haa, <- Hbb in Hk.
+  split. {
+    destruct n; [ | flia ].
+    now rewrite Nat.add_1_r in Hk.
+  }
   now apply (odd_prime_sum_two_squares_plus_one_lt x' x).
 }
 apply Nat.nle_gt in Hx'u.
@@ -730,7 +734,7 @@ specialize (H1 Hres).
 destruct H1 as (Hnp, Hsum).
 exists (n, (a, b, 1, 0)).
 rewrite Nat.pow_1_l, Nat.add_0_r.
-...
+split; [ flia Hnp | easy ].
 Qed.
 
 Definition best_four_square_sol p :=
@@ -748,8 +752,16 @@ destruct m as (m, Hm); cbn.
 cbn in Hmx.
 destruct m as (m, (((x1, x2), x3), x4)).
 cbn in Hmx; cbn.
-destruct (Nat.eq_dec m 0) as [Hmz| Hmz]. {
-  subst m.
+destruct (Nat.eq_dec m 0) as [Hmz| Hmz]; [ easy | ].
+specialize (Nat.div_mod x1 m Hmz) as H1.
+specialize (Nat.div_mod x2 m Hmz) as H2.
+specialize (Nat.div_mod x3 m Hmz) as H3.
+specialize (Nat.div_mod x4 m Hmz) as H4.
+set (u := (p - 1) / 2).
 ...
-specialize (Nat.div_mod x1 m) as H1.
+(* ah bin non, ça va pas, ça, c'est des entiers naturels *)
+set (y1 := if le_dec (x1 mod m) u then x1 mod m else x1 mod m - m).
+set (y2 := if le_dec (x2 mod m) u then x2 mod m else x2 mod m - m).
+set (y3 := if le_dec (x3 mod m) u then x3 mod m else x3 mod m - m).
+set (y4 := if le_dec (x4 mod m) u then x4 mod m else x4 mod m - m).
 ...
