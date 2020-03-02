@@ -702,11 +702,30 @@ Qed.
 
 Check Euler_s_four_square_identity.
 
-Inspect 1.
-
-Theorem glop : ∀ p,
+Theorem four_square_multiple : ∀ p,
   prime p
-  → ∀ m x1 x2 x3 x4,
-  x1 ^ 2 + x2 ^ 2 + x3 ^ 2 + x4 ^ 4 = m * p ∧
-  ∀ n y1 y2 y3 y4,
-  y1 ^ 2 + y2 ^ 2 + y3 ^ 2 + y4 ^ 4 = n * p → m ≤ n.
+  → { mx |
+      let '(m, x1, x2, x3, x4) := mx in
+      x1 ^ 2 + x2 ^ 2 + x3 ^ 2 + x4 ^ 4 = m * p }.
+(*
+  → ∃ m x1 x2 x3 x4,
+     x1 ^ 2 + x2 ^ 2 + x3 ^ 2 + x4 ^ 4 = m * p.
+*)
+Proof.
+intros p Hp.
+destruct (Nat.eq_dec p 2) as [Hp2| Hpn2]. {
+  subst p.
+  now exists (1, 1, 1, 0, 0).
+}
+specialize (odd_prime p Hp Hpn2) as Hp2.
+remember (resolve_a2_b2_1 p) as abn eqn:Hres.
+symmetry in Hres.
+destruct abn as ((a, b), n).
+specialize (odd_prime_divides_sum_two_squares_plus_one p a b n Hp Hp2) as H1.
+specialize (H1 Hres).
+destruct H1 as (Hnp, Hsum).
+exists (n, a, b, 1, 0).
+now rewrite Nat.pow_1_l, Nat.add_0_r.
+Qed.
+
+...
