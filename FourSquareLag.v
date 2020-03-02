@@ -848,4 +848,15 @@ assert (Hym : (sqr_y1 + sqr_y2 + sqr_y3 + sqr_y4) mod m = 0). {
   rewrite Nat.mul_comm.
   now apply Nat.mod_mul.
 }
+apply Nat.mod_divide in Hym; [ | easy ].
+destruct Hym as (r, Hr).
+assert (Hrm : r ≤ m). {
+  apply (Nat.mul_le_mono_pos_r _ _ m); [ flia Hmz | ].
+  rewrite <- Hr.
+  transitivity (v ^ 2 + v ^ 2 + v ^ 2 + v ^ 2). {
+    apply Nat.add_le_mono; [ | easy ].
+    apply Nat.add_le_mono; [ | easy ].
+    now apply Nat.add_le_mono.
+  }
+  unfold v.
 ...
