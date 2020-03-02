@@ -706,10 +706,10 @@ Theorem four_square_multiple : ∀ p,
   prime p
   → { mx |
       let '(m, x1, x2, x3, x4) := mx in
-      x1 ^ 2 + x2 ^ 2 + x3 ^ 2 + x4 ^ 4 = m * p }.
+      x1 ^ 2 + x2 ^ 2 + x3 ^ 2 + x4 ^ 2 = m * p }.
 (*
   → ∃ m x1 x2 x3 x4,
-     x1 ^ 2 + x2 ^ 2 + x3 ^ 2 + x4 ^ 4 = m * p.
+     x1 ^ 2 + x2 ^ 2 + x3 ^ 2 + x4 ^ 2 = m * p.
 *)
 Proof.
 intros p Hp.
