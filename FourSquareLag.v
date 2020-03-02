@@ -701,3 +701,12 @@ exfalso; apply H1; [ | | | easy ]. {
 Qed.
 
 Check Euler_s_four_square_identity.
+
+Inspect 1.
+
+Theorem glop : ∀ p,
+  prime p
+  → ∀ m x1 x2 x3 x4,
+  x1 ^ 2 + x2 ^ 2 + x3 ^ 2 + x4 ^ 4 = m * p ∧
+  ∀ n y1 y2 y3 y4,
+  y1 ^ 2 + y2 ^ 2 + y3 ^ 2 + y4 ^ 4 = n * p → m ≤ n.
