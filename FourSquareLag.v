@@ -753,37 +753,43 @@ cbn in Hmx.
 destruct m as (m, (((x1, x2), x3), x4)).
 cbn in Hmx; cbn.
 destruct (Nat.eq_dec m 0) as [Hmz| Hmz]; [ easy | ].
-specialize (Nat.div_mod x1 m Hmz) as H1.
-specialize (Nat.div_mod x2 m Hmz) as H2.
-specialize (Nat.div_mod x3 m Hmz) as H3.
-specialize (Nat.div_mod x4 m Hmz) as H4.
+specialize (Nat.div_mod x1 m Hmz) as Hx1.
+specialize (Nat.div_mod x2 m Hmz) as Hx2.
+specialize (Nat.div_mod x3 m Hmz) as Hx3.
+specialize (Nat.div_mod x4 m Hmz) as Hx4.
 set (v := m / 2).
-set
-  (sqr_y1 :=
-     if le_dec (x1 mod m) v then (x1 mod m) ^ 2 else (m - x1 mod m) ^ 2).
-set
-  (sqr_y2 :=
-     if le_dec (x2 mod m) v then (x2 mod m) ^ 2 else (m - x2 mod m) ^ 2).
-set
-  (sqr_y3 :=
-     if le_dec (x3 mod m) v then (x3 mod m) ^ 2 else (m - x3 mod m) ^ 2).
-set
-  (sqr_y4 :=
-     if le_dec (x4 mod m) v then (x4 mod m) ^ 2 else (m - x4 mod m) ^ 2).
+set (f x := if le_dec (x mod m) v then (x mod m) ^ 2 else (m - x mod m) ^ 2).
+set (sqr_y1 := f x1).
+set (sqr_y2 := f x2).
+set (sqr_y3 := f x3).
+set (sqr_y4 := f x4).
 assert (Hy : (sqr_y1 + sqr_y2 + sqr_y3 + sqr_y4) mod m = 0). {
-  assert (Hy1 : sqr_y1 ≤ v ^ 2). {
-    unfold sqr_y1.
-    destruct (le_dec (x1 mod m) v) as [Hx1v| Hx1v]. {
+  assert (Hx : ∀ x, f x ≤ v ^ 2). {
+    intros; unfold f.
+    destruct (le_dec (x mod m) v) as [Hx1v| Hx1v]. {
       now apply Nat.pow_le_mono_l.
     } {
       apply Nat.nle_gt in Hx1v.
       apply Nat.pow_le_mono_l.
-      apply (Nat.add_le_mono_r _ _ (x1 mod m)).
+      apply (Nat.add_le_mono_r _ _ (x mod m)).
       rewrite Nat.sub_add. 2: {
         now apply Nat.lt_le_incl, Nat.mod_upper_bound.
       }
-      transitivity (v + v). 2: {
-        now apply Nat.add_le_mono_l, Nat.lt_le_incl.
+      transitivity (v + (v + 1)). 2: {
+        apply Nat.add_le_mono_l.
+        now rewrite Nat.add_1_r.
       }
+      replace (v + (v + 1)) with (2 * v + 1) by flia.
       unfold v.
+      specialize (Nat.div_mod m 2 (Nat.neq_succ_0 _)) as H1.
+      rewrite H1 at 1.
+      apply Nat.add_le_mono_l.
+      apply lt_n_Sm_le.
+      now apply Nat.mod_upper_bound.
+    }
+  }
+  assert (Hy1 : sqr_y1 ≤ v ^ 2) by apply Hx.
+  assert (Hy2 : sqr_y2 ≤ v ^ 2) by apply Hx.
+  assert (Hy3 : sqr_y3 ≤ v ^ 2) by apply Hx.
+  assert (Hy4 : sqr_y4 ≤ v ^ 2) by apply Hx.
 ...
