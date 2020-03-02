@@ -699,3 +699,5 @@ exfalso; apply H1; [ | | | easy ]. {
   easy.
 }
 Qed.
+
+Check Euler_s_four_square_identity.
