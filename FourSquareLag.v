@@ -869,5 +869,5 @@ assert (Hrm : r ≤ m). {
   flia.
 }
 destruct (Nat.eq_dec r m) as [Hrme| Hrme]. {
-  subst r; clear Hrm.
+  exfalso; subst r; clear Hrm.
 ...
