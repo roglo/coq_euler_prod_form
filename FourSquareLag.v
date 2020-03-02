@@ -791,16 +791,61 @@ assert (Hy1 : sqr_y1 ≤ v ^ 2) by apply Hx.
 assert (Hy2 : sqr_y2 ≤ v ^ 2) by apply Hx.
 assert (Hy3 : sqr_y3 ≤ v ^ 2) by apply Hx.
 assert (Hy4 : sqr_y4 ≤ v ^ 2) by apply Hx.
-assert (Hy : (sqr_y1 + sqr_y2 + sqr_y3 + sqr_y4) mod m = 0). {
-  rewrite <- Nat.add_mod_idemp_r; [ | easy ].
-  replace (sqr_y4 mod m) with (x4 ^ 2 mod m). 2: {
-    unfold sqr_y4, f.
-    destruct (le_dec (x4 mod m) v) as [Hx4v| Hx4v]. {
+assert (Hym : (sqr_y1 + sqr_y2 + sqr_y3 + sqr_y4) mod m = 0). {
+  assert (Hxy2 : ∀ x, x ^ 2 ≡ f x mod m). {
+    intros x.
+    unfold f.
+    destruct (le_dec (x mod m) v) as [Hxv| Hxv]. {
       now rewrite Nat_mod_pow_mod.
     } {
-      rewrite Nat_sqr_sub.
+      rewrite Nat_sqr_sub. 2: {
+        now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+      }
       symmetry.
-      rewrite <- (Nat.mod_add _ (2 * (x4 mod m))); [ | easy ].
+      rewrite <- (Nat.mod_add _ (2 * (x mod m))); [ | easy ].
       rewrite Nat.mul_shuffle0.
       rewrite Nat.sub_add. 2: {
+        remember (x mod m) as y.
+        replace m with (y + (m - y)). 2: {
+          rewrite Nat.add_comm, Nat.sub_add; [ easy | ].
+          rewrite Heqy.
+          now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+        }
+        rewrite Nat_sqr_add.
+        rewrite Nat.mul_add_distr_l.
+        rewrite <- Nat.mul_assoc, <- Nat.pow_2_r.
+        flia.
+      }
+      rewrite <- Nat.add_mod_idemp_l; [ | easy ].
+      rewrite <- Nat_mod_pow_mod.
+      rewrite Nat.mod_same; [ | easy ].
+      rewrite Nat.pow_0_l; [ | easy ].
+      rewrite Nat.mod_0_l; [ | easy ].
+      rewrite Nat.add_0_l.
+      now rewrite Nat_mod_pow_mod.
+    }
+  }
+  unfold sqr_y1, sqr_y2, sqr_y3, sqr_y4.
+  rewrite Nat.add_mod; [ | easy ].
+  rewrite (Nat.add_mod (_ + _)); [ | easy ].
+  rewrite Nat.add_mod_idemp_l; [ | easy ].
+  rewrite (Nat.add_mod (f x1)); [ | easy ].
+  rewrite <- Nat.add_assoc.
+  rewrite Nat.add_mod_idemp_l; [ | easy ].
+  rewrite Nat.add_assoc.
+  do 4 rewrite <- Hxy2.
+  rewrite Nat.add_mod_idemp_r; [ | easy ].
+  rewrite Nat.add_comm, Nat.add_assoc.
+  rewrite Nat.add_mod_idemp_r; [ | easy ].
+  rewrite Nat.add_comm.
+  do 2 rewrite Nat.add_assoc.
+  rewrite Nat.add_mod_idemp_r; [ | easy ].
+  rewrite Nat.add_comm, Nat.add_assoc.
+  rewrite Nat.add_mod_idemp_r; [ | easy ].
+  rewrite Nat.add_comm.
+  do 2 rewrite Nat.add_assoc.
+  rewrite (proj2 Hm).
+  rewrite Nat.mul_comm.
+  now apply Nat.mod_mul.
+}
 ...
