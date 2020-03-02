@@ -720,4 +720,12 @@ destruct (lt_dec (a1 * b1) (a2 * b2 + a3 * b3 + a4 * b4)) as [H1| H1]. {
       } {
         apply Nat.nlt_ge in H4.
         ring_simplify.
+(* does not work; perhaps the version in French wikipedia works better *)
+...
+
+      }
+    } {
+      destruct (lt_dec (a1 * b4 + a2 * b3 + a4 * b1) (a3 * b2)) as [H4| H4]. {
+...
+      } {
 ...
