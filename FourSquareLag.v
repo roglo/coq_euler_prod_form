@@ -1,7 +1,7 @@
 (* Lagrange's four-square theorem *)
 
 Set Nested Proofs Allowed.
-Require Import Utf8 Arith.
+Require Import Utf8 Arith Psatz.
 Import List List.ListNotations.
 Require Import Misc Primes.
 
@@ -709,4 +709,15 @@ Theorem Euler_s_four_square_identity : ∀ a1 a2 a3 a4 b1 b2 b3 b4,
      diff (a1 * b3 + a3 * b1 + a4 * b2) (a2 * b4) ^ 2 +
      diff (a1 * b4 + a2 * b3 + a4 * b1) (a3 * b2) ^ 2.
 Proof.
+intros.
+unfold diff.
+do 12 rewrite Nat.pow_2_r.
+destruct (lt_dec (a1 * b1) (a2 * b2 + a3 * b3 + a4 * b4)) as [H1| H1]. {
+  destruct (lt_dec (a1 * b2 + a2 * b1 + a3 * b4) (a4 * b3)) as [H2| H2]. {
+    destruct (lt_dec (a1 * b3 + a3 * b1 + a4 * b2) (a2 * b4)) as [H3| H3]. {
+      destruct (lt_dec (a1 * b4 + a2 * b3 + a4 * b1) (a3 * b2)) as [H4| H4]. {
+        lia.
+      } {
+        apply Nat.nlt_ge in H4.
+        ring_simplify.
 ...
