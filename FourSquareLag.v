@@ -743,9 +743,10 @@ Definition best_four_square_sol p :=
 
 Theorem glop : ∀ p (mx : best_four_square_sol p),
   prime p
+  → p mod 2 = 1
   → fst (projT1 (projT1 mx)) = 1.
 Proof.
-intros * Hp.
+intros * Hp Hp2.
 assert (Hpz : p ≠ 0) by now (intros H; subst p).
 destruct mx as (m, Hmx); cbn.
 destruct m as (m, Hm); cbn.
@@ -868,6 +869,14 @@ assert (Hrm : r ≤ m). {
   replace (2 ^ 2) with 4 by easy.
   flia.
 }
+remember (resolve_a2_b2_1 p) as abn eqn:Habn.
+symmetry in Habn.
+destruct abn as ((a, b), n).
+specialize (odd_prime_divides_sum_two_squares_plus_one p a b n) as H1.
+specialize (H1 Hp Hp2 Habn).
+destruct H1 as (Hnp, Habnp).
+Search four_square_sol.
+...
 destruct (Nat.eq_dec r m) as [Hrme| Hrme]. {
   exfalso; subst r; clear Hrm.
 ...
