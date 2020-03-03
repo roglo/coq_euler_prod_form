@@ -924,5 +924,9 @@ destruct (Nat.eq_dec r m) as [Hrme| Hrme]. {
     }
     flia Hr H.
   }
-  (* each sqr_yi must be equal to v², i.e. (m/2)² *)
+  (* each sqr_yi must be equal to v², i.e. (m/2)²
+     therefore xi mod m = m / 2,
+     then Σ xi² = mp = Σ (mqi+m/2)² = Σ (m²qi²+(m/2)²+2mqim/2)
+     = m²Σ qi² + m² + Σ m²qi = m² (Σ qi² + 1 + Σ qi) = mp
+     → impossible since m < p *)
 ...
