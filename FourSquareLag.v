@@ -893,13 +893,5 @@ assert (Hmn : m < p). {
 }
 destruct (Nat.eq_dec r m) as [Hrme| Hrme]. {
   exfalso; subst r; clear Hrm.
-  assert
-    (sqr_y1 = v ^ 2 ∧ sqr_y2 = v ^ 2 ∧ sqr_y3 = v ^ 2 ∧ sqr_y4 = v ^ 2). {
-(* sqr_y[1234] must be at least (m/2)² *)
-...
-  assert (x1 mod m = m / 2). {
-    fold v.
-    assert (sqr_y1 = v ^ 2). {
-      unfold sqr_y1, f.
-
+  (* m cannot be odd because Σ sqr_yi would not be enough to reach m² *)
 ...
