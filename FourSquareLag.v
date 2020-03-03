@@ -929,4 +929,85 @@ destruct (Nat.eq_dec r m) as [Hrme| Hrme]. {
      then Σ xi² = mp = Σ (mqi+m/2)² = Σ (m²qi²+(m/2)²+2mqim/2)
      = m²Σ qi² + m² + Σ m²qi = m² (Σ qi² + 1 + Σ qi) = mp
      → impossible since m < p *)
+  assert
+    (Hy :
+     sqr_y1 = v ^ 2 ∧ sqr_y2 = v ^ 2 ∧ sqr_y3 = v ^ 2 ∧ sqr_y4 = v ^ 2). {
+    enough
+      (Hy :
+       ¬ (sqr_y1 ≠ v ^ 2) ∧ ¬ (sqr_y2 ≠ v ^ 2) ∧
+       ¬ (sqr_y3 ≠ v ^ 2) ∧ ¬ (sqr_y4 ≠ v ^ 2)). {
+      destruct Hy as (H1 & H2 & H3 & H4).
+      apply Nat.eq_dne in H1.
+      apply Nat.eq_dne in H2.
+      apply Nat.eq_dne in H3.
+      apply Nat.eq_dne in H4.
+      easy.
+    }
+    assert (Hvvmm : v ^ 2 + v ^ 2 + v ^ 2 + v ^ 2 ≤ m * m). {
+      unfold v.
+      specialize (Nat.div_mod m 2 (Nat.neq_succ_0 _)) as H1.
+      rewrite Hme, Nat.add_0_r in H1.
+      rewrite H1 at 5 6.
+      rewrite Nat.pow_2_r.
+      flia.
+    }
+    rewrite <- and_assoc.
+    split. {
+      apply Decidable.not_or.
+      intros [Hss| Hss]. {
+        assert (Hs1 : sqr_y1 < v ^ 2) by flia Hy1 Hss.
+        assert (H : sqr_y1 + sqr_y2 + sqr_y3 + sqr_y4 < m * m). {
+          apply (Nat.lt_le_trans _ (v ^ 2 + v ^ 2 + v ^ 2 + v ^ 2)). {
+            flia Hs1 Hy2 Hy3 Hy4.
+          }
+          easy.
+        }
+        flia Hr H.
+      } {
+        assert (Hs1 : sqr_y2 < v ^ 2) by flia Hy2 Hss.
+        assert (H : sqr_y1 + sqr_y2 + sqr_y3 + sqr_y4 < m * m). {
+          apply (Nat.lt_le_trans _ (v ^ 2 + v ^ 2 + v ^ 2 + v ^ 2)). {
+            flia Hy1 Hs1 Hy3 Hy4.
+          }
+          easy.
+        }
+        flia Hr H.
+      }
+    } {
+      apply Decidable.not_or.
+      intros [Hss| Hss]. {
+        assert (Hs1 : sqr_y3 < v ^ 2) by flia Hy3 Hss.
+        assert (H : sqr_y1 + sqr_y2 + sqr_y3 + sqr_y4 < m * m). {
+          apply (Nat.lt_le_trans _ (v ^ 2 + v ^ 2 + v ^ 2 + v ^ 2)). {
+            flia Hy1 Hy2 Hs1 Hy4.
+          }
+          easy.
+        }
+        flia Hr H.
+      } {
+        assert (Hs1 : sqr_y4 < v ^ 2) by flia Hy4 Hss.
+        assert (H : sqr_y1 + sqr_y2 + sqr_y3 + sqr_y4 < m * m). {
+          apply (Nat.lt_le_trans _ (v ^ 2 + v ^ 2 + v ^ 2 + v ^ 2)). {
+            flia Hy1 Hy2 Hy3 Hs1.
+          }
+          easy.
+        }
+        flia Hr H.
+      }
+    }
+  }
+  destruct Hy as (Hsy1 & Hsy2 & Hsy3 & Hsy4).
+...
+  unfold sqr_y1, sqr_y2, sqr_y3, sqr_y4 in Hy.
+...
+  unfold sqr_y1, sqr_y2, sqr_y3, sqr_y4, f in Hy.
+  unfold f in sqr_y1, sqr_y2, sqr_y3, sqr_y4.
+  destruct (le_dec (x1 mod m) v) as [Hx1v| Hx1v]. 2: {
+    apply Hx1v; clear Hx1v.
+    fold sqr_y1 in Hsy1.
+    apply Nat.pow_le_mono_l_iff with (c := 2); [ easy | ].
+    rewrite <- Hsy1.
+...
+    apply Nat.pow_inj_l in Hsy1.
+    rewrite <- Hsy1.
 ...
