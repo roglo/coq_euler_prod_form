@@ -5,6 +5,9 @@ Require Import Utf8 Arith.
 Import List List.ListNotations.
 Require Import Misc Primes FourSquareEuler.
 
+Tactic Notation "transparent" "assert" "(" ident(H) ":" lconstr(type) ")" :=
+  unshelve (refine (let H := (_ : type) in _)).
+
 Lemma le_half_prime_square_diff : ∀ p a a',
    prime p
    → p mod 2 = 1
@@ -869,13 +872,25 @@ assert (Hrm : r ≤ m). {
   replace (2 ^ 2) with 4 by easy.
   flia.
 }
-remember (resolve_a2_b2_1 p) as abn eqn:Habn.
-symmetry in Habn.
-destruct abn as ((a, b), n).
-specialize (odd_prime_divides_sum_two_squares_plus_one p a b n) as H1.
-specialize (H1 Hp Hp2 Habn).
-destruct H1 as (Hnp, Habnp).
-Search four_square_sol.
+assert (Hmn : m < p). {
+  remember (resolve_a2_b2_1 p) as abn eqn:Habn.
+  symmetry in Habn.
+  destruct abn as ((a, b), n).
+  specialize (odd_prime_divides_sum_two_squares_plus_one p a b n) as H1.
+  specialize (H1 Hp Hp2 Habn).
+  destruct H1 as (Hnp, Habnp).
+  assert (Hnz : n ≠ 0) by flia Hnp.
+  transparent assert (H1 : four_square_sol p). {
+    unfold four_square_sol.
+    exists (n, (a, b, 1, 0)).
+    split; [ easy | ].
+    rewrite Nat.pow_1_l, Nat.pow_0_l; [ | easy ].
+    now rewrite Nat.add_0_r.
+  }
+  specialize (Hmx H1) as H2.
+  cbn in H2.
+  flia Hnp H2.
+}
 ...
 destruct (Nat.eq_dec r m) as [Hrme| Hrme]. {
   exfalso; subst r; clear Hrm.
