@@ -891,7 +891,6 @@ assert (Hmn : m < p). {
   cbn in H2.
   flia Hnp H2.
 }
-...
 destruct (Nat.eq_dec r m) as [Hrme| Hrme]. {
   exfalso; subst r; clear Hrm.
 ...
