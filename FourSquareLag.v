@@ -997,14 +997,13 @@ destruct (Nat.eq_dec r m) as [Hrme| Hrme]. {
     }
   }
   destruct Hy as (Hsy1 & Hsy2 & Hsy3 & Hsy4).
-...
-  unfold sqr_y1, sqr_y2, sqr_y3, sqr_y4 in Hy.
-...
-  unfold sqr_y1, sqr_y2, sqr_y3, sqr_y4, f in Hy.
+  clear Hy1 Hy2 Hy3 Hy4.
   unfold f in sqr_y1, sqr_y2, sqr_y3, sqr_y4.
   destruct (le_dec (x1 mod m) v) as [Hx1v| Hx1v]. 2: {
     apply Hx1v; clear Hx1v.
-    fold sqr_y1 in Hsy1.
+    unfold sqr_y1 in Hsy1.
+    apply Nat.pow_inj_l in Hsy1; [ | easy ].
+...
     apply Nat.pow_le_mono_l_iff with (c := 2); [ easy | ].
     rewrite <- Hsy1.
 ...
