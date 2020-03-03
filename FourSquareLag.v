@@ -924,4 +924,5 @@ destruct (Nat.eq_dec r m) as [Hrme| Hrme]. {
     }
     flia Hr H.
   }
+  (* each sqr_yi must be equal to v², i.e. (m/2)² *)
 ...
