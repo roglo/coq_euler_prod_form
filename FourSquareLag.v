@@ -1000,6 +1000,12 @@ destruct (Nat.eq_dec r m) as [Hrme| Hrme]. {
   clear Hy1 Hy2 Hy3 Hy4.
   unfold f in sqr_y1, sqr_y2, sqr_y3, sqr_y4.
   destruct (le_dec (x1 mod m) v) as [Hx1v| Hx1v]. 2: {
+    apply Nat.nle_gt in Hx1v.
+    unfold sqr_y1 in Hsy1.
+    apply Nat.pow_inj_l in Hsy1; [ | easy ].
+    apply Nat.add_sub_eq_nz in Hsy1.
+Search (_ - _ = _).
+...
     apply Hx1v; clear Hx1v.
     unfold sqr_y1 in Hsy1.
     apply Nat.pow_inj_l in Hsy1; [ | easy ].
