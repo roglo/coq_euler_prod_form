@@ -1003,8 +1003,23 @@ destruct (Nat.eq_dec r m) as [Hrme| Hrme]. {
     apply Nat.nle_gt in Hx1v.
     unfold sqr_y1 in Hsy1.
     apply Nat.pow_inj_l in Hsy1; [ | easy ].
-    apply Nat.add_sub_eq_nz in Hsy1.
-Search (_ - _ = _).
+    apply Nat.add_sub_eq_nz in Hsy1. 2: {
+      intros Hv; subst v.
+      specialize (Nat.div_mod m 2 (Nat.neq_succ_0 _)) as H1.
+      now rewrite Hv, Hme in H1.
+    }
+    assert (Hxm2 : x1 mod m = m / 2). {
+      replace (m / 2) with (m - m / 2). {
+        rewrite <- Hsy1 at 2.
+        now rewrite Nat.add_sub.
+      } {
+        specialize (Nat.div_mod m 2 (Nat.neq_succ_0 _)) as H1.
+        rewrite Hme, Nat.add_0_r in H1.
+        flia H1.
+      }
+    }
+    flia Hx1v Hxm2.
+  }
 ...
     apply Hx1v; clear Hx1v.
     unfold sqr_y1 in Hsy1.
