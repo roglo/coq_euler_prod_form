@@ -894,4 +894,14 @@ assert (Hmn : m < p). {
 destruct (Nat.eq_dec r m) as [Hrme| Hrme]. {
   exfalso; subst r; clear Hrm.
   (* m cannot be odd because Σ sqr_yi would not be enough to reach m² *)
+  assert (Hme : m mod 2 = 0). {
+    enough (H : m mod 2 ≠ 1). {
+      specialize (Nat.mod_upper_bound m 2 (Nat.neq_succ_0 _)) as H1.
+      flia H H1.
+    }
+    intros Hm21.
+    specialize (Nat.div_mod m 2 (Nat.neq_succ_0 _)) as H1.
+    rewrite Hm21 in H1.
+    assert (sqr_y1 + sqr_y2 + sqr_y3 + sqr_y4 < m * m). {
+      etransitivity.
 ...
