@@ -893,7 +893,6 @@ assert (Hmn : m < p). {
 }
 destruct (Nat.eq_dec r m) as [Hrme| Hrme]. {
   exfalso; subst r; clear Hrm.
-  (* m cannot be odd because Σ sqr_yi would not be enough to reach m² *)
   assert (Hme : m mod 2 = 0). {
     enough (H : m mod 2 ≠ 1). {
       specialize (Nat.mod_upper_bound m 2 (Nat.neq_succ_0 _)) as H1.
@@ -903,5 +902,26 @@ destruct (Nat.eq_dec r m) as [Hrme| Hrme]. {
     specialize (Nat.div_mod m 2 (Nat.neq_succ_0 _)) as H1.
     rewrite Hm21 in H1.
     assert (sqr_y1 + sqr_y2 + sqr_y3 + sqr_y4 < m * m). {
-      etransitivity.
+      apply (le_lt_trans _ (4 * ((m - 1) / 2) ^ 2)). {
+        rewrite H1, Nat.add_sub.
+        rewrite (Nat.mul_comm 2), Nat.div_mul; [ | easy ].
+        fold v.
+        transitivity (v ^ 2 + v ^ 2 + v ^ 2 + v ^ 2). {
+          flia Hy1 Hy2 Hy3 Hy4.
+        }
+        flia.
+      } {
+        rewrite H1 at 1.
+        rewrite Nat.add_sub.
+        rewrite (Nat.mul_comm 2), Nat.div_mul; [ | easy ].
+        rewrite Nat.pow_2_r.
+        replace 4 with (2 * 2) by flia.
+        rewrite Nat.mul_shuffle0.
+        rewrite Nat.mul_assoc.
+        rewrite <- Nat.mul_assoc.
+        apply Nat.mul_lt_mono; flia H1.
+      }
+    }
+    flia Hr H.
+  }
 ...
