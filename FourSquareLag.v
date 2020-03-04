@@ -762,12 +762,12 @@ specialize (Nat.div_mod x2 m Hmz) as Hx2.
 specialize (Nat.div_mod x3 m Hmz) as Hx3.
 specialize (Nat.div_mod x4 m Hmz) as Hx4.
 set (v := m / 2).
-set (f x := if le_dec (x mod m) v then (x mod m) ^ 2 else (m - x mod m) ^ 2).
-set (sqr_y1 := f x1).
-set (sqr_y2 := f x2).
-set (sqr_y3 := f x3).
-set (sqr_y4 := f x4).
-assert (Hx : ∀ x, f x ≤ v ^ 2). {
+set (f x := if le_dec (x mod m) v then x mod m else m - x mod m).
+set (y1 := f x1).
+set (y2 := f x2).
+set (y3 := f x3).
+set (y4 := f x4).
+assert (Hx : ∀ x, f x ^ 2 ≤ v ^ 2). {
   intros; unfold f.
   destruct (le_dec (x mod m) v) as [Hx1v| Hx1v]. {
     now apply Nat.pow_le_mono_l.
@@ -791,12 +791,12 @@ assert (Hx : ∀ x, f x ≤ v ^ 2). {
     now apply Nat.mod_upper_bound.
   }
 }
-assert (Hy1 : sqr_y1 ≤ v ^ 2) by apply Hx.
-assert (Hy2 : sqr_y2 ≤ v ^ 2) by apply Hx.
-assert (Hy3 : sqr_y3 ≤ v ^ 2) by apply Hx.
-assert (Hy4 : sqr_y4 ≤ v ^ 2) by apply Hx.
-assert (Hym : (sqr_y1 + sqr_y2 + sqr_y3 + sqr_y4) mod m = 0). {
-  assert (Hxy2 : ∀ x, x ^ 2 ≡ f x mod m). {
+assert (Hy1 : y1 ^ 2 ≤ v ^ 2) by apply Hx.
+assert (Hy2 : y2 ^ 2 ≤ v ^ 2) by apply Hx.
+assert (Hy3 : y3 ^ 2 ≤ v ^ 2) by apply Hx.
+assert (Hy4 : y4 ^ 2 ≤ v ^ 2) by apply Hx.
+assert (Hym : (y1 ^ 2 + y2 ^ 2 + y3 ^ 2 + y4 ^ 2) mod m = 0). {
+  assert (Hxy2 : ∀ x, x ^ 2 ≡ f x ^ 2 mod m). {
     intros x.
     unfold f.
     destruct (le_dec (x mod m) v) as [Hxv| Hxv]. {
@@ -829,11 +829,11 @@ assert (Hym : (sqr_y1 + sqr_y2 + sqr_y3 + sqr_y4) mod m = 0). {
       now rewrite Nat_mod_pow_mod.
     }
   }
-  unfold sqr_y1, sqr_y2, sqr_y3, sqr_y4.
+  unfold y1, y2, y3, y4.
   rewrite Nat.add_mod; [ | easy ].
   rewrite (Nat.add_mod (_ + _)); [ | easy ].
   rewrite Nat.add_mod_idemp_l; [ | easy ].
-  rewrite (Nat.add_mod (f x1)); [ | easy ].
+  rewrite (Nat.add_mod (f x1 ^ 2)); [ | easy ].
   rewrite <- Nat.add_assoc.
   rewrite Nat.add_mod_idemp_l; [ | easy ].
   rewrite Nat.add_assoc.
@@ -901,7 +901,7 @@ destruct (Nat.eq_dec r m) as [Hrme| Hrme]. {
     intros Hm21.
     specialize (Nat.div_mod m 2 (Nat.neq_succ_0 _)) as H1.
     rewrite Hm21 in H1.
-    assert (sqr_y1 + sqr_y2 + sqr_y3 + sqr_y4 < m * m). {
+    assert (y1 ^ 2 + y2 ^ 2 + y3 ^ 2 + y4 ^ 2 < m * m). {
       apply (le_lt_trans _ (4 * ((m - 1) / 2) ^ 2)). {
         rewrite H1, Nat.add_sub.
         rewrite (Nat.mul_comm 2), Nat.div_mul; [ | easy ].
@@ -931,11 +931,11 @@ destruct (Nat.eq_dec r m) as [Hrme| Hrme]. {
      → impossible since m < p *)
   assert
     (Hy :
-     sqr_y1 = v ^ 2 ∧ sqr_y2 = v ^ 2 ∧ sqr_y3 = v ^ 2 ∧ sqr_y4 = v ^ 2). {
+     y1 ^ 2 = v ^ 2 ∧ y2 ^ 2 = v ^ 2 ∧ y3 ^ 2 = v ^ 2 ∧ y4 ^ 2 = v ^ 2). {
     enough
       (Hy :
-       ¬ (sqr_y1 ≠ v ^ 2) ∧ ¬ (sqr_y2 ≠ v ^ 2) ∧
-       ¬ (sqr_y3 ≠ v ^ 2) ∧ ¬ (sqr_y4 ≠ v ^ 2)). {
+       ¬ (y1 ^ 2 ≠ v ^ 2) ∧ ¬ (y2 ^ 2 ≠ v ^ 2) ∧
+       ¬ (y3 ^ 2 ≠ v ^ 2) ∧ ¬ (y4 ^ 2 ≠ v ^ 2)). {
       destruct Hy as (H1 & H2 & H3 & H4).
       apply Nat.eq_dne in H1.
       apply Nat.eq_dne in H2.
@@ -955,8 +955,8 @@ destruct (Nat.eq_dec r m) as [Hrme| Hrme]. {
     split. {
       apply Decidable.not_or.
       intros [Hss| Hss]. {
-        assert (Hs1 : sqr_y1 < v ^ 2) by flia Hy1 Hss.
-        assert (H : sqr_y1 + sqr_y2 + sqr_y3 + sqr_y4 < m * m). {
+        assert (Hs1 : y1 ^ 2 < v ^ 2) by flia Hy1 Hss.
+        assert (H : y1 ^ 2 + y2 ^ 2 + y3 ^ 2 + y4 ^ 2 < m * m). {
           apply (Nat.lt_le_trans _ (v ^ 2 + v ^ 2 + v ^ 2 + v ^ 2)). {
             flia Hs1 Hy2 Hy3 Hy4.
           }
@@ -964,8 +964,8 @@ destruct (Nat.eq_dec r m) as [Hrme| Hrme]. {
         }
         flia Hr H.
       } {
-        assert (Hs1 : sqr_y2 < v ^ 2) by flia Hy2 Hss.
-        assert (H : sqr_y1 + sqr_y2 + sqr_y3 + sqr_y4 < m * m). {
+        assert (Hs1 : y2 ^ 2 < v ^ 2) by flia Hy2 Hss.
+        assert (H : y1 ^ 2 + y2 ^ 2 + y3 ^ 2 + y4 ^ 2 < m * m). {
           apply (Nat.lt_le_trans _ (v ^ 2 + v ^ 2 + v ^ 2 + v ^ 2)). {
             flia Hy1 Hs1 Hy3 Hy4.
           }
@@ -976,8 +976,8 @@ destruct (Nat.eq_dec r m) as [Hrme| Hrme]. {
     } {
       apply Decidable.not_or.
       intros [Hss| Hss]. {
-        assert (Hs1 : sqr_y3 < v ^ 2) by flia Hy3 Hss.
-        assert (H : sqr_y1 + sqr_y2 + sqr_y3 + sqr_y4 < m * m). {
+        assert (Hs1 : y3 ^ 2 < v ^ 2) by flia Hy3 Hss.
+        assert (H : y1 ^ 2 + y2 ^ 2 + y3 ^ 2 + y4 ^ 2 < m * m). {
           apply (Nat.lt_le_trans _ (v ^ 2 + v ^ 2 + v ^ 2 + v ^ 2)). {
             flia Hy1 Hy2 Hs1 Hy4.
           }
@@ -985,8 +985,8 @@ destruct (Nat.eq_dec r m) as [Hrme| Hrme]. {
         }
         flia Hr H.
       } {
-        assert (Hs1 : sqr_y4 < v ^ 2) by flia Hy4 Hss.
-        assert (H : sqr_y1 + sqr_y2 + sqr_y3 + sqr_y4 < m * m). {
+        assert (Hs1 : y4 ^ 2 < v ^ 2) by flia Hy4 Hss.
+        assert (H : y1 ^ 2 + y2 ^ 2 + y3 ^ 2 + y4 ^ 2 < m * m). {
           apply (Nat.lt_le_trans _ (v ^ 2 + v ^ 2 + v ^ 2 + v ^ 2)). {
             flia Hy1 Hy2 Hy3 Hs1.
           }
@@ -999,7 +999,7 @@ destruct (Nat.eq_dec r m) as [Hrme| Hrme]. {
   (* therefore xi mod m = m / 2 *)
   destruct Hy as (Hsy1 & Hsy2 & Hsy3 & Hsy4).
   clear Hy1 Hy2 Hy3 Hy4.
-  unfold f in sqr_y1, sqr_y2, sqr_y3, sqr_y4.
+  unfold f in y1, y2, y3, y4.
   assert (Hsy : ∀ x, m / 2 < x mod m → m - x mod m = m / 2 → False). {
     clear - Hmz Hme.
     intros * Hxv Hsy.
@@ -1023,35 +1023,35 @@ destruct (Nat.eq_dec r m) as [Hrme| Hrme]. {
   destruct (le_dec (x1 mod m) v) as [Hx1v| Hx1v]. 2: {
     apply Nat.nle_gt in Hx1v.
     apply Nat.pow_inj_l in Hsy1; [ | easy ].
-    subst sqr_y1 v.
+    subst y1 v.
     now exfalso; apply (Hsy x1).
   }
   destruct (le_dec (x2 mod m) v) as [Hx2v| Hx2v]. 2: {
     apply Nat.nle_gt in Hx2v.
     apply Nat.pow_inj_l in Hsy2; [ | easy ].
-    subst sqr_y2 v.
+    subst y2 v.
     now exfalso; apply (Hsy x2).
   }
   destruct (le_dec (x3 mod m) v) as [Hx3v| Hx3v]. 2: {
     apply Nat.nle_gt in Hx3v.
     apply Nat.pow_inj_l in Hsy3; [ | easy ].
-    subst sqr_y3 v.
+    subst y3 v.
     now exfalso; apply (Hsy x3).
   }
   destruct (le_dec (x4 mod m) v) as [Hx4v| Hx4v]. 2: {
     apply Nat.nle_gt in Hx4v.
     apply Nat.pow_inj_l in Hsy4; [ | easy ].
-    subst sqr_y4 v.
+    subst y4 v.
     now exfalso; apply (Hsy x4).
   }
   move Hx2v before Hx1v.
   move Hx3v before Hx2v.
   move Hx4v before Hx3v.
   clear Hsy.
-  unfold sqr_y1 in Hsy1.
-  unfold sqr_y2 in Hsy2.
-  unfold sqr_y3 in Hsy3.
-  unfold sqr_y4 in Hsy4.
+  unfold y1 in Hsy1.
+  unfold y2 in Hsy2.
+  unfold y3 in Hsy3.
+  unfold y4 in Hsy4.
   apply Nat.pow_inj_l in Hsy1; [ | easy ].
   apply Nat.pow_inj_l in Hsy2; [ | easy ].
   apply Nat.pow_inj_l in Hsy3; [ | easy ].
@@ -1124,10 +1124,10 @@ destruct (Nat.eq_dec r 0) as [Hrz| Hrz]. {
   destruct Hr as (Hr, Hr3).
   apply Nat.eq_add_0 in Hr.
   destruct Hr as (Hr1, Hr2).
-  unfold sqr_y1, f in Hr1.
-  unfold sqr_y2, f in Hr2.
-  unfold sqr_y3, f in Hr3.
-  unfold sqr_y4, f in Hr4.
+  unfold y1, f in Hr1.
+  unfold y2, f in Hr2.
+  unfold y3, f in Hr3.
+  unfold y4, f in Hr4.
   destruct (le_dec (x1 mod m) v) as [Hx1v| Hx1v]. 2: {
     apply Nat.pow_eq_0 in Hr1; [ | easy ].
     specialize (Nat.mod_upper_bound x1 m Hrme) as H1.
@@ -1169,4 +1169,5 @@ destruct (Nat.eq_dec r 0) as [Hrz| Hrz]. {
   rewrite Hp, Nat.mul_1_r in Hm.
   flia Hmn Hm.
 }
+specialize (Euler_s_four_square_identity x1 x2 x3 x4) as H1.
 ...
