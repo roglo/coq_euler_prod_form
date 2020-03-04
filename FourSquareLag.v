@@ -762,7 +762,7 @@ specialize (Nat.div_mod x2 m Hmz) as Hx2.
 specialize (Nat.div_mod x3 m Hmz) as Hx3.
 specialize (Nat.div_mod x4 m Hmz) as Hx4.
 set (v := m / 2).
-set (f x := if le_dec (x mod m) v then x mod m else x mod m - v).
+set (f x := if le_dec (x mod m) v then x mod m else m - x mod m).
 set (y1 := f x1).
 set (y2 := f x2).
 set (y3 := f x3).
@@ -771,15 +771,15 @@ assert (Hx : ∀ x, f x ≤ v). {
   intros; unfold f.
   destruct (le_dec (x mod m) v) as [Hx1v| Hx1v]; [ easy | ].
   apply Nat.nle_gt in Hx1v.
-  apply (Nat.add_le_mono_r _ _ v).
-  rewrite Nat.sub_add; [ | now apply Nat.lt_le_incl ].
-  transitivity (m - 1). {
-    rewrite Nat.sub_1_r.
-    apply Nat.lt_le_pred.
-    now apply Nat.mod_upper_bound.
+  apply (Nat.add_le_mono_r _ _ (x mod m)).
+  rewrite Nat.sub_add. 2: {
+    now apply Nat.lt_le_incl, Nat.mod_upper_bound.
   }
-  apply Nat.le_sub_le_add_r.
-  replace (v + v) with (2 * v) by flia.
+  transitivity (v + (v + 1)). 2: {
+    apply Nat.add_le_mono_l.
+    now rewrite Nat.add_1_r.
+  }
+  replace (v + (v + 1)) with (2 * v + 1) by flia.
   unfold v.
   specialize (Nat.div_mod m 2 (Nat.neq_succ_0 _)) as H1.
   rewrite H1 at 1.
@@ -792,65 +792,18 @@ assert (Hy2 : y2 ≤ v) by apply Hx.
 assert (Hy3 : y3 ≤ v) by apply Hx.
 assert (Hy4 : y4 ≤ v) by apply Hx.
 assert (Hym : (y1 ^ 2 + y2 ^ 2 + y3 ^ 2 + y4 ^ 2) mod m = 0). {
-  unfold y1, y2, y3, y4, f.
-  destruct (le_dec (x1 mod m) v) as [Hx1v| Hx1v]. {
-    do 2 rewrite <- Nat.add_assoc.
-    rewrite <- Nat.add_mod_idemp_l; [ | easy ].
-    rewrite Nat_mod_pow_mod.
-    rewrite Nat.add_mod_idemp_l; [ rewrite Nat.add_comm | easy ].
-    destruct (le_dec (x2 mod m) v) as [Hx2v| Hx2v]. {
-      do 2 rewrite <- Nat.add_assoc.
-      rewrite <- Nat.add_mod_idemp_l; [ | easy ].
-      rewrite Nat_mod_pow_mod.
-      rewrite Nat.add_mod_idemp_l; [ rewrite Nat.add_comm | easy ].
-      destruct (le_dec (x3 mod m) v) as [Hx3v| Hx3v]. {
-        do 2 rewrite <- Nat.add_assoc.
-        rewrite <- Nat.add_mod_idemp_l; [ | easy ].
-        rewrite Nat_mod_pow_mod.
-        rewrite Nat.add_mod_idemp_l; [ rewrite Nat.add_comm | easy ].
-        destruct (le_dec (x4 mod m) v) as [Hx4v| Hx4v]. {
-          do 2 rewrite <- Nat.add_assoc.
-          rewrite <- Nat.add_mod_idemp_l; [ | easy ].
-          rewrite Nat_mod_pow_mod.
-          rewrite Nat.add_mod_idemp_l; [ rewrite Nat.add_comm | easy ].
-          rewrite Nat.add_assoc, Hm, Nat.mul_comm.
-          now apply Nat.mod_mul.
-        } {
-          apply Nat.nle_gt in Hx4v.
-          rewrite Nat_sqr_sub; [ | now apply Nat.lt_le_incl ].
-          do 2 rewrite <- Nat.add_assoc.
-(* j'ai des doutes, quand même...
-   faut peut-être revenir au git dont le log est "changing definition of f" *)
-...
   assert (Hxy2 : ∀ x, x ^ 2 ≡ f x ^ 2 mod m). {
     intros x.
     unfold f.
     destruct (le_dec (x mod m) v) as [Hxv| Hxv]. {
       now rewrite Nat_mod_pow_mod.
     } {
-      apply Nat.nle_gt in Hxv.
-(*
-      rewrite (Nat.pow_2_r (_ - _)).
-      rewrite Nat.mul_sub_distr_l.
-      rewrite Nat.mul_sub_distr_r.
-*)
-      rewrite Nat_sqr_sub; [ | now apply Nat.lt_le_incl ].
+      rewrite Nat_sqr_sub. 2: {
+        now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+      }
       symmetry.
-      rewrite <- Nat_sub_sub_assoc. 2: {
-        split. {
-          rewrite Nat.pow_2_r.
-          apply Nat.mul_le_mono_r.
-          flia Hxv.
-        } {
-...
-(*
-      rewrite <- Nat.add_sub_assoc. 2: {
-        rewrite Nat.pow_2_r.
-        apply Nat.mul_le_mono_r.
-*)
-...
-
-      rewrite <- (Nat.mod_add _ (2 * (x mod m) * v)); [ | easy ].
+      rewrite <- (Nat.mod_add _ (2 * (x mod m))); [ | easy ].
+      rewrite Nat.mul_shuffle0.
       rewrite Nat.sub_add. 2: {
         remember (x mod m) as y.
         replace m with (y + (m - y)). 2: {
@@ -1269,6 +1222,7 @@ assert (Hz1 : z1 mod m = 0). {
           rewrite Nat.mod_add; [ | easy ].
           rewrite Nat.mul_mod_idemp_r; [ | easy ].
           do 4 rewrite <- Nat.pow_2_r.
+          replace (x1 ^ 2 + x2 ^ 2 + x3 ^ 2) with (m * p - x4 ^ 2) by flia Hm.
 ...
 Theorem Nat_add_mod_cancel_l : ∀ a b c m,
   (a + b) ≡ (a + c) mod m ↔ b ≡ c mod m.
