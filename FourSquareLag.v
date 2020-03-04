@@ -996,6 +996,7 @@ destruct (Nat.eq_dec r m) as [Hrme| Hrme]. {
       }
     }
   }
+  (* therefore xi mod m = m / 2 *)
   destruct Hy as (Hsy1 & Hsy2 & Hsy3 & Hsy4).
   clear Hy1 Hy2 Hy3 Hy4.
   unfold f in sqr_y1, sqr_y2, sqr_y3, sqr_y4.
@@ -1047,4 +1048,34 @@ destruct (Nat.eq_dec r m) as [Hrme| Hrme]. {
   move Hx3v before Hx2v.
   move Hx4v before Hx3v.
   clear Hsy.
+  unfold sqr_y1 in Hsy1.
+  unfold sqr_y2 in Hsy2.
+  unfold sqr_y3 in Hsy3.
+  unfold sqr_y4 in Hsy4.
+  apply Nat.pow_inj_l in Hsy1; [ | easy ].
+  apply Nat.pow_inj_l in Hsy2; [ | easy ].
+  apply Nat.pow_inj_l in Hsy3; [ | easy ].
+  apply Nat.pow_inj_l in Hsy4; [ | easy ].
+  clear Hx1v Hx2v Hx3v Hx4v.
+  rewrite Hsy1 in Hx1.
+  rewrite Hsy2 in Hx2.
+  rewrite Hsy3 in Hx3.
+  rewrite Hsy4 in Hx4.
+  (* then Σ xi² = mp = Σ (mqi+m/2)² = Σ (m²qi²+(m/2)²+2mqim/2)
+     = m²Σ qi² + m² + Σ m²qi = m² (Σ qi² + 1 + Σ qi) = mp *)
+  move Hm at bottom.
+  rewrite Hx1, Hx2, Hx3, Hx4 in Hm.
+  do 4 rewrite Nat_sqr_add in Hm.
+  remember (x1 / m) as q1 eqn:Hq1.
+  remember (x2 / m) as q2 eqn:Hq2.
+  remember (x3 / m) as q3 eqn:Hq3.
+  remember (x4 / m) as q4 eqn:Hq4.
+  move q4 before q1; move q3 before q1; move q2 before q1.
+  unfold v in Hm.
+  setoid_rewrite (Nat.mul_shuffle0 2) in Hm.
+  rewrite <- (Nat.divide_div_mul_exact m) in Hm; [ | easy | ]. 2: {
+    now apply Nat.mod_divide in Hme.
+  }
+  rewrite (Nat.mul_comm 2) in Hm.
+  rewrite Nat.div_mul in Hm; [ | easy ].
 ...
