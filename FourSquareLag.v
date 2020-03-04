@@ -767,34 +767,30 @@ set (y1 := f x1).
 set (y2 := f x2).
 set (y3 := f x3).
 set (y4 := f x4).
-assert (Hx : ∀ x, f x ^ 2 ≤ v ^ 2). {
+assert (Hx : ∀ x, f x ≤ v). {
   intros; unfold f.
-  destruct (le_dec (x mod m) v) as [Hx1v| Hx1v]. {
-    now apply Nat.pow_le_mono_l.
-  } {
-    apply Nat.nle_gt in Hx1v.
-    apply Nat.pow_le_mono_l.
-    apply (Nat.add_le_mono_r _ _ (x mod m)).
-    rewrite Nat.sub_add. 2: {
-      now apply Nat.lt_le_incl, Nat.mod_upper_bound.
-    }
-    transitivity (v + (v + 1)). 2: {
-      apply Nat.add_le_mono_l.
-      now rewrite Nat.add_1_r.
-    }
-    replace (v + (v + 1)) with (2 * v + 1) by flia.
-    unfold v.
-    specialize (Nat.div_mod m 2 (Nat.neq_succ_0 _)) as H1.
-    rewrite H1 at 1.
-    apply Nat.add_le_mono_l.
-    apply lt_n_Sm_le.
-    now apply Nat.mod_upper_bound.
+  destruct (le_dec (x mod m) v) as [Hx1v| Hx1v]; [ easy | ].
+  apply Nat.nle_gt in Hx1v.
+  apply (Nat.add_le_mono_r _ _ (x mod m)).
+  rewrite Nat.sub_add. 2: {
+    now apply Nat.lt_le_incl, Nat.mod_upper_bound.
   }
+  transitivity (v + (v + 1)). 2: {
+    apply Nat.add_le_mono_l.
+    now rewrite Nat.add_1_r.
+  }
+  replace (v + (v + 1)) with (2 * v + 1) by flia.
+  unfold v.
+  specialize (Nat.div_mod m 2 (Nat.neq_succ_0 _)) as H1.
+  rewrite H1 at 1.
+  apply Nat.add_le_mono_l.
+  apply lt_n_Sm_le.
+  now apply Nat.mod_upper_bound.
 }
-assert (Hy1 : y1 ^ 2 ≤ v ^ 2) by apply Hx.
-assert (Hy2 : y2 ^ 2 ≤ v ^ 2) by apply Hx.
-assert (Hy3 : y3 ^ 2 ≤ v ^ 2) by apply Hx.
-assert (Hy4 : y4 ^ 2 ≤ v ^ 2) by apply Hx.
+assert (Hy1 : y1 ≤ v) by apply Hx.
+assert (Hy2 : y2 ≤ v) by apply Hx.
+assert (Hy3 : y3 ≤ v) by apply Hx.
+assert (Hy4 : y4 ≤ v) by apply Hx.
 assert (Hym : (y1 ^ 2 + y2 ^ 2 + y3 ^ 2 + y4 ^ 2) mod m = 0). {
   assert (Hxy2 : ∀ x, x ^ 2 ≡ f x ^ 2 mod m). {
     intros x.
@@ -858,9 +854,9 @@ assert (Hrm : r ≤ m). {
   apply (Nat.mul_le_mono_pos_r _ _ m); [ flia Hmz | ].
   rewrite <- Hr.
   transitivity (v ^ 2 + v ^ 2 + v ^ 2 + v ^ 2). {
-    apply Nat.add_le_mono; [ | easy ].
-    apply Nat.add_le_mono; [ | easy ].
-    now apply Nat.add_le_mono.
+    apply Nat.add_le_mono; [ | now apply Nat.pow_le_mono_l ].
+    apply Nat.add_le_mono; [ | now apply Nat.pow_le_mono_l ].
+    now apply Nat.add_le_mono; apply Nat.pow_le_mono_l.
   }
   unfold v.
   specialize (Nat.div_mod m 2 (Nat.neq_succ_0 _)) as H1.
@@ -907,7 +903,9 @@ destruct (Nat.eq_dec r m) as [Hrme| Hrme]. {
         rewrite (Nat.mul_comm 2), Nat.div_mul; [ | easy ].
         fold v.
         transitivity (v ^ 2 + v ^ 2 + v ^ 2 + v ^ 2). {
-          flia Hy1 Hy2 Hy3 Hy4.
+          apply Nat.add_le_mono; [ | now apply Nat.pow_le_mono_l ].
+          apply Nat.add_le_mono; [ | now apply Nat.pow_le_mono_l ].
+          now apply Nat.add_le_mono; apply Nat.pow_le_mono_l.
         }
         flia.
       } {
@@ -952,6 +950,10 @@ destruct (Nat.eq_dec r m) as [Hrme| Hrme]. {
       flia.
     }
     rewrite <- and_assoc.
+    apply (Nat.pow_le_mono_l _ _ 2) in Hy1.
+    apply (Nat.pow_le_mono_l _ _ 2) in Hy2.
+    apply (Nat.pow_le_mono_l _ _ 2) in Hy3.
+    apply (Nat.pow_le_mono_l _ _ 2) in Hy4.
     split. {
       apply Decidable.not_or.
       intros [Hss| Hss]. {
@@ -1170,4 +1172,6 @@ destruct (Nat.eq_dec r 0) as [Hrz| Hrz]. {
   flia Hmn Hm.
 }
 specialize (Euler_s_four_square_identity x1 x2 x3 x4) as H1.
+specialize (H1 y1 y2 y3 y4).
+rewrite Hm, Hr in H1.
 ...
