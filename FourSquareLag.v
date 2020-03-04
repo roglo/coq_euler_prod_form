@@ -792,19 +792,65 @@ assert (Hy2 : y2 ≤ v) by apply Hx.
 assert (Hy3 : y3 ≤ v) by apply Hx.
 assert (Hy4 : y4 ≤ v) by apply Hx.
 assert (Hym : (y1 ^ 2 + y2 ^ 2 + y3 ^ 2 + y4 ^ 2) mod m = 0). {
+  unfold y1, y2, y3, y4, f.
+  destruct (le_dec (x1 mod m) v) as [Hx1v| Hx1v]. {
+    do 2 rewrite <- Nat.add_assoc.
+    rewrite <- Nat.add_mod_idemp_l; [ | easy ].
+    rewrite Nat_mod_pow_mod.
+    rewrite Nat.add_mod_idemp_l; [ rewrite Nat.add_comm | easy ].
+    destruct (le_dec (x2 mod m) v) as [Hx2v| Hx2v]. {
+      do 2 rewrite <- Nat.add_assoc.
+      rewrite <- Nat.add_mod_idemp_l; [ | easy ].
+      rewrite Nat_mod_pow_mod.
+      rewrite Nat.add_mod_idemp_l; [ rewrite Nat.add_comm | easy ].
+      destruct (le_dec (x3 mod m) v) as [Hx3v| Hx3v]. {
+        do 2 rewrite <- Nat.add_assoc.
+        rewrite <- Nat.add_mod_idemp_l; [ | easy ].
+        rewrite Nat_mod_pow_mod.
+        rewrite Nat.add_mod_idemp_l; [ rewrite Nat.add_comm | easy ].
+        destruct (le_dec (x4 mod m) v) as [Hx4v| Hx4v]. {
+          do 2 rewrite <- Nat.add_assoc.
+          rewrite <- Nat.add_mod_idemp_l; [ | easy ].
+          rewrite Nat_mod_pow_mod.
+          rewrite Nat.add_mod_idemp_l; [ rewrite Nat.add_comm | easy ].
+          rewrite Nat.add_assoc, Hm, Nat.mul_comm.
+          now apply Nat.mod_mul.
+        } {
+          apply Nat.nle_gt in Hx4v.
+          rewrite Nat_sqr_sub; [ | now apply Nat.lt_le_incl ].
+          do 2 rewrite <- Nat.add_assoc.
+(* j'ai des doutes, quand même...
+   faut peut-être revenir au git dont le log est "changing definition of f" *)
+...
   assert (Hxy2 : ∀ x, x ^ 2 ≡ f x ^ 2 mod m). {
     intros x.
     unfold f.
     destruct (le_dec (x mod m) v) as [Hxv| Hxv]. {
       now rewrite Nat_mod_pow_mod.
     } {
-...
-      rewrite Nat_sqr_sub. 2: {
-        now apply Nat.lt_le_incl, Nat.mod_upper_bound.
-      }
+      apply Nat.nle_gt in Hxv.
+(*
+      rewrite (Nat.pow_2_r (_ - _)).
+      rewrite Nat.mul_sub_distr_l.
+      rewrite Nat.mul_sub_distr_r.
+*)
+      rewrite Nat_sqr_sub; [ | now apply Nat.lt_le_incl ].
       symmetry.
-      rewrite <- (Nat.mod_add _ (2 * (x mod m))); [ | easy ].
-      rewrite Nat.mul_shuffle0.
+      rewrite <- Nat_sub_sub_assoc. 2: {
+        split. {
+          rewrite Nat.pow_2_r.
+          apply Nat.mul_le_mono_r.
+          flia Hxv.
+        } {
+...
+(*
+      rewrite <- Nat.add_sub_assoc. 2: {
+        rewrite Nat.pow_2_r.
+        apply Nat.mul_le_mono_r.
+*)
+...
+
+      rewrite <- (Nat.mod_add _ (2 * (x mod m) * v)); [ | easy ].
       rewrite Nat.sub_add. 2: {
         remember (x mod m) as y.
         replace m with (y + (m - y)). 2: {
