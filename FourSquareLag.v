@@ -1204,6 +1204,33 @@ assert (Hz1 : z1 mod m = 0). {
             rewrite Nat.add_mod_idemp_l; [ | easy ].
             rewrite Nat.add_comm.
             do 4 rewrite <- Nat.pow_2_r.
-...
-Search (_ * (_ mod _)).
+Search ((_ + _) mod _ = (_ + _) mod _).
+Search (_ + _ = _ + _).
+Theorem Nat_add_mod_cancel_l : ∀ a b c m,
+  (a + b) ≡ (a + c) mod m ↔ b ≡ c mod m.
+Admitted.
+apply (Nat_add_mod_cancel_l (x1 ^ 2)).
+do 2 rewrite Nat.add_assoc.
+rewrite Hm.
+Search ((_ * _) mod _).
+rewrite Nat.mul_comm, Nat.mod_mul; [ | easy ].
+symmetry.
+replace (x1 ^ 2 + x1 ^ 2) with (2 * x1 ^ 2) by flia.
+rewrite Hx1.
+rewrite Nat_sqr_add.
+do 2 rewrite Nat.mul_add_distr_l.
+rewrite Nat.pow_mul_l.
+rewrite Nat.pow_2_r.
+rewrite Nat.mul_comm.
+do 2 rewrite <- Nat.mul_assoc.
+rewrite <- Nat.add_assoc.
+rewrite Nat_mod_add_l_mul_l; [ | easy ].
+do 3 rewrite (Nat.mul_comm 2).
+do 3 rewrite <- Nat.mul_assoc.
+rewrite Nat_mod_add_r_mul_l; [ | easy ].
+rewrite <- Nat.mul_mod_idemp_l; [ | easy ].
+rewrite Nat_mod_pow_mod.
+rewrite Nat.mul_mod_idemp_l; [ | easy ].
+rewrite Nat.mul_comm.
+(* I don't see why *)
 ...
