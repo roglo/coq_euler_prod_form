@@ -1114,9 +1114,10 @@ destruct (Nat.eq_dec r m) as [Hrme| Hrme]. {
   destruct Hp as [Hp| Hp]; [ easy | ].
   flia Hp Hqz.
 }
-assert (Hrz : r ≠ 0). {
-  intros H; subst r.
+destruct (Nat.eq_dec r 0) as [Hrz| Hrz]. {
+  subst r.
   clear Hy1 Hy2 Hy3 Hy4 Hrm.
+  apply Nat.neq_sym in Hrme.
   apply Nat.eq_add_0 in Hr.
   destruct Hr as (Hr, Hr4).
   apply Nat.eq_add_0 in Hr.
@@ -1127,4 +1128,45 @@ assert (Hrz : r ≠ 0). {
   unfold sqr_y2, f in Hr2.
   unfold sqr_y3, f in Hr3.
   unfold sqr_y4, f in Hr4.
+  destruct (le_dec (x1 mod m) v) as [Hx1v| Hx1v]. 2: {
+    apply Nat.pow_eq_0 in Hr1; [ | easy ].
+    specialize (Nat.mod_upper_bound x1 m Hrme) as H1.
+    flia Hr1 H1.
+  }
+  destruct (le_dec (x2 mod m) v) as [Hx2v| Hx2v]. 2: {
+    apply Nat.pow_eq_0 in Hr2; [ | easy ].
+    specialize (Nat.mod_upper_bound x2 m Hrme) as H2.
+    flia Hr2 H2.
+  }
+  destruct (le_dec (x3 mod m) v) as [Hx3v| Hx3v]. 2: {
+    apply Nat.pow_eq_0 in Hr3; [ | easy ].
+    specialize (Nat.mod_upper_bound x3 m Hrme) as H3.
+    flia Hr3 H3.
+  }
+  destruct (le_dec (x4 mod m) v) as [Hx4v| Hx4v]. 2: {
+    apply Nat.pow_eq_0 in Hr4; [ | easy ].
+    specialize (Nat.mod_upper_bound x4 m Hrme) as H4.
+    flia Hr4 H4.
+  }
+  apply Nat.pow_eq_0 in Hr1; [ | easy ].
+  apply Nat.pow_eq_0 in Hr2; [ | easy ].
+  apply Nat.pow_eq_0 in Hr3; [ | easy ].
+  apply Nat.pow_eq_0 in Hr4; [ | easy ].
+  clear Hx1v Hx2v Hx3v Hx4v.
+  move Hm at bottom.
+  rewrite Hx1, Hr1, Nat.add_0_r in Hm.
+  rewrite Hx2, Hr2, Nat.add_0_r in Hm.
+  rewrite Hx3, Hr3, Nat.add_0_r in Hm.
+  rewrite Hx4, Hr4, Nat.add_0_r in Hm.
+  do 4 rewrite Nat.pow_mul_l in Hm.
+  do 3 rewrite <- Nat.mul_add_distr_l in Hm.
+  rewrite Nat.pow_2_r, <- Nat.mul_assoc in Hm.
+  apply Nat.mul_cancel_l in Hm; [ | easy ].
+  rewrite <- Hm in Hp.
+  move Hp at bottom.
+  apply prime_not_mul in Hp.
+  destruct Hp as [Hp| Hp]; [ easy | ].
+  rewrite Hp, Nat.mul_1_r in Hm.
+  flia Hmn Hm.
+}
 ...
