@@ -2485,3 +2485,27 @@ apply H1; clear H1.
 rewrite Hd.
 apply Nat.divide_factor_r.
 Qed.
+
+Theorem prime_not_mul : ∀ p q, prime (p * q) → p = 1 ∨ q = 1.
+Proof.
+intros * Hpq.
+destruct (lt_dec p 2) as [H2p| H2p]. {
+  destruct p; [ easy | ].
+  destruct p; [ now left | flia H2p ].
+}
+destruct (lt_dec q 2) as [H2q| H2q]. {
+  rewrite Nat.mul_comm in Hpq.
+  destruct q; [ easy | ].
+  destruct q; [ now right | flia H2q ].
+}
+apply Nat.nlt_ge in H2p.
+apply Nat.nlt_ge in H2q.
+exfalso.
+apply prime_only_divisors with (a := p) in Hpq. {
+  destruct Hpq as [Hpq| Hpq]; [ flia Hpq H2p | ].
+  replace p with (p * 1) in Hpq at 1 by flia.
+  apply Nat.mul_cancel_l in Hpq; [ | flia H2p ].
+  flia Hpq H2q.
+}
+apply Nat.divide_factor_l.
+Qed.

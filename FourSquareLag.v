@@ -1110,5 +1110,21 @@ destruct (Nat.eq_dec r m) as [Hrme| Hrme]. {
   }
   move Hp at bottom.
   rewrite <- Hm in Hp.
-Search (prime (_ * _)).
+  apply prime_not_mul in Hp.
+  destruct Hp as [Hp| Hp]; [ easy | ].
+  flia Hp Hqz.
+}
+assert (Hrz : r ≠ 0). {
+  intros H; subst r.
+  clear Hy1 Hy2 Hy3 Hy4 Hrm.
+  apply Nat.eq_add_0 in Hr.
+  destruct Hr as (Hr, Hr4).
+  apply Nat.eq_add_0 in Hr.
+  destruct Hr as (Hr, Hr3).
+  apply Nat.eq_add_0 in Hr.
+  destruct Hr as (Hr1, Hr2).
+  unfold sqr_y1, f in Hr1.
+  unfold sqr_y2, f in Hr2.
+  unfold sqr_y3, f in Hr3.
+  unfold sqr_y4, f in Hr4.
 ...
