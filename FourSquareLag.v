@@ -1108,4 +1108,7 @@ destruct (Nat.eq_dec r m) as [Hrme| Hrme]. {
     rewrite Nat.mul_1_r in Hm.
     flia Hmn Hm.
   }
+  move Hp at bottom.
+  rewrite <- Hm in Hp.
+Search (prime (_ * _)).
 ...
