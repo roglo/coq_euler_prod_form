@@ -762,7 +762,7 @@ specialize (Nat.div_mod x2 m Hmz) as Hx2.
 specialize (Nat.div_mod x3 m Hmz) as Hx3.
 specialize (Nat.div_mod x4 m Hmz) as Hx4.
 set (v := m / 2).
-set (f x := if le_dec (x mod m) v then x mod m else m - x mod m).
+set (f x := if le_dec (x mod m) v then x mod m else x mod m - v).
 set (y1 := f x1).
 set (y2 := f x2).
 set (y3 := f x3).
@@ -771,15 +771,15 @@ assert (Hx : ∀ x, f x ≤ v). {
   intros; unfold f.
   destruct (le_dec (x mod m) v) as [Hx1v| Hx1v]; [ easy | ].
   apply Nat.nle_gt in Hx1v.
-  apply (Nat.add_le_mono_r _ _ (x mod m)).
-  rewrite Nat.sub_add. 2: {
-    now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+  apply (Nat.add_le_mono_r _ _ v).
+  rewrite Nat.sub_add; [ | now apply Nat.lt_le_incl ].
+  transitivity (m - 1). {
+    rewrite Nat.sub_1_r.
+    apply Nat.lt_le_pred.
+    now apply Nat.mod_upper_bound.
   }
-  transitivity (v + (v + 1)). 2: {
-    apply Nat.add_le_mono_l.
-    now rewrite Nat.add_1_r.
-  }
-  replace (v + (v + 1)) with (2 * v + 1) by flia.
+  apply Nat.le_sub_le_add_r.
+  replace (v + v) with (2 * v) by flia.
   unfold v.
   specialize (Nat.div_mod m 2 (Nat.neq_succ_0 _)) as H1.
   rewrite H1 at 1.
@@ -798,6 +798,7 @@ assert (Hym : (y1 ^ 2 + y2 ^ 2 + y3 ^ 2 + y4 ^ 2) mod m = 0). {
     destruct (le_dec (x mod m) v) as [Hxv| Hxv]. {
       now rewrite Nat_mod_pow_mod.
     } {
+...
       rewrite Nat_sqr_sub. 2: {
         now apply Nat.lt_le_incl, Nat.mod_upper_bound.
       }
