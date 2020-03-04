@@ -999,18 +999,17 @@ destruct (Nat.eq_dec r m) as [Hrme| Hrme]. {
   destruct Hy as (Hsy1 & Hsy2 & Hsy3 & Hsy4).
   clear Hy1 Hy2 Hy3 Hy4.
   unfold f in sqr_y1, sqr_y2, sqr_y3, sqr_y4.
-  destruct (le_dec (x1 mod m) v) as [Hx1v| Hx1v]. 2: {
-    apply Nat.nle_gt in Hx1v.
-    unfold sqr_y1 in Hsy1.
-    apply Nat.pow_inj_l in Hsy1; [ | easy ].
-    apply Nat.add_sub_eq_nz in Hsy1. 2: {
-      intros Hv; subst v.
+  assert (Hsy : ∀ x, m / 2 < x mod m → m - x mod m = m / 2 → False). {
+    clear - Hmz Hme.
+    intros * Hxv Hsy.
+    apply Nat.add_sub_eq_nz in Hsy. 2: {
+      intros Hv.
       specialize (Nat.div_mod m 2 (Nat.neq_succ_0 _)) as H1.
       now rewrite Hv, Hme in H1.
     }
-    assert (Hxm2 : x1 mod m = m / 2). {
+    assert (Hxm2 : x mod m = m / 2). {
       replace (m / 2) with (m - m / 2). {
-        rewrite <- Hsy1 at 2.
+        rewrite <- Hsy at 2.
         now rewrite Nat.add_sub.
       } {
         specialize (Nat.div_mod m 2 (Nat.neq_succ_0 _)) as H1.
@@ -1018,16 +1017,34 @@ destruct (Nat.eq_dec r m) as [Hrme| Hrme]. {
         flia H1.
       }
     }
-    flia Hx1v Hxm2.
+    flia Hxv Hxm2.
   }
-...
-    apply Hx1v; clear Hx1v.
-    unfold sqr_y1 in Hsy1.
+  destruct (le_dec (x1 mod m) v) as [Hx1v| Hx1v]. 2: {
+    apply Nat.nle_gt in Hx1v.
     apply Nat.pow_inj_l in Hsy1; [ | easy ].
-...
-    apply Nat.pow_le_mono_l_iff with (c := 2); [ easy | ].
-    rewrite <- Hsy1.
-...
-    apply Nat.pow_inj_l in Hsy1.
-    rewrite <- Hsy1.
+    subst sqr_y1 v.
+    now apply (Hsy x1).
+  }
+  destruct (le_dec (x2 mod m) v) as [Hx2v| Hx2v]. 2: {
+    apply Nat.nle_gt in Hx2v.
+    apply Nat.pow_inj_l in Hsy2; [ | easy ].
+    subst sqr_y2 v.
+    now apply (Hsy x2).
+  }
+  destruct (le_dec (x3 mod m) v) as [Hx3v| Hx3v]. 2: {
+    apply Nat.nle_gt in Hx3v.
+    apply Nat.pow_inj_l in Hsy3; [ | easy ].
+    subst sqr_y3 v.
+    now apply (Hsy x3).
+  }
+  destruct (le_dec (x4 mod m) v) as [Hx4v| Hx4v]. 2: {
+    apply Nat.nle_gt in Hx4v.
+    apply Nat.pow_inj_l in Hsy4; [ | easy ].
+    subst sqr_y4 v.
+    now apply (Hsy x4).
+  }
+  move Hx2v before Hx1v.
+  move Hx3v before Hx2v.
+  move Hx4v before Hx3v.
+  clear Hsy.
 ...
