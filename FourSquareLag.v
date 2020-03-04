@@ -711,7 +711,7 @@ exfalso; apply H1; [ | | | easy ]. {
 }
 Qed.
 
-Check Euler_s_four_square_identity.
+Check Euler_s_four_square_identity_v2.
 
 Definition four_square_sol p :=
   { mx &
@@ -1171,41 +1171,58 @@ destruct (Nat.eq_dec r 0) as [Hrz| Hrz]. {
   rewrite Hp, Nat.mul_1_r in Hm.
   flia Hmn Hm.
 }
-specialize (Euler_s_four_square_identity x1 x2 x3 x4) as H1.
+specialize (Euler_s_four_square_identity_v2 x1 x2 x3 x4) as H1.
 specialize (H1 y1 y2 y3 y4); symmetry in H1.
 rewrite Hm, Hr in H1.
-set (z1 := diff (x1 * y1) (x2 * y2 + x3 * y3 + x4 * y4)) in H1.
-set (z2 := diff (x1 * y2 + x2 * y1 + x3 * y4) (x4 * y3)) in H1.
-set (z3 := diff (x1 * y3 + x3 * y1 + x4 * y2) (x2 * y4)) in H1.
-set (z4 := diff (x1 * y4 + x2 * y3 + x4 * y1) (x3 * y2)) in H1.
+set (z1 := x1 * y1 + x2 * y2 + x3 * y3 + x4 * y4) in H1.
+set (z2 := diff (x1 * y2 + x4 * y3) (x2 * y1 + x3 * y4)) in H1.
+set (z3 := diff (x1 * y3 + x2 * y4) (x3 * y1 + x4 * y2)) in H1.
+set (z4 := diff (x1 * y4 + x3 * y2) (x2 * y3 + x4 * y1)) in H1.
 assert (Hz1 : z1 mod m = 0). {
-  unfold z1, diff.
-  destruct (lt_dec (x1 * y1) (x2 * y2 + x3 * y3 + x4 * y4)) as [Hxy| Hxy]. {
-    apply Nat_eq_mod_sub_0.
-    unfold y1, y2, y3, y4, f.
-    destruct (le_dec (x1 mod m) v) as [Hx1v| Hx1v]. {
+  unfold z1.
+  unfold y1, y2, y3, y4, f.
+  destruct (le_dec (x1 mod m) v) as [Hx1v| Hx1v]. {
+    do 2 rewrite <- Nat.add_assoc.
+    rewrite <- Nat.add_mod_idemp_l; [ | easy ].
+    rewrite Nat.mul_mod_idemp_r; [ | easy ].
+    rewrite Nat.add_mod_idemp_l; [ | easy ].
+    destruct (le_dec (x2 mod m) v) as [Hx2v| Hx2v]. {
+      rewrite Nat.add_comm.
+      do 2 rewrite <- Nat.add_assoc.
+      rewrite <- Nat.add_mod_idemp_l; [ | easy ].
       rewrite Nat.mul_mod_idemp_r; [ | easy ].
-      destruct (le_dec (x2 mod m) v) as [Hx2v| Hx2v]. {
-        rewrite <- Nat.add_assoc.
+      rewrite Nat.add_mod_idemp_l; [ | easy ].
+      destruct (le_dec (x3 mod m) v) as [Hx3v| Hx3v]. {
+        rewrite Nat.add_comm.
+        do 2 rewrite <- Nat.add_assoc.
         rewrite <- Nat.add_mod_idemp_l; [ | easy ].
         rewrite Nat.mul_mod_idemp_r; [ | easy ].
         rewrite Nat.add_mod_idemp_l; [ | easy ].
-        destruct (le_dec (x3 mod m) v) as [Hx3v| Hx3v]. {
+        destruct (le_dec (x4 mod m) v) as [Hx4v| Hx4v]. {
           rewrite Nat.add_comm.
-          rewrite <- Nat.add_assoc.
+          do 2 rewrite <- Nat.add_assoc.
           rewrite <- Nat.add_mod_idemp_l; [ | easy ].
           rewrite Nat.mul_mod_idemp_r; [ | easy ].
           rewrite Nat.add_mod_idemp_l; [ | easy ].
-          destruct (le_dec (x4 mod m) v) as [Hx4v| Hx4v]. {
-            rewrite Nat.add_comm.
-            rewrite <- Nat.add_assoc.
-            rewrite <- Nat.add_mod_idemp_l; [ | easy ].
-            rewrite Nat.mul_mod_idemp_r; [ | easy ].
-            rewrite Nat.add_mod_idemp_l; [ | easy ].
-            rewrite Nat.add_comm.
-            do 4 rewrite <- Nat.pow_2_r.
-Search ((_ + _) mod _ = (_ + _) mod _).
-Search (_ + _ = _ + _).
+          rewrite Nat.add_comm.
+          rewrite Nat.add_assoc.
+          do 4 rewrite <- Nat.pow_2_r.
+          rewrite Hm, Nat.mul_comm.
+          now apply Nat.mod_mul.
+        } {
+          rewrite Nat.mul_sub_distr_l.
+          rewrite Nat.add_comm.
+          rewrite <- Nat.add_assoc.
+          rewrite Nat.add_comm.
+          rewrite Nat.add_sub_assoc. 2: {
+            apply Nat.mul_le_mono_l, Nat.lt_le_incl.
+            now apply Nat.mod_upper_bound.
+          }
+          apply Nat_eq_mod_sub_0.
+          rewrite Nat.mod_add; [ | easy ].
+          rewrite Nat.mul_mod_idemp_r; [ | easy ].
+          do 4 rewrite <- Nat.pow_2_r.
+...
 Theorem Nat_add_mod_cancel_l : ∀ a b c m,
   (a + b) ≡ (a + c) mod m ↔ b ≡ c mod m.
 Admitted.

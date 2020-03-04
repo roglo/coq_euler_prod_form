@@ -123,9 +123,32 @@ destruct (lt_dec (a * q + d * r) (b * p + c * s)) as [H1| H1]. {
     } {
       Z_ring_for_Euler_v2 H1 H2 H3.
     }
+  } {
+    destruct (lt_dec (a * s + c * q) (b * r + d * p)) as [H3| H3]. {
+      Z_ring_for_Euler_v2 H1 H2 H3.
+    } {
+      Z_ring_for_Euler_v2 H1 H2 H3.
+    }
   }
-...
+} {
+  destruct (lt_dec (a * r + b * s) (c * p + d * q)) as [H2| H2]. {
+    destruct (lt_dec (a * s + c * q) (b * r + d * p)) as [H3| H3]. {
+      Z_ring_for_Euler_v2 H1 H2 H3.
+    } {
+      Z_ring_for_Euler_v2 H1 H2 H3.
+    }
+  } {
+    destruct (lt_dec (a * s + c * q) (b * r + d * p)) as [H3| H3]. {
+      Z_ring_for_Euler_v2 H1 H2 H3.
+    } {
+      Z_ring_for_Euler_v2 H1 H2 H3.
+    }
+  }
+}
+Qed.
 
+(*
+with ε = - 1
 Theorem Euler_s_four_square_identity_v3 : ∀ a b c d p q r s ε,
   (a ^ 2 + b ^ 2 + c ^ 2 + d ^ 2) * (p ^ 2 + q ^ 2 + r ^ 2 + s ^ 2) =
      (a * p + b * q + c * r + d * s) ^ 2 +
@@ -133,7 +156,7 @@ Theorem Euler_s_four_square_identity_v3 : ∀ a b c d p q r s ε,
      (a * r + ε * b * s - c * p - ε * d * q) ^ 2 +
      (a * s - ε * b * r + ε * c * q - d * p) ^ 2.
 Proof.
-with ε = - 1
 intros.
 unfold diff.
 do 12 rewrite Nat.pow_2_r.
+*)
