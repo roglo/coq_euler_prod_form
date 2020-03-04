@@ -892,7 +892,7 @@ assert (Hmn : m < p). {
   flia Hnp H2.
 }
 destruct (Nat.eq_dec r m) as [Hrme| Hrme]. {
-  exfalso; subst r; clear Hrm.
+  subst r; clear Hrm.
   assert (Hme : m mod 2 = 0). {
     enough (H : m mod 2 ≠ 1). {
       specialize (Nat.mod_upper_bound m 2 (Nat.neq_succ_0 _)) as H1.
@@ -1024,25 +1024,25 @@ destruct (Nat.eq_dec r m) as [Hrme| Hrme]. {
     apply Nat.nle_gt in Hx1v.
     apply Nat.pow_inj_l in Hsy1; [ | easy ].
     subst sqr_y1 v.
-    now apply (Hsy x1).
+    now exfalso; apply (Hsy x1).
   }
   destruct (le_dec (x2 mod m) v) as [Hx2v| Hx2v]. 2: {
     apply Nat.nle_gt in Hx2v.
     apply Nat.pow_inj_l in Hsy2; [ | easy ].
     subst sqr_y2 v.
-    now apply (Hsy x2).
+    now exfalso; apply (Hsy x2).
   }
   destruct (le_dec (x3 mod m) v) as [Hx3v| Hx3v]. 2: {
     apply Nat.nle_gt in Hx3v.
     apply Nat.pow_inj_l in Hsy3; [ | easy ].
     subst sqr_y3 v.
-    now apply (Hsy x3).
+    now exfalso; apply (Hsy x3).
   }
   destruct (le_dec (x4 mod m) v) as [Hx4v| Hx4v]. 2: {
     apply Nat.nle_gt in Hx4v.
     apply Nat.pow_inj_l in Hsy4; [ | easy ].
     subst sqr_y4 v.
-    now apply (Hsy x4).
+    now exfalso; apply (Hsy x4).
   }
   move Hx2v before Hx1v.
   move Hx3v before Hx2v.
@@ -1071,6 +1071,7 @@ destruct (Nat.eq_dec r m) as [Hrme| Hrme]. {
   remember (x3 / m) as q3 eqn:Hq3.
   remember (x4 / m) as q4 eqn:Hq4.
   move q4 before q1; move q3 before q1; move q2 before q1.
+  move Hq4 before Hq1; move Hq3 before Hq1; move Hq2 before Hq1.
   unfold v in Hm.
   setoid_rewrite (Nat.mul_shuffle0 2) in Hm.
   rewrite <- (Nat.divide_div_mul_exact m) in Hm; [ | easy | ]. 2: {
@@ -1078,4 +1079,33 @@ destruct (Nat.eq_dec r m) as [Hrme| Hrme]. {
   }
   rewrite (Nat.mul_comm 2) in Hm.
   rewrite Nat.div_mul in Hm; [ | easy ].
+  ring_simplify in Hm.
+  do 7 rewrite <- Nat.add_assoc in Hm.
+  rewrite Nat.add_comm in Hm.
+  do 6 rewrite Nat.add_assoc in Hm.
+  replace (4 * (m / 2) ^ 2) with (m ^ 2) in Hm. 2: {
+    specialize (Nat.div_mod m 2 (Nat.neq_succ_0 _)) as H1.
+    rewrite Hme, Nat.add_0_r in H1.
+    replace 4 with (2 ^ 2) by easy.
+    rewrite <- Nat.pow_mul_l.
+    now rewrite <- H1.
+  }
+  rewrite <- Nat.pow_2_r in Hm.
+  do 4 rewrite Nat.pow_mul_l in Hm.
+  replace (m ^ 2) with (m ^ 2 * 1) in Hm at 1 by flia.
+  do 8 rewrite <- Nat.mul_add_distr_l in Hm.
+  rewrite Nat.pow_2_r, <- Nat.mul_assoc in Hm.
+  apply Nat.mul_cancel_l in Hm; [ | easy ].
+  destruct (Nat.eq_dec (q1 + q2 + q3 + q4) 0) as [Hqz| Hqz]. {
+    apply Nat.eq_add_0 in Hqz.
+    destruct Hqz as (Hqz, H); move H at top; subst q4.
+    apply Nat.eq_add_0 in Hqz.
+    destruct Hqz as (Hqz, H); move H at top; subst q3.
+    apply Nat.eq_add_0 in Hqz.
+    destruct Hqz as (Hqz, H); move H at top; subst q2.
+    move Hqz at top; subst q1.
+    cbn in Hm.
+    rewrite Nat.mul_1_r in Hm.
+    flia Hmn Hm.
+  }
 ...
