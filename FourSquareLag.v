@@ -1357,7 +1357,7 @@ Ltac f_case_1 :=
   repeat rewrite <- Nat2Z.inj_add;
   repeat rewrite <- Z.add_sub_swap;
   repeat rewrite <- Nat2Z.inj_add.
-Ltac f_case_2 :=
+Ltac f_case_2 Hz :=
   repeat rewrite Z.mul_sub_distr_l;
   repeat rewrite Z.add_sub_assoc;
   repeat rewrite <- Nat2Z.inj_mul;
@@ -1365,7 +1365,20 @@ Ltac f_case_2 :=
   repeat rewrite <- Z.add_sub_swap;
   repeat rewrite <- Nat2Z.inj_add;
   repeat rewrite <- Z.sub_add_distr;
-  repeat rewrite <- Nat2Z.inj_add.
+  repeat rewrite <- Nat2Z.inj_add;
+  repeat rewrite <- Nat.mul_add_distr_r;
+  try (
+      rewrite <- Zminus_mod_idemp_l;
+      rewrite Hz; cbn;
+      apply Z.mod_opp_l_z; [
+        intros H;
+        replace 0%Z with (Z.of_nat 0) in H by easy;
+        now apply Nat2Z.inj_iff in H
+      |
+        rewrite <- mod_Zmod; [ | easy ];
+        now rewrite Nat.mod_mul
+      ]
+    ).
   destruct (le_dec (x1 mod m) v) as [Hx1v| Hx1v]. {
     f_case_1.
     destruct (le_dec (x2 mod m) v) as [Hx2v| Hx2v]. {
@@ -1375,20 +1388,10 @@ Ltac f_case_2 :=
         destruct (le_dec (x4 mod m) v) as [Hx4v| Hx4v]. {
           now f_case_1.
         } {
-          f_case_2.
-          rewrite <- Zminus_mod_idemp_l.
-          rewrite Hz; cbn.
-          apply Z.mod_opp_l_z. {
-            intros H.
-            replace 0%Z with (Z.of_nat 0) in H by easy.
-            now apply Nat2Z.inj_iff in H.
-          } {
-            rewrite <- mod_Zmod; [ | easy ].
-            now rewrite Nat.mod_mul.
-          }
+          f_case_2 Hz.
         }
       } {
-        f_case_2.
+        f_case_2 Hz.
         destruct (le_dec (x4 mod m) v) as [Hx4v| Hx4v]. {
           f_case_1.
           rewrite <- Zminus_mod_idemp_l.
@@ -1402,22 +1405,11 @@ Ltac f_case_2 :=
             now rewrite Nat.mod_mul.
           }
         } {
-          f_case_2.
-          rewrite <- Zminus_mod_idemp_l.
-          rewrite Hz; cbn.
-          rewrite <- Nat.mul_add_distr_r.
-          apply Z.mod_opp_l_z. {
-            intros H.
-            replace 0%Z with (Z.of_nat 0) in H by easy.
-            now apply Nat2Z.inj_iff in H.
-          } {
-            rewrite <- mod_Zmod; [ | easy ].
-            now rewrite Nat.mod_mul.
-          }
+          f_case_2 Hz.
         }
       }
     } {
-      f_case_2.
+      f_case_2 Hz.
       destruct (le_dec (x3 mod m) v) as [Hx3v| Hx3v]. {
         f_case_1.
         destruct (le_dec (x4 mod m) v) as [Hx4v| Hx4v]. {
@@ -1433,21 +1425,10 @@ Ltac f_case_2 :=
             now rewrite Nat.mod_mul.
           }
         } {
-          f_case_2.
-          rewrite <- Zminus_mod_idemp_l.
-          rewrite Hz; cbn.
-          apply Z.mod_opp_l_z. {
-            intros H.
-            replace 0%Z with (Z.of_nat 0) in H by easy.
-            now apply Nat2Z.inj_iff in H.
-          } {
-            rewrite <- Nat.mul_add_distr_r.
-            rewrite <- mod_Zmod; [ | easy ].
-            now rewrite Nat.mod_mul.
-          }
+          f_case_2 Hz.
         }
       } {
-        f_case_2.
+        f_case_2 Hz.
         destruct (le_dec (x4 mod m) v) as [Hx4v| Hx4v]. {
           f_case_1.
           rewrite <- Zminus_mod_idemp_l.
@@ -1457,24 +1438,11 @@ Ltac f_case_2 :=
             replace 0%Z with (Z.of_nat 0) in H by easy.
             now apply Nat2Z.inj_iff in H.
           } {
-            rewrite <- Nat.mul_add_distr_r.
             rewrite <- mod_Zmod; [ | easy ].
             now rewrite Nat.mod_mul.
           }
         } {
-          f_case_2.
-          rewrite <- Zminus_mod_idemp_l.
-          rewrite Hz; cbn.
-          rewrite <- Nat.mul_add_distr_r.
-          apply Z.mod_opp_l_z. {
-            intros H.
-            replace 0%Z with (Z.of_nat 0) in H by easy.
-            now apply Nat2Z.inj_iff in H.
-          } {
-            rewrite <- Nat.mul_add_distr_r.
-            rewrite <- mod_Zmod; [ | easy ].
-            now rewrite Nat.mod_mul.
-          }
+          f_case_2 Hz.
         }
       }
 ...
