@@ -821,10 +821,6 @@ cbn in Hmx.
 destruct m as (m, (((x1, x2), x3), x4)).
 cbn in Hmx; cbn.
 destruct Hm as (Hmz, Hm).
-specialize (Nat.div_mod x1 m Hmz) as Hx1.
-specialize (Nat.div_mod x2 m Hmz) as Hx2.
-specialize (Nat.div_mod x3 m Hmz) as Hx3.
-specialize (Nat.div_mod x4 m Hmz) as Hx4.
 set (v := m / 2).
 set (f x := (if le_dec (x mod m) v then x mod m else m - x mod m) ^ 2).
 set (sqr_y1 := f x1).
@@ -901,8 +897,21 @@ assert (Hmn : m < p). {
   cbn in H2.
   flia Hnp H2.
 }
+(**)
 destruct (Nat.eq_dec r m) as [Hrme| Hrme]. {
   subst r; clear Hrm.
+clear - Hy1 Hy2 Hy3 Hy4 Hr Hmz Hm Hmn Hp.
+subst sqr_y1 sqr_y2 sqr_y3 sqr_y4 v.
+... (* preparing to make a lemma *)
+specialize (Nat.div_mod x1 m Hmz) as Hx1.
+specialize (Nat.div_mod x2 m Hmz) as Hx2.
+specialize (Nat.div_mod x3 m Hmz) as Hx3.
+specialize (Nat.div_mod x4 m Hmz) as Hx4.
+set (sqr_y1 := f x1) in *.
+set (sqr_y2 := f x2) in *.
+set (sqr_y3 := f x3) in *.
+set (sqr_y4 := f x4) in *.
+set (v := m / 2) in *.
   assert (Hme : m mod 2 = 0). {
     enough (H : m mod 2 ≠ 1). {
       specialize (Nat.mod_upper_bound m 2 (Nat.neq_succ_0 _)) as H1.
@@ -1124,6 +1133,11 @@ destruct (Nat.eq_dec r m) as [Hrme| Hrme]. {
   destruct Hp as [Hp| Hp]; [ easy | ].
   flia Hp Hqz.
 }
+...
+specialize (Nat.div_mod x1 m Hmz) as Hx1.
+specialize (Nat.div_mod x2 m Hmz) as Hx2.
+specialize (Nat.div_mod x3 m Hmz) as Hx3.
+specialize (Nat.div_mod x4 m Hmz) as Hx4.
 destruct (Nat.eq_dec r 0) as [Hrz| Hrz]. {
   subst r.
   clear Hy1 Hy2 Hy3 Hy4 Hrm.
