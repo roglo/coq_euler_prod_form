@@ -1132,9 +1132,12 @@ assert (Hy2 : sqr_y2 ≤ v ^ 2) by apply Hx.
 assert (Hy3 : sqr_y3 ≤ v ^ 2) by apply Hx.
 assert (Hy4 : sqr_y4 ≤ v ^ 2) by apply Hx.
 assert (Hrm : r ≤ m). {
+...
+clear - Hmz Hr Hy4.
   apply (Nat.mul_le_mono_pos_r _ _ m); [ flia Hmz | ].
   rewrite <- Hr.
   transitivity (v ^ 2 + v ^ 2 + v ^ 2 + v ^ 2). {
+    apply Nat.add_le_mono; [ | easy ].
     apply Nat.add_le_mono; [ | easy ].
     apply Nat.add_le_mono; [ | easy ].
     now apply Nat.add_le_mono.
@@ -1149,6 +1152,7 @@ assert (Hrm : r ≤ m). {
   replace (2 ^ 2) with 4 by easy.
   flia.
 }
+...
 assert (Hmn : m < p). {
   remember (resolve_a2_b2_1 p) as abn eqn:Habn.
   symmetry in Habn.
@@ -1181,7 +1185,7 @@ specialize (Nat.div_mod x3 m Hmz) as Hx3.
 specialize (Nat.div_mod x4 m Hmz) as Hx4.
 destruct (Nat.eq_dec r 0) as [Hrz| Hrz]. {
   subst r.
-  clear Hy1 Hy2 Hy3 Hy4 Hrm.
+  clear Hy1 Hy2 Hy3 Hy4.
   apply Nat.neq_sym in Hrme.
   apply Nat.eq_add_0 in Hr.
   destruct Hr as (Hr, Hr4).
