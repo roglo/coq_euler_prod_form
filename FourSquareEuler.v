@@ -3,6 +3,20 @@
 Require Import Utf8 ZArith Psatz.
 Require Import Misc.
 
+Definition Z_diff x y := (x - y)%Z.
+
+Theorem Z_Euler_s_four_square_identity_v2 : ∀ a b c d p q r s,
+  ((a ^ 2 + b ^ 2 + c ^ 2 + d ^ 2) * (p ^ 2 + q ^ 2 + r ^ 2 + s ^ 2))%Z =
+     ((a * p + b * q + c * r + d * s) ^ 2 +
+      Z_diff (a * q + d * r) (b * p + c * s) ^ 2 +
+      Z_diff (a * r + b * s) (c * p + d * q) ^ 2 +
+      Z_diff (a * s + c * q) (b * r + d * p) ^ 2)%Z.
+Proof.
+intros.
+unfold Z_diff.
+ring.
+Qed.
+
 Definition diff x y := if lt_dec x y then y - x else x - y.
 
 Ltac Z_ring_for_Euler_v1 H1 H2 H3 H4 :=

@@ -1169,8 +1169,66 @@ destruct (Nat.eq_dec r 0) as [Hrz| Hrz]. {
   rewrite Hp, Nat.mul_1_r in Hm.
   flia Hmn Hm.
 }
+(*
 specialize (Euler_s_four_square_identity_v2 x1 x2 x3 x4) as H1.
-Check Euler_s_four_square_identity_v2.
+*)
+Require Import ZArith.
+specialize (Z_Euler_s_four_square_identity_v2) as H1.
+unfold Z_diff in H1.
+set (zx1 := Z.of_nat x1).
+set (zx2 := Z.of_nat x2).
+set (zx3 := Z.of_nat x3).
+set (zx4 := Z.of_nat x4).
+set
+  (g x :=
+     if le_dec (x mod m) v then Z.of_nat (x mod m)
+     else (Z.of_nat (x mod m) - Z.of_nat m)%Z).
+set (zy1 := g x1).
+set (zy2 := g x2).
+set (zy3 := g x3).
+set (zy4 := g x4).
+specialize (H1 zx1 zx2 zx3 zx4 zy1 zy2 zy3 zy4).
+replace (zx1 ^ 2 + zx2 ^ 2 + zx3 ^ 2 + zx4 ^ 2)%Z with (Z.of_nat (m * p))
+  in H1. 2: {
+  unfold zx1, zx2, zx3, zx4.
+  do 4 rewrite Z.pow_2_r.
+  do 4 rewrite <- Nat2Z.inj_mul.
+  do 3 rewrite <- Nat2Z.inj_add.
+  do 4 rewrite <- Nat.pow_2_r.
+  now rewrite Hm.
+}
+assert (Hgf : ∀ x, (g x ^ 2 = Z.of_nat (f x))%Z). {
+  intros x.
+  unfold g, f.
+  destruct (le_dec (x mod m) v) as [Hxv| Hxv]. {
+    rewrite Z.pow_2_r, Nat.pow_2_r.
+    now rewrite Nat2Z.inj_mul.
+  } {
+    apply Nat.nle_gt in Hxv.
+    rewrite Z.pow_2_r, Nat.pow_2_r.
+    rewrite Nat2Z.inj_mul.
+    rewrite Nat2Z.inj_sub. 2: {
+      now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+    }
+    rewrite <- Z.opp_involutive.
+    rewrite <- Z.mul_opp_l.
+    rewrite Z.opp_sub_distr.
+    rewrite Z.add_comm.
+    rewrite <- Z.mul_opp_r.
+    rewrite Z.opp_sub_distr.
+    rewrite (Z.add_comm (- Z.of_nat m)%Z).
+    easy.
+  }
+}
+replace (zy1 ^ 2 + zy2 ^ 2 + zy3 ^ 2 + zy4 ^ 2)%Z with (Z.of_nat (r * m))
+  in H1. 2: {
+  unfold zy1, zy2, zy3, zy4.
+  do 4 rewrite Hgf.
+  do 3 rewrite <- Nat2Z.inj_add.
+  fold sqr_y1 sqr_y2 sqr_y3 sqr_y4.
+  now rewrite Hr.
+}
+rewrite <- Nat2Z.inj_mul in H1.
 ...
 specialize (H1 y1 y2 y3 y4); symmetry in H1.
 rewrite Hm, Hr in H1.
