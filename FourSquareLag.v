@@ -1229,6 +1229,63 @@ replace (zy1 ^ 2 + zy2 ^ 2 + zy3 ^ 2 + zy4 ^ 2)%Z with (Z.of_nat (r * m))
   now rewrite Hr.
 }
 rewrite <- Nat2Z.inj_mul in H1.
+set (z1 := (zx1 * zy1 + zx2 * zy2 + zx3 * zy3 + zx4 * zy4)%Z) in H1.
+assert (Hz1 : (z1 mod Z.of_nat m = 0)%Z). {
+  assert
+    (Hz :
+       (Z.of_nat
+          (x1 * (x1 mod m) + x2 * (x2 mod m) +
+           x3 * (x3 mod m) + x4 * (x4 mod m)) mod Z.of_nat m)%Z = 0%Z). {
+    rewrite <- mod_Zmod; [ | easy ].
+    replace 0%Z with (Z.of_nat 0) by easy.
+    f_equal.
+    rewrite <- Nat.add_mod_idemp_r; [ | easy ].
+    rewrite Nat.mul_mod_idemp_r; [ | easy ].
+    rewrite Nat.add_mod_idemp_r; [ | easy ].
+    rewrite Nat.add_comm.
+    do 2 rewrite Nat.add_assoc.
+    rewrite <- Nat.add_mod_idemp_r; [ | easy ].
+    rewrite Nat.mul_mod_idemp_r; [ | easy ].
+    rewrite Nat.add_mod_idemp_r; [ | easy ].
+    rewrite Nat.add_comm.
+    do 2 rewrite Nat.add_assoc.
+    rewrite <- Nat.add_mod_idemp_r; [ | easy ].
+    rewrite Nat.mul_mod_idemp_r; [ | easy ].
+    rewrite Nat.add_mod_idemp_r; [ | easy ].
+    rewrite Nat.add_comm.
+    do 2 rewrite Nat.add_assoc.
+    rewrite <- Nat.add_mod_idemp_r; [ | easy ].
+    rewrite Nat.mul_mod_idemp_r; [ | easy ].
+    rewrite Nat.add_mod_idemp_r; [ | easy ].
+    rewrite Nat.add_comm.
+    do 2 rewrite Nat.add_assoc.
+    do 4 rewrite <- Nat.pow_2_r.
+    rewrite Hm, Nat.mul_comm.
+    now apply Nat.mod_mul.
+  }
+  unfold z1.
+  unfold zx1, zx2, zx3, zx4.
+  unfold zy1, zy2, zy3, zy4, g.
+  destruct (le_dec (x1 mod m) v) as [Hx1v| Hx1v]. {
+    destruct (le_dec (x2 mod m) v) as [Hx2v| Hx2v]. {
+      destruct (le_dec (x3 mod m) v) as [Hx3v| Hx3v]. {
+        destruct (le_dec (x4 mod m) v) as [Hx4v| Hx4v]. {
+          do 4 rewrite <- Nat2Z.inj_mul.
+          now do 3 rewrite <- Nat2Z.inj_add.
+        } {
+          rewrite Z.mul_sub_distr_l.
+          rewrite Z.add_sub_assoc.
+          do 5 rewrite <- Nat2Z.inj_mul.
+          do 3 rewrite <- Nat2Z.inj_add.
+          rewrite Nat2Z.inj_mul.
+          unfold Z.sub.
+          rewrite <- Z.mul_opp_l.
+          rewrite Z.mod_add; [ easy | ].
+          intros H.
+          replace 0%Z with (Z.of_nat 0) in H by easy.
+          now apply Nat2Z.inj_iff in H.
+        }
+      }
 ...
 specialize (H1 y1 y2 y3 y4); symmetry in H1.
 rewrite Hm, Hr in H1.
