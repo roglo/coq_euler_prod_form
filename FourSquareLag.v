@@ -1469,6 +1469,9 @@ assert (Hz2 : (z2 mod Z.of_nat m = 0)%Z). {
           now apply Nat2Z.inj_iff in H.
         } {
           f_case_2 Hz.
+          rewrite Z.sub_sub_distr.
+          rewrite <- Z.add_sub_swap.
+          rewrite <- Nat2Z.inj_add.
 ...
 specialize (H1 y1 y2 y3 y4); symmetry in H1.
 rewrite Hm, Hr in H1.
