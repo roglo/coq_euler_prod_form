@@ -1285,7 +1285,27 @@ assert (Hz1 : (z1 mod Z.of_nat m = 0)%Z). {
           replace 0%Z with (Z.of_nat 0) in H by easy.
           now apply Nat2Z.inj_iff in H.
         }
-      }
+      } {
+        rewrite Z.mul_sub_distr_l.
+        do 4 rewrite <- Nat2Z.inj_mul.
+        rewrite <- Nat2Z.inj_add.
+        rewrite Z.add_sub_assoc.
+        rewrite <- Nat2Z.inj_add.
+        destruct (le_dec (x4 mod m) v) as [Hx4v| Hx4v]. {
+          rewrite <- Nat2Z.inj_mul.
+          rewrite <- Z.add_sub_swap.
+          rewrite <- Nat2Z.inj_add.
+          rewrite <- Zminus_mod_idemp_l.
+          rewrite Hz; cbn.
+          apply Z.mod_opp_l_z. {
+            intros H.
+            replace 0%Z with (Z.of_nat 0) in H by easy.
+            now apply Nat2Z.inj_iff in H.
+          } {
+            rewrite <- mod_Zmod; [ | easy ].
+            now rewrite Nat.mod_mul.
+          }
+        } {
 ...
 specialize (H1 y1 y2 y3 y4); symmetry in H1.
 rewrite Hm, Hr in H1.
