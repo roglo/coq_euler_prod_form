@@ -1170,7 +1170,7 @@ destruct (Nat.eq_dec r 0) as [Hrz| Hrz]. {
   flia Hmn Hm.
 }
 specialize (Euler_s_four_square_identity_v2 x1 x2 x3 x4) as H1.
-Check Euler_s_four_square_identity_v1.
+Check Euler_s_four_square_identity_v2.
 ...
 specialize (H1 y1 y2 y3 y4); symmetry in H1.
 rewrite Hm, Hr in H1.
