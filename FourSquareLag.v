@@ -744,6 +744,72 @@ Definition best_four_square_sol p :=
   { mx : four_square_sol p &
     ∀ nx : four_square_sol p, fst (projT1 mx) ≤ fst (projT1 nx) }.
 
+Lemma sqr_y_from_x_le : ∀ m
+  (f := λ x, (if le_dec (x mod m) (m / 2) then x mod m else m - x mod m) ^ 2),
+  m ≠ 0
+  → ∀ x, f x ≤ (m / 2) ^ 2.
+Proof.
+intros * Hmz x.
+set (v := m / 2) in f.
+unfold f.
+destruct (le_dec (x mod m) v) as [Hx1v| Hx1v]. {
+  now apply Nat.pow_le_mono_l.
+} {
+  apply Nat.nle_gt in Hx1v.
+  apply Nat.pow_le_mono_l.
+  apply (Nat.add_le_mono_r _ _ (x mod m)).
+  rewrite Nat.sub_add. 2: {
+    now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+  }
+  transitivity (v + (v + 1)). 2: {
+    apply Nat.add_le_mono_l.
+    now rewrite Nat.add_1_r.
+  }
+  replace (v + (v + 1)) with (2 * v + 1) by flia.
+  unfold v.
+  specialize (Nat.div_mod m 2 (Nat.neq_succ_0 _)) as H1.
+  rewrite H1 at 1.
+  apply Nat.add_le_mono_l.
+  apply lt_n_Sm_le.
+  now apply Nat.mod_upper_bound.
+}
+Qed.
+
+Lemma sum_sqr_y_r_le_m : ∀ m x1 x2 x3 x4
+  (f := λ x, (if le_dec (x mod m) (m / 2) then x mod m else m - x mod m) ^ 2),
+  m ≠ 0
+  → ∀ r, f x1 + f x2 + f x3 + f x4 = r * m → r ≤ m.
+Proof.
+intros * Hmz r Hr.
+set (v := m / 2) in f.
+set (sqr_y1 := f x1).
+set (sqr_y2 := f x2).
+set (sqr_y3 := f x3).
+set (sqr_y4 := f x4).
+specialize (sqr_y_from_x_le m Hmz) as Hx.
+cbn - [ "/" ] in Hx.
+assert (Hy1 : sqr_y1 ≤ v ^ 2) by apply Hx.
+assert (Hy2 : sqr_y2 ≤ v ^ 2) by apply Hx.
+assert (Hy3 : sqr_y3 ≤ v ^ 2) by apply Hx.
+assert (Hy4 : sqr_y4 ≤ v ^ 2) by apply Hx.
+apply (Nat.mul_le_mono_pos_r _ _ m); [ flia Hmz | ].
+rewrite <- Hr.
+transitivity (v ^ 2 + v ^ 2 + v ^ 2 + v ^ 2). {
+  apply Nat.add_le_mono; [ | easy ].
+  apply Nat.add_le_mono; [ | easy ].
+  now apply Nat.add_le_mono.
+}
+unfold v.
+specialize (Nat.div_mod m 2 (Nat.neq_succ_0 _)) as H1.
+replace (_ + _ + _ + _) with (4 * (m / 2) ^ 2) by flia.
+rewrite <- Nat.pow_2_r.
+rewrite H1 at 2.
+rewrite Nat_sqr_add.
+rewrite Nat.pow_mul_l.
+replace (2 ^ 2) with 4 by easy.
+flia.
+Qed.
+
 Lemma sum_sqr_x_sum_sqr_y_mod : ∀ p m x1 x2 x3 x4
   (f := λ x, (if le_dec (x mod m) (m / 2) then x mod m else m - x mod m) ^ 2),
   m ≠ 0
@@ -1098,61 +1164,11 @@ set (sqr_y1 := f x1).
 set (sqr_y2 := f x2).
 set (sqr_y3 := f x3).
 set (sqr_y4 := f x4).
-assert (Hx : ∀ x, f x ≤ v ^ 2). {
-  intros; unfold f.
-  destruct (le_dec (x mod m) v) as [Hx1v| Hx1v]. {
-    now apply Nat.pow_le_mono_l.
-  } {
-    apply Nat.nle_gt in Hx1v.
-    apply Nat.pow_le_mono_l.
-    apply (Nat.add_le_mono_r _ _ (x mod m)).
-    rewrite Nat.sub_add. 2: {
-      now apply Nat.lt_le_incl, Nat.mod_upper_bound.
-    }
-    transitivity (v + (v + 1)). 2: {
-      apply Nat.add_le_mono_l.
-      now rewrite Nat.add_1_r.
-    }
-    replace (v + (v + 1)) with (2 * v + 1) by flia.
-    unfold v.
-    specialize (Nat.div_mod m 2 (Nat.neq_succ_0 _)) as H1.
-    rewrite H1 at 1.
-    apply Nat.add_le_mono_l.
-    apply lt_n_Sm_le.
-    now apply Nat.mod_upper_bound.
-  }
-}
 assert (Hym : (sqr_y1 + sqr_y2 + sqr_y3 + sqr_y4) mod m = 0). {
   now apply (sum_sqr_x_sum_sqr_y_mod p).
 }
 apply Nat.mod_divide in Hym; [ | easy ].
 destruct Hym as (r, Hr).
-assert (Hy1 : sqr_y1 ≤ v ^ 2) by apply Hx.
-assert (Hy2 : sqr_y2 ≤ v ^ 2) by apply Hx.
-assert (Hy3 : sqr_y3 ≤ v ^ 2) by apply Hx.
-assert (Hy4 : sqr_y4 ≤ v ^ 2) by apply Hx.
-assert (Hrm : r ≤ m). {
-...
-clear - Hmz Hr Hy4.
-  apply (Nat.mul_le_mono_pos_r _ _ m); [ flia Hmz | ].
-  rewrite <- Hr.
-  transitivity (v ^ 2 + v ^ 2 + v ^ 2 + v ^ 2). {
-    apply Nat.add_le_mono; [ | easy ].
-    apply Nat.add_le_mono; [ | easy ].
-    apply Nat.add_le_mono; [ | easy ].
-    now apply Nat.add_le_mono.
-  }
-  unfold v.
-  specialize (Nat.div_mod m 2 (Nat.neq_succ_0 _)) as H1.
-  replace (_ + _ + _ + _) with (4 * (m / 2) ^ 2) by flia.
-  rewrite <- Nat.pow_2_r.
-  rewrite H1 at 2.
-  rewrite Nat_sqr_add.
-  rewrite Nat.pow_mul_l.
-  replace (2 ^ 2) with 4 by easy.
-  flia.
-}
-...
 assert (Hmn : m < p). {
   remember (resolve_a2_b2_1 p) as abn eqn:Habn.
   symmetry in Habn.
@@ -1183,6 +1199,10 @@ specialize (Nat.div_mod x1 m Hmz) as Hx1.
 specialize (Nat.div_mod x2 m Hmz) as Hx2.
 specialize (Nat.div_mod x3 m Hmz) as Hx3.
 specialize (Nat.div_mod x4 m Hmz) as Hx4.
+assert (Hy1 : sqr_y1 ≤ v ^ 2) by now apply sqr_y_from_x_le.
+assert (Hy2 : sqr_y2 ≤ v ^ 2) by now apply sqr_y_from_x_le.
+assert (Hy3 : sqr_y3 ≤ v ^ 2) by now apply sqr_y_from_x_le.
+assert (Hy4 : sqr_y4 ≤ v ^ 2) by now apply sqr_y_from_x_le.
 destruct (Nat.eq_dec r 0) as [Hrz| Hrz]. {
   subst r.
   clear Hy1 Hy2 Hy3 Hy4.
@@ -1238,9 +1258,6 @@ destruct (Nat.eq_dec r 0) as [Hrz| Hrz]. {
   rewrite Hp, Nat.mul_1_r in Hm.
   flia Hmn Hm.
 }
-(*
-specialize (Euler_s_four_square_identity_v2 x1 x2 x3 x4) as H1.
-*)
 Require Import ZArith.
 specialize (Z_Euler_s_four_square_identity_v2) as H1.
 unfold Z_diff in H1.
