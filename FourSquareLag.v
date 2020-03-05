@@ -1145,7 +1145,7 @@ specialize (Nat.div_mod x4 m Hmz) as Hx4.
   flia Hp Hqz.
 Qed.
 
-Theorem glop : ∀ p (mx : best_four_square_sol p),
+Theorem eq_best_four_square_sol_coeff_1 : ∀ p (mx : best_four_square_sol p),
   prime p
   → p mod 2 = 1
   → fst (projT1 (projT1 mx)) = 1.
