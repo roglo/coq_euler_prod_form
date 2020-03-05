@@ -744,6 +744,70 @@ Definition best_four_square_sol p :=
   { mx : four_square_sol p &
     ∀ nx : four_square_sol p, fst (projT1 mx) ≤ fst (projT1 nx) }.
 
+Lemma sum_sqr_x_sum_sqr_y_mod : ∀ p m x1 x2 x3 x4
+  (f := λ x, (if le_dec (x mod m) (m / 2) then x mod m else m - x mod m) ^ 2),
+  m ≠ 0
+  → x1 ^ 2 + x2 ^ 2 + x3 ^ 2 + x4 ^ 2 = m * p
+  → (f x1 + f x2 + f x3 + f x4) mod m = 0.
+Proof.
+intros * Hmz Hm.
+set (v := m / 2) in f.
+assert (Hxy2 : ∀ x, x ^ 2 ≡ f x mod m). {
+  intros x.
+  unfold f.
+  destruct (le_dec (x mod m) v) as [Hxv| Hxv]. {
+    now rewrite Nat_mod_pow_mod.
+  } {
+    rewrite Nat_sqr_sub. 2: {
+      now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+    }
+    symmetry.
+    rewrite <- (Nat.mod_add _ (2 * (x mod m))); [ | easy ].
+    rewrite Nat.mul_shuffle0.
+    rewrite Nat.sub_add. 2: {
+      remember (x mod m) as y.
+      replace m with (y + (m - y)). 2: {
+        rewrite Nat.add_comm, Nat.sub_add; [ easy | ].
+        rewrite Heqy.
+        now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+      }
+      rewrite Nat_sqr_add.
+      rewrite Nat.mul_add_distr_l.
+      rewrite <- Nat.mul_assoc, <- Nat.pow_2_r.
+      flia.
+    }
+    rewrite <- Nat.add_mod_idemp_l; [ | easy ].
+    rewrite <- Nat_mod_pow_mod.
+    rewrite Nat.mod_same; [ | easy ].
+    rewrite Nat.pow_0_l; [ | easy ].
+    rewrite Nat.mod_0_l; [ | easy ].
+    rewrite Nat.add_0_l.
+    now rewrite Nat_mod_pow_mod.
+  }
+}
+rewrite Nat.add_mod; [ | easy ].
+rewrite (Nat.add_mod (_ + _)); [ | easy ].
+rewrite Nat.add_mod_idemp_l; [ | easy ].
+rewrite (Nat.add_mod (f x1)); [ | easy ].
+rewrite <- Nat.add_assoc.
+rewrite Nat.add_mod_idemp_l; [ | easy ].
+rewrite Nat.add_assoc.
+do 4 rewrite <- Hxy2.
+rewrite Nat.add_mod_idemp_r; [ | easy ].
+rewrite Nat.add_comm, Nat.add_assoc.
+rewrite Nat.add_mod_idemp_r; [ | easy ].
+rewrite Nat.add_comm.
+do 2 rewrite Nat.add_assoc.
+rewrite Nat.add_mod_idemp_r; [ | easy ].
+rewrite Nat.add_comm, Nat.add_assoc.
+rewrite Nat.add_mod_idemp_r; [ | easy ].
+rewrite Nat.add_comm.
+do 2 rewrite Nat.add_assoc.
+rewrite Hm.
+rewrite Nat.mul_comm.
+now apply Nat.mod_mul.
+Qed.
+
 Theorem glop : ∀ p (mx : best_four_square_sol p),
   prime p
   → p mod 2 = 1
@@ -796,61 +860,7 @@ assert (Hy2 : sqr_y2 ≤ v ^ 2) by apply Hx.
 assert (Hy3 : sqr_y3 ≤ v ^ 2) by apply Hx.
 assert (Hy4 : sqr_y4 ≤ v ^ 2) by apply Hx.
 assert (Hym : (sqr_y1 + sqr_y2 + sqr_y3 + sqr_y4) mod m = 0). {
-  assert (Hxy2 : ∀ x, x ^ 2 ≡ f x mod m). {
-    intros x.
-    unfold f.
-    destruct (le_dec (x mod m) v) as [Hxv| Hxv]. {
-      now rewrite Nat_mod_pow_mod.
-    } {
-      rewrite Nat_sqr_sub. 2: {
-        now apply Nat.lt_le_incl, Nat.mod_upper_bound.
-      }
-      symmetry.
-      rewrite <- (Nat.mod_add _ (2 * (x mod m))); [ | easy ].
-      rewrite Nat.mul_shuffle0.
-      rewrite Nat.sub_add. 2: {
-        remember (x mod m) as y.
-        replace m with (y + (m - y)). 2: {
-          rewrite Nat.add_comm, Nat.sub_add; [ easy | ].
-          rewrite Heqy.
-          now apply Nat.lt_le_incl, Nat.mod_upper_bound.
-        }
-        rewrite Nat_sqr_add.
-        rewrite Nat.mul_add_distr_l.
-        rewrite <- Nat.mul_assoc, <- Nat.pow_2_r.
-        flia.
-      }
-      rewrite <- Nat.add_mod_idemp_l; [ | easy ].
-      rewrite <- Nat_mod_pow_mod.
-      rewrite Nat.mod_same; [ | easy ].
-      rewrite Nat.pow_0_l; [ | easy ].
-      rewrite Nat.mod_0_l; [ | easy ].
-      rewrite Nat.add_0_l.
-      now rewrite Nat_mod_pow_mod.
-    }
-  }
-  unfold sqr_y1, sqr_y2, sqr_y3, sqr_y4.
-  rewrite Nat.add_mod; [ | easy ].
-  rewrite (Nat.add_mod (_ + _)); [ | easy ].
-  rewrite Nat.add_mod_idemp_l; [ | easy ].
-  rewrite (Nat.add_mod (f x1)); [ | easy ].
-  rewrite <- Nat.add_assoc.
-  rewrite Nat.add_mod_idemp_l; [ | easy ].
-  rewrite Nat.add_assoc.
-  do 4 rewrite <- Hxy2.
-  rewrite Nat.add_mod_idemp_r; [ | easy ].
-  rewrite Nat.add_comm, Nat.add_assoc.
-  rewrite Nat.add_mod_idemp_r; [ | easy ].
-  rewrite Nat.add_comm.
-  do 2 rewrite Nat.add_assoc.
-  rewrite Nat.add_mod_idemp_r; [ | easy ].
-  rewrite Nat.add_comm, Nat.add_assoc.
-  rewrite Nat.add_mod_idemp_r; [ | easy ].
-  rewrite Nat.add_comm.
-  do 2 rewrite Nat.add_assoc.
-  rewrite Hm.
-  rewrite Nat.mul_comm.
-  now apply Nat.mod_mul.
+  now apply (sum_sqr_x_sum_sqr_y_mod p).
 }
 apply Nat.mod_divide in Hym; [ | easy ].
 destruct Hym as (r, Hr).
