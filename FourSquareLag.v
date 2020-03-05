@@ -1448,8 +1448,27 @@ assert (Hz2 : (z2 mod Z.of_nat m = 0)%Z). {
         f_case_1 Hz.
         destruct (le_dec (x4 mod m) v). {
           f_case_1 Hz.
-...
-      } {
+          rewrite Zminus_mod.
+          rewrite <- mod_Zmod; [ | easy ].
+          rewrite <- mod_Zmod; [ | easy ].
+          setoid_rewrite Nat.add_mod; [ | easy | easy ].
+          rewrite Nat.mul_mod_idemp_r; [ | easy ].
+          rewrite Nat.mul_mod_idemp_r; [ | easy ].
+          rewrite Nat.add_mod_idemp_l; [ | easy ].
+          rewrite Nat.add_mod_idemp_r; [ | easy ].
+          rewrite Nat.mul_mod_idemp_r; [ | easy ].
+          rewrite Nat.mul_mod_idemp_r; [ | easy ].
+          rewrite Nat.add_mod_idemp_l; [ | easy ].
+          rewrite Nat.add_mod_idemp_r; [ | easy ].
+          rewrite (Nat.mul_comm x2).
+          rewrite (Nat.mul_comm x4).
+          rewrite Z.sub_diag.
+          rewrite Z.mod_0_l; [ easy | ].
+          intros H.
+          replace 0%Z with (Z.of_nat 0) in H by easy.
+          now apply Nat2Z.inj_iff in H.
+        } {
+          f_case_2 Hz.
 ...
 specialize (H1 y1 y2 y3 y4); symmetry in H1.
 rewrite Hm, Hr in H1.
