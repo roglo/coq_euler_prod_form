@@ -1361,6 +1361,10 @@ Ltac f_case_2 :=
   repeat rewrite Z.mul_sub_distr_l;
   repeat rewrite Z.add_sub_assoc;
   repeat rewrite <- Nat2Z.inj_mul;
+  repeat rewrite <- Nat2Z.inj_add;
+  repeat rewrite <- Z.add_sub_swap;
+  repeat rewrite <- Nat2Z.inj_add;
+  repeat rewrite <- Z.sub_add_distr;
   repeat rewrite <- Nat2Z.inj_add.
   destruct (le_dec (x1 mod m) v) as [Hx1v| Hx1v]. {
     f_case_1.
@@ -1399,12 +1403,8 @@ Ltac f_case_2 :=
           }
         } {
           f_case_2.
-          rewrite <- Z.add_sub_swap.
-          rewrite <- Nat2Z.inj_add.
-          rewrite <- Z.sub_add_distr.
           rewrite <- Zminus_mod_idemp_l.
           rewrite Hz; cbn.
-          rewrite <- Nat2Z.inj_add.
           rewrite <- Nat.mul_add_distr_r.
           apply Z.mod_opp_l_z. {
             intros H.
@@ -1434,8 +1434,6 @@ Ltac f_case_2 :=
           }
         } {
           f_case_2.
-          rewrite <- Z.sub_add_distr.
-          rewrite <- Nat2Z.inj_add.
           rewrite <- Zminus_mod_idemp_l.
           rewrite Hz; cbn.
           apply Z.mod_opp_l_z. {
@@ -1449,16 +1447,9 @@ Ltac f_case_2 :=
           }
         }
       } {
-...
-        rewrite Z.mul_sub_distr_l.
-        do 4 rewrite <- Nat2Z.inj_mul.
-        rewrite <- Nat2Z.inj_add.
-        rewrite Z.add_sub_assoc.
-        rewrite <- Nat2Z.inj_add.
+        f_case_2.
         destruct (le_dec (x4 mod m) v) as [Hx4v| Hx4v]. {
-          rewrite <- Nat2Z.inj_mul.
-          rewrite <- Z.add_sub_swap.
-          rewrite <- Nat2Z.inj_add.
+          f_case_1.
           rewrite <- Zminus_mod_idemp_l.
           rewrite Hz; cbn.
           apply Z.mod_opp_l_z. {
@@ -1466,31 +1457,26 @@ Ltac f_case_2 :=
             replace 0%Z with (Z.of_nat 0) in H by easy.
             now apply Nat2Z.inj_iff in H.
           } {
+            rewrite <- Nat.mul_add_distr_r.
             rewrite <- mod_Zmod; [ | easy ].
             now rewrite Nat.mod_mul.
           }
         } {
-          rewrite Z.mul_sub_distr_l.
-          do 2 rewrite <- Nat2Z.inj_mul.
-          rewrite <- Z.add_sub_swap.
-          rewrite Z.add_sub_assoc.
-          rewrite <- Nat2Z.inj_add.
-          rewrite <- Z.sub_add_distr.
+          f_case_2.
           rewrite <- Zminus_mod_idemp_l.
           rewrite Hz; cbn.
-          rewrite <- Nat2Z.inj_add.
           rewrite <- Nat.mul_add_distr_r.
           apply Z.mod_opp_l_z. {
             intros H.
             replace 0%Z with (Z.of_nat 0) in H by easy.
             now apply Nat2Z.inj_iff in H.
           } {
+            rewrite <- Nat.mul_add_distr_r.
             rewrite <- mod_Zmod; [ | easy ].
             now rewrite Nat.mod_mul.
           }
         }
       }
-
 ...
 specialize (H1 y1 y2 y3 y4); symmetry in H1.
 rewrite Hm, Hr in H1.
