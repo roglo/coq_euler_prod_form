@@ -1277,10 +1277,15 @@ Ltac z2_case_1 :=
     do 2 rewrite <- Nat2Z.inj_add
   );
   try (
+    rewrite <- Z.sub_add_distr;
+    repeat rewrite <- Nat2Z.inj_add
+  );
+  try (
     rewrite Zminus_mod;
     rewrite <- mod_Zmod; [ | easy ];
     rewrite <- mod_Zmod; [ | easy ];
     try (rewrite Nat.mod_add; [ | easy ]);
+    try (rewrite Nat_mod_add_l_mul_r; [ | easy ]);
     end_z2_case
   ).
 
@@ -1526,16 +1531,9 @@ assert (Hz2 : (z2 mod Z.of_nat m = 0)%Z). {
         z2_case_1.
         destruct (le_dec (x4 mod m) v). {
           z2_case_1.
-          rewrite <- Z.sub_add_distr.
-          rewrite <- Nat2Z.inj_add.
-          rewrite Zminus_mod.
-          rewrite <- mod_Zmod; [ | easy ].
-          rewrite <- mod_Zmod; [ | easy ].
-          rewrite Nat_mod_add_l_mul_r; [ | easy ].
-          end_z2_case.
         } {
           z2_case_2.
-          rewrite Z.sub_add_distr.
+          do 2 rewrite Z.sub_add_distr.
           rewrite Z.sub_sub_distr.
           do 3 rewrite <- Z.add_sub_swap.
           do 2 rewrite <- Z.sub_add_distr.
@@ -1553,14 +1551,6 @@ assert (Hz2 : (z2 mod Z.of_nat m = 0)%Z). {
         rewrite <- Nat2Z.inj_add.
         destruct (le_dec (x4 mod m) v). {
           z2_case_1.
-          rewrite <- Z.sub_add_distr.
-          do 3 rewrite <- Nat2Z.inj_add.
-          rewrite Zminus_mod.
-          rewrite <- mod_Zmod; [ | easy ].
-          rewrite <- mod_Zmod; [ | easy ].
-          rewrite Nat.mod_add; [ | easy ].
-          rewrite Nat_mod_add_l_mul_r; [ | easy ].
-          end_z2_case.
         } {
           z2_case_2.
           rewrite Z.add_sub_assoc.
