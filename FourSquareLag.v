@@ -1561,7 +1561,26 @@ assert (Hz2 : (z2 mod Z.of_nat m = 0)%Z). {
           rewrite Nat.mod_add; [ | easy ].
           rewrite Nat_mod_add_l_mul_r; [ | easy ].
           end_z2_case.
+        } {
+          z2_case_2.
+          rewrite Z.add_sub_assoc.
+          rewrite Z.sub_sub_distr.
+          rewrite Z.sub_add_distr.
+          rewrite Z.sub_sub_distr.
+          do 5 rewrite <- Z.add_sub_swap.
+          do 2 rewrite <- Z.sub_add_distr.
+          do 4 rewrite <- Nat2Z.inj_add.
+          rewrite Zminus_mod.
+          rewrite <- mod_Zmod; [ | easy ].
+          rewrite <- mod_Zmod; [ | easy ].
+          rewrite Nat.mod_add; [ | easy ].
+          rewrite Nat.mod_add; [ | easy ].
+          rewrite Nat_mod_add_l_mul_r; [ | easy ].
+          end_z2_case.
         }
+      }
+    }
+  } {
 ...
 specialize (H1 y1 y2 y3 y4); symmetry in H1.
 rewrite Hm, Hr in H1.
