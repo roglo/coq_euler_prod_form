@@ -1673,4 +1673,21 @@ assert (Hrm : 0 < r < m). {
   specialize (Hrm _ _ _ _ _ Hmz r Hr).
   flia Hrz Hrm Hrme.
 }
+move Hmx at bottom.
+transparent assert (rx : four_square_sol p). {
+  unfold four_square_sol.
+  exists (r, (w1, w2, w3, w4)).
+  easy.
+}
+specialize (Hmx rx).
+cbn in Hmx.
+flia Hrm Hmx.
+Qed.
+
+Theorem pouet : ∀ p, prime p → ∃ a b c d, a ^ 2 + b ^ 2 + c ^ 2 + d ^ 2 = p.
+Proof.
+intros * Hp.
+Inspect 1.
+specialize (eq_best_four_square_sol_coeff_1 p) as H1.
+Print best_four_square_sol.
 ...
