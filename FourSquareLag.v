@@ -1593,4 +1593,36 @@ assert (Hz3 : (z3 mod Z.of_nat m = 0)%Z). {
 assert (Hz4 : (z4 mod Z.of_nat m = 0)%Z). {
   now apply z2_z3_z4_divides_m.
 }
+assert (Hzmz : Z.of_nat m ≠ 0%Z). {
+  intros H.
+  replace 0%Z with (Z.of_nat 0) in H by easy.
+  now apply Nat2Z.inj_iff in H.
+}
+apply Z.mod_divide in Hz1; [ | easy ].
+apply Z.mod_divide in Hz2; [ | easy ].
+apply Z.mod_divide in Hz3; [ | easy ].
+apply Z.mod_divide in Hz4; [ | easy ].
+destruct Hz1 as (w1, Hw1).
+destruct Hz2 as (w2, Hw2).
+destruct Hz3 as (w3, Hw3).
+destruct Hz4 as (w4, Hw4).
+move w4 before w1; move w3 before w1; move w2 before w1.
+assert (H2 : (w1 ^ 2 + w2 ^ 2 + w3 ^ 2 + w4 ^ 2)%Z = Z.of_nat (r * p)). {
+  move H1 at bottom.
+  rewrite Hw1, Hw2, Hw3, Hw4 in H1.
+  do 4 rewrite Z.pow_mul_l in H1.
+  do 3 rewrite <- Z.mul_add_distr_r in H1.
+  replace (m * p * (r * m)) with (r * p * (m ^ 2)) in H1 by (cbn; flia).
+  rewrite Nat2Z.inj_mul in H1.
+  rewrite Nat.pow_2_r in H1.
+  rewrite (Nat2Z.inj_mul m) in H1.
+  rewrite <- Z.pow_2_r in H1.
+  apply Z.mul_cancel_r in H1. 2: {
+    replace 0%Z with (0 ^ 2)%Z by easy.
+    intros H2; apply Hzmz.
+    apply Z.pow_inj_l in H2; [ easy | flia | flia | flia ].
+  }
+  easy.
+}
+Check sum_sqr_y_r_le_m.
 ...
