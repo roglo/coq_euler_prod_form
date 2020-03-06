@@ -1321,7 +1321,7 @@ Local Ltac z2_case_2 :=
     rewrite <- Nat2Z.inj_add
   ).
 
-Lemma z2_divides_m : ∀ m x1 x2 x3 x4
+Lemma z2_z3_z4_divides_m : ∀ m x1 x2 x3 x4
   (f := Z.of_nat)
   (g := λ x,
      if le_dec (x mod m) (m / 2)
@@ -1576,12 +1576,21 @@ assert
   rewrite Hm, Nat.mul_comm.
   now apply Nat.mod_mul.
 }
+rewrite (Z.add_comm (zx2 * zy3)%Z) in H1.
 set (z1 := (zx1 * zy1 + zx2 * zy2 + zx3 * zy3 + zx4 * zy4)%Z) in H1.
 set (z2 := (zx1 * zy2 + zx4 * zy3 - (zx2 * zy1 + zx3 * zy4))%Z) in H1.
+set (z3 := (zx1 * zy3 + zx2 * zy4 - (zx3 * zy1 + zx4 * zy2))%Z) in H1.
+set (z4 := (zx1 * zy4 + zx3 * zy2 - (zx4 * zy1 + zx2 * zy3))%Z) in H1.
 assert (Hz1 : (z1 mod Z.of_nat m = 0)%Z). {
   now apply z1_divides_m.
 }
 assert (Hz2 : (z2 mod Z.of_nat m = 0)%Z). {
-  now apply z2_divides_m.
+  now apply z2_z3_z4_divides_m.
+}
+assert (Hz3 : (z3 mod Z.of_nat m = 0)%Z). {
+  now apply z2_z3_z4_divides_m.
+}
+assert (Hz4 : (z4 mod Z.of_nat m = 0)%Z). {
+  now apply z2_z3_z4_divides_m.
 }
 ...
