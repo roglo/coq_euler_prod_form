@@ -1264,26 +1264,28 @@ Ltac z2_case_1 :=
   rewrite <- Nat2Z.inj_mul;
   repeat rewrite <- Nat2Z.inj_add;
   try (
-      rewrite Zminus_mod;
-      rewrite <- mod_Zmod; [ | easy ];
-      rewrite <- mod_Zmod; [ | easy ];
-      end_z2_case
+    rewrite Zminus_mod;
+    rewrite <- mod_Zmod; [ | easy ];
+    rewrite <- mod_Zmod; [ | easy ];
+    end_z2_case
   ).
 
 Ltac z2_case_2 :=
   rewrite Z.mul_sub_distr_l;
   do 2 rewrite <- Nat2Z.inj_mul;
-  rewrite Z.sub_add_distr;
-  rewrite Z.sub_sub_distr;
-  do 2 rewrite <- Z.add_sub_swap;
-  rewrite <- Z.sub_add_distr;
-  do 2 rewrite <- Nat2Z.inj_add;
-  rewrite Zminus_mod;
-  rewrite <- mod_Zmod; [ | easy ];
-  rewrite <- mod_Zmod; [ | easy ];
-  rewrite <- Nat.add_mod_idemp_r; [ | easy ];
-  rewrite Nat.mod_mul; [ rewrite Nat.add_0_r | easy ];
-  end_z2_case.
+  try (
+    rewrite Z.sub_add_distr;
+    rewrite Z.sub_sub_distr;
+    do 2 rewrite <- Z.add_sub_swap;
+    rewrite <- Z.sub_add_distr;
+    do 2 rewrite <- Nat2Z.inj_add;
+    rewrite Zminus_mod;
+    rewrite <- mod_Zmod; [ | easy ];
+    rewrite <- mod_Zmod; [ | easy ];
+    rewrite <- Nat.add_mod_idemp_r; [ | easy ];
+    rewrite Nat.mod_mul; [ rewrite Nat.add_0_r | easy ];
+    end_z2_case
+  ).
 
 Theorem eq_best_four_square_sol_coeff_1 : ∀ p (mx : best_four_square_sol p),
   prime p
@@ -1499,8 +1501,7 @@ assert (Hz2 : (z2 mod Z.of_nat m = 0)%Z). {
         z2_case_1.
         destruct (le_dec (x4 mod m) v); [ z2_case_1 | z2_case_2 ].
       } {
-        rewrite Z.mul_sub_distr_l.
-        do 2 rewrite <- Nat2Z.inj_mul.
+        z2_case_2.
         destruct (le_dec (x4 mod m) v). {
           rewrite <- Nat2Z.inj_mul.
           rewrite Z.sub_add_distr.
