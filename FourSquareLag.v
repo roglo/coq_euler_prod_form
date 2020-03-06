@@ -1690,4 +1690,5 @@ intros * Hp.
 Inspect 1.
 specialize (eq_best_four_square_sol_coeff_1 p) as H1.
 Print best_four_square_sol.
+Print four_square_sol.
 ...
