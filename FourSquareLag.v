@@ -1315,7 +1315,11 @@ Ltac z2_case_2 :=
     end_z2_case
   );
   repeat rewrite Z.add_sub_assoc;
-  repeat rewrite <- Nat2Z.inj_add.
+  repeat rewrite <- Nat2Z.inj_add;
+  try (
+    rewrite <- Z.add_sub_swap;
+    rewrite <- Nat2Z.inj_add
+  ).
 
 Theorem eq_best_four_square_sol_coeff_1 : ∀ p (mx : best_four_square_sol p),
   prime p
@@ -1553,7 +1557,6 @@ assert (Hz2 : (z2 mod Z.of_nat m = 0)%Z). {
         destruct (le_dec (x4 mod m) v); [ z2_case_1 | z2_case_2 ].
       } {
         z2_case_2.
-...
         destruct (le_dec (x4 mod m) v); [ z2_case_1 | z2_case_2 ].
       }
     } {
@@ -1561,6 +1564,7 @@ assert (Hz2 : (z2 mod Z.of_nat m = 0)%Z). {
       destruct (le_dec (x1 mod m) v) as [Hx1v| Hx1v]. {
         z2_case_1.
         destruct (le_dec (x4 mod m) v); [ z2_case_1 | z2_case_2 ].
+...
       } {
         z2_case_2.
         destruct (le_dec (x4 mod m) v); [ z2_case_1 | z2_case_2 ].
