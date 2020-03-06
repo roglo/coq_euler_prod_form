@@ -1503,7 +1503,7 @@ assert (Hz2 : (z2 mod Z.of_nat m = 0)%Z). {
       } {
         z2_case_2.
         destruct (le_dec (x4 mod m) v). {
-          rewrite <- Nat2Z.inj_mul.
+          z2_case_1.
           rewrite Z.sub_add_distr.
           rewrite Z.sub_sub_distr.
           rewrite <- Z.add_sub_swap.
@@ -1522,13 +1522,13 @@ assert (Hz2 : (z2 mod Z.of_nat m = 0)%Z). {
           rewrite Nat.mul_mod_idemp_r; [ | easy ].
           rewrite Nat.add_mod_idemp_l; [ | easy ].
           rewrite Nat.add_mod_idemp_r; [ | easy ].
-          remember (Z.of_nat (_ mod _)) as x;
-            setoid_rewrite Nat.mul_comm; subst x;
-              rewrite Z.sub_diag;
-              rewrite Z.mod_0_l; [ easy | ];
-                intros H;
-                replace 0%Z with (Z.of_nat 0) in H by easy;
-                now apply Nat2Z.inj_iff in H.
+          remember (Z.of_nat (_ mod _)) as x.
+          setoid_rewrite Nat.mul_comm; subst x.
+          rewrite Z.sub_diag.
+          rewrite Z.mod_0_l; [ easy | ].
+          intros H.
+          replace 0%Z with (Z.of_nat 0) in H by easy.
+          now apply Nat2Z.inj_iff in H.
         } {
 ...
           f_case_2 Hz.
