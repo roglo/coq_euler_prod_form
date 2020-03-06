@@ -1513,22 +1513,7 @@ assert (Hz2 : (z2 mod Z.of_nat m = 0)%Z). {
           rewrite <- mod_Zmod; [ | easy ].
           rewrite <- mod_Zmod; [ | easy ].
           rewrite Nat.mod_add; [ | easy ].
-          setoid_rewrite Nat.add_mod; [ | easy | easy ].
-          rewrite Nat.mul_mod_idemp_r; [ | easy ].
-          rewrite Nat.mul_mod_idemp_r; [ | easy ].
-          rewrite Nat.add_mod_idemp_l; [ | easy ].
-          rewrite Nat.add_mod_idemp_r; [ | easy ].
-          rewrite Nat.mul_mod_idemp_r; [ | easy ].
-          rewrite Nat.mul_mod_idemp_r; [ | easy ].
-          rewrite Nat.add_mod_idemp_l; [ | easy ].
-          rewrite Nat.add_mod_idemp_r; [ | easy ].
-          remember (Z.of_nat (_ mod _)) as x.
-          setoid_rewrite Nat.mul_comm; subst x.
-          rewrite Z.sub_diag.
-          rewrite Z.mod_0_l; [ easy | ].
-          intros H.
-          replace 0%Z with (Z.of_nat 0) in H by easy.
-          now apply Nat2Z.inj_iff in H.
+          end_z2_case.
         } {
 ...
           f_case_2 Hz.
