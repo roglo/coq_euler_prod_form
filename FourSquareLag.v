@@ -1686,7 +1686,7 @@ Qed.
 
 Check Z_Euler_s_four_square_identity_v2.
 
-Definition glop p x1 x2 x3 x4 :=
+Definition Z_glop p x1 x2 x3 x4 :=
   let m := ((x1 ^ 2 + x2 ^ 2 + x3 ^ 2 + x4 ^ 2) / p)%Z in
   let fy x :=
     if Z.leb (x mod m)%Z (m / 2)%Z then (x mod m)%Z
@@ -1696,24 +1696,23 @@ Definition glop p x1 x2 x3 x4 :=
     Z_Euler_s_four_square_sol_v2 x1 x2 x3 x4 (fy x1) (fy x2) (fy x3) (fy x4)
   in
   let '(w1, w2, w3, w4) :=
-    let m := Z.abs_nat m in
-    (Z.abs_nat z1 / m, Z.abs_nat z2 / m, Z.abs_nat z3 / m, Z.abs_nat z4 / m)
+    (Z.abs z1 / m, Z.abs z2 / m, Z.abs z3 / m, Z.abs z4 / m)%Z
   in
-  let r := (w1 ^ 2 + w2 ^ 2 + w3 ^ 2 + w4 ^ 2) / Z.abs_nat p in
+  let r := ((w1 ^ 2 + w2 ^ 2 + w3 ^ 2 + w4 ^ 2) / p)%Z in
   (r, (w1, w2, w3, w4)).
 
-Compute (glop 31 4 13 1 0).
+Compute (Z_glop 31 4 13 1 0).
 Compute (check_resolve_a2_b2_1 29).
-Compute (glop 29 0 12 1 0).
+Compute (Z_glop 29 0 12 1 0).
 
 Compute (map check_resolve_a2_b2_1 (Primes.firstn_primes' 20)).
 Compute (check_resolve_a2_b2_1 59).
-Compute (glop 59 1 23 1 0).
-Compute (glop 59 10 3 0 3).
+Compute (Z_glop 59 1 23 1 0).
+Compute (Z_glop 59 10 3 0 3).
 Compute (check_resolve_a2_b2_1 239).
-Compute (glop 239 5 90 1 0).
-Compute (glop 239 31 15 0 3).
-Compute (glop 239 5 3 6 13).
+Compute (Z_glop 239 5 90 1 0).
+Compute (Z_glop 239 31 15 0 3).
+Compute (Z_glop 239 5 3 6 13).
 Compute (5 ^ 2 + 3 ^ 2 + 6 ^ 2 + 13 ^ 2).
 Compute (31 ^ 2 + 15 ^ 2 + 3 ^ 2).
 Compute (5 ^ 2 + 90 ^ 2 + 1).
