@@ -1281,6 +1281,11 @@ Ltac z2_case_1 :=
     repeat rewrite <- Nat2Z.inj_add
   );
   try (
+    rewrite <- Z.add_sub_swap;
+    rewrite <- Z.sub_add_distr;
+    do 2 rewrite <- Nat2Z.inj_add
+  );
+  try (
     rewrite Zminus_mod;
     rewrite <- mod_Zmod; [ | easy ];
     rewrite <- mod_Zmod; [ | easy ];
@@ -1540,6 +1545,27 @@ assert (Hz2 : (z2 mod Z.of_nat m = 0)%Z). {
       }
     }
   } {
+    z2_case_2.
+    destruct (le_dec (x3 mod m) v) as [Hx3v| Hx3v]. {
+      z2_case_1.
+      destruct (le_dec (x1 mod m) v) as [Hx1v| Hx1v]. {
+        z2_case_1.
+        destruct (le_dec (x4 mod m) v); [ z2_case_1 | z2_case_2 ].
+      } {
+        z2_case_2.
+...
+        destruct (le_dec (x4 mod m) v); [ z2_case_1 | z2_case_2 ].
+      }
+    } {
+      z2_case_2.
+      destruct (le_dec (x1 mod m) v) as [Hx1v| Hx1v]. {
+        z2_case_1.
+        destruct (le_dec (x4 mod m) v); [ z2_case_1 | z2_case_2 ].
+      } {
+        z2_case_2.
+        destruct (le_dec (x4 mod m) v); [ z2_case_1 | z2_case_2 ].
+      }
+    }
 ...
 specialize (H1 y1 y2 y3 y4); symmetry in H1.
 rewrite Hm, Hr in H1.
