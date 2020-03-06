@@ -1549,6 +1549,19 @@ assert (Hz2 : (z2 mod Z.of_nat m = 0)%Z). {
         rewrite <- Nat2Z.inj_add.
         destruct (le_dec (x4 mod m) v). {
           z2_case_1.
+          rewrite Z.sub_add_distr.
+          rewrite Z.sub_sub_distr.
+          do 2 rewrite <- Z.add_sub_swap.
+          rewrite <- Nat2Z.inj_add.
+          do 2 rewrite <- Z.sub_add_distr.
+          do 2 rewrite <- Nat2Z.inj_add.
+          rewrite Zminus_mod.
+          rewrite <- mod_Zmod; [ | easy ].
+          rewrite <- mod_Zmod; [ | easy ].
+          rewrite Nat.mod_add; [ | easy ].
+          rewrite Nat_mod_add_l_mul_r; [ | easy ].
+          end_z2_case.
+        }
 ...
 specialize (H1 y1 y2 y3 y4); symmetry in H1.
 rewrite Hm, Hr in H1.
