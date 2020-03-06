@@ -1262,6 +1262,7 @@ Ltac end_z2_case :=
 
 Ltac z2_case_1 :=
   rewrite <- Nat2Z.inj_mul;
+  repeat rewrite Z.add_sub_assoc;
   repeat rewrite <- Nat2Z.inj_add;
   try (
     rewrite Z.sub_add_distr;
@@ -1518,8 +1519,6 @@ assert (Hz2 : (z2 mod Z.of_nat m = 0)%Z). {
       z2_case_2.
       destruct (le_dec (x1 mod m) v) as [Hx1v| Hx1v]. {
         z2_case_1.
-        rewrite Z.add_sub_assoc.
-        rewrite <- Nat2Z.inj_add.
         destruct (le_dec (x4 mod m) v). {
           z2_case_1.
           rewrite <- Z.sub_add_distr.
