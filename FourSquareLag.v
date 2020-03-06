@@ -1602,12 +1602,12 @@ apply Z.mod_divide in Hz1; [ | easy ].
 apply Z.mod_divide in Hz2; [ | easy ].
 apply Z.mod_divide in Hz3; [ | easy ].
 apply Z.mod_divide in Hz4; [ | easy ].
-destruct Hz1 as (w1, Hw1).
-destruct Hz2 as (w2, Hw2).
-destruct Hz3 as (w3, Hw3).
-destruct Hz4 as (w4, Hw4).
-move w4 before w1; move w3 before w1; move w2 before w1.
-assert (H2 : (w1 ^ 2 + w2 ^ 2 + w3 ^ 2 + w4 ^ 2)%Z = Z.of_nat (r * p)). {
+destruct Hz1 as (zw1, Hw1).
+destruct Hz2 as (zw2, Hw2).
+destruct Hz3 as (zw3, Hw3).
+destruct Hz4 as (zw4, Hw4).
+move zw4 before zw1; move zw3 before zw1; move zw2 before zw1.
+assert (H2 : (zw1 ^ 2 + zw2 ^ 2 + zw3 ^ 2 + zw4 ^ 2)%Z = Z.of_nat (r * p)). {
   move H1 at bottom.
   rewrite Hw1, Hw2, Hw3, Hw4 in H1.
   do 4 rewrite Z.pow_mul_l in H1.
@@ -1624,5 +1624,53 @@ assert (H2 : (w1 ^ 2 + w2 ^ 2 + w3 ^ 2 + w4 ^ 2)%Z = Z.of_nat (r * p)). {
   }
   easy.
 }
-Check sum_sqr_y_r_le_m.
+set (w1 := Z.abs_nat zw1).
+set (w2 := Z.abs_nat zw2).
+set (w3 := Z.abs_nat zw3).
+set (w4 := Z.abs_nat zw4).
+assert (H3 : w1 ^ 2 + w2 ^ 2 + w3 ^ 2 + w4 ^ 2 = r * p). {
+  subst w1 w2 w3 w4.
+  assert (Hzan : ∀ x, Z.abs_nat x ^ 2 = Z.to_nat (x ^ 2)). {
+    intros x.
+    unfold Z.abs_nat.
+    destruct x as [| px| px]; [ easy | | ]. {
+      cbn.
+      rewrite Nat.mul_1_r, Pos.mul_1_r; symmetry.
+      apply Pos2Nat.inj_mul.
+    } {
+      cbn.
+      rewrite Nat.mul_1_r, Pos.mul_1_r; symmetry.
+      apply Pos2Nat.inj_mul.
+    }
+  }
+  do 4 rewrite Hzan.
+  rewrite <- Z2Nat.inj_add; cycle 1. {
+    now apply Z.pow_even_nonneg, Zeven_equiv.
+  } {
+    now apply Z.pow_even_nonneg, Zeven_equiv.
+  }
+  rewrite <- Z2Nat.inj_add; cycle 1. {
+    apply Z.add_nonneg_nonneg;
+    now apply Z.pow_even_nonneg, Zeven_equiv.
+  } {
+    now apply Z.pow_even_nonneg, Zeven_equiv.
+  }
+  rewrite <- Z2Nat.inj_add; cycle 1. {
+    apply Z.add_nonneg_nonneg.
+    apply Z.add_nonneg_nonneg.
+    now apply Z.pow_even_nonneg, Zeven_equiv.
+    now apply Z.pow_even_nonneg, Zeven_equiv.
+    now apply Z.pow_even_nonneg, Zeven_equiv.
+  } {
+    now apply Z.pow_even_nonneg, Zeven_equiv.
+  }
+  rewrite H2.
+  apply Nat2Z.id.
+}
+move Hm at bottom.
+assert (Hrm : 0 < r < m). {
+  specialize sum_sqr_y_r_le_m as Hrm.
+  specialize (Hrm _ _ _ _ _ Hmz r Hr).
+  flia Hrz Hrm Hrme.
+}
 ...
