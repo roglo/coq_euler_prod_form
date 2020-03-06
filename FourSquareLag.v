@@ -1147,7 +1147,7 @@ Qed.
 
 Require Import ZArith.
 
-Ltac end_z1_case Hz :=
+Local Ltac end_z1_case Hz :=
   try (
       rewrite <- Zminus_mod_idemp_l;
       rewrite Hz; cbn;
@@ -1161,14 +1161,14 @@ Ltac end_z1_case Hz :=
       ]
   ).
 
-Ltac z1_case_1 Hz :=
+Local Ltac z1_case_1 Hz :=
   repeat rewrite <- Nat2Z.inj_mul;
   repeat rewrite <- Nat2Z.inj_add;
   repeat rewrite <- Z.add_sub_swap;
   repeat rewrite <- Nat2Z.inj_add;
   end_z1_case Hz.
 
-Ltac z1_case_2 Hz :=
+Local Ltac z1_case_2 Hz :=
   repeat rewrite Z.mul_sub_distr_l;
   repeat rewrite Z.add_sub_assoc;
   repeat rewrite <- Nat2Z.inj_mul;
@@ -1242,7 +1242,7 @@ destruct (le_dec (x1 mod m) v) as [Hx1v| Hx1v]. {
 }
 Qed.
 
-Ltac end_z2_case :=
+Local Ltac end_z2_case :=
   setoid_rewrite Nat.add_mod; try easy;
   rewrite Nat.mul_mod_idemp_r; [ | easy ];
   rewrite Nat.mul_mod_idemp_r; [ | easy ];
@@ -1260,7 +1260,7 @@ Ltac end_z2_case :=
   replace 0%Z with (Z.of_nat 0) in H by easy;
   now apply Nat2Z.inj_iff in H.
 
-Ltac z2_case_1 :=
+Local Ltac z2_case_1 :=
   rewrite <- Nat2Z.inj_mul;
   repeat rewrite Z.add_sub_assoc;
   repeat rewrite <- Nat2Z.inj_add;
@@ -1294,7 +1294,7 @@ Ltac z2_case_1 :=
     end_z2_case
   ).
 
-Ltac z2_case_2 :=
+Local Ltac z2_case_2 :=
   rewrite Z.mul_sub_distr_l;
   do 2 rewrite <- Nat2Z.inj_mul;
   try (
@@ -1320,6 +1320,64 @@ Ltac z2_case_2 :=
     rewrite <- Z.add_sub_swap;
     rewrite <- Nat2Z.inj_add
   ).
+
+Lemma z2_divides_m : ∀ m x1 x2 x3 x4
+  (f := Z.of_nat)
+  (g := λ x,
+     if le_dec (x mod m) (m / 2)
+     then Z.of_nat (x mod m)
+     else (Z.of_nat (x mod m) - Z.of_nat m)%Z),
+  m ≠ 0
+  → ((f x1 * g x2 + f x4 * g x3 - (f x2 * g x1 + f x3 * g x4))
+         mod Z.of_nat m)%Z = 0%Z.
+Proof.
+intros * Hmz.
+set (v := m / 2) in g.
+unfold g.
+destruct (le_dec (x2 mod m) v) as [Hx2v| Hx2v]. {
+  z2_case_1.
+  destruct (le_dec (x3 mod m) v) as [Hx3v| Hx3v]. {
+    z2_case_1.
+    destruct (le_dec (x1 mod m) v) as [Hx1v| Hx1v]. {
+      z2_case_1.
+      destruct (le_dec (x4 mod m) v); [ z2_case_1 | z2_case_2 ].
+    } {
+      z2_case_2.
+      destruct (le_dec (x4 mod m) v); [ z2_case_1 | z2_case_2 ].
+    }
+  } {
+    z2_case_2.
+    destruct (le_dec (x1 mod m) v) as [Hx1v| Hx1v]. {
+      z2_case_1.
+      destruct (le_dec (x4 mod m) v); [ z2_case_1 | z2_case_2 ].
+    } {
+      z2_case_2.
+      destruct (le_dec (x4 mod m) v); [ z2_case_1 | z2_case_2 ].
+    }
+  }
+} {
+  z2_case_2.
+  destruct (le_dec (x3 mod m) v) as [Hx3v| Hx3v]. {
+    z2_case_1.
+    destruct (le_dec (x1 mod m) v) as [Hx1v| Hx1v]. {
+      z2_case_1.
+      destruct (le_dec (x4 mod m) v); [ z2_case_1 | z2_case_2 ].
+    } {
+      z2_case_2.
+      destruct (le_dec (x4 mod m) v); [ z2_case_1 | z2_case_2 ].
+    }
+  } {
+    z2_case_2.
+    destruct (le_dec (x1 mod m) v) as [Hx1v| Hx1v]. {
+      z2_case_1.
+      destruct (le_dec (x4 mod m) v); [ z2_case_1 | z2_case_2 ].
+    } {
+      z2_case_2.
+      destruct (le_dec (x4 mod m) v); [ z2_case_1 | z2_case_2 ].
+    }
+  }
+}
+Qed.
 
 Theorem eq_best_four_square_sol_coeff_1 : ∀ p (mx : best_four_square_sol p),
   prime p
@@ -1524,131 +1582,6 @@ assert (Hz1 : (z1 mod Z.of_nat m = 0)%Z). {
   now apply z1_divides_m.
 }
 assert (Hz2 : (z2 mod Z.of_nat m = 0)%Z). {
-  unfold z2.
-  unfold zx1, zx2, zx3, zx4.
-  unfold zy1, zy2, zy3, zy4, g.
-  destruct (le_dec (x2 mod m) v) as [Hx2v| Hx2v]. {
-    z2_case_1.
-    destruct (le_dec (x3 mod m) v) as [Hx3v| Hx3v]. {
-      z2_case_1.
-      destruct (le_dec (x1 mod m) v) as [Hx1v| Hx1v]. {
-        z2_case_1.
-        destruct (le_dec (x4 mod m) v); [ z2_case_1 | z2_case_2 ].
-      } {
-        z2_case_2.
-        destruct (le_dec (x4 mod m) v); [ z2_case_1 | z2_case_2 ].
-      }
-    } {
-      z2_case_2.
-      destruct (le_dec (x1 mod m) v) as [Hx1v| Hx1v]. {
-        z2_case_1.
-        destruct (le_dec (x4 mod m) v); [ z2_case_1 | z2_case_2 ].
-      } {
-        z2_case_2.
-        destruct (le_dec (x4 mod m) v); [ z2_case_1 | z2_case_2 ].
-      }
-    }
-  } {
-    z2_case_2.
-    destruct (le_dec (x3 mod m) v) as [Hx3v| Hx3v]. {
-      z2_case_1.
-      destruct (le_dec (x1 mod m) v) as [Hx1v| Hx1v]. {
-        z2_case_1.
-        destruct (le_dec (x4 mod m) v); [ z2_case_1 | z2_case_2 ].
-      } {
-        z2_case_2.
-        destruct (le_dec (x4 mod m) v); [ z2_case_1 | z2_case_2 ].
-      }
-    } {
-      z2_case_2.
-      destruct (le_dec (x1 mod m) v) as [Hx1v| Hx1v]. {
-        z2_case_1.
-        destruct (le_dec (x4 mod m) v); [ z2_case_1 | z2_case_2 ].
-      } {
-        z2_case_2.
-        destruct (le_dec (x4 mod m) v); [ z2_case_1 | z2_case_2 ].
-      }
-    }
-  }
+  now apply z2_divides_m.
 }
-...
-specialize (H1 y1 y2 y3 y4); symmetry in H1.
-rewrite Hm, Hr in H1.
-set (z1 := x1 * y1 + x2 * y2 + x3 * y3 + x4 * y4) in H1.
-set (z2 := diff (x1 * y2 + x4 * y3) (x2 * y1 + x3 * y4)) in H1.
-set (z3 := diff (x1 * y3 + x2 * y4) (x3 * y1 + x4 * y2)) in H1.
-set (z4 := diff (x1 * y4 + x3 * y2) (x2 * y3 + x4 * y1)) in H1.
-assert (Hz1 : z1 mod m = 0). {
-  unfold z1.
-  unfold y1, y2, y3, y4, f.
-  destruct (le_dec (x1 mod m) v) as [Hx1v| Hx1v]. {
-    do 2 rewrite <- Nat.add_assoc.
-    rewrite <- Nat.add_mod_idemp_l; [ | easy ].
-    rewrite Nat.mul_mod_idemp_r; [ | easy ].
-    rewrite Nat.add_mod_idemp_l; [ | easy ].
-    destruct (le_dec (x2 mod m) v) as [Hx2v| Hx2v]. {
-      rewrite Nat.add_comm.
-      do 2 rewrite <- Nat.add_assoc.
-      rewrite <- Nat.add_mod_idemp_l; [ | easy ].
-      rewrite Nat.mul_mod_idemp_r; [ | easy ].
-      rewrite Nat.add_mod_idemp_l; [ | easy ].
-      destruct (le_dec (x3 mod m) v) as [Hx3v| Hx3v]. {
-        rewrite Nat.add_comm.
-        do 2 rewrite <- Nat.add_assoc.
-        rewrite <- Nat.add_mod_idemp_l; [ | easy ].
-        rewrite Nat.mul_mod_idemp_r; [ | easy ].
-        rewrite Nat.add_mod_idemp_l; [ | easy ].
-        destruct (le_dec (x4 mod m) v) as [Hx4v| Hx4v]. {
-          rewrite Nat.add_comm.
-          do 2 rewrite <- Nat.add_assoc.
-          rewrite <- Nat.add_mod_idemp_l; [ | easy ].
-          rewrite Nat.mul_mod_idemp_r; [ | easy ].
-          rewrite Nat.add_mod_idemp_l; [ | easy ].
-          rewrite Nat.add_comm.
-          rewrite Nat.add_assoc.
-          do 4 rewrite <- Nat.pow_2_r.
-          rewrite Hm, Nat.mul_comm.
-          now apply Nat.mod_mul.
-        } {
-          rewrite Nat.mul_sub_distr_l.
-          rewrite Nat.add_comm.
-          rewrite <- Nat.add_assoc.
-          rewrite Nat.add_comm.
-          rewrite Nat.add_sub_assoc. 2: {
-            apply Nat.mul_le_mono_l, Nat.lt_le_incl.
-            now apply Nat.mod_upper_bound.
-          }
-          apply Nat_eq_mod_sub_0.
-          rewrite Nat.mod_add; [ | easy ].
-          rewrite Nat.mul_mod_idemp_r; [ | easy ].
-          do 4 rewrite <- Nat.pow_2_r.
-          replace (x1 ^ 2 + x2 ^ 2 + x3 ^ 2) with (m * p - x4 ^ 2) by flia Hm.
-...
-Theorem Nat_add_mod_cancel_l : ∀ a b c m,
-  (a + b) ≡ (a + c) mod m ↔ b ≡ c mod m.
-Admitted.
-apply (Nat_add_mod_cancel_l (x1 ^ 2)).
-do 2 rewrite Nat.add_assoc.
-rewrite Hm.
-Search ((_ * _) mod _).
-rewrite Nat.mul_comm, Nat.mod_mul; [ | easy ].
-symmetry.
-replace (x1 ^ 2 + x1 ^ 2) with (2 * x1 ^ 2) by flia.
-rewrite Hx1.
-rewrite Nat_sqr_add.
-do 2 rewrite Nat.mul_add_distr_l.
-rewrite Nat.pow_mul_l.
-rewrite Nat.pow_2_r.
-rewrite Nat.mul_comm.
-do 2 rewrite <- Nat.mul_assoc.
-rewrite <- Nat.add_assoc.
-rewrite Nat_mod_add_l_mul_l; [ | easy ].
-do 3 rewrite (Nat.mul_comm 2).
-do 3 rewrite <- Nat.mul_assoc.
-rewrite Nat_mod_add_r_mul_l; [ | easy ].
-rewrite <- Nat.mul_mod_idemp_l; [ | easy ].
-rewrite Nat_mod_pow_mod.
-rewrite Nat.mul_mod_idemp_l; [ | easy ].
-rewrite Nat.mul_comm.
-(* I don't see why *)
 ...
