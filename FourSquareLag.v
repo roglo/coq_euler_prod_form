@@ -1293,20 +1293,24 @@ Ltac z2_case_2 :=
   rewrite Z.mul_sub_distr_l;
   do 2 rewrite <- Nat2Z.inj_mul;
   try (
-    rewrite Z.sub_add_distr;
+    repeat rewrite Z.sub_add_distr;
     repeat rewrite Z.sub_sub_distr;
     repeat rewrite <- Z.add_sub_swap;
-    rewrite <- Z.sub_add_distr;
+    repeat rewrite <- Z.sub_add_distr;
     repeat rewrite <- Nat2Z.inj_add;
     rewrite Zminus_mod;
     rewrite <- mod_Zmod; [ | easy ];
     rewrite <- mod_Zmod; [ | easy ];
+    try (rewrite Nat.mod_add; [ | easy ]);
+    try (rewrite Nat_mod_add_l_mul_r; [ | easy ]);
     repeat (
       rewrite <- Nat.add_mod_idemp_r; [ | easy ];
       rewrite Nat.mod_mul; [ rewrite Nat.add_0_r | easy ]
     );
     end_z2_case
-  ).
+  );
+  repeat rewrite Z.add_sub_assoc;
+  repeat rewrite <- Nat2Z.inj_add.
 
 Theorem eq_best_four_square_sol_coeff_1 : ∀ p (mx : best_four_square_sol p),
   prime p
@@ -1529,45 +1533,10 @@ assert (Hz2 : (z2 mod Z.of_nat m = 0)%Z). {
       z2_case_2.
       destruct (le_dec (x1 mod m) v) as [Hx1v| Hx1v]. {
         z2_case_1.
-        destruct (le_dec (x4 mod m) v). {
-          z2_case_1.
-        } {
-          z2_case_2.
-          do 2 rewrite Z.sub_add_distr.
-          rewrite Z.sub_sub_distr.
-          do 3 rewrite <- Z.add_sub_swap.
-          do 2 rewrite <- Z.sub_add_distr.
-          do 3 rewrite <- Nat2Z.inj_add.
-          rewrite Zminus_mod.
-          rewrite <- mod_Zmod; [ | easy ].
-          rewrite <- mod_Zmod; [ | easy ].
-          rewrite Nat.mod_add; [ | easy ].
-          rewrite Nat_mod_add_l_mul_r; [ | easy ].
-          end_z2_case.
-        }
+        destruct (le_dec (x4 mod m) v); [ z2_case_1 | z2_case_2 ].
       } {
         z2_case_2.
-        rewrite Z.add_sub_assoc.
-        rewrite <- Nat2Z.inj_add.
-        destruct (le_dec (x4 mod m) v). {
-          z2_case_1.
-        } {
-          z2_case_2.
-          rewrite Z.add_sub_assoc.
-          rewrite Z.sub_sub_distr.
-          rewrite Z.sub_add_distr.
-          rewrite Z.sub_sub_distr.
-          do 5 rewrite <- Z.add_sub_swap.
-          do 2 rewrite <- Z.sub_add_distr.
-          do 4 rewrite <- Nat2Z.inj_add.
-          rewrite Zminus_mod.
-          rewrite <- mod_Zmod; [ | easy ].
-          rewrite <- mod_Zmod; [ | easy ].
-          rewrite Nat.mod_add; [ | easy ].
-          rewrite Nat.mod_add; [ | easy ].
-          rewrite Nat_mod_add_l_mul_r; [ | easy ].
-          end_z2_case.
-        }
+        destruct (le_dec (x4 mod m) v); [ z2_case_1 | z2_case_2 ].
       }
     }
   } {
