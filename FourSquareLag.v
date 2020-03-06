@@ -1195,13 +1195,14 @@ Lemma z1_divides_m : ∀ m x1 x2 x3 x4
      then Z.of_nat (x mod m)
      else (Z.of_nat (x mod m) - Z.of_nat m)%Z),
   m ≠ 0
-  → (Z.of_nat
-        (x1 * (x1 mod m) + x2 * (x2 mod m) + x3 * (x3 mod m) +
-         x4 * (x4 mod m)) mod Z.of_nat m)%Z = 0%Z
+  → (x1 * (x1 mod m) + x2 * (x2 mod m) + x3 * (x3 mod m) +
+      x4 * (x4 mod m)) mod m = 0
   → ((f x1 * g x1 + f x2 * g x2 + f x3 * g x3 + f x4 * g x4)
          mod Z.of_nat m)%Z = 0%Z.
 Proof.
 intros * Hmz Hz.
+apply (f_equal Z.of_nat) in Hz.
+rewrite mod_Zmod in Hz; [ | easy ].
 set (v := m / 2) in g.
 unfold g.
 destruct (le_dec (x1 mod m) v) as [Hx1v| Hx1v]. {
@@ -1420,12 +1421,8 @@ replace (zy1 ^ 2 + zy2 ^ 2 + zy3 ^ 2 + zy4 ^ 2)%Z with (Z.of_nat (r * m))
 rewrite <- Nat2Z.inj_mul in H1.
 assert
   (Hz :
-     (Z.of_nat
-        (x1 * (x1 mod m) + x2 * (x2 mod m) +
-         x3 * (x3 mod m) + x4 * (x4 mod m)) mod Z.of_nat m)%Z = 0%Z). {
-  rewrite <- mod_Zmod; [ | easy ].
-  replace 0%Z with (Z.of_nat 0) by easy.
-  f_equal.
+     (x1 * (x1 mod m) + x2 * (x2 mod m) + x3 * (x3 mod m) +
+      x4 * (x4 mod m)) mod m = 0). {
   rewrite <- Nat.add_mod_idemp_r; [ | easy ].
   rewrite Nat.mul_mod_idemp_r; [ | easy ].
   rewrite Nat.add_mod_idemp_r; [ | easy ].
@@ -1455,8 +1452,8 @@ set (z2 := (zx1 * zy2 + zx4 * zy3 - (zx2 * zy1 + zx3 * zy4))%Z) in H1.
 assert (Hz1 : (z1 mod Z.of_nat m = 0)%Z). {
   now apply z1_divides_m.
 }
-...
 assert (Hz2 : (z2 mod Z.of_nat m = 0)%Z). {
+...
   unfold z2.
   unfold zx1, zx2, zx3, zx4.
   unfold zy1, zy2, zy3, zy4, g.
