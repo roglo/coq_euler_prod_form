@@ -1264,9 +1264,17 @@ Ltac z2_case_1 :=
   rewrite <- Nat2Z.inj_mul;
   repeat rewrite <- Nat2Z.inj_add;
   try (
+    rewrite Z.sub_add_distr;
+    rewrite Z.sub_sub_distr;
+    rewrite <- Z.add_sub_swap;
+    rewrite <- Z.sub_add_distr;
+    do 2 rewrite <- Nat2Z.inj_add
+  );
+  try (
     rewrite Zminus_mod;
     rewrite <- mod_Zmod; [ | easy ];
     rewrite <- mod_Zmod; [ | easy ];
+    try (rewrite Nat.mod_add; [ | easy ]);
     end_z2_case
   ).
 
@@ -1502,19 +1510,7 @@ assert (Hz2 : (z2 mod Z.of_nat m = 0)%Z). {
         destruct (le_dec (x4 mod m) v); [ z2_case_1 | z2_case_2 ].
       } {
         z2_case_2.
-        destruct (le_dec (x4 mod m) v). {
-          z2_case_1.
-          rewrite Z.sub_add_distr.
-          rewrite Z.sub_sub_distr.
-          rewrite <- Z.add_sub_swap.
-          rewrite <- Z.sub_add_distr.
-          do 2 rewrite <- Nat2Z.inj_add.
-          rewrite Zminus_mod.
-          rewrite <- mod_Zmod; [ | easy ].
-          rewrite <- mod_Zmod; [ | easy ].
-          rewrite Nat.mod_add; [ | easy ].
-          end_z2_case.
-        } {
+        destruct (le_dec (x4 mod m) v); [ z2_case_1 | ].
 ...
           f_case_2 Hz.
           rewrite Z.sub_sub_distr.
