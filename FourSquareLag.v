@@ -1754,6 +1754,70 @@ replace
    else (Z.of_nat (x4 mod m) - Z.of_nat m)%Z)
 with (g x4) in Hrw by easy.
 set (v := m / 2) in g.
+remember
+  (Z_Euler_s_four_square_sol_v2
+     (Z.of_nat x1) (Z.of_nat x2) (Z.of_nat x3) (Z.of_nat x4)
+     (g x1) (g x2) (g x3) (g x4)) as w eqn:Hw.
+symmetry in Hw.
+destruct w as (((z1, z2), z3), z4).
+injection Hrw; clear Hrw; intros Hw4 Hw3 Hw2 Hw1 Hrp.
+rewrite Hw1, Hw2, Hw3, Hw4 in Hrp.
+symmetry in Hw4, Hw3, Hw2, Hw1.
+do 4 rewrite Nat.mul_1_r, <- Nat.pow_2_r in Hrp.
+unfold Z_Euler_s_four_square_sol_v2 in Hw.
+injection Hw; clear Hw; intros Hz4 Hz3 Hz2 Hz1.
+symmetry in Hz1, Hz2, Hz3, Hz4.
+assert
+  (Hz :
+     (x1 * (x1 mod m) + x2 * (x2 mod m) + x3 * (x3 mod m) +
+      x4 * (x4 mod m)) mod m = 0). {
+  rewrite <- Nat.add_mod_idemp_r; [ | easy ].
+  rewrite Nat.mul_mod_idemp_r; [ | easy ].
+  rewrite Nat.add_mod_idemp_r; [ | easy ].
+  rewrite Nat.add_comm.
+  do 2 rewrite Nat.add_assoc.
+  rewrite <- Nat.add_mod_idemp_r; [ | easy ].
+  rewrite Nat.mul_mod_idemp_r; [ | easy ].
+  rewrite Nat.add_mod_idemp_r; [ | easy ].
+  rewrite Nat.add_comm.
+  do 2 rewrite Nat.add_assoc.
+  rewrite <- Nat.add_mod_idemp_r; [ | easy ].
+  rewrite Nat.mul_mod_idemp_r; [ | easy ].
+  rewrite Nat.add_mod_idemp_r; [ | easy ].
+  rewrite Nat.add_comm.
+  do 2 rewrite Nat.add_assoc.
+  rewrite <- Nat.add_mod_idemp_r; [ | easy ].
+  rewrite Nat.mul_mod_idemp_r; [ | easy ].
+  rewrite Nat.add_mod_idemp_r; [ | easy ].
+  rewrite Nat.add_comm.
+  do 2 rewrite Nat.add_assoc.
+  do 4 rewrite <- Nat.pow_2_r.
+  rewrite Hmp, Nat.mul_comm.
+  now apply Nat.mod_mul.
+}
+rewrite (Z.add_comm (Z.of_nat x2 * g x3)%Z) in Hz4.
+assert (Hz1m : (z1 mod Z.of_nat m = 0)%Z). {
+  rewrite Hz1.
+  now apply z1_divides_m.
+}
+assert (Hz2m : (z2 mod Z.of_nat m = 0)%Z). {
+  rewrite Hz2.
+  now apply z2_z3_z4_divides_m.
+}
+assert (Hz3m : (z3 mod Z.of_nat m = 0)%Z). {
+  rewrite Hz3.
+  now apply z2_z3_z4_divides_m.
+}
+assert (Hz4m : (z4 mod Z.of_nat m = 0)%Z). {
+  rewrite Hz4.
+  now apply z2_z3_z4_divides_m.
+}
+assert (Hzmz : Z.of_nat m ≠ 0%Z). {
+  intros H.
+  replace 0%Z with (Z.of_nat 0) in H by easy.
+  now apply Nat2Z.inj_iff in H.
+}
+...
 set (f x := (if le_dec (x mod m) v then x mod m else m - x mod m) ^ 2).
 move f after g.
 set (sqr_y1 := f x1).
