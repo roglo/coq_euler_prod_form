@@ -1836,7 +1836,10 @@ rewrite Nat.div_mul in Hw1; [ | easy ].
 rewrite Nat.div_mul in Hw2; [ | easy ].
 rewrite Nat.div_mul in Hw3; [ | easy ].
 rewrite Nat.div_mul in Hw4; [ | easy ].
-Check sum_sqr_y_r_le_m.
+specialize (sum_sqr_y_r_le_m m x1 x2 x3 x4) as Hrm.
+fold v in Hrm.
+set (f x := (if le_dec (x mod m) v then x mod m else m - x mod m) ^ 2) in Hrm.
+specialize (Hrm Hmz r).
 ...
 set (f x := (if le_dec (x mod m) v then x mod m else m - x mod m) ^ 2).
 move f after g.
