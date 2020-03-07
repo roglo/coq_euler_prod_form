@@ -1817,6 +1817,25 @@ assert (Hzmz : Z.of_nat m ≠ 0%Z). {
   replace 0%Z with (Z.of_nat 0) in H by easy.
   now apply Nat2Z.inj_iff in H.
 }
+apply Z.mod_divide in Hz1m; [ | easy ].
+apply Z.mod_divide in Hz2m; [ | easy ].
+apply Z.mod_divide in Hz3m; [ | easy ].
+apply Z.mod_divide in Hz4m; [ | easy ].
+destruct Hz1m as (k1, Hz1m).
+destruct Hz2m as (k2, Hz2m).
+destruct Hz3m as (k3, Hz3m).
+destruct Hz4m as (k4, Hz4m).
+rewrite Hz1m in Hw1.
+rewrite Hz2m in Hw2.
+rewrite Hz3m in Hw3.
+rewrite Hz4m in Hw4.
+move k1 after k4; move k3 before k1; move k2 before k1.
+rewrite Zabs2Nat.inj_mul in Hw1, Hw2, Hw3, Hw4.
+rewrite Zabs2Nat.id in Hw1, Hw2, Hw3, Hw4.
+rewrite Nat.div_mul in Hw1; [ | easy ].
+rewrite Nat.div_mul in Hw2; [ | easy ].
+rewrite Nat.div_mul in Hw3; [ | easy ].
+rewrite Nat.div_mul in Hw4; [ | easy ].
 Check sum_sqr_y_r_le_m.
 ...
 set (f x := (if le_dec (x mod m) v then x mod m else m - x mod m) ^ 2).
