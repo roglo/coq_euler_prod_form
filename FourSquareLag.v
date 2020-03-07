@@ -1684,46 +1684,49 @@ cbn in Hmx.
 flia Hrm Hmx.
 Qed.
 
-Check Z_Euler_s_four_square_identity_v2.
-
-Definition Z_glop p x1 x2 x3 x4 :=
-  let m := ((x1 ^ 2 + x2 ^ 2 + x3 ^ 2 + x4 ^ 2) / p)%Z in
-  let fy x :=
-    if Z.leb (x mod m)%Z (m / 2)%Z then (x mod m)%Z
-    else (x mod m - m)%Z
+Definition smaller_4sq_sol p x1 x2 x3 x4 :=
+  let m := (x1 ^ 2 + x2 ^ 2 + x3 ^ 2 + x4 ^ 2) / p in
+  let g x :=
+    if le_dec (x mod m) (m / 2) then Z.of_nat (x mod m)
+    else (Z.of_nat (x mod m) - Z.of_nat m)%Z
   in
   let '(z1, z2, z3, z4) :=
-    Z_Euler_s_four_square_sol_v2 x1 x2 x3 x4 (fy x1) (fy x2) (fy x3) (fy x4)
+    Z_Euler_s_four_square_sol_v2
+      (Z.of_nat x1) (Z.of_nat x2) (Z.of_nat x3) (Z.of_nat x4)
+      (g x1) (g x2) (g x3) (g x4)
   in
   let '(w1, w2, w3, w4) :=
-    (Z.abs z1 / m, Z.abs z2 / m, Z.abs z3 / m, Z.abs z4 / m)%Z
+    (Z.abs_nat z1 / m, Z.abs_nat z2 / m,
+     Z.abs_nat z3 / m, Z.abs_nat z4 / m)
   in
-  let r := ((w1 ^ 2 + w2 ^ 2 + w3 ^ 2 + w4 ^ 2) / p)%Z in
+  let r := (w1 ^ 2 + w2 ^ 2 + w3 ^ 2 + w4 ^ 2) / p in
   (r, (w1, w2, w3, w4)).
 
-Compute (Z_glop 31 4 13 1 0).
+(*
+Compute (smaller_4sq_sol 31 4 13 1 0).
 Compute (check_resolve_a2_b2_1 29).
-Compute (Z_glop 29 0 12 1 0).
+Compute (smaller_4sq_sol 29 0 12 1 0).
 
 Compute (map check_resolve_a2_b2_1 (Primes.firstn_primes' 20)).
 Compute (check_resolve_a2_b2_1 59).
-Compute (Z_glop 59 1 23 1 0).
-Compute (Z_glop 59 10 3 0 3).
+Compute (smaller_4sq_sol 59 1 23 1 0).
+Compute (smaller_4sq_sol 59 10 3 0 3).
 Compute (check_resolve_a2_b2_1 239).
-Compute (Z_glop 239 5 90 1 0).
-Compute (Z_glop 239 31 15 0 3).
-Compute (Z_glop 239 5 3 6 13).
+Compute (smaller_4sq_sol 239 5 90 1 0).
+Compute (smaller_4sq_sol 239 31 15 0 3).
+Compute (smaller_4sq_sol 239 5 3 6 13).
 Compute (5 ^ 2 + 3 ^ 2 + 6 ^ 2 + 13 ^ 2).
 Compute (31 ^ 2 + 15 ^ 2 + 3 ^ 2).
 Compute (5 ^ 2 + 90 ^ 2 + 1).
+*)
 
-...
-
-Theorem pouet : ∀ p, prime p → ∃ a b c d, a ^ 2 + b ^ 2 + c ^ 2 + d ^ 2 = p.
+Theorem Z_smaller_4sq_sol_if_m_neq_1 : ∀ p x1 x2 x3 x4 m w1 w2 w3 w4 r,
+  prime p
+  → p mod 2 = 1
+  → x1 ^ 2 + x2 ^ 2 + x3 ^ 2 + x4 ^ 2 = m * p
+  → smaller_4sq_sol p x1 x2 x3 x4 = (r, (w1, w2, w3, w4))
+  → m ≠ 1
+  → r < m.
 Proof.
-intros * Hp.
-Inspect 1.
-specialize (eq_best_four_square_sol_coeff_1 p) as H1.
-Print best_four_square_sol.
-Print four_square_sol.
+intros * Hp Hp2 Hmp Hrw Hm1.
 ...
