@@ -1817,6 +1817,7 @@ assert (Hzmz : Z.of_nat m ≠ 0%Z). {
   replace 0%Z with (Z.of_nat 0) in H by easy.
   now apply Nat2Z.inj_iff in H.
 }
+Check sum_sqr_y_r_le_m.
 ...
 set (f x := (if le_dec (x mod m) v then x mod m else m - x mod m) ^ 2).
 move f after g.
