@@ -1755,6 +1755,7 @@ replace
 with (g x4) in Hrw by easy.
 set (v := m / 2) in g.
 set (f x := (if le_dec (x mod m) v then x mod m else m - x mod m) ^ 2).
+move f after g.
 set (sqr_y1 := f x1).
 set (sqr_y2 := f x2).
 set (sqr_y3 := f x3).
@@ -1766,8 +1767,14 @@ apply Nat.mod_divide in Hym; [ | easy ].
 injection Hrw; clear Hrw; intros Hw4 Hw3 Hw2 Hw1 Hrp; intros.
 rewrite Hw1, Hw2, Hw3, Hw4 in Hrp.
 do 4 rewrite Nat.mul_1_r, <- Nat.pow_2_r in Hrp.
+destruct Hym as (r', Hr).
+(*
+assert (Hrr : r = r'). {
+  rewrite <- Hrp.
+  apply (Nat.mul_cancel_r _ _ m); [ easy | ].
+  rewrite <- Hr.
 ...
-destruct Hym as (r, Hr).
+*)
 assert (Hmn : m < p). {
   remember (resolve_a2_b2_1 p) as abn eqn:Habn.
   symmetry in Habn.
@@ -1776,6 +1783,7 @@ assert (Hmn : m < p). {
   specialize (H1 Hp Hp2 Habn).
   destruct H1 as (Hnp, Habnp).
   assert (Hnz : n ≠ 0) by flia Hnp.
+...
   transparent assert (H1 : four_square_sol p). {
     unfold four_square_sol.
     exists (n, (a, b, 1, 0)).
