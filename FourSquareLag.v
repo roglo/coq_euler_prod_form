@@ -1867,6 +1867,8 @@ assert (Hfx : f x1 + f x2 + f x3 + f x4 = r * m). {
   apply Nat2Z.inj.
   do 3 rewrite Nat2Z.inj_add.
   do 4 rewrite <- Hgf.
+  unfold g.
+  destruct (le_dec (x1 mod m) v) as [Hx1| Hx1]. {
 ...
 set (f x := (if le_dec (x mod m) v then x mod m else m - x mod m) ^ 2).
 move f after g.
