@@ -1935,6 +1935,10 @@ apply (f_equal (λ x, Z.div x (Z.of_nat p))) in H1.
 rewrite Z.div_mul in H1; [ | easy ].
 rewrite Z.mul_comm in H1.
 rewrite Z.divide_div_mul_exact in H1; cycle 1; [ easy | | ]. {
+  apply Z.divide_add_r. 2: {
+    rewrite Z.pow_2_r.
+    apply Z.divide_mul_l.
+    apply (Z.gauss _ (Z.of_nat m)). 2: {
 ...
 assert (Hfx : f x1 + f x2 + f x3 + f x4 = r * m). {
   apply Nat2Z.inj.
