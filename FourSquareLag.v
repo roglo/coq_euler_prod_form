@@ -1842,6 +1842,11 @@ assert (Hzmz : Z.of_nat m ≠ 0%Z). {
   replace 0%Z with (Z.of_nat 0) in H by easy.
   now apply Nat2Z.inj_iff in H.
 }
+assert (Hzpz : Z.of_nat p ≠ 0%Z). {
+  intros H.
+  replace 0%Z with (Z.of_nat 0) in H by easy.
+  now apply Nat2Z.inj_iff in H.
+}
 apply Z.mod_divide in Hz1m; [ | easy ].
 apply Z.mod_divide in Hz2m; [ | easy ].
 apply Z.mod_divide in Hz3m; [ | easy ].
@@ -1927,12 +1932,9 @@ rewrite Z2Nat.id in H2. 2: {
   apply Z.add_nonneg_nonneg; apply Z_sqr_nonneg.
 }
 apply (f_equal (λ x, Z.div x (Z.of_nat p))) in H1.
-rewrite Z.div_mul in H1. 2: {
-  intros H.
-  replace 0%Z with (Z.of_nat 0) in H by easy.
-  now apply Nat2Z.inj_iff in H.
-}
+rewrite Z.div_mul in H1; [ | easy ].
 rewrite Z.mul_comm in H1.
+rewrite Z.divide_div_mul_exact in H1; cycle 1; [ easy | | ]. {
 ...
 assert (Hfx : f x1 + f x2 + f x3 + f x4 = r * m). {
   apply Nat2Z.inj.
