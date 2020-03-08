@@ -1840,6 +1840,33 @@ specialize (sum_sqr_y_r_le_m m x1 x2 x3 x4) as Hrm.
 fold v in Hrm.
 set (f x := (if le_dec (x mod m) v then x mod m else m - x mod m) ^ 2) in Hrm.
 specialize (Hrm Hmz r).
+assert (Hgf : ∀ x, (g x ^ 2 = Z.of_nat (f x))%Z). {
+  intros x.
+  unfold g, f.
+  destruct (le_dec (x mod m) v) as [Hxv| Hxv]. {
+    rewrite Z.pow_2_r, Nat.pow_2_r.
+    now rewrite Nat2Z.inj_mul.
+  } {
+    apply Nat.nle_gt in Hxv.
+    rewrite Z.pow_2_r, Nat.pow_2_r.
+    rewrite Nat2Z.inj_mul.
+    rewrite Nat2Z.inj_sub. 2: {
+      now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+    }
+    rewrite <- Z.opp_involutive.
+    rewrite <- Z.mul_opp_l.
+    rewrite Z.opp_sub_distr.
+    rewrite Z.add_comm.
+    rewrite <- Z.mul_opp_r.
+    rewrite Z.opp_sub_distr.
+    rewrite (Z.add_comm (- Z.of_nat m)%Z).
+    easy.
+  }
+}
+assert (Hfx : f x1 + f x2 + f x3 + f x4 = r * m). {
+  apply Nat2Z.inj.
+  do 3 rewrite Nat2Z.inj_add.
+  do 4 rewrite <- Hgf.
 ...
 set (f x := (if le_dec (x mod m) v then x mod m else m - x mod m) ^ 2).
 move f after g.
