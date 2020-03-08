@@ -1735,6 +1735,11 @@ destruct x as [| px| px]; [ easy | | ]. {
 }
 Qed.
 
+Theorem Z_sqr_nonneg : ∀ x, (0 <= x ^ 2)%Z.
+intros.
+now apply Z.pow_even_nonneg, Zeven_equiv.
+Qed.
+
 Theorem smaller_4sq_sol_if_m_neq_1 : ∀ p x1 x2 x3 x4 m w1 w2 w3 w4 r,
   prime p
   → p mod 2 = 1
@@ -1900,18 +1905,33 @@ move H1 at bottom.
 generalize Hrp; intros H2.
 rewrite Hw1, Hw2, Hw3, Hw4 in H2.
 do 4 rewrite Z_sqr_abs_nat in H2.
-do 3 rewrite <- Z2Nat.inj_add in H2.
+rewrite <- Z2Nat.inj_add in H2; [ | apply Z_sqr_nonneg | apply Z_sqr_nonneg ].
+rewrite <- Z2Nat.inj_add in H2; [ | | apply Z_sqr_nonneg ]. 2: {
+  apply Z.add_nonneg_nonneg; apply Z_sqr_nonneg.
+}
+rewrite <- Z2Nat.inj_add in H2; [ | | apply Z_sqr_nonneg ]. 2: {
+  apply Z.add_nonneg_nonneg; [ | apply Z_sqr_nonneg ].
+  apply Z.add_nonneg_nonneg; apply Z_sqr_nonneg.
+}
 rewrite Z.mul_comm in H1.
 rewrite (Z.pow_2_r (Z.of_nat m)) in H1.
 rewrite Nat2Z.inj_mul in H1.
 setoid_rewrite Z.mul_assoc in H1.
 setoid_rewrite Z.mul_shuffle0 in H1.
-apply Z.mul_cancel_r in H1.
+apply Z.mul_cancel_r in H1; [ | easy ].
 apply (f_equal Z.of_nat) in H2.
-rewrite div_Zdiv in H2.
-rewrite Z2Nat.id in H2.
+rewrite div_Zdiv in H2; [ | easy ].
+rewrite Z2Nat.id in H2. 2: {
+  apply Z.add_nonneg_nonneg; [ | apply Z_sqr_nonneg ].
+  apply Z.add_nonneg_nonneg; [ | apply Z_sqr_nonneg ].
+  apply Z.add_nonneg_nonneg; apply Z_sqr_nonneg.
+}
 apply (f_equal (λ x, Z.div x (Z.of_nat p))) in H1.
-rewrite Z.div_mul in H1.
+rewrite Z.div_mul in H1. 2: {
+  intros H.
+  replace 0%Z with (Z.of_nat 0) in H by easy.
+  now apply Nat2Z.inj_iff in H.
+}
 rewrite Z.mul_comm in H1.
 ...
 assert (Hfx : f x1 + f x2 + f x3 + f x4 = r * m). {
