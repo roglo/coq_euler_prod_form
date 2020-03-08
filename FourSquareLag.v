@@ -1767,6 +1767,11 @@ do 4 rewrite Nat.mul_1_r, <- Nat.pow_2_r in Hrp.
 unfold Z_Euler_s_four_square_sol_v2 in Hw.
 injection Hw; clear Hw; intros Hz4 Hz3 Hz2 Hz1.
 symmetry in Hz1, Hz2, Hz3, Hz4.
+specialize Z_Euler_s_four_square_identity_v2 as H1.
+specialize (H1 (Z_of_nat x1) (Z_of_nat x2)) as H1.
+specialize (H1 (Z_of_nat x3) (Z_of_nat x4)) as H1.
+specialize (H1 (g x1) (g x2) (g x3) (g x4)).
+rewrite <- Hz1, <- Hz2, <- Hz3, <- Hz4 in H1.
 assert
   (Hz :
      (x1 * (x1 mod m) + x2 * (x2 mod m) + x3 * (x3 mod m) +
@@ -1863,6 +1868,17 @@ assert (Hgf : ∀ x, (g x ^ 2 = Z.of_nat (f x))%Z). {
     easy.
   }
 }
+do 4 rewrite Hgf in H1.
+do 3 rewrite <- Nat2Z.inj_add in H1.
+assert (Hzn : ∀ a, (Z.of_nat a ^ 2 = Z.of_nat (a ^ 2))%Z). {
+  intros a.
+  cbn; rewrite Nat.mul_1_r, Z.mul_1_r.
+  symmetry; apply Nat2Z.inj_mul.
+}
+do 4 rewrite Hzn in H1; clear Hzn.
+do 3 rewrite <- Nat2Z.inj_add in H1.
+rewrite Hmp in H1.
+...
 assert (Hfx : f x1 + f x2 + f x3 + f x4 = r * m). {
   apply Nat2Z.inj.
   do 3 rewrite Nat2Z.inj_add.
