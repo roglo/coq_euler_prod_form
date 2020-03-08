@@ -1901,6 +1901,18 @@ generalize Hrp; intros H2.
 rewrite Hw1, Hw2, Hw3, Hw4 in H2.
 do 4 rewrite Z_sqr_abs_nat in H2.
 do 3 rewrite <- Z2Nat.inj_add in H2.
+rewrite Z.mul_comm in H1.
+rewrite (Z.pow_2_r (Z.of_nat m)) in H1.
+rewrite Nat2Z.inj_mul in H1.
+setoid_rewrite Z.mul_assoc in H1.
+setoid_rewrite Z.mul_shuffle0 in H1.
+apply Z.mul_cancel_r in H1.
+apply (f_equal Z.of_nat) in H2.
+rewrite div_Zdiv in H2.
+rewrite Z2Nat.id in H2.
+apply (f_equal (λ x, Z.div x (Z.of_nat p))) in H1.
+rewrite Z.div_mul in H1.
+rewrite Z.mul_comm in H1.
 ...
 assert (Hfx : f x1 + f x2 + f x3 + f x4 = r * m). {
   apply Nat2Z.inj.
