@@ -1720,6 +1720,21 @@ Compute (31 ^ 2 + 15 ^ 2 + 3 ^ 2).
 Compute (5 ^ 2 + 90 ^ 2 + 1).
 *)
 
+Theorem Z_sqr_abs_nat : ∀ x, Z.abs_nat x ^ 2 = Z.to_nat (x ^ 2).
+Proof.
+intros x.
+unfold Z.abs_nat.
+destruct x as [| px| px]; [ easy | | ]. {
+  cbn.
+  rewrite Nat.mul_1_r, Pos.mul_1_r; symmetry.
+  apply Pos2Nat.inj_mul.
+} {
+  cbn.
+  rewrite Nat.mul_1_r, Pos.mul_1_r; symmetry.
+  apply Pos2Nat.inj_mul.
+}
+Qed.
+
 Theorem smaller_4sq_sol_if_m_neq_1 : ∀ p x1 x2 x3 x4 m w1 w2 w3 w4 r,
   prime p
   → p mod 2 = 1
@@ -1878,6 +1893,14 @@ assert (Hzn : ∀ a, (Z.of_nat a ^ 2 = Z.of_nat (a ^ 2))%Z). {
 do 4 rewrite Hzn in H1; clear Hzn.
 do 3 rewrite <- Nat2Z.inj_add in H1.
 rewrite Hmp in H1.
+rewrite Hz1m, Hz2m, Hz3m, Hz4m in H1.
+do 4 rewrite Z.pow_mul_l in H1.
+do 3 rewrite <- Z.mul_add_distr_r in H1.
+move H1 at bottom.
+generalize Hrp; intros H2.
+rewrite Hw1, Hw2, Hw3, Hw4 in H2.
+do 4 rewrite Z_sqr_abs_nat in H2.
+do 3 rewrite <- Z2Nat.inj_add in H2.
 ...
 assert (Hfx : f x1 + f x2 + f x3 + f x4 = r * m). {
   apply Nat2Z.inj.
@@ -2136,6 +2159,8 @@ set (w4 := Z.abs_nat zw4).
 assert (H3 : w1 ^ 2 + w2 ^ 2 + w3 ^ 2 + w4 ^ 2 = r * p). {
   subst w1 w2 w3 w4.
   assert (Hzan : ∀ x, Z.abs_nat x ^ 2 = Z.to_nat (x ^ 2)). {
+apply Z_sqr_abs_nat.
+...
     intros x.
     unfold Z.abs_nat.
     destruct x as [| px| px]; [ easy | | ]. {
