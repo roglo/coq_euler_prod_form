@@ -1938,6 +1938,11 @@ rewrite Z.divide_div_mul_exact in H1; cycle 1; [ easy | | ]. {
   apply Z.divide_add_r. 2: {
     rewrite Z.pow_2_r.
     apply Z.divide_mul_l.
+(**)
+apply Z.mod_divide; [ easy | ].
+destruct k4 as [| k4| k4]; [ easy | | ]. {
+Check mod_Zmod.
+...
     apply (Z.gauss _ (Z.of_nat m)). 2: {
 Print Z.gcd.
 Theorem Z_gcd_of_nat : ∀ a b,
@@ -1963,6 +1968,7 @@ destruct za as [| za| za]. {
     apply Nat2Z.inj in Hzb; subst b; cbn.
     now rewrite Nat.gcd_0_r.
   } {
+Search Nat.gcd.
 ...
 Search (Z.gcd (Z.of_nat _)).
 ...
