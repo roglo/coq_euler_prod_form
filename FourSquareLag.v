@@ -1959,7 +1959,7 @@ rewrite Nat.divide_div_mul_exact in H1; [ | easy | ]. 2: {
     apply eq_gcd_prime_small_1; [ easy | flia H1m ].
   }
   exists (m * r').
-  rewrite H1.
+  rewrite <- Nat.mul_assoc; f_equal.
 ...
 rewrite Z.divide_div_mul_exact in H1; cycle 1; [ easy | | ]. {
   apply Z.divide_add_r. 2: {
