@@ -1745,7 +1745,7 @@ Theorem smaller_4sq_sol_if_m_neq_1 : ∀ p x1 x2 x3 x4 m w1 w2 w3 w4 r,
   → p mod 2 = 1
   → x1 ^ 2 + x2 ^ 2 + x3 ^ 2 + x4 ^ 2 = m * p
   → smaller_4sq_sol p x1 x2 x3 x4 = (r, (w1, w2, w3, w4))
-  → 1 < m
+  → 1 < m < p
   → r < m.
 Proof.
 intros * Hp Hp2 Hmp Hrw H1m.
@@ -1939,9 +1939,18 @@ rewrite Z.divide_div_mul_exact in H1; cycle 1; [ easy | | ]. {
     rewrite Z.pow_2_r.
     apply Z.divide_mul_l.
 (**)
-apply Z.mod_divide; [ easy | ].
-destruct k4 as [| k4| k4]; [ easy | | ]. {
-Check mod_Zmod.
+    apply Z.mod_divide; [ easy | ].
+    destruct k4 as [| k4| k4]; [ easy | | ]. {
+      rewrite <- positive_nat_Z.
+      rewrite <- mod_Zmod; [ | easy ].
+      replace 0%Z with (Z.of_nat 0) by easy; f_equal.
+      apply Nat.mod_divide; [ easy | ].
+      apply (Nat.gauss _ m). 2: {
+        apply eq_gcd_prime_small_1; [ easy | flia H1m ].
+      }
+      rewrite Nat.mul_comm.
+Search (Pos.to_nat _ * _).
+Search (Z.pos _ * Z.of_nat _)%Z.
 ...
     apply (Z.gauss _ (Z.of_nat m)). 2: {
 Print Z.gcd.
