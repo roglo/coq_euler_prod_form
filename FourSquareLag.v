@@ -1866,11 +1866,16 @@ rewrite Nat.div_mul in Hw1; [ | easy ].
 rewrite Nat.div_mul in Hw2; [ | easy ].
 rewrite Nat.div_mul in Hw3; [ | easy ].
 rewrite Nat.div_mul in Hw4; [ | easy ].
+(*
 specialize (sum_sqr_y_r_le_m m x1 x2 x3 x4) as Hrm.
 fold v in Hrm.
-set (f x := (if le_dec (x mod m) v then x mod m else m - x mod m) ^ 2) in Hrm.
-move f after g.
 specialize (Hrm Hmz r).
+*)
+specialize (sum_sqr_x_sum_sqr_y_mod p m x1 x2 x3 x4) as Hfx.
+fold v in Hfx.
+set (f x := (if le_dec (x mod m) v then x mod m else m - x mod m) ^ 2) in Hfx.
+move f after g.
+specialize (Hfx Hmz Hmp).
 assert (Hgf : ∀ x, (g x ^ 2 = Z.of_nat (f x))%Z). {
   intros x.
   unfold g, f.
@@ -1925,6 +1930,7 @@ rewrite Nat2Z.inj_mul in H1.
 setoid_rewrite Z.mul_assoc in H1.
 setoid_rewrite Z.mul_shuffle0 in H1.
 apply Z.mul_cancel_r in H1; [ | easy ].
+(*
 apply (f_equal Z.of_nat) in H2.
 rewrite div_Zdiv in H2; [ | easy ].
 rewrite Z2Nat.id in H2. 2: {
@@ -1932,9 +1938,28 @@ rewrite Z2Nat.id in H2. 2: {
   apply Z.add_nonneg_nonneg; [ | apply Z_sqr_nonneg ].
   apply Z.add_nonneg_nonneg; apply Z_sqr_nonneg.
 }
+*)
 apply (f_equal (λ x, Z.div x (Z.of_nat p))) in H1.
 rewrite Z.div_mul in H1; [ | easy ].
 rewrite Z.mul_comm in H1.
+apply Nat.mod_divide in Hfx; [ | easy ].
+destruct Hfx as (r', Hr').
+rewrite Hr', Nat.mul_comm in H1.
+rewrite <- (Z2Nat.id (_ + _ + _ + _)%Z) in H1. 2: {
+  apply Z.add_nonneg_nonneg; [ | apply Z_sqr_nonneg ].
+  apply Z.add_nonneg_nonneg; [ | apply Z_sqr_nonneg ].
+  apply Z.add_nonneg_nonneg; apply Z_sqr_nonneg.
+}
+rewrite <- Nat2Z.inj_mul in H1.
+rewrite <- div_Zdiv in H1; [ | easy ].
+apply Nat2Z.inj in H1.
+remember (Z.to_nat (k1 ^ 2 + _ + _ + _)) as kn eqn:Hkn.
+rewrite Nat.divide_div_mul_exact in H1; [ | easy | ]. 2: {
+  apply (Nat.gauss _ m). 2: {
+    apply eq_gcd_prime_small_1; [ easy | flia H1m ].
+  }
+  exists (m * r').
+  rewrite H1.
 ...
 rewrite Z.divide_div_mul_exact in H1; cycle 1; [ easy | | ]. {
   apply Z.divide_add_r. 2: {
