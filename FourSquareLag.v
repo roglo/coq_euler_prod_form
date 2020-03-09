@@ -1869,6 +1869,7 @@ rewrite Nat.div_mul in Hw4; [ | easy ].
 specialize (sum_sqr_y_r_le_m m x1 x2 x3 x4) as Hrm.
 fold v in Hrm.
 set (f x := (if le_dec (x mod m) v then x mod m else m - x mod m) ^ 2) in Hrm.
+move f after g.
 specialize (Hrm Hmz r).
 assert (Hgf : ∀ x, (g x ^ 2 = Z.of_nat (f x))%Z). {
   intros x.
@@ -1934,6 +1935,7 @@ rewrite Z2Nat.id in H2. 2: {
 apply (f_equal (λ x, Z.div x (Z.of_nat p))) in H1.
 rewrite Z.div_mul in H1; [ | easy ].
 rewrite Z.mul_comm in H1.
+...
 rewrite Z.divide_div_mul_exact in H1; cycle 1; [ easy | | ]. {
   apply Z.divide_add_r. 2: {
     rewrite Z.pow_2_r.
