@@ -1930,21 +1930,13 @@ rewrite Nat2Z.inj_mul in H1.
 setoid_rewrite Z.mul_assoc in H1.
 setoid_rewrite Z.mul_shuffle0 in H1.
 apply Z.mul_cancel_r in H1; [ | easy ].
-(*
-apply (f_equal Z.of_nat) in H2.
-rewrite div_Zdiv in H2; [ | easy ].
-rewrite Z2Nat.id in H2. 2: {
-  apply Z.add_nonneg_nonneg; [ | apply Z_sqr_nonneg ].
-  apply Z.add_nonneg_nonneg; [ | apply Z_sqr_nonneg ].
-  apply Z.add_nonneg_nonneg; apply Z_sqr_nonneg.
-}
-*)
 apply (f_equal (λ x, Z.div x (Z.of_nat p))) in H1.
 rewrite Z.div_mul in H1; [ | easy ].
 rewrite Z.mul_comm in H1.
 apply Nat.mod_divide in Hfx; [ | easy ].
 destruct Hfx as (r', Hr').
 rewrite Hr', Nat.mul_comm in H1.
+(**)
 rewrite <- (Z2Nat.id (_ + _ + _ + _)%Z) in H1. 2: {
   apply Z.add_nonneg_nonneg; [ | apply Z_sqr_nonneg ].
   apply Z.add_nonneg_nonneg; [ | apply Z_sqr_nonneg ].
@@ -1962,7 +1954,7 @@ rewrite Nat.divide_div_mul_exact in H1; [ | easy | ]. 2: {
     apply Nat.divide_mul_r.
     now apply Nat.mod_divide in H.
   }
-  rewrite Hkn.
+  subst kn.
 ...
   exists (m * r').
   rewrite H1.
