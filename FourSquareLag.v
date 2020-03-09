@@ -1939,6 +1939,32 @@ rewrite Z.divide_div_mul_exact in H1; cycle 1; [ easy | | ]. {
     rewrite Z.pow_2_r.
     apply Z.divide_mul_l.
     apply (Z.gauss _ (Z.of_nat m)). 2: {
+Print Z.gcd.
+Theorem Z_gcd_of_nat : ∀ a b,
+  Z.gcd (Z.of_nat a) (Z.of_nat b) = Z.of_nat (Nat.gcd a b).
+Proof.
+intros.
+unfold Z.gcd.
+remember (Z.of_nat a) as za eqn:Hza; symmetry in Hza.
+remember (Z.of_nat b) as zb eqn:Hzb; symmetry in Hzb.
+move zb before za.
+destruct za as [| za| za]. {
+  replace 0%Z with (Z.of_nat 0) in Hza by easy.
+  apply Nat2Z.inj in Hza; subst a; cbn.
+  destruct zb as [| zb| zb]; [ easy | easy | ].
+  specialize (Pos2Z.neg_is_neg zb) as H1.
+  rewrite <- Hzb in H1.
+  apply Z.nle_gt in H1.
+  exfalso; apply H1.
+  apply Nat2Z.is_nonneg.
+} {
+  destruct zb as [| zb| zb]. {
+    replace 0%Z with (Z.of_nat 0) in Hzb by easy.
+    apply Nat2Z.inj in Hzb; subst b; cbn.
+    now rewrite Nat.gcd_0_r.
+  } {
+...
+Search (Z.gcd (Z.of_nat _)).
 ...
 assert (Hfx : f x1 + f x2 + f x3 + f x4 = r * m). {
   apply Nat2Z.inj.
