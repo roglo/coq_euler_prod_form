@@ -1949,37 +1949,19 @@ rewrite Z.divide_div_mul_exact in H1; cycle 1; [ easy | | ]. {
         apply eq_gcd_prime_small_1; [ easy | flia H1m ].
       }
       rewrite Nat.mul_comm.
-Search (Pos.to_nat _ * _).
-Search (Z.pos _ * Z.of_nat _)%Z.
-...
-    apply (Z.gauss _ (Z.of_nat m)). 2: {
-Print Z.gcd.
-Theorem Z_gcd_of_nat : ∀ a b,
-  Z.gcd (Z.of_nat a) (Z.of_nat b) = Z.of_nat (Nat.gcd a b).
-Proof.
-intros.
-unfold Z.gcd.
-remember (Z.of_nat a) as za eqn:Hza; symmetry in Hza.
-remember (Z.of_nat b) as zb eqn:Hzb; symmetry in Hzb.
-move zb before za.
-destruct za as [| za| za]. {
-  replace 0%Z with (Z.of_nat 0) in Hza by easy.
-  apply Nat2Z.inj in Hza; subst a; cbn.
-  destruct zb as [| zb| zb]; [ easy | easy | ].
-  specialize (Pos2Z.neg_is_neg zb) as H1.
-  rewrite <- Hzb in H1.
-  apply Z.nle_gt in H1.
-  exfalso; apply H1.
-  apply Nat2Z.is_nonneg.
-} {
-  destruct zb as [| zb| zb]. {
-    replace 0%Z with (Z.of_nat 0) in Hzb by easy.
-    apply Nat2Z.inj in Hzb; subst b; cbn.
-    now rewrite Nat.gcd_0_r.
-  } {
-Search Nat.gcd.
-...
-Search (Z.gcd (Z.of_nat _)).
+      apply (f_equal Z.to_nat) in Hz4m.
+      rewrite Z2Nat.inj_mul in Hz4m; cycle 1. {
+        apply Pos2Z.pos_is_nonneg.
+      } {
+        apply Nat2Z.is_nonneg.
+      }
+      rewrite Nat2Z.id in Hz4m.
+      cbn in Hz4m.
+      rewrite <- Hz4m.
+      rewrite Hz4.
+      unfold Z_diff.
+      rewrite Z2Nat.inj_sub.
+(* interminable *)
 ...
 assert (Hfx : f x1 + f x2 + f x3 + f x4 = r * m). {
   apply Nat2Z.inj.
