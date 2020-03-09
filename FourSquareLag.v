@@ -1958,7 +1958,14 @@ rewrite Nat.divide_div_mul_exact in H1; [ | easy | ]. 2: {
   apply (Nat.gauss _ m). 2: {
     apply eq_gcd_prime_small_1; [ easy | flia H1m ].
   }
+  enough (H : kn mod p = 0). {
+    apply Nat.divide_mul_r.
+    now apply Nat.mod_divide in H.
+  }
+  rewrite Hkn.
+...
   exists (m * r').
+  rewrite H1.
   rewrite <- Nat.mul_assoc; f_equal.
 ...
 rewrite Z.divide_div_mul_exact in H1; cycle 1; [ easy | | ]. {
