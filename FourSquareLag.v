@@ -523,13 +523,27 @@ Definition check_resolve_a2_b2_1 p :=
 
 Compute (map check_resolve_a2_b2_1 (Primes.firstn_primes' 20)).
 
-Lemma odd_prime_divides_sum_two_squares_plus_one : ∀ p a b n,
+Lemma prime_divides_sum_two_squares_plus_one : ∀ p a b n,
   prime p
-  → p mod 2 = 1
   → resolve_a2_b2_1 p = (a, b, n)
   → 0 < n < p ∧ a ^ 2 + b ^ 2 + 1 = n * p.
 Proof.
-intros p aa bb n Hp Hp2 Hr.
+intros p aa bb n Hp Hr.
+destruct (Nat.eq_dec (p mod 2) 0) as [Hp2| Hp2]. {
+  destruct (Nat.eq_dec p 2) as [H2| H2]. {
+    subst p.
+    cbn in Hr.
+    injection Hr; clear Hr; intros; subst aa bb n.
+    split; [ flia | easy ].
+  }
+  specialize (odd_prime p Hp H2) as H1.
+  now rewrite Hp2 in H1.
+}
+assert (Hp3 : p mod 2 = 1). {
+  specialize (Nat.mod_upper_bound p 2 (Nat.neq_succ_0 _)) as H1.
+  flia Hp2 H1.
+}
+clear Hp2; rename Hp3 into Hp2.
 assert
   (Ha :
    ∀ a a',
@@ -711,8 +725,6 @@ exfalso; apply H1; [ | | | easy ]. {
 }
 Qed.
 
-Check Euler_s_four_square_identity_v2.
-
 Definition four_square_sol p :=
   { mx &
     let '(m, (x1, x2, x3, x4)) := mx in
@@ -724,15 +736,10 @@ Theorem four_square_multiple : ∀ p,
   → four_square_sol p.
 Proof.
 intros p Hp.
-destruct (Nat.eq_dec p 2) as [Hp2| Hpn2]. {
-  subst p.
-  now exists (1, (1, 1, 0, 0)).
-}
-specialize (odd_prime p Hp Hpn2) as Hp2.
 remember (resolve_a2_b2_1 p) as abn eqn:Hres.
 symmetry in Hres.
 destruct abn as ((a, b), n).
-specialize (odd_prime_divides_sum_two_squares_plus_one p a b n Hp Hp2) as H1.
+specialize (prime_divides_sum_two_squares_plus_one p a b n Hp) as H1.
 specialize (H1 Hres).
 destruct H1 as (Hnp, Hsum).
 exists (n, (a, b, 1, 0)).
@@ -1381,10 +1388,9 @@ Qed.
 
 Theorem eq_best_four_square_sol_coeff_1 : ∀ p (mx : best_four_square_sol p),
   prime p
-  → p mod 2 = 1
   → fst (projT1 (projT1 mx)) = 1.
 Proof.
-intros * Hp Hp2.
+intros * Hp.
 assert (Hpz : p ≠ 0) by now (intros H; subst p).
 destruct mx as (m, Hmx); cbn.
 destruct m as (m, Hm); cbn.
@@ -1407,8 +1413,8 @@ assert (Hmn : m < p). {
   remember (resolve_a2_b2_1 p) as abn eqn:Habn.
   symmetry in Habn.
   destruct abn as ((a, b), n).
-  specialize (odd_prime_divides_sum_two_squares_plus_one p a b n) as H1.
-  specialize (H1 Hp Hp2 Habn).
+  specialize (prime_divides_sum_two_squares_plus_one p a b n) as H1.
+  specialize (H1 Hp Habn).
   destruct H1 as (Hnp, Habnp).
   assert (Hnz : n ≠ 0) by flia Hnp.
   transparent assert (H1 : four_square_sol p). {
@@ -1742,13 +1748,12 @@ Qed.
 
 Theorem smaller_4sq_sol_if_m_neq_1 : ∀ p x1 x2 x3 x4 m w1 w2 w3 w4 r,
   prime p
-  → p mod 2 = 1
   → x1 ^ 2 + x2 ^ 2 + x3 ^ 2 + x4 ^ 2 = m * p
   → smaller_4sq_sol p x1 x2 x3 x4 = (r, (w1, w2, w3, w4))
   → 1 < m < p
   → r < m.
 Proof.
-intros * Hp Hp2 Hmp Hrw H1m.
+intros * Hp Hmp Hrw H1m.
 assert (Hpz : p ≠ 0) by now (intros H; subst p).
 assert (Hmz : m ≠ 0) by flia H1m.
 unfold smaller_4sq_sol in Hrw.
@@ -1945,4 +1950,35 @@ destruct (Nat.eq_dec r m) as [Hrme| Hrme]. {
 flia Hmr Hrme.
 Qed.
 
-Inspect 1.
+Fixpoint four_sq_sol_for_prime_loop it p x1 x2 x3 x4 m :=
+  match it with
+  | 0 => (x1, x2, x3, x4)
+  | S it' =>
+      if Nat.eq_dec m 1 then (x1, x2, x3, x4)
+      else
+        let '(r, (y1, y2, y3, y4)) := smaller_4sq_sol p x1 x2 x3 x4 in
+        four_sq_sol_for_prime_loop it' p y1 y2 y3 y4 r
+  end.
+
+Definition four_sq_sol_for_prime p :=
+  let '(a, b, m) := resolve_a2_b2_1 p in
+  four_sq_sol_for_prime_loop p p a b 1 0 m.
+
+(*
+Compute (four_sq_sol_for_prime 239).
+Compute (5 ^ 2 + 3 ^ 2 + 6 ^ 2 + 13 ^ 2).
+*)
+
+Theorem four_sq_for_prime : ∀ p x1 x2 x3 x4,
+  prime p
+  → four_sq_sol_for_prime p = (x1, x2, x3, x4)
+  → x1 ^ 2 + x2 ^ 2 + x3 ^ 2 + x4 ^ 2 = p.
+Proof.
+intros * Hp H4s.
+unfold four_sq_sol_for_prime in H4s.
+remember (resolve_a2_b2_1 p) as abm eqn:Habm; symmetry in Habm.
+destruct abm as ((a, b), m).
+specialize prime_divides_sum_two_squares_plus_one as H1.
+specialize (H1 p a b m Hp Habm).
+destruct H1 as (Hmp & Habm1).
+...
