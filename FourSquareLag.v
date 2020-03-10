@@ -1779,12 +1779,11 @@ remember
      (Z.of_nat x1) (Z.of_nat x2) (Z.of_nat x3) (Z.of_nat x4)
      (g x1) (g x2) (g x3) (g x4)) as w eqn:Hw.
 symmetry in Hw.
+remember Z.pow as zp.
 destruct w as (((z1, z2), z3), z4).
-injection Hrw; clear Hrw; intros Hw4 Hw3 Hw2 Hw1 Hrp.
-...
-rewrite Hw1, Hw2, Hw3, Hw4 in Hrp.
+injection Hrw; clear Hrw; intros Hw4 Hw3 Hw2 Hw1 Hrm.
+subst zp.
 symmetry in Hw4, Hw3, Hw2, Hw1.
-do 4 rewrite Nat.mul_1_r, <- Nat.pow_2_r in Hrp.
 unfold Z_Euler_s_four_square_sol_v2 in Hw.
 injection Hw; clear Hw; intros Hz4 Hz3 Hz2 Hz1.
 symmetry in Hz1, Hz2, Hz3, Hz4.
@@ -1867,11 +1866,6 @@ rewrite Nat.div_mul in Hw1; [ | easy ].
 rewrite Nat.div_mul in Hw2; [ | easy ].
 rewrite Nat.div_mul in Hw3; [ | easy ].
 rewrite Nat.div_mul in Hw4; [ | easy ].
-(*
-specialize (sum_sqr_y_r_le_m m x1 x2 x3 x4) as Hrm.
-fold v in Hrm.
-specialize (Hrm Hmz r).
-*)
 specialize (sum_sqr_x_sum_sqr_y_mod p m x1 x2 x3 x4) as Hfx.
 fold v in Hfx.
 set (f x := (if le_dec (x mod m) v then x mod m else m - x mod m) ^ 2) in Hfx.
@@ -1914,391 +1908,41 @@ rewrite Hz1m, Hz2m, Hz3m, Hz4m in H1.
 do 4 rewrite Z.pow_mul_l in H1.
 do 3 rewrite <- Z.mul_add_distr_r in H1.
 move H1 at bottom.
-generalize Hrp; intros H2.
-rewrite Hw1, Hw2, Hw3, Hw4 in H2.
-do 4 rewrite Z_sqr_abs_nat in H2.
-rewrite <- Z2Nat.inj_add in H2; [ | apply Z_sqr_nonneg | apply Z_sqr_nonneg ].
-rewrite <- Z2Nat.inj_add in H2; [ | | apply Z_sqr_nonneg ]. 2: {
-  apply Z.add_nonneg_nonneg; apply Z_sqr_nonneg.
-}
-rewrite <- Z2Nat.inj_add in H2; [ | | apply Z_sqr_nonneg ]. 2: {
-  apply Z.add_nonneg_nonneg; [ | apply Z_sqr_nonneg ].
-  apply Z.add_nonneg_nonneg; apply Z_sqr_nonneg.
-}
-rewrite Z.mul_comm in H1.
-rewrite (Z.pow_2_r (Z.of_nat m)) in H1.
-rewrite Nat2Z.inj_mul in H1.
-setoid_rewrite Z.mul_assoc in H1.
-setoid_rewrite Z.mul_shuffle0 in H1.
-apply Z.mul_cancel_r in H1; [ | easy ].
-apply (f_equal (λ x, Z.div x (Z.of_nat p))) in H1.
-rewrite Z.div_mul in H1; [ | easy ].
-rewrite Z.mul_comm in H1.
-apply Nat.mod_divide in Hfx; [ | easy ].
-destruct Hfx as (r', Hr').
-rewrite Hr', Nat.mul_comm in H1.
-(**)
-rewrite <- (Z2Nat.id (_ + _ + _ + _)%Z) in H1. 2: {
-  apply Z.add_nonneg_nonneg; [ | apply Z_sqr_nonneg ].
-  apply Z.add_nonneg_nonneg; [ | apply Z_sqr_nonneg ].
-  apply Z.add_nonneg_nonneg; apply Z_sqr_nonneg.
-}
+do 4 rewrite Hgf in Hrm.
+do 3 rewrite <- Nat2Z.inj_add in Hrm.
+rewrite Nat2Z.id in Hrm.
+move Hrm before Hfx.
+specialize (Nat.div_mod (f x1 + f x2 + f x3 + f x4) m Hmz) as H2.
+rewrite Hrm, Hfx, Nat.add_0_r in H2.
+rewrite H2 in H1.
 rewrite <- Nat2Z.inj_mul in H1.
-rewrite <- div_Zdiv in H1; [ | easy ].
-apply Nat2Z.inj in H1.
-remember (Z.to_nat (k1 ^ 2 + _ + _ + _)) as kn eqn:Hkn.
-rewrite Nat.divide_div_mul_exact in H1; [ | easy | ]. 2: {
-  apply (Nat.gauss _ m). 2: {
-    apply eq_gcd_prime_small_1; [ easy | flia H1m ].
-  }
-  enough (H : kn mod p = 0). {
-    apply Nat.divide_mul_r.
-    now apply Nat.mod_divide in H.
-  }
-  subst kn.
-...
-  exists (m * r').
-  rewrite H1.
-  rewrite <- Nat.mul_assoc; f_equal.
-...
-rewrite Z.divide_div_mul_exact in H1; cycle 1; [ easy | | ]. {
-  apply Z.divide_add_r. 2: {
-    rewrite Z.pow_2_r.
-    apply Z.divide_mul_l.
-(**)
-    apply Z.mod_divide; [ easy | ].
-    destruct k4 as [| k4| k4]; [ easy | | ]. {
-      rewrite <- positive_nat_Z.
-      rewrite <- mod_Zmod; [ | easy ].
-      replace 0%Z with (Z.of_nat 0) by easy; f_equal.
-      apply Nat.mod_divide; [ easy | ].
-      apply (Nat.gauss _ m). 2: {
-        apply eq_gcd_prime_small_1; [ easy | flia H1m ].
-      }
-      rewrite Nat.mul_comm.
-      apply (f_equal Z.to_nat) in Hz4m.
-      rewrite Z2Nat.inj_mul in Hz4m; cycle 1. {
-        apply Pos2Z.pos_is_nonneg.
-      } {
-        apply Nat2Z.is_nonneg.
-      }
-      rewrite Nat2Z.id in Hz4m.
-      cbn in Hz4m.
-      rewrite <- Hz4m.
-      rewrite Hz4.
-      unfold Z_diff.
-      rewrite Z2Nat.inj_sub.
-(* interminable *)
-...
-assert (Hfx : f x1 + f x2 + f x3 + f x4 = r * m). {
-  apply Nat2Z.inj.
-  do 3 rewrite Nat2Z.inj_add.
-  do 4 rewrite <- Hgf.
-  unfold g.
-  destruct (le_dec (x1 mod m) v) as [Hx1| Hx1]. {
-...
-set (f x := (if le_dec (x mod m) v then x mod m else m - x mod m) ^ 2).
-move f after g.
-set (sqr_y1 := f x1).
-set (sqr_y2 := f x2).
-set (sqr_y3 := f x3).
-set (sqr_y4 := f x4).
-assert (Hym : (sqr_y1 + sqr_y2 + sqr_y3 + sqr_y4) mod m = 0). {
-  now apply (sum_sqr_x_sum_sqr_y_mod p).
-}
-apply Nat.mod_divide in Hym; [ | easy ].
-injection Hrw; clear Hrw; intros Hw4 Hw3 Hw2 Hw1 Hrp; intros.
-rewrite Hw1, Hw2, Hw3, Hw4 in Hrp.
-do 4 rewrite Nat.mul_1_r, <- Nat.pow_2_r in Hrp.
-destruct Hym as (r', Hr).
-(*
-assert (Hrr : r = r'). {
-  rewrite <- Hrp.
-  apply (Nat.mul_cancel_r _ _ m); [ easy | ].
-  rewrite <- Hr.
-...
-*)
-assert (Hmn : m < p). {
-  remember (resolve_a2_b2_1 p) as abn eqn:Habn.
-  symmetry in Habn.
-  destruct abn as ((a, b), n).
-  specialize (odd_prime_divides_sum_two_squares_plus_one p a b n) as H1.
-  specialize (H1 Hp Hp2 Habn).
-  destruct H1 as (Hnp, Habnp).
-  assert (Hnz : n ≠ 0) by flia Hnp.
-...
-  transparent assert (H1 : four_square_sol p). {
-    unfold four_square_sol.
-    exists (n, (a, b, 1, 0)).
-    split; [ easy | ].
-    rewrite Nat.pow_1_l, Nat.pow_0_l; [ | easy ].
-    now rewrite Nat.add_0_r.
-  }
-  specialize (Hmx H1) as H2.
-  cbn in H2.
-  flia Hnp H2.
+replace (m * p * (m * r)) with (p * r * (m * m)) in H1 by flia.
+rewrite Nat2Z.inj_mul in H1.
+rewrite (Nat2Z.inj_mul m) in H1.
+rewrite <- Z.pow_2_r in H1.
+apply Z.mul_cancel_r in H1; [ | now apply Z.pow_nonzero ].
+symmetry in H1.
+assert (Hmr : r ≤ m). {
+  rewrite Nat.mul_comm in H2.
+  specialize sum_sqr_y_r_le_m as Hmr.
+  specialize (Hmr m x1 x2 x3 x4 Hmz r).
+  fold v in Hmr.
+  fold f in Hmr.
+  now specialize (Hmr H2).
 }
 destruct (Nat.eq_dec r m) as [Hrme| Hrme]. {
-  apply (sum_sqr_x_eq_mp_sqr_y_eq_sqr_m p m x1 x2 x3 x4); try easy. {
-    flia Hmz Hmn.
-  } {
-    now subst r; rewrite <- Nat.pow_2_r in Hr.
-  }
+  exfalso.
+  move Hrme at top; subst r; clear Hmr.
+  specialize (sum_sqr_x_eq_mp_sqr_y_eq_sqr_m p m x1 x2 x3 x4) as H3.
+  fold v in H3.
+  fold f in H3.
+  specialize (H3 Hp).
+  assert (H : 0 < m < p) by flia H1m.
+  rewrite <- Nat.pow_2_r in H2.
+  specialize (H3 H Hmp H2); clear H.
+  flia H1m H3.
 }
-specialize (Nat.div_mod x1 m Hmz) as Hx1.
-specialize (Nat.div_mod x2 m Hmz) as Hx2.
-specialize (Nat.div_mod x3 m Hmz) as Hx3.
-specialize (Nat.div_mod x4 m Hmz) as Hx4.
-assert (Hy1 : sqr_y1 ≤ v ^ 2) by now apply sqr_y_from_x_le.
-assert (Hy2 : sqr_y2 ≤ v ^ 2) by now apply sqr_y_from_x_le.
-assert (Hy3 : sqr_y3 ≤ v ^ 2) by now apply sqr_y_from_x_le.
-assert (Hy4 : sqr_y4 ≤ v ^ 2) by now apply sqr_y_from_x_le.
-destruct (Nat.eq_dec r 0) as [Hrz| Hrz]. {
-  subst r.
-  clear Hy1 Hy2 Hy3 Hy4.
-  apply Nat.neq_sym in Hrme.
-  apply Nat.eq_add_0 in Hr.
-  destruct Hr as (Hr, Hr4).
-  apply Nat.eq_add_0 in Hr.
-  destruct Hr as (Hr, Hr3).
-  apply Nat.eq_add_0 in Hr.
-  destruct Hr as (Hr1, Hr2).
-  unfold sqr_y1, f in Hr1.
-  unfold sqr_y2, f in Hr2.
-  unfold sqr_y3, f in Hr3.
-  unfold sqr_y4, f in Hr4.
-  destruct (le_dec (x1 mod m) v) as [Hx1v| Hx1v]. 2: {
-    apply Nat.pow_eq_0 in Hr1; [ | easy ].
-    specialize (Nat.mod_upper_bound x1 m Hrme) as H1.
-    flia Hr1 H1.
-  }
-  destruct (le_dec (x2 mod m) v) as [Hx2v| Hx2v]. 2: {
-    apply Nat.pow_eq_0 in Hr2; [ | easy ].
-    specialize (Nat.mod_upper_bound x2 m Hrme) as H2.
-    flia Hr2 H2.
-  }
-  destruct (le_dec (x3 mod m) v) as [Hx3v| Hx3v]. 2: {
-    apply Nat.pow_eq_0 in Hr3; [ | easy ].
-    specialize (Nat.mod_upper_bound x3 m Hrme) as H3.
-    flia Hr3 H3.
-  }
-  destruct (le_dec (x4 mod m) v) as [Hx4v| Hx4v]. 2: {
-    apply Nat.pow_eq_0 in Hr4; [ | easy ].
-    specialize (Nat.mod_upper_bound x4 m Hrme) as H4.
-    flia Hr4 H4.
-  }
-  apply Nat.pow_eq_0 in Hr1; [ | easy ].
-  apply Nat.pow_eq_0 in Hr2; [ | easy ].
-  apply Nat.pow_eq_0 in Hr3; [ | easy ].
-  apply Nat.pow_eq_0 in Hr4; [ | easy ].
-  clear Hx1v Hx2v Hx3v Hx4v.
-  move Hm at bottom.
-  rewrite Hx1, Hr1, Nat.add_0_r in Hm.
-  rewrite Hx2, Hr2, Nat.add_0_r in Hm.
-  rewrite Hx3, Hr3, Nat.add_0_r in Hm.
-  rewrite Hx4, Hr4, Nat.add_0_r in Hm.
-  do 4 rewrite Nat.pow_mul_l in Hm.
-  do 3 rewrite <- Nat.mul_add_distr_l in Hm.
-  rewrite Nat.pow_2_r, <- Nat.mul_assoc in Hm.
-  apply Nat.mul_cancel_l in Hm; [ | easy ].
-  rewrite <- Hm in Hp.
-  move Hp at bottom.
-  apply prime_not_mul in Hp.
-  destruct Hp as [Hp| Hp]; [ easy | ].
-  rewrite Hp, Nat.mul_1_r in Hm.
-  flia Hmn Hm.
-}
-specialize (Z_Euler_s_four_square_identity_v2) as H1.
-unfold Z_diff in H1.
-set (zx1 := Z.of_nat x1).
-set (zx2 := Z.of_nat x2).
-set (zx3 := Z.of_nat x3).
-set (zx4 := Z.of_nat x4).
-set
-  (g x :=
-     if le_dec (x mod m) v then Z.of_nat (x mod m)
-     else (Z.of_nat (x mod m) - Z.of_nat m)%Z).
-set (zy1 := g x1).
-set (zy2 := g x2).
-set (zy3 := g x3).
-set (zy4 := g x4).
-specialize (H1 zx1 zx2 zx3 zx4 zy1 zy2 zy3 zy4).
-replace (zx1 ^ 2 + zx2 ^ 2 + zx3 ^ 2 + zx4 ^ 2)%Z with (Z.of_nat (m * p))
-  in H1. 2: {
-  unfold zx1, zx2, zx3, zx4.
-  do 4 rewrite Z.pow_2_r.
-  do 4 rewrite <- Nat2Z.inj_mul.
-  do 3 rewrite <- Nat2Z.inj_add.
-  do 4 rewrite <- Nat.pow_2_r.
-  now rewrite Hm.
-}
-assert (Hgf : ∀ x, (g x ^ 2 = Z.of_nat (f x))%Z). {
-  intros x.
-  unfold g, f.
-  destruct (le_dec (x mod m) v) as [Hxv| Hxv]. {
-    rewrite Z.pow_2_r, Nat.pow_2_r.
-    now rewrite Nat2Z.inj_mul.
-  } {
-    apply Nat.nle_gt in Hxv.
-    rewrite Z.pow_2_r, Nat.pow_2_r.
-    rewrite Nat2Z.inj_mul.
-    rewrite Nat2Z.inj_sub. 2: {
-      now apply Nat.lt_le_incl, Nat.mod_upper_bound.
-    }
-    rewrite <- Z.opp_involutive.
-    rewrite <- Z.mul_opp_l.
-    rewrite Z.opp_sub_distr.
-    rewrite Z.add_comm.
-    rewrite <- Z.mul_opp_r.
-    rewrite Z.opp_sub_distr.
-    rewrite (Z.add_comm (- Z.of_nat m)%Z).
-    easy.
-  }
-}
-replace (zy1 ^ 2 + zy2 ^ 2 + zy3 ^ 2 + zy4 ^ 2)%Z with (Z.of_nat (r * m))
-  in H1. 2: {
-  unfold zy1, zy2, zy3, zy4.
-  do 4 rewrite Hgf.
-  do 3 rewrite <- Nat2Z.inj_add.
-  fold sqr_y1 sqr_y2 sqr_y3 sqr_y4.
-  now rewrite Hr.
-}
-rewrite <- Nat2Z.inj_mul in H1.
-assert
-  (Hz :
-     (x1 * (x1 mod m) + x2 * (x2 mod m) + x3 * (x3 mod m) +
-      x4 * (x4 mod m)) mod m = 0). {
-  rewrite <- Nat.add_mod_idemp_r; [ | easy ].
-  rewrite Nat.mul_mod_idemp_r; [ | easy ].
-  rewrite Nat.add_mod_idemp_r; [ | easy ].
-  rewrite Nat.add_comm.
-  do 2 rewrite Nat.add_assoc.
-  rewrite <- Nat.add_mod_idemp_r; [ | easy ].
-  rewrite Nat.mul_mod_idemp_r; [ | easy ].
-  rewrite Nat.add_mod_idemp_r; [ | easy ].
-  rewrite Nat.add_comm.
-  do 2 rewrite Nat.add_assoc.
-  rewrite <- Nat.add_mod_idemp_r; [ | easy ].
-  rewrite Nat.mul_mod_idemp_r; [ | easy ].
-  rewrite Nat.add_mod_idemp_r; [ | easy ].
-  rewrite Nat.add_comm.
-  do 2 rewrite Nat.add_assoc.
-  rewrite <- Nat.add_mod_idemp_r; [ | easy ].
-  rewrite Nat.mul_mod_idemp_r; [ | easy ].
-  rewrite Nat.add_mod_idemp_r; [ | easy ].
-  rewrite Nat.add_comm.
-  do 2 rewrite Nat.add_assoc.
-  do 4 rewrite <- Nat.pow_2_r.
-  rewrite Hm, Nat.mul_comm.
-  now apply Nat.mod_mul.
-}
-rewrite (Z.add_comm (zx2 * zy3)%Z) in H1.
-set (z1 := (zx1 * zy1 + zx2 * zy2 + zx3 * zy3 + zx4 * zy4)%Z) in H1.
-set (z2 := (zx1 * zy2 + zx4 * zy3 - (zx2 * zy1 + zx3 * zy4))%Z) in H1.
-set (z3 := (zx1 * zy3 + zx2 * zy4 - (zx3 * zy1 + zx4 * zy2))%Z) in H1.
-set (z4 := (zx1 * zy4 + zx3 * zy2 - (zx4 * zy1 + zx2 * zy3))%Z) in H1.
-assert (Hz1 : (z1 mod Z.of_nat m = 0)%Z). {
-  now apply z1_divides_m.
-}
-assert (Hz2 : (z2 mod Z.of_nat m = 0)%Z). {
-  now apply z2_z3_z4_divides_m.
-}
-assert (Hz3 : (z3 mod Z.of_nat m = 0)%Z). {
-  now apply z2_z3_z4_divides_m.
-}
-assert (Hz4 : (z4 mod Z.of_nat m = 0)%Z). {
-  now apply z2_z3_z4_divides_m.
-}
-assert (Hzmz : Z.of_nat m ≠ 0%Z). {
-  intros H.
-  replace 0%Z with (Z.of_nat 0) in H by easy.
-  now apply Nat2Z.inj_iff in H.
-}
-apply Z.mod_divide in Hz1; [ | easy ].
-apply Z.mod_divide in Hz2; [ | easy ].
-apply Z.mod_divide in Hz3; [ | easy ].
-apply Z.mod_divide in Hz4; [ | easy ].
-destruct Hz1 as (zw1, Hw1).
-destruct Hz2 as (zw2, Hw2).
-destruct Hz3 as (zw3, Hw3).
-destruct Hz4 as (zw4, Hw4).
-move zw4 before zw1; move zw3 before zw1; move zw2 before zw1.
-assert (H2 : (zw1 ^ 2 + zw2 ^ 2 + zw3 ^ 2 + zw4 ^ 2)%Z = Z.of_nat (r * p)). {
-  move H1 at bottom.
-  rewrite Hw1, Hw2, Hw3, Hw4 in H1.
-  do 4 rewrite Z.pow_mul_l in H1.
-  do 3 rewrite <- Z.mul_add_distr_r in H1.
-  replace (m * p * (r * m)) with (r * p * (m ^ 2)) in H1 by (cbn; flia).
-  rewrite Nat2Z.inj_mul in H1.
-  rewrite Nat.pow_2_r in H1.
-  rewrite (Nat2Z.inj_mul m) in H1.
-  rewrite <- Z.pow_2_r in H1.
-  apply Z.mul_cancel_r in H1. 2: {
-    replace 0%Z with (0 ^ 2)%Z by easy.
-    intros H2; apply Hzmz.
-    apply Z.pow_inj_l in H2; [ easy | flia | flia | flia ].
-  }
-  easy.
-}
-set (w1 := Z.abs_nat zw1).
-set (w2 := Z.abs_nat zw2).
-set (w3 := Z.abs_nat zw3).
-set (w4 := Z.abs_nat zw4).
-assert (H3 : w1 ^ 2 + w2 ^ 2 + w3 ^ 2 + w4 ^ 2 = r * p). {
-  subst w1 w2 w3 w4.
-  assert (Hzan : ∀ x, Z.abs_nat x ^ 2 = Z.to_nat (x ^ 2)). {
-apply Z_sqr_abs_nat.
-...
-    intros x.
-    unfold Z.abs_nat.
-    destruct x as [| px| px]; [ easy | | ]. {
-      cbn.
-      rewrite Nat.mul_1_r, Pos.mul_1_r; symmetry.
-      apply Pos2Nat.inj_mul.
-    } {
-      cbn.
-      rewrite Nat.mul_1_r, Pos.mul_1_r; symmetry.
-      apply Pos2Nat.inj_mul.
-    }
-  }
-  do 4 rewrite Hzan.
-  rewrite <- Z2Nat.inj_add; cycle 1. {
-    now apply Z.pow_even_nonneg, Zeven_equiv.
-  } {
-    now apply Z.pow_even_nonneg, Zeven_equiv.
-  }
-  rewrite <- Z2Nat.inj_add; cycle 1. {
-    apply Z.add_nonneg_nonneg;
-    now apply Z.pow_even_nonneg, Zeven_equiv.
-  } {
-    now apply Z.pow_even_nonneg, Zeven_equiv.
-  }
-  rewrite <- Z2Nat.inj_add; cycle 1. {
-    apply Z.add_nonneg_nonneg.
-    apply Z.add_nonneg_nonneg.
-    now apply Z.pow_even_nonneg, Zeven_equiv.
-    now apply Z.pow_even_nonneg, Zeven_equiv.
-    now apply Z.pow_even_nonneg, Zeven_equiv.
-  } {
-    now apply Z.pow_even_nonneg, Zeven_equiv.
-  }
-  rewrite H2.
-  apply Nat2Z.id.
-}
-move Hm at bottom.
-assert (Hrm : 0 < r < m). {
-  specialize sum_sqr_y_r_le_m as Hrm.
-  specialize (Hrm _ _ _ _ _ Hmz r Hr).
-  flia Hrz Hrm Hrme.
-}
-move Hmx at bottom.
-transparent assert (rx : four_square_sol p). {
-  unfold four_square_sol.
-  exists (r, (w1, w2, w3, w4)).
-  easy.
-}
-specialize (Hmx rx).
-cbn in Hmx.
-flia Hrm Hmx.
+flia Hmr Hrme.
 Qed.
-...
+
+Inspect 1.
