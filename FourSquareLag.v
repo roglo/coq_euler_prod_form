@@ -1962,12 +1962,36 @@ Fixpoint four_sq_sol_for_prime_loop it p x1 x2 x3 x4 m :=
 
 Definition four_sq_sol_for_prime p :=
   let '(a, b, m) := resolve_a2_b2_1 p in
-  four_sq_sol_for_prime_loop p p a b 1 0 m.
+  four_sq_sol_for_prime_loop m p a b 1 0 m.
 
 (*
 Compute (four_sq_sol_for_prime 239).
 Compute (5 ^ 2 + 3 ^ 2 + 6 ^ 2 + 13 ^ 2).
 *)
+
+Lemma glop : ∀ x1 x2 x3 x4 m it p y1 y2 y3 y4,
+  prime p
+  → 0 < m < p
+  → m ≤ it
+  → four_sq_sol_for_prime_loop it p x1 x2 x3 x4 m = (y1, y2, y3, y4)
+  → x1 ^ 2 + x2 ^ 2 + x3 ^ 2 + x4 ^ 2 = m * p
+  → y1 ^ 2 + y2 ^ 2 + y3 ^ 2 + y4 ^ 2 = p.
+Proof.
+intros * Hp Hmp Hit H4s Hx.
+revert x1 x2 x3 x4 m H4s Hx Hmp Hit.
+induction it; intros; [ flia Hmp Hit | ].
+cbn - [ smaller_4sq_sol ] in H4s.
+destruct (Nat.eq_dec m 1) as [Hm1| Hm1]. {
+  subst m.
+  injection H4s; intros; subst y1 y2 y3 y4.
+  now rewrite Nat.mul_1_l in Hx.
+}
+remember (smaller_4sq_sol p x1 x2 x3 x4) as ry eqn:Hry; symmetry in Hry.
+destruct ry as (r, (((z1, z2), z3), z4)).
+apply (IHit z1 z2 z3 z4 r); [ easy | | | ]. {
+  specialize (smaller_4sq_sol_if_m_neq_1) as H1.
+  specialize (H1 p x1 x2 x3 x4).
+...
 
 Theorem four_sq_for_prime : ∀ p x1 x2 x3 x4,
   prime p
@@ -1981,4 +2005,10 @@ destruct abm as ((a, b), m).
 specialize prime_divides_sum_two_squares_plus_one as H1.
 specialize (H1 p a b m Hp Habm).
 destruct H1 as (Hmp & Habm1).
+assert (Habm4 : a ^ 2 + b ^ 2 + 1 ^ 2 + 0 ^ 2 = m * p). {
+  rewrite Nat.pow_0_l; [ | easy ].
+  now rewrite Nat.pow_1_l, Nat.add_0_r.
+}
+clear Habm1.
+now apply (glop a b 1 0 m m).
 ...
