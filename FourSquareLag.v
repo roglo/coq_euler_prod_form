@@ -1699,7 +1699,7 @@ Definition smaller_4sq_sol p x1 x2 x3 x4 :=
     (Z.abs_nat z1 / m, Z.abs_nat z2 / m,
      Z.abs_nat z3 / m, Z.abs_nat z4 / m)
   in
-  let r := (w1 ^ 2 + w2 ^ 2 + w3 ^ 2 + w4 ^ 2) / p in
+  let r := Z.to_nat (g x1 ^ 2 + g x2 ^ 2 + g x3 ^ 2 + g x4 ^ 2) / m in
   (r, (w1, w2, w3, w4)).
 
 (*
@@ -1781,6 +1781,7 @@ remember
 symmetry in Hw.
 destruct w as (((z1, z2), z3), z4).
 injection Hrw; clear Hrw; intros Hw4 Hw3 Hw2 Hw1 Hrp.
+...
 rewrite Hw1, Hw2, Hw3, Hw4 in Hrp.
 symmetry in Hw4, Hw3, Hw2, Hw1.
 do 4 rewrite Nat.mul_1_r, <- Nat.pow_2_r in Hrp.
