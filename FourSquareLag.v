@@ -1804,13 +1804,53 @@ rewrite <- Z2Nat.inj_add; [ | | apply Z_sqr_nonneg ]. 2: {
 }
 unfold Z_four_square_sol in Habcd.
 rewrite <- prime_decomp_prod; [ | easy ].
+specialize (in_prime_decomp_is_prime n) as Hp.
 remember (prime_decomp n) as l eqn:Hl; clear n Hnz Hl.
-Compute (four_square_sol 1).
-...
+(**)
+set (f := λ (a : Z * Z * Z * Z) (p : nat),
+               let
+               '(a1, a2, a3, a4) := a in
+                let
+                '(m1, m2, m3, m4) := four_sq_sol_for_prime p in
+                 Z_Euler_s_four_square_sol a1 a2 a3 a4 (Z.of_nat m1) (Z.of_nat m2) (Z.of_nat m3) (Z.of_nat m4))
+  in Habcd.
 revert a b c d Habcd.
 induction l as [| p]; intros. {
   cbn in Habcd.
-  injection Habcd; intros; subst.
+  injection Habcd; intros; subst; cbn.
+  apply Pos2Nat.inj_1.
+}
+cbn in Habcd.
+cbn - [ "^"%Z ].
+Check fold_left_mul_from_1.
+...
+(*
+remember (1%Z, 0%Z, 0%Z, 0%Z) as s eqn:Hs.
+assert
+  (H :
+     let '(x, y, z, t) := four_square_sol 1 in
+     s = (Z.of_nat x, Z.of_nat y, Z.of_nat z, Z.of_nat t)). {
+  cbn.
+  now rewrite positive_nat_Z.
+}
+remember (four_square_sol 1) as s' eqn:Hs'; symmetry in Hs'.
+destruct s' as (((nx, ny), nz), nt).
+rewrite H in Habcd.
+clear s Hs H.
+remember 1 as p in Hs'.
+rewrite <- Heqp.
+clear Heqp.
+revert a b c d p Hs' Habcd.
+induction l as [| p]; intros. {
+  cbn in Habcd.
+  injection Habcd; clear Habcd; intros; subst.
+  rewrite Z2Nat.inj_add.
+  rewrite Z2Nat.inj_add.
+  rewrite Z2Nat.inj_add.
+  do 4 rewrite <- Z_sqr_abs_nat.
+  do 4 rewrite Zabs2Nat.id.
+  cbn - [ "^" ].
+...
   apply Pos2Nat.inj_1.
 }
 cbn - [ "^"%Z ].
@@ -1821,6 +1861,7 @@ remember (four_sq_sol_for_prime p) as m eqn:Hm.
 symmetry in Hm.
 destruct m as (((m1, m2), m3), m4).
 ...
+*)
 
 rewrite <- (IHl (Z.of_nat m1) (Z.of_nat m2) (Z.of_nat m3) (Z.of_nat m4)).
 
