@@ -1742,11 +1742,15 @@ apply (IHit z1 z2 z3 z4 r); [ easy | easy | | ]. {
 Qed.
 
 Theorem four_sq_for_prime : ∀ p x1 x2 x3 x4,
-  prime p
+  p = 1 ∨ prime p
   → four_sq_sol_for_prime p = (x1, x2, x3, x4)
   → x1 ^ 2 + x2 ^ 2 + x3 ^ 2 + x4 ^ 2 = p.
 Proof.
 intros * Hp H4s.
+destruct Hp as [Hp| Hp]. {
+  subst p; cbn in H4s; cbn - [ "^" ].
+  now injection H4s; intros; subst.
+}
 unfold four_sq_sol_for_prime in H4s.
 remember (resolve_a2_b2_1 p) as abm eqn:Habm; symmetry in Habm.
 destruct abm as ((a, b), m).
@@ -1799,7 +1803,7 @@ Qed.
 Lemma Z_four_squares_loop :  ∀ a b c d p l,
   fold_right f_4sq_sol (Nat2Z_quad (four_sq_sol_for_prime p)) l =
     (a, b, c, d)
-  → (∀ d, d ∈ p :: l → prime d)
+  → (∀ d, d ∈ p :: l → d = 1 ∨ prime d)
   → (a ^ 2 + b ^ 2 + c ^ 2 + d ^ 2)%Z = Z.of_nat (fold_left Nat.mul l p).
 Proof.
 intros * Habcd Hpl.
@@ -1829,7 +1833,7 @@ symmetry in Hxyzt.
 destruct xyzt as (((x, y), z), t).
 specialize (IHl x y z t p).
 cbn - [ "^"%Z ].
-assert (H : ∀ d, d ∈ p :: l → prime d). {
+assert (H : ∀ d, d ∈ p :: l → d = 1 ∨ prime d). {
   intros r Hr.
   apply Hpl.
   destruct Hr as [Hr| Hr]; [ now left | now right; right ].
@@ -1846,7 +1850,7 @@ symmetry in Hmm.
 destruct mmmm as (((m1, m2), m3), m4).
 specialize (four_sq_for_prime) as H1.
 specialize (H1 q m1 m2 m3 m4).
-assert (H : prime q). {
+assert (H : q = 1 ∨ prime q). {
   apply Hpl.
   now right; left.
 }
@@ -1874,64 +1878,28 @@ specialize (in_prime_decomp_is_prime n) as Hp.
 remember (prime_decomp n) as l eqn:Hl; clear n Hnz Hl.
 apply Z_four_squares_loop; [ easy | ].
 intros r Hr.
-destruct Hr as [Hr| Hr]; [ | now apply Hp ].
-(* eh merde *)
-...
-revert a b c d H4s.
-induction l as [| p]; intros. {
-  cbn in H4s.
-  now injection H4s; intros; subst; cbn.
-}
-assert (H : ∀ d, d ∈ l → prime d). {
-  intros q Hq.
-  now apply Hp; right.
-}
-specialize (IHl H); clear H.
-cbn in H4s.
-cbn - [ "^"%Z ].
-rewrite Nat.add_0_r.
-...
-rewrite fold_left_mul_from_1.
-rewrite Nat2Z.inj_mul.
-remember (four_sq_sol_for_prime p) as mm eqn:Hmm; symmetry in Hmm.
-destruct mm as (((m1, m2), m3), m4).
-specialize (four_sq_for_prime _ _ _ _ _ (Hp _ (or_introl eq_refl)) Hmm) as H1.
-remember (fold_right f (1%Z, 0%Z, 0%Z, 0%Z) l) as nn eqn:Hnn; symmetry in Hnn.
-destruct nn as (((n1, n2), n3), n4).
-specialize (IHl n1 n2 n3 n4 eq_refl).
-rewrite <- H1, <- IHl.
-do 3 rewrite Nat2Z.inj_add.
-do 4 rewrite Nat2Z_inj_sqr.
-unfold f in H4s.
-rewrite Z_Euler_s_four_square_identity.
-unfold Z_diff.
-...
+destruct Hr as [Hr| Hr]; [ now left | now right; apply Hp ].
+Qed.
 
-Check Nat2Z.inj_pow.
-Search (Z.of_nat (_ ^ _)).
-...
-remember (f (1%Z, 0%Z, 0%Z, 0%Z) p) as aaa eqn:Ha.
-generalize Ha; intros Hb.
-unfold f in Hb.
-rewrite <- Hb, Ha in H4s.
-clear aaa Ha Hb.
-...
-replace (1%Z, 0%Z, 0%Z, 0%Z) with (Z_four_square_sol 1) in H4s by easy.
-remember 1 as n in H4s.
-rewrite <- Heqn.
-clear Heqn.
-revert x1 x2 x3 x4 n H4s.
-induction l as [| p]; intros. {
-  cbn - [ "^"%Z ].
-  cbn in H4s.
-...
-
-Theorem four_squares : ∀ n x1 x2 x3 x4,
+Theorem four_squares : ∀ n,
   n ≠ 0
-  → four_square_sol n = (x1, x2, x3, x4)
-  → x1 ^ 2 + x2 ^ 2 + x3 ^ 2 + x4 ^ 2 = n.
+  → ∀ a b c d,
+  four_square_sol n = (a, b, c, d)
+  → a ^ 2 + b ^ 2 + c ^ 2 + d ^ 2 = n.
 Proof.
-intros * Hnz H4s.
+intros * Hnz * H4s.
+specialize (Z_four_squares n Hnz) as H1.
+specialize (H1 (Z.of_nat a) (Z.of_nat b) (Z.of_nat c) (Z.of_nat d)).
+assert
+  (H :
+   Z_four_square_sol n = (Z.of_nat a, Z.of_nat b, Z.of_nat c, Z.of_nat d)). {
+  unfold four_square_sol in H4s.
+  remember (Z_four_square_sol n) as pqrs eqn:Hpqrs; symmetry in Hpqrs.
+  destruct pqrs as (((p, q), r), s).
+  injection H4s; clear H4s; intros; subst a b c d.
+  do 4 rewrite Zabs2Nat.id_abs.
+...
+
 unfold four_square_sol in H4s.
 remember (Z_four_square_sol n) as abcd eqn:Habcd; symmetry in Habcd.
 destruct abcd as (((a, b), c), d).
