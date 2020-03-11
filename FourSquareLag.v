@@ -1752,10 +1752,9 @@ Theorem smaller_4sq_sol_if_m_neq_1 : ∀ p x1 x2 x3 x4 m w1 w2 w3 w4 r,
   → x1 ^ 2 + x2 ^ 2 + x3 ^ 2 + x4 ^ 2 = m * p
   → smaller_4sq_sol p x1 x2 x3 x4 = (r, (w1, w2, w3, w4))
   → 1 < m < p
-  → 0 < r < m.
+  → 0 < r < m ∧ w1 ^ 2 + w2 ^ 2 + w3 ^ 2 + w4 ^ 2 = r * p.
 Proof.
 intros * Hp Hmp Hrw H1m.
-...
 assert (Hpz : p ≠ 0) by now (intros H; subst p).
 assert (Hmz : m ≠ 0) by flia H1m.
 unfold smaller_4sq_sol in Hrw.
@@ -2005,7 +2004,21 @@ destruct (Nat.eq_dec r 0) as [Hrz| Hrz]. {
   rewrite Hp, Nat.mul_1_r in Hmp.
   flia Hmp H1m.
 }
-split; [ flia Hrz | flia Hmr Hrme ].
+split. {
+  split; [ flia Hrz | flia Hmr Hrme ].
+}
+rewrite Hw1, Hw2, Hw3, Hw4.
+do 4 rewrite Z_sqr_abs_nat.
+rewrite <- Z2Nat.inj_add; [ | apply Z_sqr_nonneg | apply Z_sqr_nonneg ].
+rewrite <- Z2Nat.inj_add; [ | | apply Z_sqr_nonneg ]. 2: {
+  apply Z.add_nonneg_nonneg; apply Z_sqr_nonneg.
+}
+rewrite <- Z2Nat.inj_add; [ | | apply Z_sqr_nonneg ]. 2: {
+  apply Z.add_nonneg_nonneg; [ | apply Z_sqr_nonneg ].
+  apply Z.add_nonneg_nonneg; apply Z_sqr_nonneg.
+}
+rewrite H1.
+now rewrite Nat2Z.id, Nat.mul_comm.
 Qed.
 
 Fixpoint four_sq_sol_for_prime_loop it p x1 x2 x3 x4 m :=
@@ -2027,7 +2040,7 @@ Compute (four_sq_sol_for_prime 239).
 Compute (5 ^ 2 + 3 ^ 2 + 6 ^ 2 + 13 ^ 2).
 *)
 
-Lemma glop : ∀ x1 x2 x3 x4 m it p y1 y2 y3 y4,
+Lemma four_sq_for_prime_loop : ∀ x1 x2 x3 x4 m it p y1 y2 y3 y4,
   prime p
   → 0 < m < p
   → m ≤ it
@@ -2046,19 +2059,18 @@ destruct (Nat.eq_dec m 1) as [Hm1| Hm1]. {
 }
 remember (smaller_4sq_sol p x1 x2 x3 x4) as ry eqn:Hry; symmetry in Hry.
 destruct ry as (r, (((z1, z2), z3), z4)).
-assert (Hrp : 0 < r < m). {
-  specialize (smaller_4sq_sol_if_m_neq_1) as H1.
-  specialize (H1 p x1 x2 x3 x4).
-  specialize (H1 m z1 z2 z3 z4 r Hp Hx Hry).
-  assert (H : 1 < m < p) by flia Hmp Hm1.
-  now specialize (H1 H); clear H.
-}
-apply (IHit z1 z2 z3 z4 r); [ easy | | | ]; cycle 1. {
-  flia Hmp Hrp.
+specialize (smaller_4sq_sol_if_m_neq_1) as H1.
+specialize (H1 p x1 x2 x3 x4).
+specialize (H1 m z1 z2 z3 z4 r Hp Hx Hry).
+assert (H : 1 < m < p) by flia Hmp Hm1.
+specialize (H1 H); clear H.
+destruct H1 as (Hrm, Hz).
+apply (IHit z1 z2 z3 z4 r); [ easy | easy | | ]. {
+  flia Hmp Hrm.
 } {
-  flia Hrp Hit.
+  flia Hrm Hit.
 }
-...
+Qed.
 
 Theorem four_sq_for_prime : ∀ p x1 x2 x3 x4,
   prime p
@@ -2077,5 +2089,5 @@ assert (Habm4 : a ^ 2 + b ^ 2 + 1 ^ 2 + 0 ^ 2 = m * p). {
   now rewrite Nat.pow_1_l, Nat.add_0_r.
 }
 clear Habm1.
-now apply (glop a b 1 0 m m).
-...
+now apply (four_sq_for_prime_loop a b 1 0 m m).
+Qed.
