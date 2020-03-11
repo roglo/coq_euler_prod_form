@@ -1822,14 +1822,43 @@ induction l as [| q]; intros. {
   now do 3 rewrite <- Nat2Z.inj_add.
 }
 cbn in Habcd.
-...
-specialize (IHl q).
-assert (H : ∀ d, d ∈ q :: l → prime d). {
+remember (fold_right f_4sq_sol (Nat2Z_quad (four_sq_sol_for_prime p)) l)
+  as xyzt eqn:Hxyzt.
+symmetry in Hxyzt.
+destruct xyzt as (((x, y), z), t).
+specialize (IHl x y z t p).
+cbn - [ "^"%Z ].
+assert (H : ∀ d, d ∈ p :: l → prime d). {
   intros r Hr.
-  now apply Hpl; right.
+  apply Hpl.
+  destruct Hr as [Hr| Hr]; [ now left | now right; right ].
 }
-specialize (IHl H); clear H.
-...
+specialize (IHl H Hxyzt); clear H.
+rewrite fold_left_mul_from_1 in IHl.
+rewrite fold_left_mul_from_1.
+rewrite Nat.mul_shuffle0.
+rewrite Nat2Z.inj_mul.
+rewrite <- IHl.
+unfold f_4sq_sol in Habcd.
+remember (four_sq_sol_for_prime q) as mmmm eqn:Hmm.
+symmetry in Hmm.
+destruct mmmm as (((m1, m2), m3), m4).
+specialize (four_sq_for_prime) as H1.
+specialize (H1 q m1 m2 m3 m4).
+assert (H : prime q). {
+  apply Hpl.
+  now right; left.
+}
+specialize (H1 H Hmm); clear H.
+rewrite <- H1.
+specialize (Z_Euler_s_four_square_identity) as H2.
+specialize (H2 x y z t).
+specialize (H2 (Z.of_nat m1) (Z.of_nat m2) (Z.of_nat m3) (Z.of_nat m4)).
+rewrite Habcd in H2.
+rewrite <- H2; f_equal.
+do 3 rewrite Nat2Z.inj_add.
+now do 4 rewrite Nat2Z_inj_sqr.
+Qed.
 
 Theorem Z_four_squares : ∀ n,
   n ≠ 0
@@ -1842,8 +1871,10 @@ unfold Z_four_square_sol in H4s.
 rewrite <- (prime_decomp_prod n); [ | easy ].
 specialize (in_prime_decomp_is_prime n) as Hp.
 remember (prime_decomp n) as l eqn:Hl; clear n Hnz Hl.
-...
-now apply Z_four_squares_loop.
+apply Z_four_squares_loop; [ easy | ].
+intros r Hr.
+destruct Hr as [Hr| Hr]; [ | now apply Hp ].
+(* eh merde *)
 ...
 revert a b c d H4s.
 induction l as [| p]; intros. {
