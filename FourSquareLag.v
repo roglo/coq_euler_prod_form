@@ -1465,6 +1465,7 @@ specialize Z_Euler_s_four_square_identity as H1.
 specialize (H1 (Z_of_nat x1) (Z_of_nat x2)) as H1.
 specialize (H1 (Z_of_nat x3) (Z_of_nat x4)) as H1.
 specialize (H1 (g x1) (g x2) (g x3) (g x4)).
+unfold Z_Euler_s_four_square_sol in H1.
 rewrite <- Hz1, <- Hz2, <- Hz3, <- Hz4 in H1.
 assert
   (Hz :
@@ -1783,6 +1784,14 @@ Compute
       let '(a, b, c, d) := four_square_sol n in
       (a, b, c, d, n, a ^ 2 + b ^ 2 + c ^ 2 + d ^ 2)) (seq 1 100)).
 
+Theorem Nat2Z_inj_sqr : ∀ n, Z.of_nat (n ^ 2) = (Z.of_nat n ^ 2)%Z.
+Proof.
+intros.
+rewrite Nat.pow_2_r.
+rewrite Nat2Z.inj_mul.
+symmetry; apply Z.pow_2_r.
+Qed.
+
 Theorem Z_four_squares : ∀ n x1 x2 x3 x4,
   n ≠ 0
   → Z_four_square_sol n = (x1, x2, x3, x4)
@@ -1815,10 +1824,22 @@ cbn - [ "^"%Z ].
 rewrite Nat.add_0_r.
 rewrite fold_left_mul_from_1.
 rewrite Nat2Z.inj_mul.
-...
 remember (four_sq_sol_for_prime p) as mm eqn:Hmm; symmetry in Hmm.
 destruct mm as (((m1, m2), m3), m4).
 specialize (four_sq_for_prime _ _ _ _ _ (Hp _ (or_introl eq_refl)) Hmm) as H1.
+remember (fold_right f (1%Z, 0%Z, 0%Z, 0%Z) l) as nn eqn:Hnn; symmetry in Hnn.
+destruct nn as (((n1, n2), n3), n4).
+specialize (IHl n1 n2 n3 n4 eq_refl).
+rewrite <- H1, <- IHl.
+do 3 rewrite Nat2Z.inj_add.
+do 4 rewrite Nat2Z_inj_sqr.
+unfold f in H4s.
+rewrite Z_Euler_s_four_square_identity.
+unfold Z_diff.
+...
+
+Check Nat2Z.inj_pow.
+Search (Z.of_nat (_ ^ _)).
 ...
 remember (f (1%Z, 0%Z, 0%Z, 0%Z) p) as aaa eqn:Ha.
 generalize Ha; intros Hb.
