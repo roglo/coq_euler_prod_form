@@ -1366,7 +1366,7 @@ Definition smaller_4sq_sol p x1 x2 x3 x4 :=
     else (Z.of_nat (x mod m) - Z.of_nat m)%Z
   in
   let '(z1, z2, z3, z4) :=
-    Z_Euler_s_four_square_sol_v2
+    Z_Euler_s_four_square_sol
       (Z.of_nat x1) (Z.of_nat x2) (Z.of_nat x3) (Z.of_nat x4)
       (g x1) (g x2) (g x3) (g x4)
   in
@@ -1449,7 +1449,7 @@ replace
 with (g x4) in Hrw by easy.
 set (v := m / 2) in g.
 remember
-  (Z_Euler_s_four_square_sol_v2
+  (Z_Euler_s_four_square_sol
      (Z.of_nat x1) (Z.of_nat x2) (Z.of_nat x3) (Z.of_nat x4)
      (g x1) (g x2) (g x3) (g x4)) as w eqn:Hw.
 symmetry in Hw.
@@ -1458,10 +1458,10 @@ destruct w as (((z1, z2), z3), z4).
 injection Hrw; clear Hrw; intros Hw4 Hw3 Hw2 Hw1 Hrm.
 subst zp.
 symmetry in Hw4, Hw3, Hw2, Hw1.
-unfold Z_Euler_s_four_square_sol_v2 in Hw.
+unfold Z_Euler_s_four_square_sol in Hw.
 injection Hw; clear Hw; intros Hz4 Hz3 Hz2 Hz1.
 symmetry in Hz1, Hz2, Hz3, Hz4.
-specialize Z_Euler_s_four_square_identity_v2 as H1.
+specialize Z_Euler_s_four_square_identity as H1.
 specialize (H1 (Z_of_nat x1) (Z_of_nat x2)) as H1.
 specialize (H1 (Z_of_nat x3) (Z_of_nat x4)) as H1.
 specialize (H1 (g x1) (g x2) (g x3) (g x4)).
@@ -1759,3 +1759,67 @@ assert (Habm4 : a ^ 2 + b ^ 2 + 1 ^ 2 + 0 ^ 2 = m * p). {
 clear Habm1.
 now apply (four_sq_for_prime_loop a b 1 0 m m).
 Qed.
+
+Definition Z_four_square_sol n :=
+  fold_left
+    (λ a p,
+     let '(a1, a2, a3, a4) := a in
+     let '(m1, m2, m3, m4) := four_sq_sol_for_prime p in
+     Z_Euler_s_four_square_sol a1 a2 a3 a4
+       (Z.of_nat m1) (Z.of_nat m2) (Z.of_nat m3) (Z.of_nat m4))
+    (prime_decomp n) (1, 0, 0, 0)%Z.
+
+Definition four_square_sol n :=
+  let '(a, b, c, d) := Z_four_square_sol n in
+  (Z.abs_nat a, Z.abs_nat b, Z.abs_nat c, Z.abs_nat d).
+
+Compute (four_square_sol 120).
+Compute
+  (let n := 120 in let '(a, b, c, d) := four_square_sol n in
+   (a, b, c, d, n, a ^ 2 + b ^ 2 + c ^ 2 + d ^ 2)).
+Compute
+  (map
+     (λ n,
+      let '(a, b, c, d) := four_square_sol n in
+      (a, b, c, d, n, a ^ 2 + b ^ 2 + c ^ 2 + d ^ 2)) (seq 1 100)).
+
+Theorem four_squares : ∀ n x1 x2 x3 x4,
+  n ≠ 0
+  → four_square_sol n = (x1, x2, x3, x4)
+  → x1 ^ 2 + x2 ^ 2 + x3 ^ 2 + x4 ^ 2 = n.
+Proof.
+intros * Hnz H4s.
+unfold four_square_sol in H4s.
+remember (Z_four_square_sol n) as abcd eqn:Habcd; symmetry in Habcd.
+destruct abcd as (((a, b), c), d).
+injection H4s; clear H4s; intros; subst x1 x2 x3 x4.
+do 4 rewrite Z_sqr_abs_nat.
+rewrite <- Z2Nat.inj_add; [ | apply Z_sqr_nonneg | apply Z_sqr_nonneg ].
+rewrite <- Z2Nat.inj_add; [ | | apply Z_sqr_nonneg ]. 2: {
+  apply Z.add_nonneg_nonneg; apply Z_sqr_nonneg.
+}
+rewrite <- Z2Nat.inj_add; [ | | apply Z_sqr_nonneg ]. 2: {
+  apply Z.add_nonneg_nonneg; [ | apply Z_sqr_nonneg ].
+  apply Z.add_nonneg_nonneg; apply Z_sqr_nonneg.
+}
+unfold Z_four_square_sol in Habcd.
+rewrite <- prime_decomp_prod; [ | easy ].
+...
+remember (prime_decomp n) as l eqn:Hl; clear n Hnz Hl.
+revert a b c d Habcd.
+induction l as [| p]; intros. {
+  cbn in Habcd.
+  injection Habcd; intros; subst.
+  apply Pos2Nat.inj_1.
+}
+cbn - [ "^"%Z ].
+cbn in Habcd.
+rewrite Nat.add_0_r.
+rewrite fold_left_mul_from_1.
+remember (four_sq_sol_for_prime p) as m eqn:Hm.
+symmetry in Hm.
+destruct m as (((m1, m2), m3), m4).
+...
+rewrite <- (IHl (Z.of_nat m1) (Z.of_nat m2) (Z.of_nat m3) (Z.of_nat m4)).
+
+...
