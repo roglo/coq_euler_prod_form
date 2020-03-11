@@ -1761,13 +1761,13 @@ now apply (four_sq_for_prime_loop a b 1 0 m m).
 Qed.
 
 Definition Z_four_square_sol n :=
-  fold_left
-    (λ a p,
+  fold_right
+    (λ p a,
      let '(a1, a2, a3, a4) := a in
      let '(m1, m2, m3, m4) := four_sq_sol_for_prime p in
      Z_Euler_s_four_square_sol a1 a2 a3 a4
        (Z.of_nat m1) (Z.of_nat m2) (Z.of_nat m3) (Z.of_nat m4))
-    (prime_decomp n) (1, 0, 0, 0)%Z.
+    (1, 0, 0, 0)%Z (prime_decomp n).
 
 Definition four_square_sol n :=
   let '(a, b, c, d) := Z_four_square_sol n in
@@ -1793,7 +1793,7 @@ unfold Z_four_square_sol in H4s.
 rewrite <- (prime_decomp_prod n); [ | easy ].
 specialize (in_prime_decomp_is_prime n) as Hp.
 remember (prime_decomp n) as l eqn:Hl; clear n Hnz Hl.
-set (f := λ (a : Z * Z * Z * Z) (p : nat),
+set (f := λ p (a : Z * Z * Z * Z),
                let
                '(a1, a2, a3, a4) := a in
                 let
@@ -1815,6 +1815,7 @@ cbn - [ "^"%Z ].
 rewrite Nat.add_0_r.
 rewrite fold_left_mul_from_1.
 rewrite Nat2Z.inj_mul.
+...
 remember (four_sq_sol_for_prime p) as mm eqn:Hmm; symmetry in Hmm.
 destruct mm as (((m1, m2), m3), m4).
 specialize (four_sq_for_prime _ _ _ _ _ (Hp _ (or_introl eq_refl)) Hmm) as H1.
