@@ -1792,67 +1792,31 @@ rewrite Nat2Z.inj_mul.
 symmetry; apply Z.pow_2_r.
 Qed.
 
-Theorem glop : ∀ p q,
-  prime p
-  → prime q
-  → ∀ a b c d,
-  Z_four_square_sol (p * q) = (a, b, c, d)
-  → (a ^ 2 + b ^ 2 + c ^ 2 + d ^ 2)%Z = Z.of_nat (p * q).
-Proof.
-intros * Hp Hq * Hpq.
-unfold Z_four_square_sol in Hpq.
-remember (prime_decomp (p * q)) as l eqn:Hl; symmetry in Hl.
-destruct l as [| r]. {
-  apply prime_decomp_nil_iff in Hl.
-  destruct Hl as [Hl| Hl]. {
-    apply Nat.eq_mul_0 in Hl.
-    now destruct Hl; [ subst p | subst q ].
-  } {
-    apply Nat.eq_mul_1 in Hl.
-    now destruct Hl; subst p.
-  }
-}
-Search prime_decomp.
-...
-
-assert (Hpd : prime_decomp (p * q) = [min p q; max p q]). {
-  destruct l as [| r]. {
-
-  destruct (lt_dec p q) as [Hplq| Hplq]. {
-    rewrite Nat.min_l; [ | flia Hplq ].
-    rewrite Nat.max_r; [ | flia Hplq ].
-...
-
-Theorem Z_four_squares : ∀ n x1 x2 x3 x4,
+Theorem Z_four_squares : ∀ n,
   n ≠ 0
-  → Z_four_square_sol n = (x1, x2, x3, x4)
-  → (x1 ^ 2 + x2 ^ 2 + x3 ^ 2 + x4 ^ 2)%Z = Z.of_nat n.
+  → ∀ a b c d,
+  Z_four_square_sol n = (a, b, c, d)
+  → (a ^ 2 + b ^ 2 + c ^ 2 + d ^ 2)%Z = Z.of_nat n.
 Proof.
-intros * Hnz H4s.
+intros * Hnz * H4s.
 unfold Z_four_square_sol in H4s.
 rewrite <- (prime_decomp_prod n); [ | easy ].
 specialize (in_prime_decomp_is_prime n) as Hp.
 remember (prime_decomp n) as l eqn:Hl; clear n Hnz Hl.
-set (f := λ p (a : Z * Z * Z * Z),
-               let
-               '(a1, a2, a3, a4) := a in
-                let
-                '(m1, m2, m3, m4) := four_sq_sol_for_prime p in
-                 Z_Euler_s_four_square_sol a1 a2 a3 a4 (Z.of_nat m1) (Z.of_nat m2) (Z.of_nat m3) (Z.of_nat m4))
-  in H4s.
-revert x1 x2 x3 x4 H4s.
+revert a b c d H4s.
 induction l as [| p]; intros. {
   cbn in H4s.
   now injection H4s; intros; subst; cbn.
 }
 assert (H : ∀ d, d ∈ l → prime d). {
-  intros d Hd.
+  intros q Hq.
   now apply Hp; right.
 }
 specialize (IHl H); clear H.
 cbn in H4s.
 cbn - [ "^"%Z ].
 rewrite Nat.add_0_r.
+...
 rewrite fold_left_mul_from_1.
 rewrite Nat2Z.inj_mul.
 remember (four_sq_sol_for_prime p) as mm eqn:Hmm; symmetry in Hmm.
