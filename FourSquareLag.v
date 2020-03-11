@@ -1804,8 +1804,9 @@ rewrite <- Z2Nat.inj_add; [ | | apply Z_sqr_nonneg ]. 2: {
 }
 unfold Z_four_square_sol in Habcd.
 rewrite <- prime_decomp_prod; [ | easy ].
-...
 remember (prime_decomp n) as l eqn:Hl; clear n Hnz Hl.
+Compute (four_square_sol 1).
+...
 revert a b c d Habcd.
 induction l as [| p]; intros. {
   cbn in Habcd.
@@ -1820,6 +1821,7 @@ remember (four_sq_sol_for_prime p) as m eqn:Hm.
 symmetry in Hm.
 destruct m as (((m1, m2), m3), m4).
 ...
+
 rewrite <- (IHl (Z.of_nat m1) (Z.of_nat m2) (Z.of_nat m3) (Z.of_nat m4)).
 
 ...
