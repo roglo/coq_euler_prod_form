@@ -1809,7 +1809,8 @@ induction l as [| q]; intros. {
   specialize (Hpl p (or_introl eq_refl)).
   specialize (four_sq_for_prime p) as H1.
   specialize (H1 (Z.abs_nat a) (Z.abs_nat b)).
-  specialize (H1 (Z.abs_nat c) (Z.abs_nat d) Hpl).
+  specialize (H1 (Z.abs_nat c) (Z.abs_nat d)).
+  specialize (H1 Hpl).
   remember (four_sq_sol_for_prime p) as xyzt eqn:Hxyzt.
   symmetry in Hxyzt.
   destruct xyzt as (((x, y), z), t).
