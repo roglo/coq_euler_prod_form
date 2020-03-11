@@ -1755,6 +1755,7 @@ Theorem smaller_4sq_sol_if_m_neq_1 : ∀ p x1 x2 x3 x4 m w1 w2 w3 w4 r,
   → 0 < r < m.
 Proof.
 intros * Hp Hmp Hrw H1m.
+...
 assert (Hpz : p ≠ 0) by now (intros H; subst p).
 assert (Hmz : m ≠ 0) by flia H1m.
 unfold smaller_4sq_sol in Hrw.
@@ -1950,7 +1951,6 @@ destruct (Nat.eq_dec r m) as [Hrme| Hrme]. {
 }
 destruct (Nat.eq_dec r 0) as [Hrz| Hrz]. {
   move Hrz at top; subst r; clear Hmr Hrme.
-(**)
   rewrite Nat.mul_0_r in H2.
   apply Nat.eq_add_0 in H2.
   destruct H2 as (H2, Hx4).
@@ -1958,64 +1958,54 @@ destruct (Nat.eq_dec r 0) as [Hrz| Hrz]. {
   destruct H2 as (H2, Hx3).
   apply Nat.eq_add_0 in H2.
   destruct H2 as (Hx1, Hx2).
-  (* by f, all xi are 0, which contradicts Hmp and Hmz *)
-...
-  rewrite Nat.mul_0_r in H1.
-  apply (f_equal Z.to_nat) in H1.
-  rewrite Nat2Z.id in H1.
-  rewrite Z2Nat.inj_add in H1; [ | | apply Z_sqr_nonneg ]. 2: {
-    apply Z.add_nonneg_nonneg; [ | apply Z_sqr_nonneg ].
-    apply Z.add_nonneg_nonneg; apply Z_sqr_nonneg.
-  }
-  apply Nat.eq_add_0 in H1.
-  destruct H1 as (Hk, Hk4).
-  rewrite Z2Nat.inj_add in Hk; [ | | apply Z_sqr_nonneg ]. 2: {
-    apply Z.add_nonneg_nonneg; apply Z_sqr_nonneg.
-  }
-  apply Nat.eq_add_0 in Hk.
-  destruct Hk as (Hk, Hk3).
-  rewrite Z2Nat.inj_add in Hk; [ | | apply Z_sqr_nonneg ]. 2: {
-    apply Z_sqr_nonneg.
-  }
-  apply Nat.eq_add_0 in Hk.
-  destruct Hk as (Hk1, Hk2).
-  rewrite <- Z_sqr_abs_nat in Hk1, Hk2, Hk3, Hk4.
-  apply Nat.pow_eq_0_iff in Hk1; destruct Hk1 as (_, Hk1).
-  apply Nat.pow_eq_0_iff in Hk2; destruct Hk2 as (_, Hk2).
-  apply Nat.pow_eq_0_iff in Hk3; destruct Hk3 as (_, Hk3).
-  apply Nat.pow_eq_0_iff in Hk4; destruct Hk4 as (_, Hk4).
-  apply (f_equal Z.of_nat) in Hk1.
-  apply (f_equal Z.of_nat) in Hk2.
-  apply (f_equal Z.of_nat) in Hk3.
-  apply (f_equal Z.of_nat) in Hk4.
-  rewrite Nat2Z.inj_abs_nat in Hk1, Hk2, Hk3, Hk4.
-  cbn in Hk1, Hk2, Hk3, Hk4.
-  apply -> Z.abs_0_iff in Hk1.
-  apply -> Z.abs_0_iff in Hk2.
-  apply -> Z.abs_0_iff in Hk3.
-  apply -> Z.abs_0_iff in Hk4.
-  subst k1 k2 k3 k4.
-  clear w1 w2 w3 w4 Hw1 Hw2 Hw3 Hw4.
-  cbn in Hz1m, Hz2m, Hz3m, Hz4m.
-  move Hz1m at top; subst z1.
-  move Hz2m at top; subst z2.
-  move Hz3m at top; subst z3.
-  move Hz4m at top; subst z4.
-  symmetry in Hz1, Hz2, Hz3, Hz4.
-  unfold Z_diff in Hz2, Hz3, Hz4.
-  unfold g in Hz1, Hz2, Hz3, Hz4.
-  destruct (le_dec (x1 mod m) v) as [Hx1v| Hx1v]. {
-...
-    destruct (le_dec (x2 mod m) v) as [Hx2v| Hx2v]. 2: {
+  unfold f in Hx1, Hx2, Hx3, Hx4.
+  apply Nat.pow_eq_0 in Hx1; [ | easy ].
+  apply Nat.pow_eq_0 in Hx2; [ | easy ].
+  apply Nat.pow_eq_0 in Hx3; [ | easy ].
+  apply Nat.pow_eq_0 in Hx4; [ | easy ].
   destruct (le_dec (x1 mod m) v) as [Hx1v| Hx1v]. 2: {
-  destruct (le_dec (x1 mod m) v) as [Hx1v| Hx1v]. 2: {
-    apply Nat.pow_eq_0 in Hr1; [ | easy ].
-    specialize (Nat.mod_upper_bound x1 m Hrme) as H1.
-    flia Hr1 H1.
+    specialize (Nat.mod_upper_bound x1 m Hmz) as H.
+    flia Hx1 H.
   }
+  clear Hx1v.
+  destruct (le_dec (x2 mod m) v) as [Hx2v| Hx2v]. 2: {
+    specialize (Nat.mod_upper_bound x2 m Hmz) as H.
+    flia Hx2 H.
+  }
+  clear Hx2v.
+  destruct (le_dec (x3 mod m) v) as [Hx3v| Hx3v]. 2: {
+    specialize (Nat.mod_upper_bound x3 m Hmz) as H.
+    flia Hx3 H.
+  }
+  clear Hx3v.
+  destruct (le_dec (x4 mod m) v) as [Hx4v| Hx4v]. 2: {
+    specialize (Nat.mod_upper_bound x4 m Hmz) as H.
+    flia Hx4 H.
+  }
+  clear Hx4v.
+  move Hmp at bottom.
+  apply Nat.mod_divide in Hx1; [ | easy ].
+  apply Nat.mod_divide in Hx2; [ | easy ].
+  apply Nat.mod_divide in Hx3; [ | easy ].
+  apply Nat.mod_divide in Hx4; [ | easy ].
+  destruct Hx1 as (l1, Hx1).
+  destruct Hx2 as (l2, Hx2).
+  destruct Hx3 as (l3, Hx3).
+  destruct Hx4 as (l4, Hx4).
+  rewrite Hx1, Hx2, Hx3, Hx4 in Hmp.
+  do 4 rewrite Nat.pow_mul_l in Hmp.
+  do 3 rewrite <- Nat.mul_add_distr_r in Hmp.
+  rewrite Nat.mul_comm in Hmp.
+  rewrite (Nat.pow_2_r m), <- Nat.mul_assoc in Hmp.
+  apply Nat.mul_cancel_l in Hmp; [ | easy ].
+  move Hp at bottom.
+  rewrite <- Hmp in Hp.
+  apply prime_not_mul in Hp.
+  destruct Hp as [Hp| Hp]; [ flia H1m Hp | ].
+  rewrite Hp, Nat.mul_1_r in Hmp.
+  flia Hmp H1m.
 }
-flia Hmr Hrme.
-...
+split; [ flia Hrz | flia Hmr Hrme ].
 Qed.
 
 Fixpoint four_sq_sol_for_prime_loop it p x1 x2 x3 x4 m :=
@@ -2056,13 +2046,18 @@ destruct (Nat.eq_dec m 1) as [Hm1| Hm1]. {
 }
 remember (smaller_4sq_sol p x1 x2 x3 x4) as ry eqn:Hry; symmetry in Hry.
 destruct ry as (r, (((z1, z2), z3), z4)).
-apply (IHit z1 z2 z3 z4 r); [ easy | | | ]. 2: {
+assert (Hrp : 0 < r < m). {
   specialize (smaller_4sq_sol_if_m_neq_1) as H1.
   specialize (H1 p x1 x2 x3 x4).
   specialize (H1 m z1 z2 z3 z4 r Hp Hx Hry).
   assert (H : 1 < m < p) by flia Hmp Hm1.
-  specialize (H1 H); clear H.
-  split; [ | flia H1 Hmp ].
+  now specialize (H1 H); clear H.
+}
+apply (IHit z1 z2 z3 z4 r); [ easy | | | ]; cycle 1. {
+  flia Hmp Hrp.
+} {
+  flia Hrp Hit.
+}
 ...
 
 Theorem four_sq_for_prime : ∀ p x1 x2 x3 x4,
