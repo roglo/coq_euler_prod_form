@@ -1761,14 +1761,14 @@ clear Habm1.
 now apply (four_sq_for_prime_loop a b 1 0 m m).
 Qed.
 
+Definition f_4sq_sol p a :=
+  let '(a1, a2, a3, a4) := a in
+  let '(m1, m2, m3, m4) := four_sq_sol_for_prime p in
+  Z_Euler_s_four_square_sol a1 a2 a3 a4
+    (Z.of_nat m1) (Z.of_nat m2) (Z.of_nat m3) (Z.of_nat m4).
+
 Definition Z_four_square_sol n :=
-  fold_right
-    (λ p a,
-     let '(a1, a2, a3, a4) := a in
-     let '(m1, m2, m3, m4) := four_sq_sol_for_prime p in
-     Z_Euler_s_four_square_sol a1 a2 a3 a4
-       (Z.of_nat m1) (Z.of_nat m2) (Z.of_nat m3) (Z.of_nat m4))
-    (1, 0, 0, 0)%Z (prime_decomp n).
+  fold_right f_4sq_sol (1, 0, 0, 0)%Z (prime_decomp n).
 
 Definition four_square_sol n :=
   let '(a, b, c, d) := Z_four_square_sol n in
@@ -1791,6 +1791,37 @@ rewrite Nat.pow_2_r.
 rewrite Nat2Z.inj_mul.
 symmetry; apply Z.pow_2_r.
 Qed.
+
+Theorem glop : ∀ p q,
+  prime p
+  → prime q
+  → ∀ a b c d,
+  Z_four_square_sol (p * q) = (a, b, c, d)
+  → (a ^ 2 + b ^ 2 + c ^ 2 + d ^ 2)%Z = Z.of_nat (p * q).
+Proof.
+intros * Hp Hq * Hpq.
+unfold Z_four_square_sol in Hpq.
+remember (prime_decomp (p * q)) as l eqn:Hl; symmetry in Hl.
+destruct l as [| r]. {
+  apply prime_decomp_nil_iff in Hl.
+  destruct Hl as [Hl| Hl]. {
+    apply Nat.eq_mul_0 in Hl.
+    now destruct Hl; [ subst p | subst q ].
+  } {
+    apply Nat.eq_mul_1 in Hl.
+    now destruct Hl; subst p.
+  }
+}
+Search prime_decomp.
+...
+
+assert (Hpd : prime_decomp (p * q) = [min p q; max p q]). {
+  destruct l as [| r]. {
+
+  destruct (lt_dec p q) as [Hplq| Hplq]. {
+    rewrite Nat.min_l; [ | flia Hplq ].
+    rewrite Nat.max_r; [ | flia Hplq ].
+...
 
 Theorem Z_four_squares : ∀ n x1 x2 x3 x4,
   n ≠ 0
