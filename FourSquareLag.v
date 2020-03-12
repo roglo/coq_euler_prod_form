@@ -1783,6 +1783,7 @@ Definition four_square_sol n :=
   let '(a, b, c, d) := Z_four_square_sol n in
   (Z.abs_nat a, Z.abs_nat b, Z.abs_nat c, Z.abs_nat d).
 
+(*
 Compute (four_square_sol 120).
 Compute
   (let n := 120 in let '(a, b, c, d) := four_square_sol n in
@@ -1792,6 +1793,7 @@ Compute
      (λ n,
       let '(a, b, c, d) := four_square_sol n in
       (a, b, c, d, n, a ^ 2 + b ^ 2 + c ^ 2 + d ^ 2)) (seq 1 100)).
+*)
 
 Theorem Nat2Z_inj_sqr : ∀ n, Z.of_nat (n ^ 2) = (Z.of_nat n ^ 2)%Z.
 Proof.
