@@ -1867,8 +1867,7 @@ Qed.
 
 Theorem Z_four_squares : ∀ n,
   n ≠ 0
-  → ∀ a b c d,
-  Z_four_square_sol n = (a, b, c, d)
+  → ∀ a b c d, Z_four_square_sol n = (a, b, c, d)
   → (a ^ 2 + b ^ 2 + c ^ 2 + d ^ 2)%Z = Z.of_nat n.
 Proof.
 intros * Hnz * H4s.
@@ -1883,97 +1882,24 @@ Qed.
 
 Theorem four_squares : ∀ n,
   n ≠ 0
-  → ∀ a b c d,
-  four_square_sol n = (a, b, c, d)
+  → ∀ a b c d, four_square_sol n = (a, b, c, d)
   → a ^ 2 + b ^ 2 + c ^ 2 + d ^ 2 = n.
 Proof.
 intros * Hnz * H4s.
-specialize (Z_four_squares n Hnz) as H1.
-specialize (H1 (Z.of_nat a) (Z.of_nat b) (Z.of_nat c) (Z.of_nat d)).
-assert
-  (H :
-   Z_four_square_sol n = (Z.of_nat a, Z.of_nat b, Z.of_nat c, Z.of_nat d)). {
-  unfold four_square_sol in H4s.
-  remember (Z_four_square_sol n) as pqrs eqn:Hpqrs; symmetry in Hpqrs.
-  destruct pqrs as (((p, q), r), s).
-  injection H4s; clear H4s; intros; subst a b c d.
-  do 4 rewrite Zabs2Nat.id_abs.
-...
-
+remember (Z_four_square_sol n) as pqrs eqn:Hpqrs.
+symmetry in Hpqrs.
+destruct pqrs as (((p, q), r), s).
 unfold four_square_sol in H4s.
-remember (Z_four_square_sol n) as abcd eqn:Habcd; symmetry in Habcd.
-destruct abcd as (((a, b), c), d).
-injection H4s; clear H4s; intros; subst x1 x2 x3 x4.
-do 4 rewrite Z_sqr_abs_nat.
-rewrite <- Z2Nat.inj_add; [ | apply Z_sqr_nonneg | apply Z_sqr_nonneg ].
-rewrite <- Z2Nat.inj_add; [ | | apply Z_sqr_nonneg ]. 2: {
-  apply Z.add_nonneg_nonneg; apply Z_sqr_nonneg.
-}
-rewrite <- Z2Nat.inj_add; [ | | apply Z_sqr_nonneg ]. 2: {
-  apply Z.add_nonneg_nonneg; [ | apply Z_sqr_nonneg ].
-  apply Z.add_nonneg_nonneg; apply Z_sqr_nonneg.
-}
-unfold Z_four_square_sol in Habcd.
-rewrite <- prime_decomp_prod; [ | easy ].
-specialize (in_prime_decomp_is_prime n) as Hp.
-remember (prime_decomp n) as l eqn:Hl; clear n Hnz Hl.
-(**)
-set (f := λ (a : Z * Z * Z * Z) (p : nat),
-               let
-               '(a1, a2, a3, a4) := a in
-                let
-                '(m1, m2, m3, m4) := four_sq_sol_for_prime p in
-                 Z_Euler_s_four_square_sol a1 a2 a3 a4 (Z.of_nat m1) (Z.of_nat m2) (Z.of_nat m3) (Z.of_nat m4))
-  in Habcd.
-revert a b c d Habcd.
-induction l as [| p]; intros. {
-  cbn in Habcd.
-  injection Habcd; intros; subst; cbn.
-  apply Pos2Nat.inj_1.
-}
-cbn in Habcd.
-cbn - [ "^"%Z ].
-Check fold_left_mul_from_1.
-...
-(*
-remember (1%Z, 0%Z, 0%Z, 0%Z) as s eqn:Hs.
-assert
-  (H :
-     let '(x, y, z, t) := four_square_sol 1 in
-     s = (Z.of_nat x, Z.of_nat y, Z.of_nat z, Z.of_nat t)). {
-  cbn.
-  now rewrite positive_nat_Z.
-}
-remember (four_square_sol 1) as s' eqn:Hs'; symmetry in Hs'.
-destruct s' as (((nx, ny), nz), nt).
-rewrite H in Habcd.
-clear s Hs H.
-remember 1 as p in Hs'.
-rewrite <- Heqp.
-clear Heqp.
-revert a b c d p Hs' Habcd.
-induction l as [| p]; intros. {
-  cbn in Habcd.
-  injection Habcd; clear Habcd; intros; subst.
-  rewrite Z2Nat.inj_add.
-  rewrite Z2Nat.inj_add.
-  rewrite Z2Nat.inj_add.
-  do 4 rewrite <- Z_sqr_abs_nat.
-  do 4 rewrite Zabs2Nat.id.
-  cbn - [ "^" ].
-...
-  apply Pos2Nat.inj_1.
-}
-cbn - [ "^"%Z ].
-cbn in Habcd.
-rewrite Nat.add_0_r.
-rewrite fold_left_mul_from_1.
-remember (four_sq_sol_for_prime p) as m eqn:Hm.
-symmetry in Hm.
-destruct m as (((m1, m2), m3), m4).
-...
-*)
-
-rewrite <- (IHl (Z.of_nat m1) (Z.of_nat m2) (Z.of_nat m3) (Z.of_nat m4)).
-
-...
+rewrite Hpqrs in H4s.
+injection H4s; clear H4s; intros; subst.
+specialize (Z_four_squares n Hnz p q r s Hpqrs) as H1.
+apply Nat2Z.inj.
+do 3 rewrite Nat2Z.inj_add.
+do 4 rewrite Nat2Z_inj_sqr.
+do 4 rewrite Zabs2Nat.id_abs.
+rewrite <- Z.pow_even_abs; [ | now apply Zeven_equiv ].
+rewrite <- Z.pow_even_abs; [ | now apply Zeven_equiv ].
+rewrite <- Z.pow_even_abs; [ | now apply Zeven_equiv ].
+rewrite <- Z.pow_even_abs; [ | now apply Zeven_equiv ].
+easy.
+Qed.
