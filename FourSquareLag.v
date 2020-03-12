@@ -1776,8 +1776,12 @@ Definition Nat2Z_quad '(a, b, c, d) :=
   (Z.of_nat a, Z.of_nat b, Z.of_nat c, Z.of_nat d).
 
 Definition Z_four_square_sol n :=
-  fold_right f_4sq_sol (Nat2Z_quad (four_sq_sol_for_prime 1))
-    (prime_decomp n).
+  match n with
+  | 0 => (0, 0, 0, 0)%Z
+  | _ =>
+      fold_right f_4sq_sol (Nat2Z_quad (four_sq_sol_for_prime 1))
+        (prime_decomp n)
+  end.
 
 Definition Nat_four_square_sol n :=
   let '(a, b, c, d) := Z_four_square_sol n in
@@ -1869,12 +1873,16 @@ now do 4 rewrite Nat2Z_inj_sqr.
 Qed.
 
 Theorem Z_four_squares : ∀ n,
-  n ≠ 0
-  → ∀ a b c d, Z_four_square_sol n = (a, b, c, d)
+  ∀ a b c d, Z_four_square_sol n = (a, b, c, d)
   → (a ^ 2 + b ^ 2 + c ^ 2 + d ^ 2)%Z = Z.of_nat n.
 Proof.
-intros * Hnz * H4s.
+intros * H4s.
 unfold Z_four_square_sol in H4s.
+destruct (Nat.eq_dec n 0) as [Hnz| Hnz]. {
+  subst n.
+  now injection H4s; clear H4s; intros; subst.
+}
+replace n with (S (n - 1)) in H4s at 1 by flia Hnz.
 rewrite <- (prime_decomp_prod n); [ | easy ].
 specialize (in_prime_decomp_is_prime n) as Hp.
 remember (prime_decomp n) as l eqn:Hl; clear n Hnz Hl.
@@ -1884,18 +1892,17 @@ destruct Hr as [Hr| Hr]; [ now left | now right; apply Hp ].
 Qed.
 
 Theorem Nat_four_squares : ∀ n,
-  n ≠ 0
-  → ∀ a b c d, Nat_four_square_sol n = (a, b, c, d)
+  ∀ a b c d, Nat_four_square_sol n = (a, b, c, d)
   → a ^ 2 + b ^ 2 + c ^ 2 + d ^ 2 = n.
 Proof.
-intros * Hnz * H4s.
+intros * H4s.
 remember (Z_four_square_sol n) as pqrs eqn:Hpqrs.
 symmetry in Hpqrs.
 destruct pqrs as (((p, q), r), s).
 unfold Nat_four_square_sol in H4s.
 rewrite Hpqrs in H4s.
 injection H4s; clear H4s; intros; subst.
-specialize (Z_four_squares n Hnz p q r s Hpqrs) as H1.
+specialize (Z_four_squares n p q r s Hpqrs) as H1.
 apply Nat2Z.inj.
 do 3 rewrite Nat2Z.inj_add.
 do 4 rewrite Nat2Z_inj_sqr.
