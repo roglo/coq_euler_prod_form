@@ -1,4 +1,5 @@
-(* Lagrange's four-square theorem *)
+(* Lagrange's four-squares theorem
+   ∀ n, ∃ a b c d, n = a² + b² + c² + d² *)
 
 Set Nested Proofs Allowed.
 Require Import Utf8 Arith.
