@@ -1779,7 +1779,7 @@ Definition Z_four_square_sol n :=
   fold_right f_4sq_sol (Nat2Z_quad (four_sq_sol_for_prime 1))
     (prime_decomp n).
 
-Definition four_square_sol n :=
+Definition Nat_four_square_sol n :=
   let '(a, b, c, d) := Z_four_square_sol n in
   (Z.abs_nat a, Z.abs_nat b, Z.abs_nat c, Z.abs_nat d).
 
@@ -1883,16 +1883,16 @@ intros r Hr.
 destruct Hr as [Hr| Hr]; [ now left | now right; apply Hp ].
 Qed.
 
-Theorem four_squares : ∀ n,
+Theorem Nat_four_squares : ∀ n,
   n ≠ 0
-  → ∀ a b c d, four_square_sol n = (a, b, c, d)
+  → ∀ a b c d, Nat_four_square_sol n = (a, b, c, d)
   → a ^ 2 + b ^ 2 + c ^ 2 + d ^ 2 = n.
 Proof.
 intros * Hnz * H4s.
 remember (Z_four_square_sol n) as pqrs eqn:Hpqrs.
 symmetry in Hpqrs.
 destruct pqrs as (((p, q), r), s).
-unfold four_square_sol in H4s.
+unfold Nat_four_square_sol in H4s.
 rewrite Hpqrs in H4s.
 injection H4s; clear H4s; intros; subst.
 specialize (Z_four_squares n Hnz p q r s Hpqrs) as H1.
