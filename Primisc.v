@@ -1745,6 +1745,8 @@ Compute (let p := 7 in let d := 3 in map (λ x, Nat_pow_mod x d p) (seq 1 (p - 1
 Compute (let p := 11 in let d := 5 in map (λ x, Nat_pow_mod x d p) (seq 1 (p - 1))).
 Compute (divisors 12).
 Compute (let p := 19 in map (λ d, (d, map (λ x, Nat_pow_mod x d p) (seq 1 (p - 1)))) (divisors (p - 1))).
+Compute (prim_roots 19).
+Compute (sort Nat.ltb (map (λ n, (n * 18) mod 19) [4; 5; 6; 9; 16; 17])).
 ...
 enough (H : ∃ a, length (prim_root_cycle p a) = p - 1). {
   destruct H as (a, H); exists a.
