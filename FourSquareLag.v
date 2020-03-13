@@ -1,10 +1,102 @@
 (* Lagrange's four-squares theorem
-   ∀ n, ∃ a b c d, n = a² + b² + c² + d² *)
+   ∀ n, ∃ a b c d, n = a² + b² + c² + d²
+   This is computable, i.e. a function is given, Nat_four_square_sol
+   which, for a given n, returns a solution for a, b, c and d. The
+   ending theorem proves its correctness. *)
 
 Set Nested Proofs Allowed.
-Require Import Utf8 Arith.
+Require Import Utf8 Arith ZArith.
 Import List List.ListNotations.
 Require Import Misc Primes FourSquareEuler.
+
+Definition Nat2Z_quad '(a, b, c, d) :=
+  (Z.of_nat a, Z.of_nat b, Z.of_nat c, Z.of_nat d).
+
+Fixpoint find_dup (la : list (nat * nat)) :=
+  match la with
+  | [] => None
+  | (n, a) :: la' =>
+      match find (λ nb, snd nb =? a) la' with
+      | None => find_dup la'
+      | Some (n', _) => Some (n, n')
+      end
+  end.
+
+Definition pigeonhole_fun a (f : nat → nat) :=
+  match find_dup (List.map (λ n, (n, f n)) (seq 0 a)) with
+  | Some (n, n') => (n, n')
+  | None => (0, 0)
+  end.
+
+Definition resolve_a2_b2_1 p :=
+  let u := (p - 1) / 2 in
+  let f i :=
+    if le_dec i u then (i ^ 2) mod p
+    else (p - ((i - (u + 1)) ^ 2 + 1) mod p) mod p
+  in
+  let (x, x') := pigeonhole_fun (p + 1) f in
+  let (a, b) :=
+    if le_dec x u then (x, x' - (u + 1))
+    else (x', x - (u + 1))
+  in
+  (a, b, (a ^ 2 + b ^ 2 + 1) / p).
+
+(* given a solution (x1, x2, x3, x4) of the almost four squares for p,
+   i.e. x1^2 + x2^2 + x3^2 + x4^2 = m * p for some m, returns another
+   solution with a smaller value of m; works if the initial value of
+   m is not 1 *)
+
+Definition smaller_4sq_sol p x1 x2 x3 x4 :=
+  let m := (x1 ^ 2 + x2 ^ 2 + x3 ^ 2 + x4 ^ 2) / p in
+  let g x :=
+    if le_dec (x mod m) (m / 2) then Z.of_nat (x mod m)
+    else (Z.of_nat (x mod m) - Z.of_nat m)%Z
+  in
+  let '(z1, z2, z3, z4) :=
+    Z_Euler_s_four_square_sol
+      (Z.of_nat x1) (Z.of_nat x2) (Z.of_nat x3) (Z.of_nat x4)
+      (g x1) (g x2) (g x3) (g x4)
+  in
+  let '(w1, w2, w3, w4) :=
+    (Z.abs_nat z1 / m, Z.abs_nat z2 / m,
+     Z.abs_nat z3 / m, Z.abs_nat z4 / m)
+  in
+  let r := Z.to_nat (g x1 ^ 2 + g x2 ^ 2 + g x3 ^ 2 + g x4 ^ 2) / m in
+  (r, (w1, w2, w3, w4)).
+
+Fixpoint four_sq_sol_for_prime_loop it p x1 x2 x3 x4 m :=
+  match it with
+  | 0 => (x1, x2, x3, x4)
+  | S it' =>
+      if Nat.eq_dec m 1 then (x1, x2, x3, x4)
+      else
+        let '(r, (y1, y2, y3, y4)) := smaller_4sq_sol p x1 x2 x3 x4 in
+        four_sq_sol_for_prime_loop it' p y1 y2 y3 y4 r
+  end.
+
+Definition four_sq_sol_for_prime p :=
+  let '(a, b, m) := resolve_a2_b2_1 p in
+  four_sq_sol_for_prime_loop m p a b 1 0 m.
+
+Definition f_4sq_sol p a :=
+  let '(a1, a2, a3, a4) := a in
+  let '(m1, m2, m3, m4) := four_sq_sol_for_prime p in
+  Z_Euler_s_four_square_sol a1 a2 a3 a4
+    (Z.of_nat m1) (Z.of_nat m2) (Z.of_nat m3) (Z.of_nat m4).
+
+Definition Z_four_square_sol n :=
+  match n with
+  | 0 => (0, 0, 0, 0)%Z
+  | _ =>
+      fold_right f_4sq_sol (Nat2Z_quad (four_sq_sol_for_prime 1))
+        (prime_decomp n)
+  end.
+
+Definition Nat_four_square_sol n :=
+  let '(a, b, c, d) := Z_four_square_sol n in
+  (Z.abs_nat a, Z.abs_nat b, Z.abs_nat c, Z.abs_nat d).
+
+(* *)
 
 Lemma le_half_prime_square_diff : ∀ p a a',
    prime p
@@ -104,22 +196,6 @@ flia Hb Hb' Hk Hpge2.
 Qed.
 
 (* pigeonhole *)
-
-Fixpoint find_dup (la : list (nat * nat)) :=
-  match la with
-  | [] => None
-  | (n, a) :: la' =>
-      match find (λ nb, snd nb =? a) la' with
-      | None => find_dup la'
-      | Some (n', _) => Some (n, n')
-      end
-  end.
-
-Definition pigeonhole_fun a (f : nat → nat) :=
-  match find_dup (List.map (λ n, (n, f n)) (seq 0 a)) with
-  | Some (n, n') => (n, n')
-  | None => (0, 0)
-  end.
 
 Theorem find_dup_some : ∀ x x' la,
   find_dup la = Some (x, x')
@@ -501,19 +577,6 @@ assert (Hpz : p ≠ 0) by now (intros H1; subst p).
     flia H2p.
   }
 Qed.
-
-Definition resolve_a2_b2_1 p :=
-  let u := (p - 1) / 2 in
-  let f i :=
-    if le_dec i u then (i ^ 2) mod p
-    else (p - ((i - (u + 1)) ^ 2 + 1) mod p) mod p
-  in
-  let (x, x') := pigeonhole_fun (p + 1) f in
-  let (a, b) :=
-    if le_dec x u then (x, x' - (u + 1))
-    else (x', x - (u + 1))
-  in
-  (a, b, (a ^ 2 + b ^ 2 + 1) / p).
 
 (*
 Definition check_resolve_a2_b2_1 p :=
@@ -1126,8 +1189,6 @@ specialize (Nat.div_mod x4 m Hmz) as Hx4.
   flia Hp Hqz.
 Qed.
 
-Require Import ZArith.
-
 Local Ltac end_z1_case Hz :=
   try (
       rewrite <- Zminus_mod_idemp_l;
@@ -1359,24 +1420,6 @@ destruct (le_dec (x2 mod m) v) as [Hx2v| Hx2v]. {
   }
 }
 Qed.
-
-Definition smaller_4sq_sol p x1 x2 x3 x4 :=
-  let m := (x1 ^ 2 + x2 ^ 2 + x3 ^ 2 + x4 ^ 2) / p in
-  let g x :=
-    if le_dec (x mod m) (m / 2) then Z.of_nat (x mod m)
-    else (Z.of_nat (x mod m) - Z.of_nat m)%Z
-  in
-  let '(z1, z2, z3, z4) :=
-    Z_Euler_s_four_square_sol
-      (Z.of_nat x1) (Z.of_nat x2) (Z.of_nat x3) (Z.of_nat x4)
-      (g x1) (g x2) (g x3) (g x4)
-  in
-  let '(w1, w2, w3, w4) :=
-    (Z.abs_nat z1 / m, Z.abs_nat z2 / m,
-     Z.abs_nat z3 / m, Z.abs_nat z4 / m)
-  in
-  let r := Z.to_nat (g x1 ^ 2 + g x2 ^ 2 + g x3 ^ 2 + g x4 ^ 2) / m in
-  (r, (w1, w2, w3, w4)).
 
 (*
 Compute (smaller_4sq_sol 31 4 13 1 0).
@@ -1691,20 +1734,6 @@ rewrite H1.
 now rewrite Nat2Z.id, Nat.mul_comm.
 Qed.
 
-Fixpoint four_sq_sol_for_prime_loop it p x1 x2 x3 x4 m :=
-  match it with
-  | 0 => (x1, x2, x3, x4)
-  | S it' =>
-      if Nat.eq_dec m 1 then (x1, x2, x3, x4)
-      else
-        let '(r, (y1, y2, y3, y4)) := smaller_4sq_sol p x1 x2 x3 x4 in
-        four_sq_sol_for_prime_loop it' p y1 y2 y3 y4 r
-  end.
-
-Definition four_sq_sol_for_prime p :=
-  let '(a, b, m) := resolve_a2_b2_1 p in
-  four_sq_sol_for_prime_loop m p a b 1 0 m.
-
 (*
 Compute (four_sq_sol_for_prime 239).
 Compute (5 ^ 2 + 3 ^ 2 + 6 ^ 2 + 13 ^ 2).
@@ -1765,27 +1794,6 @@ assert (Habm4 : a ^ 2 + b ^ 2 + 1 ^ 2 + 0 ^ 2 = m * p). {
 clear Habm1.
 now apply (four_sq_for_prime_loop a b 1 0 m m).
 Qed.
-
-Definition f_4sq_sol p a :=
-  let '(a1, a2, a3, a4) := a in
-  let '(m1, m2, m3, m4) := four_sq_sol_for_prime p in
-  Z_Euler_s_four_square_sol a1 a2 a3 a4
-    (Z.of_nat m1) (Z.of_nat m2) (Z.of_nat m3) (Z.of_nat m4).
-
-Definition Nat2Z_quad '(a, b, c, d) :=
-  (Z.of_nat a, Z.of_nat b, Z.of_nat c, Z.of_nat d).
-
-Definition Z_four_square_sol n :=
-  match n with
-  | 0 => (0, 0, 0, 0)%Z
-  | _ =>
-      fold_right f_4sq_sol (Nat2Z_quad (four_sq_sol_for_prime 1))
-        (prime_decomp n)
-  end.
-
-Definition Nat_four_square_sol n :=
-  let '(a, b, c, d) := Z_four_square_sol n in
-  (Z.abs_nat a, Z.abs_nat b, Z.abs_nat c, Z.abs_nat d).
 
 (*
 Compute (four_square_sol 120).

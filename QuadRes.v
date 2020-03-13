@@ -1,7 +1,7 @@
-Require Import Utf8 Arith (*Psatz Setoid Morphisms *).
-Require Import Sorting.Permutation (*SetoidList*).
+Require Import Utf8 Arith.
+Require Import Sorting.Permutation.
 Import List List.ListNotations.
-Require Import Misc Primes (*Totient*).
+Require Import Misc Primes.
 
 Definition euler_crit p :=
   filter (λ a, Nat_pow_mod a ((p - 1) / 2) p =? 1) (seq 0 p).
