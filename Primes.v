@@ -2509,3 +2509,8 @@ apply prime_only_divisors with (a := p) in Hpq. {
 }
 apply Nat.divide_factor_l.
 Qed.
+
+Definition divisors n := List.filter (λ a, n mod a =? 0) (List.seq 1 n).
+
+Definition prime_divisors n :=
+  filter (λ d, (is_prime d && (n mod d =? 0))%bool) (seq 1 n).

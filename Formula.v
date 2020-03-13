@@ -360,10 +360,6 @@ Definition series_but_mul_of {F : field} n s :=
        | _ => ls s i
        end |}.
 
-(* list of divisors of a natural number *)
-
-Definition divisors n := List.filter (λ a, n mod a =? 0) (List.seq 1 n).
-
 (* product of series is like the convolution product but
    limited to divisors; indeed the coefficient of the term
    in x^ln(n), resulting of the multiplication of two series

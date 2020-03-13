@@ -354,9 +354,6 @@ rewrite Nat.div_mul; [ | easy ].
 now rewrite Nat.mul_comm.
 Qed.
 
-Definition prime_divisors n :=
-  filter (λ d, (is_prime d && (n mod d =? 0))%bool) (seq 1 n).
-
 Theorem prime_divisors_decomp : ∀ n a,
   a ∈ prime_divisors n ↔ a ∈ prime_decomp n.
 Proof.
@@ -1742,6 +1739,12 @@ Compute (let p := 13 in let d := 4 in map (λ i, Nat_pow_mod i d p) (seq 1 (p - 
 Compute (let p := 13 in let d := 6 in map (λ i, Nat_pow_mod i d p) (seq 1 (p - 1))).
 Compute (let p := 13 in let d := 12 in map (λ i, Nat_pow_mod i d p) (seq 1 (p - 1))).
 Compute (prim_root_cycle 43 2).
+Check Nat_pow_mod.
+Compute (let p := 5 in let d := 2 in map (λ x, Nat_pow_mod x d p) (seq 1 (p - 1))).
+Compute (let p := 7 in let d := 3 in map (λ x, Nat_pow_mod x d p) (seq 1 (p - 1))).
+Compute (let p := 11 in let d := 5 in map (λ x, Nat_pow_mod x d p) (seq 1 (p - 1))).
+Compute (divisors 12).
+Compute (let p := 19 in map (λ d, (d, map (λ x, Nat_pow_mod x d p) (seq 1 (p - 1)))) (divisors (p - 1))).
 ...
 enough (H : ∃ a, length (prim_root_cycle p a) = p - 1). {
   destruct H as (a, H); exists a.
