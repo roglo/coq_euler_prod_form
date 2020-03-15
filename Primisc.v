@@ -1750,6 +1750,11 @@ Compute (sort Nat.ltb (map (λ n, (n * 18) mod 19) [4; 5; 6; 9; 16; 17])).
 Compute (sort Nat.ltb (prim_roots' 71)).
 Compute (length (prim_roots 71)).
 Compute (φ (φ 71)).
+Time Compute (map (λ i, (i, prim_roots (2^i+1))) (seq 1 5)).
+Compute (prim_roots (2^3+1)).
+Compute (prim_roots (2^4+1)).
+Compute (prim_roots (2^5+1)).
+Compute (prim_roots (2^5+1)).
 ...
 enough (H : ∃ a, length (prim_root_cycle p a) = p - 1). {
   destruct H as (a, H); exists a.
