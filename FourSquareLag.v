@@ -1941,7 +1941,6 @@ Definition are_adjacent_vertices a b :=
 
 Compute (map (λ a, (a, filter (are_adjacent_vertices a) (seq 0 16))) (seq 0 16)).
 
-Definition is_subgraph g :=
-...
-
-Definition is_2_to_n_sub_1_add_1_subgraph g
+Record subgraph :=
+  { vert : list (nat * nat);
+    sg_prop : ∀ a b, (a, b) ∈ vert → are_adjacent_vertices a b = true }.
