@@ -1942,7 +1942,7 @@ Fixpoint are_adj_vert_loop it a b :=
 Definition are_adjacent_vertices a b :=
   are_adj_vert_loop (max a b) a b.
 
-Compute (map (λ a, (a, filter (are_adjacent_vertices a) (seq 0 16))) (seq 0 16)).
+Compute (let n := 4 in map (λ a, (a, filter (are_adjacent_vertices a) (seq 0 (2^n)))) (seq 0 (2^n))).
 
 (* subgraph of the n-dimensional cube graph *)
 
