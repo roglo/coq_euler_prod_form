@@ -1921,3 +1921,27 @@ rewrite <- Z.pow_even_abs; [ | now apply Zeven_equiv ].
 rewrite <- Z.pow_even_abs; [ | now apply Zeven_equiv ].
 easy.
 Qed.
+
+(* Starting here formalization proof of the Sensitivity Theorem.
+   If the work is advanced enough, I move the code in another new
+   file. *)
+
+Fixpoint are_adj_vert_loop it a b :=
+  match it with
+  | 0 => false
+  | S it' =>
+      if Nat.eq_dec (a mod 2) (b mod 2) then
+        are_adj_vert_loop it' (a / 2) (b / 2)
+      else
+        if Nat.eq_dec (a / 2) (b / 2) then true else false
+  end.
+
+Definition are_adjacent_vertices a b :=
+  are_adj_vert_loop (max a b) a b.
+
+Compute (map (λ a, (a, filter (are_adjacent_vertices a) (seq 0 16))) (seq 0 16)).
+
+Definition is_subgraph g :=
+...
+
+Definition is_2_to_n_sub_1_add_1_subgraph g
