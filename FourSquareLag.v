@@ -1953,4 +1953,4 @@ Record subgraph n :=
 
 Arguments vert {n}.
 
-Definition sg_num_vert {n} (sg : subgraph n) := length (vert sg).
+Definition number_of_vertices {n} (sg : subgraph n) := length (vert sg).
