@@ -1923,7 +1923,7 @@ easy.
 Qed.
 
 (* Starting here formalization proof of the Sensitivity Theorem.
-   If the work is advanced enough, I move the code in another new
+   If this work is advanced enough, I move the code in another new
    file. *)
 
 (* adjacent vertices of a cube graph in any dimension;
@@ -1947,10 +1947,10 @@ Compute (let n := 4 in map (λ a, (a, filter (are_adjacent_vertices a) (seq 0 (2
 (* subgraph of the n-dimensional cube graph *)
 
 Record subgraph n :=
-  { vert : list (nat * nat);
-    sg_prop : ∀ a b, (a, b) ∈ vert →
+  { sg_vert : list (nat * nat);
+    sg_prop : ∀ a b, (a, b) ∈ sg_vert →
       a < b < 2 ^ n ∧ are_adjacent_vertices a b = true }.
 
-Arguments vert {n}.
+Arguments sg_vert {n}.
 
-Definition number_of_vertices {n} (sg : subgraph n) := length (vert sg).
+Definition number_of_vertices {n} (sg : subgraph n) := length (sg_vert sg).
