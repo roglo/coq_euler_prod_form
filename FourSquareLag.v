@@ -1926,6 +1926,9 @@ Qed.
    If the work is advanced enough, I move the code in another new
    file. *)
 
+(* adjacent vertices of a cube graph in any dimension;
+   a vertex is represented by a natural number. *)
+
 Fixpoint are_adj_vert_loop it a b :=
   match it with
   | 0 => false
@@ -1941,9 +1944,13 @@ Definition are_adjacent_vertices a b :=
 
 Compute (map (λ a, (a, filter (are_adjacent_vertices a) (seq 0 16))) (seq 0 16)).
 
-Record subgraph :=
+(* subgraph of the n-dimensional cube graph *)
+
+Record subgraph n :=
   { vert : list (nat * nat);
     sg_prop : ∀ a b, (a, b) ∈ vert →
-      a < b ∧ are_adjacent_vertices a b = true }.
+      a < b < 2 ^ n ∧ are_adjacent_vertices a b = true }.
 
-Definition sg_num_vert sg := length (vert sg).
+Arguments vert {n}.
+
+Definition sg_num_vert {n} (sg : subgraph n) := length (vert sg).
