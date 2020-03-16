@@ -1943,4 +1943,7 @@ Compute (map (λ a, (a, filter (are_adjacent_vertices a) (seq 0 16))) (seq 0 16)
 
 Record subgraph :=
   { vert : list (nat * nat);
-    sg_prop : ∀ a b, (a, b) ∈ vert → are_adjacent_vertices a b = true }.
+    sg_prop : ∀ a b, (a, b) ∈ vert →
+      a < b ∧ are_adjacent_vertices a b = true }.
+
+Definition sg_num_vert sg := length (vert sg).
