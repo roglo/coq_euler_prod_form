@@ -1942,14 +1942,17 @@ Fixpoint are_adj_vert_loop it a b :=
 Definition are_adjacent_vertices a b :=
   are_adj_vert_loop (max a b) a b.
 
-Compute (let n := 4 in map (λ a, (a, filter (are_adjacent_vertices a) (seq 0 (2^n)))) (seq 0 (2^n))).
+Compute (let n := 3 in map (λ a, (a, filter (are_adjacent_vertices a) (seq 0 (2^n)))) (seq 0 (2^n))).
 
 (* subgraph of the n-dimensional cube graph *)
 
-Record subgraph n :=
+Definition subgraph_prop n vl :=
+  ∀ a b, (a, b) ∈ vl →
+  a < b < 2 ^ n ∧ are_adjacent_vertices a b = true.
+
+Record subgraph n := mksg
   { sg_vert : list (nat * nat);
-    sg_prop : ∀ a b, (a, b) ∈ sg_vert →
-      a < b < 2 ^ n ∧ are_adjacent_vertices a b = true }.
+    sg_prop : subgraph_prop n sg_vert }.
 
 Arguments sg_vert {n}.
 
@@ -1966,9 +1969,27 @@ Definition deg {n} (sg : subgraph n) v :=
 Definition Δ {n} (sg : subgraph n) :=
   fold_left (λ m v, max m (deg sg v)) (seq 0 (2 ^ n - 1)) 0.
 
-(* test of Δ *)
+(* testing... *)
 
-Definition a_sg_vert := [(1, 2); ...
+Definition full_subgraph_3_vert :=
+  [(0, 1); (0, 2); (0, 4); (1, 3); (1, 5); (2, 3); (2, 6);
+   (3, 7); (4, 5); (4, 6); (5, 7); (6, 7)].
+Definition full_subgraph_3_prop : subgraph_prop 3 full_subgraph_3_vert.
+Proof.
+intros a b Hab.
+unfold full_subgraph_3_vert in Hab.
+cbn in Hab.
+do 12 (destruct Hab as [H| Hab]; [
+  injection H; clear H; intros; subst; cbn;
+  split; [ flia | easy ] | ]).
+easy.
+Qed.
+
+Definition full_subgraph_3 := mksg 3 full_subgraph_3_vert full_subgraph_3_prop.
+
+Compute (Δ full_subgraph_3).
+
+...
 
 (* The theorem *)
 
