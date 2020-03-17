@@ -27,41 +27,43 @@ Compute (let n := 3 in map (λ a, (a, filter (are_adjacent_vertices a) (seq 0 (2
 
 (* subgraph of the n-dimensional cube graph *)
 
-Definition subgraph_prop n el :=
-  ∀ a b, (a, b) ∈ el →
-  a < b < 2 ^ n ∧ are_adjacent_vertices a b = true.
+Definition subgraph_prop n vl el :=
+  (∀ a b, (a, b) ∈ el →
+   a ∈ vl ∧ b ∈ vl ∧ are_adjacent_vertices a b = true) ∧
+  (∀ a, a ∈ vl → a < 2 ^ n).
 
 Record subgraph n := mksg
-  { sg_edges : list (nat * nat);
-    sg_prop : subgraph_prop n sg_edges }.
+  { sg_vert : list nat;
+    sg_edges : list (nat * nat);
+    sg_prop : subgraph_prop n sg_vert sg_edges }.
 
+Arguments sg_vert {n}.
 Arguments sg_edges {n}.
-
-Definition sg_vert {n} (sg : subgraph n) :=
-  fold_right (λ '(a, b) l, if existsb (Nat.eqb a) l then l else a :: l)
-    (fold_right (λ '(a, b) l, if existsb (Nat.eqb b) l then l else b :: l)
-       [] (sg_edges sg))
-    (sg_edges sg).
 
 (* Example *)
 
+Definition cube_vert := seq 0 (2 ^ 3).
 Definition cube_edges :=
   [(0, 1); (0, 2); (0, 4); (1, 3); (1, 5); (2, 3); (2, 6);
    (3, 7); (4, 5); (4, 6); (5, 7); (6, 7)].
-Definition cube_prop : subgraph_prop 3 cube_edges.
+Definition cube_prop : subgraph_prop 3 cube_vert cube_edges.
 Proof.
-intros a b Hab.
-unfold cube_edges in Hab.
-cbn in Hab.
-do 12 (destruct Hab as [H| Hab]; [
-  injection H; clear H; intros; subst; cbn;
-  split; [ flia | easy ] | ]).
-easy.
+unfold cube_edges.
+split. {
+  intros a b Hab.
+  do 12 (destruct Hab as [H| Hab]; [
+    injection H; intros; subst; cbn;
+    split; [ flia | ];
+    split; [ flia | easy ] | ]).
+  easy.
+} {
+  intros a Ha; cbn.
+  do 8 (destruct Ha as [H| Ha]; [ flia H | ]).
+  easy.
+}
 Qed.
 
-Definition full_cube := mksg 3 cube_edges cube_prop.
-
-Compute (sg_vert full_cube).
+Definition full_cube := mksg 3 cube_vert cube_edges cube_prop.
 
 Definition number_of_edges {n} (sg : subgraph n) := length (sg_edges sg).
 Definition number_of_vertices {n} (sg : subgraph n) := length (sg_vert sg).
