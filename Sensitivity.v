@@ -102,6 +102,9 @@ Compute (edges [1; 2; 4; 7]).
 Compute (length (edges [1; 2; 4; 7])).
 Compute (2 ^ (3 - 1) + 1).
 
+Compute (vΔ 3 (edges [0; 1; 4; 5; 7])).
+Compute (edges [0; 1; 4; 5; 7]).
+
 ...
 
 (* The theorem *)
