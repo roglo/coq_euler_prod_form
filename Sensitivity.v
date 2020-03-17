@@ -41,24 +41,28 @@ Definition number_of_vertices {n} (sg : subgraph n) := length (sg_vert sg).
 
 (* degree of a vertex = number of edges adjacents to the vertex *)
 
-Definition deg {n} (sg : subgraph n) v :=
-  count_occ Bool.bool_dec (map (λ '(a, b), Nat.eqb a v) (sg_vert sg)) true +
-  count_occ Bool.bool_dec (map (λ '(a, b), Nat.eqb v b) (sg_vert sg)) true.
+Definition vdeg vl v :=
+  count_occ Bool.bool_dec (map (λ '(a, b), Nat.eqb a v) vl) true +
+  count_occ Bool.bool_dec (map (λ '(a, b), Nat.eqb v b) vl) true.
+
+Definition deg {n} (sg : subgraph n) v := vdeg (sg_vert sg) v.
 
 (* Δ : maximum degree of a subgraph *)
 
-Definition Δ {n} (sg : subgraph n) :=
-  fold_left (λ m v, max m (deg sg v)) (seq 0 (2 ^ n - 1)) 0.
+Definition vΔ n vl :=
+  fold_left (λ m v, max m (vdeg vl v)) (seq 0 (2 ^ n - 1)) 0.
+
+Definition Δ {n} (sg : subgraph n) := vΔ n (sg_vert sg).
 
 (* testing... *)
 
-Definition full_subgraph_3_vert :=
+Definition cube_vert :=
   [(0, 1); (0, 2); (0, 4); (1, 3); (1, 5); (2, 3); (2, 6);
    (3, 7); (4, 5); (4, 6); (5, 7); (6, 7)].
-Definition full_subgraph_3_prop : subgraph_prop 3 full_subgraph_3_vert.
+Definition cube_prop : subgraph_prop 3 cube_vert.
 Proof.
 intros a b Hab.
-unfold full_subgraph_3_vert in Hab.
+unfold cube_vert in Hab.
 cbn in Hab.
 do 12 (destruct Hab as [H| Hab]; [
   injection H; clear H; intros; subst; cbn;
@@ -66,9 +70,20 @@ do 12 (destruct Hab as [H| Hab]; [
 easy.
 Qed.
 
-Definition full_subgraph_3 := mksg 3 full_subgraph_3_vert full_subgraph_3_prop.
+Definition full_cube := mksg 3 cube_vert cube_prop.
 
-Compute (Δ full_subgraph_3).
+Compute (Δ full_cube, Nat.sqrt 3).
+Compute (2 ^ (3 - 1) + 1).
+
+Compute (length cube_vert).
+
+Compute (vdeg cube_vert 0).
+Compute (vdeg (map (λ i, nth i cube_vert (0, 0)) [0; 3; 6]) 0).
+Compute (vdeg (map (λ i, nth i cube_vert (0, 0)) [0; 3; 6]) 3).
+Compute (vdeg (map (λ i, nth i cube_vert (0, 0)) [0; 3; 6]) 6).
+Compute (vΔ 3 (map (λ i, nth i cube_vert (0, 0)) [0; 3; 6])).
+
+(* ah merde, ça déconne *)
 
 ...
 
