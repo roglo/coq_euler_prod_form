@@ -1954,3 +1954,26 @@ Record subgraph n :=
 Arguments sg_vert {n}.
 
 Definition number_of_vertices {n} (sg : subgraph n) := length (sg_vert sg).
+
+(* degree of a vertex = number of edges adjacents to the vertex *)
+
+Definition deg {n} (sg : subgraph n) v :=
+  count_occ Bool.bool_dec (map (λ '(a, b), Nat.eqb a v) (sg_vert sg)) true +
+  count_occ Bool.bool_dec (map (λ '(a, b), Nat.eqb v b) (sg_vert sg)) true.
+
+(* Δ : maximum degree of a subgraph *)
+
+Definition Δ {n} (sg : subgraph n) :=
+  fold_left (λ m v, max m (deg sg v)) (seq 0 (2 ^ n - 1)) 0.
+
+(* test of Δ *)
+
+Definition a_sg_vert := [(1, 2); ...
+
+(* The theorem *)
+
+Theorem sensitivity : ∀ n (sg : subgraph n),
+  number_of_vertices sg = 2 ^ (n - 1) + 1
+  → Δ sg ≥ Nat.sqrt n.
+Proof.
+...
