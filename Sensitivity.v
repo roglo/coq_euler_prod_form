@@ -98,6 +98,9 @@ Compute (vdeg (map (λ i, nth i cube_edges (0, 0)) [0; 5; 8]) 2).
 Compute (vΔ 3 (map (λ i, nth i cube_edges (0, 0)) [0; 5; 8])).
 Compute (Nat.sqrt 3).
 
+Compute (edges [1; 2; 4; 7]).
+Compute (length (edges [1; 2; 4; 7])).
+
 ...
 
 (* The theorem *)
