@@ -1,5 +1,6 @@
 (* Sensitivity Theorem.
-   https://arxiv.org/pdf/1907.00847.pdf *)
+   https://arxiv.org/pdf/1907.00847.pdf
+   https://eccc.weizmann.ac.il/report/2020/002/?fbclid=IwAR19mpxfIuoSaWq3HO8MdV8i8x_xlvwMKHjfElzBUK0GditlyaLeJiC8gJY *)
 
 Set Nested Proofs Allowed.
 Require Import Utf8 Arith.
