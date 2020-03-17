@@ -100,6 +100,7 @@ Compute (Nat.sqrt 3).
 
 Compute (edges [1; 2; 4; 7]).
 Compute (length (edges [1; 2; 4; 7])).
+Compute (2 ^ (3 - 1) + 1).
 
 ...
 
