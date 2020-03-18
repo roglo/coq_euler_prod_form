@@ -37,7 +37,7 @@ Definition edges vl :=
         if lt_dec a b then
           if are_adjacent_vertices a b then (a, b) :: l else l
         else l) l vl)
-    [] vl.
+    [] (nodup Nat.eq_dec vl).
 
 Compute (edges [1; 2; 7; 4]).
 
@@ -68,6 +68,12 @@ Definition deg sg v := vdeg (sg_edges sg) v.
 Definition vΔ vl :=
   let el := edges vl in
   fold_left (λ m v, max m (vdeg el v)) vl 0.
+
+Compute (vΔ [0; 1; 0]).
+Compute (edges [0; 1; 0]).
+
+Compute (vΔ [0; 1; 2; 4; 0]).
+Compute (vdeg (edges [0; 1; 2; 4]) 0).
 
 Definition Δ sg := vΔ (sg_vert sg).
 
@@ -107,10 +113,25 @@ Compute (length [0; 3; 5; 6; 9; 10; 12; 15; 17; 18; 20; 23; 24; 27; 29; 30]).
 Compute (edges [0; 3; 5; 6; 9; 10; 12; 15; 17; 18; 20; 23; 24; 27; 29; 30]).
 Compute (map (λ i, vΔ [0; 3; 5; 6; 9; 10; 12; 15; 17; 18; 20; 23; 24; 27; 29; 30; i]) (seq 0 32)).
 
+Compute (Nat.sqrt 4).
+Compute (let n := 4 in 2 ^ (n - 1) + 1).
+Compute (length [0; 3; 5; 6; 9; 10; 12; 15]).
+Compute (edges [0; 3; 5; 6; 9; 10; 12; 15]).
+Compute (map (λ i, vΔ [0; 3; 5; 6; 9; 10; 12; 15; i]) (seq 0 16)).
+
+Compute (Nat.sqrt 3).
+Compute (let n := 3 in 2 ^ (n - 1) + 1).
+Compute (length [0; 3; 5; 6]).
+Compute (edges [0; 3; 5; 6]).
+Compute (map (λ i, vΔ [0; 3; 5; 6; i]) (seq 0 8)).
+Compute (map (λ i, vΔ [0; 1; 2; 4; i]) (seq 0 8)).
+
+Compute (vΔ [0; 1; 2; 4; 0; 0]).
+Compute (edges [0; 1; 2; 4]).
 
 (* The theorem *)
 
-Theorem sensitivity : ∀ n (sg : subgraph n),
+Theorem sensitivity : ∀ sg n,
   number_of_vertices sg = 2 ^ (n - 1) + 1
   → Δ sg ≥ Nat.sqrt n.
 Proof.
