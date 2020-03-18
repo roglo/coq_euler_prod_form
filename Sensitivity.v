@@ -122,7 +122,9 @@ Compute (map (λ i, vΔ [0; 3; 5; 6; 9; 10; 12; 15; i]) (seq 0 16)).
 Compute (vΔ [0; 1; 6; 7; 10; 11; 12; 13]).
 Compute (map (λ i, vΔ [0; 1; 6; 7; 10; 11; 12; 13; i]) (seq 0 16)).
 
-...
+Compute (Nat.sqrt 2).
+Compute (let n := 2 in 2 ^ (n - 1) + 1).
+Compute (length [0; 3]).
 
 Compute (Nat.sqrt 3).
 Compute (let n := 3 in 2 ^ (n - 1) + 1).
