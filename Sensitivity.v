@@ -105,6 +105,13 @@ Compute (2 ^ (3 - 1) + 1).
 Compute (vΔ 3 (edges [0; 1; 4; 5; 7])).
 Compute (edges [0; 1; 4; 5; 7]).
 
+Compute (edges [0; 3; 5; 6; 9; 10; 12; 15]).
+Compute (vΔ 4 (edges [0; 3; 5; 6; 9; 10; 12; 15])).
+Compute (2 ^ (4 - 1) + 1).
+Compute (Nat.sqrt 4).
+Compute (map (λ i, vΔ 4 (edges [0; 3; 5; 6; 9; 10; 12; 15; i])) (seq 0 16)).
+Compute (map (λ i, vΔ 3 (edges [0; 3; 5; 6; i])) (seq 0 8)).
+
 ...
 
 (* The theorem *)
