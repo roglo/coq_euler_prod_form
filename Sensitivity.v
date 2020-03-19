@@ -77,6 +77,28 @@ Compute (vdeg (edges [0; 1; 2; 4]) 0).
 
 Definition Δ sg := vΔ (sg_vert sg).
 
+(* local sensitivity *)
+
+Definition flip_index x i :=
+  match x / 2 ^ i mod 2 with
+  | 0 => x + 2 ^ i
+  | _ => x - 2 ^ i
+  end.
+
+Definition flip x S := fold_right flip_index x S.
+
+Notation "x ^^ S" := (flip x S) (at level 30).
+
+Definition loc_sens_list n (f : nat → nat) x :=
+  filter (λ i, negb (Nat.eqb (f x) (f x ^^ [i]))) (seq 0 (2 ^ n)).
+
+Definition local_sensitivity (n : nat) (f : nat → nat) (x : nat) :=
+  length (loc_sens_list n f x).
+
+Definition s := local_sensitivity.
+
+...
+
 (* testing... *)
 
 Compute (Δ full_cube, Nat.sqrt 3).
