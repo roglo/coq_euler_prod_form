@@ -80,10 +80,7 @@ Definition Δ sg := vΔ (sg_vert sg).
 (* local sensitivity *)
 
 Definition flip_index x i :=
-  match x / 2 ^ i mod 2 with
-  | 0 => x + 2 ^ i
-  | _ => x - 2 ^ i
-  end.
+  if Nat.testbit x i then Nat.clearbit x i else Nat.setbit x i.
 
 Definition flip x S := fold_right flip_index x S.
 
@@ -97,6 +94,12 @@ Definition local_sensitivity (n : nat) (f : nat → bool) (x : nat) :=
 
 Definition sensitivity n f :=
   fold_right max 0 (map (local_sensitivity n f) (seq 0 (2 ^ n))).
+
+...
+
+Definition Hamming_distance x y :=
+  Nat.lxor x y
+...
 
 ...
 
