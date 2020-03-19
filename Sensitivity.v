@@ -89,13 +89,14 @@ Definition flip x S := fold_right flip_index x S.
 
 Notation "x ^^ S" := (flip x S) (at level 30).
 
-Definition loc_sens_list n (f : nat → nat) x :=
-  filter (λ i, negb (Nat.eqb (f x) (f x ^^ [i]))) (seq 0 (2 ^ n)).
+Definition loc_sens_list n (f : nat → bool) x :=
+  filter (λ i, negb (Bool.eqb (f x) (f (x ^^ [i])))) (seq 0 (2 ^ n)).
 
-Definition local_sensitivity (n : nat) (f : nat → nat) (x : nat) :=
+Definition local_sensitivity (n : nat) (f : nat → bool) (x : nat) :=
   length (loc_sens_list n f x).
 
-Definition s := local_sensitivity.
+Definition sensitivity n f :=
+  fold_right max 0 (map (local_sensitivity n f) (seq 0 (2 ^ n))).
 
 ...
 
