@@ -79,10 +79,12 @@ Definition Δ sg := vΔ (sg_vert sg).
 
 (* sensitivity *)
 
-Definition flip_index x i :=
+Search (nat → nat → nat).
+
+Definition Nat_togglebit x i :=
   if Nat.testbit x i then Nat.clearbit x i else Nat.setbit x i.
 
-Definition flip x S := fold_right flip_index x S.
+Definition flip x S := fold_right Nat_togglebit x S.
 
 Notation "x ^^ S" := (flip x S) (at level 30).
 
