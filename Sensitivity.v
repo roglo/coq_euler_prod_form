@@ -77,7 +77,7 @@ Compute (vdeg (edges [0; 1; 2; 4]) 0).
 
 Definition Δ sg := vΔ (sg_vert sg).
 
-(* local sensitivity *)
+(* sensitivity *)
 
 Definition flip_index x i :=
   if Nat.testbit x i then Nat.clearbit x i else Nat.setbit x i.
@@ -95,11 +95,17 @@ Definition local_sensitivity (n : nat) (f : nat → bool) (x : nat) :=
 Definition sensitivity n f :=
   fold_right max 0 (map (local_sensitivity n f) (seq 0 (2 ^ n))).
 
-...
+Fixpoint cnt_1_loop it n :=
+  match it with
+  | 0 => 0
+  | S it' =>
+      if Nat.eq_dec (n mod 2) 1 then 1 + cnt_1_loop it' (n / 2)
+      else cnt_1_loop it' (n / 2)
+  end.
 
-Definition Hamming_distance x y :=
-  Nat.lxor x y
-...
+Definition count_ones n := cnt_1_loop n n.
+
+Definition Hamming_distance x y := count_ones (Nat.lxor x y).
 
 ...
 
