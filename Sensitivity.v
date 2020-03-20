@@ -119,6 +119,24 @@ Definition loc_bl_sens_list Bl f x :=
 (* To define local_block_sensitivity, I need an algorithm to
    generate all lists of disjoint blocks *)
 
+Fixpoint glop n (l : list nat) : list (list (nat * nat)) :=
+  match l with
+  | [] => []
+  | [i] =>
+      map (λ j, [(i, j)]) (seq 0 n)
+  | i :: l' =>
+      let r := glop n l' in
+      let s := map (λ j, (i, j)) (seq 0 n) in
+      fold_right
+        (λ (ij : (nat * nat)) (m : list (list (nat * nat))),
+         map (λ (x : list (nat * nat)), ij :: x) r
+         ++ m)
+        ([] : list (list (nat * nat)))
+        (s : list (nat * nat))
+  end.
+
+Compute (glop 3 (seq 0 3)).
+
 Definition local_block_sensitivity f x := ...
 
 ...
