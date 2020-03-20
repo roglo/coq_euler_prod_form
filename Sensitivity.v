@@ -141,17 +141,29 @@ Compute (count_upto_n_to_n 3).
 Definition set_nth {A} i (l : list A) v :=
   firstn i l ++ v :: skipn (i + 1) l.
 
-Fixpoint glop i (l : list nat) (r : list (list nat)) :=
+Fixpoint no_empty {A} (ll : list (list A)) :=
+  match ll with
+  | [] => []
+  | [] :: ll' => no_empty ll'
+  | l :: ll' => l :: no_empty ll'
+  end.
+
+Fixpoint disp_loop i (l : list nat) (r : list (list nat)) :=
   match l with
   | [] => r
   | j :: l' =>
       let r' := set_nth j r (i :: nth j r []) in
-      glop (i + 1) l' r'
+      disp_loop (i + 1) l' r'
   end.
 
-Compute (map (@rev nat) (glop 0 [0; 0; 0] (repeat [] 3))).
-Compute (map (@rev nat) (glop 0 [0; 0; 1] (repeat [] 3))).
-Compute (map (@rev nat) (glop 0 [0; 0; 2] (repeat [] 3))).
+Compute (map (@rev nat) (no_empty (disp_loop 0 [0; 0; 0] (repeat [] 3)))).
+Compute (map (@rev nat) (no_empty (disp_loop 0 [0; 0; 1] (repeat [] 3)))).
+Compute (map (@rev nat) (no_empty (disp_loop 0 [0; 0; 2] (repeat [] 3)))).
+
+Definition dispatch n l :=
+  map (@rev nat) (no_empty (disp_loop 0 l (repeat [] n))).
+
+Compute (let n := 3 in map (dispatch n) (count_upto_n_to_n n)).
 
 ...
 [0; 0; 0] → [[0; 1; 2]]
