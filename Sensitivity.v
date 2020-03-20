@@ -141,17 +141,17 @@ Compute (count_upto_n_to_n 3).
 Definition set_nth {A} i (l : list A) v :=
   firstn i l ++ v :: skipn (i + 1) l.
 
-Fixpoint glop l r :=
+Fixpoint glop i (l : list nat) (r : list (list nat)) :=
   match l with
   | [] => r
-  | i :: l' =>
-      let r' := set_nth i r (nth i r 0 + 1) in
-      glop l' r'
+  | j :: l' =>
+      let r' := set_nth j r (i :: nth j r []) in
+      glop (i + 1) l' r'
   end.
 
-Compute (glop [0; 0; 0] (repeat 0 3)).
-
-(* ah oui, non, c'est pas ça que je veux... *)
+Compute (map (@rev nat) (glop 0 [0; 0; 0] (repeat [] 3))).
+Compute (map (@rev nat) (glop 0 [0; 0; 1] (repeat [] 3))).
+Compute (map (@rev nat) (glop 0 [0; 0; 2] (repeat [] 3))).
 
 ...
 [0; 0; 0] → [[0; 1; 2]]
