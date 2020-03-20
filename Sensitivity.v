@@ -116,26 +116,24 @@ Definition Hamming_distance x y := count_ones (Nat.lxor x y).
 Definition loc_bl_sens_list Bl f x :=
   filter (λ Bi, negb (Bool.eqb (f x) (f (x ^^ Bi)))) Bl.
 
-(* To define local_block_sensitivity, I need an algorithm to
+(* To define local_block_sensitivity, we need an algorithm to
    generate all lists of disjoint blocks *)
 
-Fixpoint glop n (l : list nat) : list (list (nat * nat)) :=
+Fixpoint disp_in_all_bl n (l : list nat) : list (list (nat * nat)) :=
   match l with
   | [] => []
   | [i] =>
       map (λ j, [(i, j)]) (seq 0 n)
   | i :: l' =>
-      let r := glop n l' in
-      fold_right
-        (λ (j : nat) (m : list (list (nat * nat))),
-         map (λ (x : list (nat * nat)), (i, j) :: x) r ++ m)
-        ([] : list (list (nat * nat)))
-        (seq 0 n)
+      let nnll := disp_in_all_bl n l' in
+      fold_right (λ j nnll_acc, map (λ nnl, (i, j) :: nnl) nnll ++ nnll_acc)
+        [] (seq 0 n)
   end.
 
-Compute (glop 3 (seq 0 3)).
+(* Return n^n possible ways to dispatch n values in n blocks *)
+Definition dispatch_in_all_blocks n := disp_in_all_bl n (seq 0 n).
 
-...
+Compute (dispatch_in_all_blocks 3).
 
 Definition local_block_sensitivity f x := ...
 
