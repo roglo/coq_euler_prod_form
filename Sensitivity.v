@@ -119,6 +119,34 @@ Definition loc_bl_sens_list Bl f x :=
 (* To define local_block_sensitivity, we need an algorithm to
    generate all lists of disjoint blocks *)
 
+Fixpoint disp_in_all_bl n m : list (list nat) :=
+  match m with
+  | 0 => []
+  | 1 =>
+      map (λ j, [j]) (seq 0 n)
+  | S m' =>
+      let nnll := disp_in_all_bl n m' in
+      fold_right (λ j nnll_acc, map (λ nnl, j :: nnl) nnll ++ nnll_acc)
+        [] (seq 0 n)
+  end.
+
+(* Return n^n possible ways to dispatch n values in n blocks *)
+Definition dispatch_in_all_blocks n := disp_in_all_bl n n.
+
+Compute (dispatch_in_all_blocks 3).
+
+Fixpoint next_in_base n dl :=
+  match dl with
+  | [] => [0]
+  | d :: dl' =>
+      if lt_dec (d + 1) n then (d + 1) :: dl'
+      else 0 :: next_in_base n dl'
+  end.
+
+Definition count_in_base n :=
+
+...
+
 Fixpoint disp_in_all_bl n (l : list nat) : list (list (nat * nat)) :=
   match l with
   | [] => []
@@ -134,6 +162,10 @@ Fixpoint disp_in_all_bl n (l : list nat) : list (list (nat * nat)) :=
 Definition dispatch_in_all_blocks n := disp_in_all_bl n (seq 0 n).
 
 Compute (dispatch_in_all_blocks 3).
+
+[(0, 0); (1, 0); (2, 0)] → [[0; 1; 2]]
+[(0, 0); (1, 0); (2, 1)] → [[0; 1]; [2]]
+...
 
 Definition local_block_sensitivity f x := ...
 
