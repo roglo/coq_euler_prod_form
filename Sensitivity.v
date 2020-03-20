@@ -137,13 +137,23 @@ Compute (dispatch_in_all_blocks 3).
 
 Fixpoint next_in_base n dl :=
   match dl with
-  | [] => [0]
+  | [] => [1]
   | d :: dl' =>
       if lt_dec (d + 1) n then (d + 1) :: dl'
       else 0 :: next_in_base n dl'
   end.
 
-Definition count_in_base n :=
+Fixpoint count_in_base n start len :=
+  match len with
+  | 0 => []
+  | S len' => start :: count_in_base n (next_in_base n start) len'
+  end.
+
+Compute (count_in_base 3 (repeat 0 3) (3 ^ 3)).
+Compute (map (@rev nat) (count_in_base 3 (repeat 0 3) (3 ^ 3))).
+Compute (dispatch_in_all_blocks 3).
+Compute (map (@rev nat) (count_in_base 2 (repeat 0 2) (2 ^ 2))).
+Compute (dispatch_in_all_blocks 2).
 
 ...
 
