@@ -126,16 +126,16 @@ Fixpoint glop n (l : list nat) : list (list (nat * nat)) :=
       map (λ j, [(i, j)]) (seq 0 n)
   | i :: l' =>
       let r := glop n l' in
-      let s := map (λ j, (i, j)) (seq 0 n) in
       fold_right
-        (λ (ij : (nat * nat)) (m : list (list (nat * nat))),
-         map (λ (x : list (nat * nat)), ij :: x) r
-         ++ m)
+        (λ (j : nat) (m : list (list (nat * nat))),
+         map (λ (x : list (nat * nat)), (i, j) :: x) r ++ m)
         ([] : list (list (nat * nat)))
-        (s : list (nat * nat))
+        (seq 0 n)
   end.
 
 Compute (glop 3 (seq 0 3)).
+
+...
 
 Definition local_block_sensitivity f x := ...
 
