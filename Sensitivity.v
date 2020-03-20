@@ -97,6 +97,8 @@ Definition local_sensitivity (n : nat) (f : nat → bool) (x : nat) :=
 Definition sensitivity n f :=
   fold_right max 0 (map (local_sensitivity n f) (seq 0 (2 ^ n))).
 
+(* Hamming distance *)
+
 Fixpoint cnt_1_loop it n :=
   match it with
   | 0 => 0
@@ -108,6 +110,16 @@ Fixpoint cnt_1_loop it n :=
 Definition count_ones n := cnt_1_loop n n.
 
 Definition Hamming_distance x y := count_ones (Nat.lxor x y).
+
+(* Local block sensitivity *)
+
+Definition loc_bl_sens_list Bl f x :=
+  filter (λ Bi, negb (Bool.eqb (f x) (f (x ^^ Bi)))) Bl.
+
+(* To define local_block_sensitivity, I need an algorithm to
+   generate all lists of disjoint blocks *)
+
+Definition local_block_sensitivity f x := ...
 
 ...
 
