@@ -163,7 +163,35 @@ Compute (map (@rev nat) (no_empty (disp_loop 0 [0; 0; 2] (repeat [] 3)))).
 Definition dispatch n l :=
   map (@rev nat) (no_empty (disp_loop 0 l (repeat [] n))).
 
+Fixpoint list_nat_le la lb :=
+  match (la, lb) with
+  | ([], _) => true
+  | (_, []) => false
+  | (a :: la', b :: lb') =>
+      match a ?= b with
+      | Eq => list_nat_le la' lb'
+      | Lt => true
+      | Gt => false
+      end
+  end.
+
+Fixpoint list_list_nat_le lla llb :=
+  match (lla, llb) with
+  | ([], _) => true
+  | (_, []) => false
+  | (la :: lla', lb :: llb') =>
+      if list_nat_le la lb then
+        if list_nat_le lb la then list_list_nat_le lla' llb'
+        else true
+      else false
+  end.
+
 Compute (let n := 3 in map (dispatch n) (count_upto_n_to_n n)).
+Compute ((let n := 3 in nodup (list_eq_dec (list_eq_dec Nat.eq_dec)) (map (dispatch n) (count_upto_n_to_n n)))).
+Compute ((let n := 3 in nodup (list_eq_dec (list_eq_dec Nat.eq_dec)) (map (sort list_nat_le) (map (dispatch n) (count_upto_n_to_n n))))).
+Compute ((let n := 3 in sort list_list_nat_le (nodup (list_eq_dec (list_eq_dec Nat.eq_dec)) (map (sort list_nat_le) (map (dispatch n) (count_upto_n_to_n n)))))).
+
+...
 
 ...
 [0; 0; 0] → [[0; 1; 2]]
