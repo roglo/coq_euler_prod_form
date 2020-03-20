@@ -138,6 +138,21 @@ Definition count_upto_n_to_n n :=
 
 Compute (count_upto_n_to_n 3).
 
+Definition set_nth {A} i (l : list A) v :=
+  firstn i l ++ v :: skipn (i + 1) l.
+
+Fixpoint glop l r :=
+  match l with
+  | [] => r
+  | i :: l' =>
+      let r' := set_nth i r (nth i r 0 + 1) in
+      glop l' r'
+  end.
+
+Compute (glop [0; 0; 0] (repeat 0 3)).
+
+(* ah oui, non, c'est pas ça que je veux... *)
+
 ...
 [0; 0; 0] → [[0; 1; 2]]
 [0; 0; 1] → [[0; 1]; [2]]
