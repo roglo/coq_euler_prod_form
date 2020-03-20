@@ -119,22 +119,6 @@ Definition loc_bl_sens_list Bl f x :=
 (* To define local_block_sensitivity, we need an algorithm to
    generate all lists of disjoint blocks *)
 
-Fixpoint disp_in_all_bl n m : list (list nat) :=
-  match m with
-  | 0 => []
-  | 1 =>
-      map (λ j, [j]) (seq 0 n)
-  | S m' =>
-      let nnll := disp_in_all_bl n m' in
-      fold_right (λ j nnll_acc, map (λ nnl, j :: nnl) nnll ++ nnll_acc)
-        [] (seq 0 n)
-  end.
-
-(* Return n^n possible ways to dispatch n values in n blocks *)
-Definition dispatch_in_all_blocks n := disp_in_all_bl n n.
-
-Compute (dispatch_in_all_blocks 3).
-
 Fixpoint next_in_base n dl :=
   match dl with
   | [] => [1]
@@ -149,29 +133,10 @@ Fixpoint count_in_base n start len :=
   | S len' => start :: count_in_base n (next_in_base n start) len'
   end.
 
-Compute (count_in_base 3 (repeat 0 3) (3 ^ 3)).
-Compute (map (@rev nat) (count_in_base 3 (repeat 0 3) (3 ^ 3))).
-Compute (dispatch_in_all_blocks 3).
-Compute (map (@rev nat) (count_in_base 2 (repeat 0 2) (2 ^ 2))).
-Compute (dispatch_in_all_blocks 2).
+Definition count_upto_n_to_n n :=
+  map (@rev nat) (count_in_base n (repeat 0 n) (n ^ n)).
 
-...
-
-Fixpoint disp_in_all_bl n (l : list nat) : list (list (nat * nat)) :=
-  match l with
-  | [] => []
-  | [i] =>
-      map (λ j, [(i, j)]) (seq 0 n)
-  | i :: l' =>
-      let nnll := disp_in_all_bl n l' in
-      fold_right (λ j nnll_acc, map (λ nnl, (i, j) :: nnl) nnll ++ nnll_acc)
-        [] (seq 0 n)
-  end.
-
-(* Return n^n possible ways to dispatch n values in n blocks *)
-Definition dispatch_in_all_blocks n := disp_in_all_bl n (seq 0 n).
-
-Compute (dispatch_in_all_blocks 3).
+Compute (count_upto_n_to_n 3).
 
 [(0, 0); (1, 0); (2, 0)] → [[0; 1; 2]]
 [(0, 0); (1, 0); (2, 1)] → [[0; 1]; [2]]
