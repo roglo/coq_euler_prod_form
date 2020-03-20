@@ -185,27 +185,15 @@ Fixpoint list_list_nat_le lla llb :=
       else false
   end.
 
-Compute (let n := 3 in map (dispatch n) (count_upto_n_to_n n)).
-Compute ((let n := 3 in nodup (list_eq_dec (list_eq_dec Nat.eq_dec)) (map (dispatch n) (count_upto_n_to_n n)))).
-Compute ((let n := 3 in nodup (list_eq_dec (list_eq_dec Nat.eq_dec)) (map (sort list_nat_le) (map (dispatch n) (count_upto_n_to_n n))))).
-Compute ((let n := 3 in sort list_list_nat_le (nodup (list_eq_dec (list_eq_dec Nat.eq_dec)) (map (sort list_nat_le) (map (dispatch n) (count_upto_n_to_n n)))))).
-
 Definition all_partitions n :=
   sort list_list_nat_le
     (nodup (list_eq_dec (list_eq_dec Nat.eq_dec))
        (map (sort list_nat_le) (map (dispatch n) (count_upto_n_to_n n)))).
 
-Time Compute (all_partitions 4).
+Compute (map (sort list_nat_le) (map (dispatch 4) (count_upto_n_to_n 4))).
+Compute (nodup (list_eq_dec (list_eq_dec Nat.eq_dec)) (map (sort list_nat_le) (map (dispatch 4) (count_upto_n_to_n 4)))).
+Compute (all_partitions 4).
 
-...
-
-...
-[0; 0; 0] → [[0; 1; 2]]
-[0; 0; 1] → [[0; 1]; [2]]
-[0; 0; 2] → [[0; 1]; []; [2]]
-...
-[(0, 0); (1, 0); (2, 0)] → [[0; 1; 2]]
-[(0, 0); (1, 0); (2, 1)] → [[0; 1]; [2]]
 ...
 
 Definition local_block_sensitivity f x := ...
