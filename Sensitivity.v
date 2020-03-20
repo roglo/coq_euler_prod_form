@@ -190,6 +190,13 @@ Compute ((let n := 3 in nodup (list_eq_dec (list_eq_dec Nat.eq_dec)) (map (dispa
 Compute ((let n := 3 in nodup (list_eq_dec (list_eq_dec Nat.eq_dec)) (map (sort list_nat_le) (map (dispatch n) (count_upto_n_to_n n))))).
 Compute ((let n := 3 in sort list_list_nat_le (nodup (list_eq_dec (list_eq_dec Nat.eq_dec)) (map (sort list_nat_le) (map (dispatch n) (count_upto_n_to_n n)))))).
 
+Definition all_partitions n :=
+  sort list_list_nat_le
+    (nodup (list_eq_dec (list_eq_dec Nat.eq_dec))
+       (map (sort list_nat_le) (map (dispatch n) (count_upto_n_to_n n)))).
+
+Time Compute (all_partitions 4).
+
 ...
 
 ...
