@@ -141,11 +141,10 @@ Compute (count_upto_n_to_n 3).
 Definition set_nth {A} i (l : list A) v :=
   firstn i l ++ v :: skipn (i + 1) l.
 
-Fixpoint no_empty {A} (ll : list (list A)) :=
-  match ll with
-  | [] => []
-  | [] :: ll' => no_empty ll'
-  | l :: ll' => l :: no_empty ll'
+Definition is_nil {A} (l : list A) :=
+  match l with
+  | [] => true
+  | _ => false
   end.
 
 Fixpoint disp_loop i (l : list nat) (r : list (list nat)) :=
@@ -156,12 +155,12 @@ Fixpoint disp_loop i (l : list nat) (r : list (list nat)) :=
       disp_loop (i + 1) l' r'
   end.
 
-Compute (map (@rev nat) (no_empty (disp_loop 0 [0; 0; 0] (repeat [] 3)))).
-Compute (map (@rev nat) (no_empty (disp_loop 0 [0; 0; 1] (repeat [] 3)))).
-Compute (map (@rev nat) (no_empty (disp_loop 0 [0; 0; 2] (repeat [] 3)))).
+Compute (map (@rev nat) (filter (λ l, negb (is_nil l)) (disp_loop 0 [0; 0; 0] (repeat [] 3)))).
+Compute (map (@rev nat) (filter (λ l, negb (is_nil l)) (disp_loop 0 [0; 0; 1] (repeat [] 3)))).
+Compute (map (@rev nat) (filter (λ l, negb (is_nil l)) (disp_loop 0 [0; 0; 2] (repeat [] 3)))).
 
 Definition dispatch n l :=
-  map (@rev nat) (no_empty (disp_loop 0 l (repeat [] n))).
+  map (@rev nat) (filter (λ l, negb (is_nil l)) (disp_loop 0 l (repeat [] n))).
 
 Fixpoint list_nat_le la lb :=
   match (la, lb) with
