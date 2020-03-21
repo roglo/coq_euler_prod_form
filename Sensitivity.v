@@ -225,8 +225,7 @@ assert (H : map (λ i, [i]) (seq 0 n) ∈ raw_partitions n). {
   unfold raw_partitions.
   assert (H : map (λ i, [i]) (seq 0 n) = dispatch n (seq 0 n)). {
     assert (H : ∀ s, map (λ i, [i]) (seq s n) = dispatch n (seq s n)). {
-      induction n; intros s; [ easy | ].
-      cbn.
+      intros s.
 ...
 
 Theorem bs_ge_s : ∀ n f, bs n f ≥ s n f.
