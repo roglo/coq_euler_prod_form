@@ -89,7 +89,7 @@ Definition flip x S := fold_right Nat_togglebit x S.
 Notation "x ^^ S" := (flip x S) (at level 30).
 
 Definition loc_sens_list n (f : nat → bool) x :=
-  filter (λ i, negb (Bool.eqb (f x) (f (x ^^ [i])))) (seq 0 (2 ^ n)).
+  filter (λ i, negb (Bool.eqb (f x) (f (x ^^ [i])))) (seq 0 n).
 
 Definition local_sensitivity (n : nat) (f : nat → bool) (x : nat) :=
   length (loc_sens_list n f x).
@@ -217,6 +217,8 @@ unfold local_block_sensitivity, local_sensitivity.
 rewrite <- map_map.
 unfold loc_sens_list.
 Search (length (filter _ _)).
+Print local_sensitivity.
+Print loc_sens_list.
 ...
 
 Theorem bs_ge_s : ∀ n f, bs n f ≥ s n f.
