@@ -145,9 +145,7 @@ Definition is_nil {A} (l : list A) :=
 Fixpoint disp_loop i (l : list nat) (r : list (list nat)) :=
   match l with
   | [] => r
-  | j :: l' =>
-      let r' := set_nth j r (i :: nth j r []) in
-      disp_loop (i + 1) l' r'
+  | j :: l' => disp_loop (i + 1) l' (set_nth j r (i :: nth j r []))
   end.
 
 Compute (map (@rev nat) (filter (λ l, negb (is_nil l)) (disp_loop 0 [0; 0; 0] (repeat [] 3)))).
@@ -217,15 +215,22 @@ unfold local_block_sensitivity, local_sensitivity.
 rewrite <- map_map.
 unfold loc_sens_list.
 unfold loc_bl_sens_list.
-Check raw_partitions.
 (* among all partitions, there must exist one which is exactly
     [[0]; [1]; [2]; ... ; [n-1]]
    I believe it is this one which corresponds to local_sensitivity *)
 assert (H : map (λ i, [i]) (seq 0 n) ∈ raw_partitions n). {
   unfold raw_partitions.
   assert (H : map (λ i, [i]) (seq 0 n) = dispatch n (seq 0 n)). {
-    assert (H : ∀ s, map (λ i, [i]) (seq s n) = dispatch n (seq s n)). {
-      intros s.
+    unfold dispatch.
+    induction n; [ easy | ].
+    rewrite <- Nat.add_1_r.
+    rewrite seq_app.
+    rewrite map_app.
+    rewrite IHn.
+    rewrite Nat.add_0_l.
+Print disp_loop.
+...
+    rewrite disp_loop_app_l.
 ...
 
 Theorem bs_ge_s : ∀ n f, bs n f ≥ s n f.
