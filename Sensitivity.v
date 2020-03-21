@@ -203,6 +203,24 @@ Definition local_block_sensitivity n f x :=
   fold_right max 0
     (map (λ Bl, length (loc_bl_sens_list Bl f x)) (raw_partitions n)).
 
+Definition block_sensitivity n f :=
+  fold_right max 0 (map (local_block_sensitivity n f) (seq 0 (2 ^ n))).
+
+Definition s := sensitivity.
+Definition bs := block_sensitivity.
+
+Theorem x_bs_ge_s : ∀ n f x,
+  local_block_sensitivity n f x ≥ local_sensitivity n f x.
+Proof.
+intros.
+unfold local_block_sensitivity, local_sensitivity.
+...
+
+Theorem bs_ge_s : ∀ n f, bs n f ≥ s n f.
+Proof.
+intros.
+unfold bs, s.
+unfold block_sensitivity, sensitivity.
 ...
 
 (* testing... *)
