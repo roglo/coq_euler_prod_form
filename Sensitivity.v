@@ -216,9 +216,17 @@ intros.
 unfold local_block_sensitivity, local_sensitivity.
 rewrite <- map_map.
 unfold loc_sens_list.
-Search (length (filter _ _)).
-Print local_sensitivity.
-Print loc_sens_list.
+unfold loc_bl_sens_list.
+Check raw_partitions.
+(* among all partitions, there must exist one which is exactly
+    [[0]; [1]; [2]; ... ; [n-1]]
+   I believe it is this one which corresponds to local_sensitivity *)
+assert (H : map (λ i, [i]) (seq 0 n) ∈ raw_partitions n). {
+  unfold raw_partitions.
+  assert (H : map (λ i, [i]) (seq 0 n) = dispatch n (seq 0 n)). {
+    assert (H : ∀ s, map (λ i, [i]) (seq s n) = dispatch n (seq s n)). {
+      induction n; intros s; [ easy | ].
+      cbn.
 ...
 
 Theorem bs_ge_s : ∀ n f, bs n f ≥ s n f.
