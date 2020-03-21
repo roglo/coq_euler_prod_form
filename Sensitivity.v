@@ -148,6 +148,11 @@ Fixpoint disp_loop i (l : list nat) (r : list (list nat)) :=
   | j :: l' => disp_loop (i + 1) l' (set_nth j r (i :: nth j r []))
   end.
 
+(*
+Definition disp_loop' i (l : list nat) (r : list (list nat)) :=
+  fold_left (λ '(r, i) j, (set_nth j r (i :: nth j r []), i+1)) l (r, i).
+*)
+
 Compute (map (@rev nat) (filter (λ l, negb (is_nil l)) (disp_loop 0 [0; 0; 0] (repeat [] 3)))).
 Compute (map (@rev nat) (filter (λ l, negb (is_nil l)) (disp_loop 0 [0; 0; 1] (repeat [] 3)))).
 Compute (map (@rev nat) (filter (λ l, negb (is_nil l)) (disp_loop 0 [0; 0; 2] (repeat [] 3)))).
@@ -204,6 +209,16 @@ Definition local_block_sensitivity n f x :=
 Definition block_sensitivity n f :=
   fold_right max 0 (map (local_block_sensitivity n f) (seq 0 (2 ^ n))).
 
+Theorem disp_loop_app : ∀ i la lb r,
+  disp_loop i (la ++ lb) r =
+  disp_loop (i + length la) lb (disp_loop i la r).
+Proof.
+intros.
+revert i lb r.
+induction la as [| j]; intros; cbn; [ now rewrite Nat.add_0_r | ].
+now rewrite IHla, <- Nat.add_assoc.
+Qed.
+
 Definition s := sensitivity.
 Definition bs := block_sensitivity.
 
@@ -228,9 +243,11 @@ assert (H : map (λ i, [i]) (seq 0 n) ∈ raw_partitions n). {
     rewrite map_app.
     rewrite IHn.
     rewrite Nat.add_0_l.
-Print disp_loop.
+    rewrite disp_loop_app.
+    rewrite seq_length, Nat.add_0_l.
+Search (repeat _ (_ + _)).
 ...
-    rewrite disp_loop_app_l.
+    rewrite disp_loop_app.
 ...
 
 Theorem bs_ge_s : ∀ n f, bs n f ≥ s n f.
