@@ -214,6 +214,9 @@ Theorem x_bs_ge_s : ∀ n f x,
 Proof.
 intros.
 unfold local_block_sensitivity, local_sensitivity.
+rewrite <- map_map.
+unfold loc_sens_list.
+Search (length (filter _ _)).
 ...
 
 Theorem bs_ge_s : ∀ n f, bs n f ≥ s n f.
