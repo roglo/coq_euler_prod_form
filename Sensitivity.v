@@ -245,7 +245,6 @@ assert (H : map (λ i, [i]) (seq 0 n) ∈ raw_partitions n). {
     rewrite Nat.add_0_l.
     rewrite disp_loop_app.
     rewrite seq_length, Nat.add_0_l.
-Search (repeat _ (_ + _)).
 ...
     rewrite disp_loop_app.
 ...
