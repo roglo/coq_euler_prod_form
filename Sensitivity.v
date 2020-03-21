@@ -111,12 +111,7 @@ Definition count_ones n := cnt_1_loop n n.
 
 Definition Hamming_distance x y := count_ones (Nat.lxor x y).
 
-(* Local block sensitivity *)
-
-Definition loc_bl_sens_list Bl f x :=
-  filter (λ Bi, negb (Bool.eqb (f x) (f (x ^^ Bi)))) Bl.
-
-(* To define local_block_sensitivity, we need an algorithm to
+(* To define local_block_sensitivity later, we need an algorithm to
    generate all lists of disjoint blocks *)
 
 Fixpoint next_in_base n dl :=
@@ -199,9 +194,14 @@ Compute (map (sort list_nat_le) (raw_partitions 4)).
 Compute (nodup (list_eq_dec (list_eq_dec Nat.eq_dec)) (map (sort list_nat_le) (raw_partitions 4))).
 Compute (all_partitions 4).
 
-...
+(* Local block sensitivity *)
 
-Definition local_block_sensitivity f x := ...
+Definition loc_bl_sens_list Bl f x :=
+  filter (λ Bi, negb (Bool.eqb (f x) (f (x ^^ Bi)))) Bl.
+
+Definition local_block_sensitivity n f x :=
+  fold_right max 0
+    (map (λ Bl, length (loc_bl_sens_list Bl f x)) (raw_partitions n)).
 
 ...
 
