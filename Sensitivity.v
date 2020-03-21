@@ -162,6 +162,11 @@ Compute (map (@rev nat) (filter (λ l, negb (is_nil l)) (disp_loop 0 [0; 0; 2] (
 Definition dispatch n l :=
   map (@rev nat) (filter (λ l, negb (is_nil l)) (disp_loop 0 l (repeat [] n))).
 
+Definition raw_partitions n :=
+  map (dispatch n) (count_upto_n_to_n n).
+
+Compute (raw_partitions 4).
+
 Fixpoint list_nat_le la lb :=
   match (la, lb) with
   | ([], _) => true
@@ -188,10 +193,10 @@ Fixpoint list_list_nat_le lla llb :=
 Definition all_partitions n :=
   sort list_list_nat_le
     (nodup (list_eq_dec (list_eq_dec Nat.eq_dec))
-       (map (sort list_nat_le) (map (dispatch n) (count_upto_n_to_n n)))).
+       (map (sort list_nat_le) (raw_partitions n))).
 
-Compute (map (sort list_nat_le) (map (dispatch 4) (count_upto_n_to_n 4))).
-Compute (nodup (list_eq_dec (list_eq_dec Nat.eq_dec)) (map (sort list_nat_le) (map (dispatch 4) (count_upto_n_to_n 4)))).
+Compute (map (sort list_nat_le) (raw_partitions 4)).
+Compute (nodup (list_eq_dec (list_eq_dec Nat.eq_dec)) (map (sort list_nat_le) (raw_partitions 4))).
 Compute (all_partitions 4).
 
 ...
