@@ -237,6 +237,16 @@ assert (H : map (λ i, [i]) (seq 0 n) ∈ raw_partitions n). {
   unfold raw_partitions.
   assert (H : map (λ i, [i]) (seq 0 n) = dispatch n (seq 0 n)). {
     unfold dispatch.
+rewrite List_filter_all_true. 2: {
+  intros a Ha.
+  clear - Ha.
+  revert a Ha.
+  induction n; intros; [ easy | ].
+  cbn in Ha.
+Print disp_loop.
+(* faut peut-être programmer disp_loop autrement ;
+   en deux étapes peut-être ? *)
+...
     induction n; [ easy | ].
     rewrite <- Nat.add_1_r.
     rewrite seq_app.
@@ -245,6 +255,7 @@ assert (H : map (λ i, [i]) (seq 0 n) ∈ raw_partitions n). {
     rewrite Nat.add_0_l.
     rewrite disp_loop_app.
     rewrite seq_length, Nat.add_0_l.
+Print dispatch.
 ...
     replace (repeat [] (n + 1)) with (repeat ([] : list nat) n ++ [[]]). 2: {
       clear.
