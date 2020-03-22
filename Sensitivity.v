@@ -241,10 +241,45 @@ assert (H : map (λ i, [i]) (seq 0 n) ∈ raw_partitions n). {
       intros a Ha.
       clear - Ha.
       destruct a; [ exfalso | easy ].
-Print disp_loop.
-(* faut peut-être programmer disp_loop autrement ;
-   en deux étapes peut-être ? *)
+      assert
+        (H : ∀ s n r1 r2,
+         (∀ l, l ∈ r1 → l ≠ [])
+         → length r2 = n
+         → [] ∉ disp_loop s (seq s n) (r1 ++ r2)). {
+        clear.
+        intros s * Hr1 Hr2 Ha.
+        revert s r1 r2 Hr1 Hr2 Ha.
+        induction n; intros s *; intros. {
+          cbn in Ha.
+          apply length_zero_iff_nil in Hr2; subst r2.
+          rewrite app_nil_r in Ha.
+          now specialize (Hr1 _ Ha).
+        }
+        cbn in Ha.
+        destruct r2 as [| a r2]; [ easy | ].
+        cbn in Hr2.
+        apply Nat.succ_inj in Hr2.
+        specialize (IHn (S n) r1 r2 Hr1 Hr2) as H1.
 ...
+      destruct n; [ easy | ].
+      cbn in Ha.
+      destruct n; [ now destruct Ha | ].
+      cbn in Ha.
+  Ha : [] ∈ disp_loop 0 (seq 0 n) (repeat [] n)
+  Ha : [] ∈ disp_loop 1 (seq 1 n) ([0] :: repeat [] n)
+  Ha : [] ∈ disp_loop 2 (seq 2 n) ([0] :: [1] :: repeat [] n)
+      destruct n. {
+        cbn in Ha.
+
+      cbn in Ha.
+...
+      assert (H : ∀ i l a r, [] ∉ disp_loop i l (a :: r)). {
+        clear.
+        intros * Ha.
+        revert i a r Ha.
+        induction l as [| b l]; intros.
+cbn in Ha.
+
     induction n; [ easy | ].
     rewrite <- Nat.add_1_r.
     rewrite seq_app.
