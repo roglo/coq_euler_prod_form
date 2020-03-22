@@ -241,6 +241,14 @@ assert (H : map (λ i, [i]) (seq 0 n) ∈ raw_partitions n). {
       intros a Ha.
       clear - Ha.
       destruct a; [ exfalso | easy ].
+      assert (H : ∀ i s n, [] ∉ disp_loop i (seq s n) (repeat [] n)). {
+        clear.
+        intros i s n Ha.
+        revert i s Ha.
+        induction n; intros i s Ha; [ easy | ].
+        cbn in Ha.
+        specialize (IHn (i + 1) (S s)) as H1.
+...
       assert
         (H : ∀ s n r1 r2,
          (∀ l, l ∈ r1 → l ≠ [])
