@@ -237,12 +237,10 @@ assert (H : map (λ i, [i]) (seq 0 n) ∈ raw_partitions n). {
   unfold raw_partitions.
   assert (H : map (λ i, [i]) (seq 0 n) = dispatch n (seq 0 n)). {
     unfold dispatch.
-rewrite List_filter_all_true. 2: {
-  intros a Ha.
-  clear - Ha.
-  revert a Ha.
-  induction n; intros; [ easy | ].
-  cbn in Ha.
+    rewrite List_filter_all_true. 2: {
+      intros a Ha.
+      clear - Ha.
+      destruct a; [ exfalso | easy ].
 Print disp_loop.
 (* faut peut-être programmer disp_loop autrement ;
    en deux étapes peut-être ? *)
