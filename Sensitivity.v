@@ -241,13 +241,35 @@ assert (H : map (λ i, [i]) (seq 0 n) ∈ raw_partitions n). {
       intros a Ha.
       clear - Ha.
       destruct a; [ exfalso | easy ].
-      assert (H : ∀ i s n, [] ∉ disp_loop i (seq s n) (repeat [] n)). {
+      assert (H : ∀ i s n r, length r = n → [] ∉ disp_loop i (seq s n) r). {
         clear.
-        intros i s n Ha.
-        revert i s Ha.
-        induction n; intros i s Ha; [ easy | ].
+        intros i s n r Hr Ha.
+        revert i s r Hr Ha.
+        induction n; intros i s r Hr Ha. {
+          now apply length_zero_iff_nil in Hr; subst r.
+        }
         cbn in Ha.
         specialize (IHn (i + 1) (S s)) as H1.
+        specialize (H1 (set_nth s r (i :: nth s r []))).
+        assert (H : length (set_nth s r (i :: nth s r [])) = n). {
+Print set_nth.
+Theorem glop {A} : ∀ s (l : list A) v, length (set_nth s l v) = length l.
+Proof.
+intros s l v.
+revert s v.
+induction l as [| a]; intros s; intros. {
+  cbn.
+  unfold set_nth.
+(* ouais non c'est faux *)
+...
+rewrite glop.
+...
+
+        destruct r as [| a]; [ easy | ].
+        cbn in Hr.
+        apply Nat.succ_inj in Hr.
+        specialize (IHn (i + 1) (S s) r Hr) as H1.
+Print set_nth.
 ...
       assert
         (H : ∀ s n r1 r2,
