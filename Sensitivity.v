@@ -239,11 +239,20 @@ assert (H : map (λ i, [i]) (seq 0 n) ∈ raw_partitions n). {
   unfold raw_partitions.
 Compute (nth 27 (raw_partitions 4) []).
 Compute (nth 194 (raw_partitions 5) []).
+Print raw_partitions.
+Compute (raw_partitions 2).
+(* apparemment, ils n'y sont pas tous ; par exemple, il n'y a pas [[1; 0]]
+   comme partition ; c'est la même que [[0; 1]] mais pourquoi celle-ci est
+   en deux exemplaires mais que celle-là n'y est pas ? C'est vrai que, bon,
+   on remplit les partitions dans l'ordre de 0 à n-1 par seq 0 n *)
+Print raw_partitions.
+Print dispatch.
+...
 (* some ideas: *)
 Definition is_partition n p :=
 ...
 assert (H1 : ∀ p, is_partition n p ↔ p ∈ raw_partitions n).
-assert (H2 : is_partition (map (λ i, [i]) (seq 0 n))).
+assert (H2 : is_partition n (map (λ i, [i]) (seq 0 n))).
 ...
 1→0 = 0 radix 1
 2→1 = 01 radix 2
