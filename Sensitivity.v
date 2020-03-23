@@ -240,6 +240,8 @@ Theorem is_partition_iff : ∀ n p, is_partition n p ↔ p ∈ raw_partitions n.
 Proof.
 intros.
 split; intros Hn. {
+  destruct Hn as (Hsort & Hlt & Hlen & Hdiff).
+  unfold raw_partitions.
 ...
 
 Theorem x_bs_ge_s : ∀ n f x,
