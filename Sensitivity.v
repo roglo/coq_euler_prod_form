@@ -209,6 +209,8 @@ Definition local_block_sensitivity n f x :=
 Definition block_sensitivity n f :=
   fold_right max 0 (map (local_block_sensitivity n f) (seq 0 (2 ^ n))).
 
+(* Proving Theorem: bs(f) ≥ s(f) *)
+
 Theorem disp_loop_app : ∀ i la lb r,
   disp_loop i (la ++ lb) r =
   disp_loop (i + length la) lb (disp_loop i la r).
@@ -221,6 +223,24 @@ Qed.
 
 Definition s := sensitivity.
 Definition bs := block_sensitivity.
+
+Require Import Sorting.
+
+Definition is_partition n p :=
+  (∀ s, s ∈ p → Sorted Nat.lt s) ∧
+  (∀ s, s ∈ p → ∀ i, i ∈ s → i < n) ∧
+  length (concat p) = n ∧
+  (∀ i j,
+   i < length p
+   → j < length p
+   → i ≠ j
+   → ∀ x, x ∈ nth i p [] → x ∉ nth j p []).
+
+Theorem is_partition_iff : ∀ n p, is_partition n p ↔ p ∈ raw_partitions n.
+Proof.
+intros.
+split; intros Hn. {
+...
 
 Theorem x_bs_ge_s : ∀ n f x,
   local_block_sensitivity n f x ≥ local_sensitivity n f x.
@@ -236,54 +256,43 @@ unfold loc_bl_sens_list.
     [[0]; [1]; [2]; ... ; [n-1]]
    I believe it is this one which corresponds to local_sensitivity *)
 assert (H : map (λ i, [i]) (seq 0 n) ∈ raw_partitions n). {
-  unfold raw_partitions.
-Compute (nth 27 (raw_partitions 4) []).
-Compute (nth 194 (raw_partitions 5) []).
-Print raw_partitions.
-Compute (raw_partitions 3).
-(* apparemment, ils n'y sont pas tous ; par exemple, il n'y a pas [[1; 0]]
-   comme partition ; c'est la même que [[0; 1]] mais pourquoi celle-ci est
-   en deux exemplaires mais que celle-là n'y est pas ? C'est vrai que, bon,
-   on remplit les partitions dans l'ordre de 0 à n-1 par seq 0 n *)
-Print raw_partitions.
-Print dispatch.
-Require Import Sorting.
-Check Sorted.
-(* some ideas: *)
-Definition is_partition n p :=
-  (∀ s, s ∈ p → Sorted Nat.lt s) ∧
-  (∀ s, s ∈ p → ∀ i, i ∈ s → i < n) ∧
-  length (concat p) = n ∧
-  (∀ i j,
-   i < length p
-   → j < length p
-   → i ≠ j
-   → ∀ x, x ∈ nth i p [] ↔ x ∉ nth j p []).
-assert (H2 : is_partition n (map (λ i, [i]) (seq 0 n))). {
-  split. {
-    intros s Hs.
-    apply in_map_iff in Hs.
-    destruct Hs as (i & Hin & His); subst s.
-    apply in_seq in His.
-    constructor; constructor.
+  assert (H1 : is_partition n (map (λ i, [i]) (seq 0 n))). {
+    split. {
+      intros s Hs.
+      apply in_map_iff in Hs.
+      destruct Hs as (i & Hin & His); subst s.
+      apply in_seq in His.
+      constructor; constructor.
+    }
+    split. {
+      intros s Hs i Hi.
+      apply in_map_iff in Hs.
+      destruct Hs as (j & Hjn & Hjs); subst s.
+      apply in_seq in Hjs.
+      destruct Hi as [Hi| ]; [ now subst j | easy ].
+    }
+    split. {
+      clear.
+      remember 0 as s.
+      clear Heqs.
+      revert s.
+      induction n; intros s; [ easy | cbn ].
+      f_equal; apply IHn.
+    }
+    clear x.
+    intros * Hi Hj Hij x Hx Hnx.
+    rewrite map_length, seq_length in Hi, Hj.
+    rewrite List_map_nth_in with (a := 0) in Hx; [ | now rewrite seq_length ].
+    rewrite List_map_nth_in with (a := 0) in Hnx; [ | now rewrite seq_length ].
+    destruct Hx as [Hx| ]; [ | easy ].
+    destruct Hnx as [Hnx| ]; [ | easy ].
+    rewrite seq_nth in Hx; [ | easy ].
+    rewrite seq_nth in Hnx; [ | easy ].
+    now rewrite <- Hnx in Hx.
   }
-  split. {
-    intros s Hs i Hi.
-    apply in_map_iff in Hs.
-    destruct Hs as (j & Hjn & Hjs); subst s.
-    apply in_seq in Hjs.
-    destruct Hi as [Hi| ]; [ now subst j | easy ].
-  }
-  split. {
-Search (concat _ (seq _ _)).
 ...
-    rewrite <- flat_map_concat_map.
-    rewrite List_flat_map_length.
-    rewrite <- map_map.
-    rewrite map_length.
-    rewrite concat_length.
-...
-assert (H1 : ∀ p, is_partition n p ↔ p ∈ raw_partitions n).
+  now is_partition_iff (proj1 (H2 _) H1) as H3.
+}
 ...
 1→0 = 0 radix 1
 2→1 = 01 radix 2
