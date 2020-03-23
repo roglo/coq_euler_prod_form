@@ -262,6 +262,26 @@ Definition is_partition n p :=
 assert (H2 : is_partition n (map (λ i, [i]) (seq 0 n))). {
   split. {
     intros s Hs.
+    apply in_map_iff in Hs.
+    destruct Hs as (i & Hin & His); subst s.
+    apply in_seq in His.
+    constructor; constructor.
+  }
+  split. {
+    intros s Hs i Hi.
+    apply in_map_iff in Hs.
+    destruct Hs as (j & Hjn & Hjs); subst s.
+    apply in_seq in Hjs.
+    destruct Hi as [Hi| ]; [ now subst j | easy ].
+  }
+  split. {
+Search (concat _ (seq _ _)).
+...
+    rewrite <- flat_map_concat_map.
+    rewrite List_flat_map_length.
+    rewrite <- map_map.
+    rewrite map_length.
+    rewrite concat_length.
 ...
 assert (H1 : ∀ p, is_partition n p ↔ p ∈ raw_partitions n).
 ...
