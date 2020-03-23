@@ -239,6 +239,11 @@ assert (H : map (λ i, [i]) (seq 0 n) ∈ raw_partitions n). {
   unfold raw_partitions.
 Compute (nth 27 (raw_partitions 4) []).
 Compute (nth 194 (raw_partitions 5) []).
+(* some ideas: *)
+Definition is_partition n p :=
+...
+assert (H1 : ∀ p, is_partition n p ↔ p ∈ raw_partitions n).
+assert (H2 : is_partition (map (λ i, [i]) (seq 0 n))).
 ...
 1→0 = 0 radix 1
 2→1 = 01 radix 2
