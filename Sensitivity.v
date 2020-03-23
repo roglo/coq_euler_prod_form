@@ -227,13 +227,38 @@ Theorem x_bs_ge_s : ∀ n f x,
 Proof.
 intros.
 unfold local_block_sensitivity, local_sensitivity.
+(*
 rewrite <- map_map.
 unfold loc_sens_list.
 unfold loc_bl_sens_list.
+*)
 (* among all partitions, there must exist one which is exactly
     [[0]; [1]; [2]; ... ; [n-1]]
    I believe it is this one which corresponds to local_sensitivity *)
 assert (H : map (λ i, [i]) (seq 0 n) ∈ raw_partitions n). {
+  unfold raw_partitions.
+Compute (nth 27 (raw_partitions 4) []).
+Compute (nth 194 (raw_partitions 5) []).
+...
+1→0 = 0 radix 1
+2→1 = 01 radix 2
+3→5 = 012 radix 3
+4→27 = 0123 radix 4
+1*n^2 + 2*n^1 + 3*n^0
+(n-1)n^0+(n-2)n^1+(n-3)^n^2+...+1*n^(n-2)+0*n^(n-1)
+  Σ (i=0,n-1) i*n^(n-1-i)
+= Σ (i=0,n-1) (n-1-i)*n^i
+
+map (λ i, [i]) (seq 0 n) = nth ... (raw_partitions n) []
+...
+}
+apply in_split in H.
+destruct H as (l1 & l2 & Hll).
+rewrite Hll.
+(* prove that the "map (λ i, [i]) (seq 0 n)" has the maximum length *)
+...
+(* previous attempt to prove
+    map (λ i, [i]) (seq 0 n) ∈ raw_partitions n *)
   unfold raw_partitions.
   assert (H : map (λ i, [i]) (seq 0 n) = dispatch n (seq 0 n)). {
     unfold dispatch.
@@ -244,12 +269,26 @@ assert (H : map (λ i, [i]) (seq 0 n) ∈ raw_partitions n). {
       assert (H : ∀ i s n r, length r = n → [] ∉ disp_loop i (seq s n) r). {
         clear.
         intros i s n r Hr Ha.
-...
         revert i s r Hr Ha.
         induction n; intros i s r Hr Ha. {
           now apply length_zero_iff_nil in Hr; subst r.
         }
         cbn in Ha.
+...
+destruct n. {
+  cbn in Ha.
+  destruct r as [| r1]; [ easy | ].
+  destruct r; [ | easy ].
+  cbn in Ha.
+  destruct s. {
+    cbn in Ha.
+    now destruct Ha.
+  }
+  cbn in Ha.
+  destruct Ha as [Ha| Ha]. {
+...
+  unfold set_nth in Ha.
+...
         specialize (IHn (i + 1) (S s)) as H1.
         specialize (H1 (set_nth s r (i :: nth s r []))).
 ...
