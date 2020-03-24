@@ -239,6 +239,9 @@ intros.
 split; intros Hn. {
   destruct Hn as (Hnn & Hsort & Hlt & Hlen & Hnd).
   unfold raw_partitions.
+(* ouais, je le sens moyen, là ; l'induction n ci-dessous n'a pas
+   trop l'air de marcher ; et pis, peut-être que count_upto_n_to_n
+   et dispatch, c'est trop à la fois pour Coq *)
 ...
   revert p Hnn Hsort Hlt Hlen Hnd.
   induction n; intros. {
