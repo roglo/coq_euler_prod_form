@@ -224,6 +224,7 @@ Qed.
 Definition s := sensitivity.
 Definition bs := block_sensitivity.
 
+(*
 Require Import Sorting.
 
 Definition is_partition n p :=
@@ -267,6 +268,7 @@ split; intros Hn. {
     destruct a. {
       ...
 ...
+*)
 
 Theorem x_bs_ge_s : ∀ n f x,
   local_block_sensitivity n f x ≥ local_sensitivity n f x.
@@ -282,6 +284,9 @@ unfold loc_bl_sens_list.
     [[0]; [1]; [2]; ... ; [n-1]]
    I believe it is this one which corresponds to local_sensitivity *)
 assert (H : map (λ i, [i]) (seq 0 n) ∈ raw_partitions n). {
+(* mouais, la définition de is_partition ne marche peut-être pas
+   bien parce que la preuve que is_partition ↔ raw_partition a
+   l'air plus compliquée que prévu ; du coup, code inutile...
   assert (H1 : is_partition n (map (λ i, [i]) (seq 0 n))). {
     split. {
       intros s Hs Hns.
@@ -327,6 +332,8 @@ assert (H : map (λ i, [i]) (seq 0 n) ∈ raw_partitions n). {
 ...
   now is_partition_iff (proj1 (H2 _) H1) as H3.
 }
+*)
+  idtac.
 ...
 1→0 = 0 radix 1
 2→1 = 01 radix 2
