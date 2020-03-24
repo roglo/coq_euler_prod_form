@@ -238,16 +238,15 @@ Theorem is_partition_iff : ∀ n p, is_partition n p ↔ p ∈ raw_partitions n.
 Proof.
 intros.
 split; intros Hn. {
-  destruct Hn as (Hsort & Hlt & Hlen & Hdiff).
+  destruct Hn as (Hsort & Hlt & Hlen & Hnd).
   unfold raw_partitions.
   destruct n. {
     cbn.
     destruct p as [| l ll]; [ now left | right ].
     destruct l as [| a]. {
       cbn in Hlen.
-      cbn - [ nth ] in Hdiff.
+      cbn in Hnd.
       destruct ll as [| l]. {
-        cbn - [ nth ] in Hdiff.
 Compute (raw_partitions 0).
 (* contradiction : si n=0, p peut être une liste contenant une ou plusieurs
    listes vides. Dans ce cas, il est bien "is_partition" mais n'appartient
