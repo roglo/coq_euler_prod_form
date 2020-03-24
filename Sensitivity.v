@@ -242,6 +242,12 @@ intros.
 split; intros Hn. {
   destruct Hn as (Hsort & Hlt & Hlen & Hdiff).
   unfold raw_partitions.
+  destruct n. {
+    cbn.
+    destruct p as [| l ll]; [ now left | right ].
+    destruct l as [| a]. {
+      cbn in Hlen.
+      cbn - [ nth ] in Hdiff.
 ...
 
 Theorem x_bs_ge_s : ∀ n f x,
