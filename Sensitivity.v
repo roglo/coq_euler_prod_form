@@ -229,6 +229,7 @@ Require Import Sorting.
 Check NoDup.
 
 Definition is_partition n p :=
+  (∀ s, s ∈ p → s ≠ []) ∧
   (∀ s, s ∈ p → Sorted Nat.lt s) ∧
   (∀ s, s ∈ p → ∀ i, i ∈ s → i < n) ∧
   length (concat p) = n ∧
@@ -238,23 +239,14 @@ Theorem is_partition_iff : ∀ n p, is_partition n p ↔ p ∈ raw_partitions n.
 Proof.
 intros.
 split; intros Hn. {
-  destruct Hn as (Hsort & Hlt & Hlen & Hnd).
+  destruct Hn as (Hnn & Hsort & Hlt & Hlen & Hnd).
   unfold raw_partitions.
   destruct n. {
     cbn.
     destruct p as [| l ll]; [ now left | right ].
     destruct l as [| a]. {
-      cbn in Hlen.
-      cbn in Hnd.
-      destruct ll as [| l]. {
-Compute (raw_partitions 0).
-(* contradiction : si n=0, p peut être une liste contenant une ou plusieurs
-   listes vides. Dans ce cas, il est bien "is_partition" mais n'appartient
-   pourtant pas à "raw_partitions 0" *)
-Print dispatch.
-Print raw_partitions.
-(* pourquoi "raw_partitions 0" renvoit "[[]]" alors qu'il filtre les
-   listes vides ? *)
+      now specialize (Hnn [] (or_introl eq_refl)).
+    }
 ...
 
 Theorem x_bs_ge_s : ∀ n f x,
