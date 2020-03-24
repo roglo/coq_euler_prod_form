@@ -334,6 +334,7 @@ assert (H : map (λ i, [i]) (seq 0 n) ∈ raw_partitions n). {
 }
 *)
   idtac.
+Compute (nth 27 (raw_partitions 4) []).
 ...
 1→0 = 0 radix 1
 2→1 = 01 radix 2
