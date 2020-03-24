@@ -254,6 +254,10 @@ Compute (raw_partitions 0).
 (* contradiction : si n=0, p peut être une liste contenant une ou plusieurs
    listes vides. Dans ce cas, il est bien "is_partition" mais n'appartient
    pourtant pas à "raw_partitions 0" *)
+Print dispatch.
+Print raw_partitions.
+(* pourquoi "raw_partitions 0" renvoit "[[]]" alors qu'il filtre les
+   listes vides ? *)
 ...
 
 Theorem x_bs_ge_s : ∀ n f x,
