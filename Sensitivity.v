@@ -226,15 +226,13 @@ Definition bs := block_sensitivity.
 
 Require Import Sorting.
 
+Check NoDup.
+
 Definition is_partition n p :=
   (∀ s, s ∈ p → Sorted Nat.lt s) ∧
   (∀ s, s ∈ p → ∀ i, i ∈ s → i < n) ∧
   length (concat p) = n ∧
-  (∀ i j,
-   i < length p
-   → j < length p
-   → i ≠ j
-   → ∀ x, x ∈ nth i p [] → x ∉ nth j p []).
+  NoDup (concat p).
 
 Theorem is_partition_iff : ∀ n p, is_partition n p ↔ p ∈ raw_partitions n.
 Proof.
@@ -298,15 +296,17 @@ assert (H : map (λ i, [i]) (seq 0 n) ∈ raw_partitions n). {
       f_equal; apply IHn.
     }
     clear x.
-    intros * Hi Hj Hij x Hx Hnx.
-    rewrite map_length, seq_length in Hi, Hj.
-    rewrite List_map_nth_in with (a := 0) in Hx; [ | now rewrite seq_length ].
-    rewrite List_map_nth_in with (a := 0) in Hnx; [ | now rewrite seq_length ].
-    destruct Hx as [Hx| ]; [ | easy ].
-    destruct Hnx as [Hnx| ]; [ | easy ].
-    rewrite seq_nth in Hx; [ | easy ].
-    rewrite seq_nth in Hnx; [ | easy ].
-    now rewrite <- Hnx in Hx.
+    remember 0 as s; clear Heqs.
+    revert s.
+    induction n; intros s; [ constructor | cbn ].
+    constructor; [ | apply IHn ].
+    intros H.
+    rewrite <- flat_map_concat_map in H.
+    apply in_flat_map in H.
+    destruct H as (x & Hx & Hsx).
+    apply in_seq in Hx.
+    destruct Hsx as [Hsx| ]; [ | easy ].
+    subst x; flia Hx.
   }
 ...
   now is_partition_iff (proj1 (H2 _) H1) as H3.
