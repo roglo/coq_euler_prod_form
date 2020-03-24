@@ -248,6 +248,12 @@ split; intros Hn. {
     destruct l as [| a]. {
       cbn in Hlen.
       cbn - [ nth ] in Hdiff.
+      destruct ll as [| l]. {
+        cbn - [ nth ] in Hdiff.
+Compute (raw_partitions 0).
+(* contradiction : si n=0, p peut être une liste contenant une ou plusieurs
+   listes vides. Dans ce cas, il est bien "is_partition" mais n'appartient
+   pourtant pas à "raw_partitions 0" *)
 ...
 
 Theorem x_bs_ge_s : ∀ n f x,
