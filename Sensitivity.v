@@ -265,6 +265,12 @@ unfold loc_bl_sens_list.
 assert (H : map (λ i, [i]) (seq 0 n) ∈ raw_partitions n). {
   assert (H1 : is_partition n (map (λ i, [i]) (seq 0 n))). {
     split. {
+      intros s Hs Hns.
+      apply in_map_iff in Hs.
+      destruct Hs as (i & Hin & His).
+      now rewrite <- Hin in Hns.
+    }
+    split. {
       intros s Hs.
       apply in_map_iff in Hs.
       destruct Hs as (i & Hin & His); subst s.
