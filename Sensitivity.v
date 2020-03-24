@@ -239,6 +239,7 @@ intros.
 split; intros Hn. {
   destruct Hn as (Hnn & Hsort & Hlt & Hlen & Hnd).
   unfold raw_partitions.
+...
   revert p Hnn Hsort Hlt Hlen Hnd.
   induction n; intros. {
     cbn.
