@@ -226,8 +226,6 @@ Definition bs := block_sensitivity.
 
 Require Import Sorting.
 
-Check NoDup.
-
 Definition is_partition n p :=
   (∀ s, s ∈ p → s ≠ []) ∧
   (∀ s, s ∈ p → Sorted Nat.lt s) ∧
@@ -241,12 +239,29 @@ intros.
 split; intros Hn. {
   destruct Hn as (Hnn & Hsort & Hlt & Hlen & Hnd).
   unfold raw_partitions.
-  destruct n. {
+  revert p Hnn Hsort Hlt Hlen Hnd.
+  induction n; intros. {
     cbn.
     destruct p as [| l ll]; [ now left | right ].
+    destruct l as [| a]; [ | easy ].
+    now specialize (Hnn [] (or_introl eq_refl)).
+  }
+  destruct n. {
+    cbn; left.
+    destruct p as [| l ll]; [ easy | ].
     destruct l as [| a]. {
-      now specialize (Hnn [] (or_introl eq_refl)).
+      now specialize (Hnn [] (or_introl eq_refl)) as H1.
     }
+    cbn in Hlen, Hnd.
+    apply Nat.succ_inj in Hlen.
+    apply length_zero_iff_nil in Hlen.
+    apply app_eq_nil in Hlen.
+    destruct Hlen as (Hl, Hlen); subst l.
+    cbn in Hnd.
+    destruct ll as [| l ll]. {
+...
+    destruct a. {
+      ...
 ...
 
 Theorem x_bs_ge_s : ∀ n f x,
