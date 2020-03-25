@@ -270,13 +270,24 @@ split; intros Hn. {
 ...
 *)
 
+(*
+Theorem loc_loc_bl_sens_list : ∀ n f g x,
+  g (loc_sens_list n f x) =
+  loc_bl_sens_list (g (seq 0 n)) f x.
+Theorem fold_right_max_map : ∀ A f (l : list A),
+  fold_right max 0 (map f l) =
+  fold_right (λ x a, max (f x) a) 0 l.
+... to be proven if useful
+*)
+
 Theorem x_bs_ge_s : ∀ n f x,
   local_block_sensitivity n f x ≥ local_sensitivity n f x.
 Proof.
 intros.
 unfold local_block_sensitivity, local_sensitivity.
-unfold loc_sens_list.
-unfold loc_bl_sens_list.
+cbn.
+Search (map (λ _, length _)).
+...
 (*
 rewrite <- map_map.
 *)
