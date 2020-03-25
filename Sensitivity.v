@@ -275,10 +275,10 @@ Theorem x_bs_ge_s : ∀ n f x,
 Proof.
 intros.
 unfold local_block_sensitivity, local_sensitivity.
-(*
-rewrite <- map_map.
 unfold loc_sens_list.
 unfold loc_bl_sens_list.
+(*
+rewrite <- map_map.
 *)
 (* among all partitions, there must exist one which is exactly
     [[0]; [1]; [2]; ... ; [n-1]]
