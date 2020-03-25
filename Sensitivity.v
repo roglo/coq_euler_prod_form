@@ -280,13 +280,20 @@ Theorem fold_right_max_map : ∀ A f (l : list A),
 ... to be proven if useful
 *)
 
+Theorem bs_ge_s : ∀ n f, bs n f ≥ s n f.
+Proof.
+intros.
+unfold bs, s.
+unfold block_sensitivity, sensitivity.
+...
+
 Theorem x_bs_ge_s : ∀ n f x,
   local_block_sensitivity n f x ≥ local_sensitivity n f x.
 Proof.
 intros.
 unfold local_block_sensitivity, local_sensitivity.
 cbn.
-Search (map (λ _, length _)).
+unfold loc_sens_list.
 ...
 (*
 rewrite <- map_map.
