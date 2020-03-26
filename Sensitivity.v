@@ -114,22 +114,22 @@ Definition Hamming_distance x y := count_ones (Nat.lxor x y).
 (* To define local_block_sensitivity later, we need an algorithm to
    generate all lists of disjoint blocks *)
 
-Fixpoint next_in_base n dl :=
+Fixpoint next_in_radix n dl :=
   match dl with
   | [] => [1]
   | d :: dl' =>
       if lt_dec (d + 1) n then (d + 1) :: dl'
-      else 0 :: next_in_base n dl'
+      else 0 :: next_in_radix n dl'
   end.
 
-Fixpoint count_in_base n start len :=
+Fixpoint count_in_radix n start len :=
   match len with
   | 0 => []
-  | S len' => start :: count_in_base n (next_in_base n start) len'
+  | S len' => start :: count_in_radix n (next_in_radix n start) len'
   end.
 
 Definition count_upto_n_to_n n :=
-  map (@rev nat) (count_in_base n (repeat 0 n) (n ^ n)).
+  map (@rev nat) (count_in_radix n (repeat 0 n) (n ^ n)).
 
 Compute (count_upto_n_to_n 3).
 
@@ -249,10 +249,14 @@ split; intros Hn. {
    valeur entre 0 et n^n
  *)
 Print count_upto_n_to_n.
-Print count_in_base.
-Print next_in_base.
+(* conversion i (nat) to radix n (nat) returning a list of n digits
+   en base n *)
+Definition to_radix n i :=
+...
+Print count_in_radix.
+Print next_in_radix.
 Compute (count_upto_n_to_n 3).
-Compute (count_in_base 3 (repeat 0 3) 10).
+Compute (count_in_radix 3 (repeat 0 3) 10).
 ...
   destruct n; [ easy | clear Hnz ].
   destruct n. {
