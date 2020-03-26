@@ -240,6 +240,10 @@ intros * Hnz.
 split; intros Hn. {
   destruct Hn as (Hel & Hne & Hu & Hi).
   unfold raw_partitions.
+(* est-ce qu'une induction sur n a du sens ?
+   ci-dessous, ça a l'air d'être vrai pour n=0 et n=1 mais quelle
+   induction ? *)
+...
   destruct n; [ easy | clear Hnz ].
   destruct n. {
     cbn.
