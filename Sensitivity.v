@@ -304,12 +304,23 @@ intros.
 apply length_loc_loc_bl_sens_list.
 Qed.
 
+Theorem map_loc_sens : ∀ n f l,
+  map (local_sensitivity n f) l =
+  map (λ x, length (loc_bl_sens_list (map (λ i, [i]) (seq 0 n)) f x)) l.
+Proof.
+intros.
+induction l; cbn; [ easy | ].
+rewrite <- loc_length_loc_bl_sens_list; f_equal.
+apply IHl.
+Qed.
+
 Theorem bs_ge_s : ∀ n f, bs n f ≥ s n f.
 Proof.
 intros.
 unfold bs, s.
 unfold block_sensitivity, sensitivity.
-Print local_block_sensitivity.
+rewrite map_loc_sens.
+unfold local_block_sensitivity.
 ...
 unfold local_block_sensitivity, local_sensitivity.
 ...
