@@ -280,11 +280,59 @@ Theorem fold_right_max_map : ∀ A f (l : list A),
 ... to be proven if useful
 *)
 
+Theorem length_loc_loc_bl_sens_list : ∀ n f x,
+  length (loc_sens_list n f x) =
+  length (loc_bl_sens_list (map (λ i, [i]) (seq 0 n)) f x).
+Proof.
+intros.
+unfold loc_sens_list.
+unfold loc_bl_sens_list.
+cbn; unfold "^^"; cbn.
+remember 0 as s eqn:Hs; clear Hs.
+revert s.
+induction n; intros s; cbn; [ easy | ].
+remember (negb (Bool.eqb (f x) (f (Nat_togglebit s x)))) as b eqn:Hb.
+symmetry in Hb.
+destruct b; [ cbn; f_equal; apply IHn | apply IHn ].
+Qed.
+
+Theorem loc_length_loc_bl_sens_list : ∀ n f x,
+  local_sensitivity n f x =
+  length (loc_bl_sens_list (map (λ i, [i]) (seq 0 n)) f x).
+Proof.
+intros.
+apply length_loc_loc_bl_sens_list.
+Qed.
+
 Theorem bs_ge_s : ∀ n f, bs n f ≥ s n f.
 Proof.
 intros.
 unfold bs, s.
 unfold block_sensitivity, sensitivity.
+Print local_block_sensitivity.
+...
+unfold local_block_sensitivity, local_sensitivity.
+...
+loc_sens_list = 
+λ (n : nat) (f : nat → bool) (x : nat),
+  filter (λ i : nat, negb (Bool.eqb (f x) (f (x ^^ [i])))) (seq 0 n)
+     : nat → (nat → bool) → nat → list nat
+...
+loc_bl_sens_list = 
+λ (Bl : list (list nat)) (f : nat → bool) (x : nat),
+  filter (λ Bi : list nat, negb (Bool.eqb (f x) (f (x ^^ Bi)))) Bl
+     : list (list nat) → (nat → bool) → nat → list (list nat)
+...
+local_block_sensitivity = 
+λ (n : nat) (f : nat → bool) (x : nat),
+  fold_right Init.Nat.max 0
+    (map (λ Bl : list (list nat), length (loc_bl_sens_list Bl f x))
+       (raw_partitions n))
+     : nat → (nat → bool) → nat → nat
+...
+local_sensitivity = 
+λ (n : nat) (f : nat → bool) (x : nat), length (loc_sens_list n f x)
+     : nat → (nat → bool) → nat → nat
 ...
 
 Theorem x_bs_ge_s : ∀ n f x,
