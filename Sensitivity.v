@@ -340,6 +340,7 @@ unfold local_block_sensitivity.
     [[0]; [1]; [2]; ... ; [n-1]]
    I believe it is this one which corresponds to local_sensitivity *)
 assert (H : map (λ i, [i]) (seq 0 n) ∈ raw_partitions n). {
+  unfold raw_partitions.
 ...
 (* mouais, la définition de is_partition ne marche peut-être pas
    bien parce que la preuve que is_partition ↔ raw_partition a
