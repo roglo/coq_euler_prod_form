@@ -142,26 +142,18 @@ Definition is_nil {A} (l : list A) :=
   | _ => false
   end.
 
-Fixpoint disp_loop i (l : list nat) (r : list (list nat)) :=
-  match l with
-  | [] => r
-  | j :: l' => disp_loop (i + 1) l' (set_nth j r (i :: nth j r []))
+Fixpoint disp_loop n i v r :=
+  match i with
+  | 0 => r
+  | S i' =>
+      disp_loop n i' (v / n) (set_nth (v mod n) r (i' :: nth (v mod n) r []))
   end.
 
-(*
-Definition disp_loop' i (l : list nat) (r : list (list nat)) :=
-  fold_left (λ '(r, i) j, (set_nth j r (i :: nth j r []), i+1)) l (r, i).
-*)
-
-Compute (map (@rev nat) (filter (λ l, negb (is_nil l)) (disp_loop 0 [0; 0; 0] (repeat [] 3)))).
-Compute (map (@rev nat) (filter (λ l, negb (is_nil l)) (disp_loop 0 [0; 0; 1] (repeat [] 3)))).
-Compute (map (@rev nat) (filter (λ l, negb (is_nil l)) (disp_loop 0 [0; 0; 2] (repeat [] 3)))).
-
-Definition dispatch n l :=
-  map (@rev nat) (filter (λ l, negb (is_nil l)) (disp_loop 0 l (repeat [] n))).
+Definition dispatch n i :=
+  filter (λ l, negb (is_nil l)) (disp_loop n n i (repeat [] n)).
 
 Definition raw_partitions n :=
-  map (dispatch n) (count_upto_n_to_n n).
+  map (dispatch n) (seq 0 (n ^ n)).
 
 Compute (raw_partitions 4).
 
@@ -211,19 +203,6 @@ Definition block_sensitivity n f :=
 
 (* Proving Theorem: bs(f) ≥ s(f) *)
 
-Theorem disp_loop_app : ∀ i la lb r,
-  disp_loop i (la ++ lb) r =
-  disp_loop (i + length la) lb (disp_loop i la r).
-Proof.
-intros.
-revert i lb r.
-induction la as [| j]; intros; cbn; [ now rewrite Nat.add_0_r | ].
-now rewrite IHla, <- Nat.add_assoc.
-Qed.
-
-Definition s := sensitivity.
-Definition bs := block_sensitivity.
-
 Require Import Sorting.
 
 (* partition of {0,1,..,n-1} *)
@@ -240,144 +219,7 @@ intros * Hnz.
 split; intros Hn. {
   destruct Hn as (Hel & Hne & Hu & Hi).
   unfold raw_partitions.
-(* est-ce qu'une induction sur n a du sens ?
-   ci-dessous, ça a l'air d'être vrai pour n=0 et n=1 mais quelle
-   induction ? *)
-(* y a un truc possible avec count_up_to_n_to_n : ce sont des nombres
-   en base n et dans l'ordre, donc c'est une sorte de map ... (seq 0 (n^n))
-   d'où la possibilité peut-être de raisonner par récurrence sur cette
-   valeur entre 0 et n^n
- *)
-Print count_upto_n_to_n.
-Compute (count_upto_n_to_n 3).
-(* conversion i (nat) to radix n (nat) returning a list of digits *)
-Fixpoint to_radix_loop it n i :=
-  match it with
-  | 0 => []
-  | S it' =>
-      if Nat.eq_dec i 0 then []
-      else i mod n :: to_radix_loop it' n (i / n)
-  end.
-Definition to_radix n i := to_radix_loop i n i.
-Compute (map (to_radix 3) (seq 0 (3 ^ 3))).
-Compute (map (dispatch 3) (map (to_radix 3) (seq 0 (3 ^ 3)))).
-Print dispatch.
-Print disp_loop.
-(* mouais non, c'est pas bon, "dispatch" n'est pas adapté à "to_radix"
-   car il demande que l'entrée soit une liste de listes de longueur n,
-   ce n'est pas ce que renvoie to_radix *)
 ...
-Print count_in_radix.
-Print next_in_radix.
-Compute (count_upto_n_to_n 3).
-Compute (count_in_radix 3 (repeat 0 3) 10).
-...
-  destruct n; [ easy | clear Hnz ].
-  destruct n. {
-    cbn.
-    specialize (Hu 0 (Nat.lt_0_succ _)) as H1.
-    destruct H1 as (s & Hsp & H0s).
-    destruct p as [| l ll]; [ easy | ].
-    destruct ll as [| l2]. {
-      destruct Hsp as [Hsp| ]; [ | easy ].
-      subst s.
-      destruct l as [| a la]; [ easy | ].
-      destruct (Nat.eq_dec a 0) as [Hnz| Hnz]. {
-        subst a.
-        destruct la as [| a2]; [ now left | right ].
-        specialize (Hel _ (or_introl eq_refl) a2) as H1.
-        specialize (H1 (or_intror (or_introl eq_refl))).
-        apply Nat.lt_1_r in H1; subst a2.
-        cbn in Hi.
-        rewrite app_nil_r in Hi.
-        apply NoDup_cons_iff in Hi.
-        destruct Hi as (Hi, _).
-        now apply Hi; left.
-      } {
-        right.
-        specialize (Hel _ (or_introl eq_refl) a) as H1.
-        specialize (H1 (or_introl eq_refl)).
-        flia Hnz H1.
-      }
-    } {
-      right.
-      rename l into l1.
-      destruct l1 as [| a1]. {
-        now specialize (Hne [] (or_introl eq_refl)) as H1.
-      }
-      destruct l2 as [| a2]. {
-        now specialize (Hne [] (or_intror (or_introl eq_refl))) as H1.
-      }
-      specialize (Hel (a1 :: l1) (or_introl eq_refl) a1) as H1.
-      specialize (H1 (or_introl eq_refl)).
-      apply Nat.lt_1_r in H1.
-      specialize (Hel (a2 :: l2) (or_intror (or_introl eq_refl)) a2) as H2.
-      specialize (H2 (or_introl eq_refl)).
-      apply Nat.lt_1_r in H2.
-      cbn in Hi; subst a1 a2.
-      apply NoDup_cons_iff in Hi.
-      destruct Hi as (Hi, _); apply Hi.
-      apply in_or_app; right.
-      now left.
-    }
-  }
-  destruct n. {
-    cbn.
-...
-
-(*
-Definition is_partition n p :=
-  (∀ s, s ∈ p → s ≠ []) ∧
-  (∀ s, s ∈ p → Sorted Nat.lt s) ∧
-  (∀ s, s ∈ p → ∀ i, i ∈ s → i < n) ∧
-  length (concat p) = n ∧
-  NoDup (concat p).
-
-Theorem is_partition_iff : ∀ n p, is_partition n p ↔ p ∈ raw_partitions n.
-Proof.
-intros.
-split; intros Hn. {
-  destruct Hn as (Hnn & Hsort & Hlt & Hlen & Hnd).
-  unfold raw_partitions.
-(* ouais, je le sens moyen, là ; l'induction n ci-dessous n'a pas
-   trop l'air de marcher ; et pis, peut-être que count_upto_n_to_n
-   et dispatch, c'est trop à la fois pour Coq *)
-...
-  revert p Hnn Hsort Hlt Hlen Hnd.
-  induction n; intros. {
-    cbn.
-    destruct p as [| l ll]; [ now left | right ].
-    destruct l as [| a]; [ | easy ].
-    now specialize (Hnn [] (or_introl eq_refl)).
-  }
-  destruct n. {
-    cbn; left.
-    destruct p as [| l ll]; [ easy | ].
-    destruct l as [| a]. {
-      now specialize (Hnn [] (or_introl eq_refl)) as H1.
-    }
-    cbn in Hlen, Hnd.
-    apply Nat.succ_inj in Hlen.
-    apply length_zero_iff_nil in Hlen.
-    apply app_eq_nil in Hlen.
-    destruct Hlen as (Hl, Hlen); subst l.
-    cbn in Hnd.
-    destruct ll as [| l ll]. {
-...
-    destruct a. {
-      ...
-...
-*)
-
-(*
-Theorem loc_loc_bl_sens_list : ∀ n f g x,
-  g (loc_sens_list n f x) =
-  loc_bl_sens_list (g (seq 0 n)) f x.
-Theorem fold_right_max_map : ∀ A f (l : list A),
-  fold_right max 0 (map f l) =
-  fold_right (λ x a, max (f x) a) 0 l.
-... to be proven if useful
-*)
 
 Theorem length_loc_loc_bl_sens_list : ∀ n f x,
   length (loc_sens_list n f x) =
@@ -413,10 +255,9 @@ rewrite <- loc_length_loc_bl_sens_list; f_equal.
 apply IHl.
 Qed.
 
-Theorem bs_ge_s : ∀ n f, bs n f ≥ s n f.
+Theorem bs_ge_s : ∀ n f, block_sensitivity n f ≥ sensitivity n f.
 Proof.
 intros.
-unfold bs, s.
 unfold block_sensitivity, sensitivity.
 rewrite map_loc_sens.
 unfold local_block_sensitivity.
@@ -440,24 +281,7 @@ unfold local_block_sensitivity.
    I believe it is this one which corresponds to local_sensitivity *)
 assert (H : map (λ i, [i]) (seq 0 n) ∈ raw_partitions n). {
   unfold raw_partitions.
-...
-(* mouais, la définition de is_partition ne marche peut-être pas
-   bien parce que la preuve que is_partition ↔ raw_partition a
-   l'air plus compliquée que prévu ; du coup, code inutile...
   assert (H1 : is_partition n (map (λ i, [i]) (seq 0 n))). {
-    split. {
-      intros s Hs Hns.
-      apply in_map_iff in Hs.
-      destruct Hs as (i & Hin & His).
-      now rewrite <- Hin in Hns.
-    }
-    split. {
-      intros s Hs.
-      apply in_map_iff in Hs.
-      destruct Hs as (i & Hin & His); subst s.
-      apply in_seq in His.
-      constructor; constructor.
-    }
     split. {
       intros s Hs i Hi.
       apply in_map_iff in Hs.
@@ -466,12 +290,21 @@ assert (H : map (λ i, [i]) (seq 0 n) ∈ raw_partitions n). {
       destruct Hi as [Hi| ]; [ now subst j | easy ].
     }
     split. {
-      clear.
-      remember 0 as s.
-      clear Heqs.
-      revert s.
-      induction n; intros s; [ easy | cbn ].
-      f_equal; apply IHn.
+      intros s Hs Hns.
+      apply in_map_iff in Hs.
+      destruct Hs as (i & Hin & His).
+      now rewrite <- Hin in Hns.
+    }
+    split. {
+      intros j Hjn.
+      exists [j].
+      split; [ | now left ].
+      apply in_map_iff.
+      exists j.
+      split; [ easy | ].
+      apply in_seq.
+      split; [ | easy ].
+      flia.
     }
     clear x.
     remember 0 as s; clear Heqs.
