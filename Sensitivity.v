@@ -249,9 +249,17 @@ split; intros Hn. {
    valeur entre 0 et n^n
  *)
 Print count_upto_n_to_n.
-(* conversion i (nat) to radix n (nat) returning a list of n digits
-   en base n *)
-Definition to_radix n i :=
+Compute (count_upto_n_to_n 3).
+(* conversion i (nat) to radix n (nat) returning a list of digits *)
+Fixpoint to_radix_loop it n i :=
+  match it with
+  | 0 => []
+  | S it' =>
+      if Nat.eq_dec i 0 then []
+      else i mod n :: to_radix_loop it' n (i / n)
+  end.
+Definition to_radix n i := rev (to_radix_loop i n i).
+Compute (map (to_radix 3) (seq 0 15)).
 ...
 Print count_in_radix.
 Print next_in_radix.
