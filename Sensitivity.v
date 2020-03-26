@@ -224,9 +224,76 @@ Qed.
 Definition s := sensitivity.
 Definition bs := block_sensitivity.
 
-(*
 Require Import Sorting.
 
+(* partition of {0,1,..,n-1} *)
+Definition is_partition n p :=
+  (∀ s, s ∈ p → ∀ i, i ∈ s → i < n) ∧
+  (∀ s, s ∈ p → s ≠ []) ∧
+  (∀ i, i < n → ∃ s, s ∈ p ∧ i ∈ s) ∧
+  NoDup (concat p).
+
+Theorem is_partition_iff : ∀ n p, n ≠ 0 →
+  is_partition n p ↔ p ∈ raw_partitions n.
+Proof.
+intros * Hnz.
+split; intros Hn. {
+  destruct Hn as (Hel & Hne & Hu & Hi).
+  unfold raw_partitions.
+  destruct n; [ easy | clear Hnz ].
+  destruct n. {
+    cbn.
+    specialize (Hu 0 (Nat.lt_0_succ _)) as H1.
+    destruct H1 as (s & Hsp & H0s).
+    destruct p as [| l ll]; [ easy | ].
+    destruct ll as [| l2]. {
+      destruct Hsp as [Hsp| ]; [ | easy ].
+      subst s.
+      destruct l as [| a la]; [ easy | ].
+      destruct (Nat.eq_dec a 0) as [Hnz| Hnz]. {
+        subst a.
+        destruct la as [| a2]; [ now left | right ].
+        specialize (Hel _ (or_introl eq_refl) a2) as H1.
+        specialize (H1 (or_intror (or_introl eq_refl))).
+        apply Nat.lt_1_r in H1; subst a2.
+        cbn in Hi.
+        rewrite app_nil_r in Hi.
+        apply NoDup_cons_iff in Hi.
+        destruct Hi as (Hi, _).
+        now apply Hi; left.
+      } {
+        right.
+        specialize (Hel _ (or_introl eq_refl) a) as H1.
+        specialize (H1 (or_introl eq_refl)).
+        flia Hnz H1.
+      }
+    } {
+      right.
+      rename l into l1.
+      destruct l1 as [| a1]. {
+        now specialize (Hne [] (or_introl eq_refl)) as H1.
+      }
+      destruct l2 as [| a2]. {
+        now specialize (Hne [] (or_intror (or_introl eq_refl))) as H1.
+      }
+      specialize (Hel (a1 :: l1) (or_introl eq_refl) a1) as H1.
+      specialize (H1 (or_introl eq_refl)).
+      apply Nat.lt_1_r in H1.
+      specialize (Hel (a2 :: l2) (or_intror (or_introl eq_refl)) a2) as H2.
+      specialize (H2 (or_introl eq_refl)).
+      apply Nat.lt_1_r in H2.
+      cbn in Hi; subst a1 a2.
+      apply NoDup_cons_iff in Hi.
+      destruct Hi as (Hi, _); apply Hi.
+      apply in_or_app; right.
+      now left.
+    }
+  }
+  destruct n. {
+    cbn.
+...
+
+(*
 Definition is_partition n p :=
   (∀ s, s ∈ p → s ≠ []) ∧
   (∀ s, s ∈ p → Sorted Nat.lt s) ∧
