@@ -243,6 +243,16 @@ split; intros Hn. {
 (* est-ce qu'une induction sur n a du sens ?
    ci-dessous, ça a l'air d'être vrai pour n=0 et n=1 mais quelle
    induction ? *)
+(* y a un truc possible avec count_up_to_n_to_n : ce sont des nombres
+   en base n et dans l'ordre, donc c'est une sorte de map ... (seq 0 (n^n))
+   d'où la possibilité peut-être de raisonner par récurrence sur cette
+   valeur entre 0 et n^n
+ *)
+Print count_upto_n_to_n.
+Print count_in_base.
+Print next_in_base.
+Compute (count_upto_n_to_n 3).
+Compute (count_in_base 3 (repeat 0 3) 10).
 ...
   destruct n; [ easy | clear Hnz ].
   destruct n. {
