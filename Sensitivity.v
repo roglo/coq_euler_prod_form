@@ -258,8 +258,12 @@ Fixpoint to_radix_loop it n i :=
       if Nat.eq_dec i 0 then []
       else i mod n :: to_radix_loop it' n (i / n)
   end.
-Definition to_radix n i := rev (to_radix_loop i n i).
-Compute (map (to_radix 3) (seq 0 15)).
+Definition to_radix n i := to_radix_loop i n i.
+Compute (map (to_radix 3) (seq 0 (3 ^ 3))).
+Compute (map (dispatch 3) (map (to_radix 3) (seq 0 (3 ^ 3)))).
+(* mouais non, c'est pas bon, "dispatch" n'est pas adapté à "to_radix"
+   car il demande que l'entrée soit une liste de listes de longueur n,
+   ce n'est pas ce que renvoie to_radix *)
 ...
 Print count_in_radix.
 Print next_in_radix.
