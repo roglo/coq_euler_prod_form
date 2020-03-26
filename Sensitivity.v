@@ -321,38 +321,19 @@ unfold bs, s.
 unfold block_sensitivity, sensitivity.
 rewrite map_loc_sens.
 unfold local_block_sensitivity.
+Print loc_bl_sens_list.
+Abort. (*
 ...
 unfold local_block_sensitivity, local_sensitivity.
 ...
-loc_sens_list = 
-λ (n : nat) (f : nat → bool) (x : nat),
-  filter (λ i : nat, negb (Bool.eqb (f x) (f (x ^^ [i])))) (seq 0 n)
-     : nat → (nat → bool) → nat → list nat
-...
-loc_bl_sens_list = 
-λ (Bl : list (list nat)) (f : nat → bool) (x : nat),
-  filter (λ Bi : list nat, negb (Bool.eqb (f x) (f (x ^^ Bi)))) Bl
-     : list (list nat) → (nat → bool) → nat → list (list nat)
-...
-local_block_sensitivity = 
-λ (n : nat) (f : nat → bool) (x : nat),
-  fold_right Init.Nat.max 0
-    (map (λ Bl : list (list nat), length (loc_bl_sens_list Bl f x))
-       (raw_partitions n))
-     : nat → (nat → bool) → nat → nat
-...
-local_sensitivity = 
-λ (n : nat) (f : nat → bool) (x : nat), length (loc_sens_list n f x)
-     : nat → (nat → bool) → nat → nat
-...
+*)
 
 Theorem x_bs_ge_s : ∀ n f x,
   local_block_sensitivity n f x ≥ local_sensitivity n f x.
 Proof.
 intros.
-unfold local_block_sensitivity, local_sensitivity.
-cbn.
-unfold loc_sens_list.
+rewrite loc_length_loc_bl_sens_list.
+unfold local_block_sensitivity.
 ...
 (*
 rewrite <- map_map.
