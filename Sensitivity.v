@@ -328,6 +328,8 @@ unfold local_block_sensitivity, local_sensitivity.
 ...
 *)
 
+(* chais pas si c'est vrai, ça, mais si ça l'est, ça implique le
+   truc ci-dessus *)
 Theorem x_bs_ge_s : ∀ n f x,
   local_block_sensitivity n f x ≥ local_sensitivity n f x.
 Proof.
