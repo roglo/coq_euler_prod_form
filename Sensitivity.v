@@ -336,14 +336,11 @@ Proof.
 intros.
 rewrite loc_length_loc_bl_sens_list.
 unfold local_block_sensitivity.
-...
-(*
-rewrite <- map_map.
-*)
 (* among all partitions, there must exist one which is exactly
     [[0]; [1]; [2]; ... ; [n-1]]
    I believe it is this one which corresponds to local_sensitivity *)
 assert (H : map (λ i, [i]) (seq 0 n) ∈ raw_partitions n). {
+...
 (* mouais, la définition de is_partition ne marche peut-être pas
    bien parce que la preuve que is_partition ↔ raw_partition a
    l'air plus compliquée que prévu ; du coup, code inutile...
