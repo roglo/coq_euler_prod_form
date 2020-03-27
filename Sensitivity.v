@@ -219,6 +219,12 @@ intros * Hnz.
 split; intros Hn. {
   destruct Hn as (Hel & Hne & Hu & Hi).
   unfold raw_partitions.
+Print dispatch.
+(* peut-être qu'il ne faut pas enlever les nil, et conserver plutôt
+   la propriété que toutes les partitions retournées par raw_partitions
+   soient de même taille : n, et donc qu'il puisse y avoir des listes
+   (ensembles) vides parmi elles ; dans ce cas, faudra enlever aussi
+   la propriété s≠[], et la remplacer par length p = n *)
 ...
 
 Theorem length_loc_loc_bl_sens_list : ∀ n f x,
