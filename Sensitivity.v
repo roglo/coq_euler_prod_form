@@ -239,6 +239,14 @@ Compute (find_in_nth nat_in_list 0 [[]; [0; 2]; [1]]).
 Compute (find_in_nth nat_in_list 1 [[]; [0; 2]; [1]]).
 Compute (find_in_nth nat_in_list 2 [[]; [0; 2]; [1]]).
 Compute (find_in_nth nat_in_list 3 [[]; [0; 2]; [1]]).
+(* locate: inverse of "dispatch" *)
+Definition locate ll :=
+  map (λ i, find_in_nth nat_in_list i ll) (seq 0 (length ll)).
+Compute (locate [[]; [0; 2]; [1]]).
+Compute (dispatch 3 16).
+Compute (locate [[2]; []; [0; 1]]).
+Compute (dispatch 3 24).
+Compute (map locate (raw_partitions 3)).
 ...
 
 Theorem length_loc_loc_bl_sens_list : ∀ n f x,
