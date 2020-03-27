@@ -302,21 +302,16 @@ rewrite disp_loop_length; [ | flia Hin | apply repeat_length ].
 rewrite repeat_length.
 revert n Hin.
 induction i; intros. {
-  replace (map _ (seq 0 n)) with (seq 0 n). 2: {
-    symmetry.
-    specialize (disp_loop_0_r n n []) as H1.
-    assert (Hnz : n ≠ 0) by flia Hin.
-    specialize (H1 Hnz).
-    replace ([] :: repeat [] (n - 1)) with
+  specialize (disp_loop_0_r n n []) as H1.
+  assert (Hnz : n ≠ 0) by flia Hin.
+  specialize (H1 Hnz).
+  replace ([] :: repeat [] (n - 1)) with
       (repeat ([] : list nat) n) in H1. 2: {
-      destruct n; [ easy | ].
-      now cbn; rewrite Nat.sub_0_r.
-    }
-    rewrite app_nil_r in H1.
-    rewrite H1; clear H1.
-    clear.
-    induction n; [ easy | ].
-    cbn; f_equal.
+    destruct n; [ easy | ].
+    now cbn; rewrite Nat.sub_0_r.
+  }
+  rewrite app_nil_r in H1.
+  rewrite H1; clear H1.
 ...
 (*
 Compute (let n := 4 in map (λ i : nat, find_in_nth nat_in_list i (disp_loop n n 0 (repeat [] n))) (seq 0 n)).
