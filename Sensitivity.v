@@ -155,6 +155,8 @@ Definition raw_partitions n := map (dispatch n) (seq 0 (n ^ n)).
 
 Compute (raw_partitions 4).
 
+(* *)
+
 Fixpoint list_nat_le la lb :=
   match (la, lb) with
   | ([], _) => true
@@ -205,11 +207,51 @@ Definition block_sensitivity n f :=
 Require Import Sorting.
 
 (* property of partitions of {0,1,..,n-1} returned by raw_partitions *)
+
 Definition is_partition n p :=
   length p = n ∧
   (∀ s, s ∈ p → ∀ i, i ∈ s → i < n) ∧
   (∀ i, i < n → ∃ s, s ∈ p ∧ i ∈ s) ∧
   NoDup (concat p).
+
+(* locate: inverse of "dispatch" *)
+
+Fixpoint find_in_nth_loop {A} (mem : A → list A → bool) a ll i :=
+  match ll with
+  | [] => i
+  | l :: ll' => if mem a l then i else find_in_nth_loop mem a ll' (i + 1)
+  end.
+
+Definition find_in_nth {A} mem a ll := @find_in_nth_loop A mem a ll 0.
+
+Fixpoint nat_in_list i l :=
+  match l with
+  | [] => false
+  | j :: l' => if Nat.eq_dec i j then true else nat_in_list i l'
+  end.
+
+Definition locate_list ll :=
+  map (λ i, find_in_nth nat_in_list i ll) (seq 0 (length ll)).
+
+Check locate_list.
+
+Definition locate ll :=
+  let l := locate_list l in
+...
+
+Compute (locate_list [[2]; []; [0; 1]]).
+Compute (dispatch 3 24).
+
+Compute (locate_list [[]; [0; 2]; [1]]).
+Compute (dispatch 3 16).
+Compute (map locate_list (raw_partitions 3)).
+
+Check dispatch.
+Check locate.
+
+Theorem locate_dispatch : ∀ n i, locate (dispatch n i) = i.
+
+...
 
 Theorem is_partition_iff : ∀ n p, n ≠ 0 →
   is_partition n p ↔ p ∈ raw_partitions n.
@@ -221,32 +263,7 @@ split; intros Hn. {
 Print dispatch.
 Compute (raw_partitions 3).
 Compute (all_partitions 3).
-(* perhaps I could write a function that, from a given partition p
-   having property "is_partition", returns its rank in the list
-   raw_partitions(n)? *)
-Fixpoint find_in_nth_loop {A} (mem : A → list A → bool) a ll i :=
-  match ll with
-  | [] => i
-  | l :: ll' => if mem a l then i else find_in_nth_loop mem a ll' (i + 1)
-  end.
-Definition find_in_nth {A} mem a ll := @find_in_nth_loop A mem a ll 0.
-Fixpoint nat_in_list i l :=
-  match l with
-  | [] => false
-  | j :: l' => if Nat.eq_dec i j then true else nat_in_list i l'
-  end.
-Compute (find_in_nth nat_in_list 0 [[]; [0; 2]; [1]]).
-Compute (find_in_nth nat_in_list 1 [[]; [0; 2]; [1]]).
-Compute (find_in_nth nat_in_list 2 [[]; [0; 2]; [1]]).
-Compute (find_in_nth nat_in_list 3 [[]; [0; 2]; [1]]).
-(* locate: inverse of "dispatch" *)
-Definition locate ll :=
-  map (λ i, find_in_nth nat_in_list i ll) (seq 0 (length ll)).
-Compute (locate [[]; [0; 2]; [1]]).
-Compute (dispatch 3 16).
-Compute (locate [[2]; []; [0; 1]]).
-Compute (dispatch 3 24).
-Compute (map locate (raw_partitions 3)).
+Search locate.
 ...
 
 Theorem length_loc_loc_bl_sens_list : ∀ n f x,
