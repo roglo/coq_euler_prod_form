@@ -149,11 +149,9 @@ Fixpoint disp_loop n i v r :=
       disp_loop n i' (v / n) (set_nth (v mod n) r (i' :: nth (v mod n) r []))
   end.
 
-Definition dispatch n i :=
-  filter (λ l, negb (is_nil l)) (disp_loop n n i (repeat [] n)).
+Definition dispatch n i := disp_loop n n i (repeat [] n).
 
-Definition raw_partitions n :=
-  map (dispatch n) (seq 0 (n ^ n)).
+Definition raw_partitions n := map (dispatch n) (seq 0 (n ^ n)).
 
 Compute (raw_partitions 4).
 
@@ -205,10 +203,10 @@ Definition block_sensitivity n f :=
 
 Require Import Sorting.
 
-(* partition of {0,1,..,n-1} *)
+(* property of partitions of {0,1,..,n-1} returned by raw_partitions *)
 Definition is_partition n p :=
+  length p = n ∧
   (∀ s, s ∈ p → ∀ i, i ∈ s → i < n) ∧
-  (∀ s, s ∈ p → s ≠ []) ∧
   (∀ i, i < n → ∃ s, s ∈ p ∧ i ∈ s) ∧
   NoDup (concat p).
 
@@ -220,11 +218,6 @@ split; intros Hn. {
   destruct Hn as (Hel & Hne & Hu & Hi).
   unfold raw_partitions.
 Print dispatch.
-(* peut-être qu'il ne faut pas enlever les nil, et conserver plutôt
-   la propriété que toutes les partitions retournées par raw_partitions
-   soient de même taille : n, et donc qu'il puisse y avoir des listes
-   (ensembles) vides parmi elles ; dans ce cas, faudra enlever aussi
-   la propriété s≠[], et la remplacer par length p = n *)
 ...
 
 Theorem length_loc_loc_bl_sens_list : ∀ n f x,
@@ -289,17 +282,15 @@ assert (H : map (λ i, [i]) (seq 0 n) ∈ raw_partitions n). {
   unfold raw_partitions.
   assert (H1 : is_partition n (map (λ i, [i]) (seq 0 n))). {
     split. {
+      rewrite map_length.
+      now rewrite seq_length.
+    }
+    split. {
       intros s Hs i Hi.
       apply in_map_iff in Hs.
       destruct Hs as (j & Hjn & Hjs); subst s.
       apply in_seq in Hjs.
       destruct Hi as [Hi| ]; [ now subst j | easy ].
-    }
-    split. {
-      intros s Hs Hns.
-      apply in_map_iff in Hs.
-      destruct Hs as (i & Hin & His).
-      now rewrite <- Hin in Hns.
     }
     split. {
       intros j Hjn.
@@ -311,19 +302,20 @@ assert (H : map (λ i, [i]) (seq 0 n) ∈ raw_partitions n). {
       apply in_seq.
       split; [ | easy ].
       flia.
+    } {
+      clear x.
+      remember 0 as s; clear Heqs.
+      revert s.
+      induction n; intros s; [ constructor | cbn ].
+      constructor; [ | apply IHn ].
+      intros H.
+      rewrite <- flat_map_concat_map in H.
+      apply in_flat_map in H.
+      destruct H as (x & Hx & Hsx).
+      apply in_seq in Hx.
+      destruct Hsx as [Hsx| ]; [ | easy ].
+      subst x; flia Hx.
     }
-    clear x.
-    remember 0 as s; clear Heqs.
-    revert s.
-    induction n; intros s; [ constructor | cbn ].
-    constructor; [ | apply IHn ].
-    intros H.
-    rewrite <- flat_map_concat_map in H.
-    apply in_flat_map in H.
-    destruct H as (x & Hx & Hsx).
-    apply in_seq in Hx.
-    destruct Hsx as [Hsx| ]; [ | easy ].
-    subst x; flia Hx.
   }
 ...
   now is_partition_iff (proj1 (H2 _) H1) as H3.
