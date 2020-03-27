@@ -314,6 +314,9 @@ induction i; intros. {
     }
     rewrite app_nil_r in H1.
     rewrite H1; clear H1.
+    clear.
+    induction n; [ easy | ].
+    cbn; f_equal.
 ...
 (*
 Compute (let n := 4 in map (λ i : nat, find_in_nth nat_in_list i (disp_loop n n 0 (repeat [] n))) (seq 0 n)).
