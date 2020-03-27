@@ -233,23 +233,49 @@ Fixpoint nat_in_list i l :=
 Definition locate_list ll :=
   map (λ i, find_in_nth nat_in_list i ll) (seq 0 (length ll)).
 
-Check locate_list.
-
 Definition locate ll :=
-  let l := locate_list l in
-...
+  fold_left (λ a i, a * length ll + i) (locate_list ll) 0.
 
-Compute (locate_list [[2]; []; [0; 1]]).
+Compute (locate [[2]; []; [0; 1]]).
 Compute (dispatch 3 24).
-
-Compute (locate_list [[]; [0; 2]; [1]]).
+Compute (locate [[]; [0; 2]; [1]]).
 Compute (dispatch 3 16).
-Compute (map locate_list (raw_partitions 3)).
+Compute (dispatch 4 23).
+Compute (locate [[0]; [1; 2]; []; [3]]).
 
-Check dispatch.
-Check locate.
+Theorem set_nth_length : ∀ {A} i l (v : A),
+  i < length l → length (set_nth i l v) = length l.
+Proof.
+intros * Hi.
+revert i v Hi.
+induction l as [| a]; intros; cbn in Hi; [ flia Hi | ].
+destruct i; [ easy | cbn ].
+apply Nat.succ_lt_mono in Hi.
+f_equal.
+now apply IHl.
+Qed.
 
-Theorem locate_dispatch : ∀ n i, locate (dispatch n i) = i.
+Theorem locate_dispatch : ∀ n i, i < n → locate (dispatch n i) = i.
+Proof.
+intros * Hin.
+unfold locate, dispatch.
+remember (length (disp_loop n n i (repeat [] n))) as len eqn:Hlen.
+Print disp_loop.
+Theorem disp_loop_length : ∀ n i v r,
+  length (disp_loop n i v r) = length r + i.
+Proof.
+intros.
+revert n v r.
+induction i; intros; cbn; [ now rewrite Nat.add_0_r | ].
+destruct r as [| l ll]. {
+  cbn.
+...
+rewrite IHi.
+rewrite set_nth_length.
+Print set_nth.
+...
+revert n Hin.
+induction i; intros. {
 
 ...
 
