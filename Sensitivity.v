@@ -221,6 +221,9 @@ split; intros Hn. {
 Print dispatch.
 Compute (raw_partitions 3).
 Compute (all_partitions 3).
+(* perhaps I could write a function that, from a given partition p
+   having property "is_partition", returns its rank in the list
+   raw_partitions(n)? *)
 ...
 
 Theorem length_loc_loc_bl_sens_list : ∀ n f x,
