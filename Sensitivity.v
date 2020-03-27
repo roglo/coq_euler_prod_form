@@ -282,6 +282,39 @@ rewrite disp_loop_length; [ | flia Hin | apply repeat_length ].
 rewrite repeat_length.
 revert n Hin.
 induction i; intros. {
+  replace (map _ (seq 0 n)) with (repeat 0 n). 2: {
+    symmetry.
+Print disp_loop.
+Theorem disp_loop_0_r : ∀ n i,
+  n ≠ 0 → disp_loop n i 0 (repeat [] n) = repeat 0 i :: repeat [] (n - 1).
+Proof.
+intros * Hnz.
+destruct n; [ easy | clear Hnz; cbn ].
+rewrite Nat.sub_0_r.
+revert n.
+induction i; intros; [ easy | cbn ].
+rewrite Nat.sub_diag; cbn.
+(* mmm.... faut voir... *)
+...
+    replace (disp_loop n n 0 (repeat [] n)) with
+      (repeat 0 n :: repeat [] (n - 1)). 2: {
+      destruct n; [ easy | ].
+      clear Hin; cbn.
+      rewrite Nat.sub_diag; cbn.
+      rewrite Nat.sub_0_r.
+      induction n; [ easy | ].
+      cbn; rewrite Nat.sub_diag; cbn.
+...
+(*
+Compute (let n := 4 in map (λ i : nat, find_in_nth nat_in_list i (disp_loop n n 0 (repeat [] n))) (seq 0 n)).
+*)
+    induction n; [ easy | cbn ].
+    clear Hin.
+    rewrite Nat.sub_diag; cbn.
+    destruct n; [ easy | ].
+    f_equal. {
+      cbn; rewrite Nat.sub_diag.
+
 ...
 
 Theorem is_partition_iff : ∀ n p, n ≠ 0 →
