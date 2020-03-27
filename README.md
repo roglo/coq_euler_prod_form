@@ -11,6 +11,9 @@ that proof:
 - About quadratic residues
 - Lagrange's theorem of four squares
 
+Other:
+- Sensitivity Conjecture
+
 # AUTHOR
 Daniel de Rauglaudre
 

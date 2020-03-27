@@ -1501,4 +1501,4 @@ Fixpoint iter_merge {A} (le : A → A → bool) stack l :=
   | a::l' => iter_merge le (merge_list_to_stack le stack [a]) l'
   end.
 
-Definition sort {A} (le : A → A → bool) := iter_merge le [].
+Definition bsort {A} (le : A → A → bool) := iter_merge le [].

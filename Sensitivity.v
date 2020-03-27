@@ -179,12 +179,13 @@ Fixpoint list_list_nat_le lla llb :=
   end.
 
 Definition all_partitions n :=
-  sort list_list_nat_le
+  bsort list_list_nat_le
     (nodup (list_eq_dec (list_eq_dec Nat.eq_dec))
-       (map (sort list_nat_le) (raw_partitions n))).
+       (map (bsort list_nat_le)
+          (map (filter (λ s, negb (is_nil s))) (raw_partitions n)))).
 
-Compute (map (sort list_nat_le) (raw_partitions 4)).
-Compute (nodup (list_eq_dec (list_eq_dec Nat.eq_dec)) (map (sort list_nat_le) (raw_partitions 4))).
+Compute (map (bsort list_nat_le) (raw_partitions 4)).
+Compute (nodup (list_eq_dec (list_eq_dec Nat.eq_dec)) (map (bsort list_nat_le) (raw_partitions 4))).
 Compute (all_partitions 4).
 
 (* Local block sensitivity *)
@@ -218,6 +219,8 @@ split; intros Hn. {
   destruct Hn as (Hel & Hne & Hu & Hi).
   unfold raw_partitions.
 Print dispatch.
+Compute (raw_partitions 3).
+Compute (all_partitions 3).
 ...
 
 Theorem length_loc_loc_bl_sens_list : ∀ n f x,
