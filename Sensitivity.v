@@ -255,28 +255,33 @@ f_equal.
 now apply IHl.
 Qed.
 
+Theorem disp_loop_length : ∀ n i v r,
+  n ≠ 0
+  → length r = n
+  → length (disp_loop n i v r) = length r.
+Proof.
+intros * Hnz Hrn.
+revert n v r Hnz Hrn.
+induction i; intros; [ easy | cbn ].
+rewrite IHi; [ | easy | ]. 2: {
+  rewrite set_nth_length; [ easy | ].
+  rewrite Hrn.
+  now apply Nat.mod_upper_bound.
+}
+apply set_nth_length.
+rewrite Hrn.
+now apply Nat.mod_upper_bound.
+Qed.
+
 Theorem locate_dispatch : ∀ n i, i < n → locate (dispatch n i) = i.
 Proof.
 intros * Hin.
 unfold locate, dispatch.
-remember (length (disp_loop n n i (repeat [] n))) as len eqn:Hlen.
-Print disp_loop.
-Theorem disp_loop_length : ∀ n i v r,
-  length (disp_loop n i v r) = length r + i.
-Proof.
-intros.
-revert n v r.
-induction i; intros; cbn; [ now rewrite Nat.add_0_r | ].
-destruct r as [| l ll]. {
-  cbn.
-...
-rewrite IHi.
-rewrite set_nth_length.
-Print set_nth.
-...
+unfold locate_list.
+rewrite disp_loop_length; [ | flia Hin | apply repeat_length ].
+rewrite repeat_length.
 revert n Hin.
 induction i; intros. {
-
 ...
 
 Theorem is_partition_iff : ∀ n p, n ≠ 0 →
