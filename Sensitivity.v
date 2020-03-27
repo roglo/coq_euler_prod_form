@@ -273,6 +273,26 @@ rewrite Hrn.
 now apply Nat.mod_upper_bound.
 Qed.
 
+Theorem disp_loop_0_r : ∀ n i l,
+  n ≠ 0
+  → disp_loop n i 0 (l :: repeat [] (n - 1)) =
+     (seq 0 i ++ l) :: repeat [] (n - 1).
+Proof.
+intros * Hnz.
+destruct n; [ easy | clear Hnz; cbn ].
+rewrite Nat.sub_0_r.
+revert n l.
+induction i; intros; [ easy | cbn ].
+rewrite Nat.sub_diag; cbn.
+rewrite IHi; f_equal.
+rewrite app_comm_cons.
+replace (0 :: seq 1 i) with (seq 0 (i + 1)) by now rewrite Nat.add_1_r.
+replace (i :: l) with ([i] ++ l) by easy.
+rewrite app_assoc.
+replace (seq 0 i ++ [i]) with (seq 0 (i + 1)) by now rewrite seq_app.
+easy.
+Qed.
+
 Theorem locate_dispatch : ∀ n i, i < n → locate (dispatch n i) = i.
 Proof.
 intros * Hin.
@@ -284,25 +304,16 @@ revert n Hin.
 induction i; intros. {
   replace (map _ (seq 0 n)) with (repeat 0 n). 2: {
     symmetry.
-Theorem disp_loop_0_r : ∀ n i,
-  n ≠ 0 → disp_loop n i 0 (repeat [] n) = seq 0 i :: repeat [] (n - 1).
-Proof.
-intros * Hnz.
-destruct n; [ easy | clear Hnz; cbn ].
-rewrite Nat.sub_0_r.
-revert n.
-induction i; intros; [ easy | cbn ].
-rewrite Nat.sub_diag; cbn.
-(* mmm.... faut voir... *)
-...
-    replace (disp_loop n n 0 (repeat [] n)) with
-      (repeat 0 n :: repeat [] (n - 1)). 2: {
+    specialize (disp_loop_0_r n n []) as H1.
+    assert (Hnz : n ≠ 0) by flia Hin.
+    specialize (H1 Hnz).
+    replace ([] :: repeat [] (n - 1)) with
+      (repeat ([] : list nat) n) in H1. 2: {
       destruct n; [ easy | ].
-      clear Hin; cbn.
-      rewrite Nat.sub_diag; cbn.
-      rewrite Nat.sub_0_r.
-      induction n; [ easy | ].
-      cbn; rewrite Nat.sub_diag; cbn.
+      now cbn; rewrite Nat.sub_0_r.
+    }
+    rewrite app_nil_r in H1.
+    rewrite H1; clear H1.
 ...
 (*
 Compute (let n := 4 in map (λ i : nat, find_in_nth nat_in_list i (disp_loop n n 0 (repeat [] n))) (seq 0 n)).
