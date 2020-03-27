@@ -284,9 +284,8 @@ revert n Hin.
 induction i; intros. {
   replace (map _ (seq 0 n)) with (repeat 0 n). 2: {
     symmetry.
-Print disp_loop.
 Theorem disp_loop_0_r : ∀ n i,
-  n ≠ 0 → disp_loop n i 0 (repeat [] n) = repeat 0 i :: repeat [] (n - 1).
+  n ≠ 0 → disp_loop n i 0 (repeat [] n) = seq 0 i :: repeat [] (n - 1).
 Proof.
 intros * Hnz.
 destruct n; [ easy | clear Hnz; cbn ].
