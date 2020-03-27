@@ -302,7 +302,7 @@ rewrite disp_loop_length; [ | flia Hin | apply repeat_length ].
 rewrite repeat_length.
 revert n Hin.
 induction i; intros. {
-  replace (map _ (seq 0 n)) with (repeat 0 n). 2: {
+  replace (map _ (seq 0 n)) with (seq 0 n). 2: {
     symmetry.
     specialize (disp_loop_0_r n n []) as H1.
     assert (Hnz : n ≠ 0) by flia Hin.
