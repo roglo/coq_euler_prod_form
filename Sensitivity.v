@@ -224,6 +224,21 @@ Compute (all_partitions 3).
 (* perhaps I could write a function that, from a given partition p
    having property "is_partition", returns its rank in the list
    raw_partitions(n)? *)
+Fixpoint find_in_nth_loop {A} (mem : A → list A → bool) a ll i :=
+  match ll with
+  | [] => i
+  | l :: ll' => if mem a l then i else find_in_nth_loop mem a ll' (i + 1)
+  end.
+Definition find_in_nth {A} mem a ll := @find_in_nth_loop A mem a ll 0.
+Fixpoint nat_in_list i l :=
+  match l with
+  | [] => false
+  | j :: l' => if Nat.eq_dec i j then true else nat_in_list i l'
+  end.
+Compute (find_in_nth nat_in_list 0 [[]; [0; 2]; [1]]).
+Compute (find_in_nth nat_in_list 1 [[]; [0; 2]; [1]]).
+Compute (find_in_nth nat_in_list 2 [[]; [0; 2]; [1]]).
+Compute (find_in_nth nat_in_list 3 [[]; [0; 2]; [1]]).
 ...
 
 Theorem length_loc_loc_bl_sens_list : ∀ n f x,
