@@ -302,30 +302,8 @@ unfold locate, dispatch.
 unfold locate_list.
 rewrite disp_loop_length; [ | flia Hin | apply repeat_length ].
 rewrite repeat_length.
-(**)
-Compute (let n := 3 in let i := 2 in
-  map
-    (λ i0 : nat, nth_find (nat_in_list i0) (disp_loop n n i (repeat [] n)))
-    (seq 0 n)).
-Compute (let n := 7 in let i := n - 1 in disp_loop n n i (repeat [] n)).
-(*
-     = [[0; 1; 2; 3; 4; 5]; []; []; []; []; []; [6]]
-     : list (list nat)
-quand on parcourt la liste en cherchant 0 ou 1 ou 2 ... ou 5, on tombe
-sur la première liste (rang 0) et pour le 6, on trouve la dernière
-(rang 6), du coup, le map renvoie [0; 0; 0; 0; 0; 6] ce qui rend le
-résultat correct ; reste à formaliser le merdier *)
-...
-Compute (nth_find nat_in_list 0 [[0; 1; 2]; []; []]).
-Check (nth_find nat_in_list).
-Compute (nth_find nat_in_list 6 [[0; 1; 2; 3; 4; 5]; []; []; []; []; []]).
-Print disp_loop.
-...
-specialize (disp_loop_0_r n n []) as H1.
-remember (disp_loop n n i (repeat [] n)) as ll eqn:Hll.
-...
-revert n Hin.
-induction i; intros. {
+destruct (Nat.eq_dec i 0) as [Hiz| Hiz]. {
+  subst i; cbn.
   specialize (disp_loop_0_r n n []) as H1.
   assert (Hnz : n ≠ 0) by flia Hin.
   specialize (H1 Hnz).
@@ -366,6 +344,12 @@ induction i; intros. {
   induction m; [ easy | ].
   apply IHm.
 }
+assert
+  (Hn :
+   ∀ j, 0 < j < n →
+   disp_loop n n j (repeat [] n) =
+   seq 0 (n - 1) :: repeat [] (j - 1) ++ [[n-1]] ++ repeat [] (n - j - 1)). {
+  intros * Hjn.
 ...
 
 Theorem is_partition_iff : ∀ n p, n ≠ 0 →
