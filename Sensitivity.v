@@ -216,13 +216,15 @@ Definition is_partition n p :=
 
 (* locate: inverse of "dispatch" *)
 
-Fixpoint find_in_nth_loop {A} (mem : A → list A → bool) a ll i :=
-  match ll with
+Fixpoint nth_find_loop {A} (f : A → bool) l i :=
+  match l with
   | [] => i
-  | l :: ll' => if mem a l then i else find_in_nth_loop mem a ll' (i + 1)
+  | a :: l' => if f a then i else nth_find_loop f l' (i + 1)
   end.
 
-Definition find_in_nth {A} mem a ll := @find_in_nth_loop A mem a ll 0.
+Definition nth_find A f l := @nth_find_loop A f l 0.
+
+Arguments nth_find [A]%type_scope _%function_scope _%list_scope.
 
 Fixpoint nat_in_list i l :=
   match l with
@@ -231,7 +233,7 @@ Fixpoint nat_in_list i l :=
   end.
 
 Definition locate_list ll :=
-  map (λ i, find_in_nth nat_in_list i ll) (seq 0 (length ll)).
+  map (λ i, nth_find (nat_in_list i) ll) (seq 0 (length ll)).
 
 Definition locate ll :=
   fold_left (λ a i, a * length ll + i) (locate_list ll) 0.
@@ -303,13 +305,20 @@ rewrite repeat_length.
 (**)
 Compute (let n := 3 in let i := 2 in
   map
-    (λ i0 : nat, find_in_nth nat_in_list i0 (disp_loop n n i (repeat [] n)))
+    (λ i0 : nat, nth_find (nat_in_list i0) (disp_loop n n i (repeat [] n)))
     (seq 0 n)).
 Compute (let n := 7 in let i := n - 1 in disp_loop n n i (repeat [] n)).
+(*
+     = [[0; 1; 2; 3; 4; 5]; []; []; []; []; []; [6]]
+     : list (list nat)
+quand on parcourt la liste en cherchant 0 ou 1 ou 2 ... ou 5, on tombe
+sur la première liste (rang 0) et pour le 6, on trouve la dernière
+(rang 6), du coup, le map renvoie [0; 0; 0; 0; 0; 6] ce qui rend le
+résultat correct ; reste à formaliser le merdier *)
 ...
-Compute (find_in_nth nat_in_list 0 [[0; 1; 2]; []; []]).
-Check (find_in_nth nat_in_list).
-Compute (find_in_nth nat_in_list 6 [[0; 1; 2; 3; 4; 5]; []; []; []; []; []]).
+Compute (nth_find nat_in_list 0 [[0; 1; 2]; []; []]).
+Check (nth_find nat_in_list).
+Compute (nth_find nat_in_list 6 [[0; 1; 2; 3; 4; 5]; []; []; []; []; []]).
 Print disp_loop.
 ...
 specialize (disp_loop_0_r n n []) as H1.
