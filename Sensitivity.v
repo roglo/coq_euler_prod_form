@@ -321,6 +321,9 @@ induction i; intros. {
     assert (Hl : length l = n) by (subst l; apply seq_length).
     clear Heql.
 (**)
+subst n.
+...
+(**)
 destruct n; intros. {
   apply length_zero_iff_nil in Hl.
   now subst l.
