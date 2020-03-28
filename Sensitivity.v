@@ -347,22 +347,30 @@ destruct (Nat.eq_dec i 0) as [Hiz| Hiz]. {
   induction m; [ easy | ].
   apply IHm.
 }
+Definition sub_list {A} (l : list A) start len :=
+  firstn len (skipn start l).
 assert
   (Hn :
-   ∀ i v, i ≠ 0 → 0 < v < n →
-   disp_loop n i v (repeat [] n) =
-   seq 0 (i - 1) :: repeat [] (v - 1) ++ [[i - 1]] ++ repeat [] (n - v - 1)). {
-  clear.
-  intros * Hiz Hv.
-  revert n v Hiz Hv.
-  induction i; intros; [ easy | ].
-  cbn; rewrite Nat.sub_0_r.
-Print disp_loop.
+   ∀ i v r, i ≠ 0 → 0 < v < n →
+   disp_loop n i v r =
+     (seq 0 (i - 1) ++ nth 0 r []) :: sub_list r 1 (v - 1) ++
+     [[i - 1] ++ nth v r []] ++
+     sub_list r (v + 1) (n - v - 1)). {
+...
+}
+rewrite Hn.
+cbn.
 ...
 Compute (
-let n := 6 in let i := n+1 in let v := 5 in
-   disp_loop n i v (repeat [] n) =
+let n := 6 in let i := n+1 in let v := 5 in let r := repeat [] n in
+   disp_loop n i v r =
    seq 0 (i - 1) :: repeat [] (v - 1) ++ [[i - 1]] ++ repeat [] (n - v - 1)).
+Compute (
+let n := 6 in let i := 42 in let v := n - 1 in let r := map (λ i, [i]) (seq 42 n) in
+   disp_loop n i v r =
+     (seq 0 (i - 1) ++ nth 0 r []) :: sub_list r 1 (v - 1) ++
+     [[i - 1] ++ nth v r []] ++
+     sub_list r (v + 1) (n - v - 1)).
 ...
 
 Theorem is_partition_iff : ∀ n p, n ≠ 0 →
