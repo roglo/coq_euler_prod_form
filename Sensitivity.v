@@ -356,6 +356,17 @@ assert
      (seq 0 (i - 1) ++ nth 0 r []) :: sub_list r 1 (v - 1) ++
      [[i - 1] ++ nth v r []] ++
      sub_list r (v + 1) (n - v - 1)). {
+  clear.
+  intros * Hiz Hvn.
+  destruct i; [ easy | clear Hiz ].
+  rewrite Nat.sub_succ, Nat.sub_0_r.
+  revert n v r Hvn.
+  induction i; intros. {
+    cbn.
+    unfold set_nth.
+    unfold sub_list.
+    cbn.
+    rewrite Nat.mod_small; [ | easy ].
 ...
 }
 rewrite Hn.
