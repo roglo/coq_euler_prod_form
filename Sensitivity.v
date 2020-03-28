@@ -300,6 +300,17 @@ unfold locate, dispatch.
 unfold locate_list.
 rewrite disp_loop_length; [ | flia Hin | apply repeat_length ].
 rewrite repeat_length.
+(**)
+Compute (let n := 3 in let i := 2 in
+  map
+    (λ i0 : nat, find_in_nth nat_in_list i0 (disp_loop n n i (repeat [] n)))
+    (seq 0 n)).
+Compute (let n := 4 in map (λ i, disp_loop n n i (repeat [] n)) (seq 0 n)).
+Print disp_loop.
+...
+specialize (disp_loop_0_r n n []) as H1.
+remember (disp_loop n n i (repeat [] n)) as ll eqn:Hll.
+...
 revert n Hin.
 induction i; intros. {
   specialize (disp_loop_0_r n n []) as H1.
