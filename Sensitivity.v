@@ -326,11 +326,22 @@ induction i; intros. {
     remember (nat_in_list i (seq 0 n)) as b eqn:Hb.
     symmetry in Hb.
     destruct b; [ easy | exfalso ].
-    apply in_seq in Hi; cbn in Hi.
-    destruct Hi as (_, Hi).
-    clear Hin Hnz.
     apply Bool.not_true_iff_false in Hb.
     apply Hb; clear Hb.
+    clear Hin Hnz.
+    remember (seq 0 n) as l; clear - Hi.
+    revert i Hi.
+    induction l as [| a]; intros; [ easy | cbn ].
+    destruct (Nat.eq_dec i a) as [Hia| Hia]; [ easy | ].
+    destruct Hi as [Hi| Hi]; [ now subst a | ].
+    now apply IHl.
+  }
+  clear.
+  remember (repeat 0 n) as l.
+  remember n as m in Heql; clear Heqm; subst l.
+  induction m; [ easy | ].
+  apply IHm.
+}
 ...
 
 Theorem is_partition_iff : ∀ n p, n ≠ 0 →
