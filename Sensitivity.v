@@ -312,17 +312,55 @@ induction i; intros. {
   }
   rewrite app_nil_r in H1.
   rewrite H1; clear H1.
+  replace (map _ (seq 0 n)) with (repeat 0 n). 2: {
+    symmetry.
+    clear.
 ...
-(*
+    assert
+      (H : ∀ s, s < n →
+       map (λ i, find_in_nth nat_in_list i (seq 0 n :: repeat [] (n - s)))
+         (seq s n) = repeat 0 n). {
+      induction n; intros s Hsn; [ easy | ].
+      remember (S n) as sn.
+      cbn - [ find_in_nth "-" ].
+      f_equal. {
+        clear.
+        revert s.
+        induction sn; intros; [ easy | ].
+        destruct s. {
+          cbn - [ find_in_nth ].
+          f_equal.
+...
+        clear - Hsn.
+        unfold find_in_nth.
+Print find_in_nth_loop.
+        revert n Hsn.
+        induction s; intros; [ easy | ].
+        cbn.
+        remember (nat_in_list (S s) (seq 1 n)) as b eqn:Hb; symmetry in Hb.
+        destruct b; [ easy | ].
+...
+
+    remember (seq 0 n) as sn eqn:Hsn.
+
+    remember 0 as s eqn:Hs.
+    rewrite Hs at 2 3 4.
+    revert s.
+    induction n; intros; [ easy | ].
+    rewrite Nat.sub_succ.
+    cbn - [ find_in_nth ].
+    f_equal.
+...
+
+Print find_in_nth.
 Compute (let n := 4 in map (λ i : nat, find_in_nth nat_in_list i (disp_loop n n 0 (repeat [] n))) (seq 0 n)).
-*)
+...
     induction n; [ easy | cbn ].
     clear Hin.
     rewrite Nat.sub_diag; cbn.
     destruct n; [ easy | ].
     f_equal. {
       cbn; rewrite Nat.sub_diag.
-
 ...
 
 Theorem is_partition_iff : ∀ n p, n ≠ 0 →
