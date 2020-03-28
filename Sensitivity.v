@@ -320,6 +320,30 @@ induction i; intros. {
     remember (seq 0 n) as l.
     assert (Hl : length l = n) by (subst l; apply seq_length).
     clear Heql.
+(**)
+destruct n; intros. {
+  apply length_zero_iff_nil in Hl.
+  now subst l.
+}
+destruct n. {
+  cbn.
+  destruct l as [| a1]; [ easy | cbn ].
+  destruct (Nat.eq_dec a1 a1) as [H| H]; [ clear H | easy ].
+  f_equal.
+  now destruct l.
+}
+destruct n. {
+  cbn.
+  destruct l as [| a1]; [ easy | cbn ].
+  destruct (Nat.eq_dec a1 a1) as [H| H]; [ clear H | easy ].
+  f_equal.
+  destruct l as [| a2]; [ easy | cbn ].
+  destruct (Nat.eq_dec a2 a2) as [H| H]; [ clear H | easy ].
+  f_equal; [ now destruct (Nat.eq_dec a2 a1) | ].
+  now destruct l.
+}
+...
+
     revert l m Hl.
     induction n; intros. {
       apply length_zero_iff_nil in Hl.
