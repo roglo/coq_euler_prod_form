@@ -314,6 +314,30 @@ induction i; intros. {
   rewrite H1; clear H1.
   replace (map _ (seq 0 n)) with (repeat 0 n). 2: {
     symmetry.
+    replace (repeat 0 n) with (map (λ _, 0) (seq 0 n)). 2: {
+      clear.
+      remember (seq 0 n) as sn eqn:Hsn.
+      remember 0 as s in Hsn; clear Heqs; subst sn.
+      revert s.
+      induction n; intros; [ easy | now cbn; rewrite IHn ].
+    }
+    apply map_ext_in_iff.
+    intros i Hi; cbn.
+    remember (nat_in_list i (seq 0 n)) as b eqn:Hb.
+    symmetry in Hb.
+    destruct b; [ easy | exfalso ].
+    apply in_seq in Hi; cbn in Hi.
+    destruct Hi as (_, Hi).
+    clear Hin Hnz.
+    apply Bool.not_true_iff_false in Hb.
+    apply Hb; clear Hb.
+...
+    remember (seq 0 n) as l eqn:Hl; symmetry in Hl.
+    revert n i Hi Hl.
+    induction l as [| a]; intros; [ now destruct n | ].
+    cbn.
+    destruct (Nat.eq_dec i a) as [Hia| Hia]; [ easy | ].
+...
     clear.
     remember (repeat [] (n - 1)) as m.
     clear Heqm.
@@ -322,6 +346,7 @@ induction i; intros. {
     clear Heql.
 (**)
 subst n.
+Search (map _ _ = map _ _).
 ...
 (**)
 destruct n; intros. {
