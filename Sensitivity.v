@@ -305,7 +305,11 @@ Compute (let n := 3 in let i := 2 in
   map
     (λ i0 : nat, find_in_nth nat_in_list i0 (disp_loop n n i (repeat [] n)))
     (seq 0 n)).
-Compute (let n := 4 in map (λ i, disp_loop n n i (repeat [] n)) (seq 0 n)).
+Compute (let n := 7 in let i := n - 1 in disp_loop n n i (repeat [] n)).
+...
+Compute (find_in_nth nat_in_list 0 [[0; 1; 2]; []; []]).
+Check (find_in_nth nat_in_list).
+Compute (find_in_nth nat_in_list 6 [[0; 1; 2; 3; 4; 5]; []; []; []; []; []]).
 Print disp_loop.
 ...
 specialize (disp_loop_0_r n n []) as H1.
