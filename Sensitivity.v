@@ -317,6 +317,42 @@ induction i; intros. {
     clear.
     remember (repeat [] (n - 1)) as m.
     clear Heqm.
+    remember (seq 0 n) as l.
+    assert (Hl : length l = n) by (subst l; apply seq_length).
+    clear Heql.
+    revert l m Hl.
+    induction n; intros. {
+      apply length_zero_iff_nil in Hl.
+      now subst l.
+    }
+    destruct l as [| a]; [ easy | ].
+    cbn - [ find_in_nth ].
+    f_equal; [ now cbn; destruct (Nat.eq_dec a a) | ].
+cbn.
+...
+Compute (let n := 1 in map (λ i : nat, find_in_nth nat_in_list i (seq 0 n :: m)) (seq 0 n)).
+Compute (let n := 7 in map (λ i : nat, find_in_nth nat_in_list i (seq 0 n :: m)) (seq 0 n)).
+...
+    assert
+      (H : ∀ m s,
+       map (λ i, find_in_nth nat_in_list i (seq 0 n :: m)) (seq s (n - s)) =
+       repeat 0 n). {
+      induction n; intros m s; [ easy | ].
+      cbn - [ find_in_nth "-" ].
+      replace (S n - s) with (S (n - s)).
+      cbn - [ find_in_nth "-" ].
+      f_equal.
+      cbn.
+      replace (0 :: seq 1 n) with (seq 0 n ++ [n]).
+...
+      destruct s. {
+        rewrite Nat.sub_0_r.
+        cbn - [ find_in_nth ].
+        f_equal.
+    remember (repeat [] (n - 1)) as m.
+    clear Heqm.
+    remember (seq 0 n) as sn.
+    rewrite Heqsn at 1.
     revert m.
     induction n; intros; [ easy | ].
     cbn - [ find_in_nth ].
