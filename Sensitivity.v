@@ -295,6 +295,9 @@ replace (seq 0 i ++ [i]) with (seq 0 (i + 1)) by now rewrite seq_app.
 easy.
 Qed.
 
+Theorem List_cons_app A (a : A) l : a :: l = [a] ++ l.
+Proof. easy. Qed.
+
 Theorem locate_dispatch : ∀ n i, i < n → locate (dispatch n i) = i.
 Proof.
 intros * Hin.
@@ -346,10 +349,20 @@ destruct (Nat.eq_dec i 0) as [Hiz| Hiz]. {
 }
 assert
   (Hn :
-   ∀ j, 0 < j < n →
-   disp_loop n n j (repeat [] n) =
-   seq 0 (n - 1) :: repeat [] (j - 1) ++ [[n-1]] ++ repeat [] (n - j - 1)). {
-  intros * Hjn.
+   ∀ i v, i ≠ 0 → 0 < v < n →
+   disp_loop n i v (repeat [] n) =
+   seq 0 (i - 1) :: repeat [] (v - 1) ++ [[i - 1]] ++ repeat [] (n - v - 1)). {
+  clear.
+  intros * Hiz Hv.
+  revert n v Hiz Hv.
+  induction i; intros; [ easy | ].
+  cbn; rewrite Nat.sub_0_r.
+Print disp_loop.
+...
+Compute (
+let n := 6 in let i := n+1 in let v := 5 in
+   disp_loop n i v (repeat [] n) =
+   seq 0 (i - 1) :: repeat [] (v - 1) ++ [[i - 1]] ++ repeat [] (n - v - 1)).
 ...
 
 Theorem is_partition_iff : ∀ n p, n ≠ 0 →
