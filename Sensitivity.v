@@ -315,6 +315,26 @@ induction i; intros. {
   replace (map _ (seq 0 n)) with (repeat 0 n). 2: {
     symmetry.
     clear.
+    remember (repeat [] (n - 1)) as m.
+    clear Heqm.
+    revert m.
+    induction n; intros; [ easy | ].
+    cbn - [ find_in_nth ].
+    f_equal.
+(* rahhh, putain, fait chier *)
+...
+    remember (seq 0 n) as l.
+    assert (Hl : length l = n) by (subst l; apply seq_length).
+    clear Heql Heqm.
+    revert n m Hl.
+    induction l as [| a la]; intros; [ now subst n | ].
+    cbn in Hl.
+    cbn - [ find_in_nth ].
+    destruct n; [ easy | ].
+    cbn - [ find_in_nth ].
+    f_equal; [ now cbn; destruct (Nat.eq_dec a a) | ].
+cbn.
+cbn in IHla.
 ...
     assert
       (H : ∀ s, s < n →
