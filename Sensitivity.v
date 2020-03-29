@@ -304,6 +304,18 @@ Proof. easy. Qed.
 Theorem List_skipn_1 : ∀ A (l : list A), skipn 1 l = tl l.
 Proof. easy. Qed.
 
+Theorem seq_app_last : ∀ start len,
+  seq start len ++ [start + len] = start :: seq (start + 1) len.
+Proof.
+intros.
+revert start.
+induction len; intros; cbn; [ now rewrite Nat.add_0_r | f_equal ].
+rewrite <- Nat.add_succ_comm.
+rewrite Nat.add_1_r.
+rewrite <- (Nat.add_1_r (S start)).
+apply IHlen.
+Qed.
+
 Theorem locate_dispatch : ∀ n i, i < n → locate (dispatch n i) = i.
 Proof.
 intros * Hin.
@@ -430,8 +442,8 @@ assert
   f_equal. {
     rewrite app_comm_cons.
     replace (0 :: seq 1 i) with (seq 0 i ++ [i]). 2: {
-...
-... suite ok
+      replace i with (0 + i) by easy.
+      now rewrite seq_app_last.
     }
     rewrite <- app_assoc.
     f_equal; cbn; f_equal.
@@ -440,8 +452,8 @@ assert
     destruct r as [| l ll']; [ now rewrite <- Hrn in Hvn | ].
     cbn in Hl2.
     now injection Hl2.
-...
-rewrite disp_loop_0_r.
+  } {
+    unfold sub_list.
 ...
 Compute (
 let n := 6 in let i := n+1 in let v := 5 in let r := repeat [] n in
