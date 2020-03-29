@@ -601,10 +601,16 @@ Theorem dispatch_locate : ∀ n ll,
 Proof.
 intros * Hll.
 revert n Hll.
-induction ll as [| l]; intros; cbn. {
+induction ll as [| l]; intros. {
   destruct Hll as (Hlen & Hall & Hin & Hnd).
   now subst n.
 }
+unfold dispatch.
+unfold locate.
+unfold locate_list.
+Search (fold_left _ (map _ _)).
+Print nth_find.
+Search nth_find_loop.
 ...
 
 Theorem is_partition_iff : ∀ n p, n ≠ 0 →
