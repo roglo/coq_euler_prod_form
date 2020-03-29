@@ -523,11 +523,36 @@ Compute
        (seq 0 n)).
 replace (map _ _) with (repeat 0 (n - 1) ++ [i]). 2: {
   symmetry.
-...
-  assert (H : 0 < i < n) by flia Hin Hiz.
-  clear Hin Hiz Hnz; rename H into Hin.
-  revert i Hin.
-  induction n; intros; [ easy | ].
+  destruct n; [ easy | ].
+  rewrite Nat.sub_succ, Nat.sub_0_r.
+  replace (S n - i - 1) with (n - i) by flia Hin.
+  rewrite <- (Nat.add_1_r n).
+  rewrite seq_app, Nat.add_0_l.
+  replace (seq n 1) with [n] by easy.
+  rewrite map_app.
+  f_equal. {
+    rewrite map_ext_in with (g := λ j, 0). 2: {
+      intros j Hj; cbn.
+      remember (nat_in_list j (seq 0 n)) as b eqn:Hb.
+      symmetry in Hb.
+      destruct b; [ easy | exfalso ].
+      apply Bool.not_true_iff_false in Hb; apply Hb; clear Hb.
+      remember (seq 0 n) as l eqn:Hl.
+      clear - Hj.
+      revert j Hj.
+      induction l as [| a]; intros; [ easy | cbn ].
+      destruct (Nat.eq_dec j a) as [Hia| Hia]; [ easy | ].
+      destruct Hj as [Hi| Hi]; [ now subst a | ].
+      now apply IHl.
+    }
+    clear.
+    remember (seq 0 n) as l.
+    remember 0 as s in Heql.
+    clear Heqs; subst l.
+    revert s.
+    induction n; intros; [ easy | cbn ].
+    now rewrite IHn.
+  } {
 ...
 Compute (
 let n := 6 in let i := n+1 in let v := 5 in let r := repeat [] n in
