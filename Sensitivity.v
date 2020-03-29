@@ -475,6 +475,44 @@ assert (Hnz : n ≠ 0) by flia Hin.
 rewrite (disp_loop_seq_sub_list n n Hnz); [ | flia Hiz Hin | ]. 2: {
   apply repeat_length.
 }
+replace (nth 0 (repeat [] n) []) with ([] : list nat) by now destruct n.
+rewrite app_nil_r.
+replace (nth i (repeat [] n) []) with ([] : list nat). 2: {
+  clear; revert i.
+  induction n; intros; [ now destruct i | cbn ].
+  destruct i; [ easy | apply IHn ].
+}
+rewrite app_nil_r.
+replace (sub_list (repeat [] n) (i + 1) (n - i - 1)) with
+    (repeat ([] : list nat) (n - i - 1)). 2: {
+  clear - Hin.
+  unfold sub_list.
+  revert i Hin.
+  induction n; intros; [ easy | cbn ].
+  destruct i; cbn. {
+    rewrite Nat.sub_0_r.
+    replace n with (length (repeat ([] : list nat) n)) at 2. 2: {
+      apply repeat_length.
+    }
+    symmetry; apply firstn_all.
+  }
+  apply Nat.succ_lt_mono in Hin.
+  now apply IHn.
+}
+replace (sub_list (repeat [] n) 1 (i - 1)) with
+    (repeat ([] : list nat) (i - 1)). 2: {
+  clear - Hin.
+  unfold sub_list.
+  destruct n; intros; [ easy | cbn ].
+  destruct i; [ easy | cbn ].
+  rewrite Nat.sub_0_r.
+  apply Nat.succ_lt_mono in Hin.
+  revert i Hin.
+  induction n; intros; [ easy | cbn ].
+  destruct i; [ easy | cbn ].
+  apply Nat.succ_lt_mono in Hin.
+  now f_equal; apply IHn.
+}
 ...
 Compute (
 let n := 6 in let i := n+1 in let v := 5 in let r := repeat [] n in
