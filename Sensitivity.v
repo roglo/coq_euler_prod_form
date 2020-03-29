@@ -602,7 +602,6 @@ Proof.
 intros * Hll.
 revert n Hll.
 induction ll as [| l]; intros; cbn. {
-  unfold is_partition in Hll.
   destruct Hll as (Hlen & Hall & Hin & Hnd).
   now subst n.
 }
@@ -613,8 +612,14 @@ Theorem is_partition_iff : ∀ n p, n ≠ 0 →
 Proof.
 intros * Hnz.
 split; intros Hn. {
-  destruct Hn as (Hel & Hne & Hu & Hi).
+(*
+  destruct Hn as (Hlen & Hmem & Hin & Hnp).
+*)
   unfold raw_partitions.
+...
+  specialize (dispatch_locate n p Hn) as H1.
+  rewrite <- H1.
+...
 Print dispatch.
 Compute (raw_partitions 3).
 Compute (all_partitions 3).
