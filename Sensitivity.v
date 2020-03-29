@@ -298,11 +298,8 @@ rewrite seq_app; cbn.
 now rewrite <- app_assoc.
 Qed.
 
-Theorem List_cons_app A (a : A) l : a :: l = [a] ++ l.
-Proof. easy. Qed.
-
-Theorem List_skipn_1 : ∀ A (l : list A), skipn 1 l = tl l.
-Proof. easy. Qed.
+Definition sub_list {A} (l : list A) start len :=
+  firstn len (skipn start l).
 
 Theorem seq_app_last : ∀ start len,
   seq start len ++ [start + len] = start :: seq (start + 1) len.
@@ -315,6 +312,107 @@ rewrite Nat.add_1_r.
 rewrite <- (Nat.add_1_r (S start)).
 apply IHlen.
 Qed.
+
+Theorem disp_loop_seq_sub_list : ∀ n i, i ≠ 0 → ∀ v r,
+  0 < v < n
+  → length r = n
+  → disp_loop n i v r =
+       (seq 0 (i - 1) ++ nth 0 r []) :: sub_list r 1 (v - 1) ++
+       [[i - 1] ++ nth v r []] ++
+       sub_list r (v + 1) (n - v - 1).
+Proof.
+intros * Hiz * Hvn Hrn.
+destruct i; [ easy | clear Hiz ].
+rewrite Nat.sub_succ, Nat.sub_0_r.
+revert n v r Hvn Hrn.
+induction i; intros. {
+  cbn.
+  unfold set_nth.
+  unfold sub_list.
+  rewrite Nat.mod_small; [ | easy ].
+  rewrite app_comm_cons.
+  destruct r as [| a l]; [ cbn in Hrn; flia Hvn Hrn | ].
+  cbn.
+  rewrite app_comm_cons.
+  f_equal. {
+    destruct v; [ easy | ].
+    rewrite Nat.sub_succ, Nat.sub_0_r.
+    apply firstn_cons.
+  } {
+    f_equal.
+    rewrite firstn_skipn_comm.
+    f_equal.
+    replace (v + 1 + (n - v - 1)) with n by flia Hvn.
+    destruct n; [ easy | cbn; f_equal ].
+    cbn in Hrn.
+    apply Nat.succ_inj in Hrn; subst n.
+    symmetry; apply firstn_all.
+  }
+}
+remember (S i) as si; cbn; subst si.
+rewrite Nat.mod_small; [ | easy ].
+rewrite Nat.div_small; [ | easy ].
+cbn.
+rewrite Nat.mod_0_l; [ | flia Hvn ].
+rewrite Nat.div_0_l; [ | flia Hvn ].
+rewrite disp_loop_0_r; [ | flia Hvn ].
+remember (set_nth _ _ _) as sn eqn:Hsn.
+symmetry in Hsn.
+destruct sn as [| l ll]. {
+  apply (f_equal (@length _)) in Hsn.
+  rewrite set_nth_length in Hsn; cbn in Hsn; [ | easy ].
+  rewrite set_nth_length in Hsn; cbn in Hsn; [ | now rewrite Hrn ].
+  now rewrite <- Hrn, Hsn in Hvn.
+}
+cbn in Hsn.
+injection Hsn; clear Hsn; intros H1 H2.
+remember (set_nth _ _ _) as l2 eqn:Hl2.
+symmetry in Hl2.
+destruct l2 as [| l2 ll2]. {
+  apply (f_equal (@length _)) in Hl2.
+  rewrite set_nth_length in Hl2; [ | now rewrite Hrn ].
+  subst ll.
+  apply length_zero_iff_nil in Hl2; subst r.
+  now rewrite <- Hrn in Hvn.
+}
+subst ll2.
+cbn in H2; subst l.
+f_equal. {
+  rewrite app_comm_cons.
+  replace (0 :: seq 1 i) with (seq 0 i ++ [i]). 2: {
+    replace i with (0 + i) by easy.
+    now rewrite seq_app_last.
+  }
+  rewrite <- app_assoc.
+  f_equal; cbn; f_equal.
+  destruct v; [ easy | ].
+  cbn in Hl2.
+  destruct r as [| l ll']; [ now rewrite <- Hrn in Hvn | ].
+  cbn in Hl2.
+  now injection Hl2.
+} {
+  destruct v; [ easy | ].
+  unfold sub_list.
+  cbn in Hl2; cbn.
+  rewrite Nat.sub_0_r.
+  destruct r as [| l ll']; [ now rewrite <- Hrn in Hvn | ].
+  cbn in Hl2; cbn.
+  injection Hl2; intros; subst l2 ll.
+  f_equal; f_equal.
+  rewrite firstn_skipn_comm.
+  f_equal.
+  replace (v + 1 + (n - S v - 1)) with (n - 1) by flia Hvn.
+  cbn in Hrn.
+  rewrite <- Hrn, Nat.sub_succ, Nat.sub_0_r.
+  symmetry; apply firstn_all.
+}
+Qed.
+
+Theorem List_cons_app A (a : A) l : a :: l = [a] ++ l.
+Proof. easy. Qed.
+
+Theorem List_skipn_1 : ∀ A (l : list A), skipn 1 l = tl l.
+Proof. easy. Qed.
 
 Theorem locate_dispatch : ∀ n i, i < n → locate (dispatch n i) = i.
 Proof.
@@ -362,8 +460,6 @@ destruct (Nat.eq_dec i 0) as [Hiz| Hiz]. {
   induction m; [ easy | ].
   apply IHm.
 }
-Definition sub_list {A} (l : list A) start len :=
-  firstn len (skipn start l).
 Compute (
    let n := 6 in let i := 1 in let v := n - 1 in
 (*
@@ -375,85 +471,10 @@ Compute (
      (seq 0 (i - 1) ++ nth 0 r []) :: sub_list r 1 (v - 1) ++
      [[i - 1] ++ nth v r []] ++
      sub_list r (v + 1) (n - v - 1)).
-assert
-  (Hn :
-   ∀ i v r, i ≠ 0 → 0 < v < n → length r = n →
-   disp_loop n i v r =
-     (seq 0 (i - 1) ++ nth 0 r []) :: sub_list r 1 (v - 1) ++
-     [[i - 1] ++ nth v r []] ++
-     sub_list r (v + 1) (n - v - 1)). {
-  clear.
-  intros * Hiz Hvn Hrn.
-  destruct i; [ easy | clear Hiz ].
-  rewrite Nat.sub_succ, Nat.sub_0_r.
-  revert n v r Hvn Hrn.
-  induction i; intros. {
-    cbn.
-    unfold set_nth.
-    unfold sub_list.
-    rewrite Nat.mod_small; [ | easy ].
-    rewrite app_comm_cons.
-    destruct r as [| a l]; [ cbn in Hrn; flia Hvn Hrn | ].
-    cbn.
-    rewrite app_comm_cons.
-    f_equal. {
-      destruct v; [ easy | ].
-      rewrite Nat.sub_succ, Nat.sub_0_r.
-      apply firstn_cons.
-    } {
-      f_equal.
-      rewrite firstn_skipn_comm.
-      f_equal.
-      replace (v + 1 + (n - v - 1)) with n by flia Hvn.
-      destruct n; [ easy | cbn; f_equal ].
-      cbn in Hrn.
-      apply Nat.succ_inj in Hrn; subst n.
-      symmetry; apply firstn_all.
-    }
-  }
-  remember (S i) as si; cbn; subst si.
-  rewrite Nat.mod_small; [ | easy ].
-  rewrite Nat.div_small; [ | easy ].
-  cbn.
-  rewrite Nat.mod_0_l; [ | flia Hvn ].
-  rewrite Nat.div_0_l; [ | flia Hvn ].
-  rewrite disp_loop_0_r; [ | flia Hvn ].
-  remember (set_nth _ _ _) as sn eqn:Hsn.
-  symmetry in Hsn.
-  destruct sn as [| l ll]. {
-    apply (f_equal (@length _)) in Hsn.
-    rewrite set_nth_length in Hsn; cbn in Hsn; [ | easy ].
-    rewrite set_nth_length in Hsn; cbn in Hsn; [ | now rewrite Hrn ].
-    now rewrite <- Hrn, Hsn in Hvn.
-  }
-  cbn in Hsn.
-  injection Hsn; clear Hsn; intros H1 H2.
-  remember (set_nth _ _ _) as l2 eqn:Hl2.
-  symmetry in Hl2.
-  destruct l2 as [| l2 ll2]. {
-    apply (f_equal (@length _)) in Hl2.
-    rewrite set_nth_length in Hl2; [ | now rewrite Hrn ].
-    subst ll.
-    apply length_zero_iff_nil in Hl2; subst r.
-    now rewrite <- Hrn in Hvn.
-  }
-  subst ll2.
-  cbn in H2; subst l.
-  f_equal. {
-    rewrite app_comm_cons.
-    replace (0 :: seq 1 i) with (seq 0 i ++ [i]). 2: {
-      replace i with (0 + i) by easy.
-      now rewrite seq_app_last.
-    }
-    rewrite <- app_assoc.
-    f_equal; cbn; f_equal.
-    destruct v; [ easy | ].
-    cbn in Hl2.
-    destruct r as [| l ll']; [ now rewrite <- Hrn in Hvn | ].
-    cbn in Hl2.
-    now injection Hl2.
-  } {
-    unfold sub_list.
+assert (Hnz : n ≠ 0) by flia Hin.
+rewrite (disp_loop_seq_sub_list n n Hnz); [ | flia Hiz Hin | ]. 2: {
+  apply repeat_length.
+}
 ...
 Compute (
 let n := 6 in let i := n+1 in let v := 5 in let r := repeat [] n in
