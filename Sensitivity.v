@@ -513,6 +513,21 @@ replace (sub_list (repeat [] n) 1 (i - 1)) with
   apply Nat.succ_lt_mono in Hin.
   now f_equal; apply IHn.
 }
+Compute
+  (let n := 6 in let i := 4 in
+   map
+     (λ j,
+      nth_find (nat_in_list j)
+        (seq 0 (n - 1) ::
+         repeat [] (i - 1) ++ [[n - 1]] ++ repeat [] (n - i - 1)))
+       (seq 0 n)).
+replace (map _ _) with (repeat 0 (n - 1) ++ [i]). 2: {
+  symmetry.
+...
+  assert (H : 0 < i < n) by flia Hin Hiz.
+  clear Hin Hiz Hnz; rename H into Hin.
+  revert i Hin.
+  induction n; intros; [ easy | ].
 ...
 Compute (
 let n := 6 in let i := n+1 in let v := 5 in let r := repeat [] n in
