@@ -208,11 +208,11 @@ Require Import Sorting.
 
 (* property of partitions of {0,1,..,n-1} returned by raw_partitions *)
 
-Definition is_partition n p :=
-  length p = n ∧
-  (∀ s, s ∈ p → ∀ i, i ∈ s → i < n) ∧
-  (∀ i, i < n → ∃ s, s ∈ p ∧ i ∈ s) ∧
-  NoDup (concat p).
+Definition is_partition n ll :=
+  length ll = n ∧
+  (∀ l, l ∈ ll → ∀ i, i ∈ l → i < n) ∧
+  (∀ i, i < n → ∃ l, l ∈ ll ∧ i ∈ l) ∧
+  NoDup (concat ll).
 
 (* locate: inverse of "dispatch" *)
 
@@ -587,17 +587,25 @@ replace (map _ _) with (repeat 0 (n - 1) ++ [i]). 2: {
     now destruct (Nat.eq_dec n n).
   }
 }
-...
-Compute (
-let n := 6 in let i := n+1 in let v := 5 in let r := repeat [] n in
-   disp_loop n i v r =
-   seq 0 (i - 1) :: repeat [] (v - 1) ++ [[i - 1]] ++ repeat [] (n - v - 1)).
-Compute (
-let n := 6 in let i := 42 in let v := n - 1 in let r := map (λ i, [i]) (seq 42 n) in
-   disp_loop n i v r =
-     (seq 0 (i - 1) ++ nth 0 r []) :: sub_list r 1 (v - 1) ++
-     [[i - 1] ++ nth v r []] ++
-     sub_list r (v + 1) (n - v - 1)).
+rewrite fold_left_app; cbn.
+rewrite <- Nat.add_0_l; f_equal.
+apply Nat.eq_mul_0.
+left; clear.
+remember (n - 1) as m eqn:Hm; clear Hm.
+now induction m.
+Qed.
+
+Theorem dispatch_locate : ∀ n ll,
+  is_partition n ll
+  → dispatch n (locate ll) = ll.
+Proof.
+intros * Hll.
+revert n Hll.
+induction ll as [| l]; intros; cbn. {
+  unfold is_partition in Hll.
+  destruct Hll as (Hlen & Hall & Hin & Hnd).
+  now subst n.
+}
 ...
 
 Theorem is_partition_iff : ∀ n p, n ≠ 0 →
