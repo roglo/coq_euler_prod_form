@@ -583,7 +583,10 @@ replace (map _ _) with (repeat 0 (n - 1) ++ [i]). 2: {
       now apply repeat_spec in Hl; subst l.
     }
     rewrite repeat_length.
-    rewrite Nat.add_comm, Nat.sub_add; [ | flia Hiz ].
+    rewrite Nat.add_comm, Nat.sub_add; [ cbn | flia Hiz ].
+    now destruct (Nat.eq_dec n n).
+  }
+}
 ...
 Compute (
 let n := 6 in let i := n+1 in let v := 5 in let r := repeat [] n in
@@ -651,11 +654,9 @@ unfold block_sensitivity, sensitivity.
 rewrite map_loc_sens.
 unfold local_block_sensitivity.
 Print loc_bl_sens_list.
-Abort. (*
 ...
 unfold local_block_sensitivity, local_sensitivity.
 ...
-*)
 
 (* chais pas si c'est vrai, ça, mais si ça l'est, ça implique le
    truc ci-dessus *)
