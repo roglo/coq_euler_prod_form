@@ -414,6 +414,21 @@ Proof. easy. Qed.
 Theorem List_skipn_1 : ∀ A (l : list A), skipn 1 l = tl l.
 Proof. easy. Qed.
 
+Theorem nth_find_loop_app_2 : ∀ A f (l1 l2 : list A) i,
+  (∀ j, j ∈ l1 → f j = false)
+  → nth_find_loop f (l1 ++ l2) i = nth_find_loop f l2 (i + length l1).
+intros * Hl1.
+revert l2 i.
+induction l1 as [| a1]; intros; cbn; [ now rewrite Nat.add_0_r | ].
+rewrite Hl1; [ | now left ].
+rewrite Nat.add_1_r.
+rewrite <- Nat.add_succ_comm.
+apply IHl1.
+intros j Hj.
+apply Hl1.
+now right.
+Qed.
+
 Theorem locate_dispatch : ∀ n i, i < n → locate (dispatch n i) = i.
 Proof.
 intros * Hin.
@@ -523,7 +538,7 @@ Compute
        (seq 0 n)).
 replace (map _ _) with (repeat 0 (n - 1) ++ [i]). 2: {
   symmetry.
-  destruct n; [ easy | ].
+  destruct n; [ easy | clear Hnz ].
   rewrite Nat.sub_succ, Nat.sub_0_r.
   replace (S n - i - 1) with (n - i) by flia Hin.
   rewrite <- (Nat.add_1_r n).
@@ -554,12 +569,21 @@ replace (map _ _) with (repeat 0 (n - 1) ++ [i]). 2: {
     now rewrite IHn.
   } {
     cbn.
-    remember (nat_in_list n (seq 0 n)) as b eqn:Hb.
-    symmetry in Hb.
-    destruct b. {
-      exfalso.
-      apply Bool.not_false_iff_true in Hb; apply Hb; clear Hb.
+    assert (H : ∀ i, nat_in_list (i + n) (seq i n) = false). {
       clear.
+      induction n; intros; [ easy | cbn ].
+      destruct (Nat.eq_dec (i + S n) i) as [Hin| Hin]; [ flia Hin | ].
+      rewrite <- Nat.add_succ_comm.
+      apply IHn.
+    }
+    specialize (H 0); cbn in H; rewrite H; clear H.
+    f_equal.
+    rewrite nth_find_loop_app_2. 2: {
+      intros l Hl.
+      now apply repeat_spec in Hl; subst l.
+    }
+    rewrite repeat_length.
+    rewrite Nat.add_comm, Nat.sub_add; [ | flia Hiz ].
 ...
 Compute (
 let n := 6 in let i := n+1 in let v := 5 in let r := repeat [] n in
