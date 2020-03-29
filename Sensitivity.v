@@ -553,6 +553,13 @@ replace (map _ _) with (repeat 0 (n - 1) ++ [i]). 2: {
     induction n; intros; [ easy | cbn ].
     now rewrite IHn.
   } {
+    cbn.
+    remember (nat_in_list n (seq 0 n)) as b eqn:Hb.
+    symmetry in Hb.
+    destruct b. {
+      exfalso.
+      apply Bool.not_false_iff_true in Hb; apply Hb; clear Hb.
+      clear.
 ...
 Compute (
 let n := 6 in let i := n+1 in let v := 5 in let r := repeat [] n in
