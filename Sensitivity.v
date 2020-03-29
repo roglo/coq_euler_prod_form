@@ -298,6 +298,9 @@ Qed.
 Theorem List_cons_app A (a : A) l : a :: l = [a] ++ l.
 Proof. easy. Qed.
 
+Theorem List_skipn_1 : ∀ A (l : list A), skipn 1 l = tl l.
+Proof. easy. Qed.
+
 Theorem locate_dispatch : ∀ n i, i < n → locate (dispatch n i) = i.
 Proof.
 intros * Hin.
@@ -349,28 +352,60 @@ destruct (Nat.eq_dec i 0) as [Hiz| Hiz]. {
 }
 Definition sub_list {A} (l : list A) start len :=
   firstn len (skipn start l).
+Compute (
+   let n := 6 in let i := 1 in let v := n - 1 in
+(*
+   let r := map (λ i, [i; i + 1]) (seq 42 n) in
+*)
+   let r := repeat [] n in
+(**)
+   disp_loop n i v r =
+     (seq 0 (i - 1) ++ nth 0 r []) :: sub_list r 1 (v - 1) ++
+     [[i - 1] ++ nth v r []] ++
+     sub_list r (v + 1) (n - v - 1)).
 assert
   (Hn :
-   ∀ i v r, i ≠ 0 → 0 < v < n →
+   ∀ i v r, i ≠ 0 → 0 < v < n → length r = n →
    disp_loop n i v r =
      (seq 0 (i - 1) ++ nth 0 r []) :: sub_list r 1 (v - 1) ++
      [[i - 1] ++ nth v r []] ++
      sub_list r (v + 1) (n - v - 1)). {
   clear.
-  intros * Hiz Hvn.
+  intros * Hiz Hvn Hrn.
   destruct i; [ easy | clear Hiz ].
   rewrite Nat.sub_succ, Nat.sub_0_r.
-  revert n v r Hvn.
+  revert n v r Hvn Hrn.
   induction i; intros. {
     cbn.
     unfold set_nth.
     unfold sub_list.
-    cbn.
     rewrite Nat.mod_small; [ | easy ].
-...
-}
-rewrite Hn.
-cbn.
+    rewrite app_comm_cons.
+    destruct r as [| a l]; [ cbn in Hrn; flia Hvn Hrn | ].
+    cbn.
+    rewrite app_comm_cons.
+    f_equal. {
+      destruct v; [ easy | ].
+      rewrite Nat.sub_succ, Nat.sub_0_r.
+      apply firstn_cons.
+    } {
+      f_equal.
+      rewrite firstn_skipn_comm.
+      f_equal.
+      replace (v + 1 + (n - v - 1)) with n by flia Hvn.
+      destruct n; [ easy | cbn; f_equal ].
+      cbn in Hrn.
+      apply Nat.succ_inj in Hrn; subst n.
+      symmetry; apply firstn_all.
+    }
+  }
+  remember (S i) as si; cbn; subst si.
+  rewrite Nat.mod_small; [ | easy ].
+  rewrite Nat.div_small; [ | easy ].
+  cbn.
+  rewrite Nat.mod_0_l; [ | flia Hvn ].
+  rewrite Nat.div_0_l; [ | flia Hvn ].
+Check disp_loop_0_r.
 ...
 Compute (
 let n := 6 in let i := n+1 in let v := 5 in let r := repeat [] n in
