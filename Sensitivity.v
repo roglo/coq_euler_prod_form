@@ -406,6 +406,40 @@ assert
   rewrite Nat.mod_0_l; [ | flia Hvn ].
   rewrite Nat.div_0_l; [ | flia Hvn ].
   rewrite disp_loop_0_r; [ | flia Hvn ].
+  remember (set_nth _ _ _) as sn eqn:Hsn.
+  symmetry in Hsn.
+  destruct sn as [| l ll]. {
+    apply (f_equal (@length _)) in Hsn.
+    rewrite set_nth_length in Hsn; cbn in Hsn; [ | easy ].
+    rewrite set_nth_length in Hsn; cbn in Hsn; [ | now rewrite Hrn ].
+    now rewrite <- Hrn, Hsn in Hvn.
+  }
+  cbn in Hsn.
+  injection Hsn; clear Hsn; intros H1 H2.
+  remember (set_nth _ _ _) as l2 eqn:Hl2.
+  symmetry in Hl2.
+  destruct l2 as [| l2 ll2]. {
+    apply (f_equal (@length _)) in Hl2.
+    rewrite set_nth_length in Hl2; [ | now rewrite Hrn ].
+    subst ll.
+    apply length_zero_iff_nil in Hl2; subst r.
+    now rewrite <- Hrn in Hvn.
+  }
+  subst ll2.
+  cbn in H2; subst l.
+  f_equal. {
+    rewrite app_comm_cons.
+    replace (0 :: seq 1 i) with (seq 0 i ++ [i]). 2: {
+...
+... suite ok
+    }
+    rewrite <- app_assoc.
+    f_equal; cbn; f_equal.
+    destruct v; [ easy | ].
+    cbn in Hl2.
+    destruct r as [| l ll']; [ now rewrite <- Hrn in Hvn | ].
+    cbn in Hl2.
+    now injection Hl2.
 ...
 rewrite disp_loop_0_r.
 ...
