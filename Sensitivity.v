@@ -275,22 +275,27 @@ rewrite Hrn.
 now apply Nat.mod_upper_bound.
 Qed.
 
-Theorem disp_loop_0_r : ∀ n i l ll,
+Theorem disp_loop_0_r : ∀ n i ll,
   n ≠ 0
-  → disp_loop n i 0 (l :: ll) = (seq 0 i ++ l) :: ll.
+  → disp_loop n i 0 ll =
+       match ll with
+       | l :: ll' => (seq 0 i ++ l) :: ll'
+       | [] => if Nat.eq_dec i 0 then [] else [seq 0 i]
+       end.
 Proof.
 intros * Hnz.
 destruct n; [ easy | clear Hnz; cbn ].
-revert n l.
-induction i; intros; [ easy | cbn ].
+revert n ll.
+induction i; intros; [ now destruct ll | cbn ].
 rewrite Nat.sub_diag; cbn.
 rewrite IHi; f_equal.
+replace (0 :: seq 1 i) with (seq 0 (i + 1)) by now rewrite Nat.add_1_r.
+rewrite seq_app.
+destruct ll as [| l]; [ easy | ].
 rewrite app_comm_cons.
 replace (0 :: seq 1 i) with (seq 0 (i + 1)) by now rewrite Nat.add_1_r.
-replace (i :: l) with ([i] ++ l) by easy.
-rewrite app_assoc.
-replace (seq 0 i ++ [i]) with (seq 0 (i + 1)) by now rewrite seq_app.
-easy.
+rewrite seq_app; cbn.
+now rewrite <- app_assoc.
 Qed.
 
 Theorem List_cons_app A (a : A) l : a :: l = [a] ++ l.
@@ -308,15 +313,10 @@ rewrite disp_loop_length; [ | flia Hin | apply repeat_length ].
 rewrite repeat_length.
 destruct (Nat.eq_dec i 0) as [Hiz| Hiz]. {
   subst i; cbn.
-  specialize (disp_loop_0_r n n [] (repeat [] (n - 1))) as H1.
+  specialize (disp_loop_0_r n n (repeat [] n)) as H1.
   assert (Hnz : n ≠ 0) by flia Hin.
-  specialize (H1 Hnz).
-  replace ([] :: repeat [] (n - 1)) with
-      (repeat ([] : list nat) n) in H1. 2: {
-    destruct n; [ easy | ].
-    now cbn; rewrite Nat.sub_0_r.
-  }
-  rewrite app_nil_r in H1.
+  specialize (H1 Hnz); cbn in H1.
+  destruct (Nat.eq_dec n 0) as [H| H] in H1; [ easy | clear H ].
   rewrite H1; clear H1.
   replace (map _ (seq 0 n)) with (repeat 0 n). 2: {
     symmetry.
@@ -329,6 +329,8 @@ destruct (Nat.eq_dec i 0) as [Hiz| Hiz]. {
     }
     apply map_ext_in_iff.
     intros i Hi; cbn.
+    replace n with (S (n - 1)) at 1 by flia Hnz; cbn.
+    rewrite app_nil_r.
     remember (nat_in_list i (seq 0 n)) as b eqn:Hb.
     symmetry in Hb.
     destruct b; [ easy | exfalso ].
@@ -403,7 +405,7 @@ assert
   cbn.
   rewrite Nat.mod_0_l; [ | flia Hvn ].
   rewrite Nat.div_0_l; [ | flia Hvn ].
-Check disp_loop_0_r.
+  rewrite disp_loop_0_r; [ | flia Hvn ].
 ...
 rewrite disp_loop_0_r.
 ...
