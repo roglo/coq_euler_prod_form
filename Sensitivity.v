@@ -275,14 +275,12 @@ rewrite Hrn.
 now apply Nat.mod_upper_bound.
 Qed.
 
-Theorem disp_loop_0_r : ∀ n i l,
+Theorem disp_loop_0_r : ∀ n i l ll,
   n ≠ 0
-  → disp_loop n i 0 (l :: repeat [] (n - 1)) =
-     (seq 0 i ++ l) :: repeat [] (n - 1).
+  → disp_loop n i 0 (l :: ll) = (seq 0 i ++ l) :: ll.
 Proof.
 intros * Hnz.
 destruct n; [ easy | clear Hnz; cbn ].
-rewrite Nat.sub_0_r.
 revert n l.
 induction i; intros; [ easy | cbn ].
 rewrite Nat.sub_diag; cbn.
@@ -310,7 +308,7 @@ rewrite disp_loop_length; [ | flia Hin | apply repeat_length ].
 rewrite repeat_length.
 destruct (Nat.eq_dec i 0) as [Hiz| Hiz]. {
   subst i; cbn.
-  specialize (disp_loop_0_r n n []) as H1.
+  specialize (disp_loop_0_r n n [] (repeat [] (n - 1))) as H1.
   assert (Hnz : n ≠ 0) by flia Hin.
   specialize (H1 Hnz).
   replace ([] :: repeat [] (n - 1)) with
@@ -406,6 +404,8 @@ assert
   rewrite Nat.mod_0_l; [ | flia Hvn ].
   rewrite Nat.div_0_l; [ | flia Hvn ].
 Check disp_loop_0_r.
+...
+rewrite disp_loop_0_r.
 ...
 Compute (
 let n := 6 in let i := n+1 in let v := 5 in let r := repeat [] n in
