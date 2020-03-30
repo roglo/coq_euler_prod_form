@@ -142,20 +142,6 @@ Definition is_nil {A} (l : list A) :=
   | _ => false
   end.
 
-Fixpoint old_disp_loop n i v r :=
-  match i with
-  | 0 => r
-  | S i' =>
-      old_disp_loop n i' (v / n)
-        (set_nth (v mod n) r (i' :: nth (v mod n) r []))
-  end.
-
-Definition old_dispatch n i := old_disp_loop n n i (repeat [] n).
-
-Definition old_raw_partitions n := map (old_dispatch n) (seq 0 (n ^ n)).
-
-Compute (old_raw_partitions 4).
-
 Fixpoint disp_loop i l ll :=
   match i with
   | 0 => ll
@@ -173,7 +159,6 @@ Definition dispatch n i := disp_loop n (to_base n n i) (repeat [] n).
 
 Definition raw_partitions n := map (dispatch n) (seq 0 (n ^ n)).
 
-Compute (old_raw_partitions 3).
 Compute (raw_partitions 2).
 
 (* *)
@@ -368,13 +353,38 @@ rewrite <- (Nat.add_1_r (S start)).
 apply IHlen.
 Qed.
 
+Print to_base.
 Print disp_loop.
 
+Compute (
+   let n := 6 in let i := 3 in let l := to_base n n i in
+   let ll := map (λ i, [i; i + 1]) (seq 42 n) in
+   disp_loop i l ll).
+
+Compute (
+   let n := 6 in let i := 2 in let l := to_base n n i in l).
+(*
+     = [2; 0; 0; 0; 0; 0]
+     : list nat
+*)
+
+Print disp_loop.
+Print dispatch.
+
+Compute (
+   let n := 6 in let i := 4 in
+   let ll := map (λ i, [i; i + 1]) (seq 42 n) in
+   disp_loop i (to_base n n i) ll =
+     (seq 0 (i - 1) ++ nth 0 ll []) :: sub_list ll 1 (i - 1) ++
+     [[i - 1] ++ nth i ll []] ++
+     sub_list ll (i + 1) (n - i - 1)).
+
+(*
 Theorem disp_loop_seq_sub_list : ∀ n i, i ≠ 0 → ∀ v r,
   0 < v < n
   → length r = n
-  → disp_loop i v r =
-       (seq 0 (i - 1) ++ nth 0 r []) :: sub_list r 1 (v - 1) ++
+  → disp_loop i l ll =
+       (seq 0 (i - 1) ++ nth 0 ll []) :: sub_list r 1 (v - 1) ++
        [[i - 1] ++ nth v r []] ++
        sub_list r (v + 1) (n - v - 1).
 ...
@@ -699,6 +709,7 @@ induction ll as [| l]; intros. {
   destruct Hll as (Hlen & Hall & Hin & Hnd).
   now subst n.
 }
+unfold dispatch, locate.
 Print locate.
 (* faudrait prouver déjà que locate renvoit bien une valeur entre
    0 et n^n *)
