@@ -133,14 +133,22 @@ Definition count_upto_n_to_n n :=
 
 Compute (count_upto_n_to_n 3).
 
-Definition set_nth {A} i (l : list A) v :=
-  firstn i l ++ v :: skipn (i + 1) l.
-
 Definition is_nil {A} (l : list A) :=
   match l with
   | [] => true
   | _ => false
   end.
+
+Fixpoint to_base_loop it n i :=
+  match it with
+  | 0 => []
+  | S it' => i mod n :: to_base_loop it' n (i / n)
+  end.
+
+Definition to_base n i := to_base_loop n n i.
+
+Definition set_nth {A} i (l : list A) v :=
+  firstn i l ++ v :: skipn (i + 1) l.
 
 Fixpoint disp_loop i l ll :=
   match i with
@@ -149,15 +157,10 @@ Fixpoint disp_loop i l ll :=
       disp_loop i' (tl l) (set_nth (hd 0 l) ll (i' :: nth (hd 0 l) ll []))
   end.
 
-Fixpoint to_base it n i :=
-  match it with
-  | 0 => []
-  | S it' => i mod n :: to_base it' n (i / n)
-  end.
+Definition dispatch l := disp_loop (length l) l (repeat [] (length l)).
 
-Definition dispatch n i := disp_loop n (to_base n n i) (repeat [] n).
-
-Definition raw_partitions n := map (dispatch n) (seq 0 (n ^ n)).
+Definition raw_partitions n :=
+  map (λ i, dispatch (to_base n i)) (seq 0 (n ^ n)).
 
 Compute (raw_partitions 2).
 
@@ -238,18 +241,14 @@ Fixpoint nat_in_list i l :=
   | j :: l' => if Nat.eq_dec i j then true else nat_in_list i l'
   end.
 
-Definition locate_list ll :=
-  map (λ i, nth_find (nat_in_list i) ll) (seq 0 (length ll)).
-
 Definition locate ll :=
-  fold_left (λ a i, a * length ll + i) (locate_list ll) 0.
+  rev (map (λ i, nth_find (nat_in_list i) ll) (seq 0 (length ll))).
 
 Compute (locate [[2]; []; [0; 1]]).
-Compute (dispatch 3 24).
-Compute (locate [[]; [0; 2]; [1]]).
-Compute (dispatch 3 16).
-Compute (dispatch 4 23).
-Compute (locate [[0]; [1; 2]; []; [3]]).
+Compute (dispatch [0; 2; 2]).
+Compute (to_base 3 24, locate (dispatch (to_base 3 24))).
+Compute (dispatch (locate [[2]; []; [0; 1]])).
+Compute (to_base 3 24).
 
 Theorem set_nth_length : ∀ {A} i l (v : A),
   i < length l → length (set_nth i l v) = length l.
@@ -288,7 +287,7 @@ destruct v; [ | now apply Hjv; cbn; left ].
 now cbn; apply Nat.neq_0_lt_0.
 Qed.
 
-Compute (let n := 4 in to_base n n 0).
+Compute (let n := 4 in to_base n 0).
 
 Theorem disp_loop_0_r : ∀ i l ll,
   (∀ j, j ∈ l → j = 0)
@@ -357,12 +356,12 @@ Print to_base.
 Print disp_loop.
 
 Compute (
-   let n := 6 in let i := 3 in let l := to_base n n i in
+   let n := 6 in let i := 3 in let l := to_base n i in
    let ll := map (λ i, [i; i + 1]) (seq 42 n) in
    disp_loop i l ll).
 
 Compute (
-   let n := 6 in let i := 2 in let l := to_base n n i in l).
+   let n := 6 in let i := 2 in let l := to_base n i in l).
 (*
      = [2; 0; 0; 0; 0; 0]
      : list nat
@@ -374,7 +373,7 @@ Print dispatch.
 Compute (
    let n := 6 in let i := 4 in
    let ll := map (λ i, [i; i + 1]) (seq 42 n) in
-   disp_loop i (to_base n n i) ll =
+   disp_loop i (to_base n i) ll =
      (seq 0 (i - 1) ++ nth 0 ll []) :: sub_list ll 1 (i - 1) ++
      [[i - 1] ++ nth i ll []] ++
      sub_list ll (i + 1) (n - i - 1)).
@@ -502,6 +501,29 @@ intros j Hj.
 apply Hl1.
 now right.
 Qed.
+
+Print dispatch.
+Print locate.
+
+Compute (let l := [3; 2; 1; 1] in locate (dispatch l)).
+Compute (dispatch (locate [[3]; [0; 2]; []; [1]])).
+
+Fixpoint in_radix n l :=
+  match l with
+  | [] => true
+  | i :: l' => (i <? n) && in_radix n l'
+  end.
+
+Definition is_in_radix n l := in_radix n l = true.
+
+Theorem locate_dispatch : ∀ l,
+  is_in_radix (length l) l
+  → locate (dispatch l) = l.
+Proof.
+intros * Hr.
+Compute (let l := [3; 2; 1] in locate (dispatch l)).
+Compute (in_radix 3 [3; 2; 1]).
+...
 
 Theorem locate_dispatch : ∀ n i, i < n → locate (dispatch n i) = i.
 Proof.
