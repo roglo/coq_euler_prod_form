@@ -605,6 +605,11 @@ induction ll as [| l]; intros. {
   destruct Hll as (Hlen & Hall & Hin & Hnd).
   now subst n.
 }
+Print locate.
+(* faudrait prouver déjà que locate renvoit bien une valeur entre
+   0 et n^n *)
+Print locate_list.
+...
 unfold dispatch.
 unfold locate.
 unfold locate_list.
