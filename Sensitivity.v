@@ -529,6 +529,28 @@ destruct (Nat.eq_dec (length l) 0) as [Hlz| Hlz]. {
 unfold is_in_radix in Hr.
 unfold locate, dispatch.
 rewrite (disp_loop_length (length l)); [ | easy | | ]; cycle 1. {
+  apply repeat_length.
+} {
+  intros j Hj.
+  remember (length l) as n.
+  assert (Hn : length l ≤ n) by flia Heqn.
+  clear Heqn.
+  revert n Hr Hlz Hn.
+  induction l as [| a l]; intros; [ easy | ].
+  cbn in Hr.
+  destruct n; [ easy | clear Hlz ].
+  apply andb_prop in Hr.
+  destruct Hr as (Han & Hsnl).
+  apply Nat.leb_le in Han.
+  cbn in Hn.
+  destruct Hj as [Hj| Hj]. {
+    subst a.
+    now apply -> Nat.succ_le_mono.
+  } {
+    apply IHl; [ easy | easy | easy | flia Hn ].
+  }
+}
+rewrite repeat_length.
 ...
 
 Theorem locate_dispatch : ∀ n i, i < n → locate (dispatch n i) = i.
