@@ -162,7 +162,22 @@ Definition dispatch l := disp_loop (length l) l (repeat [] (length l)).
 Definition raw_partitions n :=
   map (λ i, dispatch (to_base n i)) (seq 0 (n ^ n)).
 
-Compute (raw_partitions 2).
+(*
+Definition dispatch' l :=
+  snd
+    (fold_right
+       (λ i '(l, ll),
+          (tl l, set_nth (hd 0 l) ll (i :: nth (hd 0 l) ll [])))
+       (l, repeat [] (length l)) (seq 0 (length l))).
+
+Definition raw_partitions' n :=
+  map (λ i, dispatch' (to_base n i)) (seq 0 (n ^ n)).
+*)
+
+Compute (raw_partitions 3).
+(*
+Compute (raw_partitions' 3).
+*)
 
 (* *)
 
@@ -371,18 +386,28 @@ Print disp_loop.
 Print dispatch.
 
 Compute (
-   let n := 6 in let i := 4 in
+   let n := 6 in
    let ll := map (λ i, [i; i + 1]) (seq 42 n) in
-   disp_loop i (to_base n i) ll =
+   let i := 5 in
+   let l := rev (seq 0 n) in
+   disp_loop i l ll =
      (seq 0 (i - 1) ++ nth 0 ll []) :: sub_list ll 1 (i - 1) ++
      [[i - 1] ++ nth i ll []] ++
-     sub_list ll (i + 1) (n - i - 1)).
+     sub_list ll (i + 1) (length ll - i - 1)).
 
-(*
-Theorem disp_loop_seq_sub_list : ∀ n i, i ≠ 0 → ∀ v r,
+...
+
+(**)
+Theorem disp_loop_seq_sub_list : ∀ i l ll,
+  0 < i < length ll
+  → disp_loop i l ll =
+       (seq 0 (i - 1) ++ nth 0 ll []) :: sub_list ll 1 (i - 1) ++
+       [[i - 1] ++ nth i ll []] ++
+       sub_list ll (i + 1) (length ll - i - 1).
+...
   0 < v < n
   → length r = n
-  → disp_loop i l ll =
+
        (seq 0 (i - 1) ++ nth 0 ll []) :: sub_list r 1 (v - 1) ++
        [[i - 1] ++ nth v r []] ++
        sub_list r (v + 1) (n - v - 1).
@@ -525,6 +550,7 @@ rewrite (disp_loop_length (length l)); [ | easy | | easy ]. 2: {
 }
 rewrite repeat_length.
 rewrite <- rev_involutive; f_equal.
+Search disp_loop.
 ...
 destruct l as [| a1 l]; [ easy | cbn ].
 clear Hlz.
