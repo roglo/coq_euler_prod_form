@@ -142,18 +142,39 @@ Definition is_nil {A} (l : list A) :=
   | _ => false
   end.
 
-Fixpoint disp_loop n i v r :=
+Fixpoint old_disp_loop n i v r :=
   match i with
   | 0 => r
   | S i' =>
-      disp_loop n i' (v / n) (set_nth (v mod n) r (i' :: nth (v mod n) r []))
+      old_disp_loop n i' (v / n)
+        (set_nth (v mod n) r (i' :: nth (v mod n) r []))
   end.
 
-Definition dispatch n i := disp_loop n n i (repeat [] n).
+Definition old_dispatch n i := old_disp_loop n n i (repeat [] n).
+
+Definition old_raw_partitions n := map (old_dispatch n) (seq 0 (n ^ n)).
+
+Compute (old_raw_partitions 4).
+
+Fixpoint disp_loop i l ll :=
+  match i with
+  | 0 => ll
+  | S i' =>
+      disp_loop i' (tl l) (set_nth (hd 0 l) ll (i' :: nth (hd 0 l) ll []))
+  end.
+
+Fixpoint to_base it n i :=
+  match it with
+  | 0 => []
+  | S it' => i mod n :: to_base it' n (i / n)
+  end.
+
+Definition dispatch n i := disp_loop n (to_base n n i) (repeat [] n).
 
 Definition raw_partitions n := map (dispatch n) (seq 0 (n ^ n)).
 
-Compute (raw_partitions 4).
+Compute (old_raw_partitions 3).
+Compute (raw_partitions 2).
 
 (* *)
 
@@ -260,21 +281,29 @@ Qed.
 Theorem disp_loop_length : ∀ n i v r,
   n ≠ 0
   → length r = n
-  → length (disp_loop n i v r) = length r.
+  → (∀ j, j ∈ v → j < n)
+  → length (disp_loop i v r) = length r.
 Proof.
-intros * Hnz Hrn.
-revert n v r Hnz Hrn.
+intros * Hnz Hrn Hjv.
+revert v r Hrn Hjv.
 induction i; intros; [ easy | cbn ].
-rewrite IHi; [ | easy | ]. 2: {
+rewrite IHi; cycle 1. {
   rewrite set_nth_length; [ easy | ].
   rewrite Hrn.
-  now apply Nat.mod_upper_bound.
+  destruct v; [ | now apply Hjv; cbn; left ].
+  now cbn; apply Nat.neq_0_lt_0.
+} {
+  intros j Hj.
+  apply Hjv.
+  destruct v; [ easy | now right ].
 }
 apply set_nth_length.
 rewrite Hrn.
-now apply Nat.mod_upper_bound.
+destruct v; [ | now apply Hjv; cbn; left ].
+now cbn; apply Nat.neq_0_lt_0.
 Qed.
 
+(*
 Theorem disp_loop_0_r : ∀ n i ll,
   n ≠ 0
   → disp_loop n i 0 ll =
@@ -297,6 +326,7 @@ replace (0 :: seq 1 i) with (seq 0 (i + 1)) by now rewrite Nat.add_1_r.
 rewrite seq_app; cbn.
 now rewrite <- app_assoc.
 Qed.
+*)
 
 Definition sub_list {A} (l : list A) start len :=
   firstn len (skipn start l).
@@ -313,6 +343,7 @@ rewrite <- (Nat.add_1_r (S start)).
 apply IHlen.
 Qed.
 
+(*
 Theorem disp_loop_seq_sub_list : ∀ n i, i ≠ 0 → ∀ v r,
   0 < v < n
   → length r = n
@@ -407,6 +438,7 @@ f_equal. {
   symmetry; apply firstn_all.
 }
 Qed.
+*)
 
 Theorem List_cons_app A (a : A) l : a :: l = [a] ++ l.
 Proof. easy. Qed.
@@ -434,10 +466,25 @@ Proof.
 intros * Hin.
 unfold locate, dispatch.
 unfold locate_list.
-rewrite disp_loop_length; [ | flia Hin | apply repeat_length ].
+rewrite (disp_loop_length n); [ | flia Hin | apply repeat_length | ]. 2: {
+  intros j Hj.
+  assert (Hnz : n ≠ 0) by flia Hin.
+  clear - Hnz Hj.
+  remember n as it in Hj at 1; clear Heqit.
+  revert i j Hj.
+  induction it; intros; [ easy | ].
+  cbn in Hj.
+  destruct Hj as [Hj| Hj]. {
+    rewrite <- Hj.
+    now apply Nat.mod_upper_bound.
+  } {
+    now apply (IHit (i / n)).
+  }
+}
 rewrite repeat_length.
 destruct (Nat.eq_dec i 0) as [Hiz| Hiz]. {
   subst i; cbn.
+...
   specialize (disp_loop_0_r n n (repeat [] n)) as H1.
   assert (Hnz : n ≠ 0) by flia Hin.
   specialize (H1 Hnz); cbn in H1.
