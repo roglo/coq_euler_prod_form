@@ -524,6 +524,17 @@ rewrite (disp_loop_length (length l)); [ | easy | | easy ]. 2: {
   apply repeat_length.
 }
 rewrite repeat_length.
+rewrite <- rev_involutive; f_equal.
+...
+destruct l as [| a1 l]; [ easy | cbn ].
+clear Hlz.
+destruct l as [| a2 l]. {
+  cbn; f_equal.
+  specialize (Hr a1 (or_introl eq_refl)).
+  cbn in Hr.
+  now apply Nat.lt_1_r in Hr; subst a1.
+}
+cbn.
 ...
 
 Theorem locate_dispatch : ∀ n i, i < n → locate (dispatch n i) = i.
