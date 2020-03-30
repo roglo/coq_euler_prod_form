@@ -313,21 +313,44 @@ Theorem disp_loop_0_r : ∀ i l ll,
        | [] => if Nat.eq_dec i 0 then [] else [seq 0 i]
        end.
 Proof.
-intros * Hnz.
-destruct i; [ now destruct ll | ].
+intros * Hjz.
+revert l ll Hjz.
+induction i; intros; [ now destruct ll | ].
 cbn.
-...
-revert n ll.
-induction i; intros; [ now destruct ll | cbn ].
-rewrite Nat.sub_diag; cbn.
-rewrite IHi; f_equal.
-replace (0 :: seq 1 i) with (seq 0 (i + 1)) by now rewrite Nat.add_1_r.
-rewrite seq_app.
-destruct ll as [| l]; [ easy | ].
-rewrite app_comm_cons.
+rewrite IHi. 2: {
+  intros j Hj; apply Hjz.
+  destruct l as [| a]; [ easy | ].
+  now right.
+}
 replace (0 :: seq 1 i) with (seq 0 (i + 1)) by now rewrite Nat.add_1_r.
 rewrite seq_app; cbn.
-now rewrite <- app_assoc.
+destruct l as [| a]; cbn. {
+  destruct ll as [| l1]; [ easy | cbn ].
+  rewrite app_comm_cons.
+  replace (0 :: seq 1 i) with (seq 0 (i + 1)) by now rewrite Nat.add_1_r.
+  rewrite seq_app.
+  now rewrite <- app_assoc.
+} {
+  destruct ll as [| l1]. {
+    rewrite firstn_nil, skipn_nil; cbn.
+    now rewrite match_id.
+  } {
+    rewrite app_comm_cons.
+    replace (0 :: seq 1 i) with (seq 0 (i + 1)) by now rewrite Nat.add_1_r.
+    rewrite seq_app.
+    remember (_ ++ _) as ll' eqn:Hll'.
+    symmetry in Hll'.
+    destruct ll'; [ now apply app_eq_nil in Hll' | ].
+    rewrite <- app_assoc; cbn.
+    cbn in Hll'.
+    destruct a. {
+      cbn in Hll'.
+      now injection Hll'; clear Hll'; intros; subst l0 ll'.
+    } {
+      now specialize (Hjz (S a) (or_introl eq_refl)) as H1.
+    }
+  }
+}
 Qed.
 
 Definition sub_list {A} (l : list A) start len :=
@@ -345,14 +368,21 @@ rewrite <- (Nat.add_1_r (S start)).
 apply IHlen.
 Qed.
 
-(*
+Print disp_loop.
+
 Theorem disp_loop_seq_sub_list : ∀ n i, i ≠ 0 → ∀ v r,
   0 < v < n
   → length r = n
-  → disp_loop n i v r =
+  → disp_loop i v r =
        (seq 0 (i - 1) ++ nth 0 r []) :: sub_list r 1 (v - 1) ++
        [[i - 1] ++ nth v r []] ++
        sub_list r (v + 1) (n - v - 1).
+...
+  → disp_loop i l ll =
+       match ll with
+       | l :: ll' => (seq 0 i ++ l) :: ll'
+       | [] => if Nat.eq_dec i 0 then [] else [seq 0 i]
+       end.
 Proof.
 intros * Hiz * Hvn Hrn.
 destruct i; [ easy | clear Hiz ].
@@ -484,8 +514,23 @@ rewrite (disp_loop_length n); [ | flia Hin | apply repeat_length | ]. 2: {
   }
 }
 rewrite repeat_length.
+...
 destruct (Nat.eq_dec i 0) as [Hiz| Hiz]. {
   subst i; cbn.
+  rewrite disp_loop_0_r. 2: {
+    intros j Hj.
+    remember n as it in Hj at 1; clear Heqit.
+    revert j Hj.
+    induction it; intros; [ easy | cbn in Hj ].
+    rewrite Nat.mod_0_l in Hj; [ | now apply Nat.neq_0_lt_0 ].
+    rewrite Nat.div_0_l in Hj; [ | now apply Nat.neq_0_lt_0 ].
+    destruct Hj as [Hj| Hj]; [ easy | ].
+    now apply IHit.
+  }
+(**)
+  destruct n; [ easy | clear Hin ].
+  cbn - [ nth_find seq ].
+  rewrite app_nil_r.
 ...
   specialize (disp_loop_0_r n n (repeat [] n)) as H1.
   assert (Hnz : n ≠ 0) by flia Hin.
