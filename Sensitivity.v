@@ -303,17 +303,20 @@ destruct v; [ | now apply Hjv; cbn; left ].
 now cbn; apply Nat.neq_0_lt_0.
 Qed.
 
-(*
-Theorem disp_loop_0_r : ∀ n i ll,
-  n ≠ 0
-  → disp_loop n i 0 ll =
+Compute (let n := 4 in to_base n n 0).
+
+Theorem disp_loop_0_r : ∀ i l ll,
+  (∀ j, j ∈ l → j = 0)
+  → disp_loop i l ll =
        match ll with
        | l :: ll' => (seq 0 i ++ l) :: ll'
        | [] => if Nat.eq_dec i 0 then [] else [seq 0 i]
        end.
 Proof.
 intros * Hnz.
-destruct n; [ easy | clear Hnz; cbn ].
+destruct i; [ now destruct ll | ].
+cbn.
+...
 revert n ll.
 induction i; intros; [ now destruct ll | cbn ].
 rewrite Nat.sub_diag; cbn.
@@ -326,7 +329,6 @@ replace (0 :: seq 1 i) with (seq 0 (i + 1)) by now rewrite Nat.add_1_r.
 rewrite seq_app; cbn.
 now rewrite <- app_assoc.
 Qed.
-*)
 
 Definition sub_list {A} (l : list A) start len :=
   firstn len (skipn start l).
