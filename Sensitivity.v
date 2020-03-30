@@ -523,6 +523,12 @@ Proof.
 intros * Hr.
 Compute (let l := [3; 2; 1] in locate (dispatch l)).
 Compute (in_radix 3 [3; 2; 1]).
+destruct (Nat.eq_dec (length l) 0) as [Hlz| Hlz]. {
+  now apply length_zero_iff_nil in Hlz; subst l.
+}
+unfold is_in_radix in Hr.
+unfold locate, dispatch.
+rewrite (disp_loop_length (length l)); [ | easy | | ]; cycle 1. {
 ...
 
 Theorem locate_dispatch : ∀ n i, i < n → locate (dispatch n i) = i.
