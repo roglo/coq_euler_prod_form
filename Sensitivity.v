@@ -508,47 +508,20 @@ Print locate.
 Compute (let l := [3; 2; 1; 1] in locate (dispatch l)).
 Compute (dispatch (locate [[3]; [0; 2]; []; [1]])).
 
-Fixpoint in_radix n l :=
-  match l with
-  | [] => true
-  | i :: l' => (i <? n) && in_radix n l'
-  end.
-
-Definition is_in_radix n l := in_radix n l = true.
+Definition in_radix n l := ∀ i, i ∈ l → i < n.
 
 Theorem locate_dispatch : ∀ l,
-  is_in_radix (length l) l
+  in_radix (length l) l
   → locate (dispatch l) = l.
 Proof.
 intros * Hr.
-Compute (let l := [3; 2; 1] in locate (dispatch l)).
-Compute (in_radix 3 [3; 2; 1]).
 destruct (Nat.eq_dec (length l) 0) as [Hlz| Hlz]. {
   now apply length_zero_iff_nil in Hlz; subst l.
 }
-unfold is_in_radix in Hr.
+unfold in_radix in Hr.
 unfold locate, dispatch.
-rewrite (disp_loop_length (length l)); [ | easy | | ]; cycle 1. {
+rewrite (disp_loop_length (length l)); [ | easy | | easy ]. 2: {
   apply repeat_length.
-} {
-  intros j Hj.
-  remember (length l) as n.
-  assert (Hn : length l ≤ n) by flia Heqn.
-  clear Heqn.
-  revert n Hr Hlz Hn.
-  induction l as [| a l]; intros; [ easy | ].
-  cbn in Hr.
-  destruct n; [ easy | clear Hlz ].
-  apply andb_prop in Hr.
-  destruct Hr as (Han & Hsnl).
-  apply Nat.leb_le in Han.
-  cbn in Hn.
-  destruct Hj as [Hj| Hj]. {
-    subst a.
-    now apply -> Nat.succ_le_mono.
-  } {
-    apply IHl; [ easy | easy | easy | flia Hn ].
-  }
 }
 rewrite repeat_length.
 ...
