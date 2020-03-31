@@ -150,6 +150,7 @@ Definition to_base n i := to_base_loop n n i.
 Definition set_nth {A} i (l : list A) v :=
   firstn i l ++ v :: skipn (i + 1) l.
 
+(*
 Fixpoint disp_loop i l ll :=
   match i with
   | 0 => ll
@@ -158,9 +159,20 @@ Fixpoint disp_loop i l ll :=
   end.
 
 Definition dispatch l := disp_loop (length l) l (repeat [] (length l)).
+*)
+Fixpoint disp_loop i l ll :=
+  match l with
+  | [] => ll
+  | a :: l => disp_loop (pred i) l (set_nth a ll (pred i :: nth a ll []))
+  end.
+Definition dispatch l := disp_loop (length l) l (repeat [] (length l)).
 
 Definition raw_partitions n :=
   map (λ i, dispatch (to_base n i)) (seq 0 (n ^ n)).
+
+Compute (raw_partitions 3).
+
+...
 
 (*
 Definition dispatch' l :=
@@ -385,12 +397,16 @@ Compute (
 Print disp_loop.
 Print dispatch.
 
+Compute (raw_partitions 3).
+Print raw_partitions.
+
 Compute (
    let n := 6 in
-   let ll := map (λ i, [i; i + 1]) (seq 42 n) in
    let i := 5 in
-   let l := rev (seq 0 n) in
+   let l := seq 0 n in
+   let ll := map (λ i, [i; i + 1]) (seq 42 n) in
    disp_loop i l ll =
+     ll).
      (seq 0 (i - 1) ++ nth 0 ll []) :: sub_list ll 1 (i - 1) ++
      [[i - 1] ++ nth i ll []] ++
      sub_list ll (i + 1) (length ll - i - 1)).
