@@ -333,22 +333,35 @@ Theorem disp_loop_0_r : ∀ i l ll,
        end.
 Proof.
 intros * Hlz.
+...
+intros * Hlz.
+destruct ll as [| l1]. {
+  destruct (Nat.eq_dec i 0) as [Hiz| Hiz]; [ now subst i | ].
+  destruct i; [ easy | clear Hiz; cbn ].
+  replace (hd 0 l) with 0. 2: {
+    destruct l as [| b]; [ easy | cbn ].
+    now specialize (Hlz b (or_introl eq_refl)).
+  }
+  unfold set_nth.
+  rewrite firstn_nil, skipn_nil; cbn.
+  revert l Hlz.
+  induction i; intros; [ easy | cbn ].
+  unfold set_nth.
+Search (set_nth).
+Print set_nth.
+...
+intros * Hlz.
 revert l ll Hlz.
 induction i; intros; [ now destruct ll | cbn ].
 replace (hd 0 l) with 0. 2: {
   destruct l as [| b]; [ easy | cbn ].
   now specialize (Hlz b (or_introl eq_refl)).
 }
-cbn.
-...
 destruct ll as [| l1]; cbn. {
   induction l as [| a]. {
     clear; cbn.
     induction i; [ easy | cbn ].
     cbn in IHi.
-    admit.
-  }
-  cbn; clear.
 ...
 (*
           nth_find (nat_in_list i) (disp_loop n (repeat 0 n) (repeat [] n)))
