@@ -318,12 +318,6 @@ apply Hlen.
 now left.
 Qed.
 
-Inspect 1.
-Print dispatch.
-
-Compute (disp_loop 3 (repeat 0 7) (map (λ i, [i; i+1]) (seq 28 3))).
-Compute (disp_loop 3 (repeat 0 7) []).
-
 Theorem disp_loop_0_r : ∀ i l ll,
   (∀ a, a ∈ l → a = 0)
   → disp_loop i l ll =
@@ -333,60 +327,26 @@ Theorem disp_loop_0_r : ∀ i l ll,
        end.
 Proof.
 intros * Hlz.
-destruct ll as [| l1]. {
-  destruct (Nat.eq_dec i 0) as [Hiz| Hiz]; [ now subst i | ].
-...
-  destruct i; [ easy | clear Hiz; cbn ].
-  replace (hd 0 l) with 0. 2: {
-    destruct l as [| b]; [ easy | cbn ].
-    now specialize (Hlz b (or_introl eq_refl)).
-  }
-  unfold set_nth.
-  rewrite firstn_nil, skipn_nil; cbn.
-  revert l Hlz.
-  induction i; intros; [ easy | cbn ].
-  unfold set_nth.
-Search (set_nth).
-Print set_nth.
-...
-intros * Hlz.
 revert l ll Hlz.
 induction i; intros; [ now destruct ll | cbn ].
 replace (hd 0 l) with 0. 2: {
   destruct l as [| b]; [ easy | cbn ].
   now specialize (Hlz b (or_introl eq_refl)).
 }
-destruct ll as [| l1]; cbn. {
-  induction l as [| a]. {
-    clear; cbn.
-    induction i; [ easy | cbn ].
-    cbn in IHi.
-...
-(*
-          nth_find (nat_in_list i) (disp_loop n (repeat 0 n) (repeat [] n)))
-Theorem disp_loop_0_r : ∀ n i ll,
-  n ≠ 0
-  → disp_loop n i 0 ll =
-       match ll with
-       | l :: ll' => (seq 0 i ++ l) :: ll'
-       | [] => if Nat.eq_dec i 0 then [] else [seq 0 i]
-       end.
-Proof.
-intros * Hnz.
-destruct n; [ easy | clear Hnz; cbn ].
-revert n ll.
-induction i; intros; [ now destruct ll | cbn ].
-rewrite Nat.sub_diag; cbn.
-rewrite IHi; f_equal.
+rewrite IHi. 2: {
+  intros a Ha.
+  apply Hlz.
+  destruct l; [ easy | now right ].
+}
 replace (0 :: seq 1 i) with (seq 0 (i + 1)) by now rewrite Nat.add_1_r.
 rewrite seq_app.
-destruct ll as [| l]; [ easy | ].
+destruct ll as [| l1]; [ easy | ].
+cbn; f_equal.
 rewrite app_comm_cons.
 replace (0 :: seq 1 i) with (seq 0 (i + 1)) by now rewrite Nat.add_1_r.
 rewrite seq_app; cbn.
 now rewrite <- app_assoc.
 Qed.
-*)
 
 Definition sub_list {A} (l : list A) start len :=
   firstn len (skipn start l).
@@ -552,15 +512,10 @@ destruct (Nat.eq_dec i 0) as [Hiz| Hiz]. {
   subst i; cbn.
   rewrite to_radix_0_r.
   rewrite List_repeat_rev.
-...
-  rewrite disp_loop_0_r.
-...
-          nth_find (nat_in_list i) (disp_loop n (repeat 0 n) (repeat [] n)))
-  specialize (disp_loop_0_r n n (repeat [] n)) as H1.
-  assert (Hnz : n ≠ 0) by flia Hin.
-  specialize (H1 Hnz); cbn in H1.
-  destruct (Nat.eq_dec n 0) as [H| H] in H1; [ easy | clear H ].
-  rewrite H1; clear H1.
+  rewrite disp_loop_0_r. 2: {
+    intros a Ha.
+    now apply repeat_spec in Ha.
+  }
   replace (map _ (seq 0 n)) with (repeat 0 n). 2: {
     symmetry.
     replace (repeat 0 n) with (map (λ _, 0) (seq 0 n)). 2: {
@@ -572,14 +527,14 @@ destruct (Nat.eq_dec i 0) as [Hiz| Hiz]. {
     }
     apply map_ext_in_iff.
     intros i Hi; cbn.
-    replace n with (S (n - 1)) at 1 by flia Hnz; cbn.
+    replace n with (S (n - 1)) at 1 by flia Hin; cbn.
     rewrite app_nil_r.
     remember (nat_in_list i (seq 0 n)) as b eqn:Hb.
     symmetry in Hb.
     destruct b; [ easy | exfalso ].
     apply Bool.not_true_iff_false in Hb.
     apply Hb; clear Hb.
-    clear Hin Hnz.
+    clear Hin Hin.
     remember (seq 0 n) as l; clear - Hi.
     revert i Hi.
     induction l as [| a]; intros; [ easy | cbn ].
@@ -593,18 +548,8 @@ destruct (Nat.eq_dec i 0) as [Hiz| Hiz]. {
   induction m; [ easy | ].
   apply IHm.
 }
-Compute (
-   let n := 6 in let i := 1 in let v := n - 1 in
-(*
-   let r := map (λ i, [i; i + 1]) (seq 42 n) in
-*)
-   let r := repeat [] n in
-(**)
-   disp_loop n i v r =
-     (seq 0 (i - 1) ++ nth 0 r []) :: sub_list r 1 (v - 1) ++
-     [[i - 1] ++ nth v r []] ++
-     sub_list r (v + 1) (n - v - 1)).
 assert (Hnz : n ≠ 0) by flia Hin.
+...
 rewrite (disp_loop_seq_sub_list n n Hnz); [ | flia Hiz Hin | ]. 2: {
   apply repeat_length.
 }
