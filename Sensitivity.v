@@ -333,10 +333,9 @@ Theorem disp_loop_0_r : ∀ i l ll,
        end.
 Proof.
 intros * Hlz.
-...
-intros * Hlz.
 destruct ll as [| l1]. {
   destruct (Nat.eq_dec i 0) as [Hiz| Hiz]; [ now subst i | ].
+...
   destruct i; [ easy | clear Hiz; cbn ].
   replace (hd 0 l) with 0. 2: {
     destruct l as [| b]; [ easy | cbn ].
