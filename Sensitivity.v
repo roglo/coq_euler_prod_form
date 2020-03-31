@@ -318,7 +318,35 @@ apply Hlen.
 now left.
 Qed.
 
+Inspect 1.
+Print dispatch.
+
+Compute (disp_loop 3 (repeat 0 7) (map (λ i, [i; i+1]) (seq 28 3))).
+Compute (disp_loop 3 (repeat 0 7) []).
+
+Theorem disp_loop_0_r : ∀ i l ll,
+  (∀ a, a ∈ l → a = 0)
+  → disp_loop i l ll =
+       match ll with
+       | [] => if Nat.eq_dec i 0 then [] else [seq 0 i]
+       | l' :: ll' => (seq 0 i ++ l') :: ll'
+       end.
+Proof.
+intros * Hlz.
+revert l ll Hlz.
+induction i; intros; [ now destruct ll | cbn ].
+replace (hd 0 l) with 0. 2: {
+  destruct l as [| b]; [ easy | cbn ].
+  now specialize (Hlz b (or_introl eq_refl)).
+}
+cbn.
+destruct ll as [| l1]; cbn. {
+  destruct i; [ easy | ].
+  destruct l as [| a]. {
+    destruct i; [ easy | cbn ].
+...
 (*
+          nth_find (nat_in_list i) (disp_loop n (repeat 0 n) (repeat [] n)))
 Theorem disp_loop_0_r : ∀ n i ll,
   n ≠ 0
   → disp_loop n i 0 ll =
@@ -503,11 +531,14 @@ rewrite disp_loop_length; [ | now destruct n | ]. 2: {
   now apply to_radix_prop in Ha.
 }
 rewrite repeat_length.
-...
-rewrite disp_loop_length; [ | flia Hin | apply repeat_length ].
-rewrite repeat_length.
 destruct (Nat.eq_dec i 0) as [Hiz| Hiz]. {
   subst i; cbn.
+  rewrite to_radix_0_r.
+  rewrite List_repeat_rev.
+...
+  rewrite disp_loop_0_r.
+...
+          nth_find (nat_in_list i) (disp_loop n (repeat 0 n) (repeat [] n)))
   specialize (disp_loop_0_r n n (repeat [] n)) as H1.
   assert (Hnz : n ≠ 0) by flia Hin.
   specialize (H1 Hnz); cbn in H1.
