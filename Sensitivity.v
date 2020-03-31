@@ -605,7 +605,12 @@ induction ll as [| l]; intros. {
   destruct Hll as (Hlen & Hall & Hin & Hnd).
   now subst n.
 }
-Print locate.
+cbn - [ nth_find ].
+remember (nth_find _ _) as x; cbn in Heqx; subst x.
+remember (nat_in_list 0 l) as b eqn:Hb; symmetry in Hb.
+destruct b. {
+
+...
 (* faudrait prouver déjà que locate renvoit bien une valeur entre
    0 et n^n *)
 Print locate_list.
