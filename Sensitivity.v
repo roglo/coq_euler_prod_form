@@ -142,13 +142,13 @@ Definition is_nil {A} (l : list A) :=
   | _ => false
   end.
 
-Fixpoint to_base_loop it n i :=
+Fixpoint to_radix_loop it n i :=
   match it with
   | 0 => []
-  | S it' => i mod n :: to_base_loop it' n (i / n)
+  | S it' => i mod n :: to_radix_loop it' n (i / n)
   end.
 
-Definition to_base n i := to_base_loop n n i.
+Definition to_radix n i := to_radix_loop n n i.
 
 Fixpoint disp_loop i l ll :=
   match i with
@@ -158,7 +158,7 @@ Fixpoint disp_loop i l ll :=
         (set_nth (hd 0 l) ll (i' :: nth (hd 0 l) ll []))
   end.
 
-Definition dispatch n i := disp_loop n (rev (to_base n i)) (repeat [] n).
+Definition dispatch n i := disp_loop n (rev (to_radix n i)) (repeat [] n).
 
 Definition raw_partitions n := map (dispatch n) (seq 0 (n ^ n)).
 
@@ -266,10 +266,10 @@ f_equal.
 now apply IHl.
 Qed.
 
-Theorem to_base_0_r : ∀ n, to_base n 0 = repeat 0 n.
+Theorem to_radix_0_r : ∀ n, to_radix n 0 = repeat 0 n.
 Proof.
 intros.
-unfold to_base.
+unfold to_radix.
 remember n as it in |-* at 1 3.
 clear Heqit.
 revert n.
@@ -318,8 +318,7 @@ apply Hlen.
 now left.
 Qed.
 
-...
-
+(*
 Theorem disp_loop_0_r : ∀ n i ll,
   n ≠ 0
   → disp_loop n i 0 ll =
@@ -342,6 +341,7 @@ replace (0 :: seq 1 i) with (seq 0 (i + 1)) by now rewrite Nat.add_1_r.
 rewrite seq_app; cbn.
 now rewrite <- app_assoc.
 Qed.
+*)
 
 Definition sub_list {A} (l : list A) start len :=
   firstn len (skipn start l).
@@ -358,6 +358,7 @@ rewrite <- (Nat.add_1_r (S start)).
 apply IHlen.
 Qed.
 
+(*
 Theorem disp_loop_seq_sub_list : ∀ n i, i ≠ 0 → ∀ v r,
   0 < v < n
   → length r = n
@@ -452,6 +453,7 @@ f_equal. {
   symmetry; apply firstn_all.
 }
 Qed.
+*)
 
 Theorem List_cons_app A (a : A) l : a :: l = [a] ++ l.
 Proof. easy. Qed.
@@ -474,11 +476,34 @@ apply Hl1.
 now right.
 Qed.
 
+Theorem to_radix_prop : ∀ a n i, a ∈ to_radix n i → a < n.
+Proof.
+intros * Ha.
+destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
+unfold to_radix in Ha.
+remember n as it in Ha at 1; clear Heqit.
+revert i a n Ha Hnz.
+induction it; intros; [ easy | ].
+cbn in Ha.
+destruct Ha as [Ha| Ha]. {
+  now subst a; apply Nat.mod_upper_bound.
+}
+now apply (IHit (i / n)).
+Qed.
+
 Theorem locate_dispatch : ∀ n i, i < n → locate (dispatch n i) = i.
 Proof.
 intros * Hin.
 unfold locate, dispatch.
 unfold locate_list.
+rewrite disp_loop_length; [ | now destruct n | ]. 2: {
+  intros a Ha.
+  rewrite repeat_length.
+  apply in_rev in Ha.
+  now apply to_radix_prop in Ha.
+}
+rewrite repeat_length.
+...
 rewrite disp_loop_length; [ | flia Hin | apply repeat_length ].
 rewrite repeat_length.
 destruct (Nat.eq_dec i 0) as [Hiz| Hiz]. {
