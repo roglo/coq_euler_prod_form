@@ -363,7 +363,57 @@ rewrite <- (Nat.add_1_r (S start)).
 apply IHlen.
 Qed.
 
-(*
+Search disp_loop.
+Check repeat.
+Compute (let i := 4 in let l := repeat 0 i ++ [i] in let ll := map (λ i, [i; i+1]) (seq 42 6) in
+  (disp_loop i l ll = (seq 0 i ++ hd [] ll) :: tl ll)).
+
+Theorem disp_loop_small : ∀ i l ll,
+  i < length ll
+  → l = repeat 0 (i - 1) ++ [i]
+  → disp_loop i l ll = (seq 0 i ++ hd [] ll) :: tl ll.
+Proof.
+intros * Hill Hl.
+revert l ll Hill Hl.
+induction i; intros; cbn; [ now destruct ll | ].
+rewrite Nat.sub_succ, Nat.sub_0_r in Hl.
+...
+destruct l as [| a]. {
+  symmetry in Hl.
+  now apply app_eq_nil in Hl.
+}
+cbn.
+rewrite IHi.
+...
+rewrite IHi.
+destruct ll as [| l1]; [ easy | ].
+...
+rewrite IHi. 3: {
+  subst l; cbn.
+  destruct i; cbn.
+...
+remember (S i) as si; cbn; subst si.
+rewrite Nat.mod_small; [ | easy ].
+rewrite Nat.div_small; [ | easy ].
+cbn.
+rewrite Nat.mod_0_l; [ | flia Hvn ].
+rewrite Nat.div_0_l; [ | flia Hvn ].
+rewrite disp_loop_0_r; [ | flia Hvn ].
+remember (set_nth _ _ _) as sn eqn:Hsn.
+symmetry in Hsn.
+destruct sn as [| l ll]. {
+  apply (f_equal (@length _)) in Hsn.
+  rewrite set_nth_length in Hsn; cbn in Hsn; [ | easy ].
+  rewrite set_nth_length in Hsn; cbn in Hsn; [ | now rewrite Hrn ].
+  now rewrite <- Hrn, Hsn in Hvn.
+}
+...
+
+Theorem disp_loop_seq_sub_list :
+  disp_loop i l ll =
+    (seq 0 (i - 1) ++ nth 0 ll []) :: sub_list ll 1 (v - 1) ++
+    [[i - 1] ++ nth v ll []] ++
+    sub_list ll (v + 1) (length ll - v - 1).
 Theorem disp_loop_seq_sub_list : ∀ n i, i ≠ 0 → ∀ v r,
   0 < v < n
   → length r = n
@@ -372,6 +422,8 @@ Theorem disp_loop_seq_sub_list : ∀ n i, i ≠ 0 → ∀ v r,
        [[i - 1] ++ nth v r []] ++
        sub_list r (v + 1) (n - v - 1).
 Proof.
+            (disp_loop n (rev (to_radix n i)) (repeat [] n)))
+...
 intros * Hiz * Hvn Hrn.
 destruct i; [ easy | clear Hiz ].
 rewrite Nat.sub_succ, Nat.sub_0_r.
@@ -549,6 +601,15 @@ destruct (Nat.eq_dec i 0) as [Hiz| Hiz]. {
   apply IHm.
 }
 assert (Hnz : n ≠ 0) by flia Hin.
+...
+rewrite disp_loop_small. 2: {
+  rewrite <- rev_involutive; f_equal.
+  rewrite rev_app_distr; cbn.
+  rewrite List_repeat_rev.
+Compute (to_radix 4 3).
+...
+Compute (rev (to_radix 6 2)).
+repeat 0 i ++ [i]
 ...
 rewrite (disp_loop_seq_sub_list n n Hnz); [ | flia Hiz Hin | ]. 2: {
   apply repeat_length.
