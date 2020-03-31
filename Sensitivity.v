@@ -340,10 +340,15 @@ replace (hd 0 l) with 0. 2: {
   now specialize (Hlz b (or_introl eq_refl)).
 }
 cbn.
+...
 destruct ll as [| l1]; cbn. {
-  destruct i; [ easy | ].
-  destruct l as [| a]. {
-    destruct i; [ easy | cbn ].
+  induction l as [| a]. {
+    clear; cbn.
+    induction i; [ easy | cbn ].
+    cbn in IHi.
+    admit.
+  }
+  cbn; clear.
 ...
 (*
           nth_find (nat_in_list i) (disp_loop n (repeat 0 n) (repeat [] n)))
