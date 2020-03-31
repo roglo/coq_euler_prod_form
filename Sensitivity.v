@@ -297,7 +297,11 @@ intros * Hllz Hlen.
 revert l ll Hllz Hlen.
 induction i; intros; [ easy | cbn ].
 rewrite IHi; cycle 1. {
-...
+  clear.
+  intros H.
+  destruct l as [| a]; intros; [ easy | ].
+  cbn in H.
+  now apply app_eq_nil in H.
 } {
   intros a Ha.
   rewrite set_nth_length. 2: {
@@ -308,56 +312,13 @@ rewrite IHi; cycle 1. {
   apply Hlen.
   destruct l; [ easy | now right ].
 }
-apply set_nth_length.
-destruct l as [| b]. {
-  cbn.
-...
-  destruct ll.
-    cbn; now left.
-...
-
-Theorem disp_loop_length : ∀ n i r,
-  length r = n
-  → length (disp_loop n (rev (to_base n i)) r) = length r.
-Proof.
-intros n i ll Hrn.
-remember (rev (to_base n i)) as l eqn:Hl.
-clear Hl.
-subst n.
-Compute (let l := [2; 5] in let ll := [[3; 4; 5]] in length (disp_loop (length ll) l ll)).
-Print disp_loop.
-...
-subst n; clear i.
-induction ll as [| l1]; intros; [ easy | ].
-cbn - [ disp_loop to_base ].
-
-
-Print disp_loop.
-...
-destruct n; [ easy | clear Hnz ].
-
-...
-intros * Hnz Hrn.
-revert n r Hnz Hrn.
-induction i; intros. {
-  rewrite to_base_0_r.
-  rewrite List_repeat_rev.
-  destruct n; [ easy | clear Hnz; cbn ].
-  destruct r as [| l ll]; [ easy | cbn ].
-
-Search disp_loop.
-rewrite disp_loop_0_r.
-...
-induction i; intros; [ easy | cbn ].
-rewrite IHi; [ | easy | ]. 2: {
-  rewrite set_nth_length; [ easy | ].
-  rewrite Hrn.
-  now apply Nat.mod_upper_bound.
-}
-apply set_nth_length.
-rewrite Hrn.
-now apply Nat.mod_upper_bound.
+destruct l as [| b]; [ now destruct ll | ].
+apply set_nth_length; cbn.
+apply Hlen.
+now left.
 Qed.
+
+...
 
 Theorem disp_loop_0_r : ∀ n i ll,
   n ≠ 0
