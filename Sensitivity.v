@@ -142,11 +142,12 @@ Definition is_nil {A} (l : list A) :=
   | _ => false
   end.
 
-Fixpoint disp_loop n i v r :=
+Fixpoint disp_loop n i v ll :=
   match i with
-  | 0 => r
+  | 0 => ll
   | S i' =>
-      disp_loop n i' (v / n) (set_nth (v mod n) r (i' :: nth (v mod n) r []))
+      disp_loop n i' (v / n)
+        (set_nth (v mod n) ll (i' :: nth (v mod n) ll []))
   end.
 
 Definition dispatch n i := disp_loop n n i (repeat [] n).
@@ -599,6 +600,11 @@ Theorem dispatch_locate : ∀ n ll,
   is_partition n ll
   → dispatch n (locate ll) = ll.
 Proof.
+intros * Hll.
+unfold locate, dispatch.
+unfold locate_list.
+Print disp_loop.
+...
 intros * Hll.
 revert n Hll.
 induction ll as [| l]; intros. {
