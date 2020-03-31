@@ -133,62 +133,27 @@ Definition count_upto_n_to_n n :=
 
 Compute (count_upto_n_to_n 3).
 
+Definition set_nth {A} i (l : list A) v :=
+  firstn i l ++ v :: skipn (i + 1) l.
+
 Definition is_nil {A} (l : list A) :=
   match l with
   | [] => true
   | _ => false
   end.
 
-Fixpoint to_base_loop it n i :=
-  match it with
-  | 0 => []
-  | S it' => i mod n :: to_base_loop it' n (i / n)
-  end.
-
-Definition to_base n i := to_base_loop n n i.
-
-Definition set_nth {A} i (l : list A) v :=
-  firstn i l ++ v :: skipn (i + 1) l.
-
-(*
-Fixpoint disp_loop i l ll :=
+Fixpoint disp_loop n i v r :=
   match i with
-  | 0 => ll
+  | 0 => r
   | S i' =>
-      disp_loop i' (tl l) (set_nth (hd 0 l) ll (i' :: nth (hd 0 l) ll []))
+      disp_loop n i' (v / n) (set_nth (v mod n) r (i' :: nth (v mod n) r []))
   end.
 
-Definition dispatch l := disp_loop (length l) l (repeat [] (length l)).
-*)
-Fixpoint disp_loop i l ll :=
-  match l with
-  | [] => ll
-  | a :: l => disp_loop (S i) l (set_nth a ll (i :: nth a ll []))
-  end.
-Definition dispatch l := disp_loop 0 l (repeat [] (length l)).
-(**)
+Definition dispatch n i := disp_loop n n i (repeat [] n).
 
-Definition raw_partitions n :=
-  map (λ i, dispatch (to_base n i)) (seq 0 (n ^ n)).
+Definition raw_partitions n := map (dispatch n) (seq 0 (n ^ n)).
 
-Compute (raw_partitions 3).
-
-(*
-Definition dispatch' l :=
-  snd
-    (fold_right
-       (λ i '(l, ll),
-          (tl l, set_nth (hd 0 l) ll (i :: nth (hd 0 l) ll [])))
-       (l, repeat [] (length l)) (seq 0 (length l))).
-
-Definition raw_partitions' n :=
-  map (λ i, dispatch' (to_base n i)) (seq 0 (n ^ n)).
-*)
-
-Compute (raw_partitions 3).
-(*
-Compute (raw_partitions' 3).
-*)
+Compute (raw_partitions 4).
 
 (* *)
 
@@ -267,16 +232,18 @@ Fixpoint nat_in_list i l :=
   | j :: l' => if Nat.eq_dec i j then true else nat_in_list i l'
   end.
 
-Definition locate ll :=
+Definition locate_list ll :=
   map (λ i, nth_find (nat_in_list i) ll) (seq 0 (length ll)).
 
-Compute (locate [[2]; []; [1; 0]]).
-Compute (dispatch [2; 2; 0]).
-Compute (to_base 3 24, locate (dispatch (to_base 3 24))).
-Compute (dispatch (locate [[2]; []; [1; 0]])).
-Compute (to_base 3 24).
+Definition locate ll :=
+  fold_left (λ a i, a * length ll + i) (locate_list ll) 0.
 
-...
+Compute (locate [[2]; []; [0; 1]]).
+Compute (dispatch 3 24).
+Compute (locate [[]; [0; 2]; [1]]).
+Compute (dispatch 3 16).
+Compute (dispatch 4 23).
+Compute (locate [[0]; [1; 2]; []; [3]]).
 
 Theorem set_nth_length : ∀ {A} i l (v : A),
   i < length l → length (set_nth i l v) = length l.
@@ -293,76 +260,42 @@ Qed.
 Theorem disp_loop_length : ∀ n i v r,
   n ≠ 0
   → length r = n
-  → (∀ j, j ∈ v → j < n)
-  → length (disp_loop i v r) = length r.
+  → length (disp_loop n i v r) = length r.
 Proof.
-intros * Hnz Hrn Hjv.
-revert v r Hrn Hjv.
+intros * Hnz Hrn.
+revert n v r Hnz Hrn.
 induction i; intros; [ easy | cbn ].
-rewrite IHi; cycle 1. {
+rewrite IHi; [ | easy | ]. 2: {
   rewrite set_nth_length; [ easy | ].
   rewrite Hrn.
-  destruct v; [ | now apply Hjv; cbn; left ].
-  now cbn; apply Nat.neq_0_lt_0.
-} {
-  intros j Hj.
-  apply Hjv.
-  destruct v; [ easy | now right ].
+  now apply Nat.mod_upper_bound.
 }
 apply set_nth_length.
 rewrite Hrn.
-destruct v; [ | now apply Hjv; cbn; left ].
-now cbn; apply Nat.neq_0_lt_0.
+now apply Nat.mod_upper_bound.
 Qed.
 
-Compute (let n := 4 in to_base n 0).
-
-Theorem disp_loop_0_r : ∀ i l ll,
-  (∀ j, j ∈ l → j = 0)
-  → disp_loop i l ll =
+Theorem disp_loop_0_r : ∀ n i ll,
+  n ≠ 0
+  → disp_loop n i 0 ll =
        match ll with
        | l :: ll' => (seq 0 i ++ l) :: ll'
        | [] => if Nat.eq_dec i 0 then [] else [seq 0 i]
        end.
 Proof.
-intros * Hjz.
-revert l ll Hjz.
-induction i; intros; [ now destruct ll | ].
-cbn.
-rewrite IHi. 2: {
-  intros j Hj; apply Hjz.
-  destruct l as [| a]; [ easy | ].
-  now right.
-}
+intros * Hnz.
+destruct n; [ easy | clear Hnz; cbn ].
+revert n ll.
+induction i; intros; [ now destruct ll | cbn ].
+rewrite Nat.sub_diag; cbn.
+rewrite IHi; f_equal.
+replace (0 :: seq 1 i) with (seq 0 (i + 1)) by now rewrite Nat.add_1_r.
+rewrite seq_app.
+destruct ll as [| l]; [ easy | ].
+rewrite app_comm_cons.
 replace (0 :: seq 1 i) with (seq 0 (i + 1)) by now rewrite Nat.add_1_r.
 rewrite seq_app; cbn.
-destruct l as [| a]; cbn. {
-  destruct ll as [| l1]; [ easy | cbn ].
-  rewrite app_comm_cons.
-  replace (0 :: seq 1 i) with (seq 0 (i + 1)) by now rewrite Nat.add_1_r.
-  rewrite seq_app.
-  now rewrite <- app_assoc.
-} {
-  destruct ll as [| l1]. {
-    rewrite firstn_nil, skipn_nil; cbn.
-    now rewrite match_id.
-  } {
-    rewrite app_comm_cons.
-    replace (0 :: seq 1 i) with (seq 0 (i + 1)) by now rewrite Nat.add_1_r.
-    rewrite seq_app.
-    remember (_ ++ _) as ll' eqn:Hll'.
-    symmetry in Hll'.
-    destruct ll'; [ now apply app_eq_nil in Hll' | ].
-    rewrite <- app_assoc; cbn.
-    cbn in Hll'.
-    destruct a. {
-      cbn in Hll'.
-      now injection Hll'; clear Hll'; intros; subst l0 ll'.
-    } {
-      now specialize (Hjz (S a) (or_introl eq_refl)) as H1.
-    }
-  }
-}
+now rewrite <- app_assoc.
 Qed.
 
 Definition sub_list {A} (l : list A) start len :=
@@ -380,64 +313,13 @@ rewrite <- (Nat.add_1_r (S start)).
 apply IHlen.
 Qed.
 
-Print to_base.
-Print disp_loop.
-
-Compute (
-   let n := 6 in let i := 3 in let l := to_base n i in
-   let ll := map (λ i, [i; i + 1]) (seq 42 n) in
-   disp_loop i l ll).
-
-Compute (
-   let n := 6 in let i := 2 in let l := to_base n i in l).
-(*
-     = [2; 0; 0; 0; 0; 0]
-     : list nat
-*)
-
-Print disp_loop.
-Print dispatch.
-
-Compute (raw_partitions 3).
-Print raw_partitions.
-
-(*
-Check nth_find.
-
-Compute (
-   let n := 6 in
-   let i := 5 in
-   let l := [0; 1; 0; 4; 4] in
-   let ll := map (λ i, [i; i + 1]) (seq 42 n) in
-   disp_loop i l ll =
-     (nth_find (Nat.eqb 0) (rev l) :: nth 0 ll []) :: []).
-...
-     (seq 0 (i - 1) ++ nth 0 ll []) :: sub_list ll 1 (i - 1) ++
-     [[i - 1] ++ nth i ll []] ++
-     sub_list ll (i + 1) (length ll - i - 1)).
-...
-*)
-
-(*
-Theorem disp_loop_seq_sub_list : ∀ i l ll,
-  0 < i < length ll
-  → disp_loop i l ll =
-       (seq 0 (i - 1) ++ nth 0 ll []) :: sub_list ll 1 (i - 1) ++
-       [[i - 1] ++ nth i ll []] ++
-       sub_list ll (i + 1) (length ll - i - 1).
-...
+Theorem disp_loop_seq_sub_list : ∀ n i, i ≠ 0 → ∀ v r,
   0 < v < n
   → length r = n
-
-       (seq 0 (i - 1) ++ nth 0 ll []) :: sub_list r 1 (v - 1) ++
+  → disp_loop n i v r =
+       (seq 0 (i - 1) ++ nth 0 r []) :: sub_list r 1 (v - 1) ++
        [[i - 1] ++ nth v r []] ++
        sub_list r (v + 1) (n - v - 1).
-...
-  → disp_loop i l ll =
-       match ll with
-       | l :: ll' => (seq 0 i ++ l) :: ll'
-       | [] => if Nat.eq_dec i 0 then [] else [seq 0 i]
-       end.
 Proof.
 intros * Hiz * Hvn Hrn.
 destruct i; [ easy | clear Hiz ].
@@ -525,7 +407,6 @@ f_equal. {
   symmetry; apply firstn_all.
 }
 Qed.
-*)
 
 Theorem List_cons_app A (a : A) l : a :: l = [a] ++ l.
 Proof. easy. Qed.
@@ -548,82 +429,15 @@ apply Hl1.
 now right.
 Qed.
 
-Print dispatch.
-Print locate.
-
-Compute (let l := [3; 2; 1; 1] in locate (dispatch l)).
-Compute (dispatch (locate [[3]; [0; 2]; []; [1]])).
-
-Definition in_radix n l := ∀ i, i ∈ l → i < n.
-
-Theorem locate_dispatch : ∀ l,
-  in_radix (length l) l
-  → locate (dispatch l) = l.
-Proof.
-intros * Hr.
-destruct (Nat.eq_dec (length l) 0) as [Hlz| Hlz]. {
-  now apply length_zero_iff_nil in Hlz; subst l.
-}
-unfold in_radix in Hr.
-unfold locate, dispatch.
-rewrite (disp_loop_length (length l)); [ | easy | | easy ]. 2: {
-  apply repeat_length.
-}
-rewrite repeat_length.
-rewrite <- rev_involutive; f_equal.
-Compute (let l := [3; 2; 3; 1; 4] in disp_loop (length l) l (repeat [] (length l))).
-Search disp_loop.
-...
-destruct l as [| a1 l]; [ easy | cbn ].
-clear Hlz.
-destruct l as [| a2 l]. {
-  cbn; f_equal.
-  specialize (Hr a1 (or_introl eq_refl)).
-  cbn in Hr.
-  now apply Nat.lt_1_r in Hr; subst a1.
-}
-cbn.
-...
-
 Theorem locate_dispatch : ∀ n i, i < n → locate (dispatch n i) = i.
 Proof.
 intros * Hin.
 unfold locate, dispatch.
 unfold locate_list.
-rewrite (disp_loop_length n); [ | flia Hin | apply repeat_length | ]. 2: {
-  intros j Hj.
-  assert (Hnz : n ≠ 0) by flia Hin.
-  clear - Hnz Hj.
-  remember n as it in Hj at 1; clear Heqit.
-  revert i j Hj.
-  induction it; intros; [ easy | ].
-  cbn in Hj.
-  destruct Hj as [Hj| Hj]. {
-    rewrite <- Hj.
-    now apply Nat.mod_upper_bound.
-  } {
-    now apply (IHit (i / n)).
-  }
-}
+rewrite disp_loop_length; [ | flia Hin | apply repeat_length ].
 rewrite repeat_length.
-...
 destruct (Nat.eq_dec i 0) as [Hiz| Hiz]. {
   subst i; cbn.
-  rewrite disp_loop_0_r. 2: {
-    intros j Hj.
-    remember n as it in Hj at 1; clear Heqit.
-    revert j Hj.
-    induction it; intros; [ easy | cbn in Hj ].
-    rewrite Nat.mod_0_l in Hj; [ | now apply Nat.neq_0_lt_0 ].
-    rewrite Nat.div_0_l in Hj; [ | now apply Nat.neq_0_lt_0 ].
-    destruct Hj as [Hj| Hj]; [ easy | ].
-    now apply IHit.
-  }
-(**)
-  destruct n; [ easy | clear Hin ].
-  cbn - [ nth_find seq ].
-  rewrite app_nil_r.
-...
   specialize (disp_loop_0_r n n (repeat [] n)) as H1.
   assert (Hnz : n ≠ 0) by flia Hin.
   specialize (H1 Hnz); cbn in H1.
@@ -791,7 +605,6 @@ induction ll as [| l]; intros. {
   destruct Hll as (Hlen & Hall & Hin & Hnd).
   now subst n.
 }
-unfold dispatch, locate.
 Print locate.
 (* faudrait prouver déjà que locate renvoit bien une valeur entre
    0 et n^n *)
