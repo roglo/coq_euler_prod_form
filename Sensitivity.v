@@ -150,7 +150,7 @@ Definition to_base n i := to_base_loop n n i.
 Definition set_nth {A} i (l : list A) v :=
   firstn i l ++ v :: skipn (i + 1) l.
 
-(**)
+(*
 Fixpoint disp_loop i l ll :=
   match i with
   | 0 => ll
@@ -159,14 +159,14 @@ Fixpoint disp_loop i l ll :=
   end.
 
 Definition dispatch l := disp_loop (length l) l (repeat [] (length l)).
-(*
+*)
 Fixpoint disp_loop i l ll :=
   match l with
   | [] => ll
-  | a :: l => disp_loop (pred i) l (set_nth a ll (pred i :: nth a ll []))
+  | a :: l => disp_loop (S i) l (set_nth a ll (i :: nth a ll []))
   end.
-Definition dispatch l := disp_loop (length l) l (repeat [] (length l)).
-*)
+Definition dispatch l := disp_loop 0 l (repeat [] (length l)).
+(**)
 
 Definition raw_partitions n :=
   map (λ i, dispatch (to_base n i)) (seq 0 (n ^ n)).
@@ -268,13 +268,15 @@ Fixpoint nat_in_list i l :=
   end.
 
 Definition locate ll :=
-  rev (map (λ i, nth_find (nat_in_list i) ll) (seq 0 (length ll))).
+  map (λ i, nth_find (nat_in_list i) ll) (seq 0 (length ll)).
 
-Compute (locate [[2]; []; [0; 1]]).
-Compute (dispatch [0; 2; 2]).
+Compute (locate [[2]; []; [1; 0]]).
+Compute (dispatch [2; 2; 0]).
 Compute (to_base 3 24, locate (dispatch (to_base 3 24))).
-Compute (dispatch (locate [[2]; []; [0; 1]])).
+Compute (dispatch (locate [[2]; []; [1; 0]])).
 Compute (to_base 3 24).
+
+...
 
 Theorem set_nth_length : ∀ {A} i l (v : A),
   i < length l → length (set_nth i l v) = length l.
