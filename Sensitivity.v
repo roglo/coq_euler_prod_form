@@ -399,21 +399,24 @@ Print dispatch.
 Compute (raw_partitions 3).
 Print raw_partitions.
 
+(*
+Check nth_find.
+
 Compute (
    let n := 6 in
    let i := 5 in
    let l := [0; 1; 0; 4; 4] in
    let ll := map (λ i, [i; i + 1]) (seq 42 n) in
    disp_loop i l ll =
-     ll).
+     (nth_find (Nat.eqb 0) (rev l) :: nth 0 ll []) :: []).
 ...
      (seq 0 (i - 1) ++ nth 0 ll []) :: sub_list ll 1 (i - 1) ++
      [[i - 1] ++ nth i ll []] ++
      sub_list ll (i + 1) (length ll - i - 1)).
-
 ...
+*)
 
-(**)
+(*
 Theorem disp_loop_seq_sub_list : ∀ i l ll,
   0 < i < length ll
   → disp_loop i l ll =
