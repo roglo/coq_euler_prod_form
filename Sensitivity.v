@@ -365,18 +365,47 @@ Qed.
 
 Search disp_loop.
 Check repeat.
-Compute (let i := 4 in let l := repeat 0 i ++ [i] in let ll := map (λ i, [i; i+1]) (seq 42 6) in
-  (disp_loop i l ll = (seq 0 i ++ hd [] ll) :: tl ll)).
+Compute (let i := 6 in let j := 2 in let l := repeat 0 (i - 1) ++ [j] in let ll := map (λ i, [i; i+1]) (seq 42 i) in
+  disp_loop i l ll =
+    (seq 1 (i - 1) ++ hd [] ll) :: sub_list ll 1 (j - 1) ++
+    [[0] ++ nth j ll []] ++
+    sub_list ll (j + 1) (length ll - j - 1)).
+Compute (let i := 6 in let j := 2 in
+            (disp_loop i (rev (to_radix i j)) (repeat [] i))).
+Compute (rev (to_radix 6 2)).
 
-Theorem disp_loop_small : ∀ i l ll,
+Theorem disp_loop_small : ∀ i j l ll,
   i < length ll
-  → l = repeat 0 (i - 1) ++ [i]
-  → disp_loop i l ll = (seq 0 i ++ hd [] ll) :: tl ll.
+  → l = repeat 0 (i - 1) ++ [j]
+  → disp_loop i l ll =
+      (seq 1 (i - 1) ++ hd [] ll) :: sub_list ll 1 (j - 1) ++
+      [[0] ++ nth j ll []] ++
+      sub_list ll (j + 1) (length ll - j - 1).
 Proof.
 intros * Hill Hl.
+destruct i; cbn. {
+  destruct ll as [| l1]; cbn; [ easy | ].
+  f_equal.
+  destruct j; cbn.
+  cbn in Hl.
+(* bon, ça part en couille, mon histoire...
+   faut que je revoye de quel théorème j'ai besoin, en dessous *)
+...
+destruct i; cbn; [ now destruct ll | ].
 revert l ll Hill Hl.
-induction i; intros; cbn; [ now destruct ll | ].
-rewrite Nat.sub_succ, Nat.sub_0_r in Hl.
+induction i; intros; cbn. {
+  subst l; cbn.
+  destruct ll; [ easy | ].
+Compute (rev (to_radix 4 2)).
+...
+            (disp_loop n (rev (to_radix n i)) (repeat [] n)))
+  now destruct ll.
+}
+rewrite IHi.
+...
+intros * Hill Hl.
+revert l ll Hill Hl.
+induction
 ...
 destruct l as [| a]. {
   symmetry in Hl.
@@ -601,12 +630,13 @@ destruct (Nat.eq_dec i 0) as [Hiz| Hiz]. {
   apply IHm.
 }
 assert (Hnz : n ≠ 0) by flia Hin.
-...
-rewrite disp_loop_small. 2: {
+rewrite disp_loop_small. 3: {
   rewrite <- rev_involutive; f_equal.
   rewrite rev_app_distr; cbn.
   rewrite List_repeat_rev.
+  rewrite repeat_length.
 Compute (to_radix 4 3).
+Compute (to_radix 5 3).
 ...
 Compute (rev (to_radix 6 2)).
 repeat 0 i ++ [i]
