@@ -569,6 +569,7 @@ rewrite (disp_loop_length (length l)); [ | easy | | easy ]. 2: {
 }
 rewrite repeat_length.
 rewrite <- rev_involutive; f_equal.
+Compute (let l := [3; 2; 3; 1; 4] in disp_loop (length l) l (repeat [] (length l))).
 Search disp_loop.
 ...
 destruct l as [| a1 l]; [ easy | cbn ].
