@@ -142,19 +142,27 @@ Definition is_nil {A} (l : list A) :=
   | _ => false
   end.
 
-Fixpoint disp_loop n i v ll :=
+Fixpoint to_base_loop it n i :=
+  match it with
+  | 0 => []
+  | S it' => i mod n :: to_base_loop it' n (i / n)
+  end.
+
+Definition to_base n i := to_base_loop n n i.
+
+Fixpoint disp_loop i l ll :=
   match i with
   | 0 => ll
   | S i' =>
-      disp_loop n i' (v / n)
-        (set_nth (v mod n) ll (i' :: nth (v mod n) ll []))
+      disp_loop i' (tl l)
+        (set_nth (hd 0 l) ll (i' :: nth (hd 0 l) ll []))
   end.
 
-Definition dispatch n i := disp_loop n n i (repeat [] n).
+Definition dispatch n i := disp_loop n (rev (to_base n i)) (repeat [] n).
 
 Definition raw_partitions n := map (dispatch n) (seq 0 (n ^ n)).
 
-Compute (raw_partitions 4).
+Compute (raw_partitions 3).
 
 (* *)
 
@@ -258,13 +266,39 @@ f_equal.
 now apply IHl.
 Qed.
 
-Theorem disp_loop_length : ∀ n i v r,
+Theorem to_base_0_r : ∀ n, to_base n 0 = repeat 0 n.
+Proof.
+intros.
+unfold to_base.
+remember n as it in |-* at 1 3.
+clear Heqit.
+revert n.
+induction it; intros; [ easy | cbn ].
+destruct n; [ cbn; f_equal; apply IHit | ].
+cbn; rewrite Nat.sub_diag; f_equal; apply IHit.
+Qed.
+
+Theorem List_repeat_rev : ∀ A (x : A) n, rev (repeat x n) = repeat x n.
+Proof.
+intros.
+induction n; [ easy | ].
+cbn; rewrite IHn.
+clear IHn.
+induction n; [ easy | ].
+cbn; f_equal; apply IHn.
+Qed.
+
+Theorem disp_loop_length : ∀ n i r,
   n ≠ 0
   → length r = n
-  → length (disp_loop n i v r) = length r.
+  → length (disp_loop n (rev (to_base n i)) r) = length r.
 Proof.
 intros * Hnz Hrn.
-revert n v r Hnz Hrn.
+revert n r Hnz Hrn.
+induction i; intros. {
+  rewrite to_base_0_r.
+  rewrite List_repeat_rev.
+...
 induction i; intros; [ easy | cbn ].
 rewrite IHi; [ | easy | ]. 2: {
   rewrite set_nth_length; [ easy | ].
