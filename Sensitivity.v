@@ -375,24 +375,41 @@ Compute (let i := 7 in let j := 5 in let ll := map (λ i, [i; i + 1]) (seq 42 (i
     (seq 0 (i - 1) ++ hd [] ll) :: sub_list ll 1 (j - 1) ++
     [[i - 1] ++ nth j ll []] ++
     sub_list ll (j + 1) (length ll - j - 1))).
-Theorem disp_loop_small : ∀ i j ll,
+Theorem disp_loop_small : ∀ i j l ll,
   0 < j < i
   → i = length ll
-  → disp_loop i (to_radix i j) ll =
+  → hd 0 l < i
+  → (∀ k, nth (S k) l 0 = 0)
+  → disp_loop i l ll =
        (seq 0 (i - 1) ++ hd [] ll) :: sub_list ll 1 (j - 1) ++
        [[i - 1] ++ nth j ll []] ++
        sub_list ll (j + 1) (length ll - j - 1).
 Proof.
-intros * Hji Hill.
-revert j ll Hji Hill.
+intros * Hji Hill Hhd Htl.
+destruct j; [ easy | ].
+destruct Hji as (_, Hji).
+revert j l ll Hji Hill Hhd Htl.
 induction i; intros; [ easy | ].
 rewrite Nat.sub_succ, Nat.sub_0_r.
 cbn - [ "/" "mod" ].
+rewrite Nat.sub_0_r.
+destruct j. {
+  cbn.
+  rewrite (IHi 0).
+(* pfff... c'est trop nul *)
+...
+  cbn - [ "/" "mod" ].
+rewrite (IHi (S j)).
+...
 rewrite Nat.div_small; [ | easy ].
 rewrite Nat.mod_small; [ | easy ].
 unfold to_radix in IHi.
 (* mmm... il faudrait que je remplace le "to_radix" par quelque chose
    de plus général *)
+Compute (to_radix 7 2).
+Compute (to_radix_loop 7 9 2).
+Print to_radix.
+it ≤ n
 ...
 
 intros * Hji Hill.
