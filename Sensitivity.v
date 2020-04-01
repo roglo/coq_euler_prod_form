@@ -481,77 +481,9 @@ f_equal. {
   symmetry; apply firstn_all.
 }
 Qed.
+
 ...
 
-Theorem disp_loop_small : ∀ i j l ll,
-  0 < j < i
-  → l = repeat 0 (i - 1) ++ [j]
-  → disp_loop i l ll =
-      (seq 1 (i - 1) ++ hd [] ll) :: sub_list ll 1 (j - 1) ++
-      [[0] ++ nth j ll []] ++
-      sub_list ll (j + 1) (length ll - j - 1).
-Proof.
-intros * Hji Hl.
-revert j l ll Hji Hl.
-induction i; intros; cbn; [ easy | ].
-rewrite Nat.sub_succ, Nat.sub_0_r in Hl.
-rewrite Nat.sub_0_r.
-destruct j; [ easy | ].
-rewrite (IHi j).
-Abort. (*
-...
-destruct i; cbn; [ now destruct ll | ].
-revert l ll Hill Hl.
-induction i; intros; cbn. {
-  subst l; cbn.
-  destruct ll; [ easy | ].
-Compute (rev (to_radix 4 2)).
-...
-            (disp_loop n (rev (to_radix n i)) (repeat [] n)))
-  now destruct ll.
-}
-rewrite IHi.
-...
-intros * Hill Hl.
-revert l ll Hill Hl.
-induction
-...
-destruct l as [| a]. {
-  symmetry in Hl.
-  now apply app_eq_nil in Hl.
-}
-cbn.
-rewrite IHi.
-...
-rewrite IHi.
-destruct ll as [| l1]; [ easy | ].
-...
-rewrite IHi. 3: {
-  subst l; cbn.
-  destruct i; cbn.
-...
-remember (S i) as si; cbn; subst si.
-rewrite Nat.mod_small; [ | easy ].
-rewrite Nat.div_small; [ | easy ].
-cbn.
-rewrite Nat.mod_0_l; [ | flia Hvn ].
-rewrite Nat.div_0_l; [ | flia Hvn ].
-rewrite disp_loop_0_r; [ | flia Hvn ].
-remember (set_nth _ _ _) as sn eqn:Hsn.
-symmetry in Hsn.
-destruct sn as [| l ll]. {
-  apply (f_equal (@length _)) in Hsn.
-  rewrite set_nth_length in Hsn; cbn in Hsn; [ | easy ].
-  rewrite set_nth_length in Hsn; cbn in Hsn; [ | now rewrite Hrn ].
-  now rewrite <- Hrn, Hsn in Hvn.
-}
-...
-
-Theorem disp_loop_seq_sub_list :
-  disp_loop i l ll =
-    (seq 0 (i - 1) ++ nth 0 ll []) :: sub_list ll 1 (v - 1) ++
-    [[i - 1] ++ nth v ll []] ++
-    sub_list ll (v + 1) (length ll - v - 1).
 Theorem disp_loop_seq_sub_list : ∀ n i, i ≠ 0 → ∀ v r,
   0 < v < n
   → length r = n
@@ -560,8 +492,6 @@ Theorem disp_loop_seq_sub_list : ∀ n i, i ≠ 0 → ∀ v r,
        [[i - 1] ++ nth v r []] ++
        sub_list r (v + 1) (n - v - 1).
 Proof.
-            (disp_loop n (rev (to_radix n i)) (repeat [] n)))
-...
 intros * Hiz * Hvn Hrn.
 destruct i; [ easy | clear Hiz ].
 rewrite Nat.sub_succ, Nat.sub_0_r.
