@@ -158,7 +158,7 @@ Fixpoint disp_loop i l ll :=
         (set_nth (hd 0 l) ll (i' :: nth (hd 0 l) ll []))
   end.
 
-Definition dispatch n i := disp_loop n (rev (to_radix n i)) (repeat [] n).
+Definition dispatch n i := disp_loop n (to_radix n i) (repeat [] n).
 
 Definition raw_partitions n := map (dispatch n) (seq 0 (n ^ n)).
 
@@ -577,9 +577,7 @@ destruct Ha as [Ha| Ha]. {
 now apply (IHit (i / n)).
 Qed.
 
-Compute (locate (dispatch 3 1)).
-(* oh putain j'ai merdé, là ! *)
-...
+Compute (let n := 6 in map (λ i, locate (dispatch n i)) (seq 0 (n + 2))).
 
 Theorem locate_dispatch : ∀ n i, i < n → locate (dispatch n i) = i.
 Proof.
@@ -589,14 +587,12 @@ unfold locate_list.
 rewrite disp_loop_length; [ | now destruct n | ]. 2: {
   intros a Ha.
   rewrite repeat_length.
-  apply in_rev in Ha.
   now apply to_radix_prop in Ha.
 }
 rewrite repeat_length.
 destruct (Nat.eq_dec i 0) as [Hiz| Hiz]. {
   subst i; cbn.
   rewrite to_radix_0_r.
-  rewrite List_repeat_rev.
   rewrite disp_loop_0_r. 2: {
     intros a Ha.
     now apply repeat_spec in Ha.
