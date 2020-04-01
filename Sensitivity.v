@@ -162,6 +162,14 @@ Definition dispatch' n i := disp_loop' n (rev (to_radix n i)).
 
 Definition raw_partitions' n := map (dispatch' n) (seq 0 (n ^ n)).
 
+(* est-ce que c'est mieux, la définition raw_partition' ci-dessus ?
+   en tous cas, elle est équivalente à raw_partition, ci-dessous,
+   même si elle suppose d'inverser le to_radix (si on veut cette
+   équivalence à moins qu'on ne soit pas gêné par le changement
+   dans l'ordre des résultats). *)
+
+...
+
 Compute (raw_partitions' 3).
 
 Fixpoint disp_loop i l ll :=
