@@ -371,8 +371,9 @@ Compute (let i := 2 in let j := 1 in let l := repeat 0 (i - 1) ++ [j] in let ll 
     [[0] ++ nth j ll []] ++
     sub_list ll (j + 1) (length ll - j - 1)).
 Compute (let i := 6 in let j := 2 in
-            (disp_loop i (rev (to_radix i j)) (repeat [] i))).
-Compute (rev (to_radix 6 0)).
+            (disp_loop i (to_radix i j) (repeat [] i))).
+...
+    (disp_loop n (to_radix n i) (repeat [] n)) 0 = i
 
 Theorem disp_loop_small : ∀ i j l ll,
   0 < j < i
