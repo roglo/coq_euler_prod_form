@@ -382,6 +382,105 @@ Theorem disp_loop_small : ∀ i j ll,
        [[i - 1] ++ nth j ll []] ++
        sub_list ll (j + 1) (length ll - j - 1).
 Proof.
+intros * Hji.
+destruct i; [ easy | ].
+rewrite Nat.sub_succ, Nat.sub_0_r.
+cbn - [ "/" "mod" ].
+rewrite Nat.div_small; [ | easy ].
+rewrite Nat.mod_small; [ | easy ].
+destruct i; [ flia Hji | ].
+destruct i. {
+  cbn.
+  f_equal. {
+    f_equal.
+    replace j with 1 by flia Hji; clear j Hji.
+    destruct ll as [| l]; [ cbn | easy ].
+...
+intros * Hji.
+destruct j; [ easy | ].
+revert n v r Hvn Hrn.
+induction i; intros. {
+  cbn.
+  unfold set_nth.
+  unfold sub_list.
+  rewrite Nat.mod_small; [ | easy ].
+  rewrite app_comm_cons.
+  destruct r as [| a l]; [ cbn in Hrn; flia Hvn Hrn | ].
+  cbn.
+  rewrite app_comm_cons.
+  f_equal. {
+    destruct v; [ easy | ].
+    rewrite Nat.sub_succ, Nat.sub_0_r.
+    apply firstn_cons.
+  } {
+    f_equal.
+    rewrite firstn_skipn_comm.
+    f_equal.
+    replace (v + 1 + (n - v - 1)) with n by flia Hvn.
+    destruct n; [ easy | cbn; f_equal ].
+    cbn in Hrn.
+    apply Nat.succ_inj in Hrn; subst n.
+    symmetry; apply firstn_all.
+  }
+}
+remember (S i) as si; cbn; subst si.
+rewrite Nat.mod_small; [ | easy ].
+rewrite Nat.div_small; [ | easy ].
+cbn.
+rewrite Nat.mod_0_l; [ | flia Hvn ].
+rewrite Nat.div_0_l; [ | flia Hvn ].
+rewrite disp_loop_0_r; [ | flia Hvn ].
+remember (set_nth _ _ _) as sn eqn:Hsn.
+symmetry in Hsn.
+destruct sn as [| l ll]. {
+  apply (f_equal (@length _)) in Hsn.
+  rewrite set_nth_length in Hsn; cbn in Hsn; [ | easy ].
+  rewrite set_nth_length in Hsn; cbn in Hsn; [ | now rewrite Hrn ].
+  now rewrite <- Hrn, Hsn in Hvn.
+}
+cbn in Hsn.
+injection Hsn; clear Hsn; intros H1 H2.
+remember (set_nth _ _ _) as l2 eqn:Hl2.
+symmetry in Hl2.
+destruct l2 as [| l2 ll2]. {
+  apply (f_equal (@length _)) in Hl2.
+  rewrite set_nth_length in Hl2; [ | now rewrite Hrn ].
+  subst ll.
+  apply length_zero_iff_nil in Hl2; subst r.
+  now rewrite <- Hrn in Hvn.
+}
+subst ll2.
+cbn in H2; subst l.
+f_equal. {
+  rewrite app_comm_cons.
+  replace (0 :: seq 1 i) with (seq 0 i ++ [i]). 2: {
+    replace i with (0 + i) by easy.
+    now rewrite seq_app_last.
+  }
+  rewrite <- app_assoc.
+  f_equal; cbn; f_equal.
+  destruct v; [ easy | ].
+  cbn in Hl2.
+  destruct r as [| l ll']; [ now rewrite <- Hrn in Hvn | ].
+  cbn in Hl2.
+  now injection Hl2.
+} {
+  destruct v; [ easy | ].
+  unfold sub_list.
+  cbn in Hl2; cbn.
+  rewrite Nat.sub_0_r.
+  destruct r as [| l ll']; [ now rewrite <- Hrn in Hvn | ].
+  cbn in Hl2; cbn.
+  injection Hl2; intros; subst l2 ll.
+  f_equal; f_equal.
+  rewrite firstn_skipn_comm.
+  f_equal.
+  replace (v + 1 + (n - S v - 1)) with (n - 1) by flia Hvn.
+  cbn in Hrn.
+  rewrite <- Hrn, Nat.sub_succ, Nat.sub_0_r.
+  symmetry; apply firstn_all.
+}
+Qed.
 ...
 
 Theorem disp_loop_small : ∀ i j l ll,
