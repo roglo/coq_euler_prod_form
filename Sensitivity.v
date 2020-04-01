@@ -372,24 +372,26 @@ Compute (let i := 6 in let j := 2 in let l := repeat 0 (i - 1) ++ [j] in let ll 
     sub_list ll (j + 1) (length ll - j - 1)).
 Compute (let i := 6 in let j := 2 in
             (disp_loop i (rev (to_radix i j)) (repeat [] i))).
-Compute (rev (to_radix 6 2)).
+Compute (rev (to_radix 6 1)).
 
 Theorem disp_loop_small : ∀ i j l ll,
-  i < length ll
+  j < i
   → l = repeat 0 (i - 1) ++ [j]
   → disp_loop i l ll =
       (seq 1 (i - 1) ++ hd [] ll) :: sub_list ll 1 (j - 1) ++
       [[0] ++ nth j ll []] ++
       sub_list ll (j + 1) (length ll - j - 1).
 Proof.
-intros * Hill Hl.
-destruct i; cbn. {
-  destruct ll as [| l1]; cbn; [ easy | ].
-  f_equal.
-  destruct j; cbn.
-  cbn in Hl.
-(* bon, ça part en couille, mon histoire...
-   faut que je revoye de quel théorème j'ai besoin, en dessous *)
+intros * Hji Hl.
+revert j l ll Hji Hl.
+induction i; intros; cbn; [ easy | ].
+rewrite Nat.sub_succ, Nat.sub_0_r in Hl.
+rewrite Nat.sub_0_r.
+destruct j. {
+  cbn; rewrite Nat.sub_0_r.
+  clear IHi.
+  destruct i; cbn. {
+    cbn in Hl; subst l; cbn.
 ...
 destruct i; cbn; [ now destruct ll | ].
 revert l ll Hill Hl.
