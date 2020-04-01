@@ -374,10 +374,8 @@ Compute (let i := 6 in let j := 2 in
             (disp_loop i (rev (to_radix i j)) (repeat [] i))).
 Compute (rev (to_radix 6 0)).
 
-(* pb for j=0 *)
-(*
 Theorem disp_loop_small : ∀ i j l ll,
-  j < i
+  0 < j < i
   → l = repeat 0 (i - 1) ++ [j]
   → disp_loop i l ll =
       (seq 1 (i - 1) ++ hd [] ll) :: sub_list ll 1 (j - 1) ++
@@ -389,11 +387,9 @@ revert j l ll Hji Hl.
 induction i; intros; cbn; [ easy | ].
 rewrite Nat.sub_succ, Nat.sub_0_r in Hl.
 rewrite Nat.sub_0_r.
-destruct j. {
-  cbn; rewrite Nat.sub_0_r.
-  clear IHi.
-  destruct i; cbn. {
-    cbn in Hl; subst l; cbn.
+destruct j; [ easy | ].
+rewrite (IHi j).
+Abort. (*
 ...
 destruct i; cbn; [ now destruct ll | ].
 revert l ll Hill Hl.
@@ -581,6 +577,10 @@ destruct Ha as [Ha| Ha]. {
 now apply (IHit (i / n)).
 Qed.
 
+Compute (locate (dispatch 3 1)).
+(* oh putain j'ai merdé, là ! *)
+...
+
 Theorem locate_dispatch : ∀ n i, i < n → locate (dispatch n i) = i.
 Proof.
 intros * Hin.
@@ -634,6 +634,10 @@ destruct (Nat.eq_dec i 0) as [Hiz| Hiz]. {
   apply IHm.
 }
 assert (Hnz : n ≠ 0) by flia Hin.
+(*
+replace (disp_loop _ _ _) with
+  (seq 1 (n - 1) :: set_nth (i - 1) (repeat [] (n - 1)) [0]).
+*)
 replace n with (1 + (n - 1)) at 1 by flia Hnz.
 rewrite seq_app.
 rewrite Nat.add_0_l; unfold seq at 1.
