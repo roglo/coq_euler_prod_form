@@ -629,17 +629,21 @@ destruct (Nat.eq_dec i 0) as [Hiz| Hiz]. {
   induction m; [ easy | ].
   apply IHm.
 }
-assert (Hnz : n ≠ 0) by flia Hin.
-(*
-replace (disp_loop _ _ _) with
-  (seq 1 (n - 1) :: set_nth (i - 1) (repeat [] (n - 1)) [0]).
-*)
-replace n with (1 + (n - 1)) at 1 by flia Hnz.
+replace n with ((n - 1) + 1) at 1 by flia Hin.
 rewrite seq_app.
-rewrite Nat.add_0_l; unfold seq at 1.
+rewrite Nat.add_0_l; unfold seq at 2.
 rewrite map_app.
-remember (map _ _) as x.
+remember (map _ [_]) as x.
 cbn in Heqx.
+Compute (let n := 5 in map (λ i, (i, nth_find (nat_in_list (n - 1)) (disp_loop n (to_radix n i) (repeat [] n)))) (seq 0 n)).
+replace x with [i]. 2: {
+  subst x; symmetry; f_equal.
+  unfold nth_find.
+Compute (let n := 4 in map (λ i, (i, disp_loop n (to_radix n i) (repeat [] n))) (seq 0 (n + 2))).
+...
+  revert i Hin Hiz.
+  induction n; intros; [ easy | ].
+  cbn - [ "/" "mod" ].
 ...
 unfold map at 1.
 unfold nth_find at 1.
