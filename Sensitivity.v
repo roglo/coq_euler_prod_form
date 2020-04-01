@@ -365,15 +365,17 @@ Qed.
 
 Search disp_loop.
 Check repeat.
-Compute (let i := 6 in let j := 2 in let l := repeat 0 (i - 1) ++ [j] in let ll := map (λ i, [i; i+1]) (seq 42 i) in
+Compute (let i := 2 in let j := 1 in let l := repeat 0 (i - 1) ++ [j] in let ll := map (λ i, [i; i+1]) (seq 42 i) in
   disp_loop i l ll =
     (seq 1 (i - 1) ++ hd [] ll) :: sub_list ll 1 (j - 1) ++
     [[0] ++ nth j ll []] ++
     sub_list ll (j + 1) (length ll - j - 1)).
 Compute (let i := 6 in let j := 2 in
             (disp_loop i (rev (to_radix i j)) (repeat [] i))).
-Compute (rev (to_radix 6 1)).
+Compute (rev (to_radix 6 0)).
 
+(* pb for j=0 *)
+(*
 Theorem disp_loop_small : ∀ i j l ll,
   j < i
   → l = repeat 0 (i - 1) ++ [j]
@@ -632,6 +634,16 @@ destruct (Nat.eq_dec i 0) as [Hiz| Hiz]. {
   apply IHm.
 }
 assert (Hnz : n ≠ 0) by flia Hin.
+replace n with (1 + (n - 1)) at 1 by flia Hnz.
+rewrite seq_app.
+rewrite Nat.add_0_l; unfold seq at 1.
+rewrite map_app.
+remember (map _ _) as x.
+cbn in Heqx.
+...
+unfold map at 1.
+unfold nth_find at 1.
+...
 rewrite disp_loop_small. 3: {
   rewrite <- rev_involutive; f_equal.
   rewrite rev_app_distr; cbn.
