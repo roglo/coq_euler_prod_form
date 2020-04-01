@@ -150,6 +150,20 @@ Fixpoint to_radix_loop it n i :=
 
 Definition to_radix n i := to_radix_loop n n i.
 
+Fixpoint disp_loop' n l : list (list nat) :=
+  match l with
+  | [] => repeat [] n
+  | i :: l' =>
+      let ll := disp_loop' n l' in
+      set_nth i ll (n - length l :: nth i ll [])
+  end.
+
+Definition dispatch' n i := disp_loop' n (rev (to_radix n i)).
+
+Definition raw_partitions' n := map (dispatch' n) (seq 0 (n ^ n)).
+
+Compute (raw_partitions' 3).
+
 Fixpoint disp_loop i l ll :=
   match i with
   | 0 => ll
@@ -162,7 +176,7 @@ Definition dispatch n i := disp_loop n (to_radix n i) (repeat [] n).
 
 Definition raw_partitions n := map (dispatch n) (seq 0 (n ^ n)).
 
-Compute (raw_partitions 3).
+Compute (raw_partitions 3, raw_partitions' 3).
 
 (* *)
 
