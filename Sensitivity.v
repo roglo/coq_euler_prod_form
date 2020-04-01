@@ -370,19 +370,32 @@ Compute (let i := 2 in let j := 1 in let l := repeat 0 (i - 1) ++ [j] in let ll 
     (seq 1 (i - 1) ++ hd [] ll) :: sub_list ll 1 (j - 1) ++
     [[0] ++ nth j ll []] ++
     sub_list ll (j + 1) (length ll - j - 1)).
-Compute (let i := 7 in let j := 5 in let ll := map (λ i, [i; i + 1]) (seq 42 (i - 3)) in
+Compute (let i := 7 in let j := 5 in let ll := map (λ i, [i; i + 1]) (seq 42 (i - 7)) in
    (disp_loop i (to_radix i j) ll,
     (seq 0 (i - 1) ++ hd [] ll) :: sub_list ll 1 (j - 1) ++
     [[i - 1] ++ nth j ll []] ++
     sub_list ll (j + 1) (length ll - j - 1))).
 Theorem disp_loop_small : ∀ i j ll,
   0 < j < i
+  → i = length ll
   → disp_loop i (to_radix i j) ll =
        (seq 0 (i - 1) ++ hd [] ll) :: sub_list ll 1 (j - 1) ++
        [[i - 1] ++ nth j ll []] ++
        sub_list ll (j + 1) (length ll - j - 1).
 Proof.
-intros * Hji.
+intros * Hji Hill.
+revert j ll Hji Hill.
+induction i; intros; [ easy | ].
+rewrite Nat.sub_succ, Nat.sub_0_r.
+cbn - [ "/" "mod" ].
+rewrite Nat.div_small; [ | easy ].
+rewrite Nat.mod_small; [ | easy ].
+unfold to_radix in IHi.
+(* mmm... il faudrait que je remplace le "to_radix" par quelque chose
+   de plus général *)
+...
+
+intros * Hji Hill.
 destruct i; [ easy | ].
 rewrite Nat.sub_succ, Nat.sub_0_r.
 cbn - [ "/" "mod" ].
@@ -394,94 +407,30 @@ destruct i. {
   f_equal. {
     f_equal.
     replace j with 1 by flia Hji; clear j Hji.
-    destruct ll as [| l]; [ cbn | easy ].
-...
-intros * Hji.
-destruct j; [ easy | ].
-revert n v r Hvn Hrn.
-induction i; intros. {
+    now destruct ll.
+  }
+  destruct ll as [| l1]; [ easy | cbn ].
+  destruct ll as [| l2]; [ easy | cbn ].
+  destruct ll; [ cbn | easy ].
+  destruct j; [ easy | cbn ].
+  destruct j; [ easy | flia Hji ].
+}
+destruct i. {
   cbn.
-  unfold set_nth.
-  unfold sub_list.
-  rewrite Nat.mod_small; [ | easy ].
-  rewrite app_comm_cons.
-  destruct r as [| a l]; [ cbn in Hrn; flia Hvn Hrn | ].
-  cbn.
-  rewrite app_comm_cons.
+  destruct ll as [| l1]; [ easy | cbn ].
+  destruct ll as [| l2]; [ easy | cbn ].
+  destruct ll as [| l3]; [ easy | cbn ].
+  destruct ll; [ cbn | easy ].
   f_equal. {
-    destruct v; [ easy | ].
-    rewrite Nat.sub_succ, Nat.sub_0_r.
-    apply firstn_cons.
-  } {
-    f_equal.
-    rewrite firstn_skipn_comm.
-    f_equal.
-    replace (v + 1 + (n - v - 1)) with n by flia Hvn.
-    destruct n; [ easy | cbn; f_equal ].
-    cbn in Hrn.
-    apply Nat.succ_inj in Hrn; subst n.
-    symmetry; apply firstn_all.
+    f_equal; f_equal.
+    destruct j; [ easy | ].
+    now destruct j.
   }
+  destruct j; [ easy | cbn ].
+  destruct j; [ easy | cbn ].
+  destruct j; [ easy | cbn ].
+  now destruct j.
 }
-remember (S i) as si; cbn; subst si.
-rewrite Nat.mod_small; [ | easy ].
-rewrite Nat.div_small; [ | easy ].
-cbn.
-rewrite Nat.mod_0_l; [ | flia Hvn ].
-rewrite Nat.div_0_l; [ | flia Hvn ].
-rewrite disp_loop_0_r; [ | flia Hvn ].
-remember (set_nth _ _ _) as sn eqn:Hsn.
-symmetry in Hsn.
-destruct sn as [| l ll]. {
-  apply (f_equal (@length _)) in Hsn.
-  rewrite set_nth_length in Hsn; cbn in Hsn; [ | easy ].
-  rewrite set_nth_length in Hsn; cbn in Hsn; [ | now rewrite Hrn ].
-  now rewrite <- Hrn, Hsn in Hvn.
-}
-cbn in Hsn.
-injection Hsn; clear Hsn; intros H1 H2.
-remember (set_nth _ _ _) as l2 eqn:Hl2.
-symmetry in Hl2.
-destruct l2 as [| l2 ll2]. {
-  apply (f_equal (@length _)) in Hl2.
-  rewrite set_nth_length in Hl2; [ | now rewrite Hrn ].
-  subst ll.
-  apply length_zero_iff_nil in Hl2; subst r.
-  now rewrite <- Hrn in Hvn.
-}
-subst ll2.
-cbn in H2; subst l.
-f_equal. {
-  rewrite app_comm_cons.
-  replace (0 :: seq 1 i) with (seq 0 i ++ [i]). 2: {
-    replace i with (0 + i) by easy.
-    now rewrite seq_app_last.
-  }
-  rewrite <- app_assoc.
-  f_equal; cbn; f_equal.
-  destruct v; [ easy | ].
-  cbn in Hl2.
-  destruct r as [| l ll']; [ now rewrite <- Hrn in Hvn | ].
-  cbn in Hl2.
-  now injection Hl2.
-} {
-  destruct v; [ easy | ].
-  unfold sub_list.
-  cbn in Hl2; cbn.
-  rewrite Nat.sub_0_r.
-  destruct r as [| l ll']; [ now rewrite <- Hrn in Hvn | ].
-  cbn in Hl2; cbn.
-  injection Hl2; intros; subst l2 ll.
-  f_equal; f_equal.
-  rewrite firstn_skipn_comm.
-  f_equal.
-  replace (v + 1 + (n - S v - 1)) with (n - 1) by flia Hvn.
-  cbn in Hrn.
-  rewrite <- Hrn, Nat.sub_succ, Nat.sub_0_r.
-  symmetry; apply firstn_all.
-}
-Qed.
-
 ...
 
 Theorem disp_loop_seq_sub_list : ∀ n i, i ≠ 0 → ∀ v r,
