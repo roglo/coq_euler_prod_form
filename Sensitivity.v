@@ -370,10 +370,19 @@ Compute (let i := 2 in let j := 1 in let l := repeat 0 (i - 1) ++ [j] in let ll 
     (seq 1 (i - 1) ++ hd [] ll) :: sub_list ll 1 (j - 1) ++
     [[0] ++ nth j ll []] ++
     sub_list ll (j + 1) (length ll - j - 1)).
-Compute (let i := 6 in let j := 2 in
-            (disp_loop i (to_radix i j) (repeat [] i))).
+Compute (let i := 7 in let j := 5 in let ll := map (λ i, [i; i + 1]) (seq 42 (i - 3)) in
+   (disp_loop i (to_radix i j) ll,
+    (seq 0 (i - 1) ++ hd [] ll) :: sub_list ll 1 (j - 1) ++
+    [[i - 1] ++ nth j ll []] ++
+    sub_list ll (j + 1) (length ll - j - 1))).
+Theorem disp_loop_small : ∀ i j ll,
+  0 < j < i
+  → disp_loop i (to_radix i j) ll =
+       (seq 0 (i - 1) ++ hd [] ll) :: sub_list ll 1 (j - 1) ++
+       [[i - 1] ++ nth j ll []] ++
+       sub_list ll (j + 1) (length ll - j - 1).
+Proof.
 ...
-    (disp_loop n (to_radix n i) (repeat [] n)) 0 = i
 
 Theorem disp_loop_small : ∀ i j l ll,
   0 < j < i
