@@ -155,6 +155,43 @@ Definition raw_partitions n := map (dispatch n) (seq 0 (n ^ n)).
 
 Compute (raw_partitions 4).
 
+(* alternative version *)
+
+Fixpoint to_radix_loop it n i :=
+  match it with
+  | 0 => []
+  | S it' => i mod n :: to_radix_loop it' n (i / n)
+  end.
+
+Definition to_radix n i := to_radix_loop n n i.
+
+Fixpoint disp_loop' i l ll :=
+  match i with
+  | 0 => ll
+  | S i' =>
+      disp_loop' i' (tl l)
+        (set_nth (hd 0 l) ll (i' :: nth (hd 0 l) ll []))
+  end.
+
+Definition dispatch' n i := disp_loop' n (to_radix n i) (repeat [] n).
+
+Definition raw_partitions' n := map (dispatch' n) (seq 0 (n ^ n)).
+
+Compute (raw_partitions 3 = raw_partitions' 3).
+
+(* perhaps, showing they are equivalent (Compute says it), would
+   help? *)
+
+Theorem glop : ∀ n i, dispatch n i = dispatch' n i.
+Proof.
+intros.
+unfold dispatch, dispatch'.
+revert i.
+induction n; intros; [ easy | ].
+cbn - [ "mod" "/" ].
+unfold to_radix in IHn.
+...
+
 (* *)
 
 Fixpoint list_nat_le la lb :=
@@ -595,10 +632,17 @@ remember (n - 1) as m eqn:Hm; clear Hm.
 now induction m.
 Qed.
 
+Compute (let n := 3 in map (λ ll, dispatch n (locate ll) = ll) (raw_partitions n)).
+
 Theorem dispatch_locate : ∀ n ll,
   is_raw_partition n ll
   → dispatch n (locate ll) = ll.
 Proof.
+intros * Hll.
+unfold locate.
+Print locate.
+Print locate_list.
+...
 intros * Hll.
 revert n Hll.
 induction ll as [| l]; intros. {
