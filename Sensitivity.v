@@ -513,17 +513,6 @@ destruct (Nat.eq_dec i 0) as [Hiz| Hiz]. {
   induction m; [ easy | ].
   apply IHm.
 }
-Compute (
-   let n := 6 in let i := 1 in let v := n - 1 in
-(*
-   let r := map (λ i, [i; i + 1]) (seq 42 n) in
-*)
-   let r := repeat [] n in
-(**)
-   disp_loop n i v r =
-     (seq 0 (i - 1) ++ nth 0 r []) :: sub_list r 1 (v - 1) ++
-     [[i - 1] ++ nth v r []] ++
-     sub_list r (v + 1) (n - v - 1)).
 assert (Hnz : n ≠ 0) by flia Hin.
 rewrite (disp_loop_seq_sub_list n n Hnz); [ | flia Hiz Hin | ]. 2: {
   apply repeat_length.
@@ -641,8 +630,44 @@ Theorem dispatch_locate : ∀ n ll,
 Proof.
 intros * Hll.
 destruct Hll as (Hlen & Hall & Hin & Hnd).
-Print locate.
-Print locate_list.
+unfold dispatch.
+destruct (Nat.eq_dec n 0) as [Hnz| Hnz]. {
+  subst n; cbn.
+  rewrite Hnz; cbn.
+  now apply length_zero_iff_nil in Hnz.
+}
+rewrite (disp_loop_seq_sub_list n n); [ | easy | | ]; cycle 1. {
+  (* mmm... *)
+  ...
+cbn.
+replace (nth 0 (repeat [] n) []) with ([] : list nat) by now destruct n.
+rewrite app_nil_r.
+replace (nth _ (repeat [] n) []) with ([] : list nat). 2: {
+  clear.
+  remember (locate ll) as i; clear ll Heqi.
+  revert i.
+  induction n; intros; [ now destruct i | cbn ].
+  destruct i; [ easy | ].
+  apply IHn.
+}
+remember (locate ll) as i eqn:Hi.
+replace (sub_list (repeat [] n) (i + 1) (n - i - 1)) with
+    (repeat ([] : list nat) (n - i - 1)). 2: {
+  clear - Hin.
+  unfold sub_list.
+  revert i Hin.
+  induction n; intros; [ easy | cbn ].
+  destruct i; cbn. {
+    rewrite Nat.sub_0_r.
+    replace n with (length (repeat ([] : list nat) n)) at 2. 2: {
+      apply repeat_length.
+    }
+    symmetry; apply firstn_all.
+  }
+...
+  apply Nat.succ_lt_mono in Hin.
+  now apply IHn.
+}
 ...
 intros * Hll.
 revert n Hll.
