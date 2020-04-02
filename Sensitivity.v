@@ -283,6 +283,29 @@ Compute (dispatch 3 16).
 Compute (dispatch 4 23).
 Compute (locate [[0]; [1; 2]; []; [3]]).
 
+Fixpoint locate'_loop l ll a :=
+  match l with
+  | [] => a
+  | b :: l' => locate'_loop l' ll (a * length ll + nth_find (nat_in_list b) ll)
+  end.
+
+Definition locate' ll := locate'_loop (seq 0 (length ll)) ll 0.
+
+Compute (map locate' (raw_partitions 3)).
+
+Print fold_left.
+
+Theorem List_fold_left_map :
+  ∀ A B C (f : A → B → A) (g : C → B) (l : list C) a,
+  fold_left f (map g l) a = fold_left (λ c b, f c (g b)) l a.
+Proof.
+intros.
+revert a.
+induction l as [| c]; intros; [ easy | apply IHl ].
+Qed.
+
+...
+
 Fixpoint locate'_loop n l a :=
   match l with
   | [] => a
