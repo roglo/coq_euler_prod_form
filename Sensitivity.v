@@ -634,6 +634,8 @@ unfold locate.
 unfold locate_list.
 rewrite Hlen.
 rewrite List_fold_left_map.
+Print dispatch.
+Print to_radix.
 ...
 rewrite (disp_loop_seq_sub_list n n); [ | easy | | ]; cycle 1. {
   (* mmm... *)
