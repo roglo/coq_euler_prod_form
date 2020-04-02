@@ -283,6 +283,16 @@ Compute (dispatch 3 16).
 Compute (dispatch 4 23).
 Compute (locate [[0]; [1; 2]; []; [3]]).
 
+Fixpoint locate'_loop n l a :=
+  match l with
+  | [] => a
+  | b :: l' => locate'_loop n l' (a * n + b)
+  end.
+
+Definition locate' ll := locate'_loop (length ll) (locate_list ll) 0.
+
+...
+
 Theorem set_nth_length : ∀ {A} i l (v : A),
   i < length l → length (set_nth i l v) = length l.
 Proof.
