@@ -208,7 +208,7 @@ Require Import Sorting.
 
 (* property of partitions of {0,1,..,n-1} returned by raw_partitions *)
 
-Definition is_partition n ll :=
+Definition is_raw_partition n ll :=
   length ll = n ∧
   (∀ l, l ∈ ll → ∀ i, i ∈ l → i < n) ∧
   (∀ i, i < n → ∃ l, l ∈ ll ∧ i ∈ l) ∧
@@ -596,7 +596,7 @@ now induction m.
 Qed.
 
 Theorem dispatch_locate : ∀ n ll,
-  is_partition n ll
+  is_raw_partition n ll
   → dispatch n (locate ll) = ll.
 Proof.
 intros * Hll.
@@ -605,6 +605,7 @@ induction ll as [| l]; intros. {
   destruct Hll as (Hlen & Hall & Hin & Hnd).
   now subst n.
 }
+cbn.
 Print locate.
 (* faudrait prouver déjà que locate renvoit bien une valeur entre
    0 et n^n *)
