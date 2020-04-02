@@ -636,8 +636,14 @@ destruct (Nat.eq_dec n 0) as [Hnz| Hnz]. {
   rewrite Hnz; cbn.
   now apply length_zero_iff_nil in Hnz.
 }
+unfold locate.
+unfold locate_list.
+rewrite Hlen.
+...
 rewrite (disp_loop_seq_sub_list n n); [ | easy | | ]; cycle 1. {
   (* mmm... *)
+  (* bin non, locate, c'est compris entre 0 et n^n-1 *)
+Check disp_loop_seq_sub_list.
   ...
 cbn.
 replace (nth 0 (repeat [] n) []) with ([] : list nat) by now destruct n.
