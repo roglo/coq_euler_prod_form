@@ -180,7 +180,7 @@ Definition raw_partitions' n := map (dispatch' n) (seq 0 (n ^ n)).
 Compute (raw_partitions 3 = raw_partitions' 3).
 
 (* perhaps, showing they are equivalent (Compute says it), would
-   help? *)
+   help?
 
 Theorem glop : ∀ n i, dispatch n i = dispatch' n i.
 Proof.
@@ -191,6 +191,7 @@ induction n; intros; [ easy | ].
 cbn - [ "mod" "/" ].
 unfold to_radix in IHn.
 ...
+*)
 
 (* *)
 
@@ -639,7 +640,7 @@ Theorem dispatch_locate : ∀ n ll,
   → dispatch n (locate ll) = ll.
 Proof.
 intros * Hll.
-unfold locate.
+destruct Hll as (Hlen & Hall & Hin & Hnd).
 Print locate.
 Print locate_list.
 ...
