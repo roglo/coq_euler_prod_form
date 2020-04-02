@@ -150,32 +150,32 @@ Fixpoint to_radix_loop it n i :=
 
 Definition to_radix n i := to_radix_loop n n i.
 
-Fixpoint disp_loop n l : list (list nat) :=
+Fixpoint disp_loop n i l : list (list nat) :=
   match l with
   | [] => repeat [] n
-  | i :: l =>
-      let ll := disp_loop n l in
-      set_nth i ll (n - length l :: nth i ll [])
+  | j :: l' =>
+      let ll := disp_loop n (i - 1) l' in
+      set_nth j ll (n - i :: nth j ll [])
   end.
 
-Definition dispatch n i := disp_loop n (rev (to_radix n i)).
+Definition dispatch n i := disp_loop n n (rev (to_radix n i)).
 
 Definition raw_partitions n := map (dispatch n) (seq 0 (n ^ n)).
 
 Compute (raw_partitions 3).
 
 (*
-Fixpoint disp_loop i l ll :=
+Fixpoint disp_loop' i l ll :=
   match i with
   | 0 => ll
   | S i' =>
-      disp_loop i' (tl l)
+      disp_loop' i' (tl l)
         (set_nth (hd 0 l) ll (i' :: nth (hd 0 l) ll []))
   end.
 
-Definition dispatch n i := disp_loop n (to_radix n i) (repeat [] n).
+Definition dispatch' n i := disp_loop' n (to_radix n i) (repeat [] n).
 
-Definition raw_partitions n := map (dispatch n) (seq 0 (n ^ n)).
+Definition raw_partitions' n := map (dispatch' n) (seq 0 (n ^ n)).
 
 Compute (raw_partitions 3, raw_partitions' 3).
 *)
@@ -304,12 +304,12 @@ induction n; [ easy | ].
 cbn; f_equal; apply IHn.
 Qed.
 
-Theorem disp_loop_length : ∀ n l,
+Theorem disp_loop_length : ∀ n i l,
   (∀ a, a ∈ l → a < n)
-  → length (disp_loop n l) = n.
+  → length (disp_loop n i l) = n.
 Proof.
 intros * Hlen.
-revert n Hlen.
+revert n i Hlen.
 induction l as [| i]; intros; [ apply repeat_length | cbn ].
 rewrite set_nth_length. 2: {
   rewrite IHl; [ now apply Hlen; left | ].
@@ -321,9 +321,13 @@ intros a Ha.
 now apply Hlen; right.
 Qed.
 
-Compute (let n := 0 in let l := repeat 0 7 in
-  (disp_loop n l =
-   (repeat 0 (length l - n) ++ seq 1 n) :: repeat [] (n - 1))).
+Print disp_loop.
+
+Compute (let n := 3 in let i := 6 in let l := repeat 0 7 in
+  (disp_loop n i l =
+   (repeat 0 (i - n) ++ seq 1 n) :: repeat [] (n - 1))).
+(* ah, zut, c'est toujours pas ça *)
+...
 (* n ≤ length l *)
 Compute (disp_loop 3 (repeat 0 7)).
 Compute (disp_loop 2 (repeat 0 7)).
@@ -336,14 +340,13 @@ Theorem disp_loop_0_r : ∀ n l,
        (repeat 0 (length l - n) ++ seq 1 n) :: repeat [] (n - 1).
 Proof.
 intros * Hnl Hlz.
-revert n Hnl.
-induction l as [| i]; intros; [ cbn in Hnl; flia Hnl | ].
-destruct n; [ easy | ].
-cbn in Hnl.
-... ah... zut...
-cbn.
-rewrite IHl.
-Search set_nth.
+Print disp_loop.
+...
+intros * Hnl Hlz.
+destruct l as [| i1]; [ cbn in Hnl; flia Hnl | cbn ].
+rewrite (Hlz i1); [ cbn | now left ].
+destruct l as [| i2]; [ cbn in Hnl; flia Hnl | cbn ].
+rewrite (Hlz i2); [ cbn | now right; left ].
 ...
 
 Theorem disp_loop_0_r : ∀ i l ll,
