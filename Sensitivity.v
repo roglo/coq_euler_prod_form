@@ -283,18 +283,6 @@ Compute (dispatch 3 16).
 Compute (dispatch 4 23).
 Compute (locate [[0]; [1; 2]; []; [3]]).
 
-Fixpoint locate'_loop l ll a :=
-  match l with
-  | [] => a
-  | b :: l' => locate'_loop l' ll (a * length ll + nth_find (nat_in_list b) ll)
-  end.
-
-Definition locate' ll := locate'_loop (seq 0 (length ll)) ll 0.
-
-Compute (map locate' (raw_partitions 3)).
-
-Print fold_left.
-
 Theorem List_fold_left_map :
   ∀ A B C (f : A → B → A) (g : C → B) (l : list C) a,
   fold_left f (map g l) a = fold_left (λ c b, f c (g b)) l a.
@@ -303,18 +291,6 @@ intros.
 revert a.
 induction l as [| c]; intros; [ easy | apply IHl ].
 Qed.
-
-...
-
-Fixpoint locate'_loop n l a :=
-  match l with
-  | [] => a
-  | b :: l' => locate'_loop n l' (a * n + b)
-  end.
-
-Definition locate' ll := locate'_loop (length ll) (locate_list ll) 0.
-
-...
 
 Theorem set_nth_length : ∀ {A} i l (v : A),
   i < length l → length (set_nth i l v) = length l.
@@ -672,6 +648,7 @@ destruct (Nat.eq_dec n 0) as [Hnz| Hnz]. {
 unfold locate.
 unfold locate_list.
 rewrite Hlen.
+rewrite List_fold_left_map.
 ...
 rewrite (disp_loop_seq_sub_list n n); [ | easy | | ]; cycle 1. {
   (* mmm... *)
