@@ -33,6 +33,21 @@ Definition List_combine_all {A} (l1 l2 : list A) (d : A) :=
   in
   List.combine l'1 l'2.
 
+Theorem List_cons_app A (a : A) l : a :: l = [a] ++ l.
+Proof. easy. Qed.
+
+Theorem List_skipn_1 : ∀ A (l : list A), skipn 1 l = tl l.
+Proof. easy. Qed.
+
+Theorem List_fold_left_map :
+  ∀ A B C (f : A → B → A) (g : C → B) (l : list C) a,
+  fold_left f (map g l) a = fold_left (λ c b, f c (g b)) l a.
+Proof.
+intros.
+revert a.
+induction l as [| c]; intros; [ easy | apply IHl ].
+Qed.
+
 (* summations *)
 
 Notation "'Σ' ( i = b , e ) , g" :=

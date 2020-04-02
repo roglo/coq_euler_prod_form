@@ -283,15 +283,6 @@ Compute (dispatch 3 16).
 Compute (dispatch 4 23).
 Compute (locate [[0]; [1; 2]; []; [3]]).
 
-Theorem List_fold_left_map :
-  ∀ A B C (f : A → B → A) (g : C → B) (l : list C) a,
-  fold_left f (map g l) a = fold_left (λ c b, f c (g b)) l a.
-Proof.
-intros.
-revert a.
-induction l as [| c]; intros; [ easy | apply IHl ].
-Qed.
-
 Theorem set_nth_length : ∀ {A} i l (v : A),
   i < length l → length (set_nth i l v) = length l.
 Proof.
@@ -454,12 +445,6 @@ f_equal. {
   symmetry; apply firstn_all.
 }
 Qed.
-
-Theorem List_cons_app A (a : A) l : a :: l = [a] ++ l.
-Proof. easy. Qed.
-
-Theorem List_skipn_1 : ∀ A (l : list A), skipn 1 l = tl l.
-Proof. easy. Qed.
 
 Theorem nth_find_loop_app_2 : ∀ A f (l1 l2 : list A) i,
   (∀ j, j ∈ l1 → f j = false)
