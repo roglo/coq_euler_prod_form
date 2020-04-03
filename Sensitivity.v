@@ -676,6 +676,22 @@ Compute (let n := 3 in map (λ v, (v, dispatch n v)) (filter (λ v, v mod (n ^ (
 Compute (let n := 3 in map (λ v, (v, dispatch n v)) (filter (λ v, (v + n ^ n - n ^ (n - 2)) mod (n ^ (n - 1)) <? n ^ (n - 2)) (seq 0 (n ^ n)))).
 (* toutes les pré-partitions qui ont le 1 dans le troisième ensemble *)
 Compute (let n := 4 in map (λ v, (v, dispatch n v)) (filter (λ v, (v + n ^ n - 2 * n ^ (n - 2)) mod (n ^ (n - 1)) <? n ^ (n - 2)) (seq 0 (n ^ n)))).
+(* toutes les pré-partitions qui ont le 2 dans le premier ensemble *)
+Compute (let n := 4 in map (λ v, (v, dispatch n v)) (filter (λ v, v mod n =? 0) (seq 0 (n ^ n)))).
+(* non *)
+...
+0-3 16-19 32-35 48-51
+
+Compute (let n := 4 in map (λ v, (v, dispatch n v)) (seq 0 (n ^ n))).
+...
+Compute (let n := 3 in map (λ v, (v, dispatch n v)) (seq 0 (n ^ n - 1))).
+Compute (pre_partitions 4).
+(* pour 4
+
+*)
+...
+(* toutes les pré-partitions qui ont le 2 dans le deuxième ensemble *)
+Compute (let n := 3 in map (λ v, (v, dispatch n v)) (filter (λ v, (v + n - 1) mod n =? 0) (seq 0 (n ^ n)))).
 ...
 Compute (pre_partitions 4).
 ...
