@@ -646,8 +646,16 @@ Check disp_loop_small_r.
 
 Compute (let n := 3 in map (λ v, disp_loop n n v (repeat [] n)) (seq 0 (n ^ n))).
 Compute (raw_partitions 3).
-Compute (let n := 3 in map (λ v, disp_loop n n v (repeat [] n)) (seq 0 (n ^ (n - 1)))).
+Print dispatch.
+(* tous les premiers ont un 0 en premier *)
+Compute (let n := 3 in map (λ v, dispatch n v) (seq 0 (n ^ (n - 1)))).
+(* tous les deuxièmes ont un 0 en premier *)
+Compute (let n := 3 in map (λ v, dispatch n v) (seq (n ^ (n - 1)) (n ^ (n - 1)))).
+(* tous les troisièmes ont un 0 en premier *)
+Compute (let n := 3 in map (λ v, dispatch n v) (seq (2 * n ^ (n - 1)) (n ^ (n - 1)))).
+...
 Compute (let n := 3 in map (λ l, tl (hd [] l) :: tl l) (map (λ v, disp_loop n n v (repeat [] n)) (seq 0 (n ^ (n - 1))))).
+...
 Compute (let n := 3 in map (λ l, map (map pred) l) (map (λ l, tl (hd [] l) :: tl l) (map (λ v, disp_loop n n v (repeat [] n)) (seq 0 (n ^ (n - 1)))))).
 Compute (let n := 2 in map (λ v, disp_loop n n v (repeat [] n)) (seq 0 (n ^ n))).
 ...
