@@ -666,7 +666,47 @@ Proof.
 intros * Hin Hjn Hkn.
 split. {
   intros Hpp.
-  unfold pre_partition_in in Hpp.
+  apply Nat.ltb_lt in Hpp.
+  destruct n; [ easy | ].
+  destruct n. {
+    destruct j; [ clear Hjn | flia Hjn ].
+    destruct k; [ clear Hkn | flia Hkn ].
+    now left.
+  }
+  destruct n. {
+    cbn - [ "/" "mod" ].
+    destruct j; [ clear Hjn | ]. {
+      destruct k; [ clear Hkn | ]. {
+        cbn - [ "/" "mod" ].
+        cbn - [ "mod" ] in Hpp.
+        rewrite Nat.sub_0_r in Hpp.
+        rewrite <- Nat.add_mod_idemp_r in Hpp; [ | easy ].
+        rewrite Nat.mod_same in Hpp; [ | easy ].
+        rewrite Nat.add_0_r in Hpp.
+        rewrite Nat.mod_small in Hpp; [ | easy ].
+        destruct i; [ now left | ].
+        destruct i; [ now left | flia Hpp ].
+      }
+      destruct k; [ clear Hkn | flia Hkn ].
+      cbn - [ "mod" ] in Hpp.
+      replace (i + 4 - 2) with (i + 2) in Hpp by flia.
+      destruct i; [ cbn in Hpp; flia Hpp | ].
+      destruct i; [ cbn in Hpp; flia Hpp | ].
+      destruct i; [ now left | ].
+      destruct i; [ now left | cbn in Hin; flia Hin ].
+    }
+    destruct j; [ clear Hjn | flia Hjn ].
+    destruct k; [ clear Hkn | ]. {
+      cbn - [ "mod" ] in Hpp.
+      rewrite Nat.sub_0_r in Hpp.
+      rewrite <- Nat.add_mod_idemp_r in Hpp; [ | easy ].
+      replace 4 with (2 * 2) in Hpp by easy.
+      rewrite Nat.mod_mul in Hpp; [ | easy ].
+      rewrite Nat.add_0_r in Hpp.
+      destruct i; [ now right; left | ].
+      destruct i. {
+        cbn.
+(* failed *)
 ...
 
 Theorem dispatch_locate : ∀ n ll,
