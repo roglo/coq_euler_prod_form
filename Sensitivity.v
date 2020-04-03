@@ -111,6 +111,23 @@ Definition count_ones n := cnt_1_loop n n.
 
 Definition Hamming_distance x y := count_ones (Nat.lxor x y).
 
+(* pre-partitions
+   A pre-partition (my naming) of a finite set of n elements is a set
+   of n subsets such that
+   - the union of all these subsets is the initial set
+   - the intersection of two subsets is the empty set
+   It has always n subsets, some of them can be empty.
+   A partition is a pre-partition where empty sets have been eliminated.
+   There are exactly n^n pre-partitions of a set of cardinal n.
+   Each pre-partition can be associated (bijection) with a number
+   between 0 and n^n.
+   Actually, we implemented the sets as lists, and a finite set of
+   cardinal n as the natural numbers between 0 and n-1.
+   Below, the definitions of the functions
+     dispatch : number → pre-partition
+     locate : pre-partition → number
+*)
+
 (* To define local_block_sensitivity later, we need an algorithm to
    generate all lists of disjoint blocks *)
 
@@ -151,9 +168,9 @@ Fixpoint disp_loop n i v r :=
 
 Definition dispatch n i := disp_loop n n i (repeat [] n).
 
-Definition raw_partitions n := map (dispatch n) (seq 0 (n ^ n)).
+Definition pre_partitions n := map (dispatch n) (seq 0 (n ^ n)).
 
-Compute (raw_partitions 4).
+Compute (pre_partitions 4).
 
 (* alternative version *)
 
@@ -175,9 +192,9 @@ Fixpoint disp_loop' i l ll :=
 
 Definition dispatch' n i := disp_loop' n (to_radix n i) (repeat [] n).
 
-Definition raw_partitions' n := map (dispatch' n) (seq 0 (n ^ n)).
+Definition pre_partitions' n := map (dispatch' n) (seq 0 (n ^ n)).
 
-Compute (raw_partitions 3 = raw_partitions' 3).
+Compute (pre_partitions 3 = pre_partitions' 3).
 
 (* perhaps, showing they are equivalent (Compute says it), would
    help?
@@ -222,10 +239,10 @@ Definition all_partitions n :=
   bsort list_list_nat_le
     (nodup (list_eq_dec (list_eq_dec Nat.eq_dec))
        (map (bsort list_nat_le)
-          (map (filter (λ s, negb (is_nil s))) (raw_partitions n)))).
+          (map (filter (λ s, negb (is_nil s))) (pre_partitions n)))).
 
-Compute (map (bsort list_nat_le) (raw_partitions 4)).
-Compute (nodup (list_eq_dec (list_eq_dec Nat.eq_dec)) (map (bsort list_nat_le) (raw_partitions 4))).
+Compute (map (bsort list_nat_le) (pre_partitions 4)).
+Compute (nodup (list_eq_dec (list_eq_dec Nat.eq_dec)) (map (bsort list_nat_le) (pre_partitions 4))).
 Compute (all_partitions 4).
 
 (* Local block sensitivity *)
@@ -235,7 +252,7 @@ Definition loc_bl_sens_list Bl f x :=
 
 Definition local_block_sensitivity n f x :=
   fold_right max 0
-    (map (λ Bl, length (loc_bl_sens_list Bl f x)) (raw_partitions n)).
+    (map (λ Bl, length (loc_bl_sens_list Bl f x)) (pre_partitions n)).
 
 Definition block_sensitivity n f :=
   fold_right max 0 (map (local_block_sensitivity n f) (seq 0 (2 ^ n))).
@@ -244,9 +261,9 @@ Definition block_sensitivity n f :=
 
 Require Import Sorting.
 
-(* property of partitions of {0,1,..,n-1} returned by raw_partitions *)
+(* property of partitions of {0,1,..,n-1} returned by pre_partitions *)
 
-Definition is_raw_partition n ll :=
+Definition is_pre_partition n ll :=
   length ll = n ∧
   (∀ l, l ∈ ll → ∀ i, i ∈ l → i < n) ∧
   (∀ i, i < n → ∃ l, l ∈ ll ∧ i ∈ l) ∧
@@ -616,10 +633,10 @@ remember (n - 1) as m eqn:Hm; clear Hm.
 now induction m.
 Qed.
 
-Compute (let n := 3 in map (λ ll, dispatch n (locate ll) = ll) (raw_partitions n)).
+Compute (let n := 3 in map (λ ll, dispatch n (locate ll) = ll) (pre_partitions n)).
 
 Theorem dispatch_locate : ∀ n ll,
-  is_raw_partition n ll
+  is_pre_partition n ll
   → dispatch n (locate ll) = ll.
 Proof.
 intros * Hll.
@@ -645,7 +662,7 @@ Compute (let n := 3 in map (λ v, disp_loop n n v (repeat [] n)) (seq 1 (n - 1))
 Check disp_loop_small_r.
 
 Compute (let n := 3 in map (λ v, disp_loop n n v (repeat [] n)) (seq 0 (n ^ n))).
-Compute (raw_partitions 3).
+Compute (pre_partitions 3).
 Print dispatch.
 (* tous les premiers ont un 0 en premier *)
 Compute (let n := 3 in map (λ v, dispatch n v) (seq 0 (n ^ (n - 1)))).
@@ -715,20 +732,20 @@ Search nth_find_loop.
 ...
 
 Theorem is_partition_iff : ∀ n p, n ≠ 0 →
-  is_partition n p ↔ p ∈ raw_partitions n.
+  is_partition n p ↔ p ∈ pre_partitions n.
 Proof.
 intros * Hnz.
 split; intros Hn. {
 (*
   destruct Hn as (Hlen & Hmem & Hin & Hnp).
 *)
-  unfold raw_partitions.
+  unfold pre_partitions.
 ...
   specialize (dispatch_locate n p Hn) as H1.
   rewrite <- H1.
 ...
 Print dispatch.
-Compute (raw_partitions 3).
+Compute (pre_partitions 3).
 Compute (all_partitions 3).
 Search locate.
 ...
@@ -789,8 +806,8 @@ unfold local_block_sensitivity.
 (* among all partitions, there must exist one which is exactly
     [[0]; [1]; [2]; ... ; [n-1]]
    I believe it is this one which corresponds to local_sensitivity *)
-assert (H : map (λ i, [i]) (seq 0 n) ∈ raw_partitions n). {
-  unfold raw_partitions.
+assert (H : map (λ i, [i]) (seq 0 n) ∈ pre_partitions n). {
+  unfold pre_partitions.
   assert (H1 : is_partition n (map (λ i, [i]) (seq 0 n))). {
     split. {
       rewrite map_length.
@@ -833,7 +850,7 @@ assert (H : map (λ i, [i]) (seq 0 n) ∈ raw_partitions n). {
 }
 *)
   idtac.
-Compute (nth 27 (raw_partitions 4) []).
+Compute (nth 27 (pre_partitions 4) []).
 ...
 1→0 = 0 radix 1
 2→1 = 01 radix 2
@@ -844,7 +861,7 @@ Compute (nth 27 (raw_partitions 4) []).
   Σ (i=0,n-1) i*n^(n-1-i)
 = Σ (i=0,n-1) (n-1-i)*n^i
 
-map (λ i, [i]) (seq 0 n) = nth ... (raw_partitions n) []
+map (λ i, [i]) (seq 0 n) = nth ... (pre_partitions n) []
 ...
 }
 apply in_split in H.
@@ -853,8 +870,8 @@ rewrite Hll.
 (* prove that the "map (λ i, [i]) (seq 0 n)" has the maximum length *)
 ...
 (* previous attempt to prove
-    map (λ i, [i]) (seq 0 n) ∈ raw_partitions n *)
-  unfold raw_partitions.
+    map (λ i, [i]) (seq 0 n) ∈ pre_partitions n *)
+  unfold pre_partitions.
   assert (H : map (λ i, [i]) (seq 0 n) = dispatch n (seq 0 n)). {
     unfold dispatch.
     rewrite List_filter_all_true. 2: {
