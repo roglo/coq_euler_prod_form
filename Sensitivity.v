@@ -664,12 +664,23 @@ Check disp_loop_small_r.
 Compute (let n := 3 in map (λ v, disp_loop n n v (repeat [] n)) (seq 0 (n ^ n))).
 Compute (pre_partitions 3).
 Print dispatch.
-(* tous les premiers ont un 0 en premier *)
-Compute (let n := 3 in map (λ v, dispatch n v) (seq 0 (n ^ (n - 1)))).
-(* tous les deuxièmes ont un 0 en premier *)
-Compute (let n := 3 in map (λ v, dispatch n v) (seq (n ^ (n - 1)) (n ^ (n - 1)))).
-(* tous les troisièmes ont un 0 en premier *)
+(* toutes les pré-partitions qui ont le 0 dans le premier ensemble *)
+Compute (let n := 2 in map (λ v, dispatch n v) (seq 0 (n ^ (n - 1)))).
+(* toutes les pré-partitions qui ont le 0 dans le deuxième ensemble *)
+Compute (let n := 2 in map (λ v, dispatch n v) (seq (n ^ (n - 1)) (n ^ (n - 1)))).
+(* toutes les pré-partitions qui ont le 0 dans le troisieme ensemble *)
 Compute (let n := 3 in map (λ v, dispatch n v) (seq (2 * n ^ (n - 1)) (n ^ (n - 1)))).
+(* toutes les pré-partitions qui ont le 1 dans le premier ensemble *)
+Compute (let n := 3 in map (λ v, (v, dispatch n v)) (filter (λ v, v mod (n ^ (n - 1)) <? n ^ (n - 2)) (seq 0 (n ^ n)))).
+(* toutes les pré-partitions qui ont le 1 dans le deuxième ensemble *)
+Compute (let n := 3 in map (λ v, (v, dispatch n v)) (filter (λ v, (v + n ^ n - n ^ (n - 2)) mod (n ^ (n - 1)) <? n ^ (n - 2)) (seq 0 (n ^ n)))).
+(* toutes les pré-partitions qui ont le 1 dans le troisième ensemble *)
+Compute (let n := 4 in map (λ v, (v, dispatch n v)) (filter (λ v, (v + n ^ n - 2 * n ^ (n - 2)) mod (n ^ (n - 1)) <? n ^ (n - 2)) (seq 0 (n ^ n)))).
+...
+Compute (pre_partitions 4).
+...
+Compute (let n := 3 in map (λ v, dispatch n v) (seq 0 (n ^ (n - 1)))).
+...
 Compute (let n := 3 in map (λ p, (locate p, rev (to_radix n (locate p)), p)) (pre_partitions n)).
 ...
 = [ (0, [0; 0; 0], [[0; 1; 2]; []; []]);
