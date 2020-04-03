@@ -351,25 +351,25 @@ rewrite <- (Nat.add_1_r (S start)).
 apply IHlen.
 Qed.
 
-Theorem disp_loop_seq_sub_list : ∀ n i, i ≠ 0 → ∀ v r,
+Theorem disp_loop_seq_sub_list : ∀ n i, i ≠ 0 → ∀ v ll,
   0 < v < n
-  → length r = n
-  → disp_loop n i v r =
-       (seq 0 (i - 1) ++ nth 0 r []) :: sub_list r 1 (v - 1) ++
-       [[i - 1] ++ nth v r []] ++
-       sub_list r (v + 1) (n - v - 1).
+  → length ll = n
+  → disp_loop n i v ll =
+       (seq 0 (i - 1) ++ nth 0 ll []) :: sub_list ll 1 (v - 1) ++
+       [[i - 1] ++ nth v ll []] ++
+       sub_list ll (v + 1) (n - v - 1).
 Proof.
 intros * Hiz * Hvn Hrn.
 destruct i; [ easy | clear Hiz ].
 rewrite Nat.sub_succ, Nat.sub_0_r.
-revert n v r Hvn Hrn.
+revert n v ll Hvn Hrn.
 induction i; intros. {
   cbn.
   unfold set_nth.
   unfold sub_list.
   rewrite Nat.mod_small; [ | easy ].
   rewrite app_comm_cons.
-  destruct r as [| a l]; [ cbn in Hrn; flia Hvn Hrn | ].
+  destruct ll as [| a l]; [ cbn in Hrn; flia Hvn Hrn | ].
   cbn.
   rewrite app_comm_cons.
   f_equal. {
@@ -396,7 +396,7 @@ rewrite Nat.div_0_l; [ | flia Hvn ].
 rewrite disp_loop_0_r; [ | flia Hvn ].
 remember (set_nth _ _ _) as sn eqn:Hsn.
 symmetry in Hsn.
-destruct sn as [| l ll]. {
+destruct sn as [| l]. {
   apply (f_equal (@length _)) in Hsn.
   rewrite set_nth_length in Hsn; cbn in Hsn; [ | easy ].
   rewrite set_nth_length in Hsn; cbn in Hsn; [ | now rewrite Hrn ].
@@ -409,8 +409,8 @@ symmetry in Hl2.
 destruct l2 as [| l2 ll2]. {
   apply (f_equal (@length _)) in Hl2.
   rewrite set_nth_length in Hl2; [ | now rewrite Hrn ].
-  subst ll.
-  apply length_zero_iff_nil in Hl2; subst r.
+  subst sn.
+  apply length_zero_iff_nil in Hl2; subst ll.
   now rewrite <- Hrn in Hvn.
 }
 subst ll2.
@@ -425,7 +425,7 @@ f_equal. {
   f_equal; cbn; f_equal.
   destruct v; [ easy | ].
   cbn in Hl2.
-  destruct r as [| l ll']; [ now rewrite <- Hrn in Hvn | ].
+  destruct ll as [| l ll']; [ now rewrite <- Hrn in Hvn | ].
   cbn in Hl2.
   now injection Hl2.
 } {
@@ -433,9 +433,9 @@ f_equal. {
   unfold sub_list.
   cbn in Hl2; cbn.
   rewrite Nat.sub_0_r.
-  destruct r as [| l ll']; [ now rewrite <- Hrn in Hvn | ].
+  destruct ll as [| l ll']; [ now rewrite <- Hrn in Hvn | ].
   cbn in Hl2; cbn.
-  injection Hl2; intros; subst l2 ll.
+  injection Hl2; intros; subst l2 sn.
   f_equal; f_equal.
   rewrite firstn_skipn_comm.
   f_equal.
@@ -636,6 +636,8 @@ rewrite Hlen.
 rewrite List_fold_left_map.
 Print dispatch.
 Print to_radix.
+Compute (let ll := [[1; 2]; []; [0]] in let n := length ll in (fold_left (λ c b : nat, c * n + nth_find (nat_in_list b) ll) (seq 0 n) 0)).
+Search disp_loop.
 ...
 rewrite (disp_loop_seq_sub_list n n); [ | easy | | ]; cycle 1. {
   (* mmm... *)
