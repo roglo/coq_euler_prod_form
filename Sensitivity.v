@@ -664,30 +664,9 @@ Check disp_loop_small_r.
 Compute (let n := 3 in map (λ v, disp_loop n n v (repeat [] n)) (seq 0 (n ^ n))).
 Compute (pre_partitions 3).
 Print dispatch.
-(* toutes les pré-partitions qui ont le 0 dans le premier ensemble *)
-Compute (let n := 2 in map (λ v, dispatch n v) (seq 0 (n ^ (n - 1)))).
-(* toutes les pré-partitions qui ont le 0 dans le deuxième ensemble *)
-Compute (let n := 2 in map (λ v, dispatch n v) (seq (n ^ (n - 1)) (n ^ (n - 1)))).
-(* toutes les pré-partitions qui ont le 0 dans le troisieme ensemble *)
-Compute (let n := 3 in map (λ v, dispatch n v) (seq (2 * n ^ (n - 1)) (n ^ (n - 1)))).
-(* toutes les pré-partitions qui ont le 1 dans le premier ensemble *)
-Compute (let n := 3 in map (λ v, (v, dispatch n v))
-(filter (λ v, v mod (n ^ (n - 1)) <? n ^ (n - 2)) (seq 0 (n ^ n)))).
-(* toutes les pré-partitions qui ont le 1 dans le deuxième ensemble *)
-Compute (let n := 3 in map (λ v, (v, dispatch n v)) (filter (λ v, (v + n ^ n - n ^ (n - 2)) mod (n ^ (n - 1)) <? n ^ (n - 2)) (seq 0 (n ^ n)))).
-(* toutes les pré-partitions qui ont le 1 dans le troisième ensemble *)
-Compute (let n := 4 in map (λ v, (v, dispatch n v)) (filter (λ v, (v + n ^ n - 2 * n ^ (n - 2)) mod (n ^ (n - 1)) <? n ^ (n - 2)) (seq 0 (n ^ n)))).
-(* toutes les pré-partitions qui ont le 2 dans le premier ensemble *)
-Compute (let n := 4 in map (λ v, (v, dispatch n v))
-(filter (λ v, v mod (n ^ (n - 2)) <? n ^ (n - 3)) (seq 0 (n ^ n)))).
-
-(* toutes les pré-partitions qui ont k dans le premier ensemble *)
-Compute (let n := 3 in let k := 0 in map (λ v, (v, dispatch n v))
-(filter (λ v, v mod (n ^ (n - k)) <? n ^ (n - k - 1))
-   (seq 0 (n ^ n)))).
-(* toutes les pré-partitions qui ont k dans le deuxième ensemble *)
-Compute (let n := 4 in let k := 2 in map (λ v, (v, dispatch n v))
-(filter (λ v, (v + n ^ n - n ^ (n - k - 1)) mod (n ^ (n - k)) <? n ^ (n - k - 1))
+(* toutes les pré-partitions qui ont le k dans l'ensemble i *)
+Compute (let n := 3 in let k := 2 in let i := 1 in map (λ v, (v, dispatch n v))
+(filter (λ v, (v + n ^ n - i * n ^ (n - k - 1)) mod (n ^ (n - k)) <? n ^ (n - k - 1))
    (seq 0 (n ^ n)))).
 ...
 Compute (let n := 4 in map (λ v, (v, dispatch n v)) (seq 0 (n ^ n))).
