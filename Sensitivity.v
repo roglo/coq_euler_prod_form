@@ -351,7 +351,7 @@ rewrite <- (Nat.add_1_r (S start)).
 apply IHlen.
 Qed.
 
-Theorem disp_loop_small : ∀ n i, i ≠ 0 → ∀ v ll,
+Theorem disp_loop_small_r : ∀ n i, i ≠ 0 → ∀ v ll,
   0 < v < n
   → length ll = n
   → disp_loop n i v ll =
@@ -508,7 +508,7 @@ destruct (Nat.eq_dec i 0) as [Hiz| Hiz]. {
   apply IHm.
 }
 assert (Hnz : n ≠ 0) by flia Hin.
-rewrite (disp_loop_small n n Hnz); [ | flia Hiz Hin | ]. 2: {
+rewrite (disp_loop_small_r n n Hnz); [ | flia Hiz Hin | ]. 2: {
   apply repeat_length.
 }
 replace (nth 0 (repeat [] n) []) with ([] : list nat) by now destruct n.
@@ -639,8 +639,15 @@ Print to_radix.
 Compute (let ll := [[1; 2]; []; [0]] in let n := length ll in (fold_left (λ c b : nat, c * n + nth_find (nat_in_list b) ll) (seq 0 n) 0)).
 Compute (let v := 18 in let n := 3 in disp_loop n n v (repeat [] n)).
 Search disp_loop.
+Compute (let v := 3 in let n := 3 in disp_loop n n v (repeat [] n)).
+(* disp_loop_small_r applies for v > 0 and v < n: here between 1 and 2 incl *)
+Compute (let n := 3 in map (λ v, disp_loop n n v (repeat [] n)) (seq 1 (n - 1))).
+Check disp_loop_small_r.
+
+Compute (let n := 3 in map (λ v, disp_loop n n v (repeat [] n)) (seq 0 (n ^ n))).
+Compute (raw_partitions 3).
 ...
-rewrite (disp_loop_small n n); [ | easy | | ]; cycle 1. {
+rewrite (disp_loop_small_r n n); [ | easy | | ]; cycle 1. {
   (* mmm... *)
   (* bin non, locate, c'est compris entre 0 et n^n-1 *)
 Check disp_loop_seq_sub_list.
