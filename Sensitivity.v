@@ -664,9 +664,9 @@ Check disp_loop_small_r.
 Compute (let n := 3 in map (λ v, disp_loop n n v (repeat [] n)) (seq 0 (n ^ n))).
 Compute (pre_partitions 3).
 Print dispatch.
-(* toutes les pré-partitions qui ont le k dans l'ensemble i *)
-Compute (let n := 3 in let k := 2 in let i := 1 in map (λ v, (v, dispatch n v))
-(filter (λ v, (v + n ^ n - i * n ^ (n - k - 1)) mod (n ^ (n - k)) <? n ^ (n - k - 1))
+(* toutes les pré-partitions qui ont le b dans l'ensemble i *)
+Compute (let n := 3 in let b := 2 in let i := 1 in map (λ v, (v, dispatch n v))
+(filter (λ v, (v + n ^ n - i * n ^ (n - b - 1)) mod (n ^ (n - b)) <? n ^ (n - b - 1))
    (seq 0 (n ^ n)))).
 ...
 Compute (let n := 4 in map (λ v, (v, dispatch n v)) (seq 0 (n ^ n))).
