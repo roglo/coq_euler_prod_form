@@ -650,7 +650,7 @@ Qed.
 Definition pre_partition_in n j k i :=
   (i + n ^ n - k * n ^ (n - j - 1)) mod (n ^ (n - j)) <? n ^ (n - j - 1).
 
-(* example: all pre-partitions that have the 1 in 2nd set *)
+(* example: all pre-partitions that have the j in k-th set *)
 Compute (let n := 3 in let j := 1 in let k := 2 in map (λ i, (i, dispatch n i))
 (filter (pre_partition_in n j k) (seq 0 (n ^ n)))).
 
@@ -705,8 +705,27 @@ split. {
       rewrite Nat.add_0_r in Hpp.
       destruct i; [ now right; left | ].
       destruct i. {
-        cbn.
-(* failed *)
+        rewrite Nat.mod_small in Hpp; [ flia Hpp | flia ].
+      }
+      destruct i; [ now left | ].
+      destruct i; [ | cbn in Hin; flia Hin ].
+      replace 3 with (1 + 1 * 2) in Hpp by flia.
+      rewrite Nat.mod_add in Hpp; [ | easy ].
+      rewrite Nat.mod_small in Hpp; [ flia Hpp | flia ].
+    }
+    destruct k; [ clear Hkn | flia Hkn ].
+    cbn - [ "mod" ] in Hpp.
+    replace (i + 4 - 1) with (i + 1 + 1 * 2) in Hpp by flia.
+    rewrite Nat.mod_add in Hpp; [ | easy ].
+    destruct i. {
+      rewrite Nat.mod_small in Hpp; [ flia Hpp | flia ].
+    }
+    destruct i; [ now left | ].
+    destruct i; [ cbn in Hpp; flia Hpp | ].
+    destruct i; [ now right; left | cbn in Hin; flia Hin ].
+  }
+  destruct n. {
+(* etc, etc. *)
 ...
 
 Theorem dispatch_locate : ∀ n ll,
