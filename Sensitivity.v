@@ -120,7 +120,7 @@ Definition Hamming_distance x y := count_ones (Nat.lxor x y).
    A partition is a pre-partition where empty sets have been eliminated.
    There are exactly n^n pre-partitions of a set of cardinal n.
    Each pre-partition can be associated (bijection) with a number
-   between 0 and n^n.
+   between 0 and n^n-1.
    Actually, we implemented the sets as lists, and a finite set of
    cardinal n as the natural numbers between 0 and n-1.
    Below, the definitions of the functions
