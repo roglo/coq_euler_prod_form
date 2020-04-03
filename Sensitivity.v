@@ -633,7 +633,41 @@ remember (n - 1) as m eqn:Hm; clear Hm.
 now induction m.
 Qed.
 
-Compute (let n := 3 in map (λ ll, dispatch n (locate ll) = ll) (pre_partitions n)).
+(* pre_partition_in n j k i = true ↔ pre-partition i has the j in k-th set
+        0 ≤ i < n^n
+        0 ≤ j < n
+        0 ≤ k < n
+   e.g.
+      dispatch n i = [_; _; [...; j; ...]; _; ...]  (* some pre-partition *)
+                      <----> <--------->
+                         k      k-th
+                      <------------------------->
+                                  n
+   then
+     pre_partition_in n j k i = true
+ *)
+
+Definition pre_partition_in n j k i :=
+  (i + n ^ n - k * n ^ (n - j - 1)) mod (n ^ (n - j)) <? n ^ (n - j - 1).
+
+(* example: all pre-partitions that have the 1 in 2nd set *)
+Compute (let n := 3 in let j := 1 in let k := 2 in map (λ i, (i, dispatch n i))
+(filter (pre_partition_in n j k) (seq 0 (n ^ n)))).
+
+(* perhaps useless, but for the sport...
+   this is supposed to be a property of pre-partitions *)
+
+Theorem pre_partition_in_iff : ∀ n j k i,
+  i < n ^ n
+  → j < n
+  → k < n
+  → pre_partition_in n j k i = true ↔ j ∈ nth k (dispatch n i) [].
+Proof.
+intros * Hin Hjn Hkn.
+split. {
+  intros Hpp.
+  unfold pre_partition_in in Hpp.
+...
 
 Theorem dispatch_locate : ∀ n ll,
   is_pre_partition n ll
@@ -651,23 +685,8 @@ unfold locate.
 unfold locate_list.
 rewrite Hlen.
 rewrite List_fold_left_map.
-Print dispatch.
-Print to_radix.
-Compute (let ll := [[1; 2]; []; [0]] in let n := length ll in (fold_left (λ c b : nat, c * n + nth_find (nat_in_list b) ll) (seq 0 n) 0)).
-Compute (let v := 18 in let n := 3 in disp_loop n n v (repeat [] n)).
-Search disp_loop.
-Compute (let v := 3 in let n := 3 in disp_loop n n v (repeat [] n)).
-(* disp_loop_small_r applies for v > 0 and v < n: here between 1 and 2 incl *)
-Compute (let n := 3 in map (λ v, disp_loop n n v (repeat [] n)) (seq 1 (n - 1))).
-Check disp_loop_small_r.
 
-Compute (let n := 3 in map (λ v, disp_loop n n v (repeat [] n)) (seq 0 (n ^ n))).
-Compute (pre_partitions 3).
 Print dispatch.
-(* toutes les pré-partitions qui ont le b dans l'ensemble i *)
-Compute (let n := 3 in let b := 2 in let i := 1 in map (λ v, (v, dispatch n v))
-(filter (λ v, (v + n ^ n - i * n ^ (n - b - 1)) mod (n ^ (n - b)) <? n ^ (n - b - 1))
-   (seq 0 (n ^ n)))).
 ...
 Compute (let n := 4 in map (λ v, (v, dispatch n v)) (seq 0 (n ^ n))).
 ...
