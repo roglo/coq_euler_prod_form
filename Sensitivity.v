@@ -683,7 +683,12 @@ Compute (let n := 4 in map (λ v, (v, dispatch n v))
 
 (* toutes les pré-partitions qui ont k dans le premier ensemble *)
 Compute (let n := 3 in let k := 0 in map (λ v, (v, dispatch n v))
-(filter (λ v, v mod (n ^ (n - k)) <? n ^ (n - k - 1)) (seq 0 (n ^ n)))).
+(filter (λ v, v mod (n ^ (n - k)) <? n ^ (n - k - 1))
+   (seq 0 (n ^ n)))).
+(* toutes les pré-partitions qui ont k dans le deuxième ensemble *)
+Compute (let n := 4 in let k := 2 in map (λ v, (v, dispatch n v))
+(filter (λ v, (v + n ^ n - n ^ (n - k - 1)) mod (n ^ (n - k)) <? n ^ (n - k - 1))
+   (seq 0 (n ^ n)))).
 ...
 Compute (let n := 4 in map (λ v, (v, dispatch n v)) (seq 0 (n ^ n))).
 ...
