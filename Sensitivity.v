@@ -646,6 +646,10 @@ Check disp_loop_small_r.
 
 Compute (let n := 3 in map (λ v, disp_loop n n v (repeat [] n)) (seq 0 (n ^ n))).
 Compute (raw_partitions 3).
+Compute (let n := 3 in map (λ v, disp_loop n n v (repeat [] n)) (seq 0 (n ^ (n - 1)))).
+Compute (let n := 3 in map (λ l, tl (hd [] l) :: tl l) (map (λ v, disp_loop n n v (repeat [] n)) (seq 0 (n ^ (n - 1))))).
+Compute (let n := 3 in map (λ l, map (map pred) l) (map (λ l, tl (hd [] l) :: tl l) (map (λ v, disp_loop n n v (repeat [] n)) (seq 0 (n ^ (n - 1)))))).
+Compute (let n := 2 in map (λ v, disp_loop n n v (repeat [] n)) (seq 0 (n ^ n))).
 ...
 rewrite (disp_loop_small_r n n); [ | easy | | ]; cycle 1. {
   (* mmm... *)
