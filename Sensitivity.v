@@ -573,6 +573,7 @@ split. {
 }
 split. {
   intros l1 Hl1 i Hi.
+...
   unfold dispatch_list'' in Hl1.
   apply In_nth with (d := []) in Hl1.
   rewrite disp_loop''_length in Hl1; [ | easy ].
@@ -581,6 +582,8 @@ split. {
   apply In_nth with (d := 0) in Hi.
   destruct Hi as (j & Hj & Hi).
   subst i.
+  apply Hl.
+  destruct l as [| b]; [ easy | cbn ].
 ...
   revert l i Hl Hl1 Hi.
   induction l1; intros; [ easy | cbn ].
