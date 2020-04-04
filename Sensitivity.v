@@ -657,6 +657,7 @@ Compute (let n := 3 in let j := 1 in let k := 2 in map (λ i, (i, dispatch n i))
 (* perhaps useless, but for the sport...
    this is supposed to be a property of pre-partitions *)
 
+(* ... but hard to prove
 Theorem pre_partition_in_iff : ∀ n j k i,
   i < n ^ n
   → j < n
@@ -727,7 +728,9 @@ split. {
   destruct n. {
 (* etc, etc. *)
 ...
+*)
 
+(* don't know how to advance in this proof...
 Theorem dispatch_locate : ∀ n ll,
   is_pre_partition n ll
   → dispatch n (locate ll) = ll.
@@ -744,24 +747,6 @@ unfold locate.
 unfold locate_list.
 rewrite Hlen.
 rewrite List_fold_left_map.
-
-Print dispatch.
-...
-Compute (let n := 4 in map (λ v, (v, dispatch n v)) (seq 0 (n ^ n))).
-...
-Compute (let n := 3 in map (λ v, (v, dispatch n v)) (seq 0 (n ^ n - 1))).
-Compute (pre_partitions 4).
-(* pour 4
-
-*)
-...
-(* toutes les pré-partitions qui ont le 2 dans le deuxième ensemble *)
-Compute (let n := 3 in map (λ v, (v, dispatch n v)) (filter (λ v, (v + n - 1) mod n =? 0) (seq 0 (n ^ n)))).
-...
-Compute (pre_partitions 4).
-...
-Compute (let n := 3 in map (λ v, dispatch n v) (seq 0 (n ^ (n - 1)))).
-...
 Compute (let n := 3 in map (λ p, (locate p, rev (to_radix n (locate p)), p)) (pre_partitions n)).
 ...
 = [ (0, [0; 0; 0], [[0; 1; 2]; []; []]);
@@ -793,79 +778,18 @@ Compute (let n := 3 in map (λ p, (locate p, rev (to_radix n (locate p)), p)) (p
    (26, [2; 2; 2], [[]; []; [0; 1; 2]])]
      : list (nat * list nat * list (list nat))
 ...
-rewrite (disp_loop_small_r n n); [ | easy | | ]; cycle 1. {
-  (* mmm... *)
-  (* bin non, locate, c'est compris entre 0 et n^n-1 *)
-Check disp_loop_seq_sub_list.
-  ...
-cbn.
-replace (nth 0 (repeat [] n) []) with ([] : list nat) by now destruct n.
-rewrite app_nil_r.
-replace (nth _ (repeat [] n) []) with ([] : list nat). 2: {
-  clear.
-  remember (locate ll) as i; clear ll Heqi.
-  revert i.
-  induction n; intros; [ now destruct i | cbn ].
-  destruct i; [ easy | ].
-  apply IHn.
-}
-remember (locate ll) as i eqn:Hi.
-replace (sub_list (repeat [] n) (i + 1) (n - i - 1)) with
-    (repeat ([] : list nat) (n - i - 1)). 2: {
-  clear - Hin.
-  unfold sub_list.
-  revert i Hin.
-  induction n; intros; [ easy | cbn ].
-  destruct i; cbn. {
-    rewrite Nat.sub_0_r.
-    replace n with (length (repeat ([] : list nat) n)) at 2. 2: {
-      apply repeat_length.
-    }
-    symmetry; apply firstn_all.
-  }
-...
-  apply Nat.succ_lt_mono in Hin.
-  now apply IHn.
-}
-...
-intros * Hll.
-revert n Hll.
-induction ll as [| l]; intros. {
-  destruct Hll as (Hlen & Hall & Hin & Hnd).
-  now subst n.
-}
-cbn.
-Print locate.
-(* faudrait prouver déjà que locate renvoit bien une valeur entre
-   0 et n^n *)
-Print locate_list.
-...
-unfold dispatch.
-unfold locate.
-unfold locate_list.
-Search (fold_left _ (map _ _)).
-Print nth_find.
-Search nth_find_loop.
-...
+*)
 
+(* not so simple to prove...
 Theorem is_partition_iff : ∀ n p, n ≠ 0 →
-  is_partition n p ↔ p ∈ pre_partitions n.
+  is_pre_partition n p ↔ p ∈ pre_partitions n.
 Proof.
 intros * Hnz.
 split; intros Hn. {
-(*
   destruct Hn as (Hlen & Hmem & Hin & Hnp).
-*)
   unfold pre_partitions.
 ...
-  specialize (dispatch_locate n p Hn) as H1.
-  rewrite <- H1.
-...
-Print dispatch.
-Compute (pre_partitions 3).
-Compute (all_partitions 3).
-Search locate.
-...
+*)
 
 Theorem length_loc_loc_bl_sens_list : ∀ n f x,
   length (loc_sens_list n f x) =
