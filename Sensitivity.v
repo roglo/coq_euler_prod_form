@@ -577,6 +577,10 @@ unfold dispatch_list'' at 2.
 rewrite disp_loop''_length; [ | now destruct l ].
 unfold dispatch_list''.
 remember (length l) as n eqn:Hn.
+destruct l as [| a1]; [ easy | cbn ].
+rewrite Hn; cbn.
+f_equal. {
+Check disp_loop_small_r.
 Print disp_loop''.
 ...
 
