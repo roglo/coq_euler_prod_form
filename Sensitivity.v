@@ -562,11 +562,30 @@ Qed.
 Compute (locate_list (dispatch_list [2; 0; 0])).
 Compute (locate_list (dispatch_list'' [1; 2; 0])).
 
+Theorem dispatch_list_is_pre_partition : ∀ l,
+  (∀ a, a ∈ l → a < length l)
+  → is_pre_partition (length l) (dispatch_list'' l).
+Proof.
+intros * Hl.
+split. {
+  unfold dispatch_list''.
+  now apply disp_loop''_length.
+}
+split. {
+  intros l1 Hl1 i Hi.
+...
+  apply Hl. (* non *)
+Print dispatch_list''.
+Print disp_loop''.
+...
+
 Theorem locate_dispatch_list : ∀ l,
   (∀ a : nat, a ∈ l → a < length l)
   → locate_list (dispatch_list'' l) = l.
 Proof.
 intros * Hll.
+Print dispatch_list''.
+...
 destruct l as [| b]; [ easy | ].
 remember (b :: l) as l' eqn:Hl'.
 assert (Hlz : l' ≠ []) by now subst l'.
