@@ -745,7 +745,15 @@ destruct (Nat.eq_dec n 0) as [Hnz| Hnz]. {
 unfold locate.
 unfold locate_list.
 rewrite Hlen.
+(* example: (18, [2; 0; 0], [[1; 2]; []; [0]]) *)
+Compute (let n := 3 in let ll := [[1; 2]; []; [0]] in
+map (λ b, nth_find (nat_in_list b) ll) (seq 0 n)).
+destruct ll as [| l1]; [ now symmetry in Hlen | ].
+cbn.
+...
 rewrite List_fold_left_map.
+Compute (let n := 3 in let ll := [[1; 2]; []; [0]] in
+fold_left (λ c b : nat, c * n + nth_find (nat_in_list b) ll) (seq 0 n) 0).
 ...
 Compute (let n := 3 in map (λ p, (locate p, rev (to_radix n (locate p)), p)) (pre_partitions n)).
 ...
