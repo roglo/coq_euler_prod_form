@@ -213,6 +213,23 @@ unfold to_radix in IHn.
 Definition dispatch_list l :=
   disp_loop' (length l) (rev l) (repeat [] (length l)).
 
+Fixpoint disp_loop'' n i l :=
+  match l with
+  | [] => repeat [] n
+  | a :: l' =>
+      let ll := disp_loop'' n (S i) l' in
+      set_nth a ll (i :: nth a ll [])
+  end.
+
+Definition dispatch'' n i := disp_loop'' n 0 (rev (to_radix n i)).
+
+Definition pre_partitions'' n := map (dispatch'' n) (seq 0 (n ^ n)).
+
+Compute (pre_partitions 2 = pre_partitions'' 2).
+Compute (pre_partitions 3 = pre_partitions'' 3).
+
+Definition dispatch_list'' l := disp_loop'' (length l) 0 l.
+
 (* *)
 
 Fixpoint list_nat_le la lb :=
@@ -526,9 +543,29 @@ cbn; apply Hll.
 now left.
 Qed.
 
+Print disp_loop''.
+
+Theorem disp_loop''_length : ∀ n i l,
+  (∀ a, a ∈ l → a < n)
+  → length (disp_loop'' n i l) = n.
+Proof.
+intros * Hln.
+revert i n Hln.
+induction l as [| b]; intros; [ apply repeat_length | cbn ].
+rewrite set_nth_length. 2: {
+  rewrite IHl; [ now apply Hln; left | ].
+  now intros a Ha; apply Hln; right.
+}
+apply IHl.
+now intros a Ha; apply Hln; right.
+Qed.
+
+Compute (locate_list (dispatch_list [2; 0; 0])).
+Compute (locate_list (dispatch_list'' [1; 2; 0])).
+
 Theorem locate_dispatch_list : ∀ l,
   (∀ a : nat, a ∈ l → a < length l)
-  → locate_list (dispatch_list l) = l.
+  → locate_list (dispatch_list'' l) = l.
 Proof.
 intros * Hll.
 destruct l as [| b]; [ easy | ].
@@ -536,14 +573,11 @@ remember (b :: l) as l' eqn:Hl'.
 assert (Hlz : l' ≠ []) by now subst l'.
 clear b l Hl'; rename l' into l.
 unfold locate_list.
-unfold dispatch_list at 2.
-rewrite disp_loop'_length; [ | now destruct l | ]. 2: {
-  intros a Ha.
-  rewrite repeat_length.
-  apply in_rev in Ha.
-  now apply Hll.
-}
-rewrite repeat_length.
+unfold dispatch_list'' at 2.
+rewrite disp_loop''_length; [ | now destruct l ].
+unfold dispatch_list''.
+remember (length l) as n eqn:Hn.
+Print disp_loop''.
 ...
 
 Theorem locate_dispatch : ∀ n i, i < n → locate (dispatch n i) = i.
