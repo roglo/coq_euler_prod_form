@@ -587,11 +587,19 @@ split. {
   apply in_app_iff in Hl1.
   destruct Hl1 as [Hl1| Hl1]. {
     apply (IHl _ _ (S j) l1); [ | | easy ]. 2: {
+      remember (disp_loop'' n (S j) l) as ll eqn:Hll.
       clear - Hl1.
-      revert n j b l1 Hl1.
-      induction l as [| a]; intros. {
-        cbn in Hl1; cbn.
-Search (firstn _ (repeat _ _)).
+      revert b Hl1.
+      induction ll as [| l]; intros. {
+        now rewrite firstn_nil in Hl1.
+      }
+      destruct b; [ easy | cbn in Hl1 ].
+      destruct Hl1 as [Hl1| Hl1]; [ now subst l1; left | right ].
+      now apply (IHll b).
+    }
+    intros a Ha.
+    now apply Hl; right.
+  }
 ...
   apply In_nth with (d := []) in Hl1.
   rewrite disp_loop''_length in Hl1; [ | easy ].
