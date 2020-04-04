@@ -210,6 +210,9 @@ unfold to_radix in IHn.
 ...
 *)
 
+Definition dispatch_list l :=
+  disp_loop' (length l) (rev l) (repeat [] (length l)).
+
 (* *)
 
 Fixpoint list_nat_le la lb :=
@@ -478,6 +481,71 @@ apply Hl1.
 now right.
 Qed.
 
+Compute (let ll := [[1; 2]; []; [0]] in locate_list ll).
+Compute (let l := [2; 0; 0] in dispatch_list l).
+
+Theorem disp_loop'_length : ∀ i l ll,
+  ll ≠ []
+  → (∀ a, a ∈ l → a < length ll)
+  → length (disp_loop' i l ll) = length ll.
+Proof.
+intros * Hllz Hll.
+revert l ll Hllz Hll.
+induction i; intros; [ easy | cbn ].
+rewrite IHi; cycle 1. {
+  intros H; apply Hllz.
+  apply length_zero_iff_nil in H.
+  rewrite set_nth_length in H. {
+    now apply length_zero_iff_nil in H.
+  }
+  destruct l as [| b]; [ easy | ].
+  apply Hll.
+  now left.
+} {
+  intros a Ha.
+  destruct l as [| b]; [ easy | cbn in Ha; cbn ].
+  rewrite app_length; cbn.
+  rewrite firstn_length.
+  rewrite skipn_length.
+  destruct (lt_dec b (length ll)) as [Hbl| Hbl]. {
+    rewrite min_l; [ | flia Hbl ].
+    rewrite <- Nat.add_succ_comm.
+    rewrite Nat.add_1_r, Nat.add_comm.
+    rewrite Nat.sub_add; [ | easy ].
+    now apply Hll; right.
+  } {
+    exfalso; apply Hbl.
+    apply Hll.
+    now left.
+  }
+}
+destruct ll as [| l1]; [ easy | ].
+destruct l as [| a]; [ easy | ].
+apply set_nth_length.
+cbn; apply Hll.
+now left.
+Qed.
+
+Theorem locate_dispatch_list : ∀ l,
+  (∀ a : nat, a ∈ l → a < length l)
+  → locate_list (dispatch_list l) = l.
+Proof.
+intros * Hll.
+destruct l as [| b]; [ easy | ].
+remember (b :: l) as l' eqn:Hl'.
+assert (Hlz : l' ≠ []) by now subst l'.
+clear b l Hl'; rename l' into l.
+unfold locate_list.
+unfold dispatch_list at 2.
+rewrite disp_loop'_length; [ | now destruct l | ]. 2: {
+  intros a Ha.
+  rewrite repeat_length.
+  apply in_rev in Ha.
+  now apply Hll.
+}
+rewrite repeat_length.
+...
+
 Theorem locate_dispatch : ∀ n i, i < n → locate (dispatch n i) = i.
 Proof.
 intros * Hin.
@@ -743,12 +811,17 @@ destruct (Nat.eq_dec n 0) as [Hnz| Hnz]. {
   now apply length_zero_iff_nil in Hnz.
 }
 unfold locate.
+(* example: (18, [2; 0; 0], [[1; 2]; []; [0]]) *)
+Compute (let n := 3 in let ll := [[1; 2]; []; [0]] in locate_list ll).
+Compute (let n := 3 in let l := [2; 0; 0] in dispatch_list n l).
+...
+Search (list nat → list (list nat)).
+Check locate_list.
+...
 unfold locate_list.
 rewrite Hlen.
-(* example: (18, [2; 0; 0], [[1; 2]; []; [0]]) *)
-Compute (let n := 3 in let ll := [[1; 2]; []; [0]] in
-map (λ b, nth_find (nat_in_list b) ll) (seq 0 n)).
 destruct ll as [| l1]; [ now symmetry in Hlen | ].
+Print locate_list.
 cbn.
 ...
 rewrite List_fold_left_map.
