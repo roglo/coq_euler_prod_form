@@ -150,8 +150,8 @@ Definition count_upto_n_to_n n :=
 
 Compute (count_upto_n_to_n 3).
 
-Definition set_nth {A} i (l : list A) v :=
-  firstn i l ++ v :: skipn (i + 1) l.
+Definition cons_nth {A} i (a : A) ll :=
+  firstn i ll ++  (a :: nth i ll []) :: skipn (i + 1) ll.
 
 Definition is_nil {A} (l : list A) :=
   match l with
@@ -162,15 +162,14 @@ Definition is_nil {A} (l : list A) :=
 Fixpoint disp_loop n i v r :=
   match i with
   | 0 => r
-  | S i' =>
-      disp_loop n i' (v / n) (set_nth (v mod n) r (i' :: nth (v mod n) r []))
+  | S i' => disp_loop n i' (v / n) (cons_nth (v mod n) i' r)
   end.
 
 Definition dispatch n i := disp_loop n n i (repeat [] n).
 
 Definition pre_partitions n := map (dispatch n) (seq 0 (n ^ n)).
 
-Compute (pre_partitions 4).
+Compute (pre_partitions 3).
 
 (* alternative version *)
 
@@ -185,9 +184,7 @@ Definition to_radix n i := to_radix_loop n n i.
 Fixpoint disp_loop' i l ll :=
   match i with
   | 0 => ll
-  | S i' =>
-      disp_loop' i' (tl l)
-        (set_nth (hd 0 l) ll (i' :: nth (hd 0 l) ll []))
+  | S i' => disp_loop' i' (tl l) (cons_nth (hd 0 l) i' ll)
   end.
 
 Definition dispatch' n i := disp_loop' n (to_radix n i) (repeat [] n).
@@ -218,7 +215,7 @@ Fixpoint disp_loop'' n i l :=
   | [] => repeat [] n
   | a :: l' =>
       let ll := disp_loop'' n (S i) l' in
-      set_nth a ll (i :: nth a ll [])
+      cons_nth a i ll
   end.
 
 Definition dispatch'' n i := disp_loop'' n 0 (rev (to_radix n i)).
@@ -320,16 +317,18 @@ Compute (dispatch 3 16).
 Compute (dispatch 4 23).
 Compute (locate [[0]; [1; 2]; []; [3]]).
 
-Theorem set_nth_length : ∀ {A} i l (v : A),
-  i < length l → length (set_nth i l v) = length l.
+Check cons_nth.
+
+Theorem cons_nth_length : ∀ {A} i ll (v : A),
+  i < length ll → length (cons_nth i v ll) = length ll.
 Proof.
 intros * Hi.
 revert i v Hi.
-induction l as [| a]; intros; cbn in Hi; [ flia Hi | ].
+induction ll as [| l]; intros; cbn in Hi; [ flia Hi | ].
 destruct i; [ easy | cbn ].
 apply Nat.succ_lt_mono in Hi.
 f_equal.
-now apply IHl.
+now apply IHll.
 Qed.
 
 Theorem disp_loop_length : ∀ n i v r,
@@ -341,11 +340,11 @@ intros * Hnz Hrn.
 revert n v r Hnz Hrn.
 induction i; intros; [ easy | cbn ].
 rewrite IHi; [ | easy | ]. 2: {
-  rewrite set_nth_length; [ easy | ].
+  rewrite cons_nth_length; [ easy | ].
   rewrite Hrn.
   now apply Nat.mod_upper_bound.
 }
-apply set_nth_length.
+apply cons_nth_length.
 rewrite Hrn.
 now apply Nat.mod_upper_bound.
 Qed.
@@ -402,7 +401,7 @@ rewrite Nat.sub_succ, Nat.sub_0_r.
 revert n v ll Hvn Hrn.
 induction i; intros. {
   cbn.
-  unfold set_nth.
+  unfold cons_nth.
   unfold sub_list.
   rewrite Nat.mod_small; [ | easy ].
   rewrite app_comm_cons.
@@ -431,21 +430,21 @@ cbn.
 rewrite Nat.mod_0_l; [ | flia Hvn ].
 rewrite Nat.div_0_l; [ | flia Hvn ].
 rewrite disp_loop_0_r; [ | flia Hvn ].
-remember (set_nth _ _ _) as sn eqn:Hsn.
+remember (cons_nth _ _ _) as sn eqn:Hsn.
 symmetry in Hsn.
 destruct sn as [| l]. {
   apply (f_equal (@length _)) in Hsn.
-  rewrite set_nth_length in Hsn; cbn in Hsn; [ | easy ].
-  rewrite set_nth_length in Hsn; cbn in Hsn; [ | now rewrite Hrn ].
+  rewrite cons_nth_length in Hsn; cbn in Hsn; [ | easy ].
+  rewrite cons_nth_length in Hsn; cbn in Hsn; [ | now rewrite Hrn ].
   now rewrite <- Hrn, Hsn in Hvn.
 }
 cbn in Hsn.
 injection Hsn; clear Hsn; intros H1 H2.
-remember (set_nth _ _ _) as l2 eqn:Hl2.
+remember (cons_nth _ _ _) as l2 eqn:Hl2.
 symmetry in Hl2.
 destruct l2 as [| l2 ll2]. {
   apply (f_equal (@length _)) in Hl2.
-  rewrite set_nth_length in Hl2; [ | now rewrite Hrn ].
+  rewrite cons_nth_length in Hl2; [ | now rewrite Hrn ].
   subst sn.
   apply length_zero_iff_nil in Hl2; subst ll.
   now rewrite <- Hrn in Hvn.
@@ -512,7 +511,7 @@ induction i; intros; [ easy | cbn ].
 rewrite IHi; cycle 1. {
   intros H; apply Hllz.
   apply length_zero_iff_nil in H.
-  rewrite set_nth_length in H. {
+  rewrite cons_nth_length in H. {
     now apply length_zero_iff_nil in H.
   }
   destruct l as [| b]; [ easy | ].
@@ -538,7 +537,7 @@ rewrite IHi; cycle 1. {
 }
 destruct ll as [| l1]; [ easy | ].
 destruct l as [| a]; [ easy | ].
-apply set_nth_length.
+apply cons_nth_length.
 cbn; apply Hll.
 now left.
 Qed.
@@ -552,7 +551,7 @@ Proof.
 intros * Hln.
 revert i n Hln.
 induction l as [| b]; intros; [ apply repeat_length | cbn ].
-rewrite set_nth_length. 2: {
+rewrite cons_nth_length. 2: {
   rewrite IHl; [ now apply Hln; left | ].
   now intros a Ha; apply Hln; right.
 }
