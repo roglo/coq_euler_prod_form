@@ -579,8 +579,22 @@ remember (length l) as n eqn:Hn.
 destruct l as [| a1]; [ easy | cbn ].
 rewrite Hn; cbn.
 f_equal. {
-Check disp_loop_small_r.
-Print disp_loop''.
+  unfold cons_nth.
+  rewrite nth_find_loop_app_2. 2: {
+    intros j Hj.
+...
+... suite ok
+  }
+  cbn.
+  rewrite firstn_length.
+  cbn in Hn; rewrite <- Hn.
+  rewrite disp_loop''_length. 2: {
+    intros a Ha.
+    now apply Hll; right.
+  }
+  apply Nat.min_l.
+  now apply Nat.lt_le_incl, Hll; left.
+}
 ...
 
 Theorem locate_dispatch : ∀ n i, i < n → locate (dispatch n i) = i.
