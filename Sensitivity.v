@@ -730,7 +730,6 @@ split. {
 ...
 *)
 
-(* don't know how to advance in this proof...
 Theorem dispatch_locate : ∀ n ll,
   is_pre_partition n ll
   → dispatch n (locate ll) = ll.
@@ -747,6 +746,7 @@ unfold locate.
 unfold locate_list.
 rewrite Hlen.
 rewrite List_fold_left_map.
+...
 Compute (let n := 3 in map (λ p, (locate p, rev (to_radix n (locate p)), p)) (pre_partitions n)).
 ...
 = [ (0, [0; 0; 0], [[0; 1; 2]; []; []]);
@@ -778,7 +778,6 @@ Compute (let n := 3 in map (λ p, (locate p, rev (to_radix n (locate p)), p)) (p
    (26, [2; 2; 2], [[]; []; [0; 1; 2]])]
      : list (nat * list nat * list (list nat))
 ...
-*)
 
 (* not so simple to prove...
 Theorem is_partition_iff : ∀ n p, n ≠ 0 →
