@@ -573,6 +573,46 @@ split. {
 }
 split. {
   intros l1 Hl1 i Hi.
+...
+  intros l1 Hl1 i Hi.
+  remember (λ a, a < length l) as P.
+  replace (i < length l) with (P i) by now subst P.
+  assert (H : ∀ a, a ∈ l → P a) by now subst P.
+  move H before Hl; clear Hl; rename H into Hl.
+  clear HeqP.
+  unfold dispatch_list'' in Hl1.
+  remember 0 as j eqn:Hj in Hl1; clear Hj.
+  remember (length l) as n eqn:Hn; clear Hn.
+  revert n i j l1 Hl Hl1 Hi.
+  induction l as [| b]; intros. {
+    cbn in Hl1.
+    apply repeat_spec in Hl1.
+    now subst l1.
+  }
+  cbn in Hl1.
+  unfold cons_nth in Hl1.
+  apply in_app_iff in Hl1.
+  destruct Hl1 as [Hl1| Hl1]. {
+    apply (IHl n _ (S j) l1); [ | | easy ]. 2: {
+      remember (disp_loop'' n (S j) l) as ll eqn:Hll.
+      clear - Hl1.
+      revert b Hl1.
+      induction ll as [| l]; intros. {
+        now rewrite firstn_nil in Hl1.
+      }
+      destruct b; [ easy | cbn in Hl1 ].
+      destruct Hl1 as [Hl1| Hl1]; [ now subst l1; left | right ].
+      now apply (IHll b).
+    }
+    intros a Ha.
+    now apply Hl; right.
+  }
+  cbn in Hl1.
+  destruct Hl1 as [Hl1| Hl1]. {
+    subst l1.
+    destruct Hi as [Hi| Hi].
+...
+  intros l1 Hl1 i Hi.
   unfold dispatch_list'' in Hl1.
   remember (length l) as n eqn:Hn; clear Hn.
   remember 0 as j eqn:Hj in Hl1; clear Hj.
@@ -600,6 +640,24 @@ split. {
     intros a Ha.
     now apply Hl; right.
   }
+  cbn in Hl1.
+...
+clear j l1 Hl1 Hi.
+...
+  destruct Hl1 as [Hl1| Hl1]. {
+    subst l1.
+    cbn in Hi.
+    destruct Hi as [Hi| Hi]. {
+      clear j Hi.
+  b : nat
+  l : list nat
+  IHl : ∀ (n i j : nat) (l1 : list nat),
+          (∀ a : nat, a ∈ l → a < n) → l1 ∈ disp_loop'' n j l → i ∈ l1 → i < n
+  n, i : nat
+  Hl : ∀ a : nat, a ∈ b :: l → a < n
+  ============================
+  i < n
+      apply (IHl _ _ 0 [i]).
 ...
   apply In_nth with (d := []) in Hl1.
   rewrite disp_loop''_length in Hl1; [ | easy ].
