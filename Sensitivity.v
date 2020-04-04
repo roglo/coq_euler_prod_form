@@ -573,6 +573,23 @@ split. {
 }
 split. {
   intros l1 Hl1 i Hi.
+  unfold dispatch_list'' in Hl1.
+...
+  revert l i Hl Hl1 Hi.
+  induction l1; intros; [ easy | cbn ].
+  destruct Hi as [Hi| Hi]. {
+    subst a.
+    apply Hl.
+...
+  revert l1 i Hl1 Hi.
+  induction l as [| b]; intros; [ easy | cbn ].
+  cbn in Hl1.
+  unfold cons_nth in Hl1.
+  apply in_app_iff in Hl1.
+  destruct Hl1 as [Hl1| Hl1]. {
+Search (_ ∈ firstn _ _).
+    apply in_firstn in Hl1.
+
 ...
   apply Hl. (* non *)
 Print dispatch_list''.
