@@ -580,12 +580,36 @@ split. {
   unfold dispatch_list'' in Hl1.
   move i at top.
   (* lemma to do *)
-  assert (Hl : l1 = nth (nth i l 0) (disp_loop'' (length l) 0 l) []). {
+...
+  remember 0 as j.
+  remember (length l) as n.
+  assert (Hjn : n + j = length l) by flia Heqj Heqn.
+  clear Heqj Heqn.
+  move j before i; move n before j.
+  assert (Hl : l1 = nth (nth i l 0) (disp_loop'' n j l) []). {
+    revert i j n l1 Hl1 Hi Hjn.
+    induction l as [| a]; intros. {
+      cbn in Hjn.
+      apply Nat.eq_add_0 in Hjn.
+      now destruct Hjn; subst n j.
+    }
+    cbn in Hl1, Hjn; cbn.
+    destruct i. {
+      cbn.
+
+
+      destruct l. {
+        cbn in Hl1, Hjn; cbn.
 ...
 Print disp_loop''.
-cons_nth a₁ 0 (disp_loop'' n 1 l)
-cons_nth a₁ 0 (cons_nth a₂ 1 (disp_loop'' n 2 l))
-cons_nth a₁ 0 (cons_nth a₂ 1 ... (cons_nth a_{i+1} i (disp_loop'' n (i+1) l)))
+disp_loop'' n j l
+cons_nth a₀ 0 (disp_loop'' n (j+1) l)
+cons_nth a₀ 0 (cons_nth a₁ 1 (disp_loop'' n (j+2) l))
+cons_nth a₀ 0 (cons_nth a₁ 1 ... (cons_nth a_{i} i (disp_loop'' n (j+i+1) l)))
+
+cons_nth a₀ 0 (disp_loop'' n 1 l)
+cons_nth a₀ 0 (cons_nth a₁ 1 (disp_loop'' n 2 l))
+cons_nth a₀ 0 (cons_nth a₁ 1 ... (cons_nth a_{i} i (disp_loop'' n (i+1) l)))
 (* clearly each element of l is in disp_loop'' _ _ l
    less clearly but true too, each elememt in disp_loop'' _ _ l comes
    from l. But how to formally prove it? *)
