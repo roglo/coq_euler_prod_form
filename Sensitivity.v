@@ -581,6 +581,25 @@ split. {
   apply in_split in Hl1.
   destruct Hl1 as (ll2 & ll3 & Hllll).
   subst l1.
+  remember (length l) as n; clear Heqn.
+  remember 0 as j; clear Heqj.
+  revert ll2 ll3 i l2 l3 n j Hllll.
+  induction l as [| a]; intros. {
+    cbn in Hllll; cbn; symmetry in Hllll.
+    revert ll2 Hllll.
+    induction n; intros; cbn in Hllll. {
+      now apply app_eq_nil in Hllll.
+    }
+    destruct ll2 as [| l]. {
+      cbn in Hllll.
+      injection Hllll; clear Hllll; intros H1 H2.
+      now apply app_eq_nil in H2.
+    }
+    cbn in Hllll.
+    injection Hllll; clear Hllll; intros H1 H2; subst l.
+    congruence.
+  }
+  cbn in Hllll.
 ...
   intros l1 Hl1 i Hi.
   apply Hl.
