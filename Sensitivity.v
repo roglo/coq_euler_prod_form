@@ -581,6 +581,9 @@ split. {
   move i at top.
   (* lemma to do *)
 Print disp_loop''.
+cons_nth a₁ 0 (disp_loop'' n 1 l)
+cons_nth a₁ 0 (cons_nth a₂ 1 (disp_loop'' n 2 l))
+cons_nth a₁ 0 (cons_nth a₂ 1 ... (cons_nth a_{i+1} i (disp_loop'' n (i+1) l)))
 (* clearly each element of l is in disp_loop'' _ _ l
    less clearly but true too, each elememt in disp_loop'' _ _ l comes
    from l. But how to formally prove it? *)
