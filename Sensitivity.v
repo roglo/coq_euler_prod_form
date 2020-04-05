@@ -610,9 +610,10 @@ split. {
   do 2 rewrite app_assoc in Hllll.
   destruct (Nat.eq_dec i a) as [Hia| Hia]; [ now left | right ].
   symmetry in Hll.
-  eapply (IHl n (S j)).
+  apply (IHl n (S j) ll2 ll3 i l2 l3).
   rewrite Hll.
-(* bof... *)
+  rewrite List_app_cons, app_assoc.
+  rewrite <- Hllll.
 ...
   intros l1 Hl1 i Hi.
   apply Hl.
