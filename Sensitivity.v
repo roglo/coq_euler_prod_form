@@ -576,6 +576,12 @@ split. {
   apply Hl.
   clear Hl.
   unfold dispatch_list'' in Hl1.
+Print disp_loop''.
+...
+  intros l1 Hl1 i Hi.
+  apply Hl.
+  clear Hl.
+  unfold dispatch_list'' in Hl1.
   revert i l1 Hl1 Hi.
   destruct l as [| a]; intros; [ easy | ].
   cbn in Hl1.
