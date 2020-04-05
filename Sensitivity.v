@@ -580,6 +580,8 @@ split. {
   unfold dispatch_list'' in Hl1.
   move i at top.
   (* lemma to do *)
+  assert (Hl : l1 = nth (nth i l 0) (disp_loop'' (length l) 0 l) []). {
+...
 Print disp_loop''.
 cons_nth a₁ 0 (disp_loop'' n 1 l)
 cons_nth a₁ 0 (cons_nth a₂ 1 (disp_loop'' n 2 l))
