@@ -213,9 +213,7 @@ Definition dispatch_list l :=
 Fixpoint disp_loop'' n i l :=
   match l with
   | [] => repeat [] n
-  | a :: l' =>
-      let ll := disp_loop'' n (S i) l' in
-      cons_nth a i ll
+  | a :: l' => cons_nth a i (disp_loop'' n (S i) l')
   end.
 
 Definition dispatch'' n i := disp_loop'' n 0 (rev (to_radix n i)).
