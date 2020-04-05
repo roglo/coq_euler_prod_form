@@ -578,6 +578,7 @@ split. {
   apply Hl.
   clear Hl.
   unfold dispatch_list'' in Hl1.
+  move i at top.
   (* lemma to do *)
 Print disp_loop''.
 (* clearly each element of l is in disp_loop'' _ _ l
