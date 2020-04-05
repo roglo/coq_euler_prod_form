@@ -573,6 +573,40 @@ split. {
 }
 split. {
   intros l1 Hl1 i Hi.
+  apply Hl.
+  clear Hl.
+  unfold dispatch_list'' in Hl1.
+  revert i l1 Hl1 Hi.
+  destruct l as [| a]; intros; [ easy | ].
+  cbn in Hl1.
+  remember (S (length l)) as n.
+  remember 1 as j.
+  clear - Hl1 Hi.
+  revert a i l1 n j Hl1 Hi.
+  induction l as [| b]; intros; cbn in Hl1. {
+    left.
+    unfold cons_nth in Hl1.
+    apply in_app_iff in Hl1.
+    destruct Hl1 as [Hl1| Hl1]. {
+      revert a Hl1.
+      induction n; intros; [ now rewrite firstn_nil in Hl1 | ].
+      cbn in Hl1.
+      destruct a; [ easy | cbn in Hl1 ].
+      destruct Hl1 as [Hl1| Hl1]; [ now subst l1 | ].
+      apply IHn.
+      clear - Hl1.
+      revert a Hl1.
+      induction n; intros. {
+        cbn in Hl1.
+        now rewrite firstn_nil in Hl1.
+      }
+      cbn.
+      cbn in Hl1.
+      destruct a; [ easy | ].
+      cbn in Hl1.
+      destruct Hl1 as [Hl1| Hl1]; [ now left | right ].
+      now apply IHn.
+    }
 ...
   intros l1 Hl1 i Hi.
   remember (λ a, a < length l) as P.
