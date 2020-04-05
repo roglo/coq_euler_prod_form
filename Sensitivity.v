@@ -562,6 +562,10 @@ Qed.
 Compute (locate_list (dispatch_list [2; 0; 0])).
 Compute (locate_list (dispatch_list'' [1; 2; 0])).
 
+Theorem List_app_cons : ∀ A (l1 l2 : list A) a,
+  l1 ++ a :: l2 = l1 ++ [a] ++ l2.
+Proof. easy. Qed.
+
 Theorem dispatch_list_is_pre_partition : ∀ l,
   (∀ a, a ∈ l → a < length l)
   → is_pre_partition (length l) (dispatch_list'' l).
@@ -600,6 +604,10 @@ split. {
     congruence.
   }
   cbn in Hllll.
+  remember (disp_loop'' n (S j) l) as ll eqn:Hll.
+  unfold cons_nth in Hllll.
+  do 2 rewrite List_app_cons in Hllll.
+  do 2 rewrite app_assoc in Hllll.
 ...
   intros l1 Hl1 i Hi.
   apply Hl.
