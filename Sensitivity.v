@@ -587,7 +587,7 @@ split. {
   subst l1.
   remember (length l) as n; clear Heqn.
   remember 0 as j; clear Heqj.
-  revert ll2 ll3 i l2 l3 n j Hllll.
+  revert n j ll2 ll3 i l2 l3 Hllll.
   induction l as [| a]; intros. {
     cbn in Hllll; cbn; symmetry in Hllll.
     revert ll2 Hllll.
@@ -609,6 +609,10 @@ split. {
   do 2 rewrite List_app_cons in Hllll.
   do 2 rewrite app_assoc in Hllll.
   destruct (Nat.eq_dec i a) as [Hia| Hia]; [ now left | right ].
+  symmetry in Hll.
+  eapply (IHl n (S j)).
+  rewrite Hll.
+(* bof... *)
 ...
   intros l1 Hl1 i Hi.
   apply Hl.
