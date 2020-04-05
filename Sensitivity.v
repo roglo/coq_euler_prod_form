@@ -578,14 +578,22 @@ split. {
   apply Hl.
   clear Hl.
   unfold dispatch_list'' in Hl1.
+  (* lemma to do *)
+Print disp_loop''.
+(* clearly each element of l is in disp_loop'' _ _ l
+   less clearly but true too, each elememt in disp_loop'' _ _ l comes
+   from l. But how to formally prove it? *)
+...
   apply in_split in Hi.
   destruct Hi as (l2 & l3 & Hlil).
   apply in_split in Hl1.
   destruct Hl1 as (ll2 & ll3 & Hllll).
   subst l1.
   remember (length l) as n; clear Heqn.
-  remember 0 as j; clear Heqj.
-  revert n j ll2 ll3 i l2 l3 Hllll.
+  remember 0 as j.
+  assert (Hji : j ≤ i) by (subst j; flia).
+  clear Heqj.
+  revert n j ll2 ll3 i l2 l3 Hji Hllll.
   induction l as [| a]; intros. {
     cbn in Hllll; cbn; symmetry in Hllll.
     revert ll2 Hllll.
@@ -604,12 +612,18 @@ split. {
   cbn in Hllll.
   remember (disp_loop'' n (S j) l) as ll eqn:Hll.
   unfold cons_nth in Hllll.
-...
   do 2 rewrite List_app_cons in Hllll.
   do 2 rewrite app_assoc in Hllll.
   destruct (Nat.eq_dec i a) as [Hia| Hia]; [ now left | right ].
   symmetry in Hll.
-  apply (IHl n (S j) ll2 ll3 i l2 l3).
+  destruct i. {
+    apply Nat.le_0_r in Hji; subst j.
+Search (_ ++ _ = _ ++ _).
+...
+    injection Hllll.
+...
+
+  apply (IHl n (S j) ll2 ll3 i l2 l3). {
   rewrite Hll.
   rewrite List_app_cons, app_assoc.
   rewrite <- Hllll.
