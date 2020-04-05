@@ -576,7 +576,11 @@ split. {
   apply Hl.
   clear Hl.
   unfold dispatch_list'' in Hl1.
-Print disp_loop''.
+  apply in_split in Hi.
+  destruct Hi as (l2 & l3 & Hlil).
+  apply in_split in Hl1.
+  destruct Hl1 as (ll2 & ll3 & Hllll).
+  subst l1.
 ...
   intros l1 Hl1 i Hi.
   apply Hl.
