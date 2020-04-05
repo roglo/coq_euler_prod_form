@@ -579,11 +579,24 @@ split. {
   clear Hl.
   unfold dispatch_list'' in Hl1.
   move i at top.
+...
+  remember (length l) as n.
+  remember 0 as j.
+  assert (Hnj : n = j + length l) by flia Heqn Heqj.
+  clear Heqn Heqj.
   (* lemma to do *)
-  assert (Hln : l1 = nth (nth i l 0) (disp_loop'' (length l) 0 l) []). {
-    revert i l1 Hl1 Hi.
-    induction l as [| b]; intros; [ easy | ].
-    cbn in Hl1; cbn.
+  assert (Hln : l1 = nth (nth i l 0) (disp_loop'' n j l) []). {
+    revert i j n l1 Hl1 Hi Hnj.
+    induction l as [| b]; intros. {
+      cbn in Hnj; rewrite Nat.add_0_r in Hnj.
+      subst j; cbn.
+      rewrite match_id.
+      destruct n; [ easy | ].
+      cbn in Hl1.
+      destruct Hl1 as [Hl1| Hl1]; [ now subst l1 | cbn ].
+      now apply repeat_spec in Hl1.
+    }
+    cbn in Hl1, Hnj; cbn.
     destruct i. {
 ...
 Print disp_loop''.
