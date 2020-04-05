@@ -580,26 +580,11 @@ split. {
   unfold dispatch_list'' in Hl1.
   move i at top.
   (* lemma to do *)
-...
-  remember 0 as j.
-  remember (length l) as n.
-  assert (Hjn : n + j = length l) by flia Heqj Heqn.
-  clear Heqj Heqn.
-  move j before i; move n before j.
-  assert (Hl : l1 = nth (nth i l 0) (disp_loop'' n j l) []). {
-    revert i j n l1 Hl1 Hi Hjn.
-    induction l as [| a]; intros. {
-      cbn in Hjn.
-      apply Nat.eq_add_0 in Hjn.
-      now destruct Hjn; subst n j.
-    }
-    cbn in Hl1, Hjn; cbn.
+  assert (Hln : l1 = nth (nth i l 0) (disp_loop'' (length l) 0 l) []). {
+    revert i l1 Hl1 Hi.
+    induction l as [| b]; intros; [ easy | ].
+    cbn in Hl1; cbn.
     destruct i. {
-      cbn.
-
-
-      destruct l. {
-        cbn in Hl1, Hjn; cbn.
 ...
 Print disp_loop''.
 disp_loop'' n j l
