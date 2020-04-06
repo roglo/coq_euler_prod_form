@@ -608,9 +608,38 @@ split. {
   move l1 before l.
   apply in_map_iff in Hl1.
   destruct Hl1 as (b & Hb & Hbs).
-  subst l1.
+  subst l1; move b before i.
   unfold nth_find_all in Hi.
+  clear Hl.
+  revert i b (*Hl*) Hbs Hi.
+  induction l as [| a1]; intros; [ easy | ].
+  cbn in Hi.
+  remember (b =? a1) as ba eqn:Hba; symmetry in Hba.
+  destruct ba. {
+    apply Nat.eqb_eq in Hba; subst b.
+    destruct Hi as [Hi| Hi]. {
+      subst i.
+      cbn in Hbs.
+      destruct Hbs as [Hbs| Hbs]; [ now subst a1; left | right ].
+      apply IHl with (b := 0). {
+        destruct l as [| a]; [ easy | ].
+        now cbn; left.
+      }
 Print nth_find_all_loop.
+...
+  revert i b Hi Hbs.
+  induction l as [| a]; intros; [ easy | ].
+  cbn in Hi.
+  remember (b =? a) as ba eqn:Hba; symmetry in Hba.
+  destruct ba. {
+    apply Nat.eqb_eq in Hba; subst b.
+    destruct Hi as [Hi| Hi]. {
+      subst i.
+      right; apply IHl with (b := 0). {
+        destruct l as [| b]. {
+          cbn in Hbs; cbn.
+          cbn in IHl.
+        specialize (Hl b (or_intror Hb)); cbn in Hl.
 ...
 
 Theorem dispatch_list''_is_pre_partition : ∀ l,
