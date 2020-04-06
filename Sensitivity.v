@@ -589,12 +589,8 @@ Fixpoint nth_find_all_loop {A} (f : A → bool) l i :=
   end.
 Definition nth_find_all A f l := @nth_find_all_loop A f l 0.
 Arguments nth_find_all [A]%type_scope _%function_scope _%list_scope.
-Fixpoint disp_loop''' i l :=
-  match i with
-  | 0 => []
-  | S i' => nth_find_all (Nat.eqb i') l :: disp_loop''' i' l
-  end.
-Definition dispatch''' n i := disp_loop''' n (to_radix n i).
+Definition dispatch''' n i :=
+  map (λ j, nth_find_all (Nat.eqb j) (to_radix n i)) (seq 0 n).
 Definition pre_partitions''' n := map (dispatch''' n) (seq 0 (n ^ n)).
 
 Compute (pre_partitions 2 = pre_partitions''' 2).
