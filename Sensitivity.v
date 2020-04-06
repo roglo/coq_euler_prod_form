@@ -577,19 +577,14 @@ split. {
   intros l1 Hl1 i Hi.
   apply Hl.
   unfold dispatch_list'' in Hl1.
-Print disp_loop''.
-...
-cons_nth a₀ 0 (disp_loop'' n 1 l)
-cons_nth a₀ 0 (cons_nth a₁ 1 (disp_loop'' n 2 l))
-cons_nth a₀ 0 (cons_nth a₁ 1 ... (cons_nth a_{i} i (disp_loop'' n (i+1) l)))
-...
   move i at top.
   remember (length l) as n.
   remember 0 as j.
   assert (Hnj : n = j + length l) by flia Heqn Heqj.
+  replace l with (skipn j l) in Hl1 by now subst j.
   clear Heqn Heqj.
   (* lemma to do *)
-  assert (Hln : l1 = nth (nth i l 0) (disp_loop'' n j l) []). {
+  assert (Hln : l1 = nth (nth i l 0) (disp_loop'' n j (skipn j l)) []). {
     revert i j n l1 Hl1 Hi Hnj Hl.
     induction l as [| b]; intros. {
       cbn in Hnj; rewrite Nat.add_0_r in Hnj.
