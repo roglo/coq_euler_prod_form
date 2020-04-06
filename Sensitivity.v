@@ -612,20 +612,27 @@ split. {
   destruct Hl1 as (b & Hb & Hbs).
   subst l1; move b before i.
   unfold nth_find_all in Hi.
+Print nth_find_all_loop.
+...
+remember 0 as j in Hi.
+enough (i < j + length l) by flia Heqj H.
+move j before i; clear Heqj.
 (*
   clear Hl.
 Print nth_find_all_loop.
 ...
 *)
-  revert i b (*Hl*) Hbs Hi.
+  revert i j b (*Hl*) Hbs Hi.
   induction l as [| a1]; intros; [ easy | ].
   cbn in Hi.
   remember (b =? a1) as ba eqn:Hba; symmetry in Hba.
   destruct ba. {
     apply Nat.eqb_eq in Hba; subst b.
     destruct Hi as [Hi| Hi]; [ subst i; cbn; flia | ].
-    destruct i; cbn; [ flia | ].
-    apply -> Nat.succ_lt_mono.
+    cbn.
+    rewrite Nat.add_1_r in Hi.
+    rewrite <- Nat.add_succ_comm.
+    apply IHl with (b := a1); [ | | easy ]. 2: {
 ...
   revert i b Hi Hbs.
   induction l as [| a]; intros; [ easy | ].
