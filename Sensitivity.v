@@ -579,6 +579,27 @@ split. {
   unfold dispatch_list'' in Hl1.
   move i at top.
   move l1 before l.
+(* another attempt to define dispatch *)
+Fixpoint nth_find_all_loop {A} (f : A → bool) l i :=
+  match l with
+  | [] => []
+  | a :: l' =>
+      if f a then i :: nth_find_all_loop f l' (i + 1)
+      else nth_find_all_loop f l' (i + 1)
+  end.
+Definition nth_find_all A f l := @nth_find_all_loop A f l 0.
+Arguments nth_find_all [A]%type_scope _%function_scope _%list_scope.
+Fixpoint disp_loop''' i l :=
+  match i with
+  | 0 => []
+  | S i' => nth_find_all (Nat.eqb i') l :: disp_loop''' i' l
+  end.
+Definition dispatch''' n i := disp_loop''' n (to_radix n i).
+Definition pre_partitions''' n := map (dispatch''' n) (seq 0 (n ^ n)).
+
+Compute (pre_partitions 2 = pre_partitions''' 2).
+...
+Compute (pre_partitions 3 = pre_partitions''' 3).
 ...
   remember (length l) as n.
   remember 0 as j.
