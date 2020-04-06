@@ -602,7 +602,9 @@ split. {
 }
 split. {
   intros l1 Hl1 i Hi.
+(*
   apply Hl.
+*)
   unfold dispatch_list''' in Hl1.
   move i at top.
   move l1 before l.
@@ -610,26 +612,20 @@ split. {
   destruct Hl1 as (b & Hb & Hbs).
   subst l1; move b before i.
   unfold nth_find_all in Hi.
+(*
   clear Hl.
+Print nth_find_all_loop.
+...
+*)
   revert i b (*Hl*) Hbs Hi.
   induction l as [| a1]; intros; [ easy | ].
   cbn in Hi.
   remember (b =? a1) as ba eqn:Hba; symmetry in Hba.
   destruct ba. {
     apply Nat.eqb_eq in Hba; subst b.
-    destruct Hi as [Hi| Hi]. {
-      subst i.
-      cbn in Hbs.
-      destruct Hbs as [Hbs| Hbs]; [ now subst a1; left | right ].
-      apply IHl with (b := 0). {
-        destruct l as [| a]; [ easy | ].
-        now cbn; left.
-      }
-      destruct l as [| a]; [ easy | ].
-      cbn - [ Nat.eqb ].
-      destruct a; [ now left | ].
-      remember (0 =? S a) as b eqn:Hb.
-      destruct b; [ now left | clear Hb ].
+    destruct Hi as [Hi| Hi]; [ subst i; cbn; flia | ].
+    destruct i; cbn; [ flia | ].
+    apply -> Nat.succ_lt_mono.
 ...
   revert i b Hi Hbs.
   induction l as [| a]; intros; [ easy | ].
