@@ -609,6 +609,8 @@ split. {
   apply in_map_iff in Hl1.
   destruct Hl1 as (b & Hb & Hbs).
   subst l1.
+  unfold nth_find_all in Hi.
+Print nth_find_all_loop.
 ...
 
 Theorem dispatch_list''_is_pre_partition : ∀ l,
