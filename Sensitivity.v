@@ -621,6 +621,7 @@ split. {
       subst i.
       cbn in Hbs.
       destruct Hbs as [Hbs| Hbs]; [ now subst a1; left | right ].
+...
       apply IHl with (b := 0). {
         destruct l as [| a]; [ easy | ].
         now cbn; left.
