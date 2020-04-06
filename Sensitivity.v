@@ -578,6 +578,8 @@ split. {
   apply Hl.
   unfold dispatch_list'' in Hl1.
   move i at top.
+  move l1 before l.
+...
   remember (length l) as n.
   remember 0 as j.
   assert (Hnj : n = j + length l) by flia Heqn Heqj.
