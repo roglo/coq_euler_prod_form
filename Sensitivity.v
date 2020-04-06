@@ -621,12 +621,15 @@ split. {
       subst i.
       cbn in Hbs.
       destruct Hbs as [Hbs| Hbs]; [ now subst a1; left | right ].
-...
       apply IHl with (b := 0). {
         destruct l as [| a]; [ easy | ].
         now cbn; left.
       }
-Print nth_find_all_loop.
+      destruct l as [| a]; [ easy | ].
+      cbn - [ Nat.eqb ].
+      destruct a; [ now left | ].
+      remember (0 =? S a) as b eqn:Hb.
+      destruct b; [ now left | clear Hb ].
 ...
   revert i b Hi Hbs.
   induction l as [| a]; intros; [ easy | ].
