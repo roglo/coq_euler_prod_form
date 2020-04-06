@@ -225,6 +225,33 @@ Compute (pre_partitions 3 = pre_partitions'' 3).
 
 Definition dispatch_list'' l := disp_loop'' (length l) 0 l.
 
+(* third attempt to define dispatch *)
+
+Fixpoint nth_find_all_loop {A} (f : A → bool) l i :=
+  match l with
+  | [] => []
+  | a :: l' =>
+      if f a then i :: nth_find_all_loop f l' (i + 1)
+      else nth_find_all_loop f l' (i + 1)
+  end.
+
+Definition nth_find_all A f l := @nth_find_all_loop A f l 0.
+Arguments nth_find_all [A]%type_scope _%function_scope _%list_scope.
+
+Definition dispatch''' n i :=
+  map (λ j, nth_find_all (Nat.eqb j) (rev (to_radix n i))) (seq 0 n).
+
+Definition pre_partitions''' n :=
+  map (dispatch''' n) (seq 0 (n ^ n)).
+
+Compute (pre_partitions 2 = pre_partitions''' 2).
+Compute (pre_partitions 3 = pre_partitions''' 3).
+
+Definition dispatch_list''' l :=
+  map (λ j, nth_find_all (Nat.eqb j) l) (seq 0 (length l)).
+
+Compute (let l := [3; 2; 1; 1] in (dispatch_list'' l, dispatch_list''' l)).
+
 (* *)
 
 Fixpoint list_nat_le la lb :=
@@ -564,7 +591,27 @@ Theorem List_app_cons : ∀ A (l1 l2 : list A) a,
   l1 ++ a :: l2 = l1 ++ [a] ++ l2.
 Proof. easy. Qed.
 
-Theorem dispatch_list_is_pre_partition : ∀ l,
+Theorem dispatch_list'''_is_pre_partition : ∀ l,
+  (∀ a, a ∈ l → a < length l)
+  → is_pre_partition (length l) (dispatch_list''' l).
+Proof.
+intros * Hl.
+split. {
+  unfold dispatch_list'''.
+  now rewrite map_length, seq_length.
+}
+split. {
+  intros l1 Hl1 i Hi.
+  apply Hl.
+  unfold dispatch_list''' in Hl1.
+  move i at top.
+  move l1 before l.
+  apply in_map_iff in Hl1.
+  destruct Hl1 as (b & Hb & Hbs).
+  subst l1.
+...
+
+Theorem dispatch_list''_is_pre_partition : ∀ l,
   (∀ a, a ∈ l → a < length l)
   → is_pre_partition (length l) (dispatch_list'' l).
 Proof.
@@ -579,23 +626,6 @@ split. {
   unfold dispatch_list'' in Hl1.
   move i at top.
   move l1 before l.
-(* another attempt to define dispatch *)
-Fixpoint nth_find_all_loop {A} (f : A → bool) l i :=
-  match l with
-  | [] => []
-  | a :: l' =>
-      if f a then i :: nth_find_all_loop f l' (i + 1)
-      else nth_find_all_loop f l' (i + 1)
-  end.
-Definition nth_find_all A f l := @nth_find_all_loop A f l 0.
-Arguments nth_find_all [A]%type_scope _%function_scope _%list_scope.
-Definition dispatch''' n i :=
-  map (λ j, nth_find_all (Nat.eqb j) (to_radix n i)) (seq 0 n).
-Definition pre_partitions''' n := map (dispatch''' n) (seq 0 (n ^ n)).
-
-Compute (pre_partitions 2 = pre_partitions''' 2).
-...
-Compute (pre_partitions 3 = pre_partitions''' 3).
 ...
   remember (length l) as n.
   remember 0 as j.
