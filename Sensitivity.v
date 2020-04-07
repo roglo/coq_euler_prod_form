@@ -660,12 +660,6 @@ split. {
   }
   remember (map (λ j, nth_find_all (Nat.eqb j) l) (seq 0 (length l))) as ll
     eqn:Hll.
-Print locate_list.
-(* perhaps I should write a locate_list''' using nth_find_all instead
-   of nth_find? *)
-...
- nth_find_all_loop (Nat.eqb j) l 0
-  unfold nth_find_all.
 ...
 
 Theorem dispatch_list''_is_pre_partition : ∀ l,
