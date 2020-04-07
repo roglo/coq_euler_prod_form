@@ -673,7 +673,35 @@ split. {
       apply in_seq; flia Hx.
     }
     unfold nth_find_all.
+    assert (Hkl : ∀ k l, k ∈ l ↔ nth_find_all_loop (Nat.eqb k) l 0 ≠ []). {
+      clear.
+      intros.
+      split. {
+        intros Hk Hkl.
+        revert k Hk Hkl.
+        induction l as [| a]; intros; [ easy | ].
+        cbn in Hkl.
+        remember (k =? a) as b eqn:Hb; symmetry in Hb.
+        destruct b; [ easy | ].
+        apply Nat.eqb_neq in Hb.
+        destruct Hk as [Hk| Hk]; [ now symmetry in Hk | ].
+...
 Print nth_find_all_loop.
+Compute (let ll := [[1; 2]; []; [0]] in locate_list ll).
+l = [2; 0; 0]
+nth_find_all_loop (eqb k) [2; 0; 0] 0 =
+  if k=2 then
+    [0]
+  else if k=0 then
+    [1; 2]
+  else
+    []
+j=0 → k=2
+j=1 → k=0
+j=2 → k=0
+
+si k ∉ l alors nth_find_all_loop (Nat.eqb k) l 0 = []
+si k ∈ l alors nth_find_all_loop (Nat.eqb k) l 0 ≠ []
 ...
 ... suite ok.
   }
