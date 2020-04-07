@@ -646,9 +646,9 @@ split. {
   intros i Hi.
   unfold dispatch_list'''.
   enough
-    (H : ∃ l1,
-    ∃ j, l1 = nth_find_all (Nat.eqb j) l ∧ j < length l ∧ i ∈ l1). {
-    destruct H as (l1 & j & Hj & Hjl & Hil).
+    (H : ∃ l1, i ∈ l1 ∧
+    ∃ j, l1 = nth_find_all (Nat.eqb j) l ∧ j < length l). {
+    destruct H as (l1 & Hil & j & Hj & Hjl).
     exists l1.
     split; [ | easy ].
     apply in_map_iff.
@@ -658,6 +658,14 @@ split. {
     split; [ | easy ].
     apply Nat.le_0_l.
   }
+  remember (map (λ j, nth_find_all (Nat.eqb j) l) (seq 0 (length l))) as ll
+    eqn:Hll.
+Print locate_list.
+(* perhaps I should write a locate_list''' using nth_find_all instead
+   of nth_find? *)
+...
+ nth_find_all_loop (Nat.eqb j) l 0
+  unfold nth_find_all.
 ...
 
 Theorem dispatch_list''_is_pre_partition : ∀ l,
