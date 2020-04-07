@@ -697,6 +697,19 @@ split. {
         now specialize (IHl (i + 1) k Hkl).
       }
     }
+Compute (let ll := [[1; 2]; []; [0]] in locate_list ll).
+Compute (map (λ k, nth_find_all (Nat.eqb k) [2; 0; 0]) (seq 0 3)).
+...
+nth_find_all (eqb k) [2; 0; 0] =
+  if k=2 then
+    [0]
+  else if k=0 then
+    [1; 2]
+  else
+    []
+j=0 → k=2
+j=1 → k=0
+j=2 → k=0
 ...
     set (f := λ k, nth_find_all (Nat.eqb k) l).
     assert (H : ∀ k, k ∈ l ↔ f k ≠ []). {
