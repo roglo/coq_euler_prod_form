@@ -602,9 +602,6 @@ split. {
 }
 split. {
   intros l1 Hl1 i Hi.
-(*
-  apply Hl.
-*)
   unfold dispatch_list''' in Hl1.
   move i at top.
   move l1 before l.
@@ -612,41 +609,40 @@ split. {
   destruct Hl1 as (b & Hb & Hbs).
   subst l1; move b before i.
   unfold nth_find_all in Hi.
-Print nth_find_all_loop.
-...
-remember 0 as j in Hi.
-enough (i < j + length l) by flia Heqj H.
-move j before i; clear Heqj.
-(*
-  clear Hl.
-Print nth_find_all_loop.
-...
-*)
-  revert i j b (*Hl*) Hbs Hi.
-  induction l as [| a1]; intros; [ easy | ].
-  cbn in Hi.
-  remember (b =? a1) as ba eqn:Hba; symmetry in Hba.
-  destruct ba. {
-    apply Nat.eqb_eq in Hba; subst b.
-    destruct Hi as [Hi| Hi]; [ subst i; cbn; flia | ].
-    cbn.
-    rewrite Nat.add_1_r in Hi.
-    rewrite <- Nat.add_succ_comm.
-    apply IHl with (b := a1); [ | | easy ]. 2: {
-...
-  revert i b Hi Hbs.
-  induction l as [| a]; intros; [ easy | ].
-  cbn in Hi.
-  remember (b =? a) as ba eqn:Hba; symmetry in Hba.
-  destruct ba. {
-    apply Nat.eqb_eq in Hba; subst b.
-    destruct Hi as [Hi| Hi]. {
-      subst i.
-      right; apply IHl with (b := 0). {
-        destruct l as [| b]. {
-          cbn in Hbs; cbn.
-          cbn in IHl.
-        specialize (Hl b (or_intror Hb)); cbn in Hl.
+  assert
+    (H : ∀ A f (l : list A) i j,
+     j < length (nth_find_all_loop f l i)
+     → nth j (nth_find_all_loop f l i) 0 < i + length l). {
+    clear.
+    intros * Hj.
+    revert i j Hj.
+    induction l as [| a]; intros; [ easy | ].
+    cbn in Hj; cbn.
+    destruct (f a). {
+      cbn in Hj; cbn.
+      destruct j; [ flia | ].
+      apply Nat.succ_lt_mono in Hj.
+      rewrite Nat.add_1_r in Hj.
+      rewrite Nat.add_1_r.
+      rewrite <- Nat.add_succ_comm.
+      now apply IHl.
+    } {
+      rewrite Nat.add_1_r in Hj.
+      rewrite Nat.add_1_r.
+      rewrite <- Nat.add_succ_comm.
+      now apply IHl.
+    }
+  }
+  apply in_split in Hi.
+  destruct Hi as (l1 & l2 & Hi).
+  specialize (H nat (Nat.eqb b) l 0 (length l1)) as H1.
+  rewrite Hi in H1.
+  rewrite app_nth2 in H1; [ | now unfold "≥" ].
+  rewrite Nat.sub_diag in H1; cbn in H1.
+  apply H1.
+  rewrite app_length; cbn; flia.
+}
+split. {
 ...
 
 Theorem dispatch_list''_is_pre_partition : ∀ l,
