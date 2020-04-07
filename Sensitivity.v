@@ -673,18 +673,31 @@ split. {
       apply in_seq; flia Hx.
     }
     unfold nth_find_all.
-    assert (Hkl : ∀ k l, k ∈ l ↔ nth_find_all_loop (Nat.eqb k) l 0 ≠ []). {
+    assert (Hkl : ∀ i k l, k ∈ l ↔ nth_find_all_loop (Nat.eqb k) l i ≠ []). {
       clear.
       intros.
       split. {
         intros Hk Hkl.
-        revert k Hk Hkl.
+        revert i k Hk Hkl.
         induction l as [| a]; intros; [ easy | ].
         cbn in Hkl.
         remember (k =? a) as b eqn:Hb; symmetry in Hb.
         destruct b; [ easy | ].
         apply Nat.eqb_neq in Hb.
         destruct Hk as [Hk| Hk]; [ now symmetry in Hk | ].
+        now specialize (IHl (i + 1) k Hk Hkl).
+      } {
+        intros Hkl.
+        revert i k Hkl.
+        induction l as [| a]; intros; [ easy | ].
+        cbn in Hkl.
+        remember (k =? a) as b eqn:Hb; symmetry in Hb.
+        destruct b; [ now apply Nat.eqb_eq in Hb; left | ].
+        apply Nat.eqb_neq in Hb; right.
+        now specialize (IHl (i + 1) k Hkl).
+      }
+    }
+(* so the k must belong to l, for j to belong to nth_find... *)
 ...
 Print nth_find_all_loop.
 Compute (let ll := [[1; 2]; []; [0]] in locate_list ll).
