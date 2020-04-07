@@ -647,7 +647,7 @@ split. {
   unfold dispatch_list'''.
   enough
     (H : ∃ l1,
-    ∃ j, nth_find_all (Nat.eqb j) l = l1 ∧ j < length l ∧ i ∈ l1). {
+    ∃ j, l1 = nth_find_all (Nat.eqb j) l ∧ j < length l ∧ i ∈ l1). {
     destruct H as (l1 & j & Hj & Hjl & Hil).
     exists l1.
     split; [ | easy ].
