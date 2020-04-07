@@ -643,7 +643,9 @@ split. {
   rewrite app_length; cbn; flia.
 }
 split. {
-...
+  intros i Hi.
+Abort. (* to be continued... *)
+(* stopped here to try to do the proof with dispatch_list'' below *)
 
 Theorem dispatch_list''_is_pre_partition : ∀ l,
   (∀ a, a ∈ l → a < length l)
@@ -655,6 +657,63 @@ split. {
   now apply disp_loop''_length.
 }
 split. {
+  intros l1 Hl1 i Hi.
+  unfold dispatch_list'' in Hl1.
+  move i at top.
+  move l1 before l.
+  apply in_split in Hi.
+  destruct Hi as (l2 & l3 & Hlil).
+  apply in_split in Hl1.
+  destruct Hl1 as (ll2 & ll3 & Hllll).
+  subst l1.
+  remember (length l) as n; clear Heqn.
+  remember 0 as j.
+  assert (Hji : j ≤ i) by (subst j; flia).
+  clear Heqj.
+  clear Hl.
+  revert n j ll2 ll3 i l2 l3 Hji Hllll.
+  induction l as [| a]; intros. {
+    cbn in Hllll; cbn; symmetry in Hllll; exfalso.
+    clear - Hllll.
+    revert n Hllll.
+    induction ll2 as [| l]; intros. {
+      cbn in Hllll.
+      destruct n; [ easy | ].
+      cbn in Hllll.
+      injection Hllll; intros H1 H2.
+      now destruct l2.
+    }
+    destruct n; [ easy | ].
+    cbn in Hllll.
+    injection Hllll; intros H1 H2.
+    now specialize (IHll2 _ H1).
+  }
+  cbn in Hllll.
+...
+    revert ll2 Hllll.
+    induction n; intros; cbn in Hllll. {
+      now apply app_eq_nil in Hllll.
+    }
+    destruct ll2 as [| l]. {
+      cbn in Hllll.
+      injection Hllll; clear Hllll; intros H1 H2.
+      now apply app_eq_nil in H2.
+    }
+    cbn in Hllll.
+    injection Hllll; clear Hllll; intros H1 H2; subst l.
+...
+    congruence.
+  }
+  cbn in Hllll.
+  remember (disp_loop'' n (S j) l) as ll eqn:Hll.
+  unfold cons_nth in Hllll.
+  do 2 rewrite List_app_cons in Hllll.
+  do 2 rewrite app_assoc in Hllll.
+  destruct (Nat.eq_dec i a) as [Hia| Hia]; [ now left | right ].
+  symmetry in Hll.
+  destruct i. {
+    apply Nat.le_0_r in Hji; subst j.
+...
   intros l1 Hl1 i Hi.
   apply Hl.
   unfold dispatch_list'' in Hl1.
