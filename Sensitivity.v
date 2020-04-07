@@ -3,7 +3,7 @@
    https://eccc.weizmann.ac.il/report/2020/002/?fbclid=IwAR19mpxfIuoSaWq3HO8MdV8i8x_xlvwMKHjfElzBUK0GditlyaLeJiC8gJY *)
 
 Set Nested Proofs Allowed.
-Require Import Utf8 Arith Permutation.
+Require Import Utf8 Arith.
 Import List List.ListNotations.
 Require Import Misc.
 
@@ -660,9 +660,29 @@ split. {
   }
   remember (map (λ j, nth_find_all (Nat.eqb j) l) (seq 0 (length l))) as ll
     eqn:Hll.
-  assert (H : Permutation (seq 0 (length l)) (concat ll)). {
+  assert (Hslc : ∀ x, x ∈ seq 0 (length l) → x ∈ concat ll). {
+    intros j Hj; subst ll.
+    rewrite <- flat_map_concat_map.
+    apply in_flat_map.
 ...
-Search Permutation.
+... suite ok.
+  }
+  specialize (Hslc i) as H1.
+  assert (H : i ∈ seq 0 (length l)). {
+    apply in_seq; split; [ flia | easy ].
+  }
+  specialize (H1 H); clear H.
+  rewrite Hll in H1.
+  rewrite <- flat_map_concat_map in H1.
+  apply in_flat_map in H1.
+  destruct H1 as (x & Hx & Hil).
+  exists (nth_find_all (Nat.eqb x) l).
+  split; [ easy | ].
+  exists x.
+  split; [ easy | ].
+  now apply in_seq in Hx.
+}
+...
 Compute (map (to_radix 4) (seq 0 (4 ^ 4))).
 Compute (let n := 3 in map (λ l, concat (map (λ j, nth_find_all (Nat.eqb j) l) (seq 0 (length l)))) (map (to_radix n) (seq 0 (n ^ n)))).
 Compute (let l := [2; 2; 0; 2] in concat (map (λ j, nth_find_all (Nat.eqb j) l) (seq 0 (length l)))).
