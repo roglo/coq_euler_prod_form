@@ -697,7 +697,15 @@ split. {
         now specialize (IHl (i + 1) k Hkl).
       }
     }
-(* so the k must belong to l, for j to belong to nth_find... *)
+    set (f := λ k, nth_find_all_loop (Nat.eqb k) l 0).
+    assert (H : ∀ k, k ∈ l ↔ f k ≠ []). {
+      subst f; cbn.
+      intros k; apply Hkl.
+    }
+    move H before Hkl; clear Hkl; rename H into Hkl.
+    enough (H : ∃ k, k < length l ∧ j ∈ f k). {
+      now subst f; cbn in H.
+    }
 Print nth_find_all_loop.
 Compute (let ll := [[1; 2]; []; [0]] in locate_list ll).
 Compute (map (λ k, nth_find_all_loop (Nat.eqb k) [2; 0; 0] 0) (seq 0 3)).
