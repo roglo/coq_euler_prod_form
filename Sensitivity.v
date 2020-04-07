@@ -672,8 +672,8 @@ split. {
       exists x; split; [ | easy ].
       apply in_seq; flia Hx.
     }
-    unfold nth_find_all.
     assert (Hkl : ∀ i k l, k ∈ l ↔ nth_find_all_loop (Nat.eqb k) l i ≠ []). {
+      (* perhaps not necessary, but a property *)
       clear.
       intros.
       split. {
@@ -697,7 +697,8 @@ split. {
         now specialize (IHl (i + 1) k Hkl).
       }
     }
-    set (f := λ k, nth_find_all_loop (Nat.eqb k) l 0).
+...
+    set (f := λ k, nth_find_all (Nat.eqb k) l).
     assert (H : ∀ k, k ∈ l ↔ f k ≠ []). {
       subst f; cbn.
       intros k; apply Hkl.
@@ -706,9 +707,36 @@ split. {
     enough (H : ∃ k, k < length l ∧ j ∈ f k). {
       now subst f; cbn in H.
     }
-Print nth_find_all_loop.
+...
+    enough (∃ l1, j ∈ l1 ∧ l1 ∈ dispatch_list''' l). {
+      destruct H as (l1 & Hjl1 & Hl1).
+      unfold dispatch_list''' in Hl1.
+      apply in_map_iff in Hl1.
+      destruct Hl1 as (k1 & Hkl1 & Hk1).
+      unfold nth_find_all in Hkl1.
+      subst l1.
+      exists k1.
+      split; [ apply in_seq in Hk1; flia Hk1 | easy ].
+    }
+    unfold dispatch_list'''.
+    enough (∃ k1, k1 < length l ∧ j ∈ nth_find_all (Nat.eqb k1) l). {
+...
+    enough (∃ l1,
+      j ∈ l1
+      ∧ l1 ∈ map (λ j0 : nat, nth_find_all (Nat.eqb j0) l) (seq 0 (length l))). {
+      destruct H as (l1 & hjl1 & Hl1).
+      apply in_map_iff in Hl1.
+      destruct Hl1 as (k1 & Hl1 & Hk1).
+
+Search (_ ∈ map _ _).
+...
+
 Compute (let ll := [[1; 2]; []; [0]] in locate_list ll).
 Compute (map (λ k, nth_find_all_loop (Nat.eqb k) [2; 0; 0] 0) (seq 0 3)).
+Print nth_find_all_loop.
+Print dispatch_list'''.
+Compute (dispatch_list''' [2; 0; 0]).
+
 ...
 l = [2; 0; 0]
 nth_find_all_loop (eqb k) [2; 0; 0] 0 =
