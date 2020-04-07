@@ -698,9 +698,10 @@ split. {
       }
     }
 (* so the k must belong to l, for j to belong to nth_find... *)
-...
 Print nth_find_all_loop.
 Compute (let ll := [[1; 2]; []; [0]] in locate_list ll).
+Compute (map (λ k, nth_find_all_loop (Nat.eqb k) [2; 0; 0] 0) (seq 0 3)).
+...
 l = [2; 0; 0]
 nth_find_all_loop (eqb k) [2; 0; 0] 0 =
   if k=2 then
