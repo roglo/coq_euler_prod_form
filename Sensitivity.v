@@ -3,7 +3,7 @@
    https://eccc.weizmann.ac.il/report/2020/002/?fbclid=IwAR19mpxfIuoSaWq3HO8MdV8i8x_xlvwMKHjfElzBUK0GditlyaLeJiC8gJY *)
 
 Set Nested Proofs Allowed.
-Require Import Utf8 Arith.
+Require Import Utf8 Arith Permutation.
 Import List List.ListNotations.
 Require Import Misc.
 
@@ -660,6 +660,13 @@ split. {
   }
   remember (map (λ j, nth_find_all (Nat.eqb j) l) (seq 0 (length l))) as ll
     eqn:Hll.
+  assert (H : ∀ l,
+    Permutation (seq 0 (length l))
+      (concat (map (λ j, nth_find_all (Nat.eqb j) l) (seq 0 (length l))))). {
+Compute (map (to_radix 4) (seq 0 (4 ^ 4))).
+Compute (let n := 3 in map (λ l, concat (map (λ j, nth_find_all (Nat.eqb j) l) (seq 0 (length l)))) (map (to_radix n) (seq 0 (n ^ n)))).
+Compute (let l := [2; 2; 0; 2] in concat (map (λ j, nth_find_all (Nat.eqb j) l) (seq 0 (length l)))).
+Search Permutation.
 ...
 
 Theorem dispatch_list''_is_pre_partition : ∀ l,
