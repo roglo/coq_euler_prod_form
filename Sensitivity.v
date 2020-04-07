@@ -667,6 +667,13 @@ split. {
     apply in_flat_map.
     assert (H : j < length l) by now apply in_seq in Hj.
     clear Hj; rename H into Hj.
+    enough (H : ∃ k, k < length l ∧ j ∈ nth_find_all (Nat.eqb k) l). {
+      destruct H as (x & Hx & Hxl).
+      exists x; split; [ | easy ].
+      apply in_seq; flia Hx.
+    }
+    unfold nth_find_all.
+Print nth_find_all_loop.
 ...
 ... suite ok.
   }
