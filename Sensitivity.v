@@ -644,8 +644,21 @@ split. {
 }
 split. {
   intros i Hi.
-Abort. (* to be continued... *)
-(* stopped here to try to do the proof with dispatch_list'' below *)
+  unfold dispatch_list'''.
+  enough
+    (H : ∃ l1,
+    ∃ j, nth_find_all (Nat.eqb j) l = l1 ∧ j < length l ∧ i ∈ l1). {
+    destruct H as (l1 & j & Hj & Hjl & Hil).
+    exists l1.
+    split; [ | easy ].
+    apply in_map_iff.
+    exists j.
+    split; [ easy | ].
+    apply in_seq; cbn.
+    split; [ | easy ].
+    apply Nat.le_0_l.
+  }
+...
 
 Theorem dispatch_list''_is_pre_partition : ∀ l,
   (∀ a, a ∈ l → a < length l)
