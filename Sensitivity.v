@@ -661,9 +661,12 @@ split. {
   remember (map (λ j, nth_find_all (Nat.eqb j) l) (seq 0 (length l))) as ll
     eqn:Hll.
   assert (Hslc : ∀ x, x ∈ seq 0 (length l) → x ∈ concat ll). {
+    clear i Hi.
     intros j Hj; subst ll.
     rewrite <- flat_map_concat_map.
     apply in_flat_map.
+    assert (H : j < length l) by now apply in_seq in Hj.
+    clear Hj; rename H into Hj.
 ...
 ... suite ok.
   }
