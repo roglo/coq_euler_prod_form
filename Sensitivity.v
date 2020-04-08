@@ -699,13 +699,38 @@ split. {
     }
 Compute (let ll := [[1; 2]; []; [0]] in locate_list ll).
 Compute (map (λ k, nth_find_all (Nat.eqb k) [2; 0; 0]) (seq 0 3)).
-(* perhas pre_partition_in below further is the answer? *)
-...
-  ∃ l0 : list nat,
-    l0 ∈ map (λ j : nat, nth_find_all (Nat.eqb j) l) (seq 0 (length l))
-    ∧ i ∈ l0
+Compute (let ll := [[1; 2]; []; [0]] in locate ll).
+Print dispatch'''.
+(* perhas pre_partition_in below is the answer? *)
+(*****)
+(* pre_partition_in n j k i = true ↔ pre-partition i has the j in k-th set
+        0 ≤ i < n^n
+        0 ≤ j < n
+        0 ≤ k < n
+   e.g.
+      dispatch n i = [_; _; [...; j; ...]; _; ...]  (* some pre-partition *)
+                      <----> <--------->
+                         k      k-th
+                      <------------------------->
+                                  n
+   then
+     pre_partition_in n j k i = true
+ *)
 
-  ∃ l0 : list nat, l0 ∈ dispatch_list''' l ∧ i ∈ l0
+Definition pre_partition_in n j k i :=
+  (i + n ^ n - k * n ^ (n - j - 1)) mod (n ^ (n - j)) <? n ^ (n - j - 1).
+
+Compute (let ll := [[1; 2]; []; [0]] in pre_partition_in 3 0 2 (locate ll)).
+Compute (let ll := [[1; 2]; []; [0]] in pre_partition_in 3 1 0 (locate ll)).
+Compute (let ll := [[1; 2]; []; [0]] in pre_partition_in 3 2 0 (locate ll)).
+
+(* mais ce que je veux, c'est une fonction qui, à partir de l=[2; 0; 0] et
+   d'un j < n me donne le k. *)
+...
+(* example: all pre-partitions that have the j in k-th set *)
+Compute (let n := 3 in let j := 1 in let k := 2 in map (λ i, (i, dispatch''' n i))
+(filter (pre_partition_in n j k) (seq 0 (n ^ n)))).
+(*****)
 ...
 nth_find_all (eqb k) [2; 0; 0] =
   if k=2 then
