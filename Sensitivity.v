@@ -701,36 +701,27 @@ Compute (let ll := [[1; 2]; []; [0]] in locate_list ll).
 Compute (map (λ k, nth_find_all (Nat.eqb k) [2; 0; 0]) (seq 0 3)).
 Compute (let ll := [[1; 2]; []; [0]] in locate ll).
 Print dispatch'''.
-(* perhas pre_partition_in below is the answer? *)
-(*****)
-(* pre_partition_in n j k i = true ↔ pre-partition i has the j in k-th set
-        0 ≤ i < n^n
-        0 ≤ j < n
-        0 ≤ k < n
-   e.g.
-      dispatch n i = [_; _; [...; j; ...]; _; ...]  (* some pre-partition *)
-                      <----> <--------->
-                         k      k-th
-                      <------------------------->
-                                  n
-   then
-     pre_partition_in n j k i = true
- *)
+(* perhas pre_partition_in below further is the answer? *)
 
-Definition pre_partition_in n j k i :=
-  (i + n ^ n - k * n ^ (n - j - 1)) mod (n ^ (n - j)) <? n ^ (n - j - 1).
+(* mais ce que je veux, c'est une fonction qui, à partir de l (par exemple
+   [2; 0; 0]) ou, à la rigueur, son i (18 dans ce cas) et d'un j < n me
+   donne le k. *)
+Compute (pre_partitions''' 3).
+(* si on se donne j=0, par exemple, pour chaque pré-partition, il se
+   trouve dans quelle liste ? *)
+Print nth_find.
+Print pre_partitions'''.
 
-Compute (let ll := [[1; 2]; []; [0]] in pre_partition_in 3 0 2 (locate ll)).
-Compute (let ll := [[1; 2]; []; [0]] in pre_partition_in 3 1 0 (locate ll)).
-Compute (let ll := [[1; 2]; []; [0]] in pre_partition_in 3 2 0 (locate ll)).
+Definition glop n j i :=
+  if lt_dec j n then i mod n ^ (n - j) / n ^ (n - j - 1) else n.
 
-(* mais ce que je veux, c'est une fonction qui, à partir de l=[2; 0; 0] et
-   d'un j < n me donne le k. *)
-...
-(* example: all pre-partitions that have the j in k-th set *)
-Compute (let n := 3 in let j := 1 in let k := 2 in map (λ i, (i, dispatch''' n i))
-(filter (pre_partition_in n j k) (seq 0 (n ^ n)))).
-(*****)
+Compute (let n := 3 in let j := 1 in map (λ i, (nth_find (nat_in_list j) (dispatch''' n i))) (seq 0 (n ^ n))).
+Compute (let n := 3 in let j := 1 in map (λ i, (glop n j i)) (seq 0 (n ^ n))).
+Compute (glop 3 0 (locate [[1; 2]; []; [0]])).
+Compute (glop 3 1 (locate [[1; 2]; []; [0]])).
+Compute (glop 3 2 (locate [[1; 2]; []; [0]])).
+
+(* la réponse, il semblerait que ce soit glop *)
 ...
 nth_find_all (eqb k) [2; 0; 0] =
   if k=2 then
