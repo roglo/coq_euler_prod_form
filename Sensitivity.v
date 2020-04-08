@@ -685,6 +685,12 @@ split. {
   replace i with (i + 0) at 1 by easy.
   apply H.
 }
+unfold dispatch_list'''.
+rewrite <- flat_map_concat_map.
+destruct l as [| a]; [ constructor | cbn ].
+destruct a. {
+  cbn.
+  constructor. {
 ...
 
 Theorem dispatch_list''_is_pre_partition : ∀ l,
