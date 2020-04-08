@@ -699,6 +699,13 @@ split. {
     }
 Compute (let ll := [[1; 2]; []; [0]] in locate_list ll).
 Compute (map (λ k, nth_find_all (Nat.eqb k) [2; 0; 0]) (seq 0 3)).
+(* perhas pre_partition_in below further is the answer? *)
+...
+  ∃ l0 : list nat,
+    l0 ∈ map (λ j : nat, nth_find_all (Nat.eqb j) l) (seq 0 (length l))
+    ∧ i ∈ l0
+
+  ∃ l0 : list nat, l0 ∈ dispatch_list''' l ∧ i ∈ l0
 ...
 nth_find_all (eqb k) [2; 0; 0] =
   if k=2 then
