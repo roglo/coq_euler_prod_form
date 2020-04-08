@@ -670,7 +670,19 @@ split. {
   }
   cbn.
   unfold nth_find_all.
-Print nth_find_all.
+Compute (let l := [2; 0; 0] in let i := 0 in nth_find_all_loop (Nat.eqb (nth i l 0)) l 0).
+Compute (let l := [2; 0; 0] in let i := 1 in nth_find_all_loop (Nat.eqb (nth i l 0)) l 0).
+Compute (let l := [2; 0; 0] in let i := 2 in nth_find_all_loop (Nat.eqb (nth i l 0)) l 0).
+Print nth_find_all_loop.
+...
+  remember (length l) as len eqn:Hlen; symmetry in Hlen.
+  revert i l Hi Hlen Hl.
+  induction len; intros; [ easy | ].
+  destruct i. {
+    destruct l as [| a]; [ easy | cbn ].
+    now rewrite Nat.eqb_refl; left.
+  }
+Search (_ =? _ = true).
 ...
 Inspect 1.
 Print locate.
