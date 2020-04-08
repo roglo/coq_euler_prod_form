@@ -649,6 +649,24 @@ split. {
 }
 split. {
   intros i Hi.
+  exists (nth (nth i l 0) (dispatch_list''' l) []).
+  split. {
+    apply nth_In.
+    unfold dispatch_list'''.
+    rewrite map_length.
+    rewrite seq_length.
+    apply Hl.
+    now apply nth_In.
+  }
+  unfold dispatch_list'''.
+  rewrite List_map_nth_in with (a := 0). 2: {
+    rewrite seq_length.
+    apply Hl.
+    now apply nth_In.
+  }
+unfold nth_find_all.
+Print nth_find_all_loop.
+...
 Inspect 1.
 Print locate.
 (* i *)
