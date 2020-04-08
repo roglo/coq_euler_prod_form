@@ -664,8 +664,13 @@ split. {
     apply Hl.
     now apply nth_In.
   }
-unfold nth_find_all.
-Print nth_find_all_loop.
+  rewrite seq_nth. 2: {
+    apply Hl.
+    now apply nth_In.
+  }
+  cbn.
+  unfold nth_find_all.
+Print nth_find_all.
 ...
 Inspect 1.
 Print locate.
