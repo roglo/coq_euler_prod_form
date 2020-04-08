@@ -591,6 +591,11 @@ Theorem List_app_cons : ∀ A (l1 l2 : list A) a,
   l1 ++ a :: l2 = l1 ++ [a] ++ l2.
 Proof. easy. Qed.
 
+(* return the rank (from 0) in the pre-partition i where we j is found
+   (j < n) *)
+Definition in_nth_list_of_pre_part n j i :=
+  i mod n ^ (n - j) / n ^ (n - j - 1).
+
 Theorem dispatch_list'''_is_pre_partition : ∀ l,
   (∀ a, a ∈ l → a < length l)
   → is_pre_partition (length l) (dispatch_list''' l).
@@ -658,6 +663,7 @@ split. {
     split; [ | easy ].
     apply Nat.le_0_l.
   }
+...
   remember (map (λ j, nth_find_all (Nat.eqb j) l) (seq 0 (length l))) as ll
     eqn:Hll.
   assert (Hslc : ∀ x, x ∈ seq 0 (length l) → x ∈ concat ll). {
@@ -697,6 +703,7 @@ split. {
         now specialize (IHl (i + 1) k Hkl).
       }
     }
+...
 Compute (let ll := [[1; 2]; []; [0]] in locate_list ll).
 Compute (map (λ k, nth_find_all (Nat.eqb k) [2; 0; 0]) (seq 0 3)).
 Compute (let ll := [[1; 2]; []; [0]] in locate ll).
