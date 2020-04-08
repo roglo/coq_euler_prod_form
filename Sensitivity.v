@@ -674,7 +674,6 @@ Compute (let l := [2; 0; 0] in let i := 0 in nth_find_all_loop (Nat.eqb (nth i l
 Compute (let l := [2; 0; 0] in let i := 1 in nth_find_all_loop (Nat.eqb (nth i l 0)) l 0).
 Compute (let l := [2; 0; 0] in let i := 2 in nth_find_all_loop (Nat.eqb (nth i l 0)) l 0).
 Print nth_find_all_loop.
-...
   remember (length l) as len eqn:Hlen; symmetry in Hlen.
   revert i l Hi Hlen Hl.
   induction len; intros; [ easy | ].
@@ -682,6 +681,17 @@ Print nth_find_all_loop.
     destruct l as [| a]; [ easy | cbn ].
     now rewrite Nat.eqb_refl; left.
   }
+  apply Nat.succ_lt_mono in Hi.
+  destruct l as [| a]; [ easy | ].
+  cbn in Hlen; cbn.
+  apply Nat.succ_inj in Hlen.
+  remember (nth i l 0 =? a) as b eqn:Hb; symmetry in Hb.
+  destruct b. {
+    apply Nat.eqb_eq in Hb; right.
+    subst a.
+    destruct l as [| a]; [ now subst len | ].
+    cbn in Hlen.
+    remember (nth i (a :: l) 0) as x; cbn; subst x.
 Search (_ =? _ = true).
 ...
 Inspect 1.
