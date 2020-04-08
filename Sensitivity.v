@@ -721,7 +721,8 @@ Compute (glop 3 0 (locate [[1; 2]; []; [0]])).
 Compute (glop 3 1 (locate [[1; 2]; []; [0]])).
 Compute (glop 3 2 (locate [[1; 2]; []; [0]])).
 
-(* la réponse, il semblerait que ce soit glop *)
+(* la réponse, il semblerait que ce soit glop, qui ne devrait, d'ailleurs,
+   être utilisé que si j < n *)
 ...
 nth_find_all (eqb k) [2; 0; 0] =
   if k=2 then
