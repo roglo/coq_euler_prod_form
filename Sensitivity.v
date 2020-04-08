@@ -657,6 +657,15 @@ Print in_nth_list_of_pre_part.
 Compute (let l := [2; 0; 0] in let j := 0 in let k := in_nth_list_of_pre_part (length l) j (fold_left (λ a i, a * length l + i) l 0) in k).
 Compute (let l := [2; 0; 0] in let j := 1 in let k := in_nth_list_of_pre_part (length l) j (fold_left (λ a i, a * length l + i) l 0) in k).
 Compute (let l := [2; 0; 0] in let j := 2 in let k := in_nth_list_of_pre_part (length l) j (fold_left (λ a i, a * length l + i) l 0) in k).
+Definition glop l j :=
+  in_nth_list_of_pre_part (length l) j
+    (fold_left (λ a i, a * length l + i) l 0).
+(* beuh... c'est l'identité. Ou presque. *)
+...
+Compute (in_nth_list_of_pre_part 3 0 18).
+Compute (in_nth_list_of_pre_part 3 1 18).
+Compute (glop [2; 0; 0] 1).
+Compute (glop [2; 0; 0] 2).
 ...
 mettons
 l=[2;0;0]
