@@ -649,6 +649,21 @@ split. {
 }
 split. {
   intros i Hi.
+Inspect 1.
+Print locate.
+(* i *)
+Print in_nth_list_of_pre_part.
+(* result *)
+Compute (let l := [2; 0; 0] in let j := 0 in let k := in_nth_list_of_pre_part (length l) j (fold_left (λ a i, a * length l + i) l 0) in k).
+Compute (let l := [2; 0; 0] in let j := 1 in let k := in_nth_list_of_pre_part (length l) j (fold_left (λ a i, a * length l + i) l 0) in k).
+Compute (let l := [2; 0; 0] in let j := 2 in let k := in_nth_list_of_pre_part (length l) j (fold_left (λ a i, a * length l + i) l 0) in k).
+...
+mettons
+l=[2;0;0]
+i=18
+Compute (let l := [2; 0; 0] in fold_left (λ a i, a * length l + i) l 0).
+...
+  intros i Hi.
   unfold dispatch_list'''.
   enough
     (H : ∃ l1, i ∈ l1 ∧
