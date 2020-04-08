@@ -662,15 +662,20 @@ Definition glop l j :=
     (fold_left (λ a i, a * length l + i) l 0).
 (* beuh... c'est l'identité. Ou presque. *)
 ...
+mettons
+l=[2;0;0]
+ll = dispatch_list''' l = [[(1, 2)], [], [0]]
+Et donc pour tous les i<3, on les trouve dans ll
+ [0] ∈ dispatch_list''' l ∧ 0 ∈ [0]
+ [1; 2] ∈ dispatch_list''' l ∧ 1 ∈ [1; 2]
+ [1; 2] ∈ dispatch_list''' l ∧ 2 ∈ [1; 2]
+...
+Compute (let l := [2; 0; 0] in fold_left (λ a i, a * length l + i) l 0).
+...
 Compute (in_nth_list_of_pre_part 3 0 18).
 Compute (in_nth_list_of_pre_part 3 1 18).
 Compute (glop [2; 0; 0] 1).
 Compute (glop [2; 0; 0] 2).
-...
-mettons
-l=[2;0;0]
-i=18
-Compute (let l := [2; 0; 0] in fold_left (λ a i, a * length l + i) l 0).
 ...
   intros i Hi.
   unfold dispatch_list'''.
