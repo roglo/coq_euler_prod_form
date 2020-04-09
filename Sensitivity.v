@@ -760,6 +760,7 @@ assert
     rename Ha into Hai.
     rename Hal into Haj.
     move Hai before Haj.
+    assert (Hij : i < j) by (apply in_seq in Hjl; flia Hjl).
 ...
 destruct l as [| a]; [ constructor | ].
 destruct a. {
