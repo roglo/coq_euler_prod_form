@@ -724,6 +724,24 @@ destruct a. {
     }
     apply Hnd.
   } {
+    replace
+      (flat_map
+         (λ j,
+          if j =? 0 then 0 :: nth_find_all_loop (Nat.eqb j) l 1
+          else nth_find_all_loop (Nat.eqb j) l 1)
+         (seq 1 (length l)))
+      with
+        (flat_map
+           (λ j, nth_find_all_loop (Nat.eqb j) l 1) (seq 1 (length l))). 2: {
+      clear Hl.
+      do 2 rewrite flat_map_concat_map; f_equal.
+      apply map_ext_in_iff.
+      intros a Ha.
+      apply in_seq in Ha.
+      remember (a =? 0) as b eqn:Hb; symmetry in Hb.
+      destruct b; [ | easy ].
+      apply Nat.eqb_eq in Hb; flia Ha Hb.
+    }
 ...
 
 Theorem dispatch_list''_is_pre_partition : ∀ l,
