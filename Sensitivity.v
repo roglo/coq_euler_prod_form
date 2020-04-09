@@ -281,7 +281,7 @@ Definition all_partitions n :=
   bsort list_list_nat_le
     (nodup (list_eq_dec (list_eq_dec Nat.eq_dec))
        (map (bsort list_nat_le)
-          (map (filter (λ s, negb (is_nil s))) (pre_partitions n)))).
+          (map (filter (λ s, negb (is_nil s))) (pre_partitions''' n)))).
 
 Compute (map (bsort list_nat_le) (pre_partitions 4)).
 Compute (nodup (list_eq_dec (list_eq_dec Nat.eq_dec)) (map (bsort list_nat_le) (pre_partitions 4))).
@@ -294,7 +294,7 @@ Definition loc_bl_sens_list Bl f x :=
 
 Definition local_block_sensitivity n f x :=
   fold_right max 0
-    (map (λ Bl, length (loc_bl_sens_list Bl f x)) (pre_partitions n)).
+    (map (λ Bl, length (loc_bl_sens_list Bl f x)) (pre_partitions''' n)).
 
 Definition block_sensitivity n f :=
   fold_right max 0 (map (local_block_sensitivity n f) (seq 0 (2 ^ n))).
@@ -852,6 +852,7 @@ destruct a. {
     cbn - [ Nat.eqb ].
 ...
 
+(*
 Theorem dispatch_list''_is_pre_partition : ∀ l,
   (∀ a, a ∈ l → a < length l)
   → is_pre_partition (length l) (dispatch_list'' l).
@@ -1515,6 +1516,7 @@ split; intros Hn. {
   unfold pre_partitions.
 ...
 *)
+*)
 
 Theorem length_loc_loc_bl_sens_list : ∀ n f x,
   length (loc_sens_list n f x) =
@@ -1556,6 +1558,8 @@ intros.
 unfold block_sensitivity, sensitivity.
 rewrite map_loc_sens.
 unfold local_block_sensitivity.
+unfold pre_partitions'''.
+unfold dispatch'''.
 Print loc_bl_sens_list.
 ...
 unfold local_block_sensitivity, local_sensitivity.
