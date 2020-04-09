@@ -750,7 +750,11 @@ assert
     } {
       apply IHl.
     }
-    intros a Ha.
+    intros a Ha H1.
+    apply in_flat_map in H1.
+    destruct H1 as (j & Hjl & Hal).
+    revert Hal.
+    apply Hni.
 ...
 destruct l as [| a]; [ constructor | ].
 destruct a. {
