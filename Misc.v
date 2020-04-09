@@ -1369,7 +1369,7 @@ split. {
 }
 Qed.
 
-Theorem NoDup_app {A} : ∀ (l l' : list A),
+Theorem NoDup_app : ∀ A (l l' : list A),
   NoDup l
   → NoDup l'
   → (∀ a, a ∈ l → a ∉ l')

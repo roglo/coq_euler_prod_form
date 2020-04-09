@@ -796,6 +796,8 @@ assert
       now apply Hni.
     }
     apply Nat.nlt_ge in Hbk.
+(* Hb → k+1 ≤ b < k+1+length(l) *)
+...
     replace
       (flat_map
          (λ j,
