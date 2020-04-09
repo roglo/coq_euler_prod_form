@@ -761,6 +761,59 @@ assert
     rename Hal into Haj.
     move Hai before Haj.
     assert (Hij : i < j) by (apply in_seq in Hjl; flia Hjl).
+    clear IHl Hjl.
+    revert k Hai Haj.
+    induction l as [| b]; intros; [ easy | ].
+    cbn in Hai, Haj.
+    remember (i =? b) as ib eqn:Hib; symmetry in Hib.
+    remember (j =? b) as jb eqn:Hjb; symmetry in Hjb.
+    move jb before ib; move Hjb before Hib.
+    destruct ib. {
+      apply Nat.eqb_eq in Hib; subst i.
+      destruct jb. {
+        apply Nat.eqb_eq in Hjb; subst j; flia Hij.
+      }
+      destruct Hai as [Hai| Hai]. {
+        subst a.
+        apply Hni in Haj; [ easy | flia ].
+      }
+      now specialize (IHl _ Hai Haj).
+    }
+    destruct jb. {
+      destruct Haj as [Haj| Haj]. {
+        subst a.
+        apply Hni in Hai; [ easy | flia ].
+      }
+      now specialize (IHl _ Hai Haj).
+    }
+    now specialize (IHl _ Hai Haj).
+  }
+  apply Nat.eqb_neq in Hia.
+  apply NoDup_app; [ apply Hnd | | ]. 2: {
+    intros b Hb H1.
+    destruct (lt_dec b (k + 1)) as [Hbk| Hbk]. {
+      revert Hb.
+      now apply Hni.
+    }
+    apply Nat.nlt_ge in Hbk.
+    replace
+      (flat_map
+         (λ j,
+          if j =? a then k :: nth_find_all_loop (Nat.eqb j) l (k + 1)
+          else nth_find_all_loop (Nat.eqb j) l (k + 1))
+         (seq (S i) (length l)))
+      with
+        (flat_map (λ j, nth_find_all_loop (Nat.eqb j) l (k + 1))
+           (seq (S i) (length l))) in H1. 2: {
+      do 2 rewrite flat_map_concat_map; f_equal.
+      apply map_ext_in_iff.
+      intros c Hc.
+      apply in_seq in Hc.
+      remember (c =? a) as d eqn:Hd; symmetry in Hd.
+      destruct d; [ | easy ].
+      apply Nat.eqb_eq in Hd.
+      subst c.
+(* euh... *)
 ...
 destruct l as [| a]; [ constructor | ].
 destruct a. {
