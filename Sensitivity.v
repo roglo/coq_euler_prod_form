@@ -687,41 +687,56 @@ split. {
 }
 unfold dispatch_list'''.
 rewrite <- flat_map_concat_map.
+(**)
+clear.
+assert
+  (Hni : ∀ A f (l : list A) i j, i < j → i ∉ nth_find_all_loop f l j). {
+  clear.
+  intros * Hij.
+  revert i j Hij.
+  induction l as [| a]; intros; [ easy | ].
+  cbn; intros H1.
+  assert (Hij1 : i < j + 1) by flia Hij.
+  destruct (f a). {
+    destruct H1 as [H1| H1]; [ flia Hij H1 | ].
+    now specialize (IHl i (j + 1) Hij1).
+  }
+  now specialize (IHl i (j + 1) Hij1).
+}
+assert (Hnd : ∀ l i j, NoDup (nth_find_all_loop (Nat.eqb i) l j)). {
+  clear - Hni.
+  intros.
+  revert i j (*Hij*).
+  induction l as [| a]; intros; [ constructor | ].
+  cbn - [ Nat.eqb ].
+  remember (i =? a) as ia eqn:Hia; symmetry in Hia.
+  destruct ia. {
+    constructor; [ apply Hni; flia | ].
+    apply IHl.
+  }
+  apply IHl.
+}
+assert
+  (H : ∀ i,
+   NoDup (flat_map (λ j, nth_find_all (Nat.eqb j) l) (seq i (length l)))). {
+  induction l as [| a]; intros; [ constructor | ].
+  cbn.
+  remember (i =? a) as ia eqn:Hia; symmetry in Hia.
+  destruct ia. {
+    apply Nat.eqb_eq in Hia.
+    subst a.
+    apply NoDup_app. {
+      constructor; [ apply Hni; flia | ].
+      apply Hnd.
+    } {
+...
 destruct l as [| a]; [ constructor | ].
 destruct a. {
   cbn - [ Nat.eqb ].
   rewrite Nat.eqb_refl.
   apply NoDup_app. {
-    assert
-      (Hni : ∀ A f (l : list A) i j, i < j → i ∉ nth_find_all_loop f l j). {
-      clear.
-      intros * Hij.
-      revert i j Hij.
-      induction l as [| a]; intros; [ easy | ].
-      cbn; intros H1.
-      assert (Hij1 : i < j + 1) by flia Hij.
-      destruct (f a). {
-        destruct H1 as [H1| H1]; [ flia Hij H1 | ].
-        now specialize (IHl i (j + 1) Hij1).
-      }
-      now specialize (IHl i (j + 1) Hij1).
-    }
     constructor; [ apply Hni; flia | ].
     clear - Hni.
-    assert
-      (Hnd : ∀ l i, NoDup (nth_find_all_loop (Nat.eqb 0) l (S i))). {
-      clear - Hni.
-      intros.
-      revert i.
-      induction l as [| a]; intros; [ constructor | ].
-      cbn - [ Nat.eqb ].
-      destruct a. {
-        rewrite Nat.eqb_refl.
-        constructor; [ apply Hni; flia | ].
-        apply IHl.
-      }
-      apply IHl.
-    }
     apply Hnd.
   } {
     replace
@@ -742,6 +757,12 @@ destruct a. {
       destruct b; [ | easy ].
       apply Nat.eqb_eq in Hb; flia Ha Hb.
     }
+    clear Hl.
+    assert
+      (Hnd :
+
+    induction l as [| a]; [ constructor | ].
+    cbn - [ Nat.eqb ].
 ...
 
 Theorem dispatch_list''_is_pre_partition : ∀ l,
