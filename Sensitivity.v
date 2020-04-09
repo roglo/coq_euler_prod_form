@@ -727,32 +727,30 @@ assert
   destruct ia. {
     apply Nat.eqb_eq in Hia.
     subst a.
+    replace
+      (flat_map
+         (λ j,
+          if j =? i then k :: nth_find_all_loop (Nat.eqb j) l (k + 1)
+          else nth_find_all_loop (Nat.eqb j) l (k + 1))
+         (seq (S i) (length l)))
+      with
+        (flat_map (λ j, nth_find_all_loop (Nat.eqb j) l (k + 1))
+           (seq (S i) (length l))). 2: {
+      do 2 rewrite flat_map_concat_map; f_equal.
+      apply map_ext_in_iff.
+      intros a Ha.
+      apply in_seq in Ha.
+      remember (a =? i) as b eqn:Hb; symmetry in Hb.
+      destruct b; [ | easy ].
+      apply Nat.eqb_eq in Hb; flia Ha Hb.
+    }
     apply NoDup_app. {
       constructor; [ apply Hni; flia | ].
       apply Hnd.
     } {
-      replace
-        (flat_map
-           (λ j,
-            if j =? i then k :: nth_find_all_loop (Nat.eqb j) l (k + 1)
-            else nth_find_all_loop (Nat.eqb j) l (k + 1))
-           (seq (S i) (length l)))
-      with
-        (flat_map (λ j, nth_find_all_loop (Nat.eqb j) l (k + 1))
-           (seq (S i) (length l))).
-      2: {
-        do 2 rewrite flat_map_concat_map; f_equal.
-        apply map_ext_in_iff.
-        intros a Ha.
-        apply in_seq in Ha.
-        remember (a =? i) as b eqn:Hb; symmetry in Hb.
-        destruct b; [ | easy ].
-        apply Nat.eqb_eq in Hb; flia Ha Hb.
-      }
       apply IHl.
     }
     intros a Ha.
-(* faire du "replace" ci-dessus un assert à utiliser ici aussi *)
 ...
 destruct l as [| a]; [ constructor | ].
 destruct a. {
