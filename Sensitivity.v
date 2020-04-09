@@ -796,7 +796,13 @@ assert
       now apply Hni.
     }
     apply Nat.nlt_ge in Hbk.
-(* Hb → k+1 ≤ b < k+1+length(l) *)
+Compute (let l := [2; 0; 0; 3] in let k := 1 in let i := 0 in let a := 0 in
+(nth_find_all_loop (Nat.eqb i) l (k + 1),
+flat_map (λ j : nat, if j =? a then k :: nth_find_all_loop (Nat.eqb j) l (k + 1) else nth_find_all_loop (Nat.eqb j) l (k + 1)) (seq (S i) (length l)))).
+(* Hb ⇒ k+1 ≤ b < k+1+length(l) *)
+(* H1 ⇒ k+1 ≤ b < k+1+length(l) *)
+(* H1 : si j=i+1=a alors b peut être égal à k *)
+(* est-ce que a peut être dans l'intervalle k+1 ... ? *)
 ...
     replace
       (flat_map
