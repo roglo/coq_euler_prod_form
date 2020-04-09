@@ -687,7 +687,8 @@ split. {
 }
 unfold dispatch_list'''.
 rewrite <- flat_map_concat_map.
-destruct l as [| a]; [ constructor | cbn ].
+...
+destruct l as [| a]; [ constructor | ].
 destruct a. {
   cbn.
   constructor. {
