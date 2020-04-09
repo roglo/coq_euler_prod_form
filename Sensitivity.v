@@ -753,8 +753,13 @@ assert
     intros a Ha H1.
     apply in_flat_map in H1.
     destruct H1 as (j & Hjl & Hal).
-    revert Hal.
-    apply Hni.
+    destruct Ha as [Ha| Ha]. {
+      subst a; revert Hal.
+      apply Hni; flia.
+    }
+    rename Ha into Hai.
+    rename Hal into Haj.
+    move Hai before Haj.
 ...
 destruct l as [| a]; [ constructor | ].
 destruct a. {
