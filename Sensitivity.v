@@ -845,13 +845,38 @@ Compute (let l := [2; 6; 0; 0; 4; 0] in let k := 1 in let i := 0 in let a := 1 i
 nth (b - k) (a :: l) 0 = j
         pour i+1 ≤ j < i+1+length(l)
 *)
-cbn in Hb2.
 (*
 nth (b - (k + 1)) l 0 = j
         pour i+1 ≤ j < i+1+length(l)
 et en plus j=k
         si i+1 ≤ a < i+1+length(l)
 *)
+    assert (i + 1 ≤ nth (b - k) (a :: l) 0 < i + 1 + length (a :: l)). {
+      clear - Hb2 Hbk.
+      remember (a :: l) as l'.
+      remember (length l) as len.
+      clear l Heql' Heqlen.
+      rename l' into l.
+      clear - Hb2 Hbk.
+      revert i k b len Hb2 Hbk.
+      induction l as [| a]; intros. {
+        cbn in Hb2.
+        clear - Hb2; exfalso.
+        rewrite flat_map_concat_map in Hb2.
+        revert i Hb2.
+        induction len; intros; [ easy | ].
+        cbn in Hb2.
+        now apply IHlen in Hb2.
+      }
+...
+... suite ok
+    }
+    remember (b - k) as bk eqn:Hbk'; symmetry in Hbk'.
+    destruct bk; [ flia Hbk Hbk' | ].
+    cbn in H.
+    replace (b - (k + 1)) with bk in Hbi by flia Hbk'.
+    rewrite Hbi in H; flia H.
+  }
 ...
 (* Hb ⇒ k+1 ≤ b < k+1+length(l) *)
 (* H1 ⇒ k+1 ≤ b < k+1+length(l) *)
