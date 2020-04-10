@@ -808,10 +808,8 @@ map (λ j : nat, if j =? a then k :: nth_find_all_loop (Nat.eqb j) l (k + 1) els
      e.g. i=0 k=1 l=[2; 6; 0; 0; 4; 0]
                            ^  ^     ^ → 2; 3; 5 → +k+1 → 4; 5; 7
 *)
-(* b ∈ nth_find_all_loop (Nat.eqb i) l (k + 1)
-   → nth (b - (k + 1)) l 0 = i *)
     assert (Hbi : nth (b - (k + 1)) l 0 = i). {
-      clear - Hb1 Hbk.
+      clear - Hb1 Hbk Hni.
       revert i k b Hb1 Hbk.
       induction l as [| a]; intros; [ easy | ].
       cbn.
@@ -820,6 +818,26 @@ map (λ j : nat, if j =? a then k :: nth_find_all_loop (Nat.eqb j) l (k + 1) els
         cbn in Hb1.
         remember (i =? a) as ia eqn:Hia; symmetry in Hia.
         destruct ia; [ now apply Nat.eqb_eq in Hia | ].
+        replace (k + 1) with b in Hb1 by flia Hbk Hbk1.
+        exfalso.
+        revert Hb1.
+        apply Hni; flia.
+      }
+      cbn in Hb1.
+      remember (i =? a) as ia eqn:Hia; symmetry in Hia.
+      destruct ia. {
+        apply Nat.eqb_eq in Hia; subst a.
+        destruct Hb1 as [Hb1| Hb1]; [ flia Hb1 Hbk1 | ].
+        specialize (IHl i (k + 1) b Hb1) as H1.
+        assert (H : k + 1 + 1 ≤ b) by flia Hbk1.
+        specialize (H1 H); clear H.
+        now replace (b - (k + 1 + 1)) with bk in H1 by flia Hbk1.
+      }
+      specialize (IHl i (k + 1) b Hb1) as H1.
+      assert (H : k + 1 + 1 ≤ b) by flia Hbk1.
+      specialize (H1 H); clear H.
+      now replace (b - (k + 1 + 1)) with bk in H1 by flia Hbk1.
+    }
 ...
 (* Hb ⇒ k+1 ≤ b < k+1+length(l) *)
 (* H1 ⇒ k+1 ≤ b < k+1+length(l) *)
