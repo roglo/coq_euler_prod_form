@@ -611,6 +611,40 @@ destruct (f a). {
 now specialize (IHl i (j + 1) Hij1).
 Qed.
 
+Lemma in_nth_find_all_loop_eq : ∀ l i k b,
+  b ∈ nth_find_all_loop (Nat.eqb i) l k
+  → k ≤ b
+  → nth (b - k) l 0 = i.
+intros * Hb1 Hbk.
+revert i k b Hb1 Hbk.
+induction l as [| a]; intros; [ easy | ].
+cbn.
+remember (b - (k(* + 1*))) as bk eqn:Hbk1; symmetry in Hbk1.
+destruct bk. {
+  cbn in Hb1.
+  remember (i =? a) as ia eqn:Hia; symmetry in Hia.
+  destruct ia; [ now apply Nat.eqb_eq in Hia | ].
+  replace k with b in Hb1 by flia Hbk Hbk1.
+  exfalso.
+  revert Hb1.
+  apply not_in_nth_find_all_loop; flia.
+}
+cbn in Hb1.
+remember (i =? a) as ia eqn:Hia; symmetry in Hia.
+destruct ia. {
+  apply Nat.eqb_eq in Hia; subst a.
+  destruct Hb1 as [Hb1| Hb1]; [ flia Hb1 Hbk1 | ].
+  specialize (IHl i (k + 1) b Hb1) as H1.
+  assert (H : k + 1 ≤ b) by flia Hbk1.
+  specialize (H1 H); clear H.
+  now replace (b - (k + 1)) with bk in H1 by flia Hbk1.
+}
+specialize (IHl i (k + 1) b Hb1) as H1.
+assert (H : k + 1 ≤ b) by flia Hbk1.
+specialize (H1 H); clear H.
+now replace (b - (k + 1)) with bk in H1 by flia Hbk1.
+Qed.
+
 Theorem dispatch_list'''_is_pre_partition : ∀ l,
   (∀ a, a ∈ l → a < length l)
   → is_pre_partition (length l) (dispatch_list''' l).
@@ -803,40 +837,8 @@ assert
 Compute (let l := [2; 6; 0; 0; 4; 0] in let k := 1 in let i := 0 in let a := 1 in
 (nth_find_all_loop (Nat.eqb i) l (k + 1),
 map (λ j : nat, if j =? a then k :: nth_find_all_loop (Nat.eqb j) l (k + 1) else nth_find_all_loop (Nat.eqb j) l (k + 1)) (seq (S i) (length l)), map (map S) (dispatch_list''' (1 :: l)))).
-(* nth_find_all_loop (Nat.eqb i) l (k + 1): position+k+1 de tous ceux qui
-  valent i :
-     e.g. i=0 k=1 l=[2; 6; 0; 0; 4; 0]
-                           ^  ^     ^ → 2; 3; 5 → +k+1 → 4; 5; 7
-*)
     assert (Hbi : nth (b - (k + 1)) l 0 = i). {
-      clear - Hb1 Hbk (*Hni*).
-      revert i k b Hb1 Hbk.
-      induction l as [| a]; intros; [ easy | ].
-      cbn.
-      remember (b - (k + 1)) as bk eqn:Hbk1; symmetry in Hbk1.
-      destruct bk. {
-        cbn in Hb1.
-        remember (i =? a) as ia eqn:Hia; symmetry in Hia.
-        destruct ia; [ now apply Nat.eqb_eq in Hia | ].
-        replace (k + 1) with b in Hb1 by flia Hbk Hbk1.
-        exfalso.
-        revert Hb1.
-        apply not_in_nth_find_all_loop; flia.
-      }
-      cbn in Hb1.
-      remember (i =? a) as ia eqn:Hia; symmetry in Hia.
-      destruct ia. {
-        apply Nat.eqb_eq in Hia; subst a.
-        destruct Hb1 as [Hb1| Hb1]; [ flia Hb1 Hbk1 | ].
-        specialize (IHl i (k + 1) b Hb1) as H1.
-        assert (H : k + 1 + 1 ≤ b) by flia Hbk1.
-        specialize (H1 H); clear H.
-        now replace (b - (k + 1 + 1)) with bk in H1 by flia Hbk1.
-      }
-      specialize (IHl i (k + 1) b Hb1) as H1.
-      assert (H : k + 1 + 1 ≤ b) by flia Hbk1.
-      specialize (H1 H); clear H.
-      now replace (b - (k + 1 + 1)) with bk in H1 by flia Hbk1.
+      now apply in_nth_find_all_loop_eq.
     }
 ...
 (* Hb ⇒ k+1 ≤ b < k+1+length(l) *)
