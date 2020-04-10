@@ -596,6 +596,21 @@ Proof. easy. Qed.
 Definition in_nth_list_of_pre_part n j i :=
   i mod n ^ (n - j) / n ^ (n - j - 1).
 
+Lemma not_in_nth_find_all_loop : ∀ A f (l : list A) i j,
+  i < j → i ∉ nth_find_all_loop f l j.
+Proof.
+intros * Hij.
+revert i j Hij.
+induction l as [| a]; intros; [ easy | ].
+cbn; intros H1.
+assert (Hij1 : i < j + 1) by flia Hij.
+destruct (f a). {
+  destruct H1 as [H1| H1]; [ flia Hij H1 | ].
+  now specialize (IHl i (j + 1) Hij1).
+}
+now specialize (IHl i (j + 1) Hij1).
+Qed.
+
 Theorem dispatch_list'''_is_pre_partition : ∀ l,
   (∀ a, a ∈ l → a < length l)
   → is_pre_partition (length l) (dispatch_list''' l).
@@ -687,31 +702,15 @@ split. {
 }
 unfold dispatch_list'''.
 rewrite <- flat_map_concat_map.
-(**)
-clear.
-assert
-  (Hni : ∀ A f (l : list A) i j, i < j → i ∉ nth_find_all_loop f l j). {
-  clear.
-  intros * Hij.
-  revert i j Hij.
-  induction l as [| a]; intros; [ easy | ].
-  cbn; intros H1.
-  assert (Hij1 : i < j + 1) by flia Hij.
-  destruct (f a). {
-    destruct H1 as [H1| H1]; [ flia Hij H1 | ].
-    now specialize (IHl i (j + 1) Hij1).
-  }
-  now specialize (IHl i (j + 1) Hij1).
-}
 assert (Hnd : ∀ l i j, NoDup (nth_find_all_loop (Nat.eqb i) l j)). {
-  clear - Hni.
+  clear.
   intros.
   revert i j (*Hij*).
   induction l as [| a]; intros; [ constructor | ].
   cbn - [ Nat.eqb ].
   remember (i =? a) as ia eqn:Hia; symmetry in Hia.
   destruct ia. {
-    constructor; [ apply Hni; flia | ].
+    constructor; [ apply not_in_nth_find_all_loop; flia | ].
     apply IHl.
   }
   apply IHl.
@@ -721,6 +720,7 @@ assert
    NoDup
      (flat_map (λ j, nth_find_all_loop (Nat.eqb j) l k)
         (seq i (length l)))). {
+  clear Hl.
   induction l as [| a]; intros; [ constructor | ].
   remember (i =? a) as ia eqn:Hia; symmetry in Hia.
   destruct ia. {
@@ -745,7 +745,7 @@ assert
       apply Nat.eqb_eq in Hb; flia Ha Hb.
     }
     apply NoDup_app. {
-      constructor; [ apply Hni; flia | ].
+      constructor; [ apply not_in_nth_find_all_loop; flia | ].
       apply Hnd.
     } {
       apply IHl.
@@ -755,7 +755,7 @@ assert
     destruct H1 as (j & Hjl & Hal).
     destruct Ha as [Ha| Ha]. {
       subst a; revert Hal.
-      apply Hni; flia.
+      apply not_in_nth_find_all_loop; flia.
     }
     rename Ha into Hai.
     rename Hal into Haj.
@@ -775,14 +775,14 @@ assert
       }
       destruct Hai as [Hai| Hai]. {
         subst a.
-        apply Hni in Haj; [ easy | flia ].
+        apply not_in_nth_find_all_loop in Haj; [ easy | flia ].
       }
       now specialize (IHl _ Hai Haj).
     }
     destruct jb. {
       destruct Haj as [Haj| Haj]. {
         subst a.
-        apply Hni in Hai; [ easy | flia ].
+        apply not_in_nth_find_all_loop in Hai; [ easy | flia ].
       }
       now specialize (IHl _ Hai Haj).
     }
@@ -795,7 +795,7 @@ assert
     destruct (lt_dec b (k + 1)) as [Hbk| Hbk]. {
       revert Hb1.
       cbn; rewrite Hia.
-      now apply Hni.
+      now apply not_in_nth_find_all_loop.
     }
     apply Nat.nlt_ge in Hbk.
     cbn in Hb1.
@@ -809,7 +809,7 @@ map (λ j : nat, if j =? a then k :: nth_find_all_loop (Nat.eqb j) l (k + 1) els
                            ^  ^     ^ → 2; 3; 5 → +k+1 → 4; 5; 7
 *)
     assert (Hbi : nth (b - (k + 1)) l 0 = i). {
-      clear - Hb1 Hbk Hni.
+      clear - Hb1 Hbk (*Hni*).
       revert i k b Hb1 Hbk.
       induction l as [| a]; intros; [ easy | ].
       cbn.
@@ -821,7 +821,7 @@ map (λ j : nat, if j =? a then k :: nth_find_all_loop (Nat.eqb j) l (k + 1) els
         replace (k + 1) with b in Hb1 by flia Hbk Hbk1.
         exfalso.
         revert Hb1.
-        apply Hni; flia.
+        apply not_in_nth_find_all_loop; flia.
       }
       cbn in Hb1.
       remember (i =? a) as ia eqn:Hia; symmetry in Hia.
