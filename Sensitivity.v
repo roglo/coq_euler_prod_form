@@ -841,6 +841,17 @@ Compute (let l := [2; 6; 0; 0; 4; 0] in let k := 1 in let i := 0 in let a := 1 i
     assert (Hbi : nth (b - (k + 1)) l 0 = i). {
       now apply in_nth_find_all_loop_eq.
     }
+(*
+nth (b - k) (a :: l) 0 = j
+        pour i+1 ≤ j < i+1+length(l)
+*)
+cbn in Hb2.
+(*
+nth (b - (k + 1)) l 0 = j
+        pour i+1 ≤ j < i+1+length(l)
+et en plus j=k
+        si i+1 ≤ a < i+1+length(l)
+*)
 ...
 (* Hb ⇒ k+1 ≤ b < k+1+length(l) *)
 (* H1 ⇒ k+1 ≤ b < k+1+length(l) *)
