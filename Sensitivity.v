@@ -800,9 +800,10 @@ assert
     apply Nat.nlt_ge in Hbk.
     cbn in Hb1.
     rewrite Hia in Hb1.
-Compute (let l := [2; 0; 0; 1; 4; 5] in let k := 1 in let i := 0 in let a := 1 in
+Compute (let l := [2; 5; 0; 1; 4; 5] in let k := 1 in let i := 0 in let a := 1 in
 (nth_find_all_loop (Nat.eqb i) l (k + 1),
 map (λ j : nat, if j =? a then k :: nth_find_all_loop (Nat.eqb j) l (k + 1) else nth_find_all_loop (Nat.eqb j) l (k + 1)) (seq (S i) (length l)), k+1)).
+Compute (let l := [2; 5; 0; 1; 4; 5] in dispatch_list''' l).
 (* Hb ⇒ k+1 ≤ b < k+1+length(l) *)
 (* H1 ⇒ k+1 ≤ b < k+1+length(l) *)
 (* H1 : si j=i+1=a alors b peut être égal à k *)
