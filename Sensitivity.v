@@ -836,7 +836,8 @@ assert
     rewrite Hia in Hb1.
 Compute (let l := [2; 6; 0; 0; 4; 0] in let k := 1 in let i := 0 in let a := 1 in
 (nth_find_all_loop (Nat.eqb i) l (k + 1),
-map (λ j : nat, if j =? a then k :: nth_find_all_loop (Nat.eqb j) l (k + 1) else nth_find_all_loop (Nat.eqb j) l (k + 1)) (seq (S i) (length l)), map (map S) (dispatch_list''' (1 :: l)))).
+ flat_map (λ j, if j =? a then k :: nth_find_all_loop (Nat.eqb j) l (k + 1) else nth_find_all_loop (Nat.eqb j) l (k + 1)) (seq (S i) (length l)),
+ map (map S) (dispatch_list''' (1 :: l)))).
     assert (Hbi : nth (b - (k + 1)) l 0 = i). {
       now apply in_nth_find_all_loop_eq.
     }
