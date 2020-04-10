@@ -868,6 +868,11 @@ et en plus j=k
         cbn in Hb2.
         now apply IHlen in Hb2.
       }
+      cbn.
+      remember (b - k) as bk eqn:Hbk1; symmetry in Hbk1.
+      destruct bk; [ flia Hbk Hbk1 | ].
+      cbn in Hb2.
+(* ah, putain, ça va pas du tout *)
 ...
 ... suite ok
     }
