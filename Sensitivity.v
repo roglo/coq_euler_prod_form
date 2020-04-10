@@ -808,6 +808,19 @@ map (λ j : nat, if j =? a then k :: nth_find_all_loop (Nat.eqb j) l (k + 1) els
      e.g. i=0 k=1 l=[2; 6; 0; 0; 4; 0]
                            ^  ^     ^ → 2; 3; 5 → +k+1 → 4; 5; 7
 *)
+(* b ∈ nth_find_all_loop (Nat.eqb i) l (k + 1)
+   → nth (b - (k + 1)) l 0 = i *)
+    assert (Hbi : nth (b - (k + 1)) l 0 = i). {
+      clear - Hb1 Hbk.
+      revert i k b Hb1 Hbk.
+      induction l as [| a]; intros; [ easy | ].
+      cbn.
+      remember (b - (k + 1)) as bk eqn:Hbk1; symmetry in Hbk1.
+      destruct bk. {
+        cbn in Hb1.
+        remember (i =? a) as ia eqn:Hia; symmetry in Hia.
+        destruct ia; [ now apply Nat.eqb_eq in Hia | ].
+...
 (* Hb ⇒ k+1 ≤ b < k+1+length(l) *)
 (* H1 ⇒ k+1 ≤ b < k+1+length(l) *)
 (* H1 : si j=i+1=a alors b peut être égal à k *)
