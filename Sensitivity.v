@@ -916,6 +916,30 @@ assert
     apply IHl.
   }
   apply Nat.nle_gt in Hila.
+  rewrite flat_map_concat_map.
+  replace (length l) with (a - S i + (length l - (a - S i))) by flia Hila.
+  rewrite seq_app.
+  rewrite map_app.
+  rewrite concat_app.
+  do 2 rewrite <- flat_map_concat_map.
+  replace
+    (flat_map
+       (λ j : nat,
+        if j =? a then k :: nth_find_all_loop (Nat.eqb j) l (k + 1)
+        else nth_find_all_loop (Nat.eqb j) l (k + 1))
+       (seq (S i) (a - S i)))
+      with
+        (flat_map (λ j : nat, nth_find_all_loop (Nat.eqb j) l (k + 1))
+           (seq (S i) (a - S i))). 2: {
+    do 2 rewrite flat_map_concat_map; f_equal.
+    apply map_ext_in_iff.
+    intros b Hb.
+    apply in_seq in Hb.
+    remember (b =? a) as c eqn:Hc; symmetry in Hc.
+    destruct c; [ | easy ].
+    apply Nat.eqb_eq in Hc; flia Hila Hb Hc.
+  }
+  apply NoDup_app. {
 ...
 destruct l as [| a]; [ constructor | ].
 destruct a. {
