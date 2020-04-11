@@ -879,8 +879,6 @@ Qed.
 
 Inspect 1.
 
-...
-
 (*
 Theorem dispatch_list''_is_pre_partition : ∀ l,
   (∀ a, a ∈ l → a < length l)
@@ -1182,6 +1180,26 @@ Search (_ ∈ firstn _ _).
   apply Hl. (* non *)
 Print dispatch_list''.
 Print disp_loop''.
+...
+*)
+
+Theorem locate_dispatch_list''' : ∀ l,
+  (∀ a : nat, a ∈ l → a < length l)
+  → locate_list (dispatch_list''' l) = l.
+Proof.
+intros * Hl.
+specialize (dispatch_list'''_is_pre_partition l Hl) as H1.
+unfold is_pre_partition in H1.
+remember (dispatch_list''' l) as ll eqn:Hll; symmetry in Hll.
+destruct H1 as (_ & Hin & Huni & Hint).
+(* ouais, chais pas ; faut voir *)
+...
+intros * Hll.
+unfold locate_list.
+unfold dispatch_list'''.
+rewrite map_length, seq_length.
+unfold nth_find.
+Search nth_find_loop.
 ...
 
 Theorem locate_dispatch_list : ∀ l,
