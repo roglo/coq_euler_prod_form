@@ -615,6 +615,7 @@ Lemma in_nth_find_all_loop_eq : ∀ l i k b,
   b ∈ nth_find_all_loop (Nat.eqb i) l k
   → k ≤ b
   → nth (b - k) l 0 = i.
+Proof.
 intros * Hb1 Hbk.
 revert i k b Hb1 Hbk.
 induction l as [| a]; intros; [ easy | ].
@@ -851,6 +852,24 @@ nth (b - (k + 1)) l 0 = j
 et en plus j=k
         si i+1 ≤ a < i+1+length(l)
 *)
+Lemma in_flat_map_nth_find_all_loop_eq : ∀ l j k len b,
+  b ∈ flat_map (λ i, nth_find_all_loop (Nat.eqb i) l k) (seq j len)
+  → k < b
+  → j ≤ nth (b - k) l 0 < j + len.
+Proof.
+...
+specialize (in_flat_map_nth_find_all_loop_eq (a :: l) (S i) k (length l) b) as H1.
+specialize (H1 Hb2).
+assert (H : k < b) by flia Hbk.
+specialize (H1 H); clear H.
+cbn in H1.
+remember (b - k) as bk eqn:Hbk'; symmetry in Hbk'.
+destruct bk; [ flia Hbk Hbk' | ].
+replace (b - (k + 1)) with bk in Hbi by flia Hbk'.
+rewrite Hbi in H1; flia H1.
+...
+(*
+...
     assert (i + 1 ≤ nth (b - k) (a :: l) 0 < i + 1 + length (a :: l)). {
       clear - Hb2 Hbk.
       remember (a :: l) as l'.
@@ -876,11 +895,14 @@ et en plus j=k
 ...
 ... suite ok
     }
+*)
     remember (b - k) as bk eqn:Hbk'; symmetry in Hbk'.
     destruct bk; [ flia Hbk Hbk' | ].
+(*
     cbn in H.
+*)
     replace (b - (k + 1)) with bk in Hbi by flia Hbk'.
-    rewrite Hbi in H; flia H.
+    rewrite Hbi in H1; flia H1.
   }
 ...
 (* Hb ⇒ k+1 ≤ b < k+1+length(l) *)
