@@ -1188,18 +1188,10 @@ Theorem locate_dispatch_list''' : ∀ l,
   → locate_list (dispatch_list''' l) = l.
 Proof.
 intros * Hl.
-specialize (dispatch_list'''_is_pre_partition l Hl) as H1.
-unfold is_pre_partition in H1.
-remember (dispatch_list''' l) as ll eqn:Hll; symmetry in Hll.
-destruct H1 as (_ & Hin & Huni & Hint).
-(* ouais, chais pas ; faut voir *)
-...
-intros * Hll.
 unfold locate_list.
 unfold dispatch_list'''.
 rewrite map_length, seq_length.
-unfold nth_find.
-Search nth_find_loop.
+Compute (let l := [2; 2; 0; 3] in map (λ i, nth_find (nat_in_list i) (map (λ j, nth_find_all (Nat.eqb j) l) (seq 0 (length l)))) (seq 0 (length l))).
 ...
 
 Theorem locate_dispatch_list : ∀ l,
