@@ -1192,6 +1192,12 @@ unfold locate_list.
 unfold dispatch_list'''.
 rewrite map_length, seq_length.
 Compute (let l := [2; 2; 0; 3] in map (λ i, nth_find (nat_in_list i) (map (λ j, nth_find_all (Nat.eqb j) l) (seq 0 (length l)))) (seq 0 (length l))).
+destruct l as [| b]; [ easy | ].
+cbn - [ nth_find_loop nth_find_all_loop Nat.eqb ].
+f_equal. {
+  destruct b; [ easy | ].
+  cbn - [ Nat.eqb ].
+  remember (0 =? S b) as c; cbn in Heqc; subst c.
 ...
 
 Theorem locate_dispatch_list : ∀ l,
