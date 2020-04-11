@@ -652,21 +652,11 @@ Lemma in_flat_map_nth_find_all_loop_eq : ∀ l j k len b,
   → j ≤ nth (b - k) l 0 < j + len.
 Proof.
 intros * Hbf Hkb.
-revert l j k b Hbf Hkb.
-induction len; intros; [ easy | ].
-cbn in Hbf.
-apply in_app_iff in Hbf.
-destruct Hbf as [Hbf| Hbf]. {
-  specialize (in_nth_find_all_loop_eq _ _ _ _ Hbf Hkb) as H1.
-  rewrite H1; flia.
-}
-destruct (Nat.eq_dec j (nth (b - k) l 0)) as [Hjb| Hjb]. {
-  rewrite <- Hjb; flia.
-}
-specialize (IHlen _ _ _ _ Hbf Hkb) as H1.
-rewrite Nat.add_succ_comm in H1.
-split; [ | easy ].
-flia Hjb H1.
+apply in_flat_map in Hbf.
+destruct Hbf as (i & Hi & Hik).
+apply in_nth_find_all_loop_eq in Hik; [ | easy ].
+rewrite Hik.
+now apply in_seq in Hi.
 Qed.
 
 Theorem dispatch_list'''_is_pre_partition : ∀ l,
@@ -856,6 +846,37 @@ assert
       constructor; [ | apply Hnd ].
       apply not_in_nth_find_all_loop; flia.
     } {
+      set (s := seq (a + 1) (len - (a - i) - 1)).
+      replace (flat_map (λ j, nth_find_all_loop (Nat.eqb j) (a :: l) k) s)
+      with (flat_map (λ j, nth_find_all_loop (Nat.eqb j) l (k + 1)) s). 2: {
+        do 2 rewrite flat_map_concat_map; f_equal; cbn.
+        apply map_ext_in_iff.
+        intros b Hb.
+        apply in_seq in Hb.
+        remember (b =? a) as c eqn:Hc; symmetry in Hc.
+        destruct c; [ | easy ].
+        apply Nat.eqb_eq in Hc; flia Hila Hb Hc.
+      }
+      apply IHl.
+    }
+    intros b Hb Hbf.
+    apply in_flat_map_nth_find_all_loop_eq in Hbf. 2: {
+      destruct Hb as [Hb| Hb]; [ now subst b | ].
+      apply Nat.nlt_ge; intros H; revert Hb.
+      apply not_in_nth_find_all_loop; flia H.
+    }
+    destruct Hb as [Hb| Hb]. {
+      subst k.
+      rewrite Nat.sub_diag in Hbf; cbn in Hbf; flia Hbf.
+    }
+    remember (b - k) as bk eqn:Hbk; symmetry in Hbk.
+    destruct bk; [ cbn in Hbf; flia Hbf | ].
+    cbn in Hbf.
+    apply in_nth_find_all_loop_eq in Hb; [ | flia Hbk ].
+    replace (b - (k + 1)) with bk in Hb by flia Hbk.
+    flia Hb Hbf.
+  }
+  intros b Hb.
 ...
   apply NoDup_app; [ apply Hnd | | ]. 2: {
     intros b Hb1 Hb2.
