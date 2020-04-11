@@ -790,7 +790,6 @@ assert
     revert i.
     induction len; intros; [ constructor | apply IHlen ].
   }
-(**)
   destruct (lt_dec a i) as [Hai| Hai]. {
     rewrite flat_map_nth_find_all_loop_cons; [ | now left ].
     apply IHl.
@@ -864,137 +863,22 @@ assert
     now apply not_in_nth_find_all_loop.
   }
   rewrite flat_map_nth_find_all_loop_cons in Hb2; [ | left; flia ].
-...
-  apply in_flat_map_nth_find_all_loop_eq in Hb1. (* k + 1 ≤ b *)
-  apply in_flat_map_nth_find_all_loop_eq in Hb2. (* k ≤ b *)
-...
-  apply NoDup_app; [ apply Hnd | | ]. 2: {
-    intros b Hb1 Hb2.
-    destruct (lt_dec b (k + 1)) as [Hbk| Hbk]. {
-      revert Hb1.
-      cbn; rewrite Hia.
-      now apply not_in_nth_find_all_loop.
-    }
-    apply Nat.nlt_ge in Hbk.
-    cbn in Hb1.
-    rewrite Hia in Hb1.
-    assert (Hbi : nth (b - (k + 1)) l 0 = i). {
-      now apply in_nth_find_all_loop_eq.
-    }
-    specialize (in_flat_map_nth_find_all_loop_eq (a :: l) (S i) k) as H1.
-    specialize (H1 (length l) b Hb2).
-    assert (H : k ≤ b) by flia Hbk.
-    specialize (H1 H); clear H.
-    cbn in H1.
-    remember (b - k) as bk eqn:Hbk'; symmetry in Hbk'.
-    destruct bk; [ flia Hbk Hbk' | ].
-    replace (b - (k + 1)) with bk in Hbi by flia Hbk'.
-    rewrite Hbi in H1; flia H1.
+  destruct (le_dec (k + 1) b) as [Hkb| Hkb]. {
+    apply in_flat_map_nth_find_all_loop_eq in Hb1; [ | easy ].
+    apply in_flat_map_nth_find_all_loop_eq in Hb2; [ | easy ].
+    flia Hb1 Hb2.
   }
-  cbn.
-  destruct (lt_dec a (S i)) as [Hai| Hai]. {
-      rewrite flat_map_nth_find_all_loop_cons; [ | left; flia ].
-    replace
-      (flat_map
-       (λ j : nat,
-          if j =? a
-          then k :: nth_find_all_loop (Nat.eqb j) l (k + 1)
-          else nth_find_all_loop (Nat.eqb j) l (k + 1))
-       (seq (S i) (length l)))
-      with
-        (flat_map (λ j : nat, nth_find_all_loop (Nat.eqb j) l (k + 1))
-           (seq (S i) (length l))). 2: {
-      do 2 rewrite flat_map_concat_map; f_equal.
-      apply map_ext_in_iff.
-      intros b Hb.
-      apply in_seq in Hb.
-      remember (b =? a) as c eqn:Hc; symmetry in Hc.
-      destruct c; [ | easy ].
-      apply Nat.eqb_eq in Hc; flia Hai Hb Hc.
-    }
-    apply IHl.
-  }
-  apply Nat.nlt_ge in Hai.
-  destruct (le_dec (S i + length l) a) as [Hila| Hila]. {
-    replace
-      (flat_map
-       (λ j : nat,
-          if j =? a
-          then k :: nth_find_all_loop (Nat.eqb j) l (k + 1)
-          else nth_find_all_loop (Nat.eqb j) l (k + 1))
-       (seq (S i) (length l)))
-      with
-        (flat_map (λ j : nat, nth_find_all_loop (Nat.eqb j) l (k + 1))
-           (seq (S i) (length l))). 2: {
-      do 2 rewrite flat_map_concat_map; f_equal.
-      apply map_ext_in_iff.
-      intros b Hb.
-      apply in_seq in Hb.
-      remember (b =? a) as c eqn:Hc; symmetry in Hc.
-      destruct c; [ | easy ].
-      apply Nat.eqb_eq in Hc; flia Hila Hb Hc.
-    }
-    apply IHl.
-  }
-  apply Nat.nle_gt in Hila.
-  rewrite flat_map_concat_map.
-  replace (length l) with (a - S i + (length l - (a - S i))) by flia Hila.
-  rewrite seq_app.
-  rewrite map_app.
-  rewrite concat_app.
-  do 2 rewrite <- flat_map_concat_map.
-  replace
-    (flat_map
-       (λ j : nat,
-        if j =? a then k :: nth_find_all_loop (Nat.eqb j) l (k + 1)
-        else nth_find_all_loop (Nat.eqb j) l (k + 1))
-       (seq (S i) (a - S i)))
-      with
-        (flat_map (λ j : nat, nth_find_all_loop (Nat.eqb j) l (k + 1))
-           (seq (S i) (a - S i))). 2: {
-    do 2 rewrite flat_map_concat_map; f_equal.
-    apply map_ext_in_iff.
-    intros b Hb.
-    apply in_seq in Hb.
-    remember (b =? a) as c eqn:Hc; symmetry in Hc.
-    destruct c; [ | easy ].
-    apply Nat.eqb_eq in Hc; flia Hila Hb Hc.
-  }
-  apply NoDup_app. {
-...
-destruct l as [| a]; [ constructor | ].
-destruct a. {
-  cbn - [ Nat.eqb ].
-  rewrite Nat.eqb_refl.
-  apply NoDup_app. {
-    constructor; [ apply Hni; flia | ].
-    clear - Hni.
-    apply Hnd.
-  } {
-    replace
-      (flat_map
-         (λ j,
-          if j =? 0 then 0 :: nth_find_all_loop (Nat.eqb j) l 1
-          else nth_find_all_loop (Nat.eqb j) l 1)
-         (seq 1 (length l)))
-      with
-        (flat_map
-           (λ j, nth_find_all_loop (Nat.eqb j) l 1) (seq 1 (length l))). 2: {
-      clear Hl.
-      do 2 rewrite flat_map_concat_map; f_equal.
-      apply map_ext_in_iff.
-      intros a Ha.
-      apply in_seq in Ha.
-      remember (a =? 0) as b eqn:Hb; symmetry in Hb.
-      destruct b; [ | easy ].
-      apply Nat.eqb_eq in Hb; flia Ha Hb.
-    }
-    clear Hl.
-    assert
-      (Hnd :
+  apply Nat.nle_gt in Hkb.
+  apply in_flat_map in Hb1.
+  destruct Hb1 as (x & Hx & Hxl).
+  revert Hxl.
+  now apply not_in_nth_find_all_loop.
+}
+apply H.
+Qed.
 
-    induction l as [| a]; [ constructor | ].
-    cbn - [ Nat.eqb ].
+Inspect 1.
+
 ...
 
 (*
