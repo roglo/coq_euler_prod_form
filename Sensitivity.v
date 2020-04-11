@@ -646,6 +646,29 @@ specialize (H1 H); clear H.
 now replace (b - (k + 1)) with bk in H1 by flia Hbk1.
 Qed.
 
+Lemma in_flat_map_nth_find_all_loop_eq : ∀ l j k len b,
+  b ∈ flat_map (λ i, nth_find_all_loop (Nat.eqb i) l k) (seq j len)
+  → k ≤ b
+  → j ≤ nth (b - k) l 0 < j + len.
+Proof.
+intros * Hbf Hkb.
+revert l j k b Hbf Hkb.
+induction len; intros; [ easy | ].
+cbn in Hbf.
+apply in_app_iff in Hbf.
+destruct Hbf as [Hbf| Hbf]. {
+  specialize (in_nth_find_all_loop_eq _ _ _ _ Hbf Hkb) as H1.
+  rewrite H1; flia.
+}
+destruct (Nat.eq_dec j (nth (b - k) l 0)) as [Hjb| Hjb]. {
+  rewrite <- Hjb; flia.
+}
+specialize (IHlen _ _ _ _ Hbf Hkb) as H1.
+rewrite Nat.add_succ_comm in H1.
+split; [ | easy ].
+flia Hjb H1.
+Qed.
+
 Theorem dispatch_list'''_is_pre_partition : ∀ l,
   (∀ a, a ∈ l → a < length l)
   → is_pre_partition (length l) (dispatch_list''' l).
@@ -835,99 +858,19 @@ assert
     apply Nat.nlt_ge in Hbk.
     cbn in Hb1.
     rewrite Hia in Hb1.
-Compute (let l := [2; 6; 0; 0; 4; 0] in let k := 1 in let i := 0 in let a := 1 in
-(nth_find_all_loop (Nat.eqb i) l (k + 1),
- flat_map (λ j, if j =? a then k :: nth_find_all_loop (Nat.eqb j) l (k + 1) else nth_find_all_loop (Nat.eqb j) l (k + 1)) (seq (S i) (length l)),
- map (map S) (dispatch_list''' (1 :: l)))).
     assert (Hbi : nth (b - (k + 1)) l 0 = i). {
       now apply in_nth_find_all_loop_eq.
     }
-(*
-nth (b - k) (a :: l) 0 = j
-        pour i+1 ≤ j < i+1+length(l)
-*)
-(*
-nth (b - (k + 1)) l 0 = j
-        pour i+1 ≤ j < i+1+length(l)
-et en plus j=k
-        si i+1 ≤ a < i+1+length(l)
-*)
-Lemma in_flat_map_nth_find_all_loop_eq : ∀ l j k len b,
-  b ∈ flat_map (λ i, nth_find_all_loop (Nat.eqb i) l k) (seq j len)
-  → k < b
-  → j ≤ nth (b - k) l 0 < j + len.
-Proof.
-...
-specialize (in_flat_map_nth_find_all_loop_eq (a :: l) (S i) k (length l) b) as H1.
-specialize (H1 Hb2).
-assert (H : k < b) by flia Hbk.
-specialize (H1 H); clear H.
-cbn in H1.
-remember (b - k) as bk eqn:Hbk'; symmetry in Hbk'.
-destruct bk; [ flia Hbk Hbk' | ].
-replace (b - (k + 1)) with bk in Hbi by flia Hbk'.
-rewrite Hbi in H1; flia H1.
-...
-(*
-...
-    assert (i + 1 ≤ nth (b - k) (a :: l) 0 < i + 1 + length (a :: l)). {
-      clear - Hb2 Hbk.
-      remember (a :: l) as l'.
-      remember (length l) as len.
-      clear l Heql' Heqlen.
-      rename l' into l.
-      clear - Hb2 Hbk.
-      revert i k b len Hb2 Hbk.
-      induction l as [| a]; intros. {
-        cbn in Hb2.
-        clear - Hb2; exfalso.
-        rewrite flat_map_concat_map in Hb2.
-        revert i Hb2.
-        induction len; intros; [ easy | ].
-        cbn in Hb2.
-        now apply IHlen in Hb2.
-      }
-      cbn.
-      remember (b - k) as bk eqn:Hbk1; symmetry in Hbk1.
-      destruct bk; [ flia Hbk Hbk1 | ].
-      cbn in Hb2.
-(* ah, putain, ça va pas du tout *)
-...
-... suite ok
-    }
-*)
+    specialize (in_flat_map_nth_find_all_loop_eq (a :: l) (S i) k) as H1.
+    specialize (H1 (length l) b Hb2).
+    assert (H : k ≤ b) by flia Hbk.
+    specialize (H1 H); clear H.
+    cbn in H1.
     remember (b - k) as bk eqn:Hbk'; symmetry in Hbk'.
     destruct bk; [ flia Hbk Hbk' | ].
-(*
-    cbn in H.
-*)
     replace (b - (k + 1)) with bk in Hbi by flia Hbk'.
     rewrite Hbi in H1; flia H1.
   }
-...
-(* Hb ⇒ k+1 ≤ b < k+1+length(l) *)
-(* H1 ⇒ k+1 ≤ b < k+1+length(l) *)
-(* H1 : si j=i+1=a alors b peut être égal à k *)
-(* est-ce que a peut être dans l'intervalle k+1 ... ? *)
-...
-    replace
-      (flat_map
-         (λ j,
-          if j =? a then k :: nth_find_all_loop (Nat.eqb j) l (k + 1)
-          else nth_find_all_loop (Nat.eqb j) l (k + 1))
-         (seq (S i) (length l)))
-      with
-        (flat_map (λ j, nth_find_all_loop (Nat.eqb j) l (k + 1))
-           (seq (S i) (length l))) in H1. 2: {
-      do 2 rewrite flat_map_concat_map; f_equal.
-      apply map_ext_in_iff.
-      intros c Hc.
-      apply in_seq in Hc.
-      remember (c =? a) as d eqn:Hd; symmetry in Hd.
-      destruct d; [ | easy ].
-      apply Nat.eqb_eq in Hd.
-      subst c.
-(* euh... *)
 ...
 destruct l as [| a]; [ constructor | ].
 destruct a. {
