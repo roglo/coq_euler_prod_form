@@ -853,6 +853,9 @@ assert
   do 2 rewrite <- flat_map_concat_map.
   apply NoDup_app; [ apply IHl | | ]. {
     apply NoDup_app. {
+      constructor; [ | apply Hnd ].
+      apply not_in_nth_find_all_loop; flia.
+    } {
 ...
   apply NoDup_app; [ apply Hnd | | ]. 2: {
     intros b Hb1 Hb2.
