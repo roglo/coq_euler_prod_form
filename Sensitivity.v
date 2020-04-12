@@ -1192,6 +1192,18 @@ unfold locate_list.
 unfold dispatch_list'''.
 rewrite map_length, seq_length.
 Compute (let l := [2; 2; 0; 3] in map (λ i, nth_find (nat_in_list i) (map (λ j, nth_find_all (Nat.eqb j) l) (seq 0 (length l)))) (seq 0 (length l))).
+(**)
+replace l with (map (λ i, nth i l 0) (seq 0 (length l))) at 2. 2: {
+  clear Hl.
+  induction l as [| a]; [ easy | ].
+  f_equal; cbn; f_equal.
+  rewrite <- seq_shift.
+  now rewrite map_map.
+}
+apply map_ext_in_iff.
+intros a Ha.
+unfold nth_find.
+...
 destruct l as [| b]; [ easy | ].
 cbn - [ nth_find_loop nth_find_all_loop Nat.eqb ].
 f_equal. {
@@ -1239,10 +1251,9 @@ f_equal. {
   rewrite seq_app, map_app; cbn.
   now rewrite Nat.eqb_refl.
 }
-cbn - [ Nat.eqb ].
-remember (0 =? b) as bz eqn:Hbz; symmetry in Hbz.
-destruct bz. {
-  apply Nat.eqb_eq in Hbz; subst b.
+replace l with (map (λ i, i) (seq 1 (length l)) at 2. 2: {
+  clear; induction l; [ easy | now cbn; rewrite IHl ].
+}
 ...
 
 Theorem locate_dispatch_list : ∀ l,
