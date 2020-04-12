@@ -1239,6 +1239,10 @@ f_equal. {
   rewrite seq_app, map_app; cbn.
   now rewrite Nat.eqb_refl.
 }
+cbn - [ Nat.eqb ].
+remember (0 =? b) as bz eqn:Hbz; symmetry in Hbz.
+destruct bz. {
+  apply Nat.eqb_eq in Hbz; subst b.
 ...
 
 Theorem locate_dispatch_list : ∀ l,
