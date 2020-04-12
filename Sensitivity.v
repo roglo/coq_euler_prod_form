@@ -1247,15 +1247,26 @@ unfold nth_find.
 rewrite nth_find_loop_map.
 apply in_seq in Ha.
 destruct Ha as (_, Ha); cbn in Ha.
+...
 replace (length l) with (a + (length l - a)) by flia Ha.
 rewrite seq_app; cbn.
 rewrite nth_find_loop_app_2. 2: {
   intros j Hj.
   apply in_seq in Hj; cbn in Hj; destruct Hj as (_, Hja).
-  clear - Hja.
   unfold nth_find_all.
+...
+  clear - Hja.
   apply nat_in_list_false_iff.
   intros k Ha Hak; subst k.
+Check not_in_nth_find_all_loop.
+Theorem not_in_nth_find_all_loop2 : ∀ A f (l : list A) i j,
+  j + length l < i → i ∉ nth_find_all_loop f l j.
+...
+revert Ha.
+apply not_in_nth_find_all_loop2.
+...
+  revert Ha.
+  apply not_in_nth_find_all_loop.
 ...
   assert (H : ∀ i j a l,
     j + i < a
