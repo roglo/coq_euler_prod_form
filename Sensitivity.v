@@ -1199,14 +1199,14 @@ f_equal. {
   cbn - [ Nat.eqb ].
   remember (0 =? S b) as c; cbn in Heqc; subst c.
   assert
-    (Hij : ∀ i j, i < j →
-    nat_in_list i (nth_find_all_loop (Nat.eqb 0) l j) = false). {
+    (Hij : ∀ i j k, i < j →
+    nat_in_list i (nth_find_all_loop (Nat.eqb k) l j) = false). {
     clear.
     intros * Hij.
     revert i j Hij.
     induction l; intros; [ easy | ].
     cbn - [ Nat.eqb ].
-    destruct (0 =? a). {
+    destruct (k =? a). {
       cbn - [ Nat.eqb ].
       destruct (Nat.eq_dec i j) as [Hiej| Hiej]; [ flia Hij Hiej | ].
       apply IHl; flia Hij.
@@ -1214,6 +1214,31 @@ f_equal. {
     apply IHl; flia Hij.
   }
   rewrite Hij; [ | flia ].
+  replace (length l) with (b + (length l - b)). 2: {
+    specialize (Hl (S b) (or_introl eq_refl)); cbn in Hl.
+    flia Hl.
+  }
+  rewrite seq_app, map_app; cbn.
+  rewrite nth_find_loop_app_2. 2: {
+    intros j Hj.
+    apply in_map_iff in Hj.
+    destruct Hj as (k & Hk & Hkb).
+    remember (k =? S b) as kb eqn:Hkb1; symmetry in Hkb1.
+    destruct kb. {
+      apply Nat.eqb_eq in Hkb1; subst k.
+      apply in_seq in Hkb; flia Hkb.
+    }
+    rewrite <- Hk.
+    apply Hij; flia.
+  }
+  rewrite map_length, seq_length; cbn.
+  replace (length l - b) with (1 + (length l - S b)). 2: {
+    specialize (Hl (S b) (or_introl eq_refl)); cbn in Hl.
+    flia Hl.
+  }
+  rewrite seq_app, map_app; cbn.
+  now rewrite Nat.eqb_refl.
+}
 ...
 
 Theorem locate_dispatch_list : ∀ l,
