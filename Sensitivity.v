@@ -1194,6 +1194,36 @@ destruct (f (g a)); [ easy | ].
 apply IHl.
 Qed.
 
+Theorem nat_in_list_false_iff : ∀ i l,
+  nat_in_list i l = false ↔ ∀ j, j ∈ l → i ≠ j.
+Proof.
+intros.
+split. {
+  intros Hil j Hjl Hij.
+  subst j.
+  revert i Hil Hjl.
+  induction l as [| a]; intros; [ easy | ].
+  cbn in Hil, Hjl.
+  destruct Hjl as [Hjl| Hjl]. {
+    subst a.
+    now destruct (Nat.eq_dec i i).
+  }
+  destruct (Nat.eq_dec i a) as [Hia| Hia]; [ easy | ].
+  now apply (IHl i).
+} {
+  intros Hil.
+  revert i Hil.
+  induction l as [| a]; intros; [ easy | cbn ].
+  destruct (Nat.eq_dec i a) as [Hia| Hia]. {
+    subst i.
+    now specialize (Hil a (or_introl eq_refl)).
+  }
+  apply IHl.
+  intros j Hj.
+  now apply Hil; right.
+}
+Qed.
+
 Theorem locate_dispatch_list''' : ∀ l,
   (∀ a : nat, a ∈ l → a < length l)
   → locate_list (dispatch_list''' l) = l.
@@ -1224,6 +1254,9 @@ rewrite nth_find_loop_app_2. 2: {
   apply in_seq in Hj; cbn in Hj; destruct Hj as (_, Hja).
   clear - Hja.
   unfold nth_find_all.
+  apply nat_in_list_false_iff.
+  intros k Ha Hak; subst k.
+...
   assert (H : ∀ i j a l,
     j + i < a
     → nat_in_list a (nth_find_all_loop (Nat.eqb j) l i) = false). {
