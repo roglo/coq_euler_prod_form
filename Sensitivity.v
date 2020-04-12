@@ -1183,6 +1183,17 @@ Print disp_loop''.
 ...
 *)
 
+Lemma nth_find_loop_map : ∀ A B f (g : A → B) i l,
+  nth_find_loop f (map g l) i =
+  nth_find_loop (λ a, f (g a)) l i.
+Proof.
+intros.
+revert f g i.
+induction l as [| a]; intros; [ easy | cbn ].
+destruct (f (g a)); [ easy | ].
+apply IHl.
+Qed.
+
 Theorem locate_dispatch_list''' : ∀ l,
   (∀ a : nat, a ∈ l → a < length l)
   → locate_list (dispatch_list''' l) = l.
@@ -1203,6 +1214,10 @@ replace l with (map (λ i, nth i l 0) (seq 0 (length l))) at 2. 2: {
 apply map_ext_in_iff.
 intros a Ha.
 unfold nth_find.
+rewrite nth_find_loop_map.
+clear Hl; revert a Ha.
+induction l as [| b]; intros; [ now cbn; rewrite match_id | ].
+cbn - [ Nat.eqb ].
 ...
 destruct l as [| b]; [ easy | ].
 cbn - [ nth_find_loop nth_find_all_loop Nat.eqb ].
