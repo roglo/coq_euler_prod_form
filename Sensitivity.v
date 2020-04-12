@@ -1244,9 +1244,24 @@ replace l with (map (λ i, nth i l 0) (seq 0 (length l))) at 2. 2: {
 apply map_ext_in_iff.
 intros a Ha.
 unfold nth_find.
+Compute (map (λ j, nth_find_all (Nat.eqb j) [2; 2; 0]) (seq 0 3)).
+Compute (map (λ i, nat_in_list i (nth_find_all (Nat.eqb 1) [2; 2; 0])) (seq 0 3)).
+Compute (map (λ i, nat_in_list i (nth_find_all (Nat.eqb 2) [2; 2; 0])) (seq 0 3)).
 rewrite nth_find_loop_map.
 apply in_seq in Ha.
 destruct Ha as (_, Ha); cbn in Ha.
+unfold nth_find_all.
+Search nth_find_all_loop.
+...
+Search nat_in_list.
+  assert
+    (Hij : ∀ i j k, i < j →
+    nat_in_list i (nth_find_all_loop (Nat.eqb k) l j) = false). {
+...
+Print nth_find_loop.
+Compute (map (λ i, nat_in_list i (nth_find_all (Nat.eqb 0) [2; 2; 0])) (seq 0 3)).
+Compute (map (λ i, nat_in_list i (nth_find_all (Nat.eqb 1) [2; 2; 0])) (seq 0 3)).
+Compute (map (λ i, nat_in_list i (nth_find_all (Nat.eqb 2) [2; 2; 0])) (seq 0 3)).
 ...
 replace (length l) with (a + (length l - a)) by flia Ha.
 rewrite seq_app; cbn.
