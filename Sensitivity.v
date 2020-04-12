@@ -1215,6 +1215,29 @@ apply map_ext_in_iff.
 intros a Ha.
 unfold nth_find.
 rewrite nth_find_loop_map.
+apply in_seq in Ha.
+destruct Ha as (_, Ha); cbn in Ha.
+replace (length l) with (a + (length l - a)) by flia Ha.
+rewrite seq_app; cbn.
+rewrite nth_find_loop_app_2. 2: {
+  intros j Hj.
+  apply in_seq in Hj; cbn in Hj; destruct Hj as (_, Hja).
+  clear - Hja.
+  unfold nth_find_all.
+  assert (H : ∀ i j a l,
+    j + i < a
+    → nat_in_list a (nth_find_all_loop (Nat.eqb j) l i) = false). {
+... (* oui, bon, c'est pas ça *)
+    clear.
+    intros * Hja.
+    revert i j a Hja.
+    induction l as [| b]; intros; [ easy | cbn ].
+    remember (j =? b) as jb eqn:Hjb; symmetry in Hjb.
+    destruct jb. {
+      apply Nat.eqb_eq in Hjb; subst j; cbn.
+      destruct (Nat.eq_dec a i) as [Haz| Haz]; [ now subst a; flia Hja | ].
+      apply IHl.
+...
 clear Hl; revert a Ha.
 induction l as [| b]; intros; [ now cbn; rewrite match_id | ].
 cbn - [ Nat.eqb ].
