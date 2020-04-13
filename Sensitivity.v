@@ -1250,11 +1250,14 @@ replace l with (map (λ i, nth i l 0) (seq 0 (length l))) at 2. 2: {
 apply map_ext_in_iff.
 intros a Ha.
 unfold nth_find.
+(*
 rewrite nth_find_loop_map.
+*)
 unfold nth_find_all.
 induction a. {
   cbn - [ Nat.eqb ].
   destruct l as [| a]; [ easy | ].
+  clear Ha.
   cbn - [ Nat.eqb ].
   destruct a; [ easy | ].
   unfold Nat.eqb at 1.
@@ -1265,8 +1268,24 @@ induction a. {
     revert Hj.
     apply not_in_nth_find_all_loop; flia.
   }
-  destruct a. {
-Search nat_in_list.
+  destruct l as [| b]. {
+    specialize (Hl (S a) (or_introl eq_refl)); cbn in Hl.
+    flia Hl.
+  }
+  destruct a; [ easy | ].
+  replace (length (b :: l)) with (1 + (length (b :: l) - 1)) by (cbn; flia).
+  rewrite seq_app, map_app.
+  rewrite nth_find_loop_app_2. 2: {
+    intros l1 Hl1.
+    unfold seq, map in Hl1.
+    destruct Hl1 as [Hl1| Hl1]; [ | easy ].
+    apply nat_in_list_false_iff.
+    intros j Hj Hjz.
+    subst j l1.
+    replace (1 =? S (S a)) with false in Hj by easy.
+    revert Hj.
+    apply not_in_nth_find_all_loop; flia.
+  }
 ...
 Compute (map (λ j, nth_find_all (Nat.eqb j) [2; 2; 0]) (seq 0 3)).
 Compute (let l := [2; 2; 3; 1; 0; 4; 2] in map (map (λ i, nth i l 0)) (map (λ j, nth_find_all (Nat.eqb j) l) (seq 0 (length l)))).
