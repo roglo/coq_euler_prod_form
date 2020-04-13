@@ -1229,13 +1229,19 @@ Theorem locate_dispatch_list''' : ∀ l,
   → locate_list (dispatch_list''' l) = l.
 Proof.
 intros * Hl.
+specialize (dispatch_list'''_is_pre_partition l Hl) as H1.
+unfold is_pre_partition in H1.
+destruct H1 as (_ & Hin & Huni & Hint).
+remember (dispatch_list''' l) as ll.
+unfold dispatch_list''' in Heqll.
+rewrite Heqll.
 unfold locate_list.
 unfold dispatch_list'''.
 rewrite map_length, seq_length.
 Compute (let l := [2; 2; 0; 3] in map (λ i, nth_find (nat_in_list i) (map (λ j, nth_find_all (Nat.eqb j) l) (seq 0 (length l)))) (seq 0 (length l))).
 (**)
 replace l with (map (λ i, nth i l 0) (seq 0 (length l))) at 2. 2: {
-  clear Hl.
+  clear.
   induction l as [| a]; [ easy | ].
   f_equal; cbn; f_equal.
   rewrite <- seq_shift.
@@ -1245,8 +1251,10 @@ apply map_ext_in_iff.
 intros a Ha.
 unfold nth_find.
 Compute (map (λ j, nth_find_all (Nat.eqb j) [2; 2; 0]) (seq 0 3)).
+Search dispatch_list'''.
 Compute (map (λ i, nat_in_list i (nth_find_all (Nat.eqb 1) [2; 2; 0])) (seq 0 3)).
 Compute (map (λ i, nat_in_list i (nth_find_all (Nat.eqb 2) [2; 2; 0])) (seq 0 3)).
+...
 rewrite nth_find_loop_map.
 apply in_seq in Ha.
 destruct Ha as (_, Ha); cbn in Ha.
