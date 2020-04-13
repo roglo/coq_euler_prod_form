@@ -1255,6 +1255,8 @@ rewrite nth_find_loop_map.
 *)
 unfold nth_find_all.
 (**)
+Compute (let l := [2; 2; 3; 1; 0; 0; 2] in map (λ j, nth_find_all (Nat.eqb j) l) (seq 0 (length l))).
+...
 replace (length l) with (a + 1 + (length l - (a + 1))). 2: {
   apply in_seq in Ha; cbn in Ha.
   destruct Ha as (_, Ha).
