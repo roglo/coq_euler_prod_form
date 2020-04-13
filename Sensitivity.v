@@ -1251,9 +1251,23 @@ apply map_ext_in_iff.
 intros a Ha.
 unfold nth_find.
 Compute (map (λ j, nth_find_all (Nat.eqb j) [2; 2; 0]) (seq 0 3)).
+Compute (let l := [2; 2; 3; 1; 0; 4; 2] in map (map (λ i, nth i l 0)) (map (λ j, nth_find_all (Nat.eqb j) l) (seq 0 (length l)))).
 Search dispatch_list'''.
 Compute (map (λ i, nat_in_list i (nth_find_all (Nat.eqb 1) [2; 2; 0])) (seq 0 3)).
 Compute (map (λ i, nat_in_list i (nth_find_all (Nat.eqb 2) [2; 2; 0])) (seq 0 3)).
+unfold nth_find_all.
+Check disp_loop_small_r.
+Print disp_loop.
+Print nth_find_all_loop.
+Theorem nth_find_all_loop_eqb f l i =
+  nth_find_all_loop (Nat.eqb j) l i =
+(* les rangs de tous ceux dont la valeur vaut j *)
+...
+  match l with
+  | [] => []
+  | a :: l' =>
+      if Nat.eqb j a then i :: nth_find_all_loop A f l' (i + 1)
+      else nth_find_all_loop A f l' (i + 1)
 ...
 rewrite nth_find_loop_map.
 apply in_seq in Ha.
@@ -1397,6 +1411,7 @@ f_equal. {
   now apply Nat.lt_le_incl, Hll; left.
 }
 ...
+*)
 
 Theorem locate_dispatch : ∀ n i, i < n → locate (dispatch n i) = i.
 Proof.
