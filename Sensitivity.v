@@ -1250,6 +1250,24 @@ replace l with (map (λ i, nth i l 0) (seq 0 (length l))) at 2. 2: {
 apply map_ext_in_iff.
 intros a Ha.
 unfold nth_find.
+rewrite nth_find_loop_map.
+unfold nth_find_all.
+induction a. {
+  cbn - [ Nat.eqb ].
+  destruct l as [| a]; [ easy | ].
+  cbn - [ Nat.eqb ].
+  destruct a; [ easy | ].
+  unfold Nat.eqb at 1.
+  replace (nat_in_list _ _) with false. 2: {
+    symmetry.
+    apply nat_in_list_false_iff.
+    intros j Hj H; subst j.
+    revert Hj.
+    apply not_in_nth_find_all_loop; flia.
+  }
+  destruct a. {
+Search nat_in_list.
+...
 Compute (map (λ j, nth_find_all (Nat.eqb j) [2; 2; 0]) (seq 0 3)).
 Compute (let l := [2; 2; 3; 1; 0; 4; 2] in map (map (λ i, nth i l 0)) (map (λ j, nth_find_all (Nat.eqb j) l) (seq 0 (length l)))).
 Search dispatch_list'''.
