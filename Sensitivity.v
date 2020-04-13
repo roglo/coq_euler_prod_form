@@ -1254,6 +1254,31 @@ unfold nth_find.
 rewrite nth_find_loop_map.
 *)
 unfold nth_find_all.
+(**)
+replace (length l) with (a + 1 + (length l - (a + 1))). 2: {
+  apply in_seq in Ha; cbn in Ha.
+  destruct Ha as (_, Ha).
+  flia Ha.
+}
+do 2 rewrite seq_app.
+do 2 rewrite Nat.add_0_l.
+replace (seq a 1) with [a] by easy.
+do 2 rewrite map_app.
+rewrite <- app_assoc.
+rewrite nth_find_loop_app_2. 2: {
+  intros j Hj.
+  apply nat_in_list_false_iff.
+  intros k Hk Hak; subst k.
+  apply in_map_iff in Hj.
+  destruct Hj as (k & Hkl & Hka); subst j.
+  apply in_seq in Hka; destruct Hka as (_, Hka); cbn in Hka.
+...
+  apply in_nth_find_all_loop_eq in Hk; [ | flia ].
+  rewrite Nat.sub_0_r in Hk; subst k.
+...
+  revert Hk.
+  apply not_in_nth_find_all_loop.
+...
 induction a. {
   cbn - [ Nat.eqb ].
   destruct l as [| a]; [ easy | ].
