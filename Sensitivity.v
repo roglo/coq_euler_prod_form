@@ -1283,7 +1283,20 @@ Compute (let l := [2; 2; 3; 6; 0; 0; 2] in let a := 4 in nth_find_all_loop (Nat.
 remember (nat_in_list a _) as b eqn:Hb; symmetry in Hb.
 destruct b; [ easy | ].
 specialize ((proj1 (nat_in_list_false_iff _ _)) Hb a) as H1.
-exfalso; apply H1; [ | easy ].
+exfalso; apply H1; clear H1; [ | easy ].
+apply in_seq in Ha; destruct Ha as (_, Ha); cbn in Ha.
+Search nth_find_all_loop.
+...
+clear - Ha.
+revert a Ha.
+induction l as [| b]; intros; [ easy | ].
+cbn.
+destruct a; [ now rewrite Nat.eqb_refl; left | ].
+remember (nth a l 0 =? b) as c eqn:Hc; symmetry in Hc.
+destruct c. {
+  right.
+  apply Nat.eqb_eq in Hc.
+  rewrite Hc.
 ...
 rewrite nth_find_loop_app_2. 2: {
   intros l1 Hl1.
