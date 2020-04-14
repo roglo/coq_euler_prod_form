@@ -1358,6 +1358,30 @@ unfold dispatch_list'''.
 now rewrite map_length, seq_length.
 Qed.
 
+Lemma to_radix_loop_enough_iter : ∀ it it' n i,
+  n ≠ 0
+  → n ≤ it
+  → n ≤ it'
+  → to_radix_loop it n i = to_radix_loop it' n i.
+Proof.
+intros * Hnz Hnit Hnit'.
+revert n i it' Hnz Hnit Hnit'.
+induction it; intros; cbn. {
+  now apply Nat.le_0_r in Hnit; subst n.
+}
+destruct it'. {
+  now apply Nat.le_0_r in Hnit'; subst n.
+}
+cbn; f_equal.
+destruct (Nat.eq_dec n (S it)) as [Hnsit| Hnsit]. {
+  destruct it.
+  subst n.
+  rewrite Nat.div_1_r.
+  cbn.
+  destruct it'; [ easy | ].
+  cbn - [ "/" ].
+...
+
 Theorem locate_dispatch''' : ∀ n i, i < n → locate (dispatch''' n i) = i.
 Proof.
 intros * Hin.
@@ -1385,6 +1409,36 @@ assert
 }
 rewrite H; clear H.
 assert (Hnz : n ≠ 0) by flia Hin; clear Hin.
+unfold to_radix.
+assert
+  (H : ∀ it n i,
+   n ≠ 0
+   → n ≤ it
+   → fold_left (λ a j : nat, a * n + j) (rev (to_radix_loop it n i)) 0 = i). {
+  clear.
+  intros * Hnz Hnit.
+  revert n i Hnz Hnit.
+  induction it; intros; [ flia Hnz Hnit | ].
+  cbn - [ "/" "mod" ].
+  rewrite fold_left_app; cbn.
+  rewrite to_radix_loop_enough_iter with (it' := S it).
+...
+  destruct (Nat.eq_dec n (S it)) as [Hnsit| Hnsit]. {
+
+    destruct n; [ easy | ].
+    apply Nat.succ_inj in Hnsit.
+    subst it.
+...
+  rewrite IHit. 3: {
+...
+  intros * Hn Hnit.
+  destruct n; [ easy | clear Hn ].
+  assert (Hit : n < it) by flia Hnit; clear Hnit.
+  revert n i Hit.
+  induction it; intros; [ flia Hit | ].
+  cbn - [ "/" "mod" ].
+...
+
 remember (length (to_radix n i)) as len eqn:Hlen; symmetry in Hlen.
 revert n i Hnz Hlen.
 induction len; intros. {
@@ -1393,6 +1447,8 @@ induction len; intros. {
   unfold to_radix in Hlen.
   now destruct n.
 }
+Print to_radix_loop.
+Compute (let n := 5 in let it := 8 in let i := 243 in fold_left (λ a j : nat, a * n + j) (rev (to_radix_loop it n i)) 0).
 ...
 Compute (let n := 12 in let i := 7 in to_radix n i).
 Compute (let n := 5 in let i := 243 in fold_left (λ a j : nat, a * n + j) (rev (to_radix n i)) 0).
