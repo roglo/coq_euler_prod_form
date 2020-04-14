@@ -1278,7 +1278,28 @@ rewrite nth_find_loop_app_2. 2: {
   rewrite Nat.sub_0_r in Hj; subst k.
   flia Hka.
 }
-rewrite map_length, seq_length, Nat.add_0_l.
+rewrite map_length, seq_length, Nat.add_0_l; cbn.
+Compute (let l := [2; 2; 3; 6; 0; 0; 2] in let a := 4 in nth_find_all_loop (Nat.eqb (nth a l 0)) l 0).
+remember (nat_in_list a _) as b eqn:Hb; symmetry in Hb.
+destruct b; [ easy | ].
+specialize ((proj1 (nat_in_list_false_iff _ _)) Hb a) as H1.
+exfalso; apply H1; [ | easy ].
+...
+rewrite nth_find_loop_app_2. 2: {
+  intros l1 Hl1.
+  apply nat_in_list_false_iff.
+  intros j Hj Haj; subst j.
+  apply in_map_iff in Hl1.
+  destruct Hl1 as (k & Hkl & Hka); subst l1.
+  destruct Hka as [Hka| ]; [ | easy ].
+  subst k.
+  apply in_nth_find_all_loop_eq in Hj; [ | flia ].
+
+  apply in_seq in Hka; destruct Hka as (_, Hka); cbn in Hka.
+  apply in_nth_find_all_loop_eq in Hj; [ | flia ].
+  rewrite Nat.sub_0_r in Hj; subst k.
+  flia Hka.
+
 ...
 induction a. {
   cbn - [ Nat.eqb ].
