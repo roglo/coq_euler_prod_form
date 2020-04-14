@@ -1285,9 +1285,10 @@ destruct b; [ easy | ].
 specialize ((proj1 (nat_in_list_false_iff _ _)) Hb a) as H1.
 exfalso; apply H1; clear H1; [ | easy ].
 apply in_seq in Ha; destruct Ha as (_, Ha); cbn in Ha.
+clear - Ha.
+Compute (let l := [2; 2; 3; 6; 0; 0; 2] in map (λ a, nth_find_all_loop (Nat.eqb (nth a l 0)) l 0) (seq 0 (length l))).
 Search nth_find_all_loop.
 ...
-clear - Ha.
 revert a Ha.
 induction l as [| b]; intros; [ easy | ].
 cbn.
@@ -1296,7 +1297,6 @@ remember (nth a l 0 =? b) as c eqn:Hc; symmetry in Hc.
 destruct c. {
   right.
   apply Nat.eqb_eq in Hc.
-  rewrite Hc.
 ...
 rewrite nth_find_loop_app_2. 2: {
   intros l1 Hl1.
