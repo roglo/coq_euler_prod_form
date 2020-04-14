@@ -181,6 +181,14 @@ Fixpoint to_radix_loop it n i :=
 
 Definition to_radix n i := to_radix_loop n n i.
 
+(* question: my "to_radix" creates actually a list of exactly length n;
+   it is valid only for values of i between 0 and n^n-1; its name is
+   misleading. Do I change its name? Or do I program a version doing
+   exactly the conversion to radix n, e.g. by initializing it to i
+   instead of n? In that case, the result is not always of length n *)
+
+...
+
 Fixpoint disp_loop' i l ll :=
   match i with
   | 0 => ll
@@ -1357,6 +1365,30 @@ intros.
 unfold dispatch_list'''.
 now rewrite map_length, seq_length.
 Qed.
+
+Lemma to_radix_loop_enough_iter : ∀ it it' n i,
+  n ≠ 0
+  → n ≤ it
+  → n ≤ it'
+  → to_radix_loop it n i = to_radix_loop it' n i.
+Proof.
+intros * Hnz Hnit Hnit'.
+revert n i it' Hnz Hnit Hnit'.
+induction it; intros; cbn. {
+  now apply Nat.le_0_r in Hnit; subst n.
+}
+destruct it'. {
+  now apply Nat.le_0_r in Hnit'; subst n.
+}
+cbn; f_equal.
+destruct (Nat.eq_dec n (S it)) as [Hnsit| Hnsit]. {
+  destruct it.
+  subst n.
+  rewrite Nat.div_1_r.
+  cbn.
+  destruct it'; [ easy | ].
+  cbn - [ "/" ].
+...
 
 Theorem locate_dispatch''' : ∀ n i, i < n → locate (dispatch''' n i) = i.
 Proof.
