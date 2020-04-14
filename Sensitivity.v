@@ -1362,6 +1362,7 @@ unfold dispatch_list'''.
 now rewrite map_length, seq_length.
 Qed.
 
+(*
 Lemma to_radix_loop_enough_iter : ∀ it it' n i,
   n ≠ 0
   → n ≤ it
@@ -1384,7 +1385,10 @@ destruct (Nat.eq_dec n (S it)) as [Hnsit| Hnsit]. {
     apply Nat.lt_1_r in Hin; subst i; cbn.
     destruct it'; [ easy | ].
     cbn - [ "/" ].
+Print to_radix_loop.
+Compute (to_radix_loop 4 2 1).
 ...
+*)
 
 Theorem locate_dispatch''' : ∀ n i, i < n → locate (dispatch''' n i) = i.
 Proof.
@@ -1418,15 +1422,14 @@ assert
   (H : ∀ it n i,
    n ≠ 0
    → n ≤ it
+   → i < n ^ n
    → fold_left (λ a j : nat, a * n + j) (rev (to_radix_loop it n i)) 0 = i). {
   clear.
-  intros * Hnz Hnit.
-  revert n i Hnz Hnit.
+  intros * Hnz Hnit Hin.
+  revert n i Hnz Hnit Hin.
   induction it; intros; [ flia Hnz Hnit | ].
   cbn - [ "/" "mod" ].
   rewrite fold_left_app; cbn.
-...
-  rewrite to_radix_loop_enough_iter with (it' := S it).
 ...
   destruct (Nat.eq_dec n (S it)) as [Hnsit| Hnsit]. {
 
