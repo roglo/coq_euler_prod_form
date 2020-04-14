@@ -238,17 +238,15 @@ Fixpoint nth_find_all_loop {A} (f : A → bool) l i :=
 Definition nth_find_all A f l := @nth_find_all_loop A f l 0.
 Arguments nth_find_all [A]%type_scope _%function_scope _%list_scope.
 
-Definition dispatch''' n i :=
-  map (λ j, nth_find_all (Nat.eqb j) (rev (to_radix n i))) (seq 0 n).
+Definition dispatch_list''' l :=
+  map (λ j, nth_find_all (Nat.eqb j) l) (seq 0 (length l)).
 
-Definition pre_partitions''' n :=
-  map (dispatch''' n) (seq 0 (n ^ n)).
+Definition dispatch''' n i := dispatch_list''' (rev (to_radix n i)).
+
+Definition pre_partitions''' n := map (dispatch''' n) (seq 0 (n ^ n)).
 
 Compute (pre_partitions 2 = pre_partitions''' 2).
 Compute (pre_partitions 3 = pre_partitions''' 3).
-
-Definition dispatch_list''' l :=
-  map (λ j, nth_find_all (Nat.eqb j) l) (seq 0 (length l)).
 
 Compute (let l := [3; 2; 1; 1] in (dispatch_list'' l, dispatch_list''' l)).
 
@@ -1304,10 +1302,7 @@ specialize (in_nth_find_all_loop_eqb_if a l 0 Ha) as H1.
 now rewrite Nat.add_0_r in H1.
 Qed.
 
-Inspect 1.
-
-...
-
+(*
 Theorem locate_dispatch_list : ∀ l,
   (∀ a : nat, a ∈ l → a < length l)
   → locate_list (dispatch_list'' l) = l.
@@ -1345,6 +1340,65 @@ f_equal. {
 }
 ...
 *)
+
+Lemma to_radix_loop_length : ∀ it n i, length (to_radix_loop it n i) = it.
+Proof.
+intros.
+revert n i.
+induction it; intros; [ easy | cbn ].
+now rewrite IHit.
+Qed.
+
+Lemma in_to_radix_loop : ∀ it n i a,
+  n ≠ 0
+  → a ∈ to_radix_loop it n i
+  → a < n.
+Proof.
+intros * Hnz Han.
+revert a n i Hnz Han.
+induction it; intros; [ easy | ].
+cbn - [ "/" "mod" ] in Han |-*.
+destruct Han as [Han| Han]. {
+  rewrite <- Han.
+  now apply Nat.mod_upper_bound.
+}
+now apply (IHit _ _ (i / n)).
+Qed.
+
+Theorem locate_dispatch''' : ∀ n i, i < n → locate (dispatch''' n i) = i.
+Proof.
+intros * Hin.
+unfold locate, dispatch'''.
+rewrite locate_dispatch_list'''. 2: {
+  intros a Ha.
+  apply in_rev in Ha.
+  rewrite rev_length.
+  unfold to_radix in Ha |-*.
+  rewrite to_radix_loop_length.
+  apply in_to_radix_loop in Ha; [ easy | flia Hin ].
+}
+Search (length (dispatch_list''' _)).
+...
+rewrite dispatch_list_length'''.
+...
+
+  }
+  destruct a; [ apply Nat.lt_0_succ | ].
+  apply -> Nat.succ_lt_mono.
+  apply (IHn _ i).
+...
+  assert (H : ∈ it n i a, a ∈ to_radix_loop it n i → a
+  revert a i Hin Ha.
+  induction n; intros; [ easy | ].
+  cbn - [ "/" "mod" ] in Ha |-*.
+  destruct Ha as [Ha| Ha]. {
+    rewrite Nat.mod_small in Ha; [ | easy ].
+    subst a.
+    destruct i; [ flia | ].
+    apply Nat.succ_lt_mono in Hin.
+    apply -> Nat.succ_lt_mono.
+Print to_radix_loop.
+...
 
 Theorem locate_dispatch : ∀ n i, i < n → locate (dispatch n i) = i.
 Proof.
