@@ -611,7 +611,7 @@ destruct (f a). {
 now specialize (IHl i (j + 1) Hij1).
 Qed.
 
-Lemma in_nth_find_all_loop_eq : ∀ l i k b,
+Lemma in_nth_find_all_loop_eqb : ∀ l i k b,
   b ∈ nth_find_all_loop (Nat.eqb i) l k
   → k ≤ b
   → nth (b - k) l 0 = i.
@@ -646,6 +646,29 @@ specialize (H1 H); clear H.
 now replace (b - (k + 1)) with bk in H1 by flia Hbk1.
 Qed.
 
+Lemma in_nth_find_all_loop_eqb_if : ∀ a l d,
+  a < length l
+  → a + d ∈ nth_find_all_loop (Nat.eqb (nth a l 0)) l d.
+Proof.
+intros * Hal.
+revert d a Hal.
+induction l as [| b]; intros; [ easy | ].
+cbn.
+destruct a; [ now rewrite Nat.eqb_refl; left | ].
+remember (nth a l 0 =? b) as c eqn:Hc; symmetry in Hc.
+destruct c. {
+  right.
+  rewrite Nat.add_succ_comm, Nat.add_1_r.
+  cbn in Hal.
+  apply Nat.succ_lt_mono in Hal.
+  now apply IHl.
+}
+rewrite Nat.add_succ_comm, Nat.add_1_r.
+cbn in Hal.
+apply Nat.succ_lt_mono in Hal.
+now apply IHl.
+Qed.
+
 Lemma in_flat_map_nth_find_all_loop_eq : ∀ l j k len b,
   b ∈ flat_map (λ i, nth_find_all_loop (Nat.eqb i) l k) (seq j len)
   → k ≤ b
@@ -654,7 +677,7 @@ Proof.
 intros * Hbf Hkb.
 apply in_flat_map in Hbf.
 destruct Hbf as (i & Hi & Hik).
-apply in_nth_find_all_loop_eq in Hik; [ | easy ].
+apply in_nth_find_all_loop_eqb in Hik; [ | easy ].
 rewrite Hik.
 now apply in_seq in Hi.
 Qed.
@@ -838,7 +861,7 @@ assert
     remember (b - k) as bk eqn:Hbk; symmetry in Hbk.
     destruct bk; [ cbn in Hbf; flia Hbf | ].
     cbn in Hbf.
-    apply in_nth_find_all_loop_eq in Hb; [ | flia Hbk ].
+    apply in_nth_find_all_loop_eqb in Hb; [ | flia Hbk ].
     replace (b - (k + 1)) with bk in Hb by flia Hbk.
     flia Hb Hbf.
   }
@@ -854,7 +877,7 @@ assert
   destruct Hb2 as [Hb2| Hb2]. {
     destruct (le_dec (k + 1) b) as [Hkb| Hkb]. {
       apply in_flat_map_nth_find_all_loop_eq in Hb1; [ | easy ].
-      apply in_nth_find_all_loop_eq in Hb2; [ | easy ].
+      apply in_nth_find_all_loop_eqb in Hb2; [ | easy ].
       rewrite Hb2 in Hb1.
       flia Hb1.
     }
@@ -1238,8 +1261,6 @@ rewrite Heqll.
 unfold locate_list.
 unfold dispatch_list'''.
 rewrite map_length, seq_length.
-Compute (let l := [2; 2; 0; 3] in map (λ i, nth_find (nat_in_list i) (map (λ j, nth_find_all (Nat.eqb j) l) (seq 0 (length l)))) (seq 0 (length l))).
-(**)
 replace l with (map (λ i, nth i l 0) (seq 0 (length l))) at 2. 2: {
   clear.
   induction l as [| a]; [ easy | ].
@@ -1250,12 +1271,7 @@ replace l with (map (λ i, nth i l 0) (seq 0 (length l))) at 2. 2: {
 apply map_ext_in_iff.
 intros a Ha.
 unfold nth_find.
-(*
-rewrite nth_find_loop_map.
-*)
 unfold nth_find_all.
-(**)
-Compute (let l := [2; 2; 3; 6; 0; 0; 2] in map (λ j, nth_find_all (Nat.eqb j) l) (seq 0 (length l))).
 replace (length l) with (nth a l 0 + 1 + (length l - (nth a l 0 + 1))). 2: {
   apply in_seq in Ha; cbn in Ha.
   destruct Ha as (_, Ha).
@@ -1274,202 +1290,22 @@ rewrite nth_find_loop_app_2. 2: {
   apply in_map_iff in Hl1.
   destruct Hl1 as (k & Hkl & Hka); subst l1.
   apply in_seq in Hka; destruct Hka as (_, Hka); cbn in Hka.
-  apply in_nth_find_all_loop_eq in Hj; [ | flia ].
+  apply in_nth_find_all_loop_eqb in Hj; [ | flia ].
   rewrite Nat.sub_0_r in Hj; subst k.
   flia Hka.
 }
 rewrite map_length, seq_length, Nat.add_0_l; cbn.
-Compute (let l := [2; 2; 3; 6; 0; 0; 2] in let a := 4 in nth_find_all_loop (Nat.eqb (nth a l 0)) l 0).
 remember (nat_in_list a _) as b eqn:Hb; symmetry in Hb.
 destruct b; [ easy | ].
 specialize ((proj1 (nat_in_list_false_iff _ _)) Hb a) as H1.
 exfalso; apply H1; clear H1; [ | easy ].
 apply in_seq in Ha; destruct Ha as (_, Ha); cbn in Ha.
-clear - Ha.
-Compute (let l := [2; 2; 3; 6; 0; 0; 2] in map (λ a, nth_find_all_loop (Nat.eqb (nth a l 0)) l 0) (seq 0 (length l))).
-Search nth_find_all_loop.
-...
-revert a Ha.
-induction l as [| b]; intros; [ easy | ].
-cbn.
-destruct a; [ now rewrite Nat.eqb_refl; left | ].
-remember (nth a l 0 =? b) as c eqn:Hc; symmetry in Hc.
-destruct c. {
-  right.
-  apply Nat.eqb_eq in Hc.
-...
-rewrite nth_find_loop_app_2. 2: {
-  intros l1 Hl1.
-  apply nat_in_list_false_iff.
-  intros j Hj Haj; subst j.
-  apply in_map_iff in Hl1.
-  destruct Hl1 as (k & Hkl & Hka); subst l1.
-  destruct Hka as [Hka| ]; [ | easy ].
-  subst k.
-  apply in_nth_find_all_loop_eq in Hj; [ | flia ].
+specialize (in_nth_find_all_loop_eqb_if a l 0 Ha) as H1.
+now rewrite Nat.add_0_r in H1.
+Qed.
 
-  apply in_seq in Hka; destruct Hka as (_, Hka); cbn in Hka.
-  apply in_nth_find_all_loop_eq in Hj; [ | flia ].
-  rewrite Nat.sub_0_r in Hj; subst k.
-  flia Hka.
+Inspect 1.
 
-...
-induction a. {
-  cbn - [ Nat.eqb ].
-  destruct l as [| a]; [ easy | ].
-  clear Ha.
-  cbn - [ Nat.eqb ].
-  destruct a; [ easy | ].
-  unfold Nat.eqb at 1.
-  replace (nat_in_list _ _) with false. 2: {
-    symmetry.
-    apply nat_in_list_false_iff.
-    intros j Hj H; subst j.
-    revert Hj.
-    apply not_in_nth_find_all_loop; flia.
-  }
-  destruct l as [| b]. {
-    specialize (Hl (S a) (or_introl eq_refl)); cbn in Hl.
-    flia Hl.
-  }
-  destruct a; [ easy | ].
-  replace (length (b :: l)) with (1 + (length (b :: l) - 1)) by (cbn; flia).
-  rewrite seq_app, map_app.
-  rewrite nth_find_loop_app_2. 2: {
-    intros l1 Hl1.
-    unfold seq, map in Hl1.
-    destruct Hl1 as [Hl1| Hl1]; [ | easy ].
-    apply nat_in_list_false_iff.
-    intros j Hj Hjz.
-    subst j l1.
-    replace (1 =? S (S a)) with false in Hj by easy.
-    revert Hj.
-    apply not_in_nth_find_all_loop; flia.
-  }
-...
-Compute (map (λ j, nth_find_all (Nat.eqb j) [2; 2; 0]) (seq 0 3)).
-Compute (let l := [2; 2; 3; 1; 0; 4; 2] in map (map (λ i, nth i l 0)) (map (λ j, nth_find_all (Nat.eqb j) l) (seq 0 (length l)))).
-Search dispatch_list'''.
-Compute (map (λ i, nat_in_list i (nth_find_all (Nat.eqb 1) [2; 2; 0])) (seq 0 3)).
-Compute (map (λ i, nat_in_list i (nth_find_all (Nat.eqb 2) [2; 2; 0])) (seq 0 3)).
-unfold nth_find_all.
-Check disp_loop_small_r.
-Print disp_loop.
-Print nth_find_all_loop.
-Theorem nth_find_all_loop_eqb f l i =
-  nth_find_all_loop (Nat.eqb j) l i =
-(* les rangs de tous ceux dont la valeur vaut j *)
-...
-  match l with
-  | [] => []
-  | a :: l' =>
-      if Nat.eqb j a then i :: nth_find_all_loop A f l' (i + 1)
-      else nth_find_all_loop A f l' (i + 1)
-...
-rewrite nth_find_loop_map.
-apply in_seq in Ha.
-destruct Ha as (_, Ha); cbn in Ha.
-unfold nth_find_all.
-Search nth_find_all_loop.
-...
-Search nat_in_list.
-  assert
-    (Hij : ∀ i j k, i < j →
-    nat_in_list i (nth_find_all_loop (Nat.eqb k) l j) = false). {
-...
-Print nth_find_loop.
-Compute (map (λ i, nat_in_list i (nth_find_all (Nat.eqb 0) [2; 2; 0])) (seq 0 3)).
-Compute (map (λ i, nat_in_list i (nth_find_all (Nat.eqb 1) [2; 2; 0])) (seq 0 3)).
-Compute (map (λ i, nat_in_list i (nth_find_all (Nat.eqb 2) [2; 2; 0])) (seq 0 3)).
-...
-replace (length l) with (a + (length l - a)) by flia Ha.
-rewrite seq_app; cbn.
-rewrite nth_find_loop_app_2. 2: {
-  intros j Hj.
-  apply in_seq in Hj; cbn in Hj; destruct Hj as (_, Hja).
-  unfold nth_find_all.
-...
-  clear - Hja.
-  apply nat_in_list_false_iff.
-  intros k Ha Hak; subst k.
-Check not_in_nth_find_all_loop.
-Theorem not_in_nth_find_all_loop2 : ∀ A f (l : list A) i j,
-  j + length l < i → i ∉ nth_find_all_loop f l j.
-...
-revert Ha.
-apply not_in_nth_find_all_loop2.
-...
-  revert Ha.
-  apply not_in_nth_find_all_loop.
-...
-  assert (H : ∀ i j a l,
-    j + i < a
-    → nat_in_list a (nth_find_all_loop (Nat.eqb j) l i) = false). {
-... (* oui, bon, c'est pas ça *)
-    clear.
-    intros * Hja.
-    revert i j a Hja.
-    induction l as [| b]; intros; [ easy | cbn ].
-    remember (j =? b) as jb eqn:Hjb; symmetry in Hjb.
-    destruct jb. {
-      apply Nat.eqb_eq in Hjb; subst j; cbn.
-      destruct (Nat.eq_dec a i) as [Haz| Haz]; [ now subst a; flia Hja | ].
-      apply IHl.
-...
-clear Hl; revert a Ha.
-induction l as [| b]; intros; [ now cbn; rewrite match_id | ].
-cbn - [ Nat.eqb ].
-...
-destruct l as [| b]; [ easy | ].
-cbn - [ nth_find_loop nth_find_all_loop Nat.eqb ].
-f_equal. {
-  destruct b; [ easy | ].
-  cbn - [ Nat.eqb ].
-  remember (0 =? S b) as c; cbn in Heqc; subst c.
-  assert
-    (Hij : ∀ i j k, i < j →
-    nat_in_list i (nth_find_all_loop (Nat.eqb k) l j) = false). {
-    clear.
-    intros * Hij.
-    revert i j Hij.
-    induction l; intros; [ easy | ].
-    cbn - [ Nat.eqb ].
-    destruct (k =? a). {
-      cbn - [ Nat.eqb ].
-      destruct (Nat.eq_dec i j) as [Hiej| Hiej]; [ flia Hij Hiej | ].
-      apply IHl; flia Hij.
-    }
-    apply IHl; flia Hij.
-  }
-  rewrite Hij; [ | flia ].
-  replace (length l) with (b + (length l - b)). 2: {
-    specialize (Hl (S b) (or_introl eq_refl)); cbn in Hl.
-    flia Hl.
-  }
-  rewrite seq_app, map_app; cbn.
-  rewrite nth_find_loop_app_2. 2: {
-    intros j Hj.
-    apply in_map_iff in Hj.
-    destruct Hj as (k & Hk & Hkb).
-    remember (k =? S b) as kb eqn:Hkb1; symmetry in Hkb1.
-    destruct kb. {
-      apply Nat.eqb_eq in Hkb1; subst k.
-      apply in_seq in Hkb; flia Hkb.
-    }
-    rewrite <- Hk.
-    apply Hij; flia.
-  }
-  rewrite map_length, seq_length; cbn.
-  replace (length l - b) with (1 + (length l - S b)). 2: {
-    specialize (Hl (S b) (or_introl eq_refl)); cbn in Hl.
-    flia Hl.
-  }
-  rewrite seq_app, map_app; cbn.
-  now rewrite Nat.eqb_refl.
-}
-replace l with (map (λ i, i) (seq 1 (length l)) at 2. 2: {
-  clear; induction l; [ easy | now cbn; rewrite IHl ].
-}
 ...
 
 Theorem locate_dispatch_list : ∀ l,
