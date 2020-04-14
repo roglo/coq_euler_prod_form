@@ -1256,30 +1256,29 @@ rewrite nth_find_loop_map.
 unfold nth_find_all.
 (**)
 Compute (let l := [2; 2; 3; 6; 0; 0; 2] in map (λ j, nth_find_all (Nat.eqb j) l) (seq 0 (length l))).
-...
-replace (length l) with (a + 1 + (length l - (a + 1))). 2: {
+replace (length l) with (nth a l 0 + 1 + (length l - (nth a l 0 + 1))). 2: {
   apply in_seq in Ha; cbn in Ha.
   destruct Ha as (_, Ha).
-  flia Ha.
+  specialize (Hl (nth a l 0) (nth_In l 0 Ha)) as H1.
+  flia H1.
 }
 do 2 rewrite seq_app.
 do 2 rewrite Nat.add_0_l.
-replace (seq a 1) with [a] by easy.
+replace (seq _ 1) with [nth a l 0] by easy.
 do 2 rewrite map_app.
 rewrite <- app_assoc.
 rewrite nth_find_loop_app_2. 2: {
-  intros j Hj.
+  intros l1 Hl1.
   apply nat_in_list_false_iff.
-  intros k Hk Hak; subst k.
-  apply in_map_iff in Hj.
-  destruct Hj as (k & Hkl & Hka); subst j.
+  intros j Hj Haj; subst j.
+  apply in_map_iff in Hl1.
+  destruct Hl1 as (k & Hkl & Hka); subst l1.
   apply in_seq in Hka; destruct Hka as (_, Hka); cbn in Hka.
-...
-  apply in_nth_find_all_loop_eq in Hk; [ | flia ].
-  rewrite Nat.sub_0_r in Hk; subst k.
-...
-  revert Hk.
-  apply not_in_nth_find_all_loop.
+  apply in_nth_find_all_loop_eq in Hj; [ | flia ].
+  rewrite Nat.sub_0_r in Hj; subst k.
+  flia Hka.
+}
+rewrite map_length, seq_length, Nat.add_0_l.
 ...
 induction a. {
   cbn - [ Nat.eqb ].
