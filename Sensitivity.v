@@ -193,20 +193,6 @@ Definition pre_partitions' n := map (dispatch' n) (seq 0 (n ^ n)).
 
 Compute (pre_partitions 3 = pre_partitions' 3).
 
-(* perhaps, showing they are equivalent (Compute says it), would
-   help?
-
-Theorem glop : ∀ n i, dispatch n i = dispatch' n i.
-Proof.
-intros.
-unfold dispatch, dispatch'.
-revert i.
-induction n; intros; [ easy | ].
-cbn - [ "mod" "/" ].
-unfold to_radix in IHn.
-...
-*)
-
 Definition dispatch_list l :=
   disp_loop' (length l) (rev l) (repeat [] (length l)).
 
@@ -1365,6 +1351,13 @@ destruct Han as [Han| Han]. {
 now apply (IHit _ _ (i / n)).
 Qed.
 
+Theorem dispatch_list'''_length : ∀ l, length (dispatch_list''' l) = length l.
+Proof.
+intros.
+unfold dispatch_list'''.
+now rewrite map_length, seq_length.
+Qed.
+
 Theorem locate_dispatch''' : ∀ n i, i < n → locate (dispatch''' n i) = i.
 Proof.
 intros * Hin.
@@ -1377,27 +1370,21 @@ rewrite locate_dispatch_list'''. 2: {
   rewrite to_radix_loop_length.
   apply in_to_radix_loop in Ha; [ easy | flia Hin ].
 }
-Search (length (dispatch_list''' _)).
-...
-rewrite dispatch_list_length'''.
-...
-
-  }
-  destruct a; [ apply Nat.lt_0_succ | ].
-  apply -> Nat.succ_lt_mono.
-  apply (IHn _ i).
-...
-  assert (H : ∈ it n i a, a ∈ to_radix_loop it n i → a
-  revert a i Hin Ha.
-  induction n; intros; [ easy | ].
-  cbn - [ "/" "mod" ] in Ha |-*.
-  destruct Ha as [Ha| Ha]. {
-    rewrite Nat.mod_small in Ha; [ | easy ].
-    subst a.
-    destruct i; [ flia | ].
-    apply Nat.succ_lt_mono in Hin.
-    apply -> Nat.succ_lt_mono.
-Print to_radix_loop.
+rewrite dispatch_list'''_length.
+rewrite rev_length.
+assert
+  (H : ∀ i b l,
+   fold_left (λ a j, a * length (to_radix n i) + j) l b =
+   fold_left (λ a j, a * n + j) l b). {
+  clear.
+  intros.
+  unfold to_radix.
+  destruct l as [| a]; [ easy | cbn ].
+  unfold to_radix.
+  now rewrite to_radix_loop_length.
+}
+rewrite H; clear H.
+Search (fold_left _ (rev _)).
 ...
 
 Theorem locate_dispatch : ∀ n i, i < n → locate (dispatch n i) = i.
