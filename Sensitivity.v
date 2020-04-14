@@ -1384,6 +1384,18 @@ assert
   now rewrite to_radix_loop_length.
 }
 rewrite H; clear H.
+assert (Hnz : n ≠ 0) by flia Hin; clear Hin.
+remember (length (to_radix n i)) as len eqn:Hlen; symmetry in Hlen.
+revert n i Hnz Hlen.
+induction len; intros. {
+  apply length_zero_iff_nil in Hlen.
+  rewrite Hlen; cbn.
+  unfold to_radix in Hlen.
+  now destruct n.
+}
+...
+Compute (let n := 12 in let i := 7 in to_radix n i).
+Compute (let n := 5 in let i := 243 in fold_left (λ a j : nat, a * n + j) (rev (to_radix n i)) 0).
 Search (fold_left _ (rev _)).
 ...
 
