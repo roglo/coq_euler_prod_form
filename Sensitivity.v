@@ -173,6 +173,10 @@ Compute (pre_partitions 3).
 
 (* alternative version *)
 
+(* conversion natural into radix n as a list of digits; i must be
+   less than n^n; always return n digits; e.g. radix 10 37 =
+   7; 3; 0 ... (eight 0s) *)
+
 Fixpoint to_radix_loop it n i :=
   match it with
   | 0 => []
@@ -180,14 +184,6 @@ Fixpoint to_radix_loop it n i :=
   end.
 
 Definition to_radix n i := to_radix_loop n n i.
-
-(* question: my "to_radix" creates actually a list of exactly length n;
-   it is valid only for values of i between 0 and n^n-1; its name is
-   misleading. Do I change its name? Or do I program a version doing
-   exactly the conversion to radix n, e.g. by initializing it to i
-   instead of n? In that case, the result is not always of length n *)
-
-...
 
 Fixpoint disp_loop' i l ll :=
   match i with
@@ -1370,10 +1366,11 @@ Lemma to_radix_loop_enough_iter : ∀ it it' n i,
   n ≠ 0
   → n ≤ it
   → n ≤ it'
+  → i < n ^ n
   → to_radix_loop it n i = to_radix_loop it' n i.
 Proof.
-intros * Hnz Hnit Hnit'.
-revert n i it' Hnz Hnit Hnit'.
+intros * Hnz Hnit Hnit' Hin.
+revert n i it' Hnz Hnit Hnit' Hin.
 induction it; intros; cbn. {
   now apply Nat.le_0_r in Hnit; subst n.
 }
@@ -1382,12 +1379,11 @@ destruct it'. {
 }
 cbn; f_equal.
 destruct (Nat.eq_dec n (S it)) as [Hnsit| Hnsit]. {
-  destruct it.
-  subst n.
-  rewrite Nat.div_1_r.
-  cbn.
-  destruct it'; [ easy | ].
-  cbn - [ "/" ].
+  destruct it. {
+    subst n.
+    apply Nat.lt_1_r in Hin; subst i; cbn.
+    destruct it'; [ easy | ].
+    cbn - [ "/" ].
 ...
 
 Theorem locate_dispatch''' : ∀ n i, i < n → locate (dispatch''' n i) = i.
