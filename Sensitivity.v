@@ -909,6 +909,16 @@ remember (i =? locate (l :: ll) mod S n) as b eqn:Hb.
 symmetry in Hb.
 destruct b. {
   apply Nat.eqb_eq in Hb.
+  destruct ll as [| l2]. {
+    subst n; cbn.
+    apply Nat.lt_1_r in Hi; rewrite Hi; clear i Hi Hb.
+    specialize (Huni 0 (Nat.lt_0_succ _)).
+    destruct Huni as (l1 & Hl1 & Hzl1).
+    destruct Hl1 as [Hl1| Hl1]; [ | easy ].
+    subst l1.
+    specialize (Hall l (or_introl eq_refl)).
+    cbn in Hall.
+    (* ouais, ça devrait le faire *)
 ...
 unfold locate.
 unfold locate_list.
