@@ -897,14 +897,15 @@ apply map_ext_in.
 intros i Hi.
 apply in_seq in Hi; cbn in Hi; destruct Hi as (_, Hi).
 unfold nth_find_all.
-destruct i. {
-  destruct ll as [| l]; [ easy | clear Hi ].
-  cbn - [ "/" "mod" ].
-  remember (length ll) as n eqn:Hn.
-  rewrite nth_find_all_loop_app.
-  rewrite Nat.add_0_l, rev_length.
-  rewrite to_radix_loop_length.
-  cbn - [ "/" "mod" ].
+(**)
+destruct ll as [| l]; [ easy | ].
+cbn - [ "/" "mod" Nat.eqb locate nth ].
+cbn in Hi, Hall, Huni.
+remember (length ll) as n eqn:Hn.
+rewrite nth_find_all_loop_app.
+rewrite Nat.add_0_l, rev_length.
+rewrite to_radix_loop_length.
+cbn - [ "/" "mod" Nat.eqb locate nth ].
 ...
 unfold locate.
 unfold locate_list.
