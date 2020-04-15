@@ -171,19 +171,6 @@ Fixpoint to_radix_loop it n i :=
 
 Definition to_radix n i := to_radix_loop n n i.
 
-Fixpoint disp_loop' i l ll :=
-  match i with
-  | 0 => ll
-  | S i' => disp_loop' i' (tl l) (cons_nth (hd 0 l) i' ll)
-  end.
-
-Definition dispatch' n i := disp_loop' n (to_radix n i) (repeat [] n).
-
-Definition pre_partitions' n := map (dispatch' n) (seq 0 (n ^ n)).
-
-Definition dispatch_list l :=
-  disp_loop' (length l) (rev l) (repeat [] (length l)).
-
 Fixpoint disp_loop'' n i l :=
   match l with
   | [] => repeat [] n
@@ -350,51 +337,7 @@ now right.
 Qed.
 
 Compute (let ll := [[1; 2]; []; [0]] in locate_list ll).
-Compute (let l := [2; 0; 0] in dispatch_list l).
-
-Theorem disp_loop'_length : ∀ i l ll,
-  ll ≠ []
-  → (∀ a, a ∈ l → a < length ll)
-  → length (disp_loop' i l ll) = length ll.
-Proof.
-intros * Hllz Hll.
-revert l ll Hllz Hll.
-induction i; intros; [ easy | cbn ].
-rewrite IHi; cycle 1. {
-  intros H; apply Hllz.
-  apply length_zero_iff_nil in H.
-  rewrite cons_nth_length in H. {
-    now apply length_zero_iff_nil in H.
-  }
-  destruct l as [| b]; [ easy | ].
-  apply Hll.
-  now left.
-} {
-  intros a Ha.
-  destruct l as [| b]; [ easy | cbn in Ha; cbn ].
-  rewrite app_length; cbn.
-  rewrite firstn_length.
-  rewrite skipn_length.
-  destruct (lt_dec b (length ll)) as [Hbl| Hbl]. {
-    rewrite min_l; [ | flia Hbl ].
-    rewrite <- Nat.add_succ_comm.
-    rewrite Nat.add_1_r, Nat.add_comm.
-    rewrite Nat.sub_add; [ | easy ].
-    now apply Hll; right.
-  } {
-    exfalso; apply Hbl.
-    apply Hll.
-    now left.
-  }
-}
-destruct ll as [| l1]; [ easy | ].
-destruct l as [| a]; [ easy | ].
-apply cons_nth_length.
-cbn; apply Hll.
-now left.
-Qed.
-
-Print disp_loop''.
+Compute (let l := [2; 0; 0] in dispatch_list''' l).
 
 Theorem disp_loop''_length : ∀ n i l,
   (∀ a, a ∈ l → a < n)
@@ -411,7 +354,7 @@ apply IHl.
 now intros a Ha; apply Hln; right.
 Qed.
 
-Compute (locate_list (dispatch_list [2; 0; 0])).
+Compute (locate_list (dispatch_list''' [2; 0; 0])).
 Compute (locate_list (dispatch_list'' [1; 2; 0])).
 
 Theorem List_app_cons : ∀ A (l1 l2 : list A) a,
