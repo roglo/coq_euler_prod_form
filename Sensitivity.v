@@ -943,14 +943,6 @@ destruct b. {
     now subst a.
   }
 ...
-  Hn : n = length (ll1 ++ ll)
-  Hi : i < S n
-  Hb : i = locate (l :: ll1 ++ ll) mod S n
-  ============================
-  nth_find_all_loop (Nat.eqb i)
-    (rev (to_radix_loop n (S n) (locate (l :: ll1 ++ ll) / S n))) 0 ++ [n] =
-  nth i (l :: ll1 ++ ll) []
-...
   Hn : n = length ll
   Hi : i < S n
   Hb : i = locate (l :: ll) mod S n
@@ -959,7 +951,7 @@ destruct b. {
     (rev (to_radix_loop n (S n) (locate (l :: ll) / S n))) 0 ++ [n] =
   nth i (l :: ll) []
 ...
-  Hn : n = S (length ll)
+  Hn : n = length (l2 :: ll)
   Hi : i < S n
   Hb : i = locate (l :: l2 :: ll) mod S n
   ============================
