@@ -1733,6 +1733,20 @@ split. {
 ...
 *)
 
+Theorem dispatch'''_locate : ∀ n ll,
+  is_pre_partition n ll
+  → dispatch''' n (locate ll) = ll.
+Proof.
+intros * Hll.
+unfold dispatch'''.
+unfold dispatch_list'''.
+rewrite rev_length.
+unfold to_radix at 2.
+rewrite to_radix_loop_length.
+unfold locate.
+unfold locate_list.
+...
+
 Theorem dispatch_locate : ∀ n ll,
   is_pre_partition n ll
   → dispatch n (locate ll) = ll.
