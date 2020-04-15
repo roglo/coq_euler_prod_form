@@ -182,14 +182,14 @@ Fixpoint nth_find_all_loop {A} (f : A → bool) l i :=
 Definition nth_find_all A f l := @nth_find_all_loop A f l 0.
 Arguments nth_find_all [A]%type_scope _%function_scope _%list_scope.
 
-Definition dispatch_list''' l :=
+Definition dispatch_list l :=
   map (λ j, nth_find_all (Nat.eqb j) l) (seq 0 (length l)).
 
-Definition dispatch''' n i := dispatch_list''' (rev (to_radix n i)).
+Definition dispatch n i := dispatch_list (rev (to_radix n i)).
 
-Definition pre_partitions''' n := map (dispatch''' n) (seq 0 (n ^ n)).
+Definition pre_partitions n := map (dispatch n) (seq 0 (n ^ n)).
 
-Compute (let l := [3; 2; 1; 1] in dispatch_list''' l).
+Compute (let l := [3; 2; 1; 1] in dispatch_list l).
 
 (* *)
 
@@ -220,10 +220,10 @@ Definition all_partitions n :=
   bsort list_list_nat_le
     (nodup (list_eq_dec (list_eq_dec Nat.eq_dec))
        (map (bsort list_nat_le)
-          (map (filter (λ s, negb (is_nil s))) (pre_partitions''' n)))).
+          (map (filter (λ s, negb (is_nil s))) (pre_partitions n)))).
 
-Compute (map (bsort list_nat_le) (pre_partitions''' 4)).
-Compute (nodup (list_eq_dec (list_eq_dec Nat.eq_dec)) (map (bsort list_nat_le) (pre_partitions''' 4))).
+Compute (map (bsort list_nat_le) (pre_partitions 4)).
+Compute (nodup (list_eq_dec (list_eq_dec Nat.eq_dec)) (map (bsort list_nat_le) (pre_partitions 4))).
 Compute (all_partitions 4).
 
 (* Local block sensitivity *)
@@ -233,7 +233,7 @@ Definition loc_bl_sens_list Bl f x :=
 
 Definition local_block_sensitivity n f x :=
   fold_right max 0
-    (map (λ Bl, length (loc_bl_sens_list Bl f x)) (pre_partitions''' n)).
+    (map (λ Bl, length (loc_bl_sens_list Bl f x)) (pre_partitions n)).
 
 Definition block_sensitivity n f :=
   fold_right max 0 (map (local_block_sensitivity n f) (seq 0 (2 ^ n))).
@@ -274,10 +274,10 @@ Definition locate ll :=
   fold_left (λ a i, a * length ll + i) (locate_list ll) 0.
 
 Compute (locate [[2]; []; [0; 1]]).
-Compute (dispatch''' 3 24).
+Compute (dispatch 3 24).
 Compute (locate [[]; [0; 2]; [1]]).
-Compute (dispatch''' 3 16).
-Compute (dispatch''' 4 23).
+Compute (dispatch 3 16).
+Compute (dispatch 4 23).
 Compute (locate [[0]; [1; 2]; []; [3]]).
 
 Theorem cons_nth_length : ∀ {A} i ll (v : A),
@@ -323,10 +323,10 @@ now right.
 Qed.
 
 Compute (let ll := [[1; 2]; []; [0]] in locate_list ll).
-Compute (let l := [2; 0; 0] in dispatch_list''' l).
+Compute (let l := [2; 0; 0] in dispatch_list l).
 
-Compute (locate_list (dispatch_list''' [2; 0; 0])).
-Compute (locate_list (dispatch_list''' [1; 2; 0])).
+Compute (locate_list (dispatch_list [2; 0; 0])).
+Compute (locate_list (dispatch_list [1; 2; 0])).
 
 Theorem List_app_cons : ∀ A (l1 l2 : list A) a,
   l1 ++ a :: l2 = l1 ++ [a] ++ l2.
@@ -439,21 +439,21 @@ apply Nat.eqb_eq in Hc; subst b.
 flia Hai Hb.
 Qed.
 
-Theorem dispatch_list'''_length : ∀ l, length (dispatch_list''' l) = length l.
+Theorem dispatch_list_length : ∀ l, length (dispatch_list l) = length l.
 Proof.
 intros.
-unfold dispatch_list'''.
+unfold dispatch_list.
 now rewrite map_length, seq_length.
 Qed.
 
-Theorem dispatch_list'''_is_pre_partition : ∀ l,
+Theorem dispatch_list_is_pre_partition : ∀ l,
   (∀ a, a ∈ l → a < length l)
-  → is_pre_partition (dispatch_list''' l).
+  → is_pre_partition (dispatch_list l).
 Proof.
 intros * Hl.
 split. {
   intros l1 Hl1 i Hi.
-  unfold dispatch_list''' in Hl1.
+  unfold dispatch_list in Hl1.
   move i at top.
   move l1 before l.
   apply in_map_iff in Hl1.
@@ -490,23 +490,23 @@ split. {
   rewrite Hi in H1.
   rewrite app_nth2 in H1; [ | now unfold "≥" ].
   rewrite Nat.sub_diag in H1; cbn in H1.
-  rewrite dispatch_list'''_length.
+  rewrite dispatch_list_length.
   apply H1.
   rewrite app_length; cbn; flia.
 }
 split. {
   intros i Hi.
-  rewrite dispatch_list'''_length in Hi.
-  exists (nth (nth i l 0) (dispatch_list''' l) []).
+  rewrite dispatch_list_length in Hi.
+  exists (nth (nth i l 0) (dispatch_list l) []).
   split. {
     apply nth_In.
-    unfold dispatch_list'''.
+    unfold dispatch_list.
     rewrite map_length.
     rewrite seq_length.
     apply Hl.
     now apply nth_In.
   }
-  unfold dispatch_list'''.
+  unfold dispatch_list.
   rewrite List_map_nth_in with (a := 0). 2: {
     rewrite seq_length.
     apply Hl.
@@ -533,7 +533,7 @@ split. {
   replace i with (i + 0) at 1 by easy.
   apply H.
 }
-unfold dispatch_list'''.
+unfold dispatch_list.
 rewrite <- flat_map_concat_map.
 assert (Hnd : ∀ l i j, NoDup (nth_find_all_loop (Nat.eqb i) l j)). {
   clear.
@@ -687,19 +687,19 @@ split. {
 }
 Qed.
 
-Theorem locate_dispatch_list''' : ∀ l,
+Theorem locate_dispatch_list : ∀ l,
   (∀ a : nat, a ∈ l → a < length l)
-  → locate_list (dispatch_list''' l) = l.
+  → locate_list (dispatch_list l) = l.
 Proof.
 intros * Hl.
-specialize (dispatch_list'''_is_pre_partition l Hl) as H1.
+specialize (dispatch_list_is_pre_partition l Hl) as H1.
 unfold is_pre_partition in H1.
 destruct H1 as (Hin & Huni & Hint).
-remember (dispatch_list''' l) as ll.
-unfold dispatch_list''' in Heqll.
+remember (dispatch_list l) as ll.
+unfold dispatch_list in Heqll.
 rewrite Heqll.
 unfold locate_list.
-unfold dispatch_list'''.
+unfold dispatch_list.
 rewrite map_length, seq_length.
 replace l with (map (λ i, nth i l 0) (seq 0 (length l))) at 2. 2: {
   clear.
@@ -797,13 +797,13 @@ assert
 now apply H.
 Qed.
 
-Compute (let n := 4 in let i := 255 in locate (dispatch''' n i)).
+Compute (let n := 4 in let i := 255 in locate (dispatch n i)).
 
-Theorem locate_dispatch''' : ∀ n i, i < n ^ n → locate (dispatch''' n i) = i.
+Theorem locate_dispatch : ∀ n i, i < n ^ n → locate (dispatch n i) = i.
 Proof.
 intros * Hin.
-unfold locate, dispatch'''.
-rewrite locate_dispatch_list'''. 2: {
+unfold locate, dispatch.
+rewrite locate_dispatch_list. 2: {
   intros a Ha.
   apply in_rev in Ha.
   rewrite rev_length.
@@ -812,7 +812,7 @@ rewrite locate_dispatch_list'''. 2: {
   apply in_to_radix_loop in Ha; [ easy | ].
   now intros H; subst n.
 }
-rewrite dispatch_list'''_length.
+rewrite dispatch_list_length.
 rewrite rev_length.
 assert
   (H : ∀ i b l,
@@ -847,16 +847,16 @@ Definition pre_partition_in n j k i :=
   (i + n ^ n - k * n ^ (n - j - 1)) mod (n ^ (n - j)) <? n ^ (n - j - 1).
 
 (* example: all pre-partitions that have the j in k-th set *)
-Compute (let n := 3 in let j := 1 in let k := 2 in map (λ i, (i, dispatch''' n i))
+Compute (let n := 3 in let j := 1 in let k := 2 in map (λ i, (i, dispatch n i))
 (filter (pre_partition_in n j k) (seq 0 (n ^ n)))).
 
-Theorem dispatch'''_locate : ∀ ll,
+Theorem dispatch_locate : ∀ ll,
   is_pre_partition ll
-  → dispatch''' (length ll) (locate ll) = ll.
+  → dispatch (length ll) (locate ll) = ll.
 Proof.
 intros * Hll.
-unfold dispatch'''.
-unfold dispatch_list'''.
+unfold dispatch.
+unfold dispatch_list.
 rewrite rev_length.
 unfold to_radix at 2.
 rewrite to_radix_loop_length.
@@ -924,8 +924,8 @@ intros.
 unfold block_sensitivity, sensitivity.
 rewrite map_loc_sens.
 unfold local_block_sensitivity.
-unfold pre_partitions'''.
-unfold dispatch'''.
+unfold pre_partitions.
+unfold dispatch.
 Print loc_bl_sens_list.
 ...
 unfold local_block_sensitivity, local_sensitivity.
