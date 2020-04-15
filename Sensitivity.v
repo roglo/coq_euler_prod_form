@@ -1725,6 +1725,7 @@ apply map_ext_in.
 intros i Hi.
 apply in_seq in Hi; cbn in Hi; destruct Hi as (_, Hi).
 unfold nth_find_all.
+Print nth_find_all_loop.
 ...
 unfold locate.
 unfold locate_list.
