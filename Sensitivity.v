@@ -1420,7 +1420,43 @@ specialize (H n 1).
 now rewrite Nat.add_1_r in H.
 Qed.
 
-Theorem locate_dispatch''' : ∀ n i, i < n → locate (dispatch''' n i) = i.
+Theorem fold_left_to_radix : ∀ n i,
+  i < n ^ n
+  → fold_left (λ a j : nat, a * n + j) (rev (to_radix n i)) 0 = i.
+Proof.
+intros * Hin.
+Compute (let n := 4 in let i := 253 in fold_left (λ a j : nat, a * n + j) (rev (to_radix n i)) 0).
+unfold to_radix.
+destruct n. {
+  now apply Nat.lt_1_r in Hin; subst i.
+}
+cbn - [ "/" "mod" ].
+rewrite fold_left_app; cbn - [ "/" "mod" ].
+...
+rewrite Nat.mod_small; [ | easy ].
+rewrite <- Nat.add_0_l; f_equal.
+rewrite Nat.div_small; [ | easy ].
+apply Nat.eq_mul_0; left.
+assert (H : ∀ n d,
+  fold_left (λ a j : nat, a * (n + d) + j)
+    (rev (to_radix_loop n (n + d) 0)) 0 = 0). {
+  clear.
+  intros; revert d.
+  induction n; intros; [ easy | cbn ].
+  rewrite Nat.sub_diag.
+  rewrite fold_left_app; cbn.
+  rewrite Nat.add_0_r.
+  apply Nat.eq_mul_0; left.
+  replace (S (n + d)) with (n + S d) by flia.
+  apply IHn.
+}
+specialize (H n 1).
+now rewrite Nat.add_1_r in H.
+Qed.
+
+Compute (let n := 4 in let i := 255 in locate (dispatch''' n i)).
+
+Theorem locate_dispatch''' : ∀ n i, i < n ^ n → locate (dispatch''' n i) = i.
 Proof.
 intros * Hin.
 unfold locate, dispatch'''.
@@ -1430,7 +1466,8 @@ rewrite locate_dispatch_list'''. 2: {
   rewrite rev_length.
   unfold to_radix in Ha |-*.
   rewrite to_radix_loop_length.
-  apply in_to_radix_loop in Ha; [ easy | flia Hin ].
+  apply in_to_radix_loop in Ha; [ easy | ].
+  now intros H; subst n.
 }
 rewrite dispatch_list'''_length.
 rewrite rev_length.
@@ -1446,12 +1483,10 @@ assert
   now rewrite to_radix_loop_length.
 }
 rewrite H; clear H.
-now apply fold_left_to_radix_small.
-Qed.
-
-Inspect 1.
-
 ...
+apply fold_left_to_radix.
+...
+Qed.
 
 Theorem locate_dispatch : ∀ n i, i < n → locate (dispatch n i) = i.
 Proof.
@@ -1720,7 +1755,7 @@ destruct (Nat.eq_dec n 0) as [Hnz| Hnz]. {
 unfold locate.
 (* example: (18, [2; 0; 0], [[1; 2]; []; [0]]) *)
 Compute (let n := 3 in let ll := [[1; 2]; []; [0]] in locate_list ll).
-Compute (let n := 3 in let l := [2; 0; 0] in dispatch_list n l).
+Compute (let l := [2; 0; 0] in dispatch_list l).
 ...
 Search (list nat → list (list nat)).
 Check locate_list.
