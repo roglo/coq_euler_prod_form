@@ -1709,10 +1709,11 @@ unfold dispatch_list'''.
 rewrite rev_length.
 unfold to_radix at 2.
 rewrite to_radix_loop_length.
-Compute (let ll := [[2]; []; [0; 1]] in map (λ j : nat, nth_find_all (Nat.eqb j) (rev (to_radix (length ll) (locate ll)))) (seq 0 (length ll))).
-Compute (let ll := [[2]; []; [0; 1]] in rev (to_radix (length ll) (locate ll))).
-Compute (let ll := [[2]; []; [0; 1]] in to_radix (length ll) (locate ll)).
 Compute (let ll := [[2]; []; [0; 1]] in locate ll).
+Compute (let ll := [[2]; []; [0; 1]] in to_radix (length ll) (locate ll)).
+Compute (let ll := [[2]; []; [0; 1]] in rev (to_radix (length ll) (locate ll))).
+Compute (let ll := [[2]; []; [0; 1]] in map (λ j : nat, nth_find_all (Nat.eqb j) (rev (to_radix (length ll) (locate ll)))) (seq 0 (length ll))).
+destruct Hll as (Hall & Hin & Hnd).
 ...
 unfold locate.
 unfold locate_list.
