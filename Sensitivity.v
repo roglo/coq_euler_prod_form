@@ -293,10 +293,9 @@ Require Import Sorting.
 
 (* property of partitions of {0,1,..,n-1} returned by pre_partitions *)
 
-Definition is_pre_partition n ll :=
-  length ll = n ∧
-  (∀ l, l ∈ ll → ∀ i, i ∈ l → i < n) ∧
-  (∀ i, i < n → ∃ l, l ∈ ll ∧ i ∈ l) ∧
+Definition is_pre_partition ll :=
+  (∀ l, l ∈ ll → ∀ i, i ∈ l → i < length ll) ∧
+  (∀ i, i < length ll → ∃ l, l ∈ ll ∧ i ∈ l) ∧
   NoDup (concat ll).
 
 (* locate: inverse of "dispatch" *)
@@ -686,15 +685,18 @@ apply Nat.eqb_eq in Hc; subst b.
 flia Hai Hb.
 Qed.
 
+Theorem dispatch_list'''_length : ∀ l, length (dispatch_list''' l) = length l.
+Proof.
+intros.
+unfold dispatch_list'''.
+now rewrite map_length, seq_length.
+Qed.
+
 Theorem dispatch_list'''_is_pre_partition : ∀ l,
   (∀ a, a ∈ l → a < length l)
-  → is_pre_partition (length l) (dispatch_list''' l).
+  → is_pre_partition (dispatch_list''' l).
 Proof.
 intros * Hl.
-split. {
-  unfold dispatch_list'''.
-  now rewrite map_length, seq_length.
-}
 split. {
   intros l1 Hl1 i Hi.
   unfold dispatch_list''' in Hl1.
@@ -734,11 +736,13 @@ split. {
   rewrite Hi in H1.
   rewrite app_nth2 in H1; [ | now unfold "≥" ].
   rewrite Nat.sub_diag in H1; cbn in H1.
+  rewrite dispatch_list'''_length.
   apply H1.
   rewrite app_length; cbn; flia.
 }
 split. {
   intros i Hi.
+  rewrite dispatch_list'''_length in Hi.
   exists (nth (nth i l 0) (dispatch_list''' l) []).
   split. {
     apply nth_In.
@@ -1242,7 +1246,7 @@ Proof.
 intros * Hl.
 specialize (dispatch_list'''_is_pre_partition l Hl) as H1.
 unfold is_pre_partition in H1.
-destruct H1 as (_ & Hin & Huni & Hint).
+destruct H1 as (Hin & Huni & Hint).
 remember (dispatch_list''' l) as ll.
 unfold dispatch_list''' in Heqll.
 rewrite Heqll.
@@ -1354,14 +1358,6 @@ destruct Han as [Han| Han]. {
 }
 now apply (IHit _ _ (i / n)).
 Qed.
-
-Theorem dispatch_list'''_length : ∀ l, length (dispatch_list''' l) = length l.
-Proof.
-intros.
-unfold dispatch_list'''.
-now rewrite map_length, seq_length.
-Qed.
-
 (*
 Lemma to_radix_loop_enough_iter : ∀ it it' n i,
   n ≠ 0
@@ -1733,9 +1729,9 @@ split. {
 ...
 *)
 
-Theorem dispatch'''_locate : ∀ n ll,
-  is_pre_partition n ll
-  → dispatch''' n (locate ll) = ll.
+Theorem dispatch'''_locate : ∀ ll,
+  is_pre_partition ll
+  → dispatch''' (length ll) (locate ll) = ll.
 Proof.
 intros * Hll.
 unfold dispatch'''.
@@ -1743,6 +1739,7 @@ unfold dispatch_list'''.
 rewrite rev_length.
 unfold to_radix at 2.
 rewrite to_radix_loop_length.
+Compute (let ll := [[2]; []; [0; 1]] in map (λ j : nat, nth_find_all (Nat.eqb j) (rev (to_radix (length ll) (locate ll)))) (seq 0 (length ll))).
 unfold locate.
 unfold locate_list.
 ...
