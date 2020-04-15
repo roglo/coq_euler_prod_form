@@ -1386,36 +1386,6 @@ Compute (to_radix_loop 4 2 1).
 ...
 *)
 
-Theorem fold_left_to_radix_small : ∀ n i,
-  i < n
-  → fold_left (λ a j : nat, a * n + j) (rev (to_radix n i)) 0 = i.
-Proof.
-intros * Hin.
-unfold to_radix.
-destruct n; [ easy | ].
-cbn - [ "/" "mod" ].
-rewrite fold_left_app; cbn - [ "/" "mod" ].
-rewrite Nat.mod_small; [ | easy ].
-rewrite <- Nat.add_0_l; f_equal.
-rewrite Nat.div_small; [ | easy ].
-apply Nat.eq_mul_0; left.
-assert (H : ∀ n d,
-  fold_left (λ a j : nat, a * (n + d) + j)
-    (rev (to_radix_loop n (n + d) 0)) 0 = 0). {
-  clear.
-  intros; revert d.
-  induction n; intros; [ easy | cbn ].
-  rewrite Nat.sub_diag.
-  rewrite fold_left_app; cbn.
-  rewrite Nat.add_0_r.
-  apply Nat.eq_mul_0; left.
-  replace (S (n + d)) with (n + S d) by flia.
-  apply IHn.
-}
-specialize (H n 1).
-now rewrite Nat.add_1_r in H.
-Qed.
-
 Theorem fold_left_to_radix : ∀ n i,
   i < n ^ n
   → fold_left (λ a j : nat, a * n + j) (rev (to_radix n i)) 0 = i.
@@ -1740,8 +1710,14 @@ rewrite rev_length.
 unfold to_radix at 2.
 rewrite to_radix_loop_length.
 Compute (let ll := [[2]; []; [0; 1]] in map (λ j : nat, nth_find_all (Nat.eqb j) (rev (to_radix (length ll) (locate ll)))) (seq 0 (length ll))).
+Compute (let ll := [[2]; []; [0; 1]] in rev (to_radix (length ll) (locate ll))).
+Compute (let ll := [[2]; []; [0; 1]] in to_radix (length ll) (locate ll)).
+Compute (let ll := [[2]; []; [0; 1]] in locate ll).
+...
 unfold locate.
 unfold locate_list.
+Search to_radix.
+unfold nth_find_all.
 ...
 
 Theorem dispatch_locate : ∀ n ll,
