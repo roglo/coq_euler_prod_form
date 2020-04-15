@@ -1416,50 +1416,33 @@ assert
   now rewrite to_radix_loop_length.
 }
 rewrite H; clear H.
-...
-assert (Hnz : n ≠ 0) by flia Hin; clear Hin.
 unfold to_radix.
-assert
-  (H : ∀ it n i,
-   n ≠ 0
-   → n ≤ it
-   → i < n ^ n
-   → fold_left (λ a j : nat, a * n + j) (rev (to_radix_loop it n i)) 0 = i). {
+destruct n; [ easy | ].
+cbn - [ "/" "mod" ].
+rewrite fold_left_app; cbn - [ "/" "mod" ].
+rewrite Nat.mod_small; [ | easy ].
+rewrite <- Nat.add_0_l; f_equal.
+rewrite Nat.div_small; [ | easy ].
+apply Nat.eq_mul_0; left.
+assert (H : ∀ n d,
+  fold_left (λ a j : nat, a * (n + d) + j)
+    (rev (to_radix_loop n (n + d) 0)) 0 = 0). {
   clear.
-  intros * Hnz Hnit Hin.
-  revert n i Hnz Hnit Hin.
-  induction it; intros; [ flia Hnz Hnit | ].
-  cbn - [ "/" "mod" ].
+  intros; revert d.
+  induction n; intros; [ easy | cbn ].
+  rewrite Nat.sub_diag.
   rewrite fold_left_app; cbn.
-  destruct (Nat.eq_dec n (S it)) as [Hnsit| Hnsit]. {
-    destruct n; [ easy | ].
-    apply Nat.succ_inj in Hnsit.
-    subst it.
-...
-  rewrite IHit. 3: {
-...
-  intros * Hn Hnit.
-  destruct n; [ easy | clear Hn ].
-  assert (Hit : n < it) by flia Hnit; clear Hnit.
-  revert n i Hit.
-  induction it; intros; [ flia Hit | ].
-  cbn - [ "/" "mod" ].
-...
-
-remember (length (to_radix n i)) as len eqn:Hlen; symmetry in Hlen.
-revert n i Hnz Hlen.
-induction len; intros. {
-  apply length_zero_iff_nil in Hlen.
-  rewrite Hlen; cbn.
-  unfold to_radix in Hlen.
-  now destruct n.
+  rewrite Nat.add_0_r.
+  apply Nat.eq_mul_0; left.
+  replace (S (n + d)) with (n + S d) by flia.
+  apply IHn.
 }
-Print to_radix_loop.
-Compute (let n := 5 in let it := 8 in let i := 243 in fold_left (λ a j : nat, a * n + j) (rev (to_radix_loop it n i)) 0).
-...
-Compute (let n := 12 in let i := 7 in to_radix n i).
-Compute (let n := 5 in let i := 243 in fold_left (λ a j : nat, a * n + j) (rev (to_radix n i)) 0).
-Search (fold_left _ (rev _)).
+specialize (H n 1).
+now rewrite Nat.add_1_r in H.
+Qed.
+
+Inspect 1.
+
 ...
 
 Theorem locate_dispatch : ∀ n i, i < n → locate (dispatch n i) = i.
