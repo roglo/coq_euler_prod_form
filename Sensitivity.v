@@ -1416,6 +1416,7 @@ assert
   now rewrite to_radix_loop_length.
 }
 rewrite H; clear H.
+...
 assert (Hnz : n ≠ 0) by flia Hin; clear Hin.
 unfold to_radix.
 assert
@@ -1430,9 +1431,7 @@ assert
   induction it; intros; [ flia Hnz Hnit | ].
   cbn - [ "/" "mod" ].
   rewrite fold_left_app; cbn.
-...
   destruct (Nat.eq_dec n (S it)) as [Hnsit| Hnsit]. {
-
     destruct n; [ easy | ].
     apply Nat.succ_inj in Hnsit.
     subst it.
