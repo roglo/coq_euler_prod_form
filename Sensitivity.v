@@ -897,6 +897,7 @@ apply map_ext_in.
 intros i Hi.
 apply in_seq in Hi; cbn in Hi; destruct Hi as (_, Hi).
 unfold nth_find_all.
+unfold to_radix.
 destruct ll as [| l]; [ easy | ].
 cbn - [ "/" "mod" Nat.eqb locate nth ].
 cbn in Hi, Hall, Huni.
@@ -941,6 +942,14 @@ destruct b. {
     apply Nat.lt_1_r in Hall.
     now subst a.
   }
+...
+  Hn : n = length (ll1 ++ ll)
+  Hi : i < S n
+  Hb : i = locate (l :: ll1 ++ ll) mod S n
+  ============================
+  nth_find_all_loop (Nat.eqb i)
+    (rev (to_radix_loop n (S n) (locate (l :: ll1 ++ ll) / S n))) 0 ++ [n] =
+  nth i (l :: ll1 ++ ll) []
 ...
   Hn : n = length ll
   Hi : i < S n
