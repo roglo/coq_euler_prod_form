@@ -897,7 +897,6 @@ apply map_ext_in.
 intros i Hi.
 apply in_seq in Hi; cbn in Hi; destruct Hi as (_, Hi).
 unfold nth_find_all.
-(**)
 destruct ll as [| l]; [ easy | ].
 cbn - [ "/" "mod" Nat.eqb locate nth ].
 cbn in Hi, Hall, Huni.
@@ -906,6 +905,10 @@ rewrite nth_find_all_loop_app.
 rewrite Nat.add_0_l, rev_length.
 rewrite to_radix_loop_length.
 cbn - [ "/" "mod" Nat.eqb locate nth ].
+remember (i =? locate (l :: ll) mod S n) as b eqn:Hb.
+symmetry in Hb.
+destruct b. {
+  apply Nat.eqb_eq in Hb.
 ...
 unfold locate.
 unfold locate_list.
