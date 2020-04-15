@@ -159,22 +159,6 @@ Definition is_nil {A} (l : list A) :=
   | _ => false
   end.
 
-(*
-Fixpoint disp_loop n i v r :=
-  match i with
-  | 0 => r
-  | S i' => disp_loop n i' (v / n) (cons_nth (v mod n) i' r)
-  end.
-
-Definition dispatch n i := disp_loop n n i (repeat [] n).
-
-Definition pre_partitions n := map (dispatch n) (seq 0 (n ^ n)).
-
-Compute (pre_partitions 3).
-*)
-
-(* alternative version *)
-
 (* conversion natural into radix n as a list of digits; i must be
    less than n^n; always return n digits; e.g. radix 10 37 =
    7; 3; 0 ... (eight 0s) *)
@@ -197,10 +181,6 @@ Definition dispatch' n i := disp_loop' n (to_radix n i) (repeat [] n).
 
 Definition pre_partitions' n := map (dispatch' n) (seq 0 (n ^ n)).
 
-(*
-Compute (pre_partitions 3 = pre_partitions' 3).
-*)
-
 Definition dispatch_list l :=
   disp_loop' (length l) (rev l) (repeat [] (length l)).
 
@@ -213,11 +193,6 @@ Fixpoint disp_loop'' n i l :=
 Definition dispatch'' n i := disp_loop'' n 0 (rev (to_radix n i)).
 
 Definition pre_partitions'' n := map (dispatch'' n) (seq 0 (n ^ n)).
-
-(*
-Compute (pre_partitions 2 = pre_partitions'' 2).
-Compute (pre_partitions 3 = pre_partitions'' 3).
-*)
 
 Definition dispatch_list'' l := disp_loop'' (length l) 0 l.
 
@@ -240,11 +215,6 @@ Definition dispatch_list''' l :=
 Definition dispatch''' n i := dispatch_list''' (rev (to_radix n i)).
 
 Definition pre_partitions''' n := map (dispatch''' n) (seq 0 (n ^ n)).
-
-(*
-Compute (pre_partitions 2 = pre_partitions''' 2).
-Compute (pre_partitions 3 = pre_partitions''' 3).
-*)
 
 Compute (let l := [3; 2; 1; 1] in (dispatch_list'' l, dispatch_list''' l)).
 
@@ -279,10 +249,8 @@ Definition all_partitions n :=
        (map (bsort list_nat_le)
           (map (filter (λ s, negb (is_nil s))) (pre_partitions''' n)))).
 
-(*
-Compute (map (bsort list_nat_le) (pre_partitions 4)).
-Compute (nodup (list_eq_dec (list_eq_dec Nat.eq_dec)) (map (bsort list_nat_le) (pre_partitions 4))).
-*)
+Compute (map (bsort list_nat_le) (pre_partitions''' 4)).
+Compute (nodup (list_eq_dec (list_eq_dec Nat.eq_dec)) (map (bsort list_nat_le) (pre_partitions''' 4))).
 Compute (all_partitions 4).
 
 (* Local block sensitivity *)
@@ -332,14 +300,12 @@ Definition locate_list ll :=
 Definition locate ll :=
   fold_left (λ a i, a * length ll + i) (locate_list ll) 0.
 
-(*
 Compute (locate [[2]; []; [0; 1]]).
-Compute (dispatch 3 24).
+Compute (dispatch''' 3 24).
 Compute (locate [[]; [0; 2]; [1]]).
-Compute (dispatch 3 16).
-Compute (dispatch 4 23).
+Compute (dispatch''' 3 16).
+Compute (dispatch''' 4 23).
 Compute (locate [[0]; [1; 2]; []; [3]]).
-*)
 
 Theorem cons_nth_length : ∀ {A} i ll (v : A),
   i < length ll → length (cons_nth i v ll) = length ll.
@@ -352,51 +318,6 @@ apply Nat.succ_lt_mono in Hi.
 f_equal.
 now apply IHll.
 Qed.
-
-(*
-Theorem disp_loop_length : ∀ n i v r,
-  n ≠ 0
-  → length r = n
-  → length (disp_loop n i v r) = length r.
-Proof.
-intros * Hnz Hrn.
-revert n v r Hnz Hrn.
-induction i; intros; [ easy | cbn ].
-rewrite IHi; [ | easy | ]. 2: {
-  rewrite cons_nth_length; [ easy | ].
-  rewrite Hrn.
-  now apply Nat.mod_upper_bound.
-}
-apply cons_nth_length.
-rewrite Hrn.
-now apply Nat.mod_upper_bound.
-Qed.
-*)
-
-(*
-Theorem disp_loop_0_r : ∀ n i ll,
-  n ≠ 0
-  → disp_loop n i 0 ll =
-       match ll with
-       | l :: ll' => (seq 0 i ++ l) :: ll'
-       | [] => if Nat.eq_dec i 0 then [] else [seq 0 i]
-       end.
-Proof.
-intros * Hnz.
-destruct n; [ easy | clear Hnz; cbn ].
-revert n ll.
-induction i; intros; [ now destruct ll | cbn ].
-rewrite Nat.sub_diag; cbn.
-rewrite IHi; f_equal.
-replace (0 :: seq 1 i) with (seq 0 (i + 1)) by now rewrite Nat.add_1_r.
-rewrite seq_app.
-destruct ll as [| l]; [ easy | ].
-rewrite app_comm_cons.
-replace (0 :: seq 1 i) with (seq 0 (i + 1)) by now rewrite Nat.add_1_r.
-rewrite seq_app; cbn.
-now rewrite <- app_assoc.
-Qed.
-*)
 
 Definition sub_list {A} (l : list A) start len :=
   firstn len (skipn start l).
@@ -412,103 +333,6 @@ rewrite Nat.add_1_r.
 rewrite <- (Nat.add_1_r (S start)).
 apply IHlen.
 Qed.
-
-(*
-Theorem disp_loop_small_r : ∀ n i, i ≠ 0 → ∀ v ll,
-  0 < v < n
-  → length ll = n
-  → disp_loop n i v ll =
-       (seq 0 (i - 1) ++ nth 0 ll []) :: sub_list ll 1 (v - 1) ++
-       [[i - 1] ++ nth v ll []] ++
-       sub_list ll (v + 1) (n - v - 1).
-Proof.
-intros * Hiz * Hvn Hrn.
-destruct i; [ easy | clear Hiz ].
-rewrite Nat.sub_succ, Nat.sub_0_r.
-revert n v ll Hvn Hrn.
-induction i; intros. {
-  cbn.
-  unfold cons_nth.
-  unfold sub_list.
-  rewrite Nat.mod_small; [ | easy ].
-  rewrite app_comm_cons.
-  destruct ll as [| a l]; [ cbn in Hrn; flia Hvn Hrn | ].
-  cbn.
-  rewrite app_comm_cons.
-  f_equal. {
-    destruct v; [ easy | ].
-    rewrite Nat.sub_succ, Nat.sub_0_r.
-    apply firstn_cons.
-  } {
-    f_equal.
-    rewrite firstn_skipn_comm.
-    f_equal.
-    replace (v + 1 + (n - v - 1)) with n by flia Hvn.
-    destruct n; [ easy | cbn; f_equal ].
-    cbn in Hrn.
-    apply Nat.succ_inj in Hrn; subst n.
-    symmetry; apply firstn_all.
-  }
-}
-remember (S i) as si; cbn; subst si.
-rewrite Nat.mod_small; [ | easy ].
-rewrite Nat.div_small; [ | easy ].
-cbn.
-rewrite Nat.mod_0_l; [ | flia Hvn ].
-rewrite Nat.div_0_l; [ | flia Hvn ].
-rewrite disp_loop_0_r; [ | flia Hvn ].
-remember (cons_nth _ _ _) as sn eqn:Hsn.
-symmetry in Hsn.
-destruct sn as [| l]. {
-  apply (f_equal (@length _)) in Hsn.
-  rewrite cons_nth_length in Hsn; cbn in Hsn; [ | easy ].
-  rewrite cons_nth_length in Hsn; cbn in Hsn; [ | now rewrite Hrn ].
-  now rewrite <- Hrn, Hsn in Hvn.
-}
-cbn in Hsn.
-injection Hsn; clear Hsn; intros H1 H2.
-remember (cons_nth _ _ _) as l2 eqn:Hl2.
-symmetry in Hl2.
-destruct l2 as [| l2 ll2]. {
-  apply (f_equal (@length _)) in Hl2.
-  rewrite cons_nth_length in Hl2; [ | now rewrite Hrn ].
-  subst sn.
-  apply length_zero_iff_nil in Hl2; subst ll.
-  now rewrite <- Hrn in Hvn.
-}
-subst ll2.
-cbn in H2; subst l.
-f_equal. {
-  rewrite app_comm_cons.
-  replace (0 :: seq 1 i) with (seq 0 i ++ [i]). 2: {
-    replace i with (0 + i) by easy.
-    now rewrite seq_app_last.
-  }
-  rewrite <- app_assoc.
-  f_equal; cbn; f_equal.
-  destruct v; [ easy | ].
-  cbn in Hl2.
-  destruct ll as [| l ll']; [ now rewrite <- Hrn in Hvn | ].
-  cbn in Hl2.
-  now injection Hl2.
-} {
-  destruct v; [ easy | ].
-  unfold sub_list.
-  cbn in Hl2; cbn.
-  rewrite Nat.sub_0_r.
-  destruct ll as [| l ll']; [ now rewrite <- Hrn in Hvn | ].
-  cbn in Hl2; cbn.
-  injection Hl2; intros; subst l2 sn.
-  f_equal; f_equal.
-  rewrite firstn_skipn_comm.
-  f_equal.
-  replace (v + 1 + (n - S v - 1)) with (n - 1) by flia Hvn.
-  cbn in Hrn.
-  rewrite <- Hrn, Nat.sub_succ, Nat.sub_0_r.
-  symmetry; apply firstn_all.
-}
-Qed.
-*)
 
 Theorem nth_find_loop_app_2 : ∀ A f (l1 l2 : list A) i,
   (∀ j, j ∈ l1 → f j = false)
@@ -623,7 +447,7 @@ intros * Hb1 Hbk.
 revert i k b Hb1 Hbk.
 induction l as [| a]; intros; [ easy | ].
 cbn.
-remember (b - (k(* + 1*))) as bk eqn:Hbk1; symmetry in Hbk1.
+remember (b - k) as bk eqn:Hbk1; symmetry in Hbk1.
 destruct bk. {
   cbn in Hb1.
   remember (i =? a) as ia eqn:Hia; symmetry in Hia.
@@ -800,7 +624,7 @@ rewrite <- flat_map_concat_map.
 assert (Hnd : ∀ l i j, NoDup (nth_find_all_loop (Nat.eqb i) l j)). {
   clear.
   intros.
-  revert i j (*Hij*).
+  revert i j.
   induction l as [| a]; intros; [ constructor | ].
   cbn - [ Nat.eqb ].
   remember (i =? a) as ia eqn:Hia; symmetry in Hia.
@@ -1090,163 +914,6 @@ assert
 rewrite H; clear H.
 now apply fold_left_to_radix.
 Qed.
-
-(*
-Theorem locate_dispatch : ∀ n i, i < n → locate (dispatch n i) = i.
-Proof.
-intros * Hin.
-unfold locate, dispatch.
-unfold locate_list.
-rewrite disp_loop_length; [ | flia Hin | apply repeat_length ].
-rewrite repeat_length.
-destruct (Nat.eq_dec i 0) as [Hiz| Hiz]. {
-  subst i; cbn.
-  specialize (disp_loop_0_r n n (repeat [] n)) as H1.
-  assert (Hnz : n ≠ 0) by flia Hin.
-  specialize (H1 Hnz); cbn in H1.
-  destruct (Nat.eq_dec n 0) as [H| H] in H1; [ easy | clear H ].
-  rewrite H1; clear H1.
-  replace (map _ (seq 0 n)) with (repeat 0 n). 2: {
-    symmetry.
-    replace (repeat 0 n) with (map (λ _, 0) (seq 0 n)). 2: {
-      clear.
-      remember (seq 0 n) as sn eqn:Hsn.
-      remember 0 as s in Hsn; clear Heqs; subst sn.
-      revert s.
-      induction n; intros; [ easy | now cbn; rewrite IHn ].
-    }
-    apply map_ext_in_iff.
-    intros i Hi; cbn.
-    replace n with (S (n - 1)) at 1 by flia Hnz; cbn.
-    rewrite app_nil_r.
-    remember (nat_in_list i (seq 0 n)) as b eqn:Hb.
-    symmetry in Hb.
-    destruct b; [ easy | exfalso ].
-    apply Bool.not_true_iff_false in Hb.
-    apply Hb; clear Hb.
-    clear Hin Hnz.
-    remember (seq 0 n) as l; clear - Hi.
-    revert i Hi.
-    induction l as [| a]; intros; [ easy | cbn ].
-    destruct (Nat.eq_dec i a) as [Hia| Hia]; [ easy | ].
-    destruct Hi as [Hi| Hi]; [ now subst a | ].
-    now apply IHl.
-  }
-  clear.
-  remember (repeat 0 n) as l.
-  remember n as m in Heql; clear Heqm; subst l.
-  induction m; [ easy | ].
-  apply IHm.
-}
-assert (Hnz : n ≠ 0) by flia Hin.
-rewrite (disp_loop_small_r n n Hnz); [ | flia Hiz Hin | ]. 2: {
-  apply repeat_length.
-}
-replace (nth 0 (repeat [] n) []) with ([] : list nat) by now destruct n.
-rewrite app_nil_r.
-replace (nth i (repeat [] n) []) with ([] : list nat). 2: {
-  clear; revert i.
-  induction n; intros; [ now destruct i | cbn ].
-  destruct i; [ easy | apply IHn ].
-}
-rewrite app_nil_r.
-replace (sub_list (repeat [] n) (i + 1) (n - i - 1)) with
-    (repeat ([] : list nat) (n - i - 1)). 2: {
-  clear - Hin.
-  unfold sub_list.
-  revert i Hin.
-  induction n; intros; [ easy | cbn ].
-  destruct i; cbn. {
-    rewrite Nat.sub_0_r.
-    replace n with (length (repeat ([] : list nat) n)) at 2. 2: {
-      apply repeat_length.
-    }
-    symmetry; apply firstn_all.
-  }
-  apply Nat.succ_lt_mono in Hin.
-  now apply IHn.
-}
-replace (sub_list (repeat [] n) 1 (i - 1)) with
-    (repeat ([] : list nat) (i - 1)). 2: {
-  clear - Hin.
-  unfold sub_list.
-  destruct n; intros; [ easy | cbn ].
-  destruct i; [ easy | cbn ].
-  rewrite Nat.sub_0_r.
-  apply Nat.succ_lt_mono in Hin.
-  revert i Hin.
-  induction n; intros; [ easy | cbn ].
-  destruct i; [ easy | cbn ].
-  apply Nat.succ_lt_mono in Hin.
-  now f_equal; apply IHn.
-}
-Compute
-  (let n := 6 in let i := 4 in
-   map
-     (λ j,
-      nth_find (nat_in_list j)
-        (seq 0 (n - 1) ::
-         repeat [] (i - 1) ++ [[n - 1]] ++ repeat [] (n - i - 1)))
-       (seq 0 n)).
-replace (map _ _) with (repeat 0 (n - 1) ++ [i]). 2: {
-  symmetry.
-  destruct n; [ easy | clear Hnz ].
-  rewrite Nat.sub_succ, Nat.sub_0_r.
-  replace (S n - i - 1) with (n - i) by flia Hin.
-  rewrite <- (Nat.add_1_r n).
-  rewrite seq_app, Nat.add_0_l.
-  replace (seq n 1) with [n] by easy.
-  rewrite map_app.
-  f_equal. {
-    rewrite map_ext_in with (g := λ j, 0). 2: {
-      intros j Hj; cbn.
-      remember (nat_in_list j (seq 0 n)) as b eqn:Hb.
-      symmetry in Hb.
-      destruct b; [ easy | exfalso ].
-      apply Bool.not_true_iff_false in Hb; apply Hb; clear Hb.
-      remember (seq 0 n) as l eqn:Hl.
-      clear - Hj.
-      revert j Hj.
-      induction l as [| a]; intros; [ easy | cbn ].
-      destruct (Nat.eq_dec j a) as [Hia| Hia]; [ easy | ].
-      destruct Hj as [Hi| Hi]; [ now subst a | ].
-      now apply IHl.
-    }
-    clear.
-    remember (seq 0 n) as l.
-    remember 0 as s in Heql.
-    clear Heqs; subst l.
-    revert s.
-    induction n; intros; [ easy | cbn ].
-    now rewrite IHn.
-  } {
-    cbn.
-    assert (H : ∀ i, nat_in_list (i + n) (seq i n) = false). {
-      clear.
-      induction n; intros; [ easy | cbn ].
-      destruct (Nat.eq_dec (i + S n) i) as [Hin| Hin]; [ flia Hin | ].
-      rewrite <- Nat.add_succ_comm.
-      apply IHn.
-    }
-    specialize (H 0); cbn in H; rewrite H; clear H.
-    f_equal.
-    rewrite nth_find_loop_app_2. 2: {
-      intros l Hl.
-      now apply repeat_spec in Hl; subst l.
-    }
-    rewrite repeat_length.
-    rewrite Nat.add_comm, Nat.sub_add; [ cbn | flia Hiz ].
-    now destruct (Nat.eq_dec n n).
-  }
-}
-rewrite fold_left_app; cbn.
-rewrite <- Nat.add_0_l; f_equal.
-apply Nat.eq_mul_0.
-left; clear.
-remember (n - 1) as m eqn:Hm; clear Hm.
-now induction m.
-Qed.
-*)
 
 (* pre_partition_in n j k i = true ↔ pre-partition i has the j in k-th set
         0 ≤ i < n^n
