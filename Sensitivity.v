@@ -171,20 +171,6 @@ Fixpoint to_radix_loop it n i :=
 
 Definition to_radix n i := to_radix_loop n n i.
 
-Fixpoint disp_loop'' n i l :=
-  match l with
-  | [] => repeat [] n
-  | a :: l' => cons_nth a i (disp_loop'' n (S i) l')
-  end.
-
-Definition dispatch'' n i := disp_loop'' n 0 (rev (to_radix n i)).
-
-Definition pre_partitions'' n := map (dispatch'' n) (seq 0 (n ^ n)).
-
-Definition dispatch_list'' l := disp_loop'' (length l) 0 l.
-
-(* third attempt to define dispatch *)
-
 Fixpoint nth_find_all_loop {A} (f : A → bool) l i :=
   match l with
   | [] => []
@@ -203,7 +189,7 @@ Definition dispatch''' n i := dispatch_list''' (rev (to_radix n i)).
 
 Definition pre_partitions''' n := map (dispatch''' n) (seq 0 (n ^ n)).
 
-Compute (let l := [3; 2; 1; 1] in (dispatch_list'' l, dispatch_list''' l)).
+Compute (let l := [3; 2; 1; 1] in dispatch_list''' l).
 
 (* *)
 
@@ -339,23 +325,8 @@ Qed.
 Compute (let ll := [[1; 2]; []; [0]] in locate_list ll).
 Compute (let l := [2; 0; 0] in dispatch_list''' l).
 
-Theorem disp_loop''_length : ∀ n i l,
-  (∀ a, a ∈ l → a < n)
-  → length (disp_loop'' n i l) = n.
-Proof.
-intros * Hln.
-revert i n Hln.
-induction l as [| b]; intros; [ apply repeat_length | cbn ].
-rewrite cons_nth_length. 2: {
-  rewrite IHl; [ now apply Hln; left | ].
-  now intros a Ha; apply Hln; right.
-}
-apply IHl.
-now intros a Ha; apply Hln; right.
-Qed.
-
 Compute (locate_list (dispatch_list''' [2; 0; 0])).
-Compute (locate_list (dispatch_list'' [1; 2; 0])).
+Compute (locate_list (dispatch_list''' [1; 2; 0])).
 
 Theorem List_app_cons : ∀ A (l1 l2 : list A) a,
   l1 ++ a :: l2 = l1 ++ [a] ++ l2.
