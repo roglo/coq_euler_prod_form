@@ -850,6 +850,27 @@ Definition pre_partition_in n j k i :=
 Compute (let n := 3 in let j := 1 in let k := 2 in map (λ i, (i, dispatch n i))
 (filter (pre_partition_in n j k) (seq 0 (n ^ n)))).
 
+Lemma nth_find_all_loop_app : ∀ A f (l1 l2 : list A) i,
+  nth_find_all_loop f (l1 ++ l2) i =
+  nth_find_all_loop f l1 i ++ nth_find_all_loop f l2 (i + length l1).
+Proof.
+intros.
+revert i l2.
+induction l1 as [| a1]; intros. {
+  now cbn; rewrite Nat.add_0_r.
+}
+cbn.
+destruct (f a1). {
+  cbn; f_equal.
+  rewrite <- (Nat.add_succ_comm _ (length l1)).
+  rewrite Nat.add_1_r.
+  apply IHl1.
+}
+rewrite <- (Nat.add_succ_comm _ (length l1)).
+rewrite Nat.add_1_r.
+apply IHl1.
+Qed.
+
 Theorem dispatch_locate : ∀ ll,
   is_pre_partition ll
   → dispatch (length ll) (locate ll) = ll.
@@ -876,7 +897,14 @@ apply map_ext_in.
 intros i Hi.
 apply in_seq in Hi; cbn in Hi; destruct Hi as (_, Hi).
 unfold nth_find_all.
-Print nth_find_all_loop.
+destruct i. {
+  destruct ll as [| l]; [ easy | clear Hi ].
+  cbn - [ "/" "mod" ].
+  remember (length ll) as n eqn:Hn.
+  rewrite nth_find_all_loop_app.
+  rewrite Nat.add_0_l, rev_length.
+  rewrite to_radix_loop_length.
+  cbn - [ "/" "mod" ].
 ...
 unfold locate.
 unfold locate_list.
