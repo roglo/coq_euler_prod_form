@@ -1425,33 +1425,28 @@ Theorem fold_left_to_radix : ∀ n i,
   → fold_left (λ a j : nat, a * n + j) (rev (to_radix n i)) 0 = i.
 Proof.
 intros * Hin.
-Compute (let n := 4 in let i := 253 in fold_left (λ a j : nat, a * n + j) (rev (to_radix n i)) 0).
-unfold to_radix.
-destruct n. {
-  now apply Nat.lt_1_r in Hin; subst i.
-}
-cbn - [ "/" "mod" ].
-rewrite fold_left_app; cbn - [ "/" "mod" ].
-...
-rewrite Nat.mod_small; [ | easy ].
-rewrite <- Nat.add_0_l; f_equal.
-rewrite Nat.div_small; [ | easy ].
-apply Nat.eq_mul_0; left.
-assert (H : ∀ n d,
-  fold_left (λ a j : nat, a * (n + d) + j)
-    (rev (to_radix_loop n (n + d) 0)) 0 = 0). {
+assert
+  (H : ∀ it n i,
+   i < n ^ it
+   → fold_left (λ a j, a * n + j) (rev (to_radix_loop it n i)) 0 = i). {
   clear.
-  intros; revert d.
-  induction n; intros; [ easy | cbn ].
-  rewrite Nat.sub_diag.
+  intros * Hin.
+  revert n i Hin.
+  induction it; intros; [ now apply Nat.lt_1_r in Hin; subst i | ].
+  cbn.
   rewrite fold_left_app; cbn.
-  rewrite Nat.add_0_r.
-  apply Nat.eq_mul_0; left.
-  replace (S (n + d)) with (n + S d) by flia.
-  apply IHn.
+  destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
+  specialize (Nat.div_mod i n Hnz) as H1.
+  rewrite H1 at 3; f_equal.
+  rewrite Nat.mul_comm; f_equal.
+  apply IHit.
+  apply (Nat.mul_lt_mono_pos_r (n ^ 1)); [ rewrite Nat.pow_1_r; flia Hnz | ].
+  rewrite <- Nat.pow_add_r, Nat.add_1_r, Nat.pow_1_r.
+  apply (le_lt_trans _ i); [ | easy ].
+  rewrite Nat.mul_comm.
+  now apply Nat.mul_div_le.
 }
-specialize (H n 1).
-now rewrite Nat.add_1_r in H.
+now apply H.
 Qed.
 
 Compute (let n := 4 in let i := 255 in locate (dispatch''' n i)).
@@ -1483,9 +1478,7 @@ assert
   now rewrite to_radix_loop_length.
 }
 rewrite H; clear H.
-...
-apply fold_left_to_radix.
-...
+now apply fold_left_to_radix.
 Qed.
 
 Theorem locate_dispatch : ∀ n i, i < n → locate (dispatch n i) = i.
@@ -1756,6 +1749,8 @@ unfold locate.
 (* example: (18, [2; 0; 0], [[1; 2]; []; [0]]) *)
 Compute (let n := 3 in let ll := [[1; 2]; []; [0]] in locate_list ll).
 Compute (let l := [2; 0; 0] in dispatch_list l).
+Check locate_dispatch. (* berk *)
+Check locate_dispatch'''. (* ouais ! *)
 ...
 Search (list nat → list (list nat)).
 Check locate_list.
