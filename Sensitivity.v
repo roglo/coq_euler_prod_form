@@ -909,6 +909,7 @@ remember (i =? locate (l :: ll) mod S n) as b eqn:Hb.
 symmetry in Hb.
 destruct b. {
   apply Nat.eqb_eq in Hb.
+(**)
   destruct ll as [| l2]. {
     subst n; cbn.
     apply Nat.lt_1_r in Hi; rewrite Hi; clear i Hi Hb.
@@ -918,7 +919,44 @@ destruct b. {
     subst l1.
     specialize (Hall l (or_introl eq_refl)).
     cbn in Hall.
-    (* ouais, ça devrait le faire *)
+    induction l as [| a]; [ easy | ].
+    destruct Hzl1 as [Hzl1| Hzl1]. {
+      subst a; f_equal.
+      cbn in Hint; rewrite app_nil_r in Hint.
+      apply NoDup_cons_iff in Hint.
+      destruct l as [| a]; [ easy | exfalso ].
+      specialize (Hall a (or_intror (or_introl eq_refl))) as H1.
+      apply Nat.lt_1_r in H1; subst a.
+      now destruct Hint as (H, _); apply H; left.
+    }
+    specialize (IHl Hzl1).
+    cbn in IHl, Hint; rewrite app_nil_r in Hint, IHl.
+    assert (H : ∀ i : nat, i ∈ l → i < 1). {
+      intros i Hi.
+      now apply Hall; right.
+    }
+    apply NoDup_cons_iff in Hint.
+    specialize (IHl H (proj2 Hint)); clear H; subst l.
+    specialize (Hall a (or_introl eq_refl)).
+    apply Nat.lt_1_r in Hall.
+    now subst a.
+  }
+...
+  Hn : n = length ll
+  Hi : i < S n
+  Hb : i = locate (l :: ll) mod S n
+  ============================
+  nth_find_all_loop (Nat.eqb i)
+    (rev (to_radix_loop n (S n) (locate (l :: ll) / S n))) 0 ++ [n] =
+  nth i (l :: ll) []
+...
+  Hn : n = S (length ll)
+  Hi : i < S n
+  Hb : i = locate (l :: l2 :: ll) mod S n
+  ============================
+  nth_find_all_loop (Nat.eqb i)
+    (rev (to_radix_loop n (S n) (locate (l :: l2 :: ll) / S n))) 0 ++ [n] =
+  nth i (l :: l2 :: ll) []
 ...
 unfold locate.
 unfold locate_list.
