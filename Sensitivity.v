@@ -1713,7 +1713,18 @@ Compute (let ll := [[2]; []; [0; 1]] in locate ll).
 Compute (let ll := [[2]; []; [0; 1]] in to_radix (length ll) (locate ll)).
 Compute (let ll := [[2]; []; [0; 1]] in rev (to_radix (length ll) (locate ll))).
 Compute (let ll := [[2]; []; [0; 1]] in map (λ j : nat, nth_find_all (Nat.eqb j) (rev (to_radix (length ll) (locate ll)))) (seq 0 (length ll))).
-destruct Hll as (Hall & Hin & Hnd).
+destruct Hll as (Hall & Huni & Hint).
+replace ll with (map (λ i, nth i ll []) (seq 0 (length ll))) at 2. 2: {
+  clear.
+  induction ll as [| l]; [ easy | cbn ].
+  f_equal.
+  rewrite <- seq_shift.
+  now rewrite map_map.
+}
+apply map_ext_in.
+intros i Hi.
+apply in_seq in Hi; cbn in Hi; destruct Hi as (_, Hi).
+unfold nth_find_all.
 ...
 unfold locate.
 unfold locate_list.
