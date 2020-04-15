@@ -1390,6 +1390,36 @@ Compute (to_radix_loop 4 2 1).
 ...
 *)
 
+Theorem fold_left_to_radix_small : ∀ n i,
+  i < n
+  → fold_left (λ a j : nat, a * n + j) (rev (to_radix n i)) 0 = i.
+Proof.
+intros * Hin.
+unfold to_radix.
+destruct n; [ easy | ].
+cbn - [ "/" "mod" ].
+rewrite fold_left_app; cbn - [ "/" "mod" ].
+rewrite Nat.mod_small; [ | easy ].
+rewrite <- Nat.add_0_l; f_equal.
+rewrite Nat.div_small; [ | easy ].
+apply Nat.eq_mul_0; left.
+assert (H : ∀ n d,
+  fold_left (λ a j : nat, a * (n + d) + j)
+    (rev (to_radix_loop n (n + d) 0)) 0 = 0). {
+  clear.
+  intros; revert d.
+  induction n; intros; [ easy | cbn ].
+  rewrite Nat.sub_diag.
+  rewrite fold_left_app; cbn.
+  rewrite Nat.add_0_r.
+  apply Nat.eq_mul_0; left.
+  replace (S (n + d)) with (n + S d) by flia.
+  apply IHn.
+}
+specialize (H n 1).
+now rewrite Nat.add_1_r in H.
+Qed.
+
 Theorem locate_dispatch''' : ∀ n i, i < n → locate (dispatch''' n i) = i.
 Proof.
 intros * Hin.
@@ -1416,29 +1446,7 @@ assert
   now rewrite to_radix_loop_length.
 }
 rewrite H; clear H.
-unfold to_radix.
-destruct n; [ easy | ].
-cbn - [ "/" "mod" ].
-rewrite fold_left_app; cbn - [ "/" "mod" ].
-rewrite Nat.mod_small; [ | easy ].
-rewrite <- Nat.add_0_l; f_equal.
-rewrite Nat.div_small; [ | easy ].
-apply Nat.eq_mul_0; left.
-assert (H : ∀ n d,
-  fold_left (λ a j : nat, a * (n + d) + j)
-    (rev (to_radix_loop n (n + d) 0)) 0 = 0). {
-  clear.
-  intros; revert d.
-  induction n; intros; [ easy | cbn ].
-  rewrite Nat.sub_diag.
-  rewrite fold_left_app; cbn.
-  rewrite Nat.add_0_r.
-  apply Nat.eq_mul_0; left.
-  replace (S (n + d)) with (n + S d) by flia.
-  apply IHn.
-}
-specialize (H n 1).
-now rewrite Nat.add_1_r in H.
+now apply fold_left_to_radix_small.
 Qed.
 
 Inspect 1.
