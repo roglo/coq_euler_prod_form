@@ -871,13 +871,16 @@ rewrite Nat.add_1_r.
 apply IHl1.
 Qed.
 
+(*
 Lemma to_radix_loop_fold_left : ∀ it l n,
   n ≤ it
   → (∀ i, i ∈ l → i < n)
   → to_radix_loop it n (fold_left (λ a i, a * n + i) l 0) =
-     repeat 0 (it - n) ++ l.
+     rev l ++ repeat 0 (it - n).
 Proof.
 intros * Hlit Hil.
+Compute (let l := [3; 2; 0] in let n := 4 in let it := 4 in (to_radix_loop it n (fold_left (λ a i, a * n + i) l 0), rev l ++ repeat 0 (it - n))).
+...
 revert n l Hlit Hil.
 induction it; intros. {
   apply Nat.le_0_r in Hlit; subst n; cbn.
@@ -893,7 +896,9 @@ destruct n. {
 cbn - [ "/" "mod" ].
 rewrite Nat.sub_succ.
 ...
+*)
 
+(*
 Lemma to_radix_loop_fold_left : ∀ it l,
   length l ≤ it
   → (∀ i, i ∈ l → i < length l)
@@ -929,6 +934,8 @@ Proof.
 intros * Hil.
 unfold to_radix.
 Print to_radix_loop.
+Compute (let l := [1; 1; 2] in rev (to_radix_loop (length l) (length l) (fold_left (λ a i : nat, a * length l + i) l 0))).
+...
 Compute (let l := [1; 1; 2] in let it := 5 in to_radix_loop it (length l)
     (fold_left (λ a i : nat, a * length l + i) l 0)).
 ...
