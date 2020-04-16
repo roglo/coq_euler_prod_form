@@ -961,6 +961,26 @@ now apply Nat_mod_add_l_mul_r.
 Qed.
 *)
 
+Theorem fold_left_mul_add_div : ∀ n j l,
+  (∀ i, i ∈ l → i < n)
+  → fold_left (λ a i, a * n + i) l j / n = last (j :: l) 0 / n.
+Proof.
+intros * Hin.
+revert n j Hin.
+induction l as [| a]; intros; [ easy | cbn ].
+destruct l as [| b]. {
+  cbn.
+...
+rewrite IHl. 2: {
+  intros i Hi.
+  now apply Hin; right.
+}
+destruct l as [| b]. {
+  cbn.
+...
+  rewrite Nat.div_add_l.
+...
+
 Theorem to_radix_fold_left : ∀ l,
   (∀ i, i ∈ l → i < length l)
   → to_radix (length l) (fold_left (λ a i, a * length l + i) l 0) = rev l.
@@ -995,6 +1015,10 @@ f_equal. {
   remember (length (a1 :: a2 :: l)) as len'; cbn in Heqlen'; subst len'.
   rewrite <- Hlen in Hil.
   clear Hlen.
+Inspect 4.
+...
+rewrite fold_left_mul_add_div.
+...
   revert a1 a2 len Hil.
   induction l as [| a3]; intros. {
     cbn - [ "/" "mod" ].
