@@ -871,6 +871,7 @@ rewrite Nat.add_1_r.
 apply IHl1.
 Qed.
 
+(*
 Lemma to_radix_loop_fold_left : ∀ it l,
   length l ≤ it
   → to_radix_loop it (length l) (fold_left (λ a i, a * length l + i) l 0) = 
@@ -884,13 +885,18 @@ induction it; intros; cbn. {
   now subst l.
 }
 Print to_radix_loop.
+Print locate.
+Print locate_list.
 (* ouais bon, faut voir ; peut-être généraliser ce lemme *)
 ...
+*)
 
 Theorem to_radix_fold_left : ∀ l,
-  to_radix (length l) (fold_left (λ a i, a * length l + i) l 0) = rev l.
+  (∀ i, i ∈ l → i < length l)
+  → to_radix (length l) (fold_left (λ a i, a * length l + i) l 0) = rev l.
 Proof.
-intros.
+intros * Hil.
+Compute (let l := [1; 1; 2] in rev (to_radix (length l) (fold_left (λ a i : nat, a * length l + i) l 0))).
 unfold to_radix.
 ...
 induction l as [| b]; [ easy | ].
