@@ -871,13 +871,31 @@ rewrite Nat.add_1_r.
 apply IHl1.
 Qed.
 
+Lemma to_radix_loop_fold_left : ∀ it l,
+  length l ≤ it
+  → to_radix_loop it (length l) (fold_left (λ a i, a * length l + i) l 0) = 
+     rev l.
+Proof.
+intros * Hlit.
+revert l Hlit.
+induction it; intros; cbn. {
+  apply Nat.le_0_r in Hlit.
+  apply length_zero_iff_nil in Hlit.
+  now subst l.
+}
+Print to_radix_loop.
+(* ouais bon, faut voir ; peut-être généraliser ce lemme *)
+...
+
 Theorem to_radix_fold_left : ∀ l,
   to_radix (length l) (fold_left (λ a i, a * length l + i) l 0) = rev l.
 Proof.
 intros.
 unfold to_radix.
-induction l as [| a]; [ easy | ].
-cbn - [ "/" "mod" ].
+...
+induction l as [| b]; [ easy | ].
+cbn - [ "/" "mod" rev ].
+Print to_radix_loop.
 Search to_radix_loop.
 ...
 
