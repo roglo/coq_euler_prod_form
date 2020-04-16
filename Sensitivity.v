@@ -935,11 +935,26 @@ intros * Hil.
 unfold to_radix.
 Print to_radix_loop.
 Compute (let l := [1; 1; 2] in rev (to_radix_loop (length l) (length l) (fold_left (λ a i : nat, a * length l + i) l 0))).
+(*
+symmetry; rewrite <- rev_involutive; f_equal; symmetry.
 destruct l as [| a1]; [ easy | ].
 cbn - [ "/" "mod" rev ].
 remember (fold_left _ _ _) as a eqn:Ha; symmetry in Ha.
-Search removelast.
-Check app_removelast_last.
+cbn - [ "/" "mod" ].
+...
+destruct l as [| a1]; [ easy | ].
+rewrite (@app_removelast_last nat (rev _ ++ _) 0). 2: {
+  cbn - [ "/" "mod" ].
+  intros H.
+  now apply app_eq_nil in H.
+}
+rewrite removelast_app; [ | easy ].
+cbn - [ "/" "mod" ].
+rewrite app_nil_r.
+...
+*)
+destruct l as [| a1]; [ easy | ].
+cbn - [ "/" "mod" rev ].
 rewrite (@app_removelast_last nat (a1 :: l) 0); [ | easy ].
 rewrite rev_app_distr.
 cbn - [ "/" "mod" last removelast ].
