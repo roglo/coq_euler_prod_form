@@ -963,23 +963,29 @@ Qed.
 
 Theorem fold_left_mul_add_div : ∀ n j l,
   (∀ i, i ∈ l → i < n)
-  → fold_left (λ a i, a * n + i) l j / n = last (j :: l) 0 / n.
+  → l ≠ []
+  → fold_left (λ a i, a * n + i) l j / n =
+     fold_left (λ a i, a * n + i) (removelast l) j.
 Proof.
-intros * Hin.
-revert n j Hin.
-induction l as [| a]; intros; [ easy | cbn ].
-destruct l as [| b]. {
+intros * Hin Hln.
+destruct l as [| b]; [ easy | clear Hln ].
+cbn - [ removelast ].
+revert n j b Hin.
+induction l as [| a]; intros. {
   cbn.
-...
-rewrite IHl. 2: {
-  intros i Hi.
-  now apply Hin; right.
+  rewrite Nat.div_add_l. 2: {
+    intros H; subst n.
+    now specialize (Hin b (or_introl eq_refl)).
+  }
+  rewrite Nat.div_small; [ | now apply Hin; left ].
+  now rewrite Nat.add_0_r.
 }
-destruct l as [| b]. {
-  cbn.
-...
-  rewrite Nat.div_add_l.
-...
+cbn - [ removelast ].
+remember (a :: l) as l'; cbn; subst l'.
+rewrite IHl; [ easy | ].
+intros i Hl.
+now apply Hin; right.
+Qed.
 
 Theorem to_radix_fold_left : ∀ l,
   (∀ i, i ∈ l → i < length l)
@@ -1015,13 +1021,8 @@ f_equal. {
   remember (length (a1 :: a2 :: l)) as len'; cbn in Heqlen'; subst len'.
   rewrite <- Hlen in Hil.
   clear Hlen.
-Inspect 4.
-...
-rewrite fold_left_mul_add_div.
-...
-  revert a1 a2 len Hil.
-  induction l as [| a3]; intros. {
-    cbn - [ "/" "mod" ].
+  destruct l as [| a3]. {
+    cbn.
     rewrite Nat.div_add_l. 2: {
       intros H; subst len.
       now specialize (Hil a1 (or_introl eq_refl)).
@@ -1030,10 +1031,12 @@ rewrite fold_left_mul_add_div.
     rewrite Nat.add_0_r.
     now apply Nat.mod_small, Hil; left.
   }
+  rewrite fold_left_mul_add_div; [ | | easy ]. 2: {
+    intros i Hi.
+    now apply Hil; right; right.
+  }
+  cbn - [ removelast ].
   remember (a3 :: l) as l'; cbn; subst l'.
-  cbn - [ last removelast ].
-  rewrite <- (IHl _ _ len).
-(* mouais y a un truc qui va pas, là *)
 ...
 
 Theorem locate_list_to_radix_locate : ∀ ll,
