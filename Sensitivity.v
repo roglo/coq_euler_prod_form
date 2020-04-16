@@ -945,20 +945,21 @@ induction l as [| a]; intros. {
   now apply Nat_mod_add_l_mul_r.
 }
 cbn.
-...
+rewrite IHl; [ | easy ].
+now rewrite IHl.
+Qed.
 
+(*
 Theorem fold_left_mul_add_mod_r : ∀ n j k l,
-  fold_left (λ a i : nat, a * n + i) l (j * n + b) ≡ last (b :: l) 0 mod n
-...
-destruct l as [| b]; intros; [ now apply Nat.mod_small | ].
-cbn - [ last ].
-remember (b :: l) as l'; cbn; subst l'.
-clear.
-revert b n j.
-induction l as [| a]; intros. {
-  cbn.
-  rewrite Nat_mod_add_l_mul_r.
-...
+  fold_left (λ a i : nat, a * n + i) l (j * n + k) ≡ last (k :: l) 0 mod n.
+Proof.
+intros.
+destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
+rewrite fold_left_mul_add_mod.
+destruct l as [| b]; [ cbn | easy ].
+now apply Nat_mod_add_l_mul_r.
+Qed.
+*)
 
 Theorem to_radix_fold_left : ∀ l,
   (∀ i, i ∈ l → i < length l)
@@ -966,34 +967,20 @@ Theorem to_radix_fold_left : ∀ l,
 Proof.
 intros * Hil.
 unfold to_radix.
-Print to_radix_loop.
-Compute (let l := [1; 1; 2] in rev (to_radix_loop (length l) (length l) (fold_left (λ a i : nat, a * length l + i) l 0))).
-(*
-symmetry; rewrite <- rev_involutive; f_equal; symmetry.
-destruct l as [| a1]; [ easy | ].
-cbn - [ "/" "mod" rev ].
-remember (fold_left _ _ _) as a eqn:Ha; symmetry in Ha.
-cbn - [ "/" "mod" ].
-...
-destruct l as [| a1]; [ easy | ].
-rewrite (@app_removelast_last nat (rev _ ++ _) 0). 2: {
-  cbn - [ "/" "mod" ].
-  intros H.
-  now apply app_eq_nil in H.
-}
-rewrite removelast_app; [ | easy ].
-cbn - [ "/" "mod" ].
-rewrite app_nil_r.
-...
-*)
 destruct l as [| a1]; [ easy | ].
 cbn - [ "/" "mod" rev ].
 rewrite (@app_removelast_last nat (a1 :: l) 0); [ | easy ].
 rewrite rev_app_distr.
 cbn - [ "/" "mod" last removelast ].
 f_equal. {
-...
-apply fold_left_mul_add_mod.
+  rewrite fold_left_mul_add_mod.
+  apply Nat.mod_small.
+  apply Hil.
+  clear.
+  revert a1.
+  induction l as [| a2]; intros; [ now left | right ].
+  apply IHl.
+}
 ...
 
 Theorem locate_list_to_radix_locate : ∀ ll,
