@@ -871,6 +871,43 @@ rewrite Nat.add_1_r.
 apply IHl1.
 Qed.
 
+Theorem to_radix_fold_left : ∀ l,
+  to_radix (length l) (fold_left (λ a i, a * length l + i) l 0) = rev l.
+Proof.
+intros.
+unfold to_radix.
+induction l as [| a]; [ easy | ].
+cbn - [ "/" "mod" ].
+Search to_radix_loop.
+...
+
+Theorem locate_list_to_radix_locate : ∀ ll,
+  locate_list ll = rev (to_radix (length ll) (locate ll)).
+Proof.
+intros.
+unfold locate.
+Compute (let l := [1; 2; 2] in rev (to_radix (length l) (fold_left (λ a i : nat, a * length l + i) l 0))).
+Search to_radix_loop.
+...
+intros.
+unfold to_radix.
+induction ll as [| l]; [ easy | ].
+Print locate_list.
+Print locate.
+...
+
+locate_list = 
+λ ll : list (list nat),
+  map (λ i : nat, nth_find (nat_in_list i) ll) (seq 0 (length ll))
+
+locate = 
+λ ll : list (list nat),
+  fold_left (λ a i : nat, a * length ll + i) (locate_list ll) 0
+     : list (list nat) → nat
+...
+cbn - [ "/" "mod" ].
+...
+
 Theorem dispatch_locate : ∀ ll,
   is_pre_partition ll
   → dispatch (length ll) (locate ll) = ll.
@@ -881,9 +918,11 @@ unfold dispatch_list.
 rewrite rev_length.
 unfold to_radix at 2.
 rewrite to_radix_loop_length.
+...
+rewrite <- locate_list_to_radix_locate.
 Compute (let ll := [[2]; []; [0; 1]] in locate ll).
-Compute (let ll := [[2]; []; [0; 1]] in to_radix (length ll) (locate ll)).
 Compute (let ll := [[2]; []; [0; 1]] in rev (to_radix (length ll) (locate ll))).
+Compute (let ll := [[2]; []; [0; 1]] in to_radix (length ll) (locate ll)).
 Compute (let ll := [[2]; []; [0; 1]] in map (λ j : nat, nth_find_all (Nat.eqb j) (rev (to_radix (length ll) (locate ll)))) (seq 0 (length ll))).
 destruct Hll as (Hall & Huni & Hint).
 replace ll with (map (λ i, nth i ll []) (seq 0 (length ll))) at 2. 2: {
@@ -897,6 +936,17 @@ apply map_ext_in.
 intros i Hi.
 apply in_seq in Hi; cbn in Hi; destruct Hi as (_, Hi).
 unfold nth_find_all.
+(**)
+Compute (let ll := [[2]; []; [0; 1]] in rev (to_radix_loop (length ll) (length ll) (locate ll))).
+Compute (let ll := [[2]; []; [0; 1]] in rev (to_radix (length ll) (locate ll))).
+Compute (let ll := [[2]; []; [0; 1]] in locate_list ll).
+...
+rewrite <- locate_list_to_radix_locate.
+  nth_find_all_loop (Nat.eqb i) (locate_list ll) 0 = nth i ll []
+...
+Print locate.
+Search locate_list.
+...
 unfold to_radix.
 destruct ll as [| l]; [ easy | ].
 cbn - [ "/" "mod" Nat.eqb locate nth ].
@@ -911,7 +961,8 @@ symmetry in Hb.
 destruct b. {
   apply Nat.eqb_eq in Hb.
 (**)
-  destruct ll as [| l2]. {
+  revert l n Hn Hall Huni Hint i Hi Hb.
+  induction ll as [| l2]; intros. {
     subst n; cbn.
     apply Nat.lt_1_r in Hi; rewrite Hi; clear i Hi Hb.
     specialize (Huni 0 (Nat.lt_0_succ _)).
