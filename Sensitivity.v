@@ -981,6 +981,16 @@ f_equal. {
   induction l as [| a2]; intros; [ now left | right ].
   apply IHl.
 }
+destruct l as [| a2]; [ easy | ].
+remember (rev (removelast _)) as l'.
+cbn - [ "/" "mod" rev ].
+subst l'.
+rewrite (@app_removelast_last nat (removelast _) 0); [ | easy ].
+rewrite rev_app_distr.
+cbn - [ "/" "mod" last removelast ].
+f_equal. {
+...
+  rewrite fold_left_mul_add_mod.
 ...
 
 Theorem locate_list_to_radix_locate : ∀ ll,
