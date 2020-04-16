@@ -935,14 +935,15 @@ intros * Hil.
 unfold to_radix.
 Print to_radix_loop.
 Compute (let l := [1; 1; 2] in rev (to_radix_loop (length l) (length l) (fold_left (λ a i : nat, a * length l + i) l 0))).
-...
-Compute (let l := [1; 1; 2] in let it := 5 in to_radix_loop it (length l)
-    (fold_left (λ a i : nat, a * length l + i) l 0)).
-...
-induction l as [| b]; [ easy | ].
+destruct l as [| a1]; [ easy | ].
 cbn - [ "/" "mod" rev ].
-Print to_radix_loop.
-Search to_radix_loop.
+remember (fold_left _ _ _) as a eqn:Ha; symmetry in Ha.
+Search removelast.
+Check app_removelast_last.
+rewrite (@app_removelast_last nat (a1 :: l) 0); [ | easy ].
+rewrite rev_app_distr.
+cbn - [ "/" "mod" last removelast ].
+f_equal. {
 ...
 
 Theorem locate_list_to_radix_locate : ∀ ll,
