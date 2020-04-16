@@ -927,6 +927,39 @@ Print locate_list.
 ...
 *)
 
+Theorem fold_left_mul_add_mod : ∀ n j l,
+  fold_left (λ a i, a * n + i) l j mod n = last (j :: l) 0 mod n.
+Proof.
+intros.
+destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
+revert n j Hnz.
+induction l as [| b]; intros; [ easy | ].
+cbn - [ last ].
+remember (b :: l) as l'; cbn; subst l'.
+transitivity (fold_left (λ a i : nat, a * n + i) l b mod n). 2: {
+  now apply IHl.
+}
+clear - Hnz.
+revert b n j Hnz.
+induction l as [| a]; intros. {
+  now apply Nat_mod_add_l_mul_r.
+}
+cbn.
+...
+
+Theorem fold_left_mul_add_mod_r : ∀ n j k l,
+  fold_left (λ a i : nat, a * n + i) l (j * n + b) ≡ last (b :: l) 0 mod n
+...
+destruct l as [| b]; intros; [ now apply Nat.mod_small | ].
+cbn - [ last ].
+remember (b :: l) as l'; cbn; subst l'.
+clear.
+revert b n j.
+induction l as [| a]; intros. {
+  cbn.
+  rewrite Nat_mod_add_l_mul_r.
+...
+
 Theorem to_radix_fold_left : ∀ l,
   (∀ i, i ∈ l → i < length l)
   → to_radix (length l) (fold_left (λ a i, a * length l + i) l 0) = rev l.
@@ -959,6 +992,8 @@ rewrite (@app_removelast_last nat (a1 :: l) 0); [ | easy ].
 rewrite rev_app_distr.
 cbn - [ "/" "mod" last removelast ].
 f_equal. {
+...
+apply fold_left_mul_add_mod.
 ...
 
 Theorem locate_list_to_radix_locate : ∀ ll,
