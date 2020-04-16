@@ -871,19 +871,50 @@ rewrite Nat.add_1_r.
 apply IHl1.
 Qed.
 
-(*
+Lemma to_radix_loop_fold_left : ∀ it l n,
+  n ≤ it
+  → (∀ i, i ∈ l → i < n)
+  → to_radix_loop it n (fold_left (λ a i, a * n + i) l 0) =
+     repeat 0 (it - n) ++ l.
+Proof.
+intros * Hlit Hil.
+revert n l Hlit Hil.
+induction it; intros. {
+  apply Nat.le_0_r in Hlit; subst n; cbn.
+  destruct l as [| a]; [ easy | cbn ].
+  now specialize (Hil a (or_introl eq_refl)).
+}
+destruct n. {
+  clear; cbn; f_equal.
+...
+  clear; cbn; f_equal; rewrite app_nil_r.
+  induction it; [ easy | now cbn; f_equal ].
+}
+cbn - [ "/" "mod" ].
+rewrite Nat.sub_succ.
+...
+
 Lemma to_radix_loop_fold_left : ∀ it l,
   length l ≤ it
-  → to_radix_loop it (length l) (fold_left (λ a i, a * length l + i) l 0) = 
-     rev l.
+  → (∀ i, i ∈ l → i < length l)
+  → to_radix_loop it (length l) (fold_left (λ a i, a * length l + i) l 0) =
+     repeat 0 (it - length l) ++ l.
 Proof.
-intros * Hlit.
-revert l Hlit.
-induction it; intros; cbn. {
+intros * Hlit Hil.
+revert l Hlit Hil.
+induction it; intros. {
   apply Nat.le_0_r in Hlit.
   apply length_zero_iff_nil in Hlit.
   now subst l.
 }
+destruct l as [| a]. {
+  clear; cbn; f_equal; rewrite app_nil_r.
+  induction it; [ easy | now cbn; f_equal ].
+}
+cbn - [ "/" "mod" ].
+rewrite Nat.sub_succ.
+
+
 Print to_radix_loop.
 Print locate.
 Print locate_list.
@@ -896,8 +927,10 @@ Theorem to_radix_fold_left : ∀ l,
   → to_radix (length l) (fold_left (λ a i, a * length l + i) l 0) = rev l.
 Proof.
 intros * Hil.
-Compute (let l := [1; 1; 2] in rev (to_radix (length l) (fold_left (λ a i : nat, a * length l + i) l 0))).
 unfold to_radix.
+Print to_radix_loop.
+Compute (let l := [1; 1; 2] in let it := 5 in to_radix_loop it (length l)
+    (fold_left (λ a i : nat, a * length l + i) l 0)).
 ...
 induction l as [| b]; [ easy | ].
 cbn - [ "/" "mod" rev ].
