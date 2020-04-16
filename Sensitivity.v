@@ -989,8 +989,27 @@ rewrite (@app_removelast_last nat (removelast _) 0); [ | easy ].
 rewrite rev_app_distr.
 cbn - [ "/" "mod" last removelast ].
 f_equal. {
-...
-  rewrite fold_left_mul_add_mod.
+  remember (S (S (length l))) as len eqn:Hlen.
+  clear - Hil Hlen.
+  remember (a2 :: l) as l'; cbn; subst l'.
+  remember (length (a1 :: a2 :: l)) as len'; cbn in Heqlen'; subst len'.
+  rewrite <- Hlen in Hil.
+  clear Hlen.
+  revert a1 a2 len Hil.
+  induction l as [| a3]; intros. {
+    cbn - [ "/" "mod" ].
+    rewrite Nat.div_add_l. 2: {
+      intros H; subst len.
+      now specialize (Hil a1 (or_introl eq_refl)).
+    }
+    rewrite Nat.div_small; [ | now apply Hil; right; left ].
+    rewrite Nat.add_0_r.
+    now apply Nat.mod_small, Hil; left.
+  }
+  remember (a3 :: l) as l'; cbn; subst l'.
+  cbn - [ last removelast ].
+  rewrite <- (IHl _ _ len).
+(* mouais y a un truc qui va pas, là *)
 ...
 
 Theorem locate_list_to_radix_locate : ∀ ll,
