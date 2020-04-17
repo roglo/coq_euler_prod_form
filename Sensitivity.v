@@ -993,6 +993,10 @@ Theorem to_radix_fold_left : ∀ l,
 Proof.
 intros * Hil.
 unfold to_radix.
+Print to_radix_loop.
+...
+intros * Hil.
+unfold to_radix.
 destruct l as [| a1]; [ easy | ].
 cbn - [ "/" "mod" rev ].
 rewrite (@app_removelast_last nat (a1 :: l) 0); [ | easy ].
@@ -1037,6 +1041,10 @@ f_equal. {
   }
   cbn - [ removelast ].
   remember (a3 :: l) as l'; cbn; subst l'.
+...
+  ============================
+  fold_left (λ a i : nat, a * len + i) (removelast (a3 :: l)) (a1 * len + a2)
+  mod len = last (a2 :: removelast (a3 :: l)) 0
 ...
 
 Theorem locate_list_to_radix_locate : ∀ ll,
