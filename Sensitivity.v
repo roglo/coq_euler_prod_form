@@ -987,6 +987,7 @@ intros i Hl.
 now apply Hin; right.
 Qed.
 
+(*
 Theorem to_radix_fold_left : ∀ l,
   (∀ i, i ∈ l → i < length l)
   → to_radix (length l) (fold_left (λ a i, a * length l + i) l 0) = rev l.
@@ -1049,7 +1050,9 @@ f_equal. {
   fold_left (λ a i : nat, a * len + i) (removelast (a3 :: l)) (a1 * len + a2)
   mod len = last (a2 :: removelast (a3 :: l)) 0
 ...
+*)
 
+(*
 Theorem locate_list_to_radix_locate : ∀ ll,
   locate_list ll = rev (to_radix (length ll) (locate ll)).
 Proof.
@@ -1076,12 +1079,27 @@ locate =
 ...
 cbn - [ "/" "mod" ].
 ...
+*)
+
+Theorem dispatch_locate_list : ∀ ll, dispatch_list (locate_list ll) = ll.
+Proof.
+intros.
+unfold dispatch_list, locate_list.
+rewrite map_length.
+rewrite seq_length.
+Search (nth_find_loop).
+Compute (let ll := [[2]; []; [0; 1]] in locate_list ll).
+Compute (let ll := [[2]; []; [0; 1]] in locate ll).
+...
 
 Theorem dispatch_locate : ∀ ll,
   is_pre_partition ll
   → dispatch (length ll) (locate ll) = ll.
 Proof.
 intros * Hll.
+Inspect 7.
+Search dispatch_list.
+...
 unfold dispatch.
 unfold dispatch_list.
 rewrite rev_length.
