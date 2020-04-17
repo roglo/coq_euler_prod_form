@@ -1087,6 +1087,10 @@ intros.
 unfold dispatch_list, locate_list.
 rewrite map_length.
 rewrite seq_length.
+unfold nth_find.
+unfold nth_find_all.
+Search nth_find_all_loop.
+...
 Search (nth_find_loop).
 Compute (let ll := [[2]; []; [0; 1]] in locate_list ll).
 Compute (let ll := [[2]; []; [0; 1]] in locate ll).
