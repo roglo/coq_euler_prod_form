@@ -993,6 +993,9 @@ Theorem to_radix_fold_left : ∀ l,
 Proof.
 intros * Hil.
 unfold to_radix.
+remember (length l) as n eqn:Hn.
+destruct l as [| a1]; [ now subst n | ].
+cbn - [ "/" "mod" rev ].
 Print to_radix_loop.
 ...
 intros * Hil.
