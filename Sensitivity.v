@@ -1089,12 +1089,17 @@ intros * Hll.
 unfold dispatch_list, locate_list.
 rewrite map_length.
 rewrite seq_length.
-unfold nth_find.
+remember (map (λ i : nat, nth_find (nat_in_list i) ll) (seq 0 (length ll)))
+  as l eqn:Hl.
+(*
+unfold nth_find in Hl.
 unfold nth_find_all.
+*)
+destruct Hll as (Hin & Huni & Hint).
+Compute (let ll := [[2]; []; [0; 1]] in map (λ i, nth_find (nat_in_list i) ll) (seq 0 (length ll))).
+...
 destruct ll as [| l1]; [ easy | ].
 destruct ll as [| l2]. {
-  unfold is_pre_partition in Hll.
-  destruct Hll as (Hin & Huni & Hint).
   cbn in Hint.
   rewrite app_nil_r in Hint.
   specialize (Hin l1 (or_introl eq_refl)); cbn in Hin.
