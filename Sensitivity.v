@@ -1086,11 +1086,11 @@ Theorem dispatch_locate_list : ∀ ll,
   → dispatch_list (locate_list ll) = ll.
 Proof.
 intros * Hll.
-unfold dispatch_list, locate_list.
-rewrite map_length.
-rewrite seq_length.
-remember (map (λ i : nat, nth_find (nat_in_list i) ll) (seq 0 (length ll)))
-  as l eqn:Hl.
+remember (locate_list ll) as l eqn:Hl.
+unfold locate_list in Hl.
+unfold dispatch_list.
+rewrite Hl at 1.
+rewrite map_length, seq_length.
 (*
 unfold nth_find in Hl.
 unfold nth_find_all.
