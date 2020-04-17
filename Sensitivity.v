@@ -1081,15 +1081,41 @@ cbn - [ "/" "mod" ].
 ...
 *)
 
-Theorem dispatch_locate_list : ∀ ll, dispatch_list (locate_list ll) = ll.
+Theorem dispatch_locate_list : ∀ ll,
+  is_pre_partition ll
+  → dispatch_list (locate_list ll) = ll.
 Proof.
-intros.
+intros * Hll.
 unfold dispatch_list, locate_list.
 rewrite map_length.
 rewrite seq_length.
 unfold nth_find.
 unfold nth_find_all.
-Search nth_find_all_loop.
+destruct ll as [| l1]; [ easy | ].
+destruct ll as [| l2]. {
+  unfold is_pre_partition in Hll.
+  destruct Hll as (Hin & Huni & Hint).
+  cbn in Hint.
+  rewrite app_nil_r in Hint.
+  specialize (Hin l1 (or_introl eq_refl)); cbn in Hin.
+  specialize (Huni 0 (Nat.lt_0_1)).
+  destruct Huni as (l2 & Hll & Hzl).
+  destruct Hll as [Hll| Hll]; [ subst l2 | easy ].
+  assert (H : l1 = [0]). {
+    induction l1 as [| i]; [ easy | ].
+    destruct i. {
+      destruct l1 as [| j]; [ easy | exfalso ].
+      specialize (Hin j (or_intror (or_introl eq_refl))).
+      apply Nat.lt_1_r in Hin; subst j.
+      apply NoDup_cons_iff in Hint.
+      now destruct Hint as (Hint & _); apply Hint; left.
+    }
+    specialize (Hin (S i) (or_introl eq_refl)).
+    flia Hin.
+  }
+  now subst l1.
+}
+destruct ll as [| l3]. {
 ...
 Search (nth_find_loop).
 Compute (let ll := [[2]; []; [0; 1]] in locate_list ll).
