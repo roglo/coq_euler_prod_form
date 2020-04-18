@@ -657,6 +657,16 @@ destruct (f (g a)); [ easy | ].
 apply IHl.
 Qed.
 
+Theorem nth_find_all_loop_map : ∀ A B (f : B → bool) g i (l : list A),
+    nth_find_all_loop f (map g l) i = nth_find_all_loop (λ a, f (g a)) l i.
+Proof.
+intros.
+revert i.
+induction l as [| a]; intros; [ easy | cbn ].
+destruct (f (g a)); [ now rewrite IHl | ].
+apply IHl.
+Qed.
+
 Theorem nat_in_list_false_iff : ∀ i l,
   nat_in_list i l = false ↔ ∀ j, j ∈ l → i ≠ j.
 Proof.
@@ -1104,14 +1114,35 @@ intros a Ha.
 rewrite Hl.
 unfold nth_find.
 unfold nth_find_all.
+rewrite nth_find_all_loop_map.
+replace (nth a ll []) with
+    (map (λ i, nth i (nth a ll []) 0) (seq 0 (length ll))) at 2. 2: {
+  clear.
+  revert a.
+  induction ll as [| l]; intros; [ now cbn; rewrite match_id | ].
+  cbn - [ nth ].
+  rewrite <- seq_shift.
+  rewrite map_map.
+  cbn.
+  destruct a. {
+    cbn.
+    destruct l as [| b]; cbn.
+    specialize (IHll 0).
+    cbn in IHll.
+    destruct ll as [| l]; cbn in IHll.
+    cbn.
+(* crotte *)
 ...
-(* inspiré de locate_dispatch_list mais bon, ça va pas *)
-replace (length l) with (nth a ll [] + 1 + (length ll - (nth a ll 0 + 1))). 2: {
-  apply in_seq in Ha; cbn in Ha.
-  destruct Ha as (_, Ha).
-  specialize (Hl (nth a l 0) (nth_In l 0 Ha)) as H1.
-  flia H1.
+  f_equal; cbn; f_equal.
+  rewrite <- seq_shift.
+  now rewrite map_map.
 }
+...
+clear l Hl.
+remember (nth a ll []) as l eqn:Hl.
+symmetry in Hl.
+revert a Ha Hl.
+induction l as [| b]; intros. {
 ...
 destruct ll as [| l1]; [ easy | ].
 destruct ll as [| l2]. {
