@@ -699,7 +699,6 @@ remember (dispatch_list l) as ll.
 unfold dispatch_list in Heqll.
 rewrite Heqll.
 unfold locate_list.
-unfold dispatch_list.
 rewrite map_length, seq_length.
 replace l with (map (λ i, nth i l 0) (seq 0 (length l))) at 2. 2: {
   clear.
@@ -1097,6 +1096,15 @@ unfold nth_find_all.
 *)
 destruct Hll as (Hin & Huni & Hint).
 Compute (let ll := [[2]; []; [0; 1]] in map (λ i, nth_find (nat_in_list i) ll) (seq 0 (length ll))).
+replace ll with (map (λ i, nth i ll []) (seq 0 (length ll))) at 2. 2: {
+  clear.
+  induction ll as [| l]; [ easy | ].
+  f_equal; cbn; f_equal.
+  rewrite <- seq_shift.
+  now rewrite map_map.
+}
+apply map_ext_in_iff.
+intros a Ha.
 ...
 destruct ll as [| l1]; [ easy | ].
 destruct ll as [| l2]. {
