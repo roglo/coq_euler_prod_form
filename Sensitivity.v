@@ -1115,34 +1115,13 @@ rewrite Hl.
 unfold nth_find.
 unfold nth_find_all.
 rewrite nth_find_all_loop_map.
-replace (nth a ll []) with
-    (map (λ i, nth i (nth a ll []) 0) (seq 0 (length ll))) at 2. 2: {
-  clear.
-  revert a.
-  induction ll as [| l]; intros; [ now cbn; rewrite match_id | ].
-  cbn - [ nth ].
-  rewrite <- seq_shift.
-  rewrite map_map.
-  cbn.
-  destruct a. {
-    cbn.
-    destruct l as [| b]; cbn.
-    specialize (IHll 0).
-    cbn in IHll.
-    destruct ll as [| l]; cbn in IHll.
-    cbn.
-(* crotte *)
-...
-  f_equal; cbn; f_equal.
-  rewrite <- seq_shift.
-  now rewrite map_map.
-}
 ...
 clear l Hl.
 remember (nth a ll []) as l eqn:Hl.
 symmetry in Hl.
 revert a Ha Hl.
 induction l as [| b]; intros. {
+  cbn.
 ...
 destruct ll as [| l1]; [ easy | ].
 destruct ll as [| l2]. {
