@@ -667,6 +667,13 @@ destruct (f (g a)); [ now rewrite IHl | ].
 apply IHl.
 Qed.
 
+Theorem nth_find_all_map : ∀ A B (f : B → bool) g (l : list A),
+    nth_find_all f (map g l) = nth_find_all (λ a, f (g a)) l.
+Proof.
+intros.
+apply nth_find_all_loop_map.
+Qed.
+
 Theorem nat_in_list_false_iff : ∀ i l,
   nat_in_list i l = false ↔ ∀ j, j ∈ l → i ≠ j.
 Proof.
@@ -1124,6 +1131,7 @@ Compute (let ll := [[2]; []; [0; 1]] in nth_find_all (Nat.eqb 1) (locate_list ll
 Compute (let ll := [[2]; []; [0; 1]] in nth_find (nat_in_list 0) ll).
 Compute (let ll := [[2]; []; [0; 1]] in nth_find (nat_in_list 1) ll).
 Compute (let ll := [[2]; []; [0; 1]] in nth_find (nat_in_list 2) ll).
+  rewrite nth_find_all_map.
 ...
 unfold nth_find.
 unfold nth_find_all.
