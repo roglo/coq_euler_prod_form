@@ -1090,10 +1090,51 @@ cbn - [ "/" "mod" ].
 ...
 *)
 
+Theorem locate_list_length : ∀ ll, length (locate_list ll) = length ll.
+Proof.
+intros.
+unfold locate_list.
+now rewrite map_length, seq_length.
+Qed.
+
 Theorem dispatch_locate_list : ∀ ll,
   is_pre_partition ll
   → dispatch_list (locate_list ll) = ll.
 Proof.
+intros * Hll.
+unfold dispatch_list.
+rewrite locate_list_length.
+replace ll with (map (λ i, nth i ll []) (seq 0 (length ll))) at 2. 2: {
+  clear.
+  induction ll as [| l]; [ easy | ].
+  f_equal; cbn; f_equal.
+  rewrite <- seq_shift.
+  now rewrite map_map.
+}
+apply map_ext_in_iff.
+intros a Ha.
+...
+unfold nth_find.
+unfold nth_find_all.
+...
+rewrite IHll.
+...
+rewrite map_length, seq_length.
+destruct Hll as (Hin & Huni & Hint).
+Compute (let ll := [[2]; []; [0; 1]] in map (λ i, nth_find (nat_in_list i) ll) (seq 0 (length ll))).
+replace ll with (map (λ i, nth i ll []) (seq 0 (length ll))) at 2. 2: {
+  clear.
+  induction ll as [| l]; [ easy | ].
+  f_equal; cbn; f_equal.
+  rewrite <- seq_shift.
+  now rewrite map_map.
+}
+apply map_ext_in_iff.
+intros a Ha.
+rewrite Hl.
+unfold nth_find.
+unfold nth_find_all.
+...
 intros * Hll.
 remember (locate_list ll) as l eqn:Hl.
 unfold locate_list in Hl.
@@ -1114,6 +1155,7 @@ intros a Ha.
 rewrite Hl.
 unfold nth_find.
 unfold nth_find_all.
+...
 rewrite nth_find_all_loop_map.
 ...
 clear l Hl.
