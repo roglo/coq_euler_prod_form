@@ -1113,6 +1113,17 @@ replace ll with (map (λ i, nth i ll []) (seq 0 (length ll))) at 2. 2: {
 }
 apply map_ext_in_iff.
 intros a Ha.
+remember (nth a ll []) as l eqn:Hl.
+symmetry in Hl.
+revert a Ha Hl.
+induction l as [| b]; intros. {
+  cbn.
+Compute (let ll := [[2]; []; [0; 1]] in locate_list ll).
+Compute (let ll := [[2]; []; [0; 1]] in nth_find_all (Nat.eqb 1) (locate_list ll)).
+  unfold locate_list.
+Compute (let ll := [[2]; []; [0; 1]] in nth_find (nat_in_list 0) ll).
+Compute (let ll := [[2]; []; [0; 1]] in nth_find (nat_in_list 1) ll).
+Compute (let ll := [[2]; []; [0; 1]] in nth_find (nat_in_list 2) ll).
 ...
 unfold nth_find.
 unfold nth_find_all.
