@@ -1090,10 +1090,6 @@ unfold locate_list in Hl.
 unfold dispatch_list.
 rewrite Hl at 1.
 rewrite map_length, seq_length.
-(*
-unfold nth_find in Hl.
-unfold nth_find_all.
-*)
 destruct Hll as (Hin & Huni & Hint).
 Compute (let ll := [[2]; []; [0; 1]] in map (λ i, nth_find (nat_in_list i) ll) (seq 0 (length ll))).
 replace ll with (map (λ i, nth i ll []) (seq 0 (length ll))) at 2. 2: {
@@ -1105,6 +1101,17 @@ replace ll with (map (λ i, nth i ll []) (seq 0 (length ll))) at 2. 2: {
 }
 apply map_ext_in_iff.
 intros a Ha.
+rewrite Hl.
+unfold nth_find.
+unfold nth_find_all.
+...
+(* inspiré de locate_dispatch_list mais bon, ça va pas *)
+replace (length l) with (nth a ll [] + 1 + (length ll - (nth a ll 0 + 1))). 2: {
+  apply in_seq in Ha; cbn in Ha.
+  destruct Ha as (_, Ha).
+  specialize (Hl (nth a l 0) (nth_In l 0 Ha)) as H1.
+  flia H1.
+}
 ...
 destruct ll as [| l1]; [ easy | ].
 destruct ll as [| l2]. {
