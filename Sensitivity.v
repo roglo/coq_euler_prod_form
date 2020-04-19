@@ -1151,7 +1151,7 @@ Proof. intros; apply eq_nth_find_all_loop_nil. Qed.
 
 (* un peu pour le sport ; c'est utilisable dans le théorème suivant,
    mais chu même pas sûr que ça y résout le problème *)
-Theorem eq_nth_find_all_cons : ∀ A f a (d : A) l l' i,
+Lemma eq_nth_find_all_cons : ∀ A f a (d : A) l l' i,
   nth_find_all_loop f l i = a :: l' ↔
   ((∀ j, i + j < a → f (nth j l d) = false) ∧ f (nth (a - i) l d) = true ∧
    nth_find_all_loop f (skipn (a - i) l) (i + a) = l').
@@ -1174,6 +1174,22 @@ split. {
     apply (IHl (i + 1)); [ easy | ].
     flia Hja.
   }
+  split. {
+    revert i Hfl.
+    induction l as [| b]; intros; [ easy | ].
+    cbn in Hfl.
+    remember (f b) as b1 eqn:Hb1; symmetry in Hb1.
+    destruct b1. {
+      injection Hfl; clear Hfl; intros Hfl H; subst a.
+      now rewrite Nat.sub_diag; cbn.
+    }
+    cbn.
+    remember (a - i) as ai eqn:Hai; symmetry in Hai.
+    destruct ai. {
+      apply Nat.sub_0_le in Hai.
+...
+    apply (IHl (i + 1)); [ easy | ].
+    flia Hja.
 ...
 
 Theorem eq_nth_find_all_cons : ∀ A f a (d : A) l l',
