@@ -1208,6 +1208,20 @@ Print nth_find_loop.
       rewrite Nat.sub_diag.
       now apply nat_in_list_true_iff in Hb.
     }
+    cbn.
+    remember (nth_find_loop (nat_in_list i) ll (d + 1) - d) as b eqn:Hb1.
+    symmetry in Hb1.
+    destruct b. {
+      apply Nat.sub_0_le in Hb1.
+      apply Nat.nlt_ge in Hb1.
+      exfalso; apply Hb1; clear Hb1.
+      clear.
+      revert d.
+      induction ll as [| l]; intros; cbn; [ flia | ].
+      remember (nat_in_list i l) as b eqn:Hb; symmetry in Hb.
+      destruct b; [ flia | ].
+      transitivity (d + 1); [ flia | apply IHll ].
+    }
 ...
     revert i Hi d.
     induction ll as [| l]; intros; [ easy | ].
