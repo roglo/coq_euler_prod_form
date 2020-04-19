@@ -1149,6 +1149,41 @@ Theorem eq_nth_find_all_nil : ∀ A f (l : list A),
   nth_find_all f l = [] ↔ ∀ i, i ∈ l → f i = false.
 Proof. intros; apply eq_nth_find_all_loop_nil. Qed.
 
+(* un peu pour le sport ; c'est utilisable dans le théorème suivant,
+   mais chu même pas sûr que ça y résout le problème *)
+Theorem eq_nth_find_all_cons : ∀ A f a (d : A) l l' i,
+  nth_find_all_loop f l i = a :: l' ↔
+  ((∀ j, i + j < a → f (nth j l d) = false) ∧ f (nth (a - i) l d) = true ∧
+   nth_find_all_loop f (skipn (a - i) l) (i + a) = l').
+Proof.
+intros.
+split. {
+  intros Hfl.
+  split. {
+    intros j Hja.
+    revert i j Hfl Hja.
+    induction l as [| b]; intros; [ easy | ].
+    cbn in Hfl.
+    remember (f b) as b1 eqn:Hb1; symmetry in Hb1.
+    destruct b1. {
+      injection Hfl; clear Hfl; intros Hfl H; subst a.
+      flia Hja.
+    }
+    cbn.
+    destruct j; [ easy | ].
+    apply (IHl (i + 1)); [ easy | ].
+    flia Hja.
+  }
+...
+
+Theorem eq_nth_find_all_cons : ∀ A f a (d : A) l l',
+  nth_find_all f l = a :: l' ↔
+  ((∀ i, i < a → f (nth i l d) = false) ∧ f (nth a l d) = true ∧
+   nth_find_all f (skipn a l) = l').
+Proof.
+intros.
+...
+
 Theorem dispatch_locate_list : ∀ ll,
   is_pre_partition ll
   → dispatch_list (locate_list ll) = ll.
@@ -1227,6 +1262,10 @@ induction l as [| b]; intros. {
   specialize (H 0).
   now rewrite Nat.sub_0_r in H.
 }
+Check eq_nth_find_all_nil.
+Print nth_find_all_loop.
+...
+apply (proj2 (eq_nth_find_all_cons _ _ _ 0 _ _)).
 ...
 
 Theorem dispatch_locate : ∀ ll,
