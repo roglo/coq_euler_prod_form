@@ -1201,6 +1201,13 @@ Compute (let ll := [[2]; []; [0; 1]] in let i := 0 in let d := 2 in nth (nth_fin
 Print nth_find_loop.
   assert (H : ∀ d, i ∈ nth (nth_find_loop (nat_in_list i) ll d - d) ll []). {
     intros d.
+    destruct ll as [| l]; [ easy | ].
+    cbn - [ nth ].
+    remember (nat_in_list i l) as b eqn:Hb; symmetry in Hb.
+    destruct b. {
+      rewrite Nat.sub_diag.
+      now apply nat_in_list_true_iff in Hb.
+    }
 ...
     revert i Hi d.
     induction ll as [| l]; intros; [ easy | ].
