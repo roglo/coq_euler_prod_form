@@ -1151,32 +1151,30 @@ Proof. intros; apply eq_nth_find_all_loop_nil. Qed.
 
 (* un peu pour le sport ; c'est utilisable dans le théorème suivant,
    mais chu même pas sûr que ça y résout le problème *)
-Lemma eq_nth_find_all_cons : ∀ A f a (d : A) l l' i,
-  nth_find_all_loop f l i = a :: l' ↔
-  (∀ j, i + j < a → f (nth j l d) = false) ∧
-  f (nth (a - i) l d) = true ∧
+Lemma eq_nth_find_all_cons : ∀ A f j (d : A) l l' i,
+  nth_find_all_loop f l i = j :: l' ↔
+  (∀ k, i + k < j → f (nth k l d) = false) ∧
+  f (nth (j - i) l d) = true ∧
   nth_find_all_loop f
     (skipn (i - (length l - length l')) l) (i - (length l - length l')) = l'.
 Proof.
 intros.
-Print nth_find_all_loop.
-...
 split. {
   intros Hfl.
   split. {
-    intros j Hja.
-    revert i j Hfl Hja.
+    intros k Hkj.
+    revert i k Hfl Hkj.
     induction l as [| b]; intros; [ easy | ].
     cbn in Hfl.
     remember (f b) as b1 eqn:Hb1; symmetry in Hb1.
     destruct b1. {
-      injection Hfl; clear Hfl; intros Hfl H; subst a.
-      flia Hja.
+      injection Hfl; clear Hfl; intros Hfl H; subst j.
+      flia Hkj.
     }
     cbn.
-    destruct j; [ easy | ].
+    destruct k; [ easy | ].
     apply (IHl (i + 1)); [ easy | ].
-    flia Hja.
+    flia Hkj.
   }
   split. {
     revert i Hfl.
@@ -1184,20 +1182,20 @@ split. {
     cbn in Hfl.
     remember (f b) as b1 eqn:Hb1; symmetry in Hb1.
     destruct b1. {
-      injection Hfl; clear Hfl; intros Hfl H; subst a.
+      injection Hfl; clear Hfl; intros Hfl H; subst j.
       now rewrite Nat.sub_diag; cbn.
     }
     cbn.
-    remember (a - i) as ai eqn:Hai; symmetry in Hai.
-    destruct ai. {
-      apply Nat.sub_0_le in Hai.
-      specialize (not_in_nth_find_all_loop _ f l a (i + 1)) as H1.
-      assert (H : a < i + 1) by flia Hai.
+    remember (j - i) as ji eqn:Hji; symmetry in Hji.
+    destruct ji. {
+      apply Nat.sub_0_le in Hji.
+      specialize (not_in_nth_find_all_loop _ f l j (i + 1)) as H1.
+      assert (H : j < i + 1) by flia Hji.
       specialize (H1 H); clear H.
       rewrite Hfl in H1.
       now exfalso; apply H1; left.
     }
-    replace ai with (a - (i + 1)) by flia Hai.
+    replace ji with (j - (i + 1)) by flia Hji.
     now apply IHl.
   } {
     revert i Hfl.
@@ -1205,7 +1203,7 @@ split. {
     cbn in Hfl.
     remember (f b) as b1 eqn:Hb1; symmetry in Hb1.
     destruct b1. {
-      injection Hfl; clear Hfl; intros Hfl H; subst a.
+      injection Hfl; clear Hfl; intros Hfl H; subst j.
       cbn - [ "-" ].
 ...
       now rewrite Nat.sub_diag; cbn.
