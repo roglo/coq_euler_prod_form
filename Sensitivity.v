@@ -1155,7 +1155,8 @@ Lemma eq_nth_find_all_cons : ∀ A f a (d : A) l l' i,
   nth_find_all_loop f l i = a :: l' ↔
   (∀ j, i + j < a → f (nth j l d) = false) ∧
   f (nth (a - i) l d) = true ∧
-  nth_find_all_loop f (skipn (a - i + 1) l) (i + 1) = l'.
+  nth_find_all_loop f
+    (skipn (i - (length l - length l')) l) (i - (length l - length l')) = l'.
 Proof.
 intros.
 split. {
@@ -1203,8 +1204,12 @@ split. {
     remember (f b) as b1 eqn:Hb1; symmetry in Hb1.
     destruct b1. {
       injection Hfl; clear Hfl; intros Hfl H; subst a.
+      cbn - [ "-" ].
+...
       now rewrite Nat.sub_diag; cbn.
     }
+Search (skipn _ (_ :: _)).
+specialize (IHl (i + 1) Hfl).
 ...
       rewrite Hb1.
 ...
