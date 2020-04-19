@@ -1159,6 +1159,8 @@ Lemma eq_nth_find_all_cons : ∀ A f a (d : A) l l' i,
     (skipn (i - (length l - length l')) l) (i - (length l - length l')) = l'.
 Proof.
 intros.
+Print nth_find_all_loop.
+...
 split. {
   intros Hfl.
   split. {
