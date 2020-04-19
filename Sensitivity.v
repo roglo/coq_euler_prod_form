@@ -674,6 +674,19 @@ intros.
 apply nth_find_all_loop_map.
 Qed.
 
+Theorem nat_in_list_true_iff : ∀ i l,
+  nat_in_list i l = true ↔ i ∈ l.
+Proof.
+intros.
+induction l as [| j]; [ easy | cbn ].
+destruct (Nat.eq_dec i j) as [Hij| Hij]. {
+  subst j.
+  split; [ now intros; left | easy ].
+}
+split; [ now intros; right; apply IHl | ].
+intros [H| H]; [ now subst j | now apply IHl ].
+Qed.
+
 Theorem nat_in_list_false_iff : ∀ i l,
   nat_in_list i l = false ↔ ∀ j, j ∈ l → i ≠ j.
 Proof.
@@ -1177,6 +1190,71 @@ Compute (let ll := [[2]; []; [0; 1]] in let i := 2 in nth (nth_find (nat_in_list
     now rewrite Hl in H.
   }
   clear Hl.
+  unfold nth_find.
+  apply in_seq in Hi; destruct Hi as (_, Hi); cbn in Hi.
+(*
+  specialize (Huni i Hi) as H1.
+  destruct H1 as (l & Hlll & Hil).
+*)
+  assert (H : ∀ d, i + d ∈ nth (nth_find_loop (nat_in_list i) ll d) ll []). {
+    intros d.
+...
+    specialize (Huni i Hi) as H1.
+    destruct H1 as (l & Hlll & Hil).
+
+
+    revert i Hi.
+    induction ll as [| l]; intros; [ easy | ].
+    cbn - [ nth ].
+    remember (nat_in_list i l) as b eqn:Hb; symmetry in Hb.
+    destruct b. {
+      apply nat_in_list_true_iff in Hb.
+      destruct d; [ now cbn; rewrite Nat.add_0_r | cbn ].
+...
+      assert (H : ∀ i, i < length ll → ∃ l : list nat, l ∈ ll ∧ i ∈ l). {
+        intros j Hj.
+        specialize (Huni j).
+        assert (H : j < length (l :: ll)) by now cbn; flia Hj.
+        specialize (Huni H).
+        destruct Huni as (l1 & Hl1l & Hjl1).
+        destruct Hl1l as [Hl1l| H1l1]. {
+          subst l.
+,,,
+      specialize (IHll (S i)).
+
+      destruct d
+
+    destruct b; [ now apply nat_in_list_true_iff in Hb | ].
+  specialize (proj1 (nat_in_list_false_iff i l1) Hb) as H1.
+...
+  assert (H : ∀ d, i + d ∈ nth (nth_find_loop (nat_in_list i) ll d) ll []). {
+    revert i Hi.
+    induction ll as [| l]; intros; [ easy | ].
+    cbn - [ nth ].
+    remember (nat_in_list i l) as b eqn:Hb; symmetry in Hb.
+    destruct b. {
+      apply nat_in_list_true_iff in Hb.
+      destruct d; [ now cbn; rewrite Nat.add_0_r | ].
+      cbn.
+...
+      rewrite Nat.
+    destruct i; [ now cbn; rewrite Nat.eqb_refl; left | cbn ].
+    enough (S i + d ∈ nth_find_all_loop (Nat.eqb (nth i l 0)) l (d + 1)). {
+      destruct (nth i l 0 =? a); [ now right | easy ].
+    }
+    cbn in Hi; apply Nat.succ_lt_mono in Hi.
+    rewrite Nat.add_succ_comm, Nat.add_1_r.
+    now apply IHl.
+  }
+Print nth_find_loop.
+...
+*)
+  revert i Hi.
+  induction ll as [| l]; intros; [ easy | ].
+  cbn - [ nth ].
+  remember (nat_in_list i l) as b eqn:Hb; symmetry in Hb.
+  destruct b; [ now apply nat_in_list_true_iff in Hb | ].
+  specialize (proj1 (nat_in_list_false_iff i l) Hb) as H1.
 ...
 Search (_ ∈ nth (nth_find _ _) _ _).
 ...
