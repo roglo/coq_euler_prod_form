@@ -1170,8 +1170,6 @@ symmetry in Hl.
 revert a Ha Hl.
 induction l as [| b]; intros. {
   cbn.
-Compute (let ll := [[2]; []; [0; 1]] in locate_list ll).
-Compute (let ll := [[2]; []; [0; 1]] in nth_find_all (Nat.eqb 1) (locate_list ll)).
   apply eq_nth_find_all_nil.
   intros i Hi.
   apply Nat.eqb_neq.
@@ -1183,30 +1181,29 @@ Compute (let ll := [[2]; []; [0; 1]] in nth_find_all (Nat.eqb 1) (locate_list ll
   clear a Ha Hia.
   destruct Hll as (Hin & Huni & Hint).
   clear Hint.
-Compute (let ll := [[2]; []; [0; 1]] in let i := 0 in nth (nth_find (nat_in_list i) ll) ll []).
-Compute (let ll := [[2]; []; [0; 1]] in let i := 1 in nth (nth_find (nat_in_list i) ll) ll []).
-Compute (let ll := [[2]; []; [0; 1]] in let i := 2 in nth (nth_find (nat_in_list i) ll) ll []).
   enough (H : i ∈ nth (nth_find (nat_in_list i) ll) ll []). {
     now rewrite Hl in H.
   }
   clear Hl.
   unfold nth_find.
   apply in_seq in Hi; destruct Hi as (_, Hi); cbn in Hi.
-(*
-  specialize (Huni i Hi) as H1.
-  destruct H1 as (l & Hlll & Hil).
-*)
-Compute (let ll := [[2]; []; [0; 1]] in let i := 0 in let d := 0 in nth (nth_find_loop (nat_in_list i) ll d) ll []).
-Compute (let ll := [[2]; []; [0; 1]] in let i := 0 in let d := 2 in nth (nth_find_loop (nat_in_list i) ll d - d) ll []).
-Print nth_find_loop.
   assert (H : ∀ d, i ∈ nth (nth_find_loop (nat_in_list i) ll d - d) ll []). {
     intros d.
-    destruct ll as [| l]; [ easy | ].
+    specialize (Huni _ Hi).
+    destruct Huni as (l & Hlll & Hil).
+    clear - Hlll Hil.
+    revert d l Hlll Hil.
+    induction ll as [| l1]; intros; [ easy | ].
     cbn - [ nth ].
-    remember (nat_in_list i l) as b eqn:Hb; symmetry in Hb.
+    remember (nat_in_list i l1) as b eqn:Hb; symmetry in Hb.
     destruct b. {
-      rewrite Nat.sub_diag.
+      rewrite Nat.sub_diag; cbn.
       now apply nat_in_list_true_iff in Hb.
+    }
+    destruct Hlll as [Hlll| Hlll]. {
+      subst l1.
+      apply nat_in_list_true_iff in Hil.
+      now rewrite Hil in Hb.
     }
     cbn.
     remember (nth_find_loop (nat_in_list i) ll (d + 1) - d) as b eqn:Hb1.
@@ -1222,161 +1219,14 @@ Print nth_find_loop.
       destruct b; [ flia | ].
       transitivity (d + 1); [ flia | apply IHll ].
     }
-...
-    revert i Hi d.
-    induction ll as [| l]; intros; [ easy | ].
-...
-    intros d.
-    specialize (Huni i Hi) as H1.
-    destruct H1 as (l & Hlll & Hil).
-    revert i Hi.
-    induction ll as [| l]; intros; [ easy | ].
-    cbn - [ nth ].
-    remember (nat_in_list i l) as b eqn:Hb; symmetry in Hb.
-    destruct b. {
-      apply nat_in_list_true_iff in Hb.
-      destruct d; [ now cbn; rewrite Nat.add_0_r | cbn ].
-...
-      assert (H : ∀ i, i < length ll → ∃ l : list nat, l ∈ ll ∧ i ∈ l). {
-        intros j Hj.
-        specialize (Huni j).
-        assert (H : j < length (l :: ll)) by now cbn; flia Hj.
-        specialize (Huni H).
-        destruct Huni as (l1 & Hl1l & Hjl1).
-        destruct Hl1l as [Hl1l| H1l1]. {
-          subst l.
-,,,
-      specialize (IHll (S i)).
-
-      destruct d
-
-    destruct b; [ now apply nat_in_list_true_iff in Hb | ].
-  specialize (proj1 (nat_in_list_false_iff i l1) Hb) as H1.
-...
-  assert (H : ∀ d, i + d ∈ nth (nth_find_loop (nat_in_list i) ll d) ll []). {
-    revert i Hi.
-    induction ll as [| l]; intros; [ easy | ].
-    cbn - [ nth ].
-    remember (nat_in_list i l) as b eqn:Hb; symmetry in Hb.
-    destruct b. {
-      apply nat_in_list_true_iff in Hb.
-      destruct d; [ now cbn; rewrite Nat.add_0_r | ].
-      cbn.
-...
-      rewrite Nat.
-    destruct i; [ now cbn; rewrite Nat.eqb_refl; left | cbn ].
-    enough (S i + d ∈ nth_find_all_loop (Nat.eqb (nth i l 0)) l (d + 1)). {
-      destruct (nth i l 0 =? a); [ now right | easy ].
-    }
-    cbn in Hi; apply Nat.succ_lt_mono in Hi.
-    rewrite Nat.add_succ_comm, Nat.add_1_r.
-    now apply IHl.
+    specialize (IHll (d + 1) l Hlll Hil).
+    rewrite Nat.sub_add_distr in IHll.
+    rewrite Hb1 in IHll.
+    now rewrite Nat.sub_succ, Nat.sub_0_r in IHll.
   }
-Print nth_find_loop.
-...
-*)
-  revert i Hi.
-  induction ll as [| l]; intros; [ easy | ].
-  cbn - [ nth ].
-  remember (nat_in_list i l) as b eqn:Hb; symmetry in Hb.
-  destruct b; [ now apply nat_in_list_true_iff in Hb | ].
-  specialize (proj1 (nat_in_list_false_iff i l) Hb) as H1.
-...
-Search (_ ∈ nth (nth_find _ _) _ _).
-...
-  unfold nth_find in Hl.
-  revert i Hi Hl.
-  induction ll as [| l]; intros; [ easy | ].
-  cbn in Hl.
-  remember (nat_in_list i l) as b eqn:Hb; symmetry in Hb.
-  destruct b; [ now subst l | ].
-(* mouais... faut voir... *)
-...
-  unfold locate_list.
-Compute (let ll := [[2]; []; [0; 1]] in nth_find (nat_in_list 0) ll).
-Compute (let ll := [[2]; []; [0; 1]] in nth_find (nat_in_list 1) ll).
-Compute (let ll := [[2]; []; [0; 1]] in nth_find (nat_in_list 2) ll).
-...
-  rewrite nth_find_all_map.
-...
-unfold nth_find.
-unfold nth_find_all.
-...
-rewrite IHll.
-...
-rewrite map_length, seq_length.
-destruct Hll as (Hin & Huni & Hint).
-Compute (let ll := [[2]; []; [0; 1]] in map (λ i, nth_find (nat_in_list i) ll) (seq 0 (length ll))).
-replace ll with (map (λ i, nth i ll []) (seq 0 (length ll))) at 2. 2: {
-  clear.
-  induction ll as [| l]; [ easy | ].
-  f_equal; cbn; f_equal.
-  rewrite <- seq_shift.
-  now rewrite map_map.
+  specialize (H 0).
+  now rewrite Nat.sub_0_r in H.
 }
-apply map_ext_in_iff.
-intros a Ha.
-rewrite Hl.
-unfold nth_find.
-unfold nth_find_all.
-...
-intros * Hll.
-remember (locate_list ll) as l eqn:Hl.
-unfold locate_list in Hl.
-unfold dispatch_list.
-rewrite Hl at 1.
-rewrite map_length, seq_length.
-destruct Hll as (Hin & Huni & Hint).
-Compute (let ll := [[2]; []; [0; 1]] in map (λ i, nth_find (nat_in_list i) ll) (seq 0 (length ll))).
-replace ll with (map (λ i, nth i ll []) (seq 0 (length ll))) at 2. 2: {
-  clear.
-  induction ll as [| l]; [ easy | ].
-  f_equal; cbn; f_equal.
-  rewrite <- seq_shift.
-  now rewrite map_map.
-}
-apply map_ext_in_iff.
-intros a Ha.
-rewrite Hl.
-unfold nth_find.
-unfold nth_find_all.
-...
-rewrite nth_find_all_loop_map.
-...
-clear l Hl.
-remember (nth a ll []) as l eqn:Hl.
-symmetry in Hl.
-revert a Ha Hl.
-induction l as [| b]; intros. {
-  cbn.
-...
-destruct ll as [| l1]; [ easy | ].
-destruct ll as [| l2]. {
-  cbn in Hint.
-  rewrite app_nil_r in Hint.
-  specialize (Hin l1 (or_introl eq_refl)); cbn in Hin.
-  specialize (Huni 0 (Nat.lt_0_1)).
-  destruct Huni as (l2 & Hll & Hzl).
-  destruct Hll as [Hll| Hll]; [ subst l2 | easy ].
-  assert (H : l1 = [0]). {
-    induction l1 as [| i]; [ easy | ].
-    destruct i. {
-      destruct l1 as [| j]; [ easy | exfalso ].
-      specialize (Hin j (or_intror (or_introl eq_refl))).
-      apply Nat.lt_1_r in Hin; subst j.
-      apply NoDup_cons_iff in Hint.
-      now destruct Hint as (Hint & _); apply Hint; left.
-    }
-    specialize (Hin (S i) (or_introl eq_refl)).
-    flia Hin.
-  }
-  now subst l1.
-}
-destruct ll as [| l3]. {
-...
-Search (nth_find_loop).
-Compute (let ll := [[2]; []; [0; 1]] in locate_list ll).
-Compute (let ll := [[2]; []; [0; 1]] in locate ll).
 ...
 
 Theorem dispatch_locate : ∀ ll,
