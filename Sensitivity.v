@@ -1196,13 +1196,18 @@ Compute (let ll := [[2]; []; [0; 1]] in let i := 2 in nth (nth_find (nat_in_list
   specialize (Huni i Hi) as H1.
   destruct H1 as (l & Hlll & Hil).
 *)
-  assert (H : ∀ d, i + d ∈ nth (nth_find_loop (nat_in_list i) ll d) ll []). {
+Compute (let ll := [[2]; []; [0; 1]] in let i := 0 in let d := 0 in nth (nth_find_loop (nat_in_list i) ll d) ll []).
+Compute (let ll := [[2]; []; [0; 1]] in let i := 0 in let d := 2 in nth (nth_find_loop (nat_in_list i) ll d - d) ll []).
+Print nth_find_loop.
+  assert (H : ∀ d, i ∈ nth (nth_find_loop (nat_in_list i) ll d - d) ll []). {
     intros d.
 ...
+    revert i Hi d.
+    induction ll as [| l]; intros; [ easy | ].
+...
+    intros d.
     specialize (Huni i Hi) as H1.
     destruct H1 as (l & Hlll & Hil).
-
-
     revert i Hi.
     induction ll as [| l]; intros; [ easy | ].
     cbn - [ nth ].
