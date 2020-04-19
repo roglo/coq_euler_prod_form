@@ -1220,10 +1220,11 @@ split. {
   intros (Hij & Hfji & Hsk).
 ...
 
-Theorem eq_nth_find_all_cons : ∀ A f a (d : A) l l',
-  nth_find_all f l = a :: l' ↔
-  ((∀ i, i < a → f (nth i l d) = false) ∧ f (nth a l d) = true ∧
-   nth_find_all f (skipn a l) = l').
+Theorem eq_nth_find_all_cons : ∀ A f j (d : A) l l',
+  nth_find_all f l = j :: l' ↔
+  (∀ k, k < j → f (nth k l d) = false) ∧
+  f (nth j l d) = true ∧
+  nth_find_all_loop f (skipn (j + 1) l) (j + 1) = l'.
 Proof.
 intros.
 ...
