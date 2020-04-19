@@ -1153,6 +1153,8 @@ Proof. intros; apply eq_nth_find_all_loop_nil. Qed.
    mais chu même pas sûr que ça y résout le problème *)
 Lemma eq_nth_find_all_cons : ∀ A f j (d : A) l l' i,
   nth_find_all_loop f l i = j :: l' ↔
+  l ≠ [] ∧
+  i ≤ j ∧
   (∀ k, i + k < j → f (nth k l d) = false) ∧
   f (nth (j - i) l d) = true ∧
   nth_find_all_loop f (skipn (j + 1 - i) l) (j + 1) = l'.
@@ -1160,6 +1162,12 @@ Proof.
 intros.
 split. {
   intros Hfl.
+  split; [ now intros H; subst l | ].
+  split. {
+    apply Nat.nlt_ge; intros Hij.
+    specialize (not_in_nth_find_all_loop _ f l _ _ Hij) as H1.
+    now apply H1; rewrite Hfl; left.
+  }
   split. {
     intros k Hkj.
     revert i k Hfl Hkj.
@@ -1217,7 +1225,28 @@ split. {
     now rewrite skipn_cons.
   }
 } {
-  intros (Hij & Hfji & Hsk).
+  intros (Hlz & Hij & Hikj & Hfji & Hsk).
+  revert j d l' i Hij Hikj Hfji Hsk.
+  induction l as [| b]; intros; [ easy | clear Hlz ].
+  cbn.
+  remember (f b) as b1 eqn:Hb1; symmetry in Hb1.
+  destruct b1. {
+    f_equal. {
+      cbn in Hfji.
+      remember (j - i) as ji eqn:Hji; symmetry in Hji.
+      destruct ji; [ flia Hij Hji | exfalso ].
+      replace (j + 1 - i) with (S (S ji)) in Hsk by flia Hji.
+      rewrite skipn_cons in Hsk.
+      destruct l as [| a]. {
+        specialize (Hikj 0).
+        cbn in Hikj.
+        rewrite Nat.add_0_r in Hikj.
+        rewrite Hikj in Hb1; [ easy | ].
+        flia Hji.
+      }
+      assert (H : a :: l ≠ []) by easy.
+      specialize (IHl H); clear H.
+      rewrite skipn_cons in Hsk.
 ...
 
 Theorem eq_nth_find_all_cons : ∀ A f j (d : A) l l',
