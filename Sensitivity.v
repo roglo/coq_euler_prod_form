@@ -1155,8 +1155,7 @@ Lemma eq_nth_find_all_cons : ∀ A f j (d : A) l l' i,
   nth_find_all_loop f l i = j :: l' ↔
   (∀ k, i + k < j → f (nth k l d) = false) ∧
   f (nth (j - i) l d) = true ∧
-  nth_find_all_loop f
-    (skipn (i - (length l - length l')) l) (i - (length l - length l')) = l'.
+  nth_find_all_loop f (skipn (j + 1 - i) l) (j + 1) = l'.
 Proof.
 intros.
 split. {
@@ -1204,28 +1203,21 @@ split. {
     remember (f b) as b1 eqn:Hb1; symmetry in Hb1.
     destruct b1. {
       injection Hfl; clear Hfl; intros Hfl H; subst j.
-      cbn - [ "-" ].
-...
-      now rewrite Nat.sub_diag; cbn.
+      rewrite Nat.add_comm at 1.
+      now rewrite Nat.add_sub.
     }
-Search (skipn _ (_ :: _)).
-specialize (IHl (i + 1) Hfl).
-...
-      rewrite Hb1.
-...
+    specialize (IHl (i + 1) Hfl).
+    assert (Hij : i + 1 ≤ j). {
+      apply Nat.nlt_ge; intros Hij.
+      specialize (not_in_nth_find_all_loop _ f l _ _ Hij) as H1.
+      now apply H1; rewrite Hfl; left.
     }
-    cbn.
-    remember (a - i) as ai eqn:Hai; symmetry in Hai.
-    destruct ai. {
-      apply Nat.sub_0_le in Hai.
-      specialize (not_in_nth_find_all_loop _ f l a (i + 1)) as H1.
-      assert (H : a < i + 1) by flia Hai.
-      specialize (H1 H); clear H.
-      rewrite Hfl in H1.
-      now exfalso; apply H1; left.
-    }
-    replace ai with (a - (i + 1)) by flia Hai.
-    now apply IHl.
+    replace (j + 1 - (i + 1)) with (j - i) in IHl by flia Hij.
+    replace (j + 1 - i) with (S (j - i)) by flia Hij.
+    now rewrite skipn_cons.
+  }
+} {
+  intros (Hij & Hfji & Hsk).
 ...
 
 Theorem eq_nth_find_all_cons : ∀ A f a (d : A) l l',
