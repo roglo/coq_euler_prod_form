@@ -1173,6 +1173,12 @@ Compute (let ll := [[2]; []; [0; 1]] in nth_find_all (Nat.eqb 1) (locate_list ll
 Compute (let ll := [[2]; []; [0; 1]] in let i := 0 in nth (nth_find (nat_in_list i) ll) ll []).
 Compute (let ll := [[2]; []; [0; 1]] in let i := 1 in nth (nth_find (nat_in_list i) ll) ll []).
 Compute (let ll := [[2]; []; [0; 1]] in let i := 2 in nth (nth_find (nat_in_list i) ll) ll []).
+  enough (H : i ∈ nth (nth_find (nat_in_list i) ll) ll []). {
+    now rewrite Hl in H.
+  }
+  clear Hl.
+...
+Search (_ ∈ nth (nth_find _ _) _ _).
 ...
   unfold nth_find in Hl.
   revert i Hi Hl.
