@@ -1104,6 +1104,38 @@ unfold locate_list.
 now rewrite map_length, seq_length.
 Qed.
 
+Theorem eq_nth_find_all_loop_nil : ∀ A f (l : list A) i,
+  nth_find_all_loop f l i = [] ↔ ∀ j, j ∈ l → f j = false.
+Proof.
+intros.
+split. {
+  intros Hfl * Hj.
+  revert i j Hj Hfl.
+  induction l as [| k]; intros; [ easy | ].
+  cbn in Hfl.
+  remember (f k) as b eqn:Hb; symmetry in Hb.
+  destruct b; [ easy | ].
+  destruct Hj as [Hj| Hj]; [ now subst k | ].
+  now apply (IHl (i + 1)).
+} {
+  intros Hlf.
+  revert i.
+  induction l as [| k]; intros; [ easy | cbn ].
+  remember (f k) as b eqn:Hb; symmetry in Hb.
+  destruct b. {
+    specialize (Hlf k (or_introl eq_refl)).
+    now rewrite Hlf in Hb.
+  }
+  apply IHl.
+  intros j Hj.
+  now apply Hlf; right.
+}
+Qed.
+
+Theorem eq_nth_find_all_nil : ∀ A f (l : list A),
+  nth_find_all f l = [] ↔ ∀ i, i ∈ l → f i = false.
+Proof. intros; apply eq_nth_find_all_loop_nil. Qed.
+
 Theorem dispatch_locate_list : ∀ ll,
   is_pre_partition ll
   → dispatch_list (locate_list ll) = ll.
@@ -1127,10 +1159,34 @@ induction l as [| b]; intros. {
   cbn.
 Compute (let ll := [[2]; []; [0; 1]] in locate_list ll).
 Compute (let ll := [[2]; []; [0; 1]] in nth_find_all (Nat.eqb 1) (locate_list ll)).
+  apply eq_nth_find_all_nil.
+  intros i Hi.
+  apply Nat.eqb_neq.
+  intros H; subst i.
+  apply in_map_iff in Hi.
+  destruct Hi as (i & Hia & Hi).
+  move i before a; move Hi before Ha.
+  rewrite <- Hia in Hl.
+  clear a Ha Hia.
+  destruct Hll as (Hin & Huni & Hint).
+  clear Hint.
+Compute (let ll := [[2]; []; [0; 1]] in let i := 0 in nth (nth_find (nat_in_list i) ll) ll []).
+Compute (let ll := [[2]; []; [0; 1]] in let i := 1 in nth (nth_find (nat_in_list i) ll) ll []).
+Compute (let ll := [[2]; []; [0; 1]] in let i := 2 in nth (nth_find (nat_in_list i) ll) ll []).
+...
+  unfold nth_find in Hl.
+  revert i Hi Hl.
+  induction ll as [| l]; intros; [ easy | ].
+  cbn in Hl.
+  remember (nat_in_list i l) as b eqn:Hb; symmetry in Hb.
+  destruct b; [ now subst l | ].
+(* mouais... faut voir... *)
+...
   unfold locate_list.
 Compute (let ll := [[2]; []; [0; 1]] in nth_find (nat_in_list 0) ll).
 Compute (let ll := [[2]; []; [0; 1]] in nth_find (nat_in_list 1) ll).
 Compute (let ll := [[2]; []; [0; 1]] in nth_find (nat_in_list 2) ll).
+...
   rewrite nth_find_all_map.
 ...
 unfold nth_find.
