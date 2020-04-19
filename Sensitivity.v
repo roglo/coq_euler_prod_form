@@ -1153,8 +1153,9 @@ Proof. intros; apply eq_nth_find_all_loop_nil. Qed.
    mais chu même pas sûr que ça y résout le problème *)
 Lemma eq_nth_find_all_cons : ∀ A f a (d : A) l l' i,
   nth_find_all_loop f l i = a :: l' ↔
-  ((∀ j, i + j < a → f (nth j l d) = false) ∧ f (nth (a - i) l d) = true ∧
-   nth_find_all_loop f (skipn (a - i) l) (i + a) = l').
+  (∀ j, i + j < a → f (nth j l d) = false) ∧
+  f (nth (a - i) l d) = true ∧
+  nth_find_all_loop f (skipn (a - i) l) (i + a) = l'.
 Proof.
 intros.
 split. {
@@ -1187,9 +1188,15 @@ split. {
     remember (a - i) as ai eqn:Hai; symmetry in Hai.
     destruct ai. {
       apply Nat.sub_0_le in Hai.
-...
-    apply (IHl (i + 1)); [ easy | ].
-    flia Hja.
+      specialize (not_in_nth_find_all_loop _ f l a (i + 1)) as H1.
+      assert (H : a < i + 1) by flia Hai.
+      specialize (H1 H); clear H.
+      rewrite Hfl in H1.
+      now exfalso; apply H1; left.
+    }
+    replace ai with (a - (i + 1)) by flia Hai.
+    now apply IHl.
+  }
 ...
 
 Theorem eq_nth_find_all_cons : ∀ A f a (d : A) l l',
