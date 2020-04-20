@@ -1240,6 +1240,15 @@ split. {
       rewrite Hikj in Hb1; [ easy | ].
       flia Hji.
     }
+    destruct (Nat.eq_dec i j) as [Hiej| Hiej]. {
+      subst j.
+      now replace (i + 1 - i) with 1 by flia.
+    }
+    specialize (Hikj 0).
+    assert (H : i + 0 < j) by flia Hij Hiej.
+    specialize (Hikj H); cbn in Hikj.
+    now rewrite Hikj in Hb1.
+  }
 ...
 
 Theorem eq_nth_find_all_cons : ∀ A f j (d : A) l l',
