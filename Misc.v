@@ -1369,29 +1369,67 @@ split. {
 }
 Qed.
 
-Theorem NoDup_app : ∀ A (l l' : list A),
-  NoDup l
-  → NoDup l'
-  → (∀ a, a ∈ l → a ∉ l')
-  → NoDup (l ++ l').
+Theorem NoDup_app_remove_l : ∀ A (l l' : list A), NoDup (l ++ l') → NoDup l'.
 Proof.
-intros * Hnl Hnl' Hll.
-revert l' Hnl' Hll.
-induction l as [| b l]; intros; [ easy | ].
-cbn.
-constructor. {
-  intros Hb.
-  apply in_app_or in Hb.
-  destruct Hb as [Hb| Hb]. {
-    now apply NoDup_cons_iff in Hnl.
-  } {
-    now specialize (Hll b (or_introl eq_refl)) as H1.
+intros * Hnd.
+apply NoDup_app_comm in Hnd.
+revert l Hnd.
+induction l' as [| b]; intros; [ constructor | ].
+cbn in Hnd.
+apply NoDup_cons_iff in Hnd.
+destruct Hnd as (H1, H2).
+constructor; [ | now apply IHl' in H2 ].
+intros H; apply H1.
+now apply in_or_app; left.
+Qed.
+
+Theorem NoDup_app_remove_r : ∀ A (l l' : list A), NoDup (l ++ l') → NoDup l.
+Proof.
+intros * Hnd.
+apply NoDup_app_comm in Hnd.
+now apply NoDup_app_remove_l in Hnd.
+Qed.
+
+Theorem NoDup_app_iff : ∀ A (l l' : list A),
+  NoDup (l ++ l') ↔
+    NoDup l ∧ NoDup l' ∧ (∀ a, a ∈ l → a ∉ l').
+Proof.
+intros.
+split. {
+  intros Hnd.
+  split; [ now apply NoDup_app_remove_r in Hnd | ].
+  split; [ now apply NoDup_app_remove_l in Hnd | ].
+  intros a Ha Ha'.
+  revert l' Hnd Ha'.
+  induction l as [| b]; intros; [ easy | ].
+  destruct Ha as [Ha| Ha]. {
+    subst b.
+    apply NoDup_app_comm in Hnd.
+    apply NoDup_remove_2 in Hnd.
+    apply Hnd.
+    now apply in_app_iff; left.
   }
+  apply (IHl Ha l'); [ | easy ].
+  cbn in Hnd.
+  now apply NoDup_cons_iff in Hnd.
 } {
-  apply NoDup_cons_iff in Hnl.
-  apply IHl; [ easy | easy | ].
-  intros a Ha.
-  now apply Hll; right.
+  intros * (Hnl & Hnl' & Hll).
+  revert l' Hnl' Hll.
+  induction l as [| b l]; intros; [ easy | cbn ].
+  constructor. {
+    intros Hb.
+    apply in_app_or in Hb.
+    destruct Hb as [Hb| Hb]. {
+      now apply NoDup_cons_iff in Hnl.
+    } {
+      now specialize (Hll b (or_introl eq_refl)) as H1.
+    }
+  } {
+    apply NoDup_cons_iff in Hnl.
+    apply IHl; [ easy | easy | ].
+    intros a Ha.
+    now apply Hll; right.
+  }
 }
 Qed.
 
@@ -1402,9 +1440,9 @@ intros * Hnl Hnl'.
 revert l' Hnl'.
 induction l as [| a l]; intros; [ constructor | ].
 cbn.
-apply NoDup_app. {
+apply NoDup_app_iff.
+split. {
   induction l' as [| b l']; [ constructor | ].
-  cbn.
   apply NoDup_cons. {
     intros Hab.
     apply NoDup_cons_iff in Hnl'; apply Hnl'.
@@ -1417,11 +1455,11 @@ apply NoDup_app. {
     } {
       now right; apply IHl'.
     }
-  } {
-    apply IHl'.
-    now apply NoDup_cons_iff in Hnl'.
   }
-} {
+  apply IHl'.
+  now apply NoDup_cons_iff in Hnl'.
+}
+split. {
   apply IHl; [ | easy ].
   now apply NoDup_cons_iff in Hnl.
 } {

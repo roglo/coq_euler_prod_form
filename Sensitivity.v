@@ -588,11 +588,15 @@ split. {
     remember (nth_find_all_loop (Nat.eqb a) _ _) as x; cbn in Heqx; subst x.
     rewrite Nat.eqb_refl.
     do 2 rewrite <- flat_map_concat_map.
-    apply NoDup_app; [ apply IHl | | ]. {
-      apply NoDup_app. {
+    apply NoDup_app_iff.
+    split; [ apply IHl | ].
+    split. {
+      apply NoDup_app_iff.
+      split. {
         constructor; [ | apply Hnd ].
         apply not_in_nth_find_all_loop; flia.
-      } {
+      }
+      split. {
         rewrite flat_map_nth_find_all_loop_cons; [ | left; flia ].
         apply IHl.
       }
@@ -1464,6 +1468,24 @@ split. {
   unfold locate_list.
   rewrite (List_map_nth_in _ 0); [ | now rewrite seq_length ].
   rewrite seq_nth; [ cbn | easy ].
+  specialize (in_nth_nth_find ll b Huni Hbl) as H1.
+  assert (H2 : b ∈ nth a ll []) by now rewrite Hl; left.
+  remember (nth_find (nat_in_list b) ll) as c eqn:Hc.
+  clear - Hint H1 H2.
+  revert a b c H1 H2.
+  induction ll as [| l]; intros. {
+    cbn in H1.
+    now rewrite match_id in H1.
+  }
+  cbn in Hint.
+  apply NoDup_app_iff in Hint.
+  destruct Hint as (Hnd & Hndc & Hll).
+  specialize (IHll Hndc).
+  cbn in H1, H2.
+  destruct c. {
+    destruct a; [ easy | exfalso ].
+    specialize (Hll _ H1) as H3.
+    apply H3; clear H3.
 ...
 
 Theorem dispatch_locate : ∀ ll,
