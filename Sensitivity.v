@@ -1513,6 +1513,14 @@ split. {
   rewrite List_skipn_map.
   rewrite List_skipn_seq; [ cbn | flia Hbl ].
   unfold locate_list in IHl.
+Lemma nth_find_all_loop_map_seq : ∀ a ll start,
+  nth_find_all_loop (Nat.eqb a)
+    (map (λ i, nth_find (nat_in_list i) ll)
+       (seq start (length ll - start))) start = skipn start (nth a ll []).
+Admitted.
+rewrite nth_find_all_loop_map_seq.
+rewrite Hl.
+(* non, c'est pas ça *)
 ...
 
 Theorem dispatch_locate : ∀ ll,
