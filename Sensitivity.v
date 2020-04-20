@@ -1447,6 +1447,23 @@ split. {
   }
   specialize (Hsort _ H) as H2; clear H.
   clear - H1 H2 Hkb.
+  apply Sorted_LocallySorted_iff in H2.
+  revert b k Hkb H1 H2.
+  induction l as [| a]; intros; [ easy | ].
+  destruct H1 as [H1| H1]. {
+    subst a.
+    inversion H2; subst.
+    flia Hkb H4.
+  }
+  inversion H2; subst.
+  apply (IHl a k); [ | easy | easy ].
+  now transitivity b.
+}
+split. {
+  apply Nat.eqb_eq.
+  unfold locate_list.
+  rewrite (List_map_nth_in _ 0); [ | now rewrite seq_length ].
+  rewrite seq_nth; [ cbn | easy ].
 ...
 
 Theorem dispatch_locate : ∀ ll,
