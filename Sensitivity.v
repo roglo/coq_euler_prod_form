@@ -1382,6 +1382,18 @@ induction l as [| b]; intros. {
   now rewrite Nat.sub_0_r in H.
 }
 apply (proj2 (eq_nth_find_all_cons _ _ _ 0 _ _)).
+split. {
+  rewrite locate_list_length.
+  destruct Hll as (Hin & Huni & Hint).
+  apply (Hin (b :: l)); [ | now left ].
+  rewrite <- Hl.
+  apply in_seq in Ha.
+  now apply nth_In.
+}
+split. {
+  intros k Hkb.
+  apply Nat.eqb_neq; intros H.
+Search locate_list.
 ...
 
 Theorem dispatch_locate : ∀ ll,
