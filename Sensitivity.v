@@ -1149,8 +1149,6 @@ Theorem eq_nth_find_all_nil : ∀ A f (l : list A),
   nth_find_all f l = [] ↔ ∀ i, i ∈ l → f i = false.
 Proof. intros; apply eq_nth_find_all_loop_nil. Qed.
 
-(* un peu pour le sport ; c'est utilisable dans le théorème suivant,
-   mais chu même pas sûr que ça y résout le problème *)
 Lemma eq_nth_find_all_loop_cons : ∀ A f j (d : A) l l' i,
   nth_find_all_loop f l i = j :: l' ↔
     i ≤ j < i + length l ∧
@@ -1303,6 +1301,58 @@ split. {
 }
 Qed.
 
+Lemma in_nth_nth_find_loop : ∀ ll i d,
+  (∀ i, i < length ll → ∃ l : list nat, l ∈ ll ∧ i ∈ l)
+  → i < length ll
+  → i ∈ nth (nth_find_loop (nat_in_list i) ll d - d) ll [].
+Proof.
+intros * Huni Hi.
+specialize (Huni _ Hi).
+destruct Huni as (l & Hlll & Hil).
+clear - Hlll Hil.
+revert d l Hlll Hil.
+induction ll as [| l1]; intros; [ easy | ].
+cbn - [ nth ].
+remember (nat_in_list i l1) as b eqn:Hb; symmetry in Hb.
+destruct b. {
+  rewrite Nat.sub_diag; cbn.
+  now apply nat_in_list_true_iff in Hb.
+}
+destruct Hlll as [Hlll| Hlll]. {
+  subst l1.
+  apply nat_in_list_true_iff in Hil.
+  now rewrite Hil in Hb.
+}
+cbn.
+remember (nth_find_loop (nat_in_list i) ll (d + 1) - d) as b eqn:Hb1.
+symmetry in Hb1.
+destruct b. {
+  apply Nat.sub_0_le in Hb1.
+  apply Nat.nlt_ge in Hb1.
+  exfalso; apply Hb1; clear Hb1.
+  clear.
+  revert d.
+  induction ll as [| l]; intros; cbn; [ flia | ].
+  remember (nat_in_list i l) as b eqn:Hb; symmetry in Hb.
+  destruct b; [ flia | ].
+  transitivity (d + 1); [ flia | apply IHll ].
+}
+specialize (IHll (d + 1) l Hlll Hil).
+rewrite Nat.sub_add_distr in IHll.
+rewrite Hb1 in IHll.
+now rewrite Nat.sub_succ, Nat.sub_0_r in IHll.
+Qed.
+
+Theorem in_nth_nth_find : ∀ ll j,
+  (∀ i, i < length ll → ∃ l : list nat, l ∈ ll ∧ i ∈ l)
+  → j < length ll
+  → j ∈ nth (nth_find (nat_in_list j) ll) ll [].
+Proof.
+intros * Huni Hi.
+specialize (in_nth_nth_find_loop ll j 0 Huni Hi) as H1.
+now rewrite Nat.sub_0_r in H1.
+Qed.
+
 Theorem dispatch_locate_list : ∀ ll,
   is_pre_partition ll
   → dispatch_list (locate_list ll) = ll.
@@ -1338,62 +1388,36 @@ induction l as [| b]; intros. {
   enough (H : i ∈ nth (nth_find (nat_in_list i) ll) ll []). {
     now rewrite Hl in H.
   }
-  clear Hl.
-  unfold nth_find.
-  apply in_seq in Hi; destruct Hi as (_, Hi); cbn in Hi.
-  assert (H : ∀ d, i ∈ nth (nth_find_loop (nat_in_list i) ll d - d) ll []). {
-    intros d.
-    specialize (Huni _ Hi).
-    destruct Huni as (l & Hlll & Hil).
-    clear - Hlll Hil.
-    revert d l Hlll Hil.
-    induction ll as [| l1]; intros; [ easy | ].
-    cbn - [ nth ].
-    remember (nat_in_list i l1) as b eqn:Hb; symmetry in Hb.
-    destruct b. {
-      rewrite Nat.sub_diag; cbn.
-      now apply nat_in_list_true_iff in Hb.
-    }
-    destruct Hlll as [Hlll| Hlll]. {
-      subst l1.
-      apply nat_in_list_true_iff in Hil.
-      now rewrite Hil in Hb.
-    }
-    cbn.
-    remember (nth_find_loop (nat_in_list i) ll (d + 1) - d) as b eqn:Hb1.
-    symmetry in Hb1.
-    destruct b. {
-      apply Nat.sub_0_le in Hb1.
-      apply Nat.nlt_ge in Hb1.
-      exfalso; apply Hb1; clear Hb1.
-      clear.
-      revert d.
-      induction ll as [| l]; intros; cbn; [ flia | ].
-      remember (nat_in_list i l) as b eqn:Hb; symmetry in Hb.
-      destruct b; [ flia | ].
-      transitivity (d + 1); [ flia | apply IHll ].
-    }
-    specialize (IHll (d + 1) l Hlll Hil).
-    rewrite Nat.sub_add_distr in IHll.
-    rewrite Hb1 in IHll.
-    now rewrite Nat.sub_succ, Nat.sub_0_r in IHll.
-  }
-  specialize (H 0).
-  now rewrite Nat.sub_0_r in H.
+  apply in_seq in Hi.
+  now apply in_nth_nth_find.
 }
 apply (proj2 (eq_nth_find_all_cons _ _ _ 0 _ _)).
-split. {
-  rewrite locate_list_length.
-  destruct Hll as (Hin & Huni & Hint).
+destruct Hll as (Hin & Huni & Hint).
+assert (Hbl : b < length ll). {
   apply (Hin (b :: l)); [ | now left ].
   rewrite <- Hl.
   apply in_seq in Ha.
   now apply nth_In.
 }
+split; [ now rewrite locate_list_length | ].
 split. {
   intros k Hkb.
-  apply Nat.eqb_neq; intros H.
-Search locate_list.
+  apply Nat.eqb_neq; intros Hanl.
+  unfold locate_list in Hanl.
+  rewrite (List_map_nth_in _ 0) in Hanl. 2: {
+    rewrite seq_length.
+    now transitivity b.
+  }
+  rewrite seq_nth in Hanl; cbn in Hanl; [ | now transitivity b ].
+  specialize (in_nth_nth_find ll k Huni) as H1.
+  assert (H : k < length ll) by now transitivity b.
+  specialize (H1 H); clear H.
+  rewrite <- Hanl, Hl in H1.
+  destruct H1 as [H1| H1]; [ subst k; flia Hkb | ].
+  (* is_pre_partition should perhaps add the condition that all
+     lists are sorted; in that case, I could find a contradiction
+     between Hkb and H1; but, well, is it enough? *)
+Search (nth (nth_find _ _)).
 ...
 
 Theorem dispatch_locate : ∀ ll,
