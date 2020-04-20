@@ -1226,7 +1226,8 @@ split. {
   }
 } {
   intros (Hlz & Hij & Hikj & Hfji & Hsk).
-  revert j d l' i Hij Hikj Hfji Hsk.
+  subst l'.
+  revert j d i Hij Hikj Hfji.
   induction l as [| b]; intros; [ easy | clear Hlz ].
   cbn.
   remember (f b) as b1 eqn:Hb1; symmetry in Hb1.
@@ -1235,18 +1236,10 @@ split. {
       cbn in Hfji.
       remember (j - i) as ji eqn:Hji; symmetry in Hji.
       destruct ji; [ flia Hij Hji | exfalso ].
-      replace (j + 1 - i) with (S (S ji)) in Hsk by flia Hji.
-      rewrite skipn_cons in Hsk.
-      destruct l as [| a]. {
-        specialize (Hikj 0).
-        cbn in Hikj.
-        rewrite Nat.add_0_r in Hikj.
-        rewrite Hikj in Hb1; [ easy | ].
-        flia Hji.
-      }
-      assert (H : a :: l ≠ []) by easy.
-      specialize (IHl H); clear H.
-      rewrite skipn_cons in Hsk.
+      specialize (Hikj 0); cbn in Hikj.
+      rewrite Hikj in Hb1; [ easy | ].
+      flia Hji.
+    }
 ...
 
 Theorem eq_nth_find_all_cons : ∀ A f j (d : A) l l',
