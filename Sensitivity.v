@@ -1385,11 +1385,9 @@ induction l as [| b]; intros. {
   clear a Ha Hia.
   destruct Hll as (Hin & Huni & Hint).
   clear Hint.
-  enough (H : i ∈ nth (nth_find (nat_in_list i) ll) ll []). {
-    now rewrite Hl in H.
-  }
-  apply in_seq in Hi.
-  now apply in_nth_nth_find.
+  apply in_seq in Hi; destruct Hi as (_, Hi); cbn in Hi.
+  specialize (in_nth_nth_find _ _ Huni Hi) as H1.
+  now rewrite Hl in H1.
 }
 apply (proj2 (eq_nth_find_all_cons _ _ _ 0 _ _)).
 destruct Hll as (Hin & Huni & Hint).
