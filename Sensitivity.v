@@ -247,7 +247,8 @@ Require Import Sorting.
 Definition is_pre_partition ll :=
   (∀ l, l ∈ ll → ∀ i, i ∈ l → i < length ll) ∧
   (∀ i, i < length ll → ∃ l, l ∈ ll ∧ i ∈ l) ∧
-  NoDup (concat ll).
+  NoDup (concat ll) ∧
+  (∀ l, l ∈ ll → Sorted lt l).
 
 (* locate: inverse of "dispatch" *)
 
@@ -533,117 +534,145 @@ split. {
   replace i with (i + 0) at 1 by easy.
   apply H.
 }
-unfold dispatch_list.
-rewrite <- flat_map_concat_map.
-assert (Hnd : ∀ l i j, NoDup (nth_find_all_loop (Nat.eqb i) l j)). {
-  clear.
-  intros.
-  revert i j.
-  induction l as [| a]; intros; [ constructor | ].
-  cbn - [ Nat.eqb ].
-  remember (i =? a) as ia eqn:Hia; symmetry in Hia.
-  destruct ia. {
-    constructor; [ apply not_in_nth_find_all_loop; flia | ].
-    apply IHl.
-  }
-  apply IHl.
-}
-assert
-  (H : ∀ i k len,
-   NoDup
-     (flat_map (λ j, nth_find_all_loop (Nat.eqb j) l k)
-        (seq i len))). {
-  clear Hl.
-  induction l as [| a]; intros. {
-    cbn; clear.
-    revert i.
-    induction len; intros; [ constructor | apply IHlen ].
-  }
-  destruct (lt_dec a i) as [Hai| Hai]. {
-    rewrite flat_map_nth_find_all_loop_cons; [ | now left ].
-    apply IHl.
-  }
-  apply Nat.nlt_ge in Hai.
-  destruct (le_dec (i + len) a) as [Hila| Hila]. {
-    rewrite flat_map_nth_find_all_loop_cons; [ | now right ].
-    apply IHl.
-  }
-  apply Nat.nle_gt in Hila.
-  rewrite flat_map_concat_map.
-  replace len with (a - i + (len - (a - i))) by flia Hila.
-  rewrite seq_app.
-  rewrite map_app.
-  rewrite concat_app.
-  do 2 rewrite <- flat_map_concat_map.
-  rewrite flat_map_nth_find_all_loop_cons; [ | right; flia Hai ].
-  rewrite (Nat.add_comm i), Nat.sub_add; [ | easy ].
-  replace (len - (a - i)) with (1 + (len - (a - i) - 1)) by flia Hai Hila.
-  rewrite seq_app.
-  do 2 rewrite flat_map_concat_map.
-  rewrite map_app, concat_app.
-  unfold seq at 2, map at 2, concat at 2.
-  rewrite app_nil_r.
-  remember (nth_find_all_loop (Nat.eqb a) _ _) as x; cbn in Heqx; subst x.
-  rewrite Nat.eqb_refl.
-  do 2 rewrite <- flat_map_concat_map.
-  apply NoDup_app; [ apply IHl | | ]. {
-    apply NoDup_app. {
-      constructor; [ | apply Hnd ].
-      apply not_in_nth_find_all_loop; flia.
-    } {
-      rewrite flat_map_nth_find_all_loop_cons; [ | left; flia ].
+split. {
+  unfold dispatch_list.
+  rewrite <- flat_map_concat_map.
+  assert (Hnd : ∀ l i j, NoDup (nth_find_all_loop (Nat.eqb i) l j)). {
+    clear.
+    intros.
+    revert i j.
+    induction l as [| a]; intros; [ constructor | ].
+    cbn - [ Nat.eqb ].
+    remember (i =? a) as ia eqn:Hia; symmetry in Hia.
+    destruct ia. {
+      constructor; [ apply not_in_nth_find_all_loop; flia | ].
       apply IHl.
     }
-    intros b Hb Hbf.
-    apply in_flat_map_nth_find_all_loop_eq in Hbf. 2: {
-      destruct Hb as [Hb| Hb]; [ now subst b | ].
-      apply Nat.nlt_ge; intros H; revert Hb.
-      apply not_in_nth_find_all_loop; flia H.
+    apply IHl.
+  }
+  assert
+  (H : ∀ i k len,
+      NoDup
+        (flat_map (λ j, nth_find_all_loop (Nat.eqb j) l k)
+                  (seq i len))). {
+    clear Hl.
+    induction l as [| a]; intros. {
+      cbn; clear.
+      revert i.
+      induction len; intros; [ constructor | apply IHlen ].
     }
-    destruct Hb as [Hb| Hb]. {
+    destruct (lt_dec a i) as [Hai| Hai]. {
+      rewrite flat_map_nth_find_all_loop_cons; [ | now left ].
+      apply IHl.
+    }
+    apply Nat.nlt_ge in Hai.
+    destruct (le_dec (i + len) a) as [Hila| Hila]. {
+      rewrite flat_map_nth_find_all_loop_cons; [ | now right ].
+      apply IHl.
+    }
+    apply Nat.nle_gt in Hila.
+    rewrite flat_map_concat_map.
+    replace len with (a - i + (len - (a - i))) by flia Hila.
+    rewrite seq_app.
+    rewrite map_app.
+    rewrite concat_app.
+    do 2 rewrite <- flat_map_concat_map.
+    rewrite flat_map_nth_find_all_loop_cons; [ | right; flia Hai ].
+    rewrite (Nat.add_comm i), Nat.sub_add; [ | easy ].
+    replace (len - (a - i)) with (1 + (len - (a - i) - 1)) by flia Hai Hila.
+    rewrite seq_app.
+    do 2 rewrite flat_map_concat_map.
+    rewrite map_app, concat_app.
+    unfold seq at 2, map at 2, concat at 2.
+    rewrite app_nil_r.
+    remember (nth_find_all_loop (Nat.eqb a) _ _) as x; cbn in Heqx; subst x.
+    rewrite Nat.eqb_refl.
+    do 2 rewrite <- flat_map_concat_map.
+    apply NoDup_app; [ apply IHl | | ]. {
+      apply NoDup_app. {
+        constructor; [ | apply Hnd ].
+        apply not_in_nth_find_all_loop; flia.
+      } {
+        rewrite flat_map_nth_find_all_loop_cons; [ | left; flia ].
+        apply IHl.
+      }
+      intros b Hb Hbf.
+      apply in_flat_map_nth_find_all_loop_eq in Hbf. 2: {
+        destruct Hb as [Hb| Hb]; [ now subst b | ].
+        apply Nat.nlt_ge; intros H; revert Hb.
+        apply not_in_nth_find_all_loop; flia H.
+      }
+      destruct Hb as [Hb| Hb]. {
+        subst k.
+        rewrite Nat.sub_diag in Hbf; cbn in Hbf; flia Hbf.
+      }
+      remember (b - k) as bk eqn:Hbk; symmetry in Hbk.
+      destruct bk; [ cbn in Hbf; flia Hbf | ].
+      cbn in Hbf.
+      apply in_nth_find_all_loop_eqb in Hb; [ | flia Hbk ].
+      replace (b - (k + 1)) with bk in Hb by flia Hbk.
+      flia Hb Hbf.
+    }
+    intros b Hb1 Hb2.
+    destruct Hb2 as [Hb2| Hb2]. {
       subst k.
-      rewrite Nat.sub_diag in Hbf; cbn in Hbf; flia Hbf.
+      apply in_flat_map in Hb1.
+      destruct Hb1 as (j & Hj & Hjb).
+      revert Hjb.
+      apply not_in_nth_find_all_loop; flia.
     }
-    remember (b - k) as bk eqn:Hbk; symmetry in Hbk.
-    destruct bk; [ cbn in Hbf; flia Hbf | ].
-    cbn in Hbf.
-    apply in_nth_find_all_loop_eqb in Hb; [ | flia Hbk ].
-    replace (b - (k + 1)) with bk in Hb by flia Hbk.
-    flia Hb Hbf.
-  }
-  intros b Hb1 Hb2.
-  destruct Hb2 as [Hb2| Hb2]. {
-    subst k.
-    apply in_flat_map in Hb1.
-    destruct Hb1 as (j & Hj & Hjb).
-    revert Hjb.
-    apply not_in_nth_find_all_loop; flia.
-  }
-  apply in_app_iff in Hb2.
-  destruct Hb2 as [Hb2| Hb2]. {
+    apply in_app_iff in Hb2.
+    destruct Hb2 as [Hb2| Hb2]. {
+      destruct (le_dec (k + 1) b) as [Hkb| Hkb]. {
+        apply in_flat_map_nth_find_all_loop_eq in Hb1; [ | easy ].
+        apply in_nth_find_all_loop_eqb in Hb2; [ | easy ].
+        rewrite Hb2 in Hb1.
+        flia Hb1.
+      }
+      apply Nat.nle_gt in Hkb.
+      revert Hb2.
+      now apply not_in_nth_find_all_loop.
+    }
+    rewrite flat_map_nth_find_all_loop_cons in Hb2; [ | left; flia ].
     destruct (le_dec (k + 1) b) as [Hkb| Hkb]. {
       apply in_flat_map_nth_find_all_loop_eq in Hb1; [ | easy ].
-      apply in_nth_find_all_loop_eqb in Hb2; [ | easy ].
-      rewrite Hb2 in Hb1.
-      flia Hb1.
+      apply in_flat_map_nth_find_all_loop_eq in Hb2; [ | easy ].
+      flia Hb1 Hb2.
     }
     apply Nat.nle_gt in Hkb.
-    revert Hb2.
+    apply in_flat_map in Hb1.
+    destruct Hb1 as (x & Hx & Hxl).
+    revert Hxl.
     now apply not_in_nth_find_all_loop.
   }
-  rewrite flat_map_nth_find_all_loop_cons in Hb2; [ | left; flia ].
-  destruct (le_dec (k + 1) b) as [Hkb| Hkb]. {
-    apply in_flat_map_nth_find_all_loop_eq in Hb1; [ | easy ].
-    apply in_flat_map_nth_find_all_loop_eq in Hb2; [ | easy ].
-    flia Hb1 Hb2.
+  apply H.
+} {
+  intros l1 Hl1.
+  unfold dispatch_list in Hl1.
+  apply in_map_iff in Hl1.
+  destruct Hl1 as (i & Hill & Hil); subst l1.
+  apply in_seq in Hil; destruct Hil as (_, Hil); cbn in Hil.
+  unfold nth_find_all.
+  remember 0 as j; clear Heqj.
+  clear Hl Hil.
+  revert i j.
+  induction l as [| k]; intros; [ constructor | cbn ].
+  remember (i =? k) as b eqn:Hb; symmetry in Hb.
+  destruct b; [ | apply IHl ].
+  apply Nat.eqb_eq in Hb; subst k.
+  constructor; [ apply IHl | clear ].
+  remember 0 as d.
+  clear Heqd.
+  revert i j d.
+  induction l as [| k]; intros; [ constructor | cbn ].
+  remember (i =? k) as b eqn:Hb; symmetry in Hb.
+  destruct b. {
+    apply Nat.eqb_eq in Hb; subst k.
+    constructor; flia.
   }
-  apply Nat.nle_gt in Hkb.
-  apply in_flat_map in Hb1.
-  destruct Hb1 as (x & Hx & Hxl).
-  revert Hxl.
-  now apply not_in_nth_find_all_loop.
+  replace (j + S d + 1) with (j + S (S d)) by flia.
+  apply IHl.
 }
-apply H.
 Qed.
 
 Lemma nth_find_loop_map : ∀ A B f (g : A → B) i l,
@@ -724,7 +753,7 @@ Proof.
 intros * Hl.
 specialize (dispatch_list_is_pre_partition l Hl) as H1.
 unfold is_pre_partition in H1.
-destruct H1 as (Hin & Huni & Hint).
+destruct H1 as (Hin & Huni & Hint & Hsort).
 remember (dispatch_list l) as ll.
 unfold dispatch_list in Heqll.
 rewrite Heqll.
@@ -1371,6 +1400,7 @@ apply map_ext_in_iff.
 intros a Ha.
 remember (nth a ll []) as l eqn:Hl.
 symmetry in Hl.
+apply in_seq in Ha; destruct Ha as (_, Ha); cbn in Ha.
 revert a Ha Hl.
 induction l as [| b]; intros. {
   cbn.
@@ -1383,18 +1413,17 @@ induction l as [| b]; intros. {
   move i before a; move Hi before Ha.
   rewrite <- Hia in Hl.
   clear a Ha Hia.
-  destruct Hll as (Hin & Huni & Hint).
+  destruct Hll as (Hin & Huni & Hint & Hsort).
   clear Hint.
   apply in_seq in Hi; destruct Hi as (_, Hi); cbn in Hi.
   specialize (in_nth_nth_find _ _ Huni Hi) as H1.
   now rewrite Hl in H1.
 }
 apply (proj2 (eq_nth_find_all_cons _ _ _ 0 _ _)).
-destruct Hll as (Hin & Huni & Hint).
+destruct Hll as (Hin & Huni & Hint & Hsort).
 assert (Hbl : b < length ll). {
   apply (Hin (b :: l)); [ | now left ].
   rewrite <- Hl.
-  apply in_seq in Ha.
   now apply nth_In.
 }
 split; [ now rewrite locate_list_length | ].
@@ -1412,10 +1441,12 @@ split. {
   specialize (H1 H); clear H.
   rewrite <- Hanl, Hl in H1.
   destruct H1 as [H1| H1]; [ subst k; flia Hkb | ].
-  (* is_pre_partition should perhaps add the condition that all
-     lists are sorted; in that case, I could find a contradiction
-     between Hkb and H1; but, well, is it enough? *)
-Search (nth (nth_find _ _)).
+  assert (H : b :: l ∈ ll). {
+    rewrite <- Hl.
+    now apply nth_In.
+  }
+  specialize (Hsort _ H) as H2; clear H.
+  clear - H1 H2 Hkb.
 ...
 
 Theorem dispatch_locate : ∀ ll,
