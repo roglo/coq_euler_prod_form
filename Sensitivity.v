@@ -1160,6 +1160,13 @@ Lemma eq_nth_find_all_cons : ∀ A f j (d : A) l l' i,
   nth_find_all_loop f (skipn (j + 1 - i) l) (j + 1) = l'.
 Proof.
 intros.
+(* a term is missing: something telling that l is not just ≠ [] but
+   more; with only these terms above, I fail in the reverse when l
+   is just [b] and j=i+1 *)
+(* for "nth_find_all_loop f [b] i" to be equal to "i+1 :: l'",
+   "f b" must be false but since the remaining list is [], the
+   result cannot be "i+1 :: l". *)
+...
 split. {
   intros Hfl.
   split; [ now intros H; subst l | ].
