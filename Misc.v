@@ -1257,6 +1257,31 @@ destruct l as [| a]; [ easy | cbn in Hl ].
 now apply app_eq_nil in Hl.
 Qed.
 
+Theorem List_app_cons : ∀ A (l1 l2 : list A) a,
+  l1 ++ a :: l2 = l1 ++ [a] ++ l2.
+Proof. easy. Qed.
+
+Theorem List_skipn_map : ∀ A B (f : A → B) l n,
+  skipn n (map f l) = map f (skipn n l).
+Proof.
+intros.
+revert n.
+induction l as [| a]; intros; [ now do 2 rewrite skipn_nil | cbn ].
+destruct n; [ easy | cbn; apply IHl ].
+Qed.
+
+Theorem List_skipn_seq : ∀ n start len,
+  n ≤ len → skipn n (seq start len) = seq (start + n) (len - n).
+Proof.
+intros * Hnlen.
+revert n start Hnlen.
+induction len; intros; [ now rewrite skipn_nil | cbn ].
+destruct n; [ now cbn; rewrite Nat.add_0_r | cbn ].
+rewrite <- Nat.add_succ_comm.
+apply Nat.succ_le_mono in Hnlen.
+now apply IHlen.
+Qed.
+
 Theorem NoDup_app_app_swap {A} : ∀ l1 l2 l3 : list A,
   NoDup (l1 ++ l2 ++ l3) → NoDup (l1 ++ l3 ++ l2).
 Proof.

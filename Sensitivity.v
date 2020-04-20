@@ -329,10 +329,6 @@ Compute (let l := [2; 0; 0] in dispatch_list l).
 Compute (locate_list (dispatch_list [2; 0; 0])).
 Compute (locate_list (dispatch_list [1; 2; 0])).
 
-Theorem List_app_cons : ∀ A (l1 l2 : list A) a,
-  l1 ++ a :: l2 = l1 ++ [a] ++ l2.
-Proof. easy. Qed.
-
 (* return the rank (from 0) in the pre-partition i where we j is found
    (j < n) *)
 Definition in_nth_list_of_pre_part n j i :=
@@ -1406,7 +1402,7 @@ remember (nth a ll []) as l eqn:Hl.
 symmetry in Hl.
 apply in_seq in Ha; destruct Ha as (_, Ha); cbn in Ha.
 revert a Ha Hl.
-destruct l as [| b]; intros. {
+induction l as [| b]; intros. {
   cbn.
   apply eq_nth_find_all_nil.
   intros i Hi.
@@ -1513,6 +1509,10 @@ split. {
   f_equal.
   now apply IHll.
 } {
+  unfold locate_list.
+  rewrite List_skipn_map.
+  rewrite List_skipn_seq; [ cbn | flia Hbl ].
+  unfold locate_list in IHl.
 ...
 
 Theorem dispatch_locate : ∀ ll,
