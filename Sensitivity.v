@@ -1151,29 +1151,31 @@ Proof. intros; apply eq_nth_find_all_loop_nil. Qed.
 
 (* un peu pour le sport ; c'est utilisable dans le théorème suivant,
    mais chu même pas sûr que ça y résout le problème *)
-Lemma eq_nth_find_all_cons : ∀ A f j (d : A) l l' i,
+Lemma eq_nth_find_all_loop_cons : ∀ A f j (d : A) l l' i,
   nth_find_all_loop f l i = j :: l' ↔
-  l ≠ [] ∧
-  i ≤ j ∧
-  (∀ k, i + k < j → f (nth k l d) = false) ∧
-  f (nth (j - i) l d) = true ∧
-  nth_find_all_loop f (skipn (j + 1 - i) l) (j + 1) = l'.
+    i ≤ j < i + length l ∧
+    (∀ k, i + k < j → f (nth k l d) = false) ∧
+    f (nth (j - i) l d) = true ∧
+    nth_find_all_loop f (skipn (j + 1 - i) l) (j + 1) = l'.
 Proof.
 intros.
-(* a term is missing: something telling that l is not just ≠ [] but
-   more; with only these terms above, I fail in the reverse when l
-   is just [b] and j=i+1 *)
-(* for "nth_find_all_loop f [b] i" to be equal to "i+1 :: l'",
-   "f b" must be false but since the remaining list is [], the
-   result cannot be "i+1 :: l". *)
-...
 split. {
   intros Hfl.
-  split; [ now intros H; subst l | ].
   split. {
-    apply Nat.nlt_ge; intros Hij.
-    specialize (not_in_nth_find_all_loop _ f l _ _ Hij) as H1.
-    now apply H1; rewrite Hfl; left.
+    split. {
+      apply Nat.nlt_ge; intros Hij.
+      specialize (not_in_nth_find_all_loop _ f l _ _ Hij) as H1.
+      now apply H1; rewrite Hfl; left.
+    }
+    revert i j Hfl.
+    induction l as [| a]; intros; [ easy | ].
+    cbn in Hfl |-*.
+    remember (f a) as b eqn:Hb; symmetry in Hb.
+    destruct b. {
+      injection Hfl; clear Hfl; intros Hfl H; subst j; flia.
+    }
+    rewrite <- Nat.add_succ_comm, <- Nat.add_1_r.
+    now apply IHl.
   }
   split. {
     intros k Hkj.
@@ -1232,10 +1234,13 @@ split. {
     now rewrite skipn_cons.
   }
 } {
-  intros (Hlz & Hij & Hikj & Hfji & Hsk).
+  intros ((Hij, Hjil) & Hikj & Hfji & Hsk).
   subst l'.
-  revert j i Hij Hikj Hfji.
-  induction l as [| b]; intros; [ easy | clear Hlz ].
+  revert j i Hij Hjil Hikj Hfji.
+  induction l as [| b]; intros. {
+    cbn in Hjil.
+    flia Hij Hjil.
+  }
   cbn.
   remember (f b) as b1 eqn:Hb1; symmetry in Hb1.
   destruct b1. {
@@ -1262,24 +1267,41 @@ split. {
     subst j; rewrite Nat.sub_diag in Hfji; cbn in Hfji.
     now rewrite Hfji in Hb1.
   }
-  destruct l as [| a]. {
-    exfalso.
-    replace (j - i) with (S (j - 1 - i)) in Hfji by flia Hij Hiej.
-    cbn in Hfji.
-    rewrite match_id in Hfji.
-    destruct (Nat.eq_dec (i + 1) j) as [Hi1j| Hi1j]. {
-      subst j.
-      (* ah bin non *)
-...
+  replace (j - i) with (j + 1 - (i + 1)) by flia.
+  replace (j - i) with (S (j - (i + 1))) in Hfji by flia Hij Hiej.
+  cbn in Hfji, Hjil.
+  rewrite <- Nat.add_succ_comm, <- Nat.add_1_r in Hjil.
+  apply IHl; [ flia Hij Hiej | easy | | easy ].
+  intros k Hk.
+  rewrite Nat.add_1_r, Nat.add_succ_comm in Hk.
+  now specialize (Hikj _ Hk).
+}
+Qed.
 
 Theorem eq_nth_find_all_cons : ∀ A f j (d : A) l l',
   nth_find_all f l = j :: l' ↔
-  (∀ k, k < j → f (nth k l d) = false) ∧
-  f (nth j l d) = true ∧
-  nth_find_all_loop f (skipn (j + 1) l) (j + 1) = l'.
+    j < length l ∧
+    (∀ k : nat, k < j → f (nth k l d) = false) ∧
+    f (nth j l d) = true ∧
+    nth_find_all_loop f (skipn (j + 1) l) (j + 1) = l'.
 Proof.
 intros.
-...
+specialize (eq_nth_find_all_loop_cons _ f j d l l' 0) as H1.
+cbn in H1.
+do 2 rewrite Nat.sub_0_r in H1.
+unfold nth_find_all.
+split. {
+  intros H.
+  specialize (proj1 H1 H) as H2.
+  now destruct H2 as ((_, H3), H2).
+} {
+  intros H.
+  destruct H as (H2, H3).
+  apply H1.
+  split; [ | easy ].
+  split; [ flia | easy ].
+}
+Qed.
 
 Theorem dispatch_locate_list : ∀ ll,
   is_pre_partition ll
@@ -1359,9 +1381,6 @@ induction l as [| b]; intros. {
   specialize (H 0).
   now rewrite Nat.sub_0_r in H.
 }
-Check eq_nth_find_all_nil.
-Print nth_find_all_loop.
-...
 apply (proj2 (eq_nth_find_all_cons _ _ _ 0 _ _)).
 ...
 
