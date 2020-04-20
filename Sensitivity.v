@@ -1472,7 +1472,7 @@ split. {
   assert (H2 : b ∈ nth a ll []) by now rewrite Hl; left.
   remember (nth_find (nat_in_list b) ll) as c eqn:Hc.
   clear - Hint H1 H2.
-  revert a b c H1 H2.
+  revert a c H1 H2.
   induction ll as [| l]; intros. {
     cbn in H1.
     now rewrite match_id in H1.
@@ -1486,6 +1486,33 @@ split. {
     destruct a; [ easy | exfalso ].
     specialize (Hll _ H1) as H3.
     apply H3; clear H3.
+    clear - H2.
+    revert a b H2.
+    induction ll as [| l]; intros. {
+      rewrite nth_overflow in H2; [ easy | cbn; flia ].
+    }
+    cbn in H2; cbn.
+    destruct a; [ now apply in_or_app; left | ].
+    apply in_or_app; right.
+    now apply (IHll a).
+  }
+  destruct a. {
+    exfalso.
+    specialize (Hll _ H2) as H3.
+    apply H3; clear H3.
+    clear - H1.
+    revert c H1.
+    induction ll as [| l]; intros. {
+      rewrite nth_overflow in H1; [ easy | cbn; flia ].
+    }
+    cbn in H1; cbn.
+    destruct c; [ now apply in_or_app; left | ].
+    apply in_or_app; right.
+    now apply (IHll c).
+  }
+  f_equal.
+  now apply IHll.
+} {
 ...
 
 Theorem dispatch_locate : ∀ ll,
