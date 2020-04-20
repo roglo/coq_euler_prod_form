@@ -1406,7 +1406,7 @@ remember (nth a ll []) as l eqn:Hl.
 symmetry in Hl.
 apply in_seq in Ha; destruct Ha as (_, Ha); cbn in Ha.
 revert a Ha Hl.
-induction l as [| b]; intros. {
+destruct l as [| b]; intros. {
   cbn.
   apply eq_nth_find_all_nil.
   intros i Hi.
