@@ -1537,32 +1537,19 @@ destruct l as [| b2]. {
   }
   apply eq_nth_find_all_loop_nil.
   intros j Hj.
-Search (_ ∈ skipn _ _).
-...
+  apply Nat.eqb_neq; intros H; subst j.
+  rewrite List_skipn_map in Hj.
+  rewrite List_skipn_seq in Hj; [ | flia Hb1 Hbb1 ].
+  replace (b + 1 + (b1 + 1 - (b + 1))) with (b1 + 1) in Hj by flia Hbb1.
+  replace (length ll - (b + 1) - (b1 + 1 - (b + 1))) with
+    (length ll - (b1 + 1)) in Hj by flia Hbb1.
   apply in_map_iff in Hj.
   destruct Hj as (i & Hli & Hil).
-  apply Bool.not_true_iff_false.
-...
-  replace (b1 + 1 - (b + 1)) with (S (b1 - (b + 1))) in Hj by flia Hbb1.
-  cbn in Hj.
-  destruct ll as [| l]; [ easy | ].
-  rewrite map_cons in Hj.
-  apply Bool.not_true_iff_false; intros Haj.
-  apply Nat.eqb_eq in Haj; subst j.
-  cbn in Hj.
-Search (skipn (S _)).
-...
-  apply in_map_iff in Hj.
-  destruct Hj as (i & Hli & Hil).
-  apply Bool.not_true_iff_false.
-  intros H.
-  apply Nat.eqb_eq in H; subst j a.
   apply in_seq in Hil.
   specialize (in_nth_nth_find ll i Huni) as H1.
   assert (H : i < length ll) by flia Hil.
   specialize (H1 H); clear H.
-  rewrite Hl in H1.
-  destruct H1 as [H1| H1]; [ subst i; flia Hil | easy ].
+  rewrite Hli in H1.
 ...
   Hl : nth a ll [] = b :: b1 :: l
   ============================
