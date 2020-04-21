@@ -1523,7 +1523,8 @@ split. {
       cbn in Hl; subst l1.
 *)
 Lemma nth_find_all_loop_map_seq : ∀ a ll,
-  (∀ i, i < length ll → ∃ l : list nat, l ∈ ll ∧ i ∈ l)
+  (∀ l, l ∈ ll → ∀ i, i ∈ l → i < length ll)
+  → (∀ i, i < length ll → ∃ l : list nat, l ∈ ll ∧ i ∈ l)
   → (∀ l, l ∈ ll → Sorted lt l)
   → nth_find_all_loop (Nat.eqb a)
        (map (λ i, nth_find (nat_in_list i) ll)
@@ -1531,7 +1532,7 @@ Lemma nth_find_all_loop_map_seq : ∀ a ll,
              (length ll - (hd 0 (nth a ll []) + 1))))
        (hd 0 (nth a ll []) + 1) = tl (nth a ll []).
 Proof.
-intros * Huni Hsort.
+intros * Hin Huni Hsort.
 remember (nth a ll []) as l eqn:Hl; symmetry in Hl.
 revert a Hl.
 induction l as [| b]; intros. {
@@ -1571,11 +1572,11 @@ destruct l as [| b2]. {
   split. {
     specialize (Hsort (nth a ll [])) as H1.
     specialize (@nth_In _ a ll []) as H2.
-    assert (H : a < length ll). {
+    assert (Halt : a < length ll). {
       apply Nat.nle_gt; intros H.
       now rewrite nth_overflow in Hl.
     }
-    specialize (H2 H); clear H.
+    specialize (H2 Halt).
     specialize (H1 H2); clear H2.
     rewrite Hl in H1.
     cbn in H1.
@@ -1583,6 +1584,13 @@ destruct l as [| b2]. {
     destruct H1 as (_, H1).
     apply HdRel_inv in H1.
     split; [ flia H1 | ].
+    enough (H : b1 < length ll) by flia H H1.
+    apply (Hin [b; b1]); [ | now right; left ].
+    rewrite <- Hl.
+    now apply nth_In.
+  }
+  split. {
+    intros k Hk.
 ...
 
 Theorem dispatch_locate : ∀ ll,
