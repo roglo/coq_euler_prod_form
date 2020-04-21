@@ -1598,6 +1598,17 @@ destruct l as [| b2]. {
       rewrite seq_length.
       flia Hk Hb1.
     }
+    rewrite seq_nth in Ha; [ | flia Hk Hb1 ].
+    specialize (in_nth_nth_find ll (b + 1 + k) Huni) as H1.
+    assert (H : b + 1 + k < length ll) by flia Hk Hb1.
+    specialize (H1 H); clear H.
+    rewrite <- Ha, Hl in H1.
+    destruct H1 as [H1| H1]; [ flia H1 | ].
+    destruct H1 as [H1| H1]; [ | easy ].
+    flia Hk H1.
+  }
+  split. {
+    apply Nat.eqb_eq.
 ...
 
 Theorem dispatch_locate : ∀ ll,
