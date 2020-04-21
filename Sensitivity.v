@@ -1569,28 +1569,35 @@ destruct l as [| b1]. {
 destruct l as [| b2]. {
   apply (proj2 (eq_nth_find_all_loop_cons _ _ b1 0 _ [] (b + 1))).
   rewrite map_length, seq_length.
+  assert (Halt : a < length ll). {
+    apply Nat.nle_gt; intros H.
+    now rewrite nth_overflow in Hl.
+  }
+  assert (Hb1 : b1 < length ll). {
+    apply (Hin [b; b1]); [ | now right; left ].
+    rewrite <- Hl.
+    now apply nth_In.
+  }
   split. {
     specialize (Hsort (nth a ll [])) as H1.
-    specialize (@nth_In _ a ll []) as H2.
-    assert (Halt : a < length ll). {
-      apply Nat.nle_gt; intros H.
-      now rewrite nth_overflow in Hl.
-    }
-    specialize (H2 Halt).
+    specialize (@nth_In _ a ll [] Halt) as H2.
     specialize (H1 H2); clear H2.
     rewrite Hl in H1.
     cbn in H1.
     apply Sorted_inv in H1.
     destruct H1 as (_, H1).
     apply HdRel_inv in H1.
-    split; [ flia H1 | ].
-    enough (H : b1 < length ll) by flia H H1.
-    apply (Hin [b; b1]); [ | now right; left ].
-    rewrite <- Hl.
-    now apply nth_In.
+    split; [ flia H1 | flia Hb1 H1 ].
   }
   split. {
     intros k Hk.
+    apply Bool.not_true_iff_false.
+    intros Ha.
+    apply Nat.eqb_eq in Ha.
+    rewrite (List_map_nth_in _ 0) in Ha. 2: {
+      rewrite seq_length.
+      flia Hk Hb1.
+    }
 ...
 
 Theorem dispatch_locate : ∀ ll,
