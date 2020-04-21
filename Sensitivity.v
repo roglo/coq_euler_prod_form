@@ -1578,7 +1578,7 @@ destruct l as [| b2]. {
     rewrite <- Hl.
     now apply nth_In.
   }
-  split. {
+  assert (Hbb1 : b < b1). {
     specialize (Hsort (nth a ll [])) as H1.
     specialize (@nth_In _ a ll [] Halt) as H2.
     specialize (H1 H2); clear H2.
@@ -1586,9 +1586,9 @@ destruct l as [| b2]. {
     cbn in H1.
     apply Sorted_inv in H1.
     destruct H1 as (_, H1).
-    apply HdRel_inv in H1.
-    split; [ flia H1 | flia Hb1 H1 ].
+    now apply HdRel_inv in H1.
   }
+  split; [ flia Hb1 Hbb1 | ].
   split. {
     intros k Hk.
     apply Bool.not_true_iff_false.
@@ -1609,6 +1609,13 @@ destruct l as [| b2]. {
   }
   split. {
     apply Nat.eqb_eq.
+    rewrite (List_map_nth_in _ 0). 2: {
+      rewrite seq_length.
+      flia Hb1 Hbb1.
+    }
+    rewrite seq_nth; [ | flia Hb1 Hbb1 ].
+    rewrite Nat.add_sub_assoc; [ | flia Hbb1 ].
+    rewrite Nat.add_comm, Nat.add_sub.
 ...
 
 Theorem dispatch_locate : ∀ ll,
