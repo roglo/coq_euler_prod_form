@@ -1512,6 +1512,7 @@ split. {
   unfold locate_list.
   rewrite List_skipn_map.
   rewrite List_skipn_seq; [ cbn | flia Hbl ].
+...
   clear - Hl Hbl.
   revert a b l Hl Hbl.
   induction ll as [| l1]; intros; [ easy | cbn ].
