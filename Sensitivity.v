@@ -1382,6 +1382,108 @@ specialize (in_nth_nth_find_loop ll j 0 Huni Hi) as H1.
 now rewrite Nat.sub_0_r in H1.
 Qed.
 
+Lemma nth_find_all_loop_map_seq : ∀ a ll,
+  (∀ l, l ∈ ll → ∀ i, i ∈ l → i < length ll)
+  → (∀ i, i < length ll → ∃ l : list nat, l ∈ ll ∧ i ∈ l)
+  → NoDup (concat ll)
+  → (∀ l, l ∈ ll → Sorted lt l)
+  → nth_find_all_loop (Nat.eqb a)
+       (map (λ i, nth_find (nat_in_list i) ll)
+          (seq (hd 0 (nth a ll []) + 1)
+             (length ll - (hd 0 (nth a ll []) + 1))))
+       (hd 0 (nth a ll []) + 1) = tl (nth a ll []).
+Proof.
+intros * Hin Huni Hint Hsort.
+remember (nth a ll []) as l eqn:Hl; symmetry in Hl.
+revert a Hl.
+induction l as [| b]; intros. {
+  cbn.
+  apply eq_nth_find_all_loop_nil.
+  intros j Hj.
+  apply in_map_iff in Hj.
+  destruct Hj as (i & Hli & Hil).
+  apply Bool.not_true_iff_false.
+  intros H.
+  apply Nat.eqb_eq in H; subst j a.
+  apply in_seq in Hil.
+  specialize (in_nth_nth_find ll i Huni) as H1.
+  assert (H : i < length ll) by flia Hil.
+  specialize (H1 H); clear H.
+  now rewrite Hl in H1.
+}
+cbn.
+destruct l as [| b1]. {
+  apply eq_nth_find_all_loop_nil.
+  intros j Hj.
+  apply in_map_iff in Hj.
+  destruct Hj as (i & Hli & Hil).
+  apply Bool.not_true_iff_false.
+  intros H.
+  apply Nat.eqb_eq in H; subst j a.
+  apply in_seq in Hil.
+  specialize (in_nth_nth_find ll i Huni) as H1.
+  assert (H : i < length ll) by flia Hil.
+  specialize (H1 H); clear H.
+  rewrite Hl in H1.
+  destruct H1 as [H1| H1]; [ subst i; flia Hil | easy ].
+}
+destruct l as [| b2]. {
+  apply (proj2 (eq_nth_find_all_loop_cons _ _ b1 0 _ [] (b + 1))).
+  rewrite map_length, seq_length.
+  assert (Halt : a < length ll). {
+    apply Nat.nle_gt; intros H.
+    now rewrite nth_overflow in Hl.
+  }
+  assert (Hb1 : b1 < length ll). {
+    apply (Hin [b; b1]); [ | now right; left ].
+    rewrite <- Hl.
+    now apply nth_In.
+  }
+  assert (Hbb1 : b < b1). {
+    specialize (Hsort (nth a ll [])) as H1.
+    specialize (@nth_In _ a ll [] Halt) as H2.
+    specialize (H1 H2); clear H2.
+    rewrite Hl in H1.
+    cbn in H1.
+    apply Sorted_inv in H1.
+    destruct H1 as (_, H1).
+    now apply HdRel_inv in H1.
+  }
+  split; [ flia Hb1 Hbb1 | ].
+  split. {
+    intros k Hk.
+    apply Bool.not_true_iff_false.
+    intros Ha.
+    apply Nat.eqb_eq in Ha.
+    rewrite (List_map_nth_in _ 0) in Ha. 2: {
+      rewrite seq_length.
+      flia Hk Hb1.
+    }
+    rewrite seq_nth in Ha; [ | flia Hk Hb1 ].
+    specialize (in_nth_nth_find ll (b + 1 + k) Huni) as H1.
+    assert (H : b + 1 + k < length ll) by flia Hk Hb1.
+    specialize (H1 H); clear H.
+    rewrite <- Ha, Hl in H1.
+    destruct H1 as [H1| H1]; [ flia H1 | ].
+    destruct H1 as [H1| H1]; [ | easy ].
+    flia Hk H1.
+  }
+  split. {
+    apply Nat.eqb_eq.
+    rewrite (List_map_nth_in _ 0). 2: {
+      rewrite seq_length.
+      flia Hb1 Hbb1.
+    }
+    rewrite seq_nth; [ | flia Hb1 Hbb1 ].
+    rewrite Nat.add_sub_assoc; [ | flia Hbb1 ].
+    rewrite Nat.add_comm, Nat.add_sub.
+    specialize (in_nth_nth_find ll b1 Huni Hb1) as H1.
+    remember (nth_find (nat_in_list b1) ll) as c eqn:Hc.
+    move Hl before H1.
+    assert (H2 : b1 ∈ nth a ll []) by now rewrite Hl; right; left.
+    clear - Hint H1 H2.
+...
+
 Theorem dispatch_locate_list : ∀ ll,
   is_pre_partition ll
   → dispatch_list (locate_list ll) = ll.
@@ -1522,100 +1624,6 @@ split. {
     destruct a. {
       cbn in Hl; subst l1.
 *)
-Lemma nth_find_all_loop_map_seq : ∀ a ll,
-  (∀ l, l ∈ ll → ∀ i, i ∈ l → i < length ll)
-  → (∀ i, i < length ll → ∃ l : list nat, l ∈ ll ∧ i ∈ l)
-  → (∀ l, l ∈ ll → Sorted lt l)
-  → nth_find_all_loop (Nat.eqb a)
-       (map (λ i, nth_find (nat_in_list i) ll)
-          (seq (hd 0 (nth a ll []) + 1)
-             (length ll - (hd 0 (nth a ll []) + 1))))
-       (hd 0 (nth a ll []) + 1) = tl (nth a ll []).
-Proof.
-intros * Hin Huni Hsort.
-remember (nth a ll []) as l eqn:Hl; symmetry in Hl.
-revert a Hl.
-induction l as [| b]; intros. {
-  cbn.
-  apply eq_nth_find_all_loop_nil.
-  intros j Hj.
-  apply in_map_iff in Hj.
-  destruct Hj as (i & Hli & Hil).
-  apply Bool.not_true_iff_false.
-  intros H.
-  apply Nat.eqb_eq in H; subst j a.
-  apply in_seq in Hil.
-  specialize (in_nth_nth_find ll i Huni) as H1.
-  assert (H : i < length ll) by flia Hil.
-  specialize (H1 H); clear H.
-  now rewrite Hl in H1.
-}
-cbn.
-destruct l as [| b1]. {
-  apply eq_nth_find_all_loop_nil.
-  intros j Hj.
-  apply in_map_iff in Hj.
-  destruct Hj as (i & Hli & Hil).
-  apply Bool.not_true_iff_false.
-  intros H.
-  apply Nat.eqb_eq in H; subst j a.
-  apply in_seq in Hil.
-  specialize (in_nth_nth_find ll i Huni) as H1.
-  assert (H : i < length ll) by flia Hil.
-  specialize (H1 H); clear H.
-  rewrite Hl in H1.
-  destruct H1 as [H1| H1]; [ subst i; flia Hil | easy ].
-}
-destruct l as [| b2]. {
-  apply (proj2 (eq_nth_find_all_loop_cons _ _ b1 0 _ [] (b + 1))).
-  rewrite map_length, seq_length.
-  assert (Halt : a < length ll). {
-    apply Nat.nle_gt; intros H.
-    now rewrite nth_overflow in Hl.
-  }
-  assert (Hb1 : b1 < length ll). {
-    apply (Hin [b; b1]); [ | now right; left ].
-    rewrite <- Hl.
-    now apply nth_In.
-  }
-  assert (Hbb1 : b < b1). {
-    specialize (Hsort (nth a ll [])) as H1.
-    specialize (@nth_In _ a ll [] Halt) as H2.
-    specialize (H1 H2); clear H2.
-    rewrite Hl in H1.
-    cbn in H1.
-    apply Sorted_inv in H1.
-    destruct H1 as (_, H1).
-    now apply HdRel_inv in H1.
-  }
-  split; [ flia Hb1 Hbb1 | ].
-  split. {
-    intros k Hk.
-    apply Bool.not_true_iff_false.
-    intros Ha.
-    apply Nat.eqb_eq in Ha.
-    rewrite (List_map_nth_in _ 0) in Ha. 2: {
-      rewrite seq_length.
-      flia Hk Hb1.
-    }
-    rewrite seq_nth in Ha; [ | flia Hk Hb1 ].
-    specialize (in_nth_nth_find ll (b + 1 + k) Huni) as H1.
-    assert (H : b + 1 + k < length ll) by flia Hk Hb1.
-    specialize (H1 H); clear H.
-    rewrite <- Ha, Hl in H1.
-    destruct H1 as [H1| H1]; [ flia H1 | ].
-    destruct H1 as [H1| H1]; [ | easy ].
-    flia Hk H1.
-  }
-  split. {
-    apply Nat.eqb_eq.
-    rewrite (List_map_nth_in _ 0). 2: {
-      rewrite seq_length.
-      flia Hb1 Hbb1.
-    }
-    rewrite seq_nth; [ | flia Hb1 Hbb1 ].
-    rewrite Nat.add_sub_assoc; [ | flia Hbb1 ].
-    rewrite Nat.add_comm, Nat.add_sub.
 ...
 
 Theorem dispatch_locate : ∀ ll,
