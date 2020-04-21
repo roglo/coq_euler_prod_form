@@ -1512,16 +1512,14 @@ split. {
   unfold locate_list.
   rewrite List_skipn_map.
   rewrite List_skipn_seq; [ cbn | flia Hbl ].
-...
   clear - Hl Hbl.
-  revert a b l Hl Hbl.
-  induction ll as [| l1]; intros; [ easy | cbn ].
-  rewrite Nat.add_1_r.
-  rewrite <- (Nat.add_1_r b).
-  cbn in Hl.
-  destruct a. {
-    cbn.
-(* bof *)
+  revert a b ll Hl Hbl.
+  induction l as [| c]; intros. {
+    destruct ll as [| l1]; [ easy | cbn in Hbl; cbn ].
+    rewrite Nat.add_1_r.
+    rewrite <- (Nat.add_1_r b).
+    destruct a. {
+      cbn in Hl; subst l1.
 ...
   unfold locate_list in IHl.
 Lemma nth_find_all_loop_map_seq : ∀ a b ll start,
