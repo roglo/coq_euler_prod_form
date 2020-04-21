@@ -1537,7 +1537,19 @@ destruct l as [| b2]. {
   }
   apply eq_nth_find_all_loop_nil.
   intros j Hj.
+Search (_ ∈ skipn _ _).
+...
+  apply in_map_iff in Hj.
+  destruct Hj as (i & Hli & Hil).
+  apply Bool.not_true_iff_false.
+...
   replace (b1 + 1 - (b + 1)) with (S (b1 - (b + 1))) in Hj by flia Hbb1.
+  cbn in Hj.
+  destruct ll as [| l]; [ easy | ].
+  rewrite map_cons in Hj.
+  apply Bool.not_true_iff_false; intros Haj.
+  apply Nat.eqb_eq in Haj; subst j.
+  cbn in Hj.
 Search (skipn (S _)).
 ...
   apply in_map_iff in Hj.
