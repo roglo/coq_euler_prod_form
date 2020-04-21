@@ -1536,7 +1536,7 @@ destruct l as [| b]. {
   destruct a. {
     cbn in Hl; subst l1.
     rewrite Nat.sub_0_r.
-rewrite nth_find_all_loop_map.
+    induction ll as [| l1]; [ easy | ].
 ...
 specialize (nth_find_all_loop_map_seq a ll) as H1.
 now rewrite Hl in H1.
