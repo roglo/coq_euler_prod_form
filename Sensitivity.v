@@ -1382,6 +1382,55 @@ specialize (in_nth_nth_find_loop ll j 0 Huni Hi) as H1.
 now rewrite Nat.sub_0_r in H1.
 Qed.
 
+Theorem NoDup_concat_in_in : ∀ A ll (a : A) b c,
+  NoDup (concat ll)
+  → a ∈ nth b ll []
+  → a ∈ nth c ll []
+  → b = c.
+Proof.
+intros * Hnd Hb Hc.
+revert b c Hb Hc.
+induction ll as [| l]; intros. {
+  cbn in Hb.
+  now rewrite match_id in Hb.
+}
+cbn in Hnd.
+apply NoDup_app_iff in Hnd.
+destruct Hnd as (Hnd & Hndc & Hll).
+specialize (IHll Hndc).
+cbn in Hb, Hc.
+destruct b. {
+  destruct c; [ easy | exfalso ].
+  specialize (Hll _ Hb) as H1.
+  apply H1; clear H1.
+  clear - Hc.
+  revert c a Hc.
+  induction ll as [| l]; intros. {
+    rewrite nth_overflow in Hc; [ easy | cbn; flia ].
+  }
+  cbn in Hc; cbn.
+  destruct c; [ now apply in_or_app; left | ].
+  apply in_or_app; right.
+  now apply (IHll c).
+}
+destruct c. {
+  exfalso.
+  specialize (Hll _ Hc) as H1.
+  apply H1; clear H1.
+  clear - Hb.
+  revert b Hb.
+  induction ll as [| l]; intros. {
+    rewrite nth_overflow in Hb; [ easy | cbn; flia ].
+  }
+  cbn in Hb; cbn.
+  destruct b; [ now apply in_or_app; left | ].
+  apply in_or_app; right.
+  now apply (IHll b).
+}
+f_equal.
+now apply IHll.
+Qed.
+
 Lemma nth_find_all_loop_map_seq : ∀ a ll,
   (∀ l, l ∈ ll → ∀ i, i ∈ l → i < length ll)
   → (∀ i, i < length ll → ∃ l : list nat, l ∈ ll ∧ i ∈ l)
@@ -1481,7 +1530,8 @@ destruct l as [| b2]. {
     remember (nth_find (nat_in_list b1) ll) as c eqn:Hc.
     move Hl before H1.
     assert (H2 : b1 ∈ nth a ll []) by now rewrite Hl; right; left.
-    clear - Hint H1 H2.
+    now apply (NoDup_concat_in_in _ ll b1).
+  }
 ...
 
 Theorem dispatch_locate_list : ∀ ll,
@@ -1569,47 +1619,7 @@ split. {
   specialize (in_nth_nth_find ll b Huni Hbl) as H1.
   assert (H2 : b ∈ nth a ll []) by now rewrite Hl; left.
   remember (nth_find (nat_in_list b) ll) as c eqn:Hc.
-  clear - Hint H1 H2.
-  revert a c H1 H2.
-  induction ll as [| l]; intros. {
-    cbn in H1.
-    now rewrite match_id in H1.
-  }
-  cbn in Hint.
-  apply NoDup_app_iff in Hint.
-  destruct Hint as (Hnd & Hndc & Hll).
-  specialize (IHll Hndc).
-  cbn in H1, H2.
-  destruct c. {
-    destruct a; [ easy | exfalso ].
-    specialize (Hll _ H1) as H3.
-    apply H3; clear H3.
-    clear - H2.
-    revert a b H2.
-    induction ll as [| l]; intros. {
-      rewrite nth_overflow in H2; [ easy | cbn; flia ].
-    }
-    cbn in H2; cbn.
-    destruct a; [ now apply in_or_app; left | ].
-    apply in_or_app; right.
-    now apply (IHll a).
-  }
-  destruct a. {
-    exfalso.
-    specialize (Hll _ H2) as H3.
-    apply H3; clear H3.
-    clear - H1.
-    revert c H1.
-    induction ll as [| l]; intros. {
-      rewrite nth_overflow in H1; [ easy | cbn; flia ].
-    }
-    cbn in H1; cbn.
-    destruct c; [ now apply in_or_app; left | ].
-    apply in_or_app; right.
-    now apply (IHll c).
-  }
-  f_equal.
-  now apply IHll.
+  now apply (NoDup_concat_in_in _ ll b).
 } {
   unfold locate_list.
   rewrite List_skipn_map.
