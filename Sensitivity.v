@@ -1532,6 +1532,11 @@ intros.
 remember (nth a ll []) as l eqn:Hl; symmetry in Hl.
 destruct l as [| b]. {
   cbn.
+  destruct ll as [| l1]; [ easy | cbn ].
+  destruct a. {
+    cbn in Hl; subst l1.
+    rewrite Nat.sub_0_r.
+rewrite nth_find_all_loop_map.
 ...
 specialize (nth_find_all_loop_map_seq a ll) as H1.
 now rewrite Hl in H1.
