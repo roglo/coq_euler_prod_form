@@ -1523,23 +1523,33 @@ split. {
       cbn in Hl; subst l1.
 *)
 Lemma nth_find_all_loop_map_seq : ∀ a ll,
-  nth_find_all_loop (Nat.eqb a)
-    (map (λ i, nth_find (nat_in_list i) ll)
-       (seq (hd 0 (nth a ll []) + 1) (length ll - (hd 0 (nth a ll []) + 1))))
-    (hd 0 (nth a ll []) + 1) = tl (nth a ll []).
+  (∀ i, i < length ll → ∃ l : list nat, l ∈ ll ∧ i ∈ l)
+  → nth_find_all_loop (Nat.eqb a)
+       (map (λ i, nth_find (nat_in_list i) ll)
+          (seq (hd 0 (nth a ll []) + 1)
+             (length ll - (hd 0 (nth a ll []) + 1))))
+       (hd 0 (nth a ll []) + 1) = tl (nth a ll []).
 Proof.
-intros.
+intros * Huni.
 remember (nth a ll []) as l eqn:Hl; symmetry in Hl.
-destruct l as [| b]. {
+revert a Hl.
+induction l as [| b]; intros. {
   cbn.
-  destruct ll as [| l1]; [ easy | cbn ].
-  destruct a. {
-    cbn in Hl; subst l1.
-    rewrite Nat.sub_0_r.
-    induction ll as [| l1]; [ easy | ].
-...
-specialize (nth_find_all_loop_map_seq a ll) as H1.
-now rewrite Hl in H1.
+  apply eq_nth_find_all_loop_nil.
+  intros j Hj.
+  apply in_map_iff in Hj.
+  destruct Hj as (i & Hli & Hil).
+  apply Bool.not_true_iff_false.
+  intros H.
+  apply Nat.eqb_eq in H; subst j a.
+  apply in_seq in Hil.
+  specialize (in_nth_nth_find ll i Huni) as H1.
+  assert (H : i < length ll) by flia Hil.
+  specialize (H1 H); clear H.
+  now rewrite Hl in H1.
+}
+cbn.
+destruct a. {
 ...
 
 Theorem dispatch_locate : ∀ ll,
