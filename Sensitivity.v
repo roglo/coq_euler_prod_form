@@ -1512,6 +1512,7 @@ split. {
   unfold locate_list.
   rewrite List_skipn_map.
   rewrite List_skipn_seq; [ cbn | flia Hbl ].
+(*
   clear - Hl Hbl.
   revert a b ll Hl Hbl.
   induction l as [| c]; intros. {
@@ -1520,18 +1521,20 @@ split. {
     rewrite <- (Nat.add_1_r b).
     destruct a. {
       cbn in Hl; subst l1.
-...
-  unfold locate_list in IHl.
-Lemma nth_find_all_loop_map_seq : ∀ a b ll start,
-  nth a ll [] = b :: l
+*)
+Lemma nth_find_all_loop_map_seq : ∀ a ll,
   nth_find_all_loop (Nat.eqb a)
     (map (λ i, nth_find (nat_in_list i) ll)
-       (seq start (length ll - start))) start = skipn start (nth a ll []).
-(* mouais, pas sûr... *)
+       (seq (hd 0 (nth a ll []) + 1) (length ll - (hd 0 (nth a ll []) + 1))))
+    (hd 0 (nth a ll []) + 1) = tl (nth a ll []).
+Proof.
+intros.
+remember (nth a ll []) as l eqn:Hl; symmetry in Hl.
+destruct l as [| b]. {
+  cbn.
 ...
-rewrite nth_find_all_loop_map_seq.
-rewrite Hl.
-(* non, c'est pas ça *)
+specialize (nth_find_all_loop_map_seq a ll) as H1.
+now rewrite Hl in H1.
 ...
 
 Theorem dispatch_locate : ∀ ll,
