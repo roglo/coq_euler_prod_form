@@ -1444,6 +1444,7 @@ Lemma nth_find_all_loop_map_seq : ∀ a ll,
 Proof.
 intros * Hin Huni Hint Hsort.
 remember (nth a ll []) as l eqn:Hl; symmetry in Hl.
+(*1*)
 revert a Hl.
 induction l as [| b]; intros. {
   cbn.
@@ -1461,6 +1462,7 @@ induction l as [| b]; intros. {
   now rewrite Hl in H1.
 }
 cbn.
+(*2*)
 destruct l as [| b1]. {
   apply eq_nth_find_all_loop_nil.
   intros j Hj.
@@ -1476,6 +1478,7 @@ destruct l as [| b1]. {
   rewrite Hl in H1.
   destruct H1 as [H1| H1]; [ subst i; flia Hil | easy ].
 }
+(*3*)
 destruct l as [| b2]. {
   apply (proj2 (eq_nth_find_all_loop_cons _ _ b1 0 _ [] (b + 1))).
   rewrite map_length, seq_length.
@@ -1532,6 +1535,42 @@ destruct l as [| b2]. {
     assert (H2 : b1 ∈ nth a ll []) by now rewrite Hl; right; left.
     now apply (NoDup_concat_in_in _ ll b1).
   }
+  apply eq_nth_find_all_loop_nil.
+  intros j Hj.
+  replace (b1 + 1 - (b + 1)) with (S (b1 - (b + 1))) in Hj by flia Hbb1.
+Search (skipn (S _)).
+...
+  apply in_map_iff in Hj.
+  destruct Hj as (i & Hli & Hil).
+  apply Bool.not_true_iff_false.
+  intros H.
+  apply Nat.eqb_eq in H; subst j a.
+  apply in_seq in Hil.
+  specialize (in_nth_nth_find ll i Huni) as H1.
+  assert (H : i < length ll) by flia Hil.
+  specialize (H1 H); clear H.
+  rewrite Hl in H1.
+  destruct H1 as [H1| H1]; [ subst i; flia Hil | easy ].
+...
+  Hl : nth a ll [] = b :: b1 :: l
+  ============================
+  nth_find_all_loop (Nat.eqb a)
+    (map (λ i : nat, nth_find (nat_in_list i) ll)
+       (seq (b + 1) (length ll - (b + 1)))) (b + 1) = 
+  b1 :: l
+...
+  Hl : nth a ll [] = b :: l
+  ============================
+  nth_find_all_loop (Nat.eqb a)
+    (map (λ i : nat, nth_find (nat_in_list i) ll)
+       (seq (b + 1) (length ll - (b + 1)))) (b + 1) = l
+...
+  Hl : nth a ll [] = l
+  ============================
+  nth_find_all_loop (Nat.eqb a)
+    (map (λ i : nat, nth_find (nat_in_list i) ll)
+       (seq (hd 0 l + 1) (length ll - (hd 0 l + 1)))) 
+    (hd 0 l + 1) = tl l
 ...
 
 Theorem dispatch_locate_list : ∀ ll,
