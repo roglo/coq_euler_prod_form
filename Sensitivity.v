@@ -1549,7 +1549,25 @@ induction l as [| b]; intros. {
   now rewrite Hl in H1.
 }
 cbn.
-destruct a. {
+destruct l as [| b1]. {
+  apply eq_nth_find_all_loop_nil.
+  intros j Hj.
+  apply in_map_iff in Hj.
+  destruct Hj as (i & Hli & Hil).
+  apply Bool.not_true_iff_false.
+  intros H.
+  apply Nat.eqb_eq in H; subst j a.
+  apply in_seq in Hil.
+  specialize (in_nth_nth_find ll i Huni) as H1.
+  assert (H : i < length ll) by flia Hil.
+  specialize (H1 H); clear H.
+  rewrite Hl in H1.
+  destruct H1 as [H1| H1]; [ subst i; flia Hil | easy ].
+}
+destruct l as [| b2]. {
+  apply (proj2 (eq_nth_find_all_loop_cons _ _ b1 0 _ [] (b + 1))).
+  rewrite map_length, seq_length.
+  split. {
 ...
 
 Theorem dispatch_locate : ∀ ll,
