@@ -1477,13 +1477,6 @@ induction l as [| b]. {
   now rewrite Hl in H1.
 }
 cbn.
-(**)
-clear IHl.
-...
-  Hil : 1 ≤ i < 1 + (length ll - 1)
-  H1 : i ∈ nth (nth_find (nat_in_list i) ll) ll []
-...
-...
 (*2*)
 destruct l as [| b1]. {
   apply eq_nth_find_all_loop_nil.
@@ -1491,15 +1484,18 @@ destruct l as [| b1]. {
   apply in_map_iff in Hj.
   destruct Hj as (i & Hli & Hil).
   apply Bool.not_true_iff_false.
-  intros H.
-  apply Nat.eqb_eq in H; subst j a.
+  intros Haj.
+  apply Nat.eqb_eq in Haj.
   apply in_seq in Hil.
   specialize (in_nth_nth_find ll i Huni) as H1.
   assert (H : i < length ll) by flia Hil.
   specialize (H1 H); clear H.
-  rewrite Hl in H1.
-  destruct H1 as [H1| H1]; [ subst i; flia Hil | easy ].
+  rewrite Hli, <- Haj, Hl in H1.
+  destruct H1 as [H1| H1]; [ | easy ].
+  rewrite H1 in Hil.
+  flia Hil.
 }
+...
 (*3*)
 destruct l as [| b2]. {
 (*
