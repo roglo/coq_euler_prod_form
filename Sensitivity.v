@@ -1445,8 +1445,7 @@ Proof.
 intros * Hin Huni Hint Hsort.
 remember (nth a ll []) as l eqn:Hl; symmetry in Hl.
 (*1*)
-revert a Hl.
-induction l as [| b]; intros. {
+destruct l as [| b]. {
   cbn.
   apply eq_nth_find_all_loop_nil.
   intros j Hj.
@@ -1463,7 +1462,7 @@ induction l as [| b]; intros. {
 }
 cbn.
 (*2*)
-destruct l as [| b1]. {
+induction l as [| b1]. {
   apply eq_nth_find_all_loop_nil.
   intros j Hj.
   apply in_map_iff in Hj.
@@ -1549,7 +1548,17 @@ destruct l as [| b2]. {
   specialize (in_nth_nth_find ll i Huni) as H1.
   assert (H : i < length ll) by flia Hil.
   specialize (H1 H); clear H.
-  rewrite Hli in H1.
+  rewrite Hli, Hl in H1.
+  destruct H1 as [H1| H1]; [ flia Hbb1 H1 Hil | ].
+  destruct H1 as [H1| H1]; [ flia H1 Hil | easy ].
+}
+...
+  Hl : nth a ll [] = b :: b1 :: b2 :: l
+  ============================
+  nth_find_all_loop (Nat.eqb a)
+    (map (λ i : nat, nth_find (nat_in_list i) ll)
+       (seq (b + 1) (length ll - (b + 1)))) (b + 1) = 
+  b1 :: b2 :: l
 ...
   Hl : nth a ll [] = b :: b1 :: l
   ============================
