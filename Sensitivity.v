@@ -1477,6 +1477,13 @@ induction l as [| b]. {
   now rewrite Hl in H1.
 }
 cbn.
+(**)
+clear IHl.
+...
+  Hil : 1 ≤ i < 1 + (length ll - 1)
+  H1 : i ∈ nth (nth_find (nat_in_list i) ll) ll []
+...
+...
 (*2*)
 destruct l as [| b1]. {
   apply eq_nth_find_all_loop_nil.
@@ -1604,6 +1611,7 @@ apply (proj2 (@eq_nth_find_all_loop_iff nat (Nat.eqb a) 0 _ _ _)).
        (seq (hd 0 l + 1) (length ll - (hd 0 l + 1)))) 
     (hd 0 l + 1) = tl l
 ...
+*)
 
 Theorem dispatch_locate_list : ∀ ll,
   is_pre_partition ll
