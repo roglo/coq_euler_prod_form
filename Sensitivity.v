@@ -1431,6 +1431,22 @@ f_equal.
 now apply IHll.
 Qed.
 
+Lemma eq_nth_find_all_loop_iff : ∀ A f (d : A) l l1 i,
+  nth_find_all_loop f l i = l1 ↔
+    match l1 with
+    | [] => (∀ j, j ∈ l → f j = false)
+    | j :: l2 =>
+        i ≤ j < i + length l ∧
+        (∀ k, i + k < j → f (nth k l d) = false) ∧
+        f (nth (j - i) l d) = true ∧
+        nth_find_all_loop f (skipn (j + 1 - i) l) (j + 1) = l2
+end.
+Proof.
+intros.
+destruct l1 as [| b]; [ apply eq_nth_find_all_loop_nil | ].
+apply eq_nth_find_all_loop_cons.
+Qed.
+
 Lemma nth_find_all_loop_map_seq : ∀ a ll,
   (∀ l, l ∈ ll → ∀ i, i ∈ l → i < length ll)
   → (∀ i, i < length ll → ∃ l : list nat, l ∈ ll ∧ i ∈ l)
@@ -1445,7 +1461,7 @@ Proof.
 intros * Hin Huni Hint Hsort.
 remember (nth a ll []) as l eqn:Hl; symmetry in Hl.
 (*1*)
-destruct l as [| b]. {
+induction l as [| b]. {
   cbn.
   apply eq_nth_find_all_loop_nil.
   intros j Hj.
@@ -1462,7 +1478,7 @@ destruct l as [| b]. {
 }
 cbn.
 (*2*)
-induction l as [| b1]. {
+destruct l as [| b1]. {
   apply eq_nth_find_all_loop_nil.
   intros j Hj.
   apply in_map_iff in Hj.
@@ -1479,6 +1495,14 @@ induction l as [| b1]. {
 }
 (*3*)
 destruct l as [| b2]. {
+(*
+replace [b1] with (tl (nth a ll [])) by now rewrite Hl.
+replace b with (hd 0 (nth a ll [])) by now rewrite Hl.
+remember (nth a ll []) as l.
+clear Heql Hl.
+apply (proj2 (@eq_nth_find_all_loop_iff nat (Nat.eqb a) 0 _ _ _)).
+...
+*)
   apply (proj2 (eq_nth_find_all_loop_cons _ _ b1 0 _ [] (b + 1))).
   rewrite map_length, seq_length.
   assert (Halt : a < length ll). {
