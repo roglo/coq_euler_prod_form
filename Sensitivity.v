@@ -1495,7 +1495,6 @@ destruct l as [| b1]. {
   rewrite H1 in Hil.
   flia Hil.
 }
-...
 (*3*)
 destruct l as [| b2]. {
 (*
@@ -1579,6 +1578,7 @@ apply (proj2 (@eq_nth_find_all_loop_iff nat (Nat.eqb a) 0 _ _ _)).
   destruct H1 as [H1| H1]; [ flia Hbb1 H1 Hil | ].
   destruct H1 as [H1| H1]; [ flia H1 Hil | easy ].
 }
+Abort. (*
 ...
   Hl : nth a ll [] = b :: b1 :: b2 :: l
   ============================
@@ -1653,6 +1653,15 @@ assert (Hbl : b < length ll). {
   rewrite <- Hl.
   now apply nth_In.
 }
+assert (Hab : a = nth b (locate_list ll) 0). {
+  unfold locate_list.
+  rewrite (List_map_nth_in _ 0); [ | now rewrite seq_length ].
+  rewrite seq_nth; [ cbn | easy ].
+  specialize (in_nth_nth_find ll b Huni Hbl) as H1.
+  assert (H2 : b ∈ nth a ll []) by now rewrite Hl; left.
+  remember (nth_find (nat_in_list b) ll) as c eqn:Hc.
+  now apply (NoDup_concat_in_in _ ll b).
+}
 split; [ now rewrite locate_list_length | ].
 split. {
   intros k Hkb.
@@ -1687,18 +1696,18 @@ split. {
   now transitivity b.
 }
 split. {
-  apply Nat.eqb_eq.
-  unfold locate_list.
-  rewrite (List_map_nth_in _ 0); [ | now rewrite seq_length ].
-  rewrite seq_nth; [ cbn | easy ].
-  specialize (in_nth_nth_find ll b Huni Hbl) as H1.
-  assert (H2 : b ∈ nth a ll []) by now rewrite Hl; left.
-  remember (nth_find (nat_in_list b) ll) as c eqn:Hc.
-  now apply (NoDup_concat_in_in _ ll b).
+  now apply Nat.eqb_eq.
 } {
   unfold locate_list.
   rewrite List_skipn_map.
   rewrite List_skipn_seq; [ cbn | flia Hbl ].
+(**)
+  unfold locate_list in Hab.
+  rewrite (List_map_nth_in _ 0) in Hab; [ | now rewrite seq_length ].
+  rewrite seq_nth in Hab; [ cbn in Hab | easy ].
+  rewrite Hab in Hl.
+Search (nth (nth_find _ _)).
+...
 (*
   clear - Hl Hbl.
   revert a b ll Hl Hbl.
