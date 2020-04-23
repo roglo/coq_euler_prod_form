@@ -1706,7 +1706,14 @@ split. {
   rewrite (List_map_nth_in _ 0) in Hab; [ | now rewrite seq_length ].
   rewrite seq_nth in Hab; [ cbn in Hab | easy ].
   rewrite Hab in Hl.
-Search (nth (nth_find _ _)).
+  apply (proj2 (@eq_nth_find_all_loop_iff nat (Nat.eqb a) 0 _ _ _)).
+  destruct l as [| b2]. {
+    intros j Hj.
+    apply Bool.not_true_iff_false; intros Hja.
+    apply Nat.eqb_eq in Hja.
+    subst j.
+    apply in_map_iff in Hj.
+    destruct Hj as (j & Hja & Hj).
 ...
 (*
   clear - Hl Hbl.
