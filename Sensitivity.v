@@ -171,6 +171,8 @@ Fixpoint to_radix_loop it n i :=
 
 Definition to_radix n i := to_radix_loop n n i.
 
+(**)
+
 Fixpoint nth_find_all_loop {A} (f : A → bool) l i :=
   match l with
   | [] => []
@@ -181,6 +183,47 @@ Fixpoint nth_find_all_loop {A} (f : A → bool) l i :=
 
 Definition nth_find_all A f l := @nth_find_all_loop A f l 0.
 Arguments nth_find_all [A]%type_scope _%function_scope _%list_scope.
+
+(**)
+
+Fixpoint nth_find_loop {A} (f : A → bool) l i :=
+  match l with
+  | [] => i
+  | a :: l' => if f a then i else nth_find_loop f l' (i + 1)
+  end.
+
+Definition nth_find A f l := @nth_find_loop A f l 0.
+Arguments nth_find [A]%type_scope _%function_scope _%list_scope.
+
+(**)
+
+Lemma nth_find_nth_find_all_loop : ∀ A (f : A → bool) l i,
+  nth_find_loop f l i =
+    match nth_find_all_loop f l i with
+    | [] => i + length l
+    | a :: _ => a
+    end.
+Proof.
+intros.
+revert i.
+induction l as [| a]; intros; [ now rewrite Nat.add_0_r | cbn ].
+destruct (f a); [ easy | ].
+rewrite <- (Nat.add_succ_comm _ (length l)), Nat.add_1_r.
+apply IHl.
+Qed.
+
+Theorem nth_find_nth_find_all : ∀ A (f : A → bool) l,
+  nth_find f l =
+    match nth_find_all f l with
+    | [] => length l
+    | a :: _ => a
+    end.
+Proof.
+intros.
+apply nth_find_nth_find_all_loop.
+Qed.
+
+(**)
 
 Definition dispatch_list l :=
   map (λ j, nth_find_all (Nat.eqb j) l) (seq 0 (length l)).
@@ -251,16 +294,6 @@ Definition is_pre_partition ll :=
   (∀ l, l ∈ ll → Sorted lt l).
 
 (* locate: inverse of "dispatch" *)
-
-Fixpoint nth_find_loop {A} (f : A → bool) l i :=
-  match l with
-  | [] => i
-  | a :: l' => if f a then i else nth_find_loop f l' (i + 1)
-  end.
-
-Definition nth_find A f l := @nth_find_loop A f l 0.
-
-Arguments nth_find [A]%type_scope _%function_scope _%list_scope.
 
 Fixpoint nat_in_list i l :=
   match l with
