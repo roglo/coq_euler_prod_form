@@ -334,6 +334,18 @@ Compute (locate_list (dispatch_list [1; 2; 0])).
 Definition in_nth_list_of_pre_part n j i :=
   i mod n ^ (n - j) / n ^ (n - j - 1).
 
+Lemma not_in_nth_find_loop : ∀ A f (l : list A) i j,
+  i < j → i ≠ nth_find_loop f l j.
+Proof.
+intros * Hij.
+revert i j Hij.
+induction l as [| a]; intros; [ cbn; flia Hij | ].
+cbn; intros H1.
+assert (Hij1 : i < j + 1) by flia Hij.
+destruct (f a); [ flia Hij H1 | ].
+now specialize (IHl i (j + 1) Hij1).
+Qed.
+
 Lemma not_in_nth_find_all_loop : ∀ A f (l : list A) i j,
   i < j → i ∉ nth_find_all_loop f l j.
 Proof.
@@ -1655,6 +1667,20 @@ destruct b1. {
         intros a Ha.
         apply in_seq in Ha; cbn.
         destruct (Nat.eq_dec a 0) as [Haz| Haz]; [ flia Ha Haz | easy ].
+      }
+      remember (map _ _) as m eqn:Hm in |-*.
+      apply (proj2 (@eq_nth_find_all_loop_iff nat (Nat.eqb 0) 0 _ _ _)).
+      destruct l1 as [| a1]. {
+        intros j Hj.
+        subst m.
+        apply in_map_iff in Hj.
+        destruct Hj as (i & Hij & Hi).
+        cbn in Hij.
+        apply Bool.not_true_iff_false; intros Hj.
+        apply Nat.eqb_eq in Hj; move Hj at top; subst j.
+        apply in_seq in Hi.
+        specialize (not_in_nth_find_loop _ (nat_in_list i) ll 0 1) as H1.
+        apply H1; [ flia | easy ].
       }
 ...
 intros * Hll.
