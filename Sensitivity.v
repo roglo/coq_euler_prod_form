@@ -1758,6 +1758,11 @@ destruct b1. {
         symmetry in Him; revert Him.
         apply not_in_nth_find_loop; flia.
       }
+      assert (Ha1 : a1 ≤ length ll). {
+        specialize (Hin _ (or_introl eq_refl) a1).
+        specialize (Hin (or_intror (or_introl eq_refl))).
+        cbn in Hin; flia Hin.
+      }
       split. {
         apply Nat.eqb_eq; symmetry.
         subst m.
@@ -1768,10 +1773,6 @@ destruct b1. {
           destruct Hint as (H, _); apply H.
           now left.
         }
-        assert (Ha1 : a1 < S (length ll)). {
-          specialize (Hin _ (or_introl eq_refl) a1).
-          now specialize (Hin (or_intror (or_introl eq_refl))).
-        }
         rewrite (List_map_nth_in _ 0). 2: {
           rewrite seq_length.
           flia Ha1z Ha1.
@@ -1781,6 +1782,21 @@ destruct b1. {
         now destruct (Nat.eq_dec a1 a1).
       }
       rewrite Nat.add_sub.
+      subst m.
+      rewrite List_skipn_map.
+      rewrite List_skipn_seq; [ | easy ].
+      replace (map _ _) with
+        (map
+           (λ i,
+            if nat_in_list i l1 then 0
+            else
+              nth_find_loop (nat_in_list i) ll 1)
+                (seq (1 + a1) (length ll - a1))). 2: {
+        apply map_ext_in_iff.
+        intros a Ha.
+        apply in_seq in Ha; cbn.
+        destruct (Nat.eq_dec a a1) as [Haz| Haz]; [ flia Ha Haz | easy ].
+      }
 ...
 intros * Hll.
 unfold dispatch_list.
