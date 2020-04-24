@@ -1641,6 +1641,21 @@ destruct b1. {
     clear Ha.
     cbn - [ Nat.eqb ].
     apply nat_in_list_true_iff in Hb1.
+    destruct l1 as [| a1]; [ easy | ].
+    destruct Hb1 as [Hb1| Hb1]. {
+      subst a1; f_equal.
+      cbn in Hint.
+      replace (map _ _) with
+        (map
+           (λ i,
+            if nat_in_list i l1 then 0
+            else
+              nth_find_loop (nat_in_list i) ll 1) (seq 1 (length ll))). 2: {
+        apply map_ext_in_iff.
+        intros a Ha.
+        apply in_seq in Ha; cbn.
+        destruct (Nat.eq_dec a 0) as [Haz| Haz]; [ flia Ha Haz | easy ].
+      }
 ...
 intros * Hll.
 unfold dispatch_list.
