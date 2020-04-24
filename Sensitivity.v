@@ -1715,6 +1715,33 @@ destruct b1. {
         specialize (not_in_nth_find_loop _ (nat_in_list i) ll 0 1) as H1.
         apply H1; [ flia | easy ].
       }
+      split. {
+        split. {
+          apply Nat.neq_0_lt_0.
+          intros H; subst a1.
+          cbn in Hint.
+          apply NoDup_cons_iff in Hint.
+          destruct Hint as (H, _); apply H.
+          now left.
+        }
+        rewrite Hm, map_length, seq_length.
+        specialize (Hin _ (or_introl eq_refl) a1).
+        specialize (Hin (or_intror (or_introl eq_refl))).
+        now cbn in Hin.
+      }
+      split. {
+        intros i Hi.
+        apply Nat.eqb_neq; intros Him.
+        symmetry in Him.
+        rewrite Hm, (List_map_nth_in _ 0) in Him.
+        rewrite seq_nth in Him.
+        remember (nat_in_list (1 + i) (a1 :: l1)) as b eqn:Hb; symmetry in Hb.
+        destruct b. {
+          apply nat_in_list_true_iff in Hb; clear Him.
+          destruct Hb as [Hb| Hb]; [ flia Hi Hb | ].
+          specialize (Hsort _ (or_introl eq_refl)).
+          apply Sorted_inv in Hsort.
+          destruct Hsort as (Hsort, _).
 ...
 intros * Hll.
 unfold dispatch_list.
