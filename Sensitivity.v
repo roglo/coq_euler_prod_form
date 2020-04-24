@@ -1806,6 +1806,11 @@ destruct b1. {
         apply in_map_iff in Hj.
         destruct Hj as (j & Hjl & Hj).
         cbn in Hjl.
+        symmetry in Hjl; revert Hjl.
+        apply not_in_nth_find_loop; flia.
+      }
+      rewrite map_length, seq_length.
+      remember (map _ _) as m eqn:Hm in |-*.
 ...
 intros * Hll.
 unfold dispatch_list.
