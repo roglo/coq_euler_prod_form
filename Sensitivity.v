@@ -1759,6 +1759,28 @@ destruct b1. {
         apply not_in_nth_find_loop; flia.
       }
       split. {
+        apply Nat.eqb_eq; symmetry.
+        subst m.
+        destruct (Nat.eq_dec a1 0) as [Ha1z| Ha1z]. {
+          exfalso.
+          subst a1.
+          apply NoDup_cons_iff in Hint.
+          destruct Hint as (H, _); apply H.
+          now left.
+        }
+        assert (Ha1 : a1 < S (length ll)). {
+          specialize (Hin _ (or_introl eq_refl) a1).
+          now specialize (Hin (or_intror (or_introl eq_refl))).
+        }
+        rewrite (List_map_nth_in _ 0). 2: {
+          rewrite seq_length.
+          flia Ha1z Ha1.
+        }
+        rewrite seq_nth; [ | flia Ha1z Ha1 ].
+        replace (1 + (a1 - 1)) with a1 by flia Ha1z; cbn.
+        now destruct (Nat.eq_dec a1 a1).
+      }
+      rewrite Nat.add_sub.
 ...
 intros * Hll.
 unfold dispatch_list.
