@@ -1672,7 +1672,9 @@ apply map_ext_in_iff.
 intros a Ha.
 apply in_seq in Ha; destruct Ha as (_, Ha); cbn in Ha.
 destruct Hll as (Hin & Huni & Hint & Hsort).
+(*
 clear Huni.
+*)
 unfold locate_list.
 unfold nth_find_all.
 revert a Ha.
@@ -1797,6 +1799,13 @@ destruct b1. {
         apply in_seq in Ha; cbn.
         destruct (Nat.eq_dec a a1) as [Haz| Haz]; [ flia Ha Haz | easy ].
       }
+      apply (proj2 (@eq_nth_find_all_loop_iff nat (Nat.eqb 0) 0 _ _ _)).
+      destruct l1 as [| b1]. {
+        intros j Hj.
+        apply Nat.eqb_neq; intros H; subst j.
+        apply in_map_iff in Hj.
+        destruct Hj as (j & Hjl & Hj).
+        cbn in Hjl.
 ...
 intros * Hll.
 unfold dispatch_list.
