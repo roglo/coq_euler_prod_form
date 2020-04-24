@@ -1625,6 +1625,35 @@ replace ll with (map (λ i, nth i ll []) (seq 0 (length ll))) at 2. 2: {
 }
 apply map_ext_in_iff.
 intros a Ha.
+apply in_seq in Ha; destruct Ha as (_, Ha); cbn in Ha.
+destruct Hll as (Hin & Huni & Hint & Hsort).
+clear Huni.
+unfold locate_list.
+unfold nth_find_all.
+revert a Ha.
+induction ll as [| l1]; intros; [ easy | ].
+cbn - [ nth ].
+remember (nat_in_list 0 l1) as b1 eqn:Hb1; symmetry in Hb1.
+destruct b1. {
+  remember (a =? 0) as az eqn:Haz; symmetry in Haz.
+  destruct az. {
+    apply Nat.eqb_eq in Haz; subst a.
+    clear Ha.
+    cbn - [ Nat.eqb ].
+    apply nat_in_list_true_iff in Hb1.
+...
+intros * Hll.
+unfold dispatch_list.
+rewrite locate_list_length.
+replace ll with (map (λ i, nth i ll []) (seq 0 (length ll))) at 2. 2: {
+  clear.
+  induction ll as [| l]; [ easy | ].
+  f_equal; cbn; f_equal.
+  rewrite <- seq_shift.
+  now rewrite map_map.
+}
+apply map_ext_in_iff.
+intros a Ha.
 remember (nth a ll []) as l eqn:Hl.
 symmetry in Hl.
 apply in_seq in Ha; destruct Ha as (_, Ha); cbn in Ha.
@@ -1701,7 +1730,7 @@ split. {
   unfold locate_list.
   rewrite List_skipn_map.
   rewrite List_skipn_seq; [ cbn | flia Hbl ].
-(**)
+...
   unfold locate_list in Hab.
   rewrite (List_map_nth_in _ 0) in Hab; [ | now rewrite seq_length ].
   rewrite seq_nth in Hab; [ cbn in Hab | easy ].
