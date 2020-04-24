@@ -1733,8 +1733,14 @@ destruct b1. {
         intros i Hi.
         apply Nat.eqb_neq; intros Him.
         symmetry in Him.
-        rewrite Hm, (List_map_nth_in _ 0) in Him.
-        rewrite seq_nth in Him.
+        assert (Hill : i < length ll). {
+          specialize (Hin _ (or_introl eq_refl) a1).
+          specialize (Hin (or_intror (or_introl eq_refl))).
+          cbn in Hin.
+          flia Hin Hi.
+        }
+        rewrite Hm, (List_map_nth_in _ 0) in Him; [ | now rewrite seq_length ].
+        rewrite seq_nth in Him; [ | easy ].
         remember (nat_in_list (1 + i) (a1 :: l1)) as b eqn:Hb; symmetry in Hb.
         destruct b. {
           apply nat_in_list_true_iff in Hb; clear Him.
@@ -1742,6 +1748,17 @@ destruct b1. {
           specialize (Hsort _ (or_introl eq_refl)).
           apply Sorted_inv in Hsort.
           destruct Hsort as (Hsort, _).
+          apply Sorted_extends in Hsort. 2: {
+            intros x y z Hxy Hyz.
+            now transitivity y.
+          }
+          specialize (proj1 (Forall_forall _ _) Hsort _ Hb) as H1.
+          flia Hi H1.
+        }
+        symmetry in Him; revert Him.
+        apply not_in_nth_find_loop; flia.
+      }
+      split. {
 ...
 intros * Hll.
 unfold dispatch_list.
