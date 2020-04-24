@@ -1447,6 +1447,7 @@ destruct l1 as [| b]; [ apply eq_nth_find_all_loop_nil | ].
 apply eq_nth_find_all_loop_cons.
 Qed.
 
+(*
 Lemma nth_find_all_loop_map_seq : ∀ a ll,
   (∀ l, l ∈ ll → ∀ i, i ∈ l → i < length ll)
   → (∀ i, i < length ll → ∃ l : list nat, l ∈ ll ∧ i ∈ l)
@@ -1578,7 +1579,6 @@ apply (proj2 (@eq_nth_find_all_loop_iff nat (Nat.eqb a) 0 _ _ _)).
   destruct H1 as [H1| H1]; [ flia Hbb1 H1 Hil | ].
   destruct H1 as [H1| H1]; [ flia H1 Hil | easy ].
 }
-Abort. (*
 ...
   Hl : nth a ll [] = b :: b1 :: b2 :: l
   ============================
