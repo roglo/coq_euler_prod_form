@@ -1811,6 +1811,7 @@ destruct b1. {
       }
       rewrite map_length, seq_length.
       remember (map _ _) as m eqn:Hm in |-*.
+Abort. (*
 ...
 intros * Hll.
 unfold dispatch_list.
@@ -1925,6 +1926,7 @@ split. {
       cbn in Hl; subst l1.
 *)
 ...
+*)
 
 Theorem dispatch_locate : ∀ ll,
   is_pre_partition ll
@@ -1933,6 +1935,7 @@ Proof.
 intros * Hll.
 Inspect 7.
 Search dispatch_list.
+Abort. (*
 ...
 unfold dispatch.
 unfold dispatch_list.
@@ -2036,6 +2039,7 @@ unfold locate_list.
 Search to_radix.
 unfold nth_find_all.
 ...
+*)
 
 Theorem length_loc_loc_bl_sens_list : ∀ n f x,
   length (loc_sens_list n f x) =
