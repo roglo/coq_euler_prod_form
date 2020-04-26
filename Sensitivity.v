@@ -1654,6 +1654,7 @@ apply (proj2 (@eq_nth_find_all_loop_iff nat (Nat.eqb a) 0 _ _ _)).
 ...
 *)
 
+(*
 Theorem dispatch_locate_list : ∀ ll,
   is_pre_partition ll
   → dispatch_list (locate_list ll) = ll.
@@ -1811,7 +1812,6 @@ destruct b1. {
       }
       rewrite map_length, seq_length.
       remember (map _ _) as m eqn:Hm in |-*.
-Abort. (*
 ...
 intros * Hll.
 unfold dispatch_list.
@@ -1928,6 +1928,7 @@ split. {
 ...
 *)
 
+(*
 Theorem dispatch_locate : ∀ ll,
   is_pre_partition ll
   → dispatch (length ll) (locate ll) = ll.
@@ -1935,7 +1936,6 @@ Proof.
 intros * Hll.
 Inspect 7.
 Search dispatch_list.
-Abort. (*
 ...
 unfold dispatch.
 unfold dispatch_list.
@@ -2075,6 +2075,7 @@ rewrite <- loc_length_loc_bl_sens_list; f_equal.
 apply IHl.
 Qed.
 
+(*
 Theorem trivial_partition : ∀ n,
   nth (Σ (j = 1, n - 1), j * n ^ (n - 1 - j)) (pre_partitions n) [] =
   map (λ i, [i]) (seq 0 n).
@@ -2088,7 +2089,12 @@ rewrite (List_map_nth_in _ 0). 2: {
   rewrite seq_length.
   replace n with (S n - 1) at 1; [ | flia ].
   (* pffff... compliqué *)
-Abort.
+*)
+
+(*
+Theorem trivial_partition : ∀ n,
+   dispatch_list (seq 0 n) = map (λ i, [i]) (seq 0 n).
+*)
 
 Theorem x_bs_ge_s : ∀ n f x,
   local_block_sensitivity n f x ≥ local_sensitivity n f x.
@@ -2096,25 +2102,21 @@ Proof.
 intros.
 rewrite loc_length_loc_bl_sens_list.
 unfold local_block_sensitivity.
-Search is_pre_partition.
-Compute (locate_list (dispatch_list (seq 0 10))).
-Search (locate_list (dispatch_list _)).
-Theorem trivial_partition : ∀ n,
-   dispatch_list (seq 0 n) = map (λ i, [i]) (seq 0 n).
-Admitted.
 remember (pre_partitions n) as ll eqn:Hll.
-remember (locate (map (λ i, [i]) (seq 0 n))) as i eqn:Hi.
-specialize (@nth_split _ i ll []) as H1.
-unfold locate, locate_list in Hi.
-rewrite map_length, seq_length in Hi.
-Search loc_bl_sens_list.
-...
-assert (H : n < length ll). {
-  rewrite Hll.
+remember (locate (dispatch_list (seq 0 n))) as j eqn:Hj.
+specialize (@nth_split _ j ll []) as H1.
+assert (H : j < length ll). {
+  rewrite Hj, Hll.
   unfold pre_partitions.
   rewrite map_length, seq_length.
+  unfold locate.
+  rewrite locate_dispatch_list. 2: {
+    intros a Ha.
+    rewrite seq_length.
+    now apply in_seq in Ha.
+  }
+  rewrite dispatch_list_length, seq_length.
 ...
-
 Compute (dispatch_list (seq 0 7)).
 Compute map (λ i, [i]) (seq 0 7).
 ...
