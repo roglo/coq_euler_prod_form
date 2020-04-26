@@ -2075,6 +2075,16 @@ rewrite <- loc_length_loc_bl_sens_list; f_equal.
 apply IHl.
 Qed.
 
+Theorem trivial_partition : ∀ n,
+  nth (Σ (j = 1, n - 1), j * n ^ (n - 1 - j)) (pre_partitions n) [] =
+  map (λ i, [i]) (seq 0 n).
+Proof.
+intros.
+cbn; rewrite Nat.sub_0_r.
+induction n; [ easy | cbn ].
+rewrite Nat.sub_0_r.
+...
+
 Theorem x_bs_ge_s : ∀ n f x,
   local_block_sensitivity n f x ≥ local_sensitivity n f x.
 Proof.
@@ -2087,6 +2097,7 @@ Compute (nth 5 (pre_partitions 3) []).
 Compute (nth 27 (pre_partitions 4) []).
 Compute (nth 194 (pre_partitions 5) []).
 Compute (let n := 5 in ((n ^ n - n ^ 2 + n - 1) / (n - 1) ^ 2)).
+Compute (let n := 4 in (Σ (j = 1, n - 1), j * n ^ (n - 1 - j))).
 ...
 a(n) = (n^n-n^2+n-1)/(n-1)^2
 a(n) = Sum_{j=1...n-1} j*n^(n-1-j).
