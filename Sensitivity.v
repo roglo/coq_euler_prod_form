@@ -2103,9 +2103,12 @@ Theorem trivial_partition : ∀ n,
    dispatch_list (seq 0 n) = map (λ i, [i]) (seq 0 n).
 Admitted.
 remember (pre_partitions n) as ll eqn:Hll.
-Print locate.
+remember (locate (map (λ i, [i]) (seq 0 n))) as i eqn:Hi.
+specialize (@nth_split _ i ll []) as H1.
+unfold locate, locate_list in Hi.
+rewrite map_length, seq_length in Hi.
+Search loc_bl_sens_list.
 ...
-specialize (@nth_split _ (locate (map) ll []) as H1.
 assert (H : n < length ll). {
   rewrite Hll.
   unfold pre_partitions.
