@@ -2088,7 +2088,7 @@ rewrite (List_map_nth_in _ 0). 2: {
   rewrite seq_length.
   replace n with (S n - 1) at 1; [ | flia ].
   (* pffff... compliqué *)
-...
+Abort.
 
 Theorem x_bs_ge_s : ∀ n f x,
   local_block_sensitivity n f x ≥ local_sensitivity n f x.
@@ -2096,6 +2096,11 @@ Proof.
 intros.
 rewrite loc_length_loc_bl_sens_list.
 unfold local_block_sensitivity.
+Search is_pre_partition.
+Compute (locate_list (dispatch_list (seq 0 10))).
+Search (locate_list (dispatch_list _)).
+...
+Compute (locate_list (nth 5 (pre_partitions 3) [])).
 Compute (nth 0 (pre_partitions 1) []).
 Compute (nth 1 (pre_partitions 2) []).
 Compute (nth 5 (pre_partitions 3) []).
