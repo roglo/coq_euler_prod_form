@@ -2075,6 +2075,23 @@ rewrite <- loc_length_loc_bl_sens_list; f_equal.
 apply IHl.
 Qed.
 
+Theorem x_bs_ge_s : ∀ n f x,
+  local_block_sensitivity n f x ≥ local_sensitivity n f x.
+Proof.
+intros.
+rewrite loc_length_loc_bl_sens_list.
+unfold local_block_sensitivity.
+Compute (nth 0 (pre_partitions 1) []).
+Compute (nth 1 (pre_partitions 2) []).
+Compute (nth 5 (pre_partitions 3) []).
+Compute (nth 27 (pre_partitions 4) []).
+Compute (nth 194 (pre_partitions 5) []).
+Compute (let n := 5 in ((n ^ n - n ^ 2 + n - 1) / (n - 1) ^ 2)).
+...
+a(n) = (n^n-n^2+n-1)/(n-1)^2
+a(n) = Sum_{j=1...n-1} j*n^(n-1-j).
+...
+
 Theorem bs_ge_s : ∀ n f, block_sensitivity n f ≥ sensitivity n f.
 Proof.
 intros.
