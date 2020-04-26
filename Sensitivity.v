@@ -2099,6 +2099,21 @@ unfold local_block_sensitivity.
 Search is_pre_partition.
 Compute (locate_list (dispatch_list (seq 0 10))).
 Search (locate_list (dispatch_list _)).
+Theorem trivial_partition : ∀ n,
+   dispatch_list (seq 0 n) = map (λ i, [i]) (seq 0 n).
+Admitted.
+remember (pre_partitions n) as ll eqn:Hll.
+Print locate.
+...
+specialize (@nth_split _ (locate (map) ll []) as H1.
+assert (H : n < length ll). {
+  rewrite Hll.
+  unfold pre_partitions.
+  rewrite map_length, seq_length.
+...
+
+Compute (dispatch_list (seq 0 7)).
+Compute map (λ i, [i]) (seq 0 7).
 ...
 Compute (locate_list (nth 5 (pre_partitions 3) [])).
 Compute (nth 0 (pre_partitions 1) []).
