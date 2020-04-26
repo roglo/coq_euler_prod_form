@@ -2087,6 +2087,7 @@ unfold dispatch.
 rewrite (List_map_nth_in _ 0). 2: {
   rewrite seq_length.
   replace n with (S n - 1) at 1; [ | flia ].
+  (* pffff... compliqué *)
 ...
 
 Theorem x_bs_ge_s : ∀ n f x,
