@@ -2117,6 +2117,9 @@ assert (H : j < length ll). {
   }
   rewrite dispatch_list_length, seq_length.
   clear.
+  apply (le_lt_trans _ (Σ (i = 0, n - 1), n ^ i)). {
+    cbn.
+...
   destruct n; [ cbn; flia | ].
   destruct n; [ cbn; flia | ].
   destruct n; [ cbn; flia | ].
