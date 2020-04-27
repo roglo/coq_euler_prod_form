@@ -2117,6 +2117,9 @@ assert (H : j < length ll). {
   }
   rewrite dispatch_list_length, seq_length.
   clear.
+  destruct n; [ cbn; flia | ].
+  destruct n; [ cbn; flia | ].
+  destruct n; [ cbn; flia | ].
 ...
   induction n; [ cbn; flia | ].
   cbn.
