@@ -2116,6 +2116,12 @@ assert (H : j < length ll). {
     now apply in_seq in Ha.
   }
   rewrite dispatch_list_length, seq_length.
+  clear.
+...
+  induction n; [ cbn; flia | ].
+  cbn.
+  rewrite <- seq_shift.
+  rewrite List_fold_left_map.
 ...
 Compute (dispatch_list (seq 0 7)).
 Compute map (λ i, [i]) (seq 0 7).
