@@ -2121,18 +2121,14 @@ assert (H : j < length ll). {
     cbn.
     destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ subst n; cbn; flia | ].
     replace n with (1 + (n - 1)) at 1 by flia Hnz.
-(*
     rewrite seq_app; cbn.
-*)
-    cbn.
     remember (n - 1) as k eqn:Hk; clear Hk.
     induction k; [ cbn; flia | ].
-Search (seq (_ (S _))).
-replace (seq 1 (S k)) with (seq 1 k ++ [k]).
-Search (fold_left _ (_ ++ _)).
-setoid_rewrite fold_left_app.
-cbn.
-apply Nat.add_le_mono.
+    replace (seq 1 (S k)) with (seq 1 k ++ [k]).
+    setoid_rewrite fold_left_app; cbn.
+    transitivity (fold_left (λ c i, c + n ^ i) (seq 1 k) 1 * n + k). {
+      now apply Nat.add_le_mono_r, Nat.mul_le_mono_r.
+    }
 ...
   destruct n; [ cbn; flia | ].
   destruct n; [ cbn; flia | ].
