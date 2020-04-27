@@ -2129,6 +2129,7 @@ assert (H : j < length ll). {
     transitivity (fold_left (λ c i, c + n ^ i) (seq 1 k) 1 * n + k). {
       now apply Nat.add_le_mono_r, Nat.mul_le_mono_r.
     }
+(* ah oui mais non, j'ai 1 là où j'avais 0 dans fold_left de gauche *)
 ...
   destruct n; [ cbn; flia | ].
   destruct n; [ cbn; flia | ].
