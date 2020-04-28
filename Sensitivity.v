@@ -2096,6 +2096,27 @@ Theorem trivial_partition : ∀ n,
    dispatch_list (seq 0 n) = map (λ i, [i]) (seq 0 n).
 *)
 
+Theorem Nat_pow_from_sum : ∀ a n, a * n ≠ 0 →
+  n ^ a = (n - 1) * (Σ (i = 0, a - 1), n ^ i) + 1.
+Proof.
+intros * Hanz.
+destruct a; [ easy | ].
+replace (S a - 1) with a by flia.
+destruct (Nat.eq_dec n 0) as [Hnz| Hnz]. {
+  now rewrite Hnz, Nat.mul_comm in Hanz.
+}
+clear Hanz.
+revert n Hnz.
+induction a; intros; [ cbn; flia Hnz | ].
+rewrite summation_split_last; [ | flia | flia ].
+replace (S a - 1) with a by flia.
+rewrite Nat.mul_add_distr_l, Nat.add_shuffle0.
+rewrite <- IHa; [ | easy ].
+replace (n ^ S a) with (1 * n ^ S a) at 1 by flia.
+rewrite <- Nat.mul_add_distr_r.
+now replace (1 + (n - 1)) with n by flia Hnz.
+Qed.
+
 Theorem x_bs_ge_s : ∀ n f x,
   local_block_sensitivity n f x ≥ local_sensitivity n f x.
 Proof.
@@ -2116,39 +2137,15 @@ assert (H : j < length ll). {
     now apply in_seq in Ha.
   }
   rewrite dispatch_list_length, seq_length.
-  clear.
-...
-  assert (∀ a n, a ^ n = (((a - 1) * Σ (i = 0, n - 1), n ^ i) + 1). 2: {
-  replace (n ^ n) with (((n - 1) * Σ (i = 0, n - 1), n ^ i) + 1). 2: {
-    induction n; [ easy | ].
-...
   destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ subst n; cbn; flia | ].
-  apply (le_lt_trans _ (Σ (i = 0, n - 1), n ^ i)). {
-    cbn - [ seq ].
-    replace (S (n - 1)) with n by flia Hnz.
+  rewrite Nat_pow_from_sum. 2: {
+    intros H; apply Hnz.
+    apply Nat.eq_mul_0 in H.
+    now destruct H.
+  }
+  rewrite Nat.add_1_r.
+  apply Nat.lt_succ_r.
 ...
-    destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ subst n; cbn; flia | ].
-    replace n with (1 + (n - 1)) at 1 by flia Hnz.
-    rewrite seq_app; cbn.
-    remember (n - 1) as k eqn:Hk; clear Hk.
-    induction k; [ cbn; flia | ].
-    replace (seq 1 (S k)) with (seq 1 k ++ [k]).
-    setoid_rewrite fold_left_app; cbn.
-    transitivity (fold_left (λ c i, c + n ^ i) (seq 1 k) 1 * n + k). {
-      now apply Nat.add_le_mono_r, Nat.mul_le_mono_r.
-    }
-(* ah oui mais non, j'ai 1 là où j'avais 0 dans fold_left de gauche *)
-...
-  destruct n; [ cbn; flia | ].
-  destruct n; [ cbn; flia | ].
-  destruct n; [ cbn; flia | ].
-...
-  induction n; [ cbn; flia | ].
-  cbn.
-  rewrite <- seq_shift.
-  rewrite List_fold_left_map.
-...
-Compute (dispatch_list (seq 0 7)).
 Compute map (λ i, [i]) (seq 0 7).
 ...
 Compute (locate_list (nth 5 (pre_partitions 3) [])).
