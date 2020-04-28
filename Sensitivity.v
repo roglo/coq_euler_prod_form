@@ -2157,6 +2157,7 @@ assert (H : j < length ll). {
   destruct l as [| a1]; [ easy | cbn ].
   destruct l as [| a2]. {
     cbn.
+(* counterexample : k=1000000 n=2 a1=0 *)
 ...
   revert k.
   induction l as [| j]; intros; [ easy | cbn ].
