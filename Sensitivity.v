@@ -2149,10 +2149,18 @@ assert (H : j < length ll). {
   cbn - [ seq ].
   replace (S (n - 1)) with n by flia Hnz.
   remember (seq 0 n) as l eqn:Hl.
-  remember 0 as k.
+  remember 1 as one.
+  remember 0 as k in |-*.
+  subst one.
   clear.
+...
   revert k.
   induction l as [| j]; intros; [ easy | cbn ].
+  etransitivity; [ | apply IHl ].
+  clear.
+  revert n j k.
+  induction l as [| i]; intros. {
+    cbn.
 ...
 Compute map (λ i, [i]) (seq 0 7).
 ...
