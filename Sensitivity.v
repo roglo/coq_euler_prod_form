@@ -2145,6 +2145,14 @@ assert (H : j < length ll). {
   }
   rewrite Nat.add_1_r.
   apply Nat.lt_succ_r.
+  rewrite mul_summation_distr_l.
+  cbn - [ seq ].
+  replace (S (n - 1)) with n by flia Hnz.
+  remember (seq 0 n) as l eqn:Hl.
+  remember 0 as k.
+  clear.
+  revert k.
+  induction l as [| j]; intros; [ easy | cbn ].
 ...
 Compute map (λ i, [i]) (seq 0 7).
 ...
