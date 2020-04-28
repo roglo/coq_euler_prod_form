@@ -2117,8 +2117,15 @@ assert (H : j < length ll). {
   }
   rewrite dispatch_list_length, seq_length.
   clear.
+...
+  assert (∀ a n, a ^ n = (((a - 1) * Σ (i = 0, n - 1), n ^ i) + 1). 2: {
+  replace (n ^ n) with (((n - 1) * Σ (i = 0, n - 1), n ^ i) + 1). 2: {
+    induction n; [ easy | ].
+...
+  destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ subst n; cbn; flia | ].
   apply (le_lt_trans _ (Σ (i = 0, n - 1), n ^ i)). {
-    cbn.
+    cbn - [ seq ].
+    replace (S (n - 1)) with n by flia Hnz.
 ...
     destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ subst n; cbn; flia | ].
     replace n with (1 + (n - 1)) at 1 by flia Hnz.
