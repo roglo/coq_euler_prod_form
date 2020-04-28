@@ -2119,6 +2119,7 @@ assert (H : j < length ll). {
   clear.
   apply (le_lt_trans _ (Σ (i = 0, n - 1), n ^ i)). {
     cbn.
+...
     destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ subst n; cbn; flia | ].
     replace n with (1 + (n - 1)) at 1 by flia Hnz.
     rewrite seq_app; cbn.
