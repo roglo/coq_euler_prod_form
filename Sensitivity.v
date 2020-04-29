@@ -2161,6 +2161,7 @@ assert (H : j < length ll). {
   clear - Hn Hk.
 (* non ça va pas : à gauche, le k est multiplié par n^n tandis
    qu'à droite il n'est pas multiplié *)
+Search (fold_left _ _ 0).
 ...
   destruct l as [| a1]; [ easy | cbn ].
   destruct l as [| a2]. {
