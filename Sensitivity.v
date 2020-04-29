@@ -2159,6 +2159,9 @@ assert (H : j < length ll). {
     now apply Nat.pow_nonzero.
   }
   clear - Hn Hk.
+(* non ça va pas : à gauche, le k est multiplié par n^n tandis
+   qu'à droite il n'est pas multiplié *)
+...
   destruct l as [| a1]; [ easy | cbn ].
   destruct l as [| a2]. {
     cbn.
