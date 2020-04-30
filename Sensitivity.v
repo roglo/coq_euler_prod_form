@@ -2150,6 +2150,15 @@ assert (H : j < length ll). {
   replace (S (n - 1)) with n by flia Hnz.
   assert (Hn : ∀ i, i ∈ seq 0 n → i < n) by apply in_seq.
   remember (seq 0 n) as l eqn:Hl.
+(**)
+clear - Hn.
+destruct l as [| a1]; [ easy | cbn ].
+destruct l as [| a2]. {
+  cbn.
+  specialize (Hn _ (or_introl eq_refl)).
+  destruct a1; [ cbn; flia | cbn ].
+  destruct a1; [ cbn | ].
+...
   remember 1 as one.
   remember 0 as k in |-*.
   subst one.
