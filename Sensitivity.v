@@ -2148,6 +2148,14 @@ assert (H : j < length ll). {
   rewrite mul_summation_distr_l.
   cbn - [ seq ].
   replace (S (n - 1)) with n by flia Hnz.
+(**)
+remember (seq 0 n) as s eqn:Hs.
+remember 0 as a in Hs.
+remember n as m in Hs; subst s.
+clear.
+revert a n.
+induction m; intros; [ easy | ].
+cbn.
 ...
   assert (Hn : ∀ i, i ∈ seq 0 n → i < n) by apply in_seq.
   remember (seq 0 n) as l eqn:Hl.
