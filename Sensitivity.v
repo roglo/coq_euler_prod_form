@@ -2117,6 +2117,14 @@ rewrite <- Nat.mul_add_distr_r.
 now replace (1 + (n - 1)) with n by flia Hnz.
 Qed.
 
+Theorem horner_is_eval_polyn : ∀ l x,
+  fold_left (λ a ai, a * x + ai) l 0 =
+  Σ (i = 0, length l - 1), nth (length l - 1 - i) l 0 * x ^ i.
+Proof.
+intros.
+induction l as [| a0]; [ easy | cbn ].
+...
+
 Theorem x_bs_ge_s : ∀ n f x,
   local_block_sensitivity n f x ≥ local_sensitivity n f x.
 Proof.
@@ -2148,18 +2156,19 @@ assert (H : j < length ll). {
   rewrite mul_summation_distr_l.
   cbn - [ seq ].
   replace (S (n - 1)) with n by flia Hnz.
+...
+rewrite horner_is_eval_polyn.
+rewrite seq_length.
+cbn - [ seq ].
+replace (S (n - 1)) with n by flia Hnz.
+Check seq_nth.
+...
 (**)
   remember (seq 0 n) as s eqn:Hs.
   remember n as m in Hs; subst s.
   clear.
   induction m; intros; [ easy | cbn ].
   rewrite Nat.mul_1_r.
-Theorem horner_is_eval_polyn : ∀ l x,
-  fold_left (λ a ai, a * x + ai) l 0 =
-  Σ (i = 0, length l - 1), nth i l 0 * x ^ (length l - 1 - i).
-Proof.
-intros.
-induction l as [| a0]; [ easy | cbn ].
 ...
   etransitivity. 2: {
     apply Nat.add_le_mono_l.
