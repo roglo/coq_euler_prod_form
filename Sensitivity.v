@@ -2122,7 +2122,9 @@ Theorem horner_is_eval_polyn : ∀ l x,
   Σ (i = 0, length l - 1), nth (length l - 1 - i) l 0 * x ^ i.
 Proof.
 intros.
-induction l as [| a0]; [ easy | cbn ].
+induction l as [| an]; [ easy | cbn ].
+destruct l as [| an1]; cbn; [ flia | ].
+destruct l as [| an2]; cbn; [ flia | ].
 ...
 
 Theorem x_bs_ge_s : ∀ n f x,
