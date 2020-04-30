@@ -2160,6 +2160,9 @@ assert (H : j < length ll). {
     apply Nat.add_le_mono_l.
     apply IHm.
   }
+destruct m. {
+    cbn.
+(* n must be ≥ 2 *)
 ...
   assert (Hn : ∀ i, i ∈ seq 0 n → i < n) by apply in_seq.
   remember (seq 0 n) as l eqn:Hl.
