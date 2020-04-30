@@ -2156,7 +2156,7 @@ assert (H : j < length ll). {
   rewrite Nat.mul_1_r.
 Theorem horner_is_eval_polyn : ∀ l x,
   fold_left (λ a ai, a * x + ai) l 0 =
-  Σ (i = 0, length l - 1), nth i l 0 * x ^ i.
+  Σ (i = 0, length l - 1), nth i l 0 * x ^ (length l - 1 - i).
 Proof.
 intros.
 induction l as [| a0]; [ easy | cbn ].
