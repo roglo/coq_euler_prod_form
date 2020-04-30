@@ -2149,13 +2149,17 @@ assert (H : j < length ll). {
   cbn - [ seq ].
   replace (S (n - 1)) with n by flia Hnz.
 (**)
-remember (seq 0 n) as s eqn:Hs.
-remember 0 as a in Hs.
-remember n as m in Hs; subst s.
-clear.
-revert a n.
-induction m; intros; [ easy | ].
-cbn.
+  remember (seq 0 n) as s eqn:Hs.
+  remember 0 as b in Hs.
+  remember n as m in Hs; subst s.
+  clear.
+  revert b n.
+  induction m; intros; [ easy | cbn ].
+  rewrite fold_left_add_fun_from_0.
+  etransitivity. 2: {
+    apply Nat.add_le_mono_l.
+    apply IHm.
+  }
 ...
   assert (Hn : ∀ i, i ∈ seq 0 n → i < n) by apply in_seq.
   remember (seq 0 n) as l eqn:Hl.
