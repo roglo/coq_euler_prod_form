@@ -2150,12 +2150,11 @@ assert (H : j < length ll). {
   replace (S (n - 1)) with n by flia Hnz.
 (**)
   remember (seq 0 n) as s eqn:Hs.
-  remember 0 as b in Hs.
   remember n as m in Hs; subst s.
   clear.
-  revert b n.
   induction m; intros; [ easy | cbn ].
-  rewrite fold_left_add_fun_from_0.
+  rewrite Nat.mul_1_r.
+...
   etransitivity. 2: {
     apply Nat.add_le_mono_l.
     apply IHm.
