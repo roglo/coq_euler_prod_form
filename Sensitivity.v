@@ -2123,10 +2123,8 @@ Theorem horner_is_eval_polyn : ∀ n a x,
 Proof.
 intros.
 Locate "Σ".
-About summation_split_last.
-...
-
 rewrite summation_rtl.
+rewrite Nat.add_0_r.
 ...
 cbn; rewrite Nat.mul_1_r.
 destruct n; [ easy | ].

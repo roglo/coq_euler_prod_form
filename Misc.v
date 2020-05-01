@@ -379,29 +379,14 @@ rewrite Nat.add_sub.
 replace (b + S len - 1) with (b + len) by flia.
 rewrite <- seq_shift.
 rewrite List_fold_left_map.
-Search (fold_left _ _ (_ + _)).
-...
-induction len; intros; [ easy | cbn ].
-rewrite Nat.add_sub.
-rewrite IHlen.
-...
-rewrite summation_aux_rtl.
-apply summation_aux_compat; intros i (Hi, Hikb).
-destruct b; simpl.
- rewrite Nat.sub_0_r; reflexivity.
-
- rewrite Nat.sub_0_r.
- simpl in Hikb.
- eapply Nat.le_lt_trans in Hikb; eauto .
- apply lt_O_minus_lt, Nat.lt_le_incl in Hikb.
- remember (b + (k - b))%nat as x eqn:H .
- rewrite Nat.add_sub_assoc in H; auto.
- rewrite Nat.add_sub_swap in H; auto.
- rewrite Nat.add_sub_swap in H; auto.
- rewrite Nat.sub_diag in H; subst x; reflexivity.
+setoid_rewrite fold_left_add_fun_from_0.
+rewrite Nat.add_shuffle0; f_equal.
+destruct len; [ easy | ].
+replace (S len) with (S (len + b) - b) by flia.
+apply summation_eq_compat.
+intros i Hi; f_equal.
+flia.
 Qed.
-
-...
 
 (* *)
 
