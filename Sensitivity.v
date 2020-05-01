@@ -2129,6 +2129,12 @@ induction n; [ now cbn; rewrite Nat.mul_1_r | ].
 cbn - [ "-" ].
 rewrite Nat.sub_0_r.
 rewrite Nat.sub_succ, Nat.sub_0_r.
+destruct n; [ now cbn; do 2 rewrite Nat.mul_1_r | ].
+cbn - [ "-" ].
+do 2 rewrite Nat.sub_succ.
+rewrite Nat.sub_0_r.
+rewrite <- Nat.pow_succ_r; [ | flia ].
+rewrite <- Nat.pow_succ_r; [ | flia ].
 ...
 rewrite Nat.mul_1_r.
 ...
