@@ -2135,6 +2135,11 @@ do 2 rewrite Nat.sub_succ.
 rewrite Nat.sub_0_r.
 rewrite <- Nat.pow_succ_r; [ | flia ].
 rewrite <- Nat.pow_succ_r; [ | flia ].
+rewrite Nat.mul_add_distr_r.
+rewrite <- Nat.mul_assoc.
+replace (x * x) with (x ^ 2) by apply Nat.pow_2_r.
+replace (S (S n)) with (n + 2) by flia.
+replace (S n) with (n + 1) by flia.
 ...
 rewrite Nat.mul_1_r.
 ...
