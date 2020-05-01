@@ -347,25 +347,16 @@ f_equal; f_equal.
 apply IHm; flia Hm.
 Qed.
 
-(*
-Theorem summation_aux_succ_last : ∀ g b len,
-  summation_aux r b (S len) g =
-  summation_aux r b len g + g (b + len).
+Lemma fold_left_seq_succ_last : ∀ g b len s,
+  fold_left (λ c i, c + g i) (seq b (S len)) s =
+  fold_left (λ c i, c + g i) (seq b len) s + g (b + len).
 Proof.
-intros g b len.
-revert b.
-induction len; intros.
- simpl.
- rewrite rng_add_0_l, rng_add_0_r, Nat.add_0_r.
- reflexivity.
-
- remember (S len) as x; simpl; subst x.
- rewrite IHlen.
- simpl.
- rewrite rng_add_assoc, Nat.add_succ_r.
- reflexivity.
+intros.
+revert b s.
+induction len; intros; [ now cbn; rewrite Nat.add_0_r | ].
+remember (S len) as x; cbn; subst x.
+now rewrite IHlen, Nat.add_succ_comm.
 Qed.
-*)
 
 Theorem summation_rtl : ∀ g b k,
   Σ (i = b, k), g i = Σ (i = b, k), g (k + b - i).
@@ -381,6 +372,15 @@ remember 0 as s.
 remember (S k - b) as len eqn:Hlen.
 replace k with (b + len - 1) by flia Hkb Hlen; clear.
 revert s b.
+induction len; intros; [ easy | ].
+rewrite fold_left_seq_succ_last.
+rewrite IHlen; cbn.
+rewrite Nat.add_sub.
+replace (b + S len - 1) with (b + len) by flia.
+rewrite <- seq_shift.
+rewrite List_fold_left_map.
+Search (fold_left _ _ (_ + _)).
+...
 induction len; intros; [ easy | cbn ].
 rewrite Nat.add_sub.
 rewrite IHlen.
