@@ -2117,6 +2117,14 @@ rewrite <- Nat.mul_add_distr_r.
 now replace (1 + (n - 1)) with n by flia Hnz.
 Qed.
 
+Theorem horner_is_eval_polyn : ∀ n a x,
+  fold_left (λ acc i, acc * x + a i) (seq 0 (S n)) 0 =
+  Σ (i = 0, n), a i * x ^ i.
+Proof.
+intros.
+cbn; rewrite Nat.mul_1_r.
+...
+
 Theorem horner_is_eval_polyn : ∀ l x,
   fold_left (λ a ai, a * x + ai) l 0 =
   Σ (i = 0, length l - 1), nth (length l - 1 - i) l 0 * x ^ i.
