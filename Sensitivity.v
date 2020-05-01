@@ -2122,14 +2122,15 @@ Theorem horner_is_eval_polyn : ∀ n a x,
   Σ (i = 0, n), a i * x ^ i.
 Proof.
 intros.
-Locate "Σ".
 rewrite summation_rtl.
 rewrite Nat.add_0_r.
+cbn - [ seq ].
 ...
-cbn; rewrite Nat.mul_1_r.
-destruct n; [ easy | ].
+cbn; rewrite Nat.sub_0_r.
+destruct n; [ now cbn; rewrite Nat.mul_1_r | ].
 cbn - [ "-" ].
-rewrite Nat.sub_0_r, Nat.sub_succ, Nat.sub_0_r.
+rewrite Nat.sub_succ, Nat.sub_0_r.
+...
 rewrite Nat.mul_1_r.
 ...
 remember (a 0) as a0.
