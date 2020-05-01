@@ -86,9 +86,6 @@ Theorem summation_compat : ∀ g h b k,
   → (Σ (i = b, k), g i = Σ (i = b, k), h i)%Rng.
 Proof.
 intros g h b k Hgh.
-(*
-do 2 rewrite fold_left_is_summation.
-*)
 apply summation_aux_compat.
 intros i (_, Hi).
 apply Hgh.

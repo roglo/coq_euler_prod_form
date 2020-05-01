@@ -2118,11 +2118,27 @@ now replace (1 + (n - 1)) with n by flia Hnz.
 Qed.
 
 Theorem horner_is_eval_polyn : ∀ n a x,
-  fold_left (λ acc i, acc * x + a i) (seq 0 (S n)) 0 =
+  fold_left (λ acc i, acc * x + a (n - i)) (seq 0 (S n)) 0 =
   Σ (i = 0, n), a i * x ^ i.
 Proof.
 intros.
+Locate "Σ".
+About summation_split_last.
+...
+
+rewrite summation_rtl.
+...
 cbn; rewrite Nat.mul_1_r.
+destruct n; [ easy | ].
+cbn - [ "-" ].
+rewrite Nat.sub_0_r, Nat.sub_succ, Nat.sub_0_r.
+rewrite Nat.mul_1_r.
+...
+remember (a 0) as a0.
+remember 1 as s.
+clear.
+revert s a0.
+induction n; intros; [ easy | cbn ].
 ...
 
 Theorem horner_is_eval_polyn : ∀ l x,

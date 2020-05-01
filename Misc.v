@@ -347,6 +347,62 @@ f_equal; f_equal.
 apply IHm; flia Hm.
 Qed.
 
+(*
+Theorem summation_aux_succ_last : ∀ g b len,
+  summation_aux r b (S len) g =
+  summation_aux r b len g + g (b + len).
+Proof.
+intros g b len.
+revert b.
+induction len; intros.
+ simpl.
+ rewrite rng_add_0_l, rng_add_0_r, Nat.add_0_r.
+ reflexivity.
+
+ remember (S len) as x; simpl; subst x.
+ rewrite IHlen.
+ simpl.
+ rewrite rng_add_assoc, Nat.add_succ_r.
+ reflexivity.
+Qed.
+*)
+
+Theorem summation_rtl : ∀ g b k,
+  Σ (i = b, k), g i = Σ (i = b, k), g (k + b - i).
+Proof.
+intros g b k.
+destruct (le_dec (S k) b) as [Hkb| Hkb]. {
+  cbn - [ "-" ].
+  now replace (S k - b) with 0 by flia Hkb.
+}
+apply Nat.nle_gt in Hkb.
+apply -> Nat.lt_succ_r in Hkb.
+remember 0 as s.
+remember (S k - b) as len eqn:Hlen.
+replace k with (b + len - 1) by flia Hkb Hlen; clear.
+revert s b.
+induction len; intros; [ easy | cbn ].
+rewrite Nat.add_sub.
+rewrite IHlen.
+...
+rewrite summation_aux_rtl.
+apply summation_aux_compat; intros i (Hi, Hikb).
+destruct b; simpl.
+ rewrite Nat.sub_0_r; reflexivity.
+
+ rewrite Nat.sub_0_r.
+ simpl in Hikb.
+ eapply Nat.le_lt_trans in Hikb; eauto .
+ apply lt_O_minus_lt, Nat.lt_le_incl in Hikb.
+ remember (b + (k - b))%nat as x eqn:H .
+ rewrite Nat.add_sub_assoc in H; auto.
+ rewrite Nat.add_sub_swap in H; auto.
+ rewrite Nat.add_sub_swap in H; auto.
+ rewrite Nat.sub_diag in H; subst x; reflexivity.
+Qed.
+
+...
+
 (* *)
 
 Theorem match_id {A} : ∀ a (b : A), match a with O => b | S _ => b end = b.
