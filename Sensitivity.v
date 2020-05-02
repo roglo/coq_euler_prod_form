@@ -2168,17 +2168,33 @@ cbn in H1.
 now rewrite Nat.add_0_r, Nat.mul_1_r in H1.
 Qed.
 
-...
+Theorem List_fold_left_ext_in : ∀ A B (f g : A → B → A) l a,
+  (∀ b c, b ∈ l → f c b = g c b)
+  → fold_left f l a = fold_left g l a.
+Proof.
+intros * Hfg.
+revert a.
+induction l as [| d]; intros; [ easy | cbn ].
+rewrite (Hfg d a); [ | now left ].
+apply IHl.
+intros b c Hb.
+apply Hfg.
+now right.
+Qed.
 
-Theorem horner_is_eval_polyn : ∀ l x,
-  fold_left (λ a ai, a * x + ai) l 0 =
-  Σ (i = 0, length l - 1), nth (length l - 1 - i) l 0 * x ^ i.
+Theorem horner_is_eval_polyn2 : ∀ n a x,
+  fold_left (λ acc i, acc * x + a i) (seq 0 (S n)) 0 =
+  Σ (i = 0, n), a (n - i) * x ^ i.
 Proof.
 intros.
-induction l as [| an]; [ easy | ].
-remember (length (an :: l)) as a; cbn in Heqa; subst a.
-rewrite Nat.sub_succ, Nat.sub_0_r.
-...
+specialize (horner_is_eval_polyn n (λ i, a (n - i)) x) as H1.
+cbn - [ "-" fold_left seq ] in H1.
+rewrite <- H1.
+apply List_fold_left_ext_in.
+intros b c Hb; f_equal; f_equal.
+apply in_seq in Hb.
+flia Hb.
+Qed.
 
 Theorem x_bs_ge_s : ∀ n f x,
   local_block_sensitivity n f x ≥ local_sensitivity n f x.
@@ -2211,6 +2227,15 @@ assert (H : j < length ll). {
   rewrite mul_summation_distr_l.
   cbn - [ seq ].
   replace (S (n - 1)) with n by flia Hnz.
+  specialize (horner_is_eval_polyn (n - 1)) as H2.
+  specialize (H2 (λ i, n - 1 - i) n).
+  cbn - [ "-" fold_left seq ] in H2.
+...
+  rewrite (horner_is_eval_polyn2) in H2.
+...
+  rewrite  (horner_is_eval_polyn2 (n - 1)) in H2.
+rewrite (horner_is_eval_polyn2 (n - 1)) with (a := λ i, i) in H2.
+  replace (S (n - 1)) with n in H2 by flia Hnz.
 ...
 rewrite horner_is_eval_polyn.
 rewrite seq_length.
