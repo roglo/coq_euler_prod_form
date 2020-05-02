@@ -2131,9 +2131,9 @@ replace (n + S k) with (S n + k) in IHn by flia.
 replace (seq (S k) (S n)) with (S k :: seq (S (S k)) n) by easy.
 cbn - [ "-" "+" ].
 replace (S n + k - S k) with n by flia.
-rewrite (Nat.add_comm _ (a n)).
 rewrite summation_split_first in IHn; [ | flia ].
 rewrite Nat.pow_0_r, Nat.add_0_r, Nat.mul_1_r in IHn.
+rewrite (Nat.add_comm (a n)) in IHn.
 rewrite summation_succ_succ in IHn.
 rewrite summation_eq_compat with (h := λ i, a (S n + i) * x ^ i * x)
   in IHn. 2: {
@@ -2142,66 +2142,32 @@ rewrite summation_eq_compat with (h := λ i, a (S n + i) * x ^ i * x)
   now cbn; rewrite Nat.mul_assoc, Nat.mul_shuffle0.
 }
 rewrite <- mul_summation_distr_r in IHn.
-rewrite IHn.
-...
+symmetry in IHn; symmetry.
+rewrite summation_split_first in IHn; [ | flia ].
+rewrite Nat.add_0_r in IHn.
+rewrite (Nat.add_comm (a n * x ^ n)) in IHn.
+rewrite summation_succ_succ in IHn.
+rewrite summation_eq_compat with (h := λ i, a (S n + i) * x ^ (S n + i))
+  in IHn. 2: {
+  intros i Hi.
+  now rewrite Nat.add_succ_comm.
+}
+apply IHn.
+Qed.
 
 Theorem horner_is_eval_polyn : ∀ n a x,
   fold_left (λ acc i, acc * x + a (n - i)) (seq 0 (S n)) 0 =
   Σ (i = 0, n), a i * x ^ i.
 Proof.
-(*
 intros.
 rewrite summation_rtl.
 rewrite Nat.add_0_r; cbn.
 rewrite Nat.sub_0_r.
-...
 specialize (fold_left_horner_eval_sum 0 n a x) as H1.
-rewrite summation_rtl in H1.
-rewrite Nat.add_0_r in H1.
 cbn in H1.
-rewrite Nat.add_0_r in H1.
-now rewrite Nat.mul_1_r in H1.
-...
-*)
-intros.
-rewrite summation_rtl.
-rewrite Nat.add_0_r.
-cbn - [ seq ].
-revert a.
-induction n; intros; [ now cbn; rewrite Nat.mul_1_r | ].
-cbn - [ "-" ].
-rewrite Nat.sub_0_r.
-rewrite Nat.sub_succ, Nat.sub_0_r.
-destruct n; [ now cbn; do 2 rewrite Nat.mul_1_r | ].
-cbn - [ "-" ].
-do 2 rewrite Nat.sub_succ.
-rewrite Nat.sub_0_r.
-rewrite <- Nat.pow_succ_r; [ | flia ].
-rewrite <- Nat.pow_succ_r; [ | flia ].
-rewrite Nat.mul_add_distr_r.
-rewrite <- Nat.mul_assoc.
-replace (x * x) with (x ^ 2) by apply Nat.pow_2_r.
-replace (S (S n)) with (n + 2) by flia.
-replace (S n) with (n + 1) by flia.
-...
-specialize (fold_left_horner_eval_sum 2 n a x) as H1.
-rewrite summation_rtl in H1.
-rewrite Nat.add_0_r in H1.
-cbn in H1.
-do 2 rewrite Nat.mul_1_r in H1.
-rewrite Nat.add_0_r in H1.
-rewrite <- Nat.pow_2_r in H1.
-rewrite H1; f_equal.
-flia.
+now rewrite Nat.add_0_r, Nat.mul_1_r in H1.
+Qed.
 
-...
-rewrite Nat.mul_1_r.
-...
-remember (a 0) as a0.
-remember 1 as s.
-clear.
-revert s a0.
-induction n; intros; [ easy | cbn ].
 ...
 
 Theorem horner_is_eval_polyn : ∀ l x,
