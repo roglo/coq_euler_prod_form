@@ -2117,7 +2117,6 @@ rewrite <- Nat.mul_add_distr_r.
 now replace (1 + (n - 1)) with n by flia Hnz.
 Qed.
 
-(*
 Lemma fold_left_horner_eval_sum : ∀ k n a x,
   fold_left (λ acc i : nat, acc * x + a (n + k - i))
     (seq (S k) n) (Σ (i = 0, k), a (n + i) * x ^ i) =
@@ -2127,35 +2126,24 @@ Proof.
 intros.
 revert k.
 induction n; intros; [ easy | ].
-specialize (IHn k).
+specialize (IHn (S k)).
 replace (n + S k) with (S n + k) in IHn by flia.
+replace (seq (S k) (S n)) with (S k :: seq (S (S k)) n) by easy.
+cbn - [ "-" "+" ].
+replace (S n + k - S k) with n by flia.
+rewrite (Nat.add_comm _ (a n)).
+rewrite summation_split_first in IHn; [ | flia ].
+rewrite Nat.pow_0_r, Nat.add_0_r, Nat.mul_1_r in IHn.
+rewrite summation_succ_succ in IHn.
+rewrite summation_eq_compat with (h := λ i, a (S n + i) * x ^ i * x)
+  in IHn. 2: {
+  intros i Hi.
+  rewrite Nat.add_succ_comm.
+  now cbn; rewrite Nat.mul_assoc, Nat.mul_shuffle0.
+}
+rewrite <- mul_summation_distr_r in IHn.
+rewrite IHn.
 ...
-destruct n. {
-  cbn.
-  rewrite Nat.sub_diag.
-  do 2 rewrite Nat.mul_1_r.
-  rewrite Nat.pow_0_r, Nat.mul_1_r.
-  f_equal.
-  destruct k; [ easy | cbn ].
-  rewrite Nat.mul_1_r.
-  rewrite <- Nat.pow_2_r.
-  destruct k; cbn. {
-    rewrite Nat.mul_add_distr_r.
-    now rewrite Nat.mul_1_r, Nat.mul_assoc.
-  }
-  destruct k; cbn.
-(* ouais, bon, ça devrait être bon, mais pour le prouver... *)
-...
-Search (seq (S _)).
-rewrite <- seq_shift in IHn.
-Search (fold_left _ (map _ _)).
-do 2 rewrite List_fold_left_map in IHn.
-...
-cbn in IHn.
-rewrite Nat.add_0_r, Nat.mul_1_r in IHn.
-cbn - [ "-" ].
-...
-*)
 
 Theorem horner_is_eval_polyn : ∀ n a x,
   fold_left (λ acc i, acc * x + a (n - i)) (seq 0 (S n)) 0 =
