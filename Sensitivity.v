@@ -2125,7 +2125,8 @@ intros.
 rewrite summation_rtl.
 rewrite Nat.add_0_r.
 cbn - [ seq ].
-induction n; [ now cbn; rewrite Nat.mul_1_r | ].
+revert a.
+induction n; intros; [ now cbn; rewrite Nat.mul_1_r | ].
 cbn - [ "-" ].
 rewrite Nat.sub_0_r.
 rewrite Nat.sub_succ, Nat.sub_0_r.
