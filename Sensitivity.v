@@ -2128,6 +2128,21 @@ revert k.
 induction n; intros; [ easy | ].
 specialize (IHn (S k)).
 replace (n + S k) with (S n + k) in IHn by flia.
+destruct n. {
+  cbn.
+  rewrite Nat.sub_diag.
+  do 2 rewrite Nat.mul_1_r.
+  rewrite Nat.pow_0_r, Nat.mul_1_r.
+  f_equal.
+  destruct k; [ easy | cbn ].
+  rewrite Nat.mul_1_r.
+  rewrite <- Nat.pow_2_r.
+  destruct k; cbn. {
+    rewrite Nat.mul_add_distr_r.
+    now rewrite Nat.mul_1_r, Nat.mul_assoc.
+  }
+  destruct k; cbn.
+(* ouais, bon, ça devrait être bon, mais pour le prouver... *)
 ...
 Search (seq (S _)).
 rewrite <- seq_shift in IHn.
