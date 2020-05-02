@@ -2226,73 +2226,22 @@ assert (H : j < length ll). {
   apply Nat.lt_succ_r.
   rewrite mul_summation_distr_l.
   cbn - [ seq ].
-  replace (S (n - 1)) with n by flia Hnz.
   specialize (horner_is_eval_polyn (n - 1)) as H2.
   specialize (H2 (λ i, n - 1 - i) n).
   cbn - [ "-" fold_left seq ] in H2.
-...
-  rewrite (horner_is_eval_polyn2) in H2.
-...
-  rewrite  (horner_is_eval_polyn2 (n - 1)) in H2.
-rewrite (horner_is_eval_polyn2 (n - 1)) with (a := λ i, i) in H2.
-  replace (S (n - 1)) with n in H2 by flia Hnz.
-...
-rewrite horner_is_eval_polyn.
-rewrite seq_length.
-cbn - [ seq ].
-replace (S (n - 1)) with n by flia Hnz.
-Check seq_nth.
-...
-(**)
-  remember (seq 0 n) as s eqn:Hs.
-  remember n as m in Hs; subst s.
-  clear.
-  induction m; intros; [ easy | cbn ].
-  rewrite Nat.mul_1_r.
-...
-  etransitivity. 2: {
-    apply Nat.add_le_mono_l.
-    apply IHm.
+  rewrite List_fold_left_ext_in with (g := λ acc i, acc * n + i) in H2. 2: {
+    intros acc i Hacc.
+    apply in_seq in Hacc.
+    flia Hacc.
   }
-destruct m. {
-    cbn.
-(* n must be ≥ 2 *)
-...
-  assert (Hn : ∀ i, i ∈ seq 0 n → i < n) by apply in_seq.
-  remember (seq 0 n) as l eqn:Hl.
-(**)
-clear - Hn.
-destruct l as [| a1]; [ easy | cbn ].
-destruct l as [| a2]. {
-  cbn.
-  specialize (Hn _ (or_introl eq_refl)).
-  destruct a1; [ cbn; flia | cbn ].
-  destruct a1; [ cbn | ].
-...
-  remember 1 as one.
-  remember 0 as k in |-*.
-  subst one.
-  assert (Hk : k < n ^ n). {
-    subst k.
-    apply Nat.neq_0_lt_0.
-    now apply Nat.pow_nonzero.
-  }
-  clear - Hn Hk.
-(* non ça va pas : à gauche, le k est multiplié par n^n tandis
-   qu'à droite il n'est pas multiplié *)
-Search (fold_left _ _ 0).
-...
-  destruct l as [| a1]; [ easy | cbn ].
-  destruct l as [| a2]. {
-    cbn.
-...
-  revert k.
-  induction l as [| j]; intros; [ easy | cbn ].
-  etransitivity; [ | apply IHl ].
-  clear.
-  revert n j k.
-  induction l as [| i]; intros. {
-    cbn.
+  replace (S (n - 1)) with n in H2 at 1 by flia Hnz.
+  replace (S (n - 1)) with (S (n - 1) - 0) by flia Hnz.
+  rewrite H2.
+  apply summation_le_compat.
+  intros i Hi.
+  apply Nat.mul_le_mono_r; flia.
+}
+specialize (H1 H); clear H.
 ...
 Compute map (λ i, [i]) (seq 0 7).
 ...

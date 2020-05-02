@@ -163,6 +163,23 @@ intros i Hbie.
 apply Hgh; flia Hbie.
 Qed.
 
+Theorem summation_le_compat: ∀ b e g h,
+  (∀ i, b ≤ i ≤ e → g i ≤ h i) → Σ (i = b, e), g i ≤ Σ (i = b, e), h i.
+Proof.
+intros * Hgh.
+remember (S e - b) as n eqn:Hn.
+remember 0 as a eqn:Ha; clear Ha.
+revert a b Hn Hgh.
+induction n as [| n IHn]; intros; [ easy | cbn ].
+setoid_rewrite fold_left_add_fun_from_0.
+do 2 rewrite <- Nat.add_assoc.
+apply Nat.add_le_mono_l.
+apply Nat.add_le_mono; [ apply Hgh; flia Hn | ].
+apply IHn; [ flia Hn | ].
+intros i Hbie.
+apply Hgh; flia Hbie.
+Qed.
+
 Theorem mul_add_distr_r_in_summation : ∀ b e f g h,
   Σ (i = b, e), (f i + g i) * h i =
   Σ (i = b, e), (f i * h i + g i * h i).
