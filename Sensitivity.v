@@ -2117,6 +2117,7 @@ rewrite <- Nat.mul_add_distr_r.
 now replace (1 + (n - 1)) with n by flia Hnz.
 Qed.
 
+(*
 Lemma fold_left_horner_eval_sum : ∀ k n a x,
   fold_left (λ acc i : nat, acc * x + a (n + k - i))
     (seq (S k) n) (Σ (i = 0, k), a (n + i) * x ^ i) =
@@ -2126,8 +2127,9 @@ Proof.
 intros.
 revert k.
 induction n; intros; [ easy | ].
-specialize (IHn (S k)).
+specialize (IHn k).
 replace (n + S k) with (S n + k) in IHn by flia.
+...
 destruct n. {
   cbn.
   rewrite Nat.sub_diag.
@@ -2153,15 +2155,18 @@ cbn in IHn.
 rewrite Nat.add_0_r, Nat.mul_1_r in IHn.
 cbn - [ "-" ].
 ...
+*)
 
 Theorem horner_is_eval_polyn : ∀ n a x,
   fold_left (λ acc i, acc * x + a (n - i)) (seq 0 (S n)) 0 =
   Σ (i = 0, n), a i * x ^ i.
 Proof.
+(*
 intros.
 rewrite summation_rtl.
 rewrite Nat.add_0_r; cbn.
 rewrite Nat.sub_0_r.
+...
 specialize (fold_left_horner_eval_sum 0 n a x) as H1.
 rewrite summation_rtl in H1.
 rewrite Nat.add_0_r in H1.
@@ -2169,6 +2174,7 @@ cbn in H1.
 rewrite Nat.add_0_r in H1.
 now rewrite Nat.mul_1_r in H1.
 ...
+*)
 intros.
 rewrite summation_rtl.
 rewrite Nat.add_0_r.
