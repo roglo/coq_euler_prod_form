@@ -2254,7 +2254,14 @@ rewrite dispatch_list_length in Hl1.
 rewrite seq_length in Hl1.
 rewrite Hll12.
 rewrite map_app.
+rewrite fold_right_app.
+cbn.
+Search length (loc_bl_sens_list _ _ _).
 Print loc_bl_sens_list.
+...
+    (map (λ Bl : list (list nat), length (loc_bl_sens_list Bl f x)) l1)
+...
+
 ...
 Compute map (λ i, [i]) (seq 0 7).
 ...
