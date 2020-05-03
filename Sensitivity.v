@@ -2200,9 +2200,37 @@ Theorem to_radix_fold_left : ∀ n,
   to_radix n (fold_left (λ a i, a * n + i) (seq 0 n) 0) = rev (seq 0 n).
 Proof.
 intros.
+assert
+  (Hft : ∀ it n l,
+   n = length l
+   → n ≤ it
+   → (∀ i, i ∈ l → i < n)
+   → firstn n (to_radix_loop it n (fold_left (λ a j, a * n + j) l 0)) =
+        rev l). {
+  clear.
+  intros * Hnl Hit Hil.
+  revert n l Hnl Hit Hil.
+  induction it; intros. {
+    apply Nat.le_0_r in Hit; subst n.
+    apply length_zero_iff_nil in Hit.
+    now subst l.
+  }
+  cbn.
+  destruct n. {
+    symmetry in Hnl.
+    now apply length_zero_iff_nil in Hnl; subst l.
+  }
+  cbn - [ "/" "mod" ].
+(* ouais non mais c'est la merde *)
+... suite ok
+}
 unfold to_radix.
-induction n; [ easy | ].
-cbn - [ "/" "mod" ].
+erewrite <- Hft; try easy.
+rewrite seq_length.
+Search firstn.
+symmetry.
+apply firstn_all2.
+now rewrite to_radix_loop_length.
 ...
 
 Theorem x_bs_ge_s : ∀ n f x,
