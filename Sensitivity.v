@@ -2196,6 +2196,15 @@ apply in_seq in Hb.
 flia Hb.
 Qed.
 
+Theorem to_radix_fold_left : ∀ n,
+  to_radix n (fold_left (λ a i, a * n + i) (seq 0 n) 0) = rev (seq 0 n).
+Proof.
+intros.
+unfold to_radix.
+induction n; [ easy | ].
+cbn - [ "/" "mod" ].
+...
+
 Theorem x_bs_ge_s : ∀ n f x,
   local_block_sensitivity n f x ≥ local_sensitivity n f x.
 Proof.
@@ -2254,8 +2263,19 @@ rewrite seq_length in Hj.
 rewrite Hll12.
 rewrite map_app.
 rewrite fold_right_app; cbn.
-...
+Compute (let n := 4 in let j := fold_left (λ a i : nat, a * n + i) (seq 0 n) 0 in nth j (pre_partitions n) []).
 assert (nth j ll [] = map (λ i, [i]) (seq 0 n)). {
+  rewrite Hll.
+  unfold pre_partitions.
+  rewrite (List_map_nth_in _ 0).
+  rewrite seq_nth.
+  cbn.
+  unfold dispatch.
+  rewrite Hj.
+Search to_radix.
+...
+rewrite to_radix_fold_left.
+rewrite rev_involutive.
 ...
 Compute map (λ i, [i]) (seq 0 7).
 ...
