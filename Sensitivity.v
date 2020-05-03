@@ -2242,6 +2242,19 @@ assert (H : j < length ll). {
   apply Nat.mul_le_mono_r; flia.
 }
 specialize (H1 H); clear H.
+destruct H1 as (l1 & l2 & Hll12 & Hl1).
+rewrite Hj in Hl1.
+unfold locate in Hl1.
+rewrite locate_dispatch_list in Hl1. 2: {
+  intros a Ha.
+  apply in_seq in Ha.
+  now rewrite seq_length.
+}
+rewrite dispatch_list_length in Hl1.
+rewrite seq_length in Hl1.
+rewrite Hll12.
+rewrite map_app.
+Print loc_bl_sens_list.
 ...
 Compute map (λ i, [i]) (seq 0 7).
 ...
