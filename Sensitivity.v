@@ -2254,10 +2254,17 @@ rewrite dispatch_list_length in Hl1.
 rewrite seq_length in Hl1.
 rewrite Hll12.
 rewrite map_app.
-rewrite fold_right_app.
-cbn.
-Search length (loc_bl_sens_list _ _ _).
-Print loc_bl_sens_list.
+rewrite fold_right_app; cbn.
+assert (nth j ll [] = map (λ i, [i]) (seq 0 n)). {
+  rewrite Hj.
+  unfold locate.
+  rewrite locate_dispatch_list.
+  rewrite dispatch_list_length.
+  rewrite seq_length.
+  rewrite Hll.
+  unfold pre_partitions.
+  rewrite (List_map_nth_in _ 0).
+  unfold dispatch.
 ...
     (map (λ Bl : list (list nat), length (loc_bl_sens_list Bl f x)) l1)
 ...
