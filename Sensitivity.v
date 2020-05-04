@@ -2168,20 +2168,6 @@ cbn in H1.
 now rewrite Nat.add_0_r, Nat.mul_1_r in H1.
 Qed.
 
-Theorem List_fold_left_ext_in : ∀ A B (f g : A → B → A) l a,
-  (∀ b c, b ∈ l → f c b = g c b)
-  → fold_left f l a = fold_left g l a.
-Proof.
-intros * Hfg.
-revert a.
-induction l as [| d]; intros; [ easy | cbn ].
-rewrite (Hfg d a); [ | now left ].
-apply IHl.
-intros b c Hb.
-apply Hfg.
-now right.
-Qed.
-
 Theorem horner_is_eval_polyn2 : ∀ n a x,
   fold_left (λ acc i, acc * x + a i) (seq 0 (S n)) 0 =
   Σ (i = 0, n), a (n - i) * x ^ i.
@@ -2263,13 +2249,11 @@ assert
     now rewrite Nat.mod_small.
   }
   cbn.
-  assert
-    (Hmnl : ∀ l,
-     fold_left (λ a j, a * length l + j) l 0 ≡ last l 0 mod length l). {
+  assert (Hmnl : ∀ n l, fold_left (λ a j, a * n + j) l 0 ≡ last l 0 mod n). {
     clear.
     intros.
     destruct l as [| b]; [ easy | ].
-    remember (length (b :: l)) as n; clear Heqn.
+    remember (length (b :: l)) as l'.
     cbn - [ last ].
     apply fold_left_mul_add_mod.
   }
@@ -2278,15 +2262,34 @@ assert
     apply Hmnl.
   }
   rewrite Hmn.
-  assert (Hmnn : (m / n) mod n = last (removelast l) 0 + last l 0 / n mod n). {
+  assert (Hmnn : (m / n) ≡ last (removelast l) 0 mod n). {
     assert (Hmnn : m / n = fold_left (λ a j, a * n + j) (removelast l) 0). {
       destruct l as [| b]; [ now subst n | ].
       rewrite <- fold_left_mul_add_div; [ | easy | easy ].
       now rewrite <- Hm.
     }
     rewrite Hmnn, <- Hnl.
+    apply Hmnl.
+  }
+  rewrite Hmnn.
+  assert (Hmnnn : (m / n / n) ≡ last (removelast (removelast l)) 0 mod n). {
+    assert
+      (Hmnnn :
+         m / n / n =
+         fold_left (λ a j, a * n + j) (removelast (removelast l)) 0). {
+      destruct l as [| b]; [ now subst n | ].
+      rewrite <- fold_left_mul_add_div; cycle 1. {
+        intros i Hi.
+        apply Hil.
+        now apply List_in_removelast.
+      } {
 ...
-    rewrite Hmnl.
+      now rewrite <- Hm.
+    }
+    rewrite Hmnn, <- Hnl.
+    apply Hmnl.
+  }
+  rewrite Hmnn.
 ...
 ... suite ok
 }

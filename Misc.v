@@ -1281,6 +1281,31 @@ destruct Hin as [Hin| Hin]; [ now left | right ].
 now apply IHl1.
 Qed.
 
+Theorem List_in_removelast : ∀ A l (x : A), x ∈ removelast l → x ∈ l.
+Proof.
+intros * Hx.
+revert x Hx.
+induction l as [| a]; intros; [ easy | ].
+cbn in Hx.
+destruct l as [| b]; [ easy | ].
+destruct Hx as [Hx| Hx]; [ now left | right ].
+now apply IHl.
+Qed.
+
+Theorem List_fold_left_ext_in : ∀ A B (f g : A → B → A) l a,
+  (∀ b c, b ∈ l → f c b = g c b)
+  → fold_left f l a = fold_left g l a.
+Proof.
+intros * Hfg.
+revert a.
+induction l as [| d]; intros; [ easy | cbn ].
+rewrite (Hfg d a); [ | now left ].
+apply IHl.
+intros b c Hb.
+apply Hfg.
+now right.
+Qed.
+
 Theorem List_fold_left_mul_assoc : ∀ a b l,
   fold_left Nat.mul l a * b = fold_left Nat.mul l (a * b).
 Proof.
