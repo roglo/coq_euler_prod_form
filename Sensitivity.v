@@ -2217,6 +2217,7 @@ assert
     now subst l.
   }
   cbn.
+  remember (fold_left (λ a j, a * n + j) l 0) as m eqn:Hm.
   symmetry in Hnl.
   destruct it. {
     cbn.
@@ -2231,7 +2232,6 @@ assert
     now apply Nat.lt_1_r in Hil; subst a.
   }
   cbn.
-  remember (fold_left (λ a j, a * n + j) l 0) as m eqn:Hm.
   destruct it. {
     cbn.
     destruct n. {
@@ -2263,6 +2263,15 @@ assert
     now rewrite Nat.mod_small.
   }
   cbn.
+  assert (m mod n = last l 0 mod n). {
+    subst n m; clear.
+    destruct l as [| b]; [ easy | ].
+    remember (length (b :: l)) as n; clear Heqn.
+    revert b.
+    induction l as [| c]; intros; [ easy | ].
+    remember (c :: l) as cl.
+    cbn - [ "/" "mod" ].
+    subst cl.
 ...
   destruct n. {
     symmetry in Hnl.
