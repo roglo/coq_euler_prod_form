@@ -2263,12 +2263,19 @@ assert
     now rewrite Nat.mod_small.
   }
   cbn.
-  assert (Hmn : m ≡ last l 0 mod n). {
-    subst n m.
+  assert
+    (Hmnl : ∀ l,
+     fold_left (λ a j, a * length l + j) l 0 ≡ last l 0 mod length l). {
+    clear.
+    intros.
     destruct l as [| b]; [ easy | ].
     remember (length (b :: l)) as n; clear Heqn.
     cbn - [ last ].
     apply fold_left_mul_add_mod.
+  }
+  assert (Hmn : m ≡ last l 0 mod n). {
+    subst n m.
+    apply Hmnl.
   }
   rewrite Hmn.
   assert (Hmnn : (m / n) mod n = last (removelast l) 0 + last l 0 / n mod n). {
@@ -2277,6 +2284,9 @@ assert
       rewrite <- fold_left_mul_add_div; [ | easy | easy ].
       now rewrite <- Hm.
     }
+    rewrite Hmnn, <- Hnl.
+...
+    rewrite Hmnl.
 ...
 ... suite ok
 }
