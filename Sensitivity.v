@@ -2263,16 +2263,16 @@ assert
     now rewrite Nat.mod_small.
   }
   cbn.
-  assert (m ≡ last l 0 mod n). {
+  assert (Hmn : m ≡ last l 0 mod n). {
     subst n m.
     destruct l as [| b]; [ easy | ].
     remember (length (b :: l)) as n; clear Heqn.
     cbn - [ last ].
     apply fold_left_mul_add_mod.
   }
-  rewrite H; clear H.
-  assert ((m / n) mod n = last (removelast l) 0). {
-    subst n m.
+  rewrite Hmn.
+  assert (Hmnn : (m / n) mod n = last (removelast l) 0 + last l 0 / n mod n). {
+    destruct l as [| b]; [ now subst n | ].
 ...
 Search removelast.
 ...
