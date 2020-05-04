@@ -2263,15 +2263,18 @@ assert
     now rewrite Nat.mod_small.
   }
   cbn.
-  assert (m mod n = last l 0 mod n). {
-    subst n m; clear.
+  assert (m ≡ last l 0 mod n). {
+    subst n m.
     destruct l as [| b]; [ easy | ].
     remember (length (b :: l)) as n; clear Heqn.
-    revert b.
-    induction l as [| c]; intros; [ easy | ].
-    remember (c :: l) as cl.
-    cbn - [ "/" "mod" ].
-    subst cl.
+    cbn - [ last ].
+    apply fold_left_mul_add_mod.
+  }
+  rewrite H; clear H.
+  assert ((m / n) mod n = last (removelast l) 0). {
+    subst n m.
+...
+Search removelast.
 ...
   destruct n. {
     symmetry in Hnl.
