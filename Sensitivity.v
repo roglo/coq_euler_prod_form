@@ -2272,16 +2272,12 @@ assert
   }
   rewrite Hmn.
   assert (Hmnn : (m / n) mod n = last (removelast l) 0 + last l 0 / n mod n). {
-    destruct l as [| b]; [ now subst n | ].
+    assert (Hmnn : m / n = fold_left (λ a j, a * n + j) (removelast l) 0). {
+      destruct l as [| b]; [ now subst n | ].
+      rewrite <- fold_left_mul_add_div; [ | easy | easy ].
+      now rewrite <- Hm.
+    }
 ...
-Search removelast.
-...
-  destruct n. {
-    symmetry in Hnl.
-    now apply length_zero_iff_nil in Hnl; subst l.
-  }
-  cbn - [ "/" "mod" ].
-(* ouais non mais c'est la merde *)
 ... suite ok
 }
 unfold to_radix.
