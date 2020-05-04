@@ -2200,6 +2200,7 @@ Theorem to_radix_fold_left : ∀ n,
   to_radix n (fold_left (λ a i, a * n + i) (seq 0 n) 0) = rev (seq 0 n).
 Proof.
 intros.
+Compute (let l := [2; 2; 0] in let n := length l in let it := 7 in firstn n (to_radix_loop it n (fold_left (λ a j, a * n + j) l 0))).
 assert
   (Hft : ∀ it n l,
    n = length l
@@ -2216,6 +2217,53 @@ assert
     now subst l.
   }
   cbn.
+  symmetry in Hnl.
+  destruct it. {
+    cbn.
+    destruct n. {
+      now apply length_zero_iff_nil in Hnl; subst l.
+    }
+    cbn - [ "/" "mod" ].
+    destruct n; [ cbn | flia Hit ].
+    destruct l as [| a]; [ easy | ].
+    destruct l as [| b]; [ | easy ].
+    specialize (Hil a (or_introl eq_refl)).
+    now apply Nat.lt_1_r in Hil; subst a.
+  }
+  cbn.
+  remember (fold_left (λ a j, a * n + j) l 0) as m eqn:Hm.
+  destruct it. {
+    cbn.
+    destruct n. {
+      now apply length_zero_iff_nil in Hnl; subst l.
+    }
+    cbn - [ "/" "mod" ].
+    destruct l as [| a]; [ easy | cbn in Hnl ].
+    destruct l as [| b]. {
+      cbn in Hnl.
+      destruct n; [ | easy ].
+      cbn.
+      specialize (Hil a (or_introl eq_refl)).
+      now apply Nat.lt_1_r in Hil; subst a.
+    }
+    destruct n; [ easy | ].
+    destruct n; [ | flia Hit ].
+    cbn in Hnl.
+    do 2 apply Nat.succ_inj in Hnl.
+    apply length_zero_iff_nil in Hnl; subst l.
+    cbn - [ "/" "mod" ].
+    cbn in Hm; subst m.
+    rewrite Nat_mod_add_l_mul_r; [ | easy ].
+    rewrite Nat.div_add_l; [ | easy ].
+    specialize (Hil a (or_introl eq_refl)) as Ha.
+    specialize (Hil b (or_intror (or_introl eq_refl))) as Hb.
+    rewrite Nat.mod_small; [ | easy ].
+    rewrite Nat.div_small; [ | easy ].
+    rewrite Nat.add_0_r.
+    now rewrite Nat.mod_small.
+  }
+  cbn.
+...
   destruct n. {
     symmetry in Hnl.
     now apply length_zero_iff_nil in Hnl; subst l.
