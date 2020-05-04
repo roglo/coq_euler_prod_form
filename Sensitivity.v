@@ -2273,10 +2273,11 @@ assert
   }
   rewrite Hmnn.
   assert (Hmnnn : (m / n / n) ≡ last (removelast (removelast l)) 0 mod n). {
+...
     assert
       (Hmnnn :
-         m / n / n =
-         fold_left (λ a j, a * n + j) (removelast (removelast l)) 0). {
+         m / n / n ≡
+         fold_left (λ a j, a * n + j) (removelast (removelast l)) 0 mod n). {
       destruct l as [| b]; [ now subst n | ].
       destruct l as [| a]. {
         cbn in Hnl; subst n.
@@ -2290,7 +2291,6 @@ assert
         apply Hil.
         now apply List_in_removelast.
       }
-      f_equal.
       remember (a :: l) as l'; cbn in Hmn, Hmnn |-*; subst l'.
 ...
       now rewrite <- Hm.
