@@ -2280,18 +2280,18 @@ assert
       destruct l as [| b]; [ now subst n | ].
       destruct l as [| a]. {
         cbn in Hnl; subst n.
-        do 2 rewrite Nat.div_1_r.
+        specialize (Hil b (or_introl eq_refl)).
+        apply Nat.lt_1_r in Hil; subst b.
         cbn in Hm.
-        cbn.
-...
-      rewrite <- fold_left_mul_add_div; cycle 1. {
+        now do 2 rewrite Nat.div_1_r.
+      }
+      rewrite <- fold_left_mul_add_div; [ | | easy ]. 2: {
         intros i Hi.
         apply Hil.
         now apply List_in_removelast.
-      } {
-        destruct l as [| a]. {
-          cbn in Hnl; subst n.
-          cbn in Hmnn, Hmn.
+      }
+      f_equal.
+      remember (a :: l) as l'; cbn in Hmn, Hmnn |-*; subst l'.
 ...
       now rewrite <- Hm.
     }
