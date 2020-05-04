@@ -2278,11 +2278,20 @@ assert
          m / n / n =
          fold_left (λ a j, a * n + j) (removelast (removelast l)) 0). {
       destruct l as [| b]; [ now subst n | ].
+      destruct l as [| a]. {
+        cbn in Hnl; subst n.
+        do 2 rewrite Nat.div_1_r.
+        cbn in Hm.
+        cbn.
+...
       rewrite <- fold_left_mul_add_div; cycle 1. {
         intros i Hi.
         apply Hil.
         now apply List_in_removelast.
       } {
+        destruct l as [| a]. {
+          cbn in Hnl; subst n.
+          cbn in Hmnn, Hmn.
 ...
       now rewrite <- Hm.
     }
