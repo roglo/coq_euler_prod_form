@@ -2321,7 +2321,6 @@ assert
   }
   rewrite Hmnn.
   assert (Hmnnn : (m / n / n) ≡ last (removelast (removelast l)) 0 mod n). {
-...
     assert
       (Hmnnn :
          m / n / n ≡
@@ -2340,6 +2339,11 @@ assert
         now apply List_in_removelast.
       }
       remember (a :: l) as l'; cbn in Hmn, Hmnn |-*; subst l'.
+      cbn.
+      destruct l as [| c]. {
+        cbn in Hm; subst m.
+        cbn in Hnl; subst n.
+        cbn - [ "/" "mod" ] in Hmnn, Hmn |-*.
 ...
       now rewrite <- Hm.
     }
