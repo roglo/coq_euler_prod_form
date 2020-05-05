@@ -2249,6 +2249,54 @@ assert
     now rewrite Nat.mod_small.
   }
   cbn.
+  destruct it. {
+    cbn.
+    destruct n. {
+      now apply length_zero_iff_nil in Hnl; subst l.
+    }
+    cbn - [ "/" "mod" ].
+    destruct l as [| a]; [ easy | cbn in Hnl ].
+    apply Nat.succ_inj in Hnl.
+    destruct l as [| b]. {
+      cbn in Hnl; subst n; cbn.
+      specialize (Hil a (or_introl eq_refl)).
+      now apply Nat.lt_1_r in Hil; subst a.
+    }
+    destruct n; [ easy | ].
+    destruct n. {
+      destruct l; [ | easy ].
+      cbn - [ "/" "mod" ].
+      cbn in Hm; subst m.
+      rewrite Nat_mod_add_l_mul_r; [ | easy ].
+      rewrite Nat.div_add_l; [ | easy ].
+      specialize (Hil a (or_introl eq_refl)) as Ha.
+      specialize (Hil b (or_intror (or_introl eq_refl))) as Hb.
+      rewrite Nat.mod_small; [ | easy ].
+      rewrite Nat.div_small; [ | easy ].
+      rewrite Nat.add_0_r.
+      now rewrite Nat.mod_small.
+    }
+    destruct n; [ | flia Hit ].
+    destruct l as [| c]; [ easy | ].
+    destruct l; [ | easy ].
+    cbn - [ "/" "mod" ].
+    cbn in Hm; subst m.
+    rewrite Nat_mod_add_l_mul_r; [ | easy ].
+    rewrite Nat.div_add_l; [ | easy ].
+    specialize (Hil a (or_introl eq_refl)) as Ha.
+    specialize (Hil b (or_intror (or_introl eq_refl))) as Hb.
+    specialize (Hil c (or_intror (or_intror (or_introl eq_refl)))) as Hc.
+    rewrite Nat.mod_small; [ | easy ].
+    rewrite Nat.div_small; [ | easy ].
+    rewrite Nat.add_0_r.
+    rewrite Nat_mod_add_l_mul_r; [ | easy ].
+    rewrite Nat.mod_small; [ | easy ].
+    rewrite Nat.div_add_l; [ | easy ].
+    rewrite Nat.div_small; [ | easy ].
+    rewrite Nat.add_0_r.
+    now rewrite Nat.mod_small.
+  }
+  cbn.
   assert (Hmnl : ∀ n l, fold_left (λ a j, a * n + j) l 0 ≡ last l 0 mod n). {
     clear.
     intros.
