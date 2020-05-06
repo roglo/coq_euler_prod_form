@@ -2323,14 +2323,16 @@ assert
 (**)
 assert (Hmnnn : ∀ d, m / (n ^ d) ≡ nth (length l - S d) l 0 mod n). {
   intros.
-  destruct d. {
+  subst m n.
+  clear - Hmnl.
+  induction d. {
     rewrite Nat.pow_0_r, Nat.div_1_r.
-    rewrite Hmn.
-    clear.
+    rewrite Hmnl.
     now rewrite List_last_nth.
   }
+...
   destruct d. {
-    rewrite Nat.pow_1_r, Hmnn.
+    rewrite Nat.pow_1_r.
     rewrite List_last_nth.
 ...
   assert (Hmnnn : (m / n / n) ≡ last (removelast (removelast l)) 0 mod n). {
