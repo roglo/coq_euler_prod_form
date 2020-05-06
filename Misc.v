@@ -1365,6 +1365,19 @@ apply Nat.succ_le_mono in Hnlen.
 now apply IHlen.
 Qed.
 
+Theorem List_last_nth : ∀ A l (d : A), last l d = nth (length l - 1) l d.
+Proof.
+intros.
+destruct l as [| a]; [ easy | ].
+cbn - [ last nth ].
+rewrite Nat.sub_0_r.
+revert a.
+induction l as [| b]; intros; [ easy | ].
+cbn - [ last nth ].
+remember (b :: l) as l'; cbn; subst l'.
+apply IHl.
+Qed.
+
 Theorem NoDup_app_app_swap {A} : ∀ l1 l2 l3 : list A,
   NoDup (l1 ++ l2 ++ l3) → NoDup (l1 ++ l3 ++ l2).
 Proof.

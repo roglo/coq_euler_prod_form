@@ -2320,6 +2320,19 @@ assert
     apply Hmnl.
   }
   rewrite Hmnn.
+(**)
+assert (Hmnnn : ∀ d, m / (n ^ d) ≡ nth (length l - S d) l 0 mod n). {
+  intros.
+  destruct d. {
+    rewrite Nat.pow_0_r, Nat.div_1_r.
+    rewrite Hmn.
+    clear.
+    now rewrite List_last_nth.
+  }
+  destruct d. {
+    rewrite Nat.pow_1_r, Hmnn.
+    rewrite List_last_nth.
+...
   assert (Hmnnn : (m / n / n) ≡ last (removelast (removelast l)) 0 mod n). {
     assert
       (Hmnnn :
@@ -2338,7 +2351,6 @@ assert
         apply Hil.
         now apply List_in_removelast.
       }
-...
       remember (a :: l) as l'; cbn in Hmn, Hmnn |-*; subst l'.
       cbn.
       destruct l as [| c]. {
