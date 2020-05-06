@@ -2338,12 +2338,18 @@ assert
         apply Hil.
         now apply List_in_removelast.
       }
+...
       remember (a :: l) as l'; cbn in Hmn, Hmnn |-*; subst l'.
       cbn.
       destruct l as [| c]. {
         cbn in Hm; subst m.
         cbn in Hnl; subst n.
         cbn - [ "/" "mod" ] in Hmnn, Hmn |-*.
+        specialize (Hil a (or_intror (or_introl eq_refl))).
+        rewrite Nat.div_add_l; [ | easy ].
+        rewrite (Nat.div_small a); [ | easy ].
+        now rewrite Nat.add_0_r.
+      }
 ...
       now rewrite <- Hm.
     }
