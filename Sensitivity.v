@@ -2189,6 +2189,7 @@ intros.
 Compute (let n:= 3 in to_radix n (fold_left (λ a i, a * n + i) (seq 0 n) 0) = rev (seq 0 n)).
 Print to_radix.
 Print to_radix_loop.
+...
 Compute (let l := [2; 2; 0] in let n := length l in let it := 7 in firstn n (to_radix_loop it n (fold_left (λ a j, a * n + j) l 0))).
 assert
   (Hft : ∀ it n l,
@@ -2387,6 +2388,7 @@ symmetry.
 apply firstn_all2.
 now rewrite to_radix_loop_length.
 ...
+*)
 
 Theorem x_bs_ge_s : ∀ n f x,
   local_block_sensitivity n f x ≥ local_sensitivity n f x.
