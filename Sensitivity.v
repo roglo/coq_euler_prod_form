@@ -2213,6 +2213,11 @@ assert
   cbn.
   rewrite fold_left_mul_add_mod.
   rewrite fold_left_mul_add_div.
+  destruct n. {
+    symmetry in Hnl.
+    now apply length_zero_iff_nil in Hnl; subst l.
+  }
+  cbn - [ last "mod" ].
 (**)
 ...
   remember (fold_left (λ a j, a * n + j) l 0) as m eqn:Hm.
