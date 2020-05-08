@@ -2222,20 +2222,20 @@ assert
   destruct rl as [| a]. {
     now apply List_eq_rev_nil in Hrl; subst l.
   }
-  assert (H : l = rev (a :: rl)). {
+  assert (Hlr : l = rev (a :: rl)). {
     rewrite <- Hrl; symmetry; apply rev_involutive.
   }
-  clear Hrl; rename H into Hrl.
-  rewrite Hrl.
+  rewrite Hlr.
   cbn - [ last "mod" ].
   rewrite app_comm_cons, List_last_app.
   rewrite Nat.mod_small. 2: {
-    apply Hil; rewrite Hrl; cbn.
+    apply Hil; rewrite Hlr; cbn.
     now apply in_or_app; right; left.
   }
   f_equal.
   rewrite removelast_app; [ | easy ].
   rewrite app_nil_r.
+  replace rl with (tl (rev l)) by now rewrite Hrl.
 ...
 (**)
 ...
