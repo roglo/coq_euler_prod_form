@@ -2283,10 +2283,6 @@ replace n with (length l). 2: {
 apply firstn_all.
 Qed.
 
-Inspect 1.
-
-...
-
 Theorem x_bs_ge_s : ∀ n f x,
   local_block_sensitivity n f x ≥ local_sensitivity n f x.
 Proof.
@@ -2345,19 +2341,26 @@ rewrite seq_length in Hj.
 rewrite Hll12.
 rewrite map_app.
 rewrite fold_right_app; cbn.
+(*
 Compute (let n := 4 in let j := fold_left (λ a i : nat, a * n + i) (seq 0 n) 0 in nth j (pre_partitions n) []).
+*)
 assert (nth j ll [] = map (λ i, [i]) (seq 0 n)). {
   rewrite Hll.
   unfold pre_partitions.
-  rewrite (List_map_nth_in _ 0).
-  rewrite seq_nth.
-  cbn.
+  assert (Hjnn : j < n ^ n). {
+    rewrite Hj.
+Search (fold_left _ _ _ < _).
+...
+... suite ok
+  }
+  rewrite (List_map_nth_in _ 0) by now rewrite seq_length.
+  rewrite seq_nth; [ cbn | easy ].
   unfold dispatch.
   rewrite Hj.
-Search to_radix.
-...
-rewrite to_radix_fold_left.
-rewrite rev_involutive.
+  rewrite to_radix_fold_left.
+  rewrite rev_involutive.
+  clear.
+  induction n; [ easy | ].
 ...
 Compute map (λ i, [i]) (seq 0 7).
 ...
