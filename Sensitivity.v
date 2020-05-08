@@ -2218,6 +2218,25 @@ assert
     now apply length_zero_iff_nil in Hnl; subst l.
   }
   cbn - [ last "mod" ].
+  remember (rev l) as rl eqn:Hrl; symmetry in Hrl.
+  destruct rl as [| a]. {
+    now apply List_eq_rev_nil in Hrl; subst l.
+  }
+  assert (H : l = rev (a :: rl)). {
+    rewrite <- Hrl; symmetry; apply rev_involutive.
+  }
+  clear Hrl; rename H into Hrl.
+  rewrite Hrl.
+  cbn - [ last "mod" ].
+  rewrite app_comm_cons, List_last_app.
+  rewrite Nat.mod_small. 2: {
+    apply Hil; rewrite Hrl; cbn.
+    now apply in_or_app; right; left.
+  }
+  f_equal.
+  rewrite removelast_app; [ | easy ].
+  rewrite app_nil_r.
+...
 (**)
 ...
   remember (fold_left (λ a j, a * n + j) l 0) as m eqn:Hm.
