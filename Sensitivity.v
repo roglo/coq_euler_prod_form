@@ -2265,189 +2265,27 @@ assert
   rewrite Hlr.
   now rewrite rev_length.
 }
-...
-(**)
-...
-  remember (fold_left (λ a j, a * n + j) l 0) as m eqn:Hm.
-  symmetry in Hnl.
-  destruct it. {
-    cbn.
-    destruct n. {
-      now apply length_zero_iff_nil in Hnl; subst l.
-    }
-    cbn - [ "/" "mod" ].
-    destruct n; [ cbn | flia Hit ].
-    destruct l as [| a]; [ easy | ].
-    destruct l as [| b]; [ | easy ].
-    specialize (Hil a (or_introl eq_refl)).
-    now apply Nat.lt_1_r in Hil; subst a.
-  }
-  cbn.
-  destruct it. {
-    cbn.
-    destruct n. {
-      now apply length_zero_iff_nil in Hnl; subst l.
-    }
-    cbn - [ "/" "mod" ].
-    destruct l as [| a]; [ easy | cbn in Hnl ].
-    destruct l as [| b]. {
-      cbn in Hnl.
-      destruct n; [ | easy ].
-      cbn.
-      specialize (Hil a (or_introl eq_refl)).
-      now apply Nat.lt_1_r in Hil; subst a.
-    }
-    destruct n; [ easy | ].
-    destruct n; [ | flia Hit ].
-    cbn in Hnl.
-    do 2 apply Nat.succ_inj in Hnl.
-    apply length_zero_iff_nil in Hnl; subst l.
-    cbn - [ "/" "mod" ].
-    cbn in Hm; subst m.
-    rewrite Nat_mod_add_l_mul_r; [ | easy ].
-    rewrite Nat.div_add_l; [ | easy ].
-    specialize (Hil a (or_introl eq_refl)) as Ha.
-    specialize (Hil b (or_intror (or_introl eq_refl))) as Hb.
-    rewrite Nat.mod_small; [ | easy ].
-    rewrite Nat.div_small; [ | easy ].
-    rewrite Nat.add_0_r.
-    now rewrite Nat.mod_small.
-  }
-  cbn.
-  destruct it. {
-    cbn.
-    destruct n. {
-      now apply length_zero_iff_nil in Hnl; subst l.
-    }
-    cbn - [ "/" "mod" ].
-    destruct l as [| a]; [ easy | cbn in Hnl ].
-    apply Nat.succ_inj in Hnl.
-    destruct l as [| b]. {
-      cbn in Hnl; subst n; cbn.
-      specialize (Hil a (or_introl eq_refl)).
-      now apply Nat.lt_1_r in Hil; subst a.
-    }
-    destruct n; [ easy | ].
-    destruct n. {
-      destruct l; [ | easy ].
-      cbn - [ "/" "mod" ].
-      cbn in Hm; subst m.
-      rewrite Nat_mod_add_l_mul_r; [ | easy ].
-      rewrite Nat.div_add_l; [ | easy ].
-      specialize (Hil a (or_introl eq_refl)) as Ha.
-      specialize (Hil b (or_intror (or_introl eq_refl))) as Hb.
-      rewrite Nat.mod_small; [ | easy ].
-      rewrite Nat.div_small; [ | easy ].
-      rewrite Nat.add_0_r.
-      now rewrite Nat.mod_small.
-    }
-    destruct n; [ | flia Hit ].
-    destruct l as [| c]; [ easy | ].
-    destruct l; [ | easy ].
-    cbn - [ "/" "mod" ].
-    cbn in Hm; subst m.
-    rewrite Nat_mod_add_l_mul_r; [ | easy ].
-    rewrite Nat.div_add_l; [ | easy ].
-    specialize (Hil a (or_introl eq_refl)) as Ha.
-    specialize (Hil b (or_intror (or_introl eq_refl))) as Hb.
-    specialize (Hil c (or_intror (or_intror (or_introl eq_refl)))) as Hc.
-    rewrite Nat.mod_small; [ | easy ].
-    rewrite Nat.div_small; [ | easy ].
-    rewrite Nat.add_0_r.
-    rewrite Nat_mod_add_l_mul_r; [ | easy ].
-    rewrite Nat.mod_small; [ | easy ].
-    rewrite Nat.div_add_l; [ | easy ].
-    rewrite Nat.div_small; [ | easy ].
-    rewrite Nat.add_0_r.
-    now rewrite Nat.mod_small.
-  }
-  cbn.
-  assert (Hmnl : ∀ n l, fold_left (λ a j, a * n + j) l 0 ≡ last l 0 mod n). {
-    clear.
-    intros.
-    destruct l as [| b]; [ easy | ].
-    remember (length (b :: l)) as l'.
-    cbn - [ last ].
-    apply fold_left_mul_add_mod.
-  }
-  assert (Hmn : m ≡ last l 0 mod n). {
-    subst n m.
-    apply Hmnl.
-  }
-  rewrite Hmn.
-  assert (Hmnn : (m / n) ≡ last (removelast l) 0 mod n). {
-    assert (Hmnn : m / n = fold_left (λ a j, a * n + j) (removelast l) 0). {
-      destruct l as [| b]; [ now subst n | ].
-      rewrite <- fold_left_mul_add_div; [ | easy | easy ].
-      now rewrite <- Hm.
-    }
-    rewrite Hmnn, <- Hnl.
-    apply Hmnl.
-  }
-  rewrite Hmnn.
-(**)
-assert (Hmnnn : ∀ d, m / (n ^ d) ≡ nth (length l - S d) l 0 mod n). {
-  intros.
-  subst m n.
-  clear - Hmnl.
-  induction d. {
-    rewrite Nat.pow_0_r, Nat.div_1_r.
-    rewrite Hmnl.
-    now rewrite List_last_nth.
-  }
-...
-  destruct d. {
-    rewrite Nat.pow_1_r.
-    rewrite List_last_nth.
-...
-  assert (Hmnnn : (m / n / n) ≡ last (removelast (removelast l)) 0 mod n). {
-    assert
-      (Hmnnn :
-         m / n / n ≡
-         fold_left (λ a j, a * n + j) (removelast (removelast l)) 0 mod n). {
-      destruct l as [| b]; [ now subst n | ].
-      destruct l as [| a]. {
-        cbn in Hnl; subst n.
-        specialize (Hil b (or_introl eq_refl)).
-        apply Nat.lt_1_r in Hil; subst b.
-        cbn in Hm.
-        now do 2 rewrite Nat.div_1_r.
-      }
-      rewrite <- fold_left_mul_add_div; [ | | easy ]. 2: {
-        intros i Hi.
-        apply Hil.
-        now apply List_in_removelast.
-      }
-      remember (a :: l) as l'; cbn in Hmn, Hmnn |-*; subst l'.
-      cbn.
-      destruct l as [| c]. {
-        cbn in Hm; subst m.
-        cbn in Hnl; subst n.
-        cbn - [ "/" "mod" ] in Hmnn, Hmn |-*.
-        specialize (Hil a (or_intror (or_introl eq_refl))).
-        rewrite Nat.div_add_l; [ | easy ].
-        rewrite (Nat.div_small a); [ | easy ].
-        now rewrite Nat.add_0_r.
-      }
-...
-      now rewrite <- Hm.
-    }
-    rewrite Hmnn, <- Hnl.
-    apply Hmnl.
-  }
-  rewrite Hmnn.
-...
-... suite ok
+specialize (Hft n n (seq 0 n) 0) as H1.
+rewrite seq_length in H1.
+specialize (H1 eq_refl (le_refl _)).
+rewrite Nat.add_0_r in H1.
+assert (H : ∀ i, i ∈ seq 0 n → i < n). {
+  now intros i Hi; apply in_seq in Hi.
 }
+specialize (H1 H); clear H.
 unfold to_radix.
-erewrite <- Hft; try easy.
-rewrite seq_length.
-Search firstn.
-symmetry.
-apply firstn_all2.
-now rewrite to_radix_loop_length.
+remember (to_radix_loop _ _ _) as l.
+rewrite <- H1; symmetry.
+replace n with (length l). 2: {
+  rewrite Heql.
+  apply to_radix_loop_length.
+}
+apply firstn_all.
+Qed.
+
+Inspect 1.
+
 ...
-*)
 
 Theorem x_bs_ge_s : ∀ n f x,
   local_block_sensitivity n f x ≥ local_sensitivity n f x.
