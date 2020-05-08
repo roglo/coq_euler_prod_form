@@ -2186,25 +2186,21 @@ Theorem to_radix_fold_left : ∀ n,
   to_radix n (fold_left (λ a i, a * n + i) (seq 0 n) 0) = rev (seq 0 n).
 Proof.
 intros.
-Compute (let n:= 3 in to_radix n (fold_left (λ a i, a * n + i) (seq 0 n) 0) = rev (seq 0 n)).
-Print to_radix.
-Print to_radix_loop.
 (*
-assert (fold_left (λ a i, a * n + i) (seq 0 n) 0 mod n = n - 1). {
-  rewrite fold_left_mul_add_mod.
-...
+Compute (let n:= 3 in to_radix n (fold_left (λ a i, a * n + i) (seq 0 n) 0) = rev (seq 0 n)).
+Compute (let l := [2; 2; 0] in let n := length l in let d := 4 in let it := 7 in firstn n (to_radix_loop it (n + d) (fold_left (λ a j, a * (n + d) + j) l 0))).
 *)
-Compute (let l := [2; 2; 0] in let n := length l in let it := 7 in firstn n (to_radix_loop it n (fold_left (λ a j, a * n + j) l 0))).
 assert
-  (Hft : ∀ it n l,
+  (Hft : ∀ it n l d,
    n = length l
    → n ≤ it
-   → (∀ i, i ∈ l → i < n)
-   → firstn n (to_radix_loop it n (fold_left (λ a j, a * n + j) l 0)) =
+   → (∀ i, i ∈ l → i < n + d)
+   → firstn n
+        (to_radix_loop it (n + d) (fold_left (λ a j, a * (n + d) + j) l 0)) =
         rev l). {
   clear.
   intros * Hnl Hit Hil.
-  revert n l Hnl Hit Hil.
+  revert n d l Hnl Hit Hil.
   induction it; intros. {
     apply Nat.le_0_r in Hit; subst n.
     apply length_zero_iff_nil in Hit.
@@ -2212,7 +2208,15 @@ assert
   }
   cbn.
   rewrite fold_left_mul_add_mod.
-  rewrite fold_left_mul_add_div.
+  destruct l as [| a]. {
+    now cbn in Hnl; subst n; cbn.
+  }
+  remember (a :: l) as l' eqn:Hl'; symmetry in Hl'.
+  rewrite fold_left_mul_add_div; [ | easy | ]. 2: {
+    now subst l'.
+  }
+  clear a l Hl'.
+  rename l' into l.
   destruct n. {
     symmetry in Hnl.
     now apply length_zero_iff_nil in Hnl; subst l.
@@ -2236,6 +2240,31 @@ assert
   rewrite removelast_app; [ | easy ].
   rewrite app_nil_r.
   replace rl with (tl (rev l)) by now rewrite Hrl.
+  cbn in Hil.
+  replace (S (n + d)) with (n + S d) in Hil |-* by flia.
+  apply Nat.succ_le_mono in Hit.
+  rewrite IHit; [ apply rev_involutive | | easy | ]. 2: {
+    intros i Hi.
+    apply Hil.
+    apply in_rev in Hi.
+    apply in_rev.
+    remember (rev l) as l'.
+    clear - Hi; rename l' into l.
+    induction l as [| a]; [ easy | ].
+    cbn in Hi.
+    destruct l as [| b]; [ easy | ].
+    destruct Hi as [Hi| Hi]. {
+      subst b.
+      now right; left.
+    }
+    now right; apply IHl.
+  }
+  rewrite rev_length.
+  apply Nat.succ_inj.
+  rewrite Hnl, Hrl; cbn.
+  rewrite Hlr.
+  now rewrite rev_length.
+}
 ...
 (**)
 ...
