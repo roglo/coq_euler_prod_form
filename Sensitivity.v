@@ -2190,9 +2190,7 @@ Compute (let n:= 3 in to_radix n (fold_left (λ a i, a * n + i) (seq 0 n) 0) = r
 Print to_radix.
 Print to_radix_loop.
 assert (fold_left (λ a i, a * n + i) (seq 0 n) 0 mod n = n - 1). {
-  induction n; [ easy | ].
-  cbn - [ "mod" ].
-  (* c'est nul, pas assez général, mon colonel *)
+  rewrite fold_left_mul_add_mod.
 ...
 Compute (let l := [2; 2; 0] in let n := length l in let it := 7 in firstn n (to_radix_loop it n (fold_left (λ a j, a * n + j) l 0))).
 assert
