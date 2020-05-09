@@ -2365,7 +2365,39 @@ assert (nth j ll [] = map (λ i, [i]) (seq 0 n)). {
   rewrite to_radix_fold_left.
   rewrite rev_involutive.
   clear.
-  induction n; [ easy | ].
+  unfold dispatch_list.
+  rewrite seq_length.
+  apply map_ext_in_iff.
+  intros a Ha.
+  unfold nth_find_all.
+  apply (eq_nth_find_all_loop_cons _ _ _ 0).
+  rewrite seq_length, Nat.sub_0_r, Nat.sub_0_r; cbn.
+  apply in_seq in Ha.
+  split; [ easy | ]; destruct Ha as (_, Ha); cbn in Ha.
+  rewrite seq_nth; [ | easy ].
+  split. {
+    intros k Hk.
+    rewrite seq_nth; [ | flia Ha Hk ].
+    apply Bool.not_true_iff_false; intros Hak.
+    apply Nat.eqb_eq in Hak.
+    rewrite Hak in Hk; flia Hk.
+  }
+  split; [ now apply Nat.eqb_eq | ].
+  apply eq_nth_find_all_loop_nil.
+  intros j Hj.
+  apply Bool.not_true_iff_false; intros Haj.
+  apply Nat.eqb_eq in Haj; subst j.
+  clear - Hj.
+...
+  induction n; cbn in Hj. {
+    now rewrite skipn_nil in Hj.
+  }
+  apply IHn.
+  destruct n. {
+    rewrite Nat.add_1_r in Hj; cbn in Hj.
+    now rewrite skipn_nil in Hj.
+  }
+  cbn.
 ...
 Compute map (λ i, [i]) (seq 0 7).
 ...
