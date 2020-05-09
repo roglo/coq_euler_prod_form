@@ -88,6 +88,14 @@ rewrite Nat.add_0_r.
 apply Nat.mul_assoc.
 Qed.
 
+Theorem fold_right_max_ge : ∀ m l, m ≤ fold_right max m l.
+Proof.
+intros.
+induction l as [| a]; [ easy | cbn ].
+etransitivity; [ apply IHl | ].
+apply Nat.le_max_r.
+Qed.
+
 Theorem summation_split_first : ∀ b e f,
   b ≤ e
   → Σ (i = b, e), f i = f b + Σ (i = S b, e), f i.

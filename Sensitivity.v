@@ -2393,25 +2393,16 @@ assert (Hjll : nth j ll [] = map (λ i, [i]) (seq 0 n)). {
 }
 rewrite Hjll.
 rewrite <- loc_length_loc_bl_sens_list.
-...
-Compute map (λ i, [i]) (seq 0 7).
-...
-Compute (locate_list (nth 5 (pre_partitions 3) [])).
-Compute (nth 0 (pre_partitions 1) []).
-Compute (nth 1 (pre_partitions 2) []).
-Compute (nth 5 (pre_partitions 3) []).
-Compute (nth 27 (pre_partitions 4) []).
-Compute (nth 194 (pre_partitions 5) []).
-Compute (let n := 5 in ((n ^ n - n ^ 2 + n - 1) / (n - 1) ^ 2)).
-Compute (let n := 4 in (Σ (j = 1, n - 1), j * n ^ (n - 1 - j))).
-...
-a(n) = (n^n-n^2+n-1)/(n-1)^2
-a(n) = Sum_{j=1...n-1} j*n^(n-1-j).
-...
+unfold "≥".
+etransitivity; [ | apply fold_right_max_ge ].
+apply Nat.le_max_l.
+Qed.
 
 Theorem bs_ge_s : ∀ n f, block_sensitivity n f ≥ sensitivity n f.
 Proof.
 intros.
+Inspect 1.
+...
 unfold block_sensitivity, sensitivity.
 rewrite map_loc_sens.
 unfold local_block_sensitivity.
@@ -2420,64 +2411,6 @@ unfold dispatch.
 Print loc_bl_sens_list.
 ...
 unfold local_block_sensitivity, local_sensitivity.
-...
-
-(* chais pas si c'est vrai, ça, mais si ça l'est, ça implique le
-   truc ci-dessus *)
-Theorem x_bs_ge_s : ∀ n f x,
-  local_block_sensitivity n f x ≥ local_sensitivity n f x.
-Proof.
-intros.
-rewrite loc_length_loc_bl_sens_list.
-unfold local_block_sensitivity.
-(* among all partitions, there must exist one which is exactly
-    [[0]; [1]; [2]; ... ; [n-1]]
-   I believe it is this one which corresponds to local_sensitivity *)
-assert (H : map (λ i, [i]) (seq 0 n) ∈ pre_partitions n). {
-  unfold pre_partitions.
-  assert (H1 : is_partition n (map (λ i, [i]) (seq 0 n))). {
-    split. {
-      rewrite map_length.
-      now rewrite seq_length.
-    }
-    split. {
-      intros s Hs i Hi.
-      apply in_map_iff in Hs.
-      destruct Hs as (j & Hjn & Hjs); subst s.
-      apply in_seq in Hjs.
-      destruct Hi as [Hi| ]; [ now subst j | easy ].
-    }
-    split. {
-      intros j Hjn.
-      exists [j].
-      split; [ | now left ].
-      apply in_map_iff.
-      exists j.
-      split; [ easy | ].
-      apply in_seq.
-      split; [ | easy ].
-      flia.
-    } {
-      clear x.
-      remember 0 as s; clear Heqs.
-      revert s.
-      induction n; intros s; [ constructor | cbn ].
-      constructor; [ | apply IHn ].
-      intros H.
-      rewrite <- flat_map_concat_map in H.
-      apply in_flat_map in H.
-      destruct H as (x & Hx & Hsx).
-      apply in_seq in Hx.
-      destruct Hsx as [Hsx| ]; [ | easy ].
-      subst x; flia Hx.
-    }
-  }
-...
-  now is_partition_iff (proj1 (H2 _) H1) as H3.
-}
-*)
-  idtac.
-Compute (nth 27 (pre_partitions 4) []).
 ...
 1→0 = 0 radix 1
 2→1 = 01 radix 2
