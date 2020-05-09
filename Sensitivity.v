@@ -2351,7 +2351,7 @@ rewrite fold_right_app; cbn.
 (*
 Compute (let n := 4 in let j := fold_left (λ a i : nat, a * n + i) (seq 0 n) 0 in nth j (pre_partitions n) []).
 *)
-assert (nth j ll [] = map (λ i, [i]) (seq 0 n)). {
+assert (Hjll : nth j ll [] = map (λ i, [i]) (seq 0 n)). {
   rewrite Hll.
   unfold pre_partitions.
   assert (Hjnn : j < n ^ n). {
@@ -2387,17 +2387,12 @@ assert (nth j ll [] = map (λ i, [i]) (seq 0 n)). {
   intros j Hj.
   apply Bool.not_true_iff_false; intros Haj.
   apply Nat.eqb_eq in Haj; subst j.
-  clear - Hj.
-...
-  induction n; cbn in Hj. {
-    now rewrite skipn_nil in Hj.
-  }
-  apply IHn.
-  destruct n. {
-    rewrite Nat.add_1_r in Hj; cbn in Hj.
-    now rewrite skipn_nil in Hj.
-  }
-  cbn.
+  rewrite List_skipn_seq in Hj; [ | flia Ha ].
+  cbn in Hj.
+  apply in_seq in Hj; flia Hj.
+}
+rewrite Hjll.
+rewrite <- loc_length_loc_bl_sens_list.
 ...
 Compute map (λ i, [i]) (seq 0 7).
 ...
