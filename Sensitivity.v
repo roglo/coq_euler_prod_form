@@ -2283,6 +2283,36 @@ replace n with (length l). 2: {
 apply firstn_all.
 Qed.
 
+Theorem fold_left_mul_seq_lt : ∀ n,
+  fold_left (λ a i, a * n + i) (seq 0 n) 0 < n ^ n.
+Proof.
+intros.
+destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ subst n; cbn; flia | ].
+rewrite Nat_pow_from_sum. 2: {
+  intros H; apply Hnz.
+  apply Nat.eq_mul_0 in H.
+  now destruct H.
+}
+rewrite Nat.add_1_r.
+apply Nat.lt_succ_r.
+rewrite mul_summation_distr_l.
+cbn - [ seq ].
+specialize (horner_is_eval_polyn (n - 1)) as H2.
+specialize (H2 (λ i, n - 1 - i) n).
+cbn - [ "-" fold_left seq ] in H2.
+rewrite List_fold_left_ext_in with (g := λ acc i, acc * n + i) in H2. 2: {
+  intros acc i Hacc.
+  apply in_seq in Hacc.
+  flia Hacc.
+}
+replace (S (n - 1)) with n in H2 at 1 by flia Hnz.
+replace (S (n - 1)) with (S (n - 1) - 0) by flia Hnz.
+rewrite H2.
+apply summation_le_compat.
+intros i Hi.
+apply Nat.mul_le_mono_r; flia.
+Qed.
+
 Theorem x_bs_ge_s : ∀ n f x,
   local_block_sensitivity n f x ≥ local_sensitivity n f x.
 Proof.
@@ -2303,30 +2333,7 @@ assert (H : j < length ll). {
     now apply in_seq in Ha.
   }
   rewrite dispatch_list_length, seq_length.
-  destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ subst n; cbn; flia | ].
-  rewrite Nat_pow_from_sum. 2: {
-    intros H; apply Hnz.
-    apply Nat.eq_mul_0 in H.
-    now destruct H.
-  }
-  rewrite Nat.add_1_r.
-  apply Nat.lt_succ_r.
-  rewrite mul_summation_distr_l.
-  cbn - [ seq ].
-  specialize (horner_is_eval_polyn (n - 1)) as H2.
-  specialize (H2 (λ i, n - 1 - i) n).
-  cbn - [ "-" fold_left seq ] in H2.
-  rewrite List_fold_left_ext_in with (g := λ acc i, acc * n + i) in H2. 2: {
-    intros acc i Hacc.
-    apply in_seq in Hacc.
-    flia Hacc.
-  }
-  replace (S (n - 1)) with n in H2 at 1 by flia Hnz.
-  replace (S (n - 1)) with (S (n - 1) - 0) by flia Hnz.
-  rewrite H2.
-  apply summation_le_compat.
-  intros i Hi.
-  apply Nat.mul_le_mono_r; flia.
+  apply fold_left_mul_seq_lt.
 }
 specialize (H1 H); clear H.
 destruct H1 as (l1 & l2 & Hll12 & Hl1).
@@ -2349,9 +2356,7 @@ assert (nth j ll [] = map (λ i, [i]) (seq 0 n)). {
   unfold pre_partitions.
   assert (Hjnn : j < n ^ n). {
     rewrite Hj.
-Search (fold_left _ _ _ < _).
-...
-... suite ok
+    apply fold_left_mul_seq_lt.
   }
   rewrite (List_map_nth_in _ 0) by now rewrite seq_length.
   rewrite seq_nth; [ cbn | easy ].
