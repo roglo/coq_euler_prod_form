@@ -2399,7 +2399,7 @@ split.
  }
  (* now we must prove that the multiplication can be done by
     associating pairs of (a, b) in interval [2, n-2] such that
-    a * b ≡ 1 (mod n). We not by Fermat's little theorem that
+    a * b ≡ 1 (mod n). We know by Fermat's little theorem that
     a * a^(n-2) indeed equals 1 mod n. So b=a^(n-2) mod n. All
     these pairs are supposed to cover [2, n-2] *)
  now apply eq_fold_left_mul_seq_2_prime_sub_3_1.
