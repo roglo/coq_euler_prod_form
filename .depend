@@ -2,10 +2,12 @@ Formula.vio: Formula.v Misc.vio Primes.vio
 Formula.vo Formula.glob Formula.v.beautified Formula.required_vo: Formula.v Misc.vo Primes.vo
 FourSquareEuler.vio: FourSquareEuler.v 
 FourSquareEuler.vo FourSquareEuler.glob FourSquareEuler.v.beautified FourSquareEuler.required_vo: FourSquareEuler.v 
-FourSquareLag.vio: FourSquareLag.v Misc.vio Primes.vio FourSquareEuler.vio
-FourSquareLag.vo FourSquareLag.glob FourSquareLag.v.beautified FourSquareLag.required_vo: FourSquareLag.v Misc.vo Primes.vo FourSquareEuler.vo
+FourSquareLag.vio: FourSquareLag.v Misc.vio Primes.vio FourSquareEuler.vio Pigeonhole.vio
+FourSquareLag.vo FourSquareLag.glob FourSquareLag.v.beautified FourSquareLag.required_vo: FourSquareLag.v Misc.vo Primes.vo FourSquareEuler.vo Pigeonhole.vo
 Misc.vio: Misc.v 
 Misc.vo Misc.glob Misc.v.beautified Misc.required_vo: Misc.v 
+Pigeonhole.vio: Pigeonhole.v Misc.vio
+Pigeonhole.vo Pigeonhole.glob Pigeonhole.v.beautified Pigeonhole.required_vo: Pigeonhole.v Misc.vo
 Primes.vio: Primes.v Misc.vio
 Primes.vo Primes.glob Primes.v.beautified Primes.required_vo: Primes.v Misc.vo
 Primisc.vio: Primisc.v Misc.vio Primes.vio Totient.vio QuadRes.vio Ring2.vio Rpolynomial2.vio Rsummation.vio
@@ -18,7 +20,7 @@ Rpolynomial2.vio: Rpolynomial2.v Misc.vio Ring2.vio Rsummation.vio
 Rpolynomial2.vo Rpolynomial2.glob Rpolynomial2.v.beautified Rpolynomial2.required_vo: Rpolynomial2.v Misc.vo Ring2.vo Rsummation.vo
 Rsummation.vio: Rsummation.v Misc.vio Ring2.vio
 Rsummation.vo Rsummation.glob Rsummation.v.beautified Rsummation.required_vo: Rsummation.v Misc.vo Ring2.vo
-Sensitivity.vio: Sensitivity.v Misc.vio
-Sensitivity.vo Sensitivity.glob Sensitivity.v.beautified Sensitivity.required_vo: Sensitivity.v Misc.vo
+Sensitivity.vio: Sensitivity.v 
+Sensitivity.vo Sensitivity.glob Sensitivity.v.beautified Sensitivity.required_vo: Sensitivity.v 
 Totient.vio: Totient.v Misc.vio Primes.vio
 Totient.vo Totient.glob Totient.v.beautified Totient.required_vo: Totient.v Misc.vo Primes.vo
