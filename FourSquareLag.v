@@ -399,7 +399,7 @@ set
 remember (pigeonhole_fun (p + 1) f) as xx eqn:Hxx.
 symmetry in Hxx.
 destruct xx as (x, x').
-specialize (pigeonhole (p + 1) p f x x') as H1.
+specialize (pigeonhole (p + 1) p f) as H1.
 assert (H : p < p + 1) by flia.
 specialize (H1 H); clear H.
 assert (H : ∀ x, x < p + 1 → f x < p). {
@@ -407,7 +407,7 @@ assert (H : ∀ x, x < p + 1 → f x < p). {
   unfold f; cbn - [ "/" ].
   destruct (le_dec x1 u); now apply Nat.mod_upper_bound.
 }
-specialize (H1 H Hxx); clear H.
+specialize (H1 H x x' Hxx); clear H.
 destruct H1 as (Hxp & Hx'p & Hxx' & Hfxx).
 unfold f in Hfxx.
 destruct (le_dec x u) as [Hxu| Hxu]. {

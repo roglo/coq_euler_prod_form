@@ -88,13 +88,13 @@ constructor. {
 }
 Qed.
 
-Theorem pigeonhole : ∀ a b f x x',
+Theorem pigeonhole : ∀ a b f,
   b < a
   → (∀ x, x < a → f x < b)
-  → pigeonhole_fun a f = (x, x')
+  → ∀ x x', pigeonhole_fun a f = (x, x')
   → x < a ∧ x' < a ∧ x ≠ x' ∧ f x = f x'.
 Proof.
-intros * Hba Hf Hpf.
+intros * Hba Hf * Hpf.
 unfold pigeonhole_fun in Hpf.
 remember (find_dup _) as fd eqn:Hfd.
 symmetry in Hfd.
