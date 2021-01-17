@@ -301,3 +301,16 @@ destruct fd as [(n, n') |]. {
   now apply H2.
 }
 Qed.
+
+Theorem pigeonhole_exist : ∀ a b f,
+  b < a
+  → (∀ x, x < a → f x < b)
+  → ∃ x x', x < a ∧ x' < a ∧ x ≠ x' ∧ f x = f x'.
+Proof.
+intros * Hba Hf.
+remember (pigeonhole_fun a f) as xx' eqn:Hpf.
+symmetry in Hpf.
+destruct xx' as (x, x').
+exists x, x'.
+now apply (pigeonhole a b).
+Qed.
