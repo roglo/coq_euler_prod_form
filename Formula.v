@@ -458,7 +458,7 @@ Qed.
       (s1 * s2)%LS
    changing it into
       (s3 * s4)%LS *)
-Instance ls_mul_morph {F : field} :
+Local Instance ls_mul_morph {F : field} :
   Proper (ls_eq ==> ls_eq ==> ls_eq) ls_mul.
 Proof.
 intros s1 s2 Hs12 s'1 s'2 Hs'12 n Hn.
@@ -1932,7 +1932,11 @@ destruct m. {
 }
 remember ((a1 * i) mod a) as n eqn:Hn; symmetry in Hn.
 destruct n. {
-  destruct a; [ easy | ].
+  destruct a. {
+    cbn in Hm, Hn; subst i.
+    apply Nat.mul_eq_0_l in Hn; [ subst a1 | easy ].
+    now specialize (Hgcd 0 1 (Nat.neq_0_succ _)) as H1.
+  }
   apply Nat.mod_divide in Hn; [ | easy ].
   specialize (Nat.gauss (S a) a1 i Hn) as H1.
   enough (H : Nat.gcd (S a) a1 = 1). {

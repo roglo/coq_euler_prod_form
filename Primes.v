@@ -1921,7 +1921,9 @@ Theorem fold_left_mul_map_mod : ∀ a b l,
   fold_left Nat.mul l b mod a.
 Proof.
 intros.
-destruct (Nat.eq_dec a 0) as [Haz| Haz]; [ now subst a | ].
+destruct (Nat.eq_dec a 0) as [Haz| Haz]. {
+  now subst a; rewrite map_id.
+}
 induction l as [| c l]; [ easy | cbn ].
 rewrite <- List_fold_left_mul_assoc.
 rewrite Nat.mul_mod_idemp_r; [ | easy ].
