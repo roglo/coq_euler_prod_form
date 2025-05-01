@@ -1192,8 +1192,8 @@ assert (Hl1s : Sorted.Sorted lt_triplet l1). {
 assert (Hll : length l1 = length l2). {
   rewrite mul_assoc_indices_eq in Hl1.
   subst l1 l2.
-  rewrite map_length.
-  do 2 rewrite List_flat_map_length.
+  rewrite length_map.
+  do 2 rewrite List_flat_length_map.
   do 2 rewrite map_rev.
   rewrite map_map.
   remember (map _ (divisors n)) as l eqn:Hl; clear.
@@ -1419,7 +1419,7 @@ specialize (List_last_seq 1 n Hn) as H1.
 replace (1 + n - 1) with n in H1 by flia.
 specialize (proj2 (filter_In (λ a, n mod a =? 0) n (seq 1 n))) as H2.
 rewrite Hl in H2.
-rewrite Nat.mod_same in H2; [ | easy ].
+rewrite Nat.Div0.mod_same in H2.
 cbn in H2.
 assert (H3 : n ∈ seq 1 n). {
   rewrite <- H1 at 1.
@@ -1433,7 +1433,7 @@ specialize (app_removelast_last 0 H) as H4; clear H.
 rewrite H1 in H4.
 assert (H : seq 1 n ≠ []); [ now intros H; rewrite H in H3 | ].
 rewrite H4, filter_app in Hl; cbn in Hl.
-rewrite Nat.mod_same in Hl; [ | easy ].
+rewrite Nat.Div0.mod_same in Hl.
 cbn in Hl; rewrite <- Hl.
 apply List_last_app.
 Qed.
@@ -1598,7 +1598,7 @@ destruct p. {
     move d before p; move Hd before Hn.
     assert (Hdnd : n = d * nd). {
       rewrite <- Hnd.
-      apply Nat.div_exact; [ easy | ].
+      apply Nat.Div0.div_exact.
       now apply in_divisors in Hdn.
     }
     clear Hnd.
@@ -1624,7 +1624,7 @@ destruct p. {
   }
   assert (Hpd : p ∈ divisors n). {
     apply in_divisors_iff; [ easy | ].
-    now rewrite Hp, Nat.mod_mul.
+    now rewrite Hp, Nat.Div0.mod_mul.
   }
   specialize (In_nth _ _ 0 Hpd) as (k & Hkd & Hkn).
   specialize (nth_split _ 0 Hkd) as (l1 & l2 & Hll & Hl1).
@@ -1826,7 +1826,7 @@ assert (Hto : ∀ d, d ∈ divisors n → d ≠ n → t d = 0%F). {
 }
 assert (Hnd : n ∈ divisors n). {
   apply in_divisors_iff; [ easy | ].
-  now rewrite Nat.mod_same.
+  now rewrite Nat.Div0.mod_same.
 }
 specialize (NoDup_divisors n) as Hndd.
 remember (divisors n) as l eqn:Hl; symmetry in Hl.
@@ -1928,7 +1928,7 @@ destruct m. {
   apply Nat.Div0.mod_divides in Hm.
   destruct Hm as (m, Hm).
   rewrite Hm, Nat.mul_comm, <- Nat.mul_assoc, Nat.mul_comm.
-  now rewrite Nat.mod_mul.
+  now rewrite Nat.Div0.mod_mul.
 }
 remember ((a1 * i) mod a) as n eqn:Hn; symmetry in Hn.
 destruct n. {
@@ -1937,11 +1937,11 @@ destruct n. {
     apply Nat.mul_eq_0_l in Hn; [ subst a1 | easy ].
     now specialize (Hgcd 0 1 (Nat.neq_0_succ _)) as H1.
   }
-  apply Nat.mod_divide in Hn; [ | easy ].
+  apply Nat.Lcm0.mod_divide in Hn.
   specialize (Nat.gauss (S a) a1 i Hn) as H1.
   enough (H : Nat.gcd (S a) a1 = 1). {
     specialize (H1 H); clear H.
-    apply Nat.mod_divide in H1; [ | easy ].
+    apply Nat.Lcm0.mod_divide in H1.
     now rewrite Hm in H1.
   }
   specialize (Hgcd 0 1 (Nat.neq_0_succ _)) as H2.
@@ -2079,7 +2079,7 @@ assert (Hdn : d ∈ primes_upto n). {
   split; [ | easy ].
   apply in_seq.
   assert (Hdz : d ≠ 0); [ now intros H; rewrite H in Hd | ].
-  apply Nat.mod_divide in Hdi; [ | easy ].
+  apply Nat.Lcm0.mod_divide in Hdi.
   apply Nat.Div0.mod_divides in Hdi.
   destruct Hdi as (c, Hc).
   split. {
@@ -2091,7 +2091,7 @@ assert (Hdn : d ∈ primes_upto n). {
   rewrite Nat.mul_succ_r; flia.
 }
 assert (Hdz : d ≠ 0); [ now intros H; rewrite H in Hd | ].
-apply Nat.mod_divide in Hdi; [ | easy ].
+apply Nat.Lcm0.mod_divide in Hdi.
 apply Nat.Div0.mod_divides in Hdi.
 destruct Hdi as (c, Hc).
 subst i.
@@ -2100,7 +2100,7 @@ clear n Hin Heql.
 induction l as [| a l]; [ easy | ].
 destruct Hdn as [Hdn| Hdn]. {
   subst a; cbn.
-  now rewrite Nat.mul_comm, Nat.mod_mul.
+  now rewrite Nat.mul_comm, Nat.Div0.mod_mul.
 }
 cbn.
 destruct ((d * c) mod a); [ easy | ].
