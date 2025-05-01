@@ -2,8 +2,8 @@
 (* https://en.wikipedia.org/wiki/Proof_of_the_Euler_product_formula_for_the_Riemann_zeta_function *)
 
 Set Nested Proofs Allowed.
-Require Import Utf8 Arith Psatz Setoid Morphisms.
-Require Import Sorting.Permutation SetoidList.
+From Stdlib Require Import Utf8 Arith Psatz Setoid Morphisms.
+From Stdlib Require Import Sorting.Permutation SetoidList.
 Import List List.ListNotations.
 Require Import Misc Primes.
 
@@ -290,14 +290,14 @@ Delimit Scope ls_scope with LS.
 Declare Scope lp_scope.
 Delimit Scope lp_scope with LP.
 
-Arguments ls {_} _%LS _%nat.
+Arguments ls {_} _%_LS _%_nat.
 Arguments lp {_}.
 
 (* Equality between series; since these series start with 1, the
    comparison is only on natural indices different from 0 *)
 
 Definition ls_eq {F : field} s1 s2 := ∀ n, n ≠ 0 → ls s1 n = ls s2 n.
-Arguments ls_eq _ s1%LS s2%LS.
+Arguments ls_eq _ s1%_LS s2%_LS.
 
 (* which is an equivalence relation *)
 

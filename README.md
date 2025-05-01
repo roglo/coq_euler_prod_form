@@ -14,6 +14,8 @@ that proof:
 # AUTHOR
 Daniel de Rauglaudre
 
-# COQ VERSION
-  The Coq Proof Assistant, version 8.14+alpha
-  compiled with OCaml 4.12.0
+# ROCQ VERSION
+```
+The Rocq Prover, version 9.0.0
+compiled with OCaml 4.14.1
+```

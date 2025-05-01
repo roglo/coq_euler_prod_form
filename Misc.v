@@ -1,7 +1,7 @@
 (* Theorems of general usage, which could be (or not) in Coq library *)
 
 Set Nested Proofs Allowed.
-Require Import Utf8 Arith Psatz Sorted Permutation Decidable.
+From Stdlib Require Import Utf8 Arith Psatz Sorted Permutation Decidable.
 Import List List.ListNotations.
 
 (* "fast" lia, to improve compilation speed *)
@@ -365,9 +365,9 @@ revert b Hm.
 induction m; intros; [ easy | cbn ].
 rewrite (fold_left_add_fun_from_0 (f b)).
 rewrite (fold_left_add_fun_from_0 (f b mod n)).
-rewrite Nat.add_mod_idemp_l; [ | easy ].
-rewrite <- Nat.add_mod_idemp_r; [ symmetry | easy ].
-rewrite <- Nat.add_mod_idemp_r; [ symmetry | easy ].
+rewrite Nat.Div0.add_mod_idemp_l.
+rewrite <- Nat.Div0.add_mod_idemp_r; symmetry.
+rewrite <- Nat.Div0.add_mod_idemp_r; symmetry.
 f_equal; f_equal.
 apply IHm; flia Hm.
 Qed.
@@ -469,7 +469,7 @@ rewrite H1, H2, Hab.
 rewrite (Nat.add_comm (c * (b / c))).
 rewrite Nat.sub_add_distr, Nat.add_sub.
 rewrite <- Nat.mul_sub_distr_l, Nat.mul_comm.
-now apply Nat.mod_mul.
+apply Nat.Div0.mod_mul.
 Qed.
 
 Theorem Nat_mod_add_r_mul_l : ∀ a b c,
@@ -477,7 +477,7 @@ Theorem Nat_mod_add_r_mul_l : ∀ a b c,
 Proof.
 intros * Hbz.
 rewrite Nat.mul_comm.
-now apply Nat.mod_add.
+apply Nat.Div0.mod_add.
 Qed.
 
 Theorem Nat_mod_add_l_mul_l : ∀ a b c,
@@ -485,7 +485,7 @@ Theorem Nat_mod_add_l_mul_l : ∀ a b c,
 Proof.
 intros * Hbz.
 rewrite Nat.add_comm, Nat.mul_comm.
-now apply Nat.mod_add.
+apply Nat.Div0.mod_add.
 Qed.
 
 Theorem Nat_mod_add_l_mul_r : ∀ a b c,
@@ -493,7 +493,7 @@ Theorem Nat_mod_add_l_mul_r : ∀ a b c,
 Proof.
 intros * Hbz.
 rewrite Nat.add_comm.
-now apply Nat.mod_add.
+apply Nat.Div0.mod_add.
 Qed.
 
 Theorem Nat_mod_0_mod_div : ∀ a b,
@@ -531,8 +531,8 @@ rewrite Nat.add_0_r in H1.
 apply (Nat.mul_cancel_l _ _ (a / b)); [ easy | ].
 rewrite <- H1; symmetry.
 rewrite Nat.mul_comm.
-apply Nat.mod_divide in Ha; [ | easy ].
-rewrite <- Nat.divide_div_mul_exact; [ | easy | easy ].
+apply Nat.Lcm0.mod_divide in Ha.
+rewrite <- Nat.Lcm0.divide_div_mul_exact; [ | easy ].
 now rewrite Nat.mul_comm, Nat.div_mul.
 Qed.
 
@@ -722,6 +722,12 @@ exists (uc * vc * c + uc + vc).
 ring.
 Qed.
 
+Theorem Nat_gcd_1_r : ∀ a, Nat.gcd a 1 = 1.
+Proof.
+intros.
+now rewrite Nat.gcd_comm.
+Qed.
+
 Theorem Nat_gcd_le_r : ∀ a b, b ≠ 0 → Nat.gcd a b ≤ b.
 Proof.
 intros * Hbz.
@@ -794,7 +800,7 @@ intros * Hcz.
 revert a.
 induction b; intros; [ easy | ].
 cbn; rewrite IHb.
-now rewrite Nat.mul_mod_idemp_r.
+apply Nat.Div0.mul_mod_idemp_r.
 Qed.
 
 Theorem Nat_pow_sub_pow : ∀ a b n,
@@ -931,10 +937,10 @@ intros.
 destruct (Nat.eq_dec b 0) as [Hbz| Hbz]; [ now subst b | ].
 revert a b Hbz.
 induction c; intros; [ easy | cbn ].
-rewrite Nat.mul_mod_idemp_l; [ | easy ].
-rewrite <- Nat.mul_mod_idemp_r; [ | easy ].
+rewrite Nat.Div0.mul_mod_idemp_l.
+rewrite <- Nat.Div0.mul_mod_idemp_r.
 rewrite IHc; [ | easy ].
-now rewrite Nat.mul_mod_idemp_r.
+now rewrite Nat.Div0.mul_mod_idemp_r.
 Qed.
 
 Notation "a ≡ b 'mod' c" := (a mod c = b mod c) (at level 70, b at level 36).
@@ -953,25 +959,25 @@ destruct (Nat.eq_dec n 0) as [Hnz| Hnz]. {
 destruct (le_dec b a) as [Hba| Hba]. {
   apply Nat_eq_mod_sub_0 in Hab.
   rewrite <- Nat.mul_sub_distr_r in Hab.
-  apply Nat.mod_divide in Hab; [ | easy ].
+  apply Nat.Lcm0.mod_divide in Hab.
   rewrite Nat.gcd_comm in Hg.
   rewrite Nat.mul_comm in Hab.
   specialize (Nat.gauss n c (a - b) Hab Hg) as H1.
   destruct H1 as (k, Hk).
   replace a with (b + k * n) by flia Hba Hk.
-  now rewrite Nat.mod_add.
+  now rewrite Nat.Div0.mod_add.
 } {
   apply Nat.nle_gt in Hba.
   symmetry in Hab.
   apply Nat_eq_mod_sub_0 in Hab.
   rewrite <- Nat.mul_sub_distr_r in Hab.
-  apply Nat.mod_divide in Hab; [ | easy ].
+  apply Nat.Lcm0.mod_divide in Hab.
   rewrite Nat.gcd_comm in Hg.
   rewrite Nat.mul_comm in Hab.
   specialize (Nat.gauss n c (b - a) Hab Hg) as H1.
   destruct H1 as (k, Hk).
   replace b with (a + k * n) by flia Hba Hk.
-  now rewrite Nat.mod_add.
+  now rewrite Nat.Div0.mod_add.
 }
 Qed.
 
@@ -1010,7 +1016,7 @@ Theorem List_flat_map_length {A B} : ∀ (l : list A) (f : _ → list B),
 Proof.
 intros.
 induction l as [| a l]; [ easy | cbn ].
-now rewrite app_length, IHl.
+now rewrite length_app, IHl.
 Qed.
 
 Theorem List_last_seq : ∀ i n, n ≠ 0 → last (seq i n) 0 = i + n - 1.

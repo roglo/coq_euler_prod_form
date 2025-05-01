@@ -1,7 +1,7 @@
 (* Prime numbers *)
 
 Set Nested Proofs Allowed.
-Require Import Utf8 Arith SetoidList Permutation.
+From Stdlib Require Import Utf8 Arith SetoidList Permutation.
 Require Import Misc.
 Import List ListNotations.
 
@@ -39,7 +39,7 @@ split.
  remember (n mod k) as m eqn:Hm; symmetry in Hm.
  destruct m. {
    destruct k; [ easy | ].
-   apply Nat.mod_divides in Hm; [ | easy ].
+   apply Nat.Div0.mod_divides in Hm.
    destruct Hm as (m, Hm).
    destruct m; [ now rewrite Hm, Nat.mul_0_r in Hcnt | ].
    destruct k; [ flia Hk | ].
@@ -78,7 +78,7 @@ split.
    }
    specialize (H1 H).
    exfalso; apply H1; rewrite Hnab, Nat.mul_comm.
-   apply Nat.mod_mul; flia H.
+   apply Nat.Div0.mod_mul.
  }
  cbn.
  remember (n mod k) as m eqn:Hm; symmetry in Hm.
@@ -236,8 +236,8 @@ destruct (zerop a) as [Ha| Ha]. {
   apply Nat.divide_0_l in Hap; flia Hap Hp2.
 }
 apply Nat.neq_0_lt_0 in Ha.
-apply Nat.mod_divide in Hap; [ | easy ].
-apply Nat.mod_divides in Hap; [ | easy ].
+apply Nat.Lcm0.mod_divide in Hap.
+apply Nat.Div0.mod_divides in Hap.
 destruct Hap as (k, Hk).
 symmetry in Hk.
 destruct p; [ easy | ].
@@ -255,7 +255,7 @@ assert (H : 2 ≤ S (S k) < S (S p)). {
 }
 specialize (H2 H); clear H.
 apply H2; rewrite <- Hk.
-now rewrite Nat.mod_mul.
+now rewrite Nat.Div0.mod_mul.
 Qed.
 
 Theorem prime_prop : ∀ p, prime p → ∀ i, 2 ≤ i ≤ p - 1 → ¬ Nat.divide i p.
@@ -306,7 +306,7 @@ replace (S (S n) - 2) with n in Hpn by flia.
 revert k Hpn.
 induction n; intros. {
   cbn - [ "/" "mod" ].
-  rewrite Nat.mod_same; [ | flia ].
+  rewrite Nat.Div0.mod_same.
   rewrite Nat.div_same; [ | flia ].
   rewrite Nat.mod_1_l; [ easy | flia ].
 }
@@ -351,7 +351,7 @@ intros * Hdd.
 revert n d d' Hdd.
 induction cnt; intros; [ constructor | cbn ].
 destruct (n mod d') as [| Hnd]; [ now constructor | ].
-apply IHcnt, (le_trans _ d'); [ easy | ].
+apply IHcnt, (Nat.le_trans _ d'); [ easy | ].
 apply Nat.le_succ_diag_r.
 Qed.
 
@@ -432,9 +432,9 @@ induction cnt; intros; [ easy | ].
 cbn in Hp.
 remember (n mod d) as b eqn:Hb; symmetry in Hb.
 destruct b. {
-  destruct Hp as [Hp| Hp]; [ now subst d; apply Nat.mod_divide | ].
+  destruct Hp as [Hp| Hp]; [ now subst d; apply Nat.Lcm0.mod_divide | ].
   apply (Nat.divide_trans _ (n / d)). 2: {
-    apply Nat.mod_divides in Hb; [ | easy ].
+    apply Nat.Div0.mod_divides in Hb.
     destruct Hb as (c, Hc).
     rewrite Hc, Nat.mul_comm, Nat.div_mul; [ | easy ].
     apply Nat.divide_factor_l.
@@ -500,7 +500,7 @@ cbn - [ "/" "mod" ].
 remember (n mod d) as b eqn:Hb; symmetry in Hb.
 destruct b. {
   f_equal.
-  apply Nat.mod_divides in Hb; [ | flia H2d ].
+  apply Nat.Div0.mod_divides in Hb.
   destruct Hb as (b, Hb); rewrite Nat.mul_comm in Hb.
   rewrite Hb, Nat.div_mul; [ | flia H2d ].
   destruct (le_dec 2 b) as [H2b| H2b]. {
@@ -570,7 +570,7 @@ induction cnt; intros; [ easy | cbn ].
 remember (n mod d) as b1 eqn:Hb1; symmetry in Hb1.
 destruct b1. {
   apply Nat.leb_le.
-  apply Nat.mod_divides in Hb1; [ | flia H2d ].
+  apply Nat.Div0.mod_divides in Hb1.
   destruct Hb1 as (b1, Hb1).
   destruct b1; [ flia H2d Hb1 | ].
   destruct b1; [ flia Hb1 | ].
@@ -584,7 +584,7 @@ destruct b1. {
   specialize (H1 H).
   exfalso; apply H1; clear H1.
   rewrite Hb1.
-  now apply Nat.mod_mul.
+  now apply Nat.Div0.mod_mul.
 }
 apply IHcnt; [ easy | flia H2d | flia Hcnt | easy ].
 Qed.
@@ -604,7 +604,7 @@ cbn - [ "/" "mod" ] in Hb.
 remember (n mod d) as b1 eqn:Hb1; symmetry in Hb1.
 destruct b1. {
   cbn in Hb; subst b.
-  apply Nat.mod_divides in Hb1; [ | flia H2d ].
+  apply Nat.Div0.mod_divides in Hb1.
   destruct Hb1 as (b1, Hb1).
   destruct b1; [ flia H2n Hb1 | ].
   destruct b1. {
@@ -615,10 +615,10 @@ destruct b1. {
   intros e He.
   specialize (Hnd e He) as H1.
   intros H2; apply H1; clear H1.
-  apply Nat.mod_divides in H2; [ | flia He ].
+  apply Nat.Div0.mod_divides in H2.
   destruct H2 as (b2, Hb2); rewrite Nat.mul_comm in Hb2.
   rewrite Hb1, Hb2, Nat.mul_shuffle0.
-  apply Nat.mod_mul; flia He.
+  apply Nat.Div0.mod_mul; flia He.
 }
 assert (H : ∀ e, 2 ≤ e < 1 + d → n mod e ≠ 0). {
   intros e He.
@@ -642,7 +642,7 @@ destruct n; [ easy | ].
 assert (H2n : 2 ≤ S (S n)) by flia.
 remember (S (S n)) as n'.
 clear n Heqn'; rename n' into n.
-specialize (hd_prime_decomp_aux_ge n n 2 (le_refl _)) as H2b.
+specialize (hd_prime_decomp_aux_ge n n 2 (Nat.le_refl _)) as H2b.
 unfold prime, is_prime.
 remember (hd 2 (prime_decomp_aux n n 2)) as b eqn:Hb.
 move b before n; move H2b before H2n.
@@ -665,7 +665,7 @@ revert d H2d Hcnt Hnd.
 induction cnt; intros. {
   assert (H : 2 ≤ n < d) by flia H2n Hcnt.
   specialize (Hnd n H); clear H.
-  rewrite Nat.mod_same in Hnd; [ easy | flia H2n ].
+  now rewrite Nat.Div0.mod_same in Hnd.
 }
 cbn - [ "/" "mod" ].
 remember (n mod d) as b eqn:Hb; symmetry in Hb.
@@ -758,11 +758,11 @@ rewrite (prime_decomp_aux_more_iter 1); try easy.
 rewrite Nat.add_1_r; cbn.
 remember (n mod d) as b2 eqn:Hb2; symmetry in Hb2.
 destruct b2. {
-  apply Nat.mod_divides in Hb2; [ | flia H2d ].
+  apply Nat.Div0.mod_divides in Hb2.
   destruct Hb2 as (b2, Hb2).
   rewrite <- Hb, Hb2 in Hb1.
   rewrite <- Nat.mul_assoc, Nat.mul_comm in Hb1.
-  rewrite Nat.mod_mul in Hb1; [ easy | flia H2d ].
+  now rewrite Nat.Div0.mod_mul in Hb1.
 }
 rewrite Nat.add_succ_comm in Hcb.
 apply (IHcb p b); try easy; [ flia H2d | flia Hcn ].
@@ -979,12 +979,12 @@ assert (prime_divisor_in_decomp_aux : ∀ cnt n d p,
     apply IHcnt; [ easy | flia H2d | | flia Hcnt | easy | easy ].
     destruct (Nat.eq_dec p d) as [Hpd| Hpd]; [ | flia Hdp Hpd ].
     subst d; exfalso.
-    apply Nat.mod_divide in Hpn; [ | easy ].
+    apply Nat.Lcm0.mod_divide in Hpn.
     now rewrite Hpn in Hb.
   }
   destruct (Nat.eq_dec p d) as [Hpd| Hpd]; [ now left | right ].
   apply IHcnt; [ | easy | easy | | easy | ]. {
-    apply Nat.mod_divide in Hb; [ | easy ].
+    apply Nat.Lcm0.mod_divide in Hb.
     destruct Hb as (k, Hk).
     rewrite Hk, Nat.div_mul; [ | easy ].
     destruct k; [ flia H2n Hk | ].
@@ -998,7 +998,7 @@ assert (prime_divisor_in_decomp_aux : ∀ cnt n d p,
     destruct p; [ now rewrite Nat.mul_0_r in Hk | flia ].
   } {
     transitivity (n + 1); [ | flia Hcnt ].
-    apply Nat.mod_divide in Hb; [ | easy ].
+    apply Nat.Lcm0.mod_divide in Hb.
     destruct Hb as (k, Hk).
     rewrite Hk.
     rewrite Nat.div_mul; [ | easy ].
@@ -1006,7 +1006,7 @@ assert (prime_divisor_in_decomp_aux : ∀ cnt n d p,
     destruct d; [ flia H2d | ].
     destruct k; [ flia H2n Hk | flia ].
   }
-  apply Nat.mod_divide in Hb; [ | easy ].
+  apply Nat.Lcm0.mod_divide in Hb.
   destruct Hpn as (k, Hk).
   rewrite Hk in Hb.
   rewrite Nat.mul_comm in Hb.
@@ -1058,10 +1058,10 @@ destruct (Nat.eq_dec (Nat.gcd p a) 1) as [Hpa| Hpa]. {
   right; apply H1, Hpa.
 } {
   left.
-  apply Nat.mod_divide; [ easy | ].
+  apply Nat.Lcm0.mod_divide.
   destruct (Nat.eq_dec (a mod p) 0) as [Ha| Ha]; [ easy | exfalso ].
   apply Hpa; clear Hpa.
-  rewrite <- Nat.gcd_mod; [ | easy ].
+  rewrite <- Nat.Lcm0.gcd_mod.
   rewrite Nat.gcd_comm.
   apply eq_gcd_prime_small_1; [ easy | ].
   split; [ now apply Nat.neq_0_lt_0 | ].
@@ -1104,7 +1104,7 @@ split.
  specialize (not_prime_decomp n) as H1.
  assert (H : 2 ≤ n) by flia H5n.
  specialize (H1 H Hn) as (a & b & Ha & Hb & Hab); clear H.
- apply Nat.mod_divide; [ flia H5n | ].
+ apply Nat.Lcm0.mod_divide.
  assert (Han : 0 < a ≤ n - 1). {
    rewrite Hab.
    destruct a; [ easy | ].
@@ -1164,7 +1164,7 @@ split.
   rewrite Nat.mul_comm.
   now apply Nat_divide_mul_fact.
 -intros Hn Hp.
- apply Nat.mod_divide in Hn; [ | flia H5n ].
+ apply Nat.Lcm0.mod_divide in Hn.
  specialize (prime_divides_fact_ge _ _ Hp Hn) as H1.
  flia H5n H1.
 Qed.
@@ -1452,7 +1452,7 @@ induction niter; intros. {
   destruct b; [ now replace i with n by flia Hni | ].
   apply (no_prime_before_phony_prime_after n); [ easy | ].
   split; [ easy | ].
-  eapply lt_le_trans; [ apply Hni | ].
+  eapply Nat.lt_le_trans; [ apply Hni | ].
   rewrite (phony_prime_after_more_iter (fact (n + 1) - fact n + 1) n);
     [ | easy ].
   replace (fact n + 1 + (fact (n + 1) - fact n + 1)) with
@@ -1491,7 +1491,7 @@ Theorem Nat_gcd_prime_fact_lt : ∀ p,
   prime p → ∀ k, k < p → Nat.gcd p (fact k) = 1.
 Proof.
 intros * Hp * Hkp.
-induction k; [ apply Nat.gcd_1_r | ].
+induction k; [ apply Nat_gcd_1_r | ].
 rewrite Nat_fact_succ.
 apply Nat_gcd_1_mul_r; [ | apply IHk; flia Hkp ].
 apply eq_gcd_prime_small_1; [ easy | flia Hkp ].
@@ -1614,7 +1614,7 @@ replace (prod_consec k m) with (prod_consec (k - 1) m * (k + (m - 1))). 2: {
   replace (m + k - 1) with (S (m + k - 2)) by flia H2m.
   rewrite Nat_fact_succ.
   replace (S (m + k - 2)) with (m + k - 1) by flia H2m.
-  rewrite Nat.divide_div_mul_exact; [ | apply fact_neq_0 | ]. 2: {
+  rewrite Nat.Lcm0.divide_div_mul_exact. 2: {
     apply Nat_le_divides_fact; flia H2k.
   }
   rewrite Nat.mul_comm; f_equal; flia H2m.
@@ -1664,7 +1664,7 @@ assert (H2k : 2 ≤ k) by flia H1k Hk1.
 specialize (prod_consec_rec_formula m k H2m H2k) as H1.
 assert (Hmn : m + (k - 1) < n) by flia Hn H2k.
 assert (H1k1 : 1 ≤ k - 1) by flia H2k.
-specialize (IHn (m + (k - 1)) Hmn (k - 1) m (le_refl _) H1m H1k1) as H2.
+specialize (IHn (m + (k - 1)) Hmn (k - 1) m (Nat.le_refl _) H1m H1k1) as H2.
 apply (Nat.mul_divide_mono_l _ _ k) in H2.
 replace k with (S (k - 1)) in H2 at 1 by flia H1k.
 rewrite <- Nat_fact_succ in H2.
@@ -1701,8 +1701,8 @@ apply (Nat.mul_divide_cancel_r _ _ (fact (n - k))) in H1. 2: {
 }
 eapply Nat.divide_trans; [ apply H1 | ].
 rewrite Nat.mul_comm.
-rewrite <- (proj2 (Nat.div_exact _ _ (fact_neq_0 _))). 2: {
-  apply Nat.mod_divide; [ apply fact_neq_0 | ].
+rewrite <- (proj2 (Nat.Div0.div_exact (fact _) (fact _))). 2: {
+  apply Nat.Lcm0.mod_divide.
   apply Nat_divide_fact_fact.
 }
 apply Nat.divide_refl.
@@ -1756,18 +1756,18 @@ rewrite Nat_add_div_same. 2: {
     rewrite Nat.mul_comm, Nat.div_mul; [ easy | ].
     flia Hkn.
   }
-  rewrite <- Nat.divide_div_mul_exact; [ | flia Hkn | ]. 2: {
+  rewrite <- Nat.Lcm0.divide_div_mul_exact. 2: {
     apply Nat_divide_small_fact; flia Hkn.
   }
   apply (Nat.mul_divide_cancel_l _ _ (n - k)); [ flia Hkn | ].
-  rewrite <- Nat.divide_div_mul_exact; [ | flia Hkn | ]. 2: {
+  rewrite <- Nat.Lcm0.divide_div_mul_exact. 2: {
     apply (Nat.divide_trans _ (fact (n - k))). {
       apply Nat_divide_small_fact; flia Hkn.
     }
     apply Nat.divide_factor_r.
   }
   rewrite Nat.mul_comm, Nat.div_mul; [ | flia Hkn ].
-  rewrite <- Nat.divide_div_mul_exact; [ | flia Hkn | ]. 2: {
+  rewrite <- Nat.Lcm0.divide_div_mul_exact. 2: {
     apply Nat_divide_small_fact; flia Hkn.
   }
   rewrite (Nat.mul_comm (n - k)), Nat.div_mul; [ | flia Hkn ].
@@ -1839,8 +1839,8 @@ assert (Hffz : fact k * fact (p - k) ≠ 0). {
   apply Nat.neq_mul_0; split; apply fact_neq_0.
 }
 apply (Nat.gauss _ (fact k * fact (p - k))). {
-  rewrite <- (proj2 (Nat.div_exact _ _ Hffz)). 2: {
-    apply Nat.mod_divide; [ easy | ].
+  rewrite <- (proj2 (Nat.Div0.div_exact _ _)). 2: {
+    apply Nat.Lcm0.mod_divide.
     apply fact_fact_divides_fact; flia Hkp.
   }
   apply Nat_divide_small_fact; flia Hkp.
@@ -1854,7 +1854,7 @@ revert j Hjp.
 induction k; intros. {
   rewrite Nat.mul_1_r.
   clear Hkp.
-  induction j; [ apply Nat.gcd_1_r | ].
+  induction j; [ apply Nat_gcd_1_r | ].
   rewrite Nat_fact_succ.
   apply Nat_gcd_1_mul_r. {
     apply eq_gcd_prime_small_1; [ easy | flia Hjp ].
@@ -1897,7 +1897,7 @@ specialize (binomial_prime _ _ Hp Hi) as (c, Hc).
 rewrite Hc, (Nat.mul_comm c).
 do 2 rewrite <- Nat.mul_assoc.
 rewrite Nat.mul_comm.
-apply Nat.mod_mul; flia H2p.
+apply Nat.Div0.mod_mul; flia H2p.
 Qed.
 
 Theorem smaller_than_prime_all_different_multiples : ∀ p,
@@ -1977,7 +1977,7 @@ assert
     split; [ | now apply Nat.mod_upper_bound ].
     apply Nat.neq_0_lt_0.
     intros Hi.
-    apply Nat.mod_divide in Hi; [ | easy ].
+    apply Nat.Lcm0.mod_divide in Hi.
     specialize (Nat.gauss _ _ _ Hi) as H2.
     assert (H : Nat.gcd p j = 1) by now apply eq_gcd_prime_small_1.
     specialize (H2 H); clear H.
@@ -2077,7 +2077,7 @@ Theorem pow_mod_prime_ne_0 : ∀ i n p,
 Proof.
 intros * Hp Hip Hinp.
 assert (Hpz : p ≠ 0) by now intros H; rewrite H in Hp.
-apply Nat.mod_divide in Hinp; [ | easy ].
+apply Nat.Lcm0.mod_divide in Hinp.
 induction n. {
   cbn in Hinp.
   destruct Hinp as (c, Hc).
@@ -2132,7 +2132,7 @@ split. {
   rewrite Hj in H1.
   replace 1 with (1 mod p) in H1 at 2; [ | rewrite Nat.mod_small; flia Hip ].
   apply Nat_eq_mod_sub_0 in H1.
-  apply Nat.mod_divide in H1; [ | easy ].
+  apply Nat.Lcm0.mod_divide in H1.
   destruct H1 as (c, Hc).
   rewrite Nat.mul_sub_distr_l, Nat.mul_1_r in Hc.
   rewrite <- Nat.sub_add_distr in Hc.
@@ -2170,7 +2170,7 @@ rewrite Nat.pow_add_r in H1.
 rewrite <- Nat.mul_sub_distr_l in H1.
 rewrite <- Nat.mul_mod_idemp_l in H1; [ | easy ].
 rewrite Hcon in H1.
-apply Nat.mod_divide in H1; [ | easy ].
+apply Nat.Lcm0.mod_divide in H1.
 specialize (Nat.gauss _ _ _ H1) as H2.
 assert (H : Nat.gcd p i = 1). {
   apply eq_gcd_prime_small_1; [ easy | flia Hip ].
@@ -2249,13 +2249,13 @@ assert
     apply in_seq in Hkl.
     rewrite Nat.mod_small in Hk; [ | flia Hkl ].
     rewrite Nat.mod_small in Hk; [ easy | ].
-    apply (le_lt_trans _ k); [ easy | flia Hkl ].
+    apply (Nat.le_lt_trans _ k); [ easy | flia Hkl ].
   }
   apply Nat.nle_gt in Hik.
   symmetry in Hk.
   apply Nat_eq_mod_sub_0 in Hk.
   rewrite <- Nat.mul_sub_distr_r in Hk.
-  apply Nat.mod_divide in Hk; [ | easy ].
+  apply Nat.Lcm0.mod_divide in Hk.
   specialize (Nat.gauss _ _ _ Hk) as H4.
   assert (H : Nat.gcd p (i - k) = 1). {
     apply eq_gcd_prime_small_1; [ easy | ].
@@ -2263,7 +2263,7 @@ assert
     flia Hi Hkl Hink Hik.
   }
   specialize (H4 H); clear H.
-  apply Nat.mod_divide in H4; [ | easy ].
+  apply Nat.Lcm0.mod_divide in H4.
   rewrite Nat.mod_small in H4. 2: {
     unfold inv_mod.
     rewrite Nat_pow_mod_is_pow_mod; [ | easy ].
@@ -2472,7 +2472,7 @@ destruct r. 2: {
   flia Hp2z H1.
 }
 exfalso.
-apply Nat.mod_divides in Hp2z; [ | easy ].
+apply Nat.Div0.mod_divides in Hp2z.
 destruct Hp2z as (d, Hd).
 destruct (lt_dec d 2) as [Hd2| Hd2]. {
   destruct d; [ now subst p; rewrite Nat.mul_0_r in Hp | ].

@@ -1,6 +1,6 @@
 (* Ring2.v *)
 
-Require Import Utf8.
+From Stdlib Require Import Utf8.
 
 Class ring A :=
   { rng_zero : A;
@@ -34,7 +34,7 @@ Notation "- a" := (rng_opp a) : ring_scope.
 Notation "0" := rng_zero : ring_scope.
 Notation "1" := rng_one : ring_scope.
 
-Arguments rng_eq_dec {_} {_} _%Rng _%Rng.
+Arguments rng_eq_dec {_} {_} _%_Rng _%_Rng.
 
 Fixpoint rng_power {A} {R : ring A} a n :=
   match n with

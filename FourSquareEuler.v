@@ -1,6 +1,6 @@
 (* Euler's four square identity *)
 
-Require Import Utf8 ZArith.
+From Stdlib Require Import Utf8 ZArith.
 
 Definition Z_Euler_s_four_square_sol a b c d p q r s :=
   (a * p + b * q + c * r + d * s,

@@ -2,7 +2,7 @@
 
 (* summations on a ring *)
 
-Require Import Utf8 Arith.
+From Stdlib Require Import Utf8 Arith.
 Import List.
 Require Import Misc Ring2.
 
