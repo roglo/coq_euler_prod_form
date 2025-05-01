@@ -391,8 +391,8 @@ Definition ls_of_pol {F : field} p :=
 Definition ls_pol_mul_r {F : field} s p :=
   ls_mul s (ls_of_pol p).
 
-Arguments ls_of_pol _ p%LP.
-Arguments ls_pol_mul_r _ s%LS p%LP.
+Arguments ls_of_pol _ p%_LP.
+Arguments ls_pol_mul_r _ s%_LS p%_LP.
 
 Notation "x = y" := (ls_eq x y) : ls_scope.
 Notation "x * y" := (ls_mul x y) : ls_scope.
@@ -422,7 +422,7 @@ apply filter_In.
 split; [ | now apply Nat.eqb_eq ].
 apply in_seq.
 split; [ flia Hd | ].
-apply Nat.mod_divides in Hnd; [ | easy ].
+apply Nat.Div0.mod_divides in Hnd.
 destruct Hnd as (c, Hc).
 rewrite Nat.mul_comm in Hc; rewrite Hc.
 destruct c; [ easy | ].
@@ -439,7 +439,7 @@ apply List.in_seq in Hd.
 apply Nat.eqb_eq in Hm.
 rewrite Nat_mod_0_mod_div; [ | flia Hd | easy ].
 split; [ | easy ].
-apply Nat.mod_divides in Hm; [ | flia Hd ].
+apply Nat.Div0.mod_divides in Hm.
 destruct Hm as (m, Hm).
 rewrite Hm at 1.
 apply List.in_seq.
@@ -474,7 +474,7 @@ specialize (Hd a (or_introl eq_refl)) as Ha.
 destruct Ha as (Hna, Ha).
 rewrite Hs12; [ | easy ].
 rewrite Hs'12; [ easy | ].
-apply Nat.mod_divides in Hna; [ | easy ].
+apply Nat.Div0.mod_divides in Hna.
 destruct Hna as (c, Hc).
 rewrite Hc, Nat.mul_comm, Nat.div_mul; [ | easy ].
 now intros H; rewrite Hc, H, Nat.mul_0_r in Hn.
@@ -632,7 +632,7 @@ split; intros Ha.
  split; [ | now apply divisor_inv ].
  apply Nat_mod_0_div_div; [ | easy ].
  split; [ flia Haz | ].
- apply Nat.mod_divides in Hna; [ | easy ].
+ apply Nat.Div0.mod_divides in Hna.
  destruct Hna as (c, Hc); subst n.
  destruct c; [ now rewrite Nat.mul_comm in Hn | ].
  rewrite Nat.mul_comm; cbn; flia.
@@ -687,7 +687,7 @@ rewrite <- IHl.
 -unfold log_prod_term at 2 4.
  rewrite Nat_mod_0_div_div; [ | | easy ]; cycle 1. {
    split; [ flia H2 | ].
-   apply Nat.mod_divides in H1; [ | easy ].
+   apply Nat.Div0.mod_divides in H1.
    destruct H1 as (c, Hc).
    destruct c; [ now rewrite Nat.mul_comm in Hc | ].
    rewrite Hc, Nat.mul_comm; cbn; flia.
@@ -913,7 +913,7 @@ f_equal.
 rewrite Nat_mod_0_div_div; cycle 1. {
   specialize (Hin a (or_introl eq_refl)) as (H1, H2).
   split; [ flia H2 | ].
-  apply Nat.mod_divides in H1; [ | easy ].
+  apply Nat.Div0.mod_divides in H1.
   destruct H1 as (c, Hc); rewrite Hc.
   destruct c; [ now rewrite Hc, Nat.mul_comm in Hn | ].
   rewrite Nat.mul_comm; cbn; flia.
@@ -1004,7 +1004,7 @@ assert (H1 : ∀ d1 d2 d3, d1 * d2 * d3 = n ↔ (d1, d2, d3) ∈ l1). {
      apply in_divisors_iff; [ easy | ].
      split; [ | easy ].
      rewrite <- Huvw.
-     apply Nat.mod_divides; [ easy | ].
+     apply Nat.Div0.mod_divides.
      exists (d2 * d3).
      symmetry; apply Nat.mul_assoc.
    }
@@ -1018,7 +1018,7 @@ assert (H1 : ∀ d1 d2 d3, d1 * d2 * d3 = n ↔ (d1, d2, d3) ∈ l1). {
    split; [ easy | ].
    apply in_divisors_iff; [ now apply Nat.neq_mul_0 | ].
    split; [ | easy ].
-   apply Nat.mod_divides; [ easy | ].
+   apply Nat.Div0.mod_divides.
    exists d3; apply Nat.mul_comm.
   -subst l1.
    apply List.in_flat_map in Huvw.
@@ -1029,14 +1029,14 @@ assert (H1 : ∀ d1 d2 d3, d1 * d2 * d3 = n ↔ (d1, d2, d3) ∈ l1). {
    destruct Hd as (Hnd, Hd).
    injection Hd'; clear Hd'; intros Hw Hv Hu.
    subst d1 d2 d3.
-   apply Nat.mod_divides in Hnd; [ | easy ].
+   apply Nat.Div0.mod_divides in Hnd.
    destruct Hnd as (d1, Hd1).
    rewrite Hd1, Nat.mul_comm, Nat.div_mul in Hdd; [ | easy ].
    rewrite Hd1, (Nat.mul_comm _ d1), Nat.div_mul; [ | easy ].
    assert (Hd1z : d1 ≠ 0) by now intros H; rewrite H in Hdd.
    apply in_divisors in Hdd; [ | easy ].
    destruct Hdd as (Hdd, Hd'z).
-   apply Nat.mod_divides in Hdd; [ | easy ].
+   apply Nat.Div0.mod_divides in Hdd.
    destruct Hdd as (d'', Hdd).
    rewrite <- Nat.mul_assoc, Nat.mul_comm; f_equal.
    rewrite Hdd at 1.
@@ -1059,7 +1059,7 @@ assert (H2 : ∀ d1 d2 d3, d1 * d2 * d3 = n ↔ (d1, d2, d3) ∈ l2). {
      apply in_divisors_iff; [ easy | ].
      split; [ | now apply Nat.neq_mul_0 ].
      rewrite <- Hddd.
-     apply Nat.mod_divides; [ now apply Nat.neq_mul_0 | ].
+     apply Nat.Div0.mod_divides.
      now exists d3.
    }
    apply List.in_map_iff.
@@ -1070,7 +1070,7 @@ assert (H2 : ∀ d1 d2 d3, d1 * d2 * d3 = n ↔ (d1, d2, d3) ∈ l2). {
    split; [ easy | ].
    apply in_divisors_iff; [ now apply Nat.neq_mul_0 | ].
    split; [ | easy ].
-   apply Nat.mod_divides; [ easy | ].
+   apply Nat.Div0.mod_divides.
    exists d2; apply Nat.mul_comm.
   -subst l2.
    apply List.in_flat_map in Hddd.
@@ -1081,13 +1081,13 @@ assert (H2 : ∀ d1 d2 d3, d1 * d2 * d3 = n ↔ (d1, d2, d3) ∈ l2). {
    destruct Hd as (Hnd, Hd).
    injection Hd'; clear Hd'; intros Hd3 Hd2 Hd1.
    subst d1 d2 d3.
-   apply Nat.mod_divides in Hnd; [ | easy ].
+   apply Nat.Div0.mod_divides in Hnd.
    destruct Hnd as (d1, Hd1).
    rewrite Hd1, (Nat.mul_comm d), Nat.div_mul; [ | easy ].
    rewrite Nat.mul_comm; f_equal.
    apply in_divisors in Hdd; [ | easy ].
    destruct Hdd as (Hdd, Hd').
-   apply Nat.mod_divides in Hdd; [ | easy ].
+   apply Nat.Div0.mod_divides in Hdd.
    destruct Hdd as (d'', Hdd).
    rewrite Hdd at 1.
    now rewrite (Nat.mul_comm _ d''), Nat.div_mul.
@@ -1103,7 +1103,7 @@ assert (Hl1s : Sorted.Sorted lt_triplet l1). {
   apply (SetoidList.SortA_app eq_equivalence).
   -specialize (Hin a (or_introl eq_refl)); clear IHl.
    destruct Hin as (Hna, Ha).
-   apply Nat.mod_divides in Hna; [ | easy ].
+   apply Nat.Div0.mod_divides in Hna.
    destruct Hna as (b, Hb).
    rewrite Hb, Nat.mul_comm, Nat.div_mul; [ | easy ].
    subst n.
@@ -1564,7 +1564,7 @@ assert (Htn : t n = s~{n}). {
   apply f_mul_1_r.
 }
 destruct p. {
-  apply Nat.mod_divides in Hp; [ | flia Hm ].
+  apply Nat.Div0.mod_divides in Hp.
   destruct Hp as (p, Hp).
   assert (Hpz : p ≠ 0). {
     now intros H; rewrite H, Nat.mul_0_r in Hp.
@@ -1807,7 +1807,7 @@ assert (Hto : ∀ d, d ∈ divisors n → d ≠ n → t d = 0%F). {
       intros H.
       apply in_divisors in Hd; [ | easy ].
       destruct Hd as (Hnd, Hd).
-      apply Nat.mod_divides in Hnd; [ | easy ].
+      apply Nat.Div0.mod_divides in Hnd.
       destruct Hnd as (c, Hc).
       rewrite Hc, Nat.mul_comm, Nat.div_mul in H; [ | easy ].
       rewrite H, Nat.mul_1_r in Hc.
@@ -1925,7 +1925,7 @@ induction l as [| a l]; [ now apply Ha1i | cbn ].
 remember (i mod a) as m eqn:Hm; symmetry in Hm.
 destruct m. {
   destruct a; [ easy | ].
-  apply Nat.mod_divides in Hm; [ | easy ].
+  apply Nat.Div0.mod_divides in Hm.
   destruct Hm as (m, Hm).
   rewrite Hm, Nat.mul_comm, <- Nat.mul_assoc, Nat.mul_comm.
   now rewrite Nat.mod_mul.
@@ -2080,7 +2080,7 @@ assert (Hdn : d ∈ primes_upto n). {
   apply in_seq.
   assert (Hdz : d ≠ 0); [ now intros H; rewrite H in Hd | ].
   apply Nat.mod_divide in Hdi; [ | easy ].
-  apply Nat.mod_divides in Hdi; [ | easy ].
+  apply Nat.Div0.mod_divides in Hdi.
   destruct Hdi as (c, Hc).
   split. {
     destruct d; [ rewrite Hc in H1i; cbn in H1i; flia H1i | flia ].
@@ -2092,7 +2092,7 @@ assert (Hdn : d ∈ primes_upto n). {
 }
 assert (Hdz : d ≠ 0); [ now intros H; rewrite H in Hd | ].
 apply Nat.mod_divide in Hdi; [ | easy ].
-apply Nat.mod_divides in Hdi; [ | easy ].
+apply Nat.Div0.mod_divides in Hdi.
 destruct Hdi as (c, Hc).
 subst i.
 remember (primes_upto n) as l.

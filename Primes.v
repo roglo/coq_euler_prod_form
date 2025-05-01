@@ -1743,12 +1743,8 @@ replace (S (n - S k)) with (n - k) by flia Hkn.
 rewrite (Nat.mul_comm (fact k)).
 rewrite Nat.mul_shuffle0.
 do 2 rewrite <- Nat.mul_assoc.
-rewrite <- Nat.div_div; [ | flia Hkn | ]. 2: {
-  apply Nat.neq_mul_0; split; apply fact_neq_0.
-}
-rewrite <- (Nat.div_div _ (S k)); [ | easy | ]. 2: {
-  apply Nat.neq_mul_0; split; apply fact_neq_0.
-}
+rewrite <- Nat.Div0.div_div.
+rewrite <- (Nat.Div0.div_div _ (S k)).
 rewrite Nat_add_div_same. 2: {
   replace (fact (n - S k)) with (fact (n - k) / (n - k)). 2: {
     replace (n - k) with (S (n - S k)) by flia Hkn.
@@ -1774,15 +1770,11 @@ rewrite Nat_add_div_same. 2: {
   now apply fact_fact_divides_fact, Nat.lt_le_incl.
 }
 rewrite Nat.mul_shuffle1.
-rewrite <- (Nat.div_div (S n * _)); cycle 1. {
-  apply Nat.neq_mul_0; split; [ easy | flia Hkn ].
-} {
-  apply Nat.neq_mul_0; split; apply fact_neq_0.
-}
+rewrite <- (Nat.Div0.div_div (S n * _)).
 f_equal.
 (* lemma to do, perhaps? *)
-rewrite <- (Nat.div_mul_cancel_l _ _ (S k)); [ | flia Hkn | easy ].
-rewrite <- (Nat.div_mul_cancel_r (fact n) _ (n - k)); [ | easy | flia Hkn ].
+rewrite <- (Nat.Div0.div_mul_cancel_l _ _ (S k)); [ | easy ].
+rewrite <- (Nat.Div0.div_mul_cancel_r (fact n) _ (n - k)); [ | flia Hkn ].
 rewrite Nat_add_div_same. 2: {
   apply Nat.mul_divide_cancel_l; [ easy | ].
   apply Nat_divide_small_fact; flia Hkn.
@@ -1884,13 +1876,13 @@ rewrite Nat.add_assoc, Nat.add_shuffle0.
 symmetry.
 remember (a ^ p + b ^ p) as x.
 replace x with (x + 0) at 1 by flia.
-rewrite <- Nat.add_mod_idemp_r; [ symmetry | flia H2p ].
-rewrite <- Nat.add_mod_idemp_r; [ symmetry | flia H2p ].
+rewrite <- Nat.Div0.add_mod_idemp_r; symmetry.
+rewrite <- Nat.Div0.add_mod_idemp_r; symmetry.
 f_equal; f_equal; clear x Heqx; symmetry.
-rewrite Nat.mod_0_l; [ | flia H2p ].
+rewrite Nat.Div0.mod_0_l.
 rewrite summation_mod_idemp.
 rewrite all_0_summation_0. {
-  rewrite Nat.mod_0_l; [ easy | flia H2p ].
+  now rewrite Nat.Div0.mod_0_l.
 }
 intros i Hi.
 specialize (binomial_prime _ _ Hp Hi) as (c, Hc).
@@ -1926,10 +1918,10 @@ destruct (Nat.eq_dec a 0) as [Haz| Haz]. {
 }
 induction l as [| c l]; [ easy | cbn ].
 rewrite <- List_fold_left_mul_assoc.
-rewrite Nat.mul_mod_idemp_r; [ | easy ].
-rewrite <- Nat.mul_mod_idemp_l; [ | easy ].
+rewrite Nat.Div0.mul_mod_idemp_r.
+rewrite <- Nat.Div0.mul_mod_idemp_l.
 rewrite IHl.
-rewrite Nat.mul_mod_idemp_l; [ | easy ].
+rewrite Nat.Div0.mul_mod_idemp_l.
 now rewrite List_fold_left_mul_assoc.
 Qed.
 
@@ -1965,7 +1957,7 @@ assert
        (seq 1 (p - 1))). {
 (**)
   apply NoDup_Permutation_bis; cycle 1. {
-    now rewrite map_length, seq_length.
+    now rewrite length_map, length_seq.
   } {
     intros i Hi.
     apply in_map_iff in Hi.
@@ -2036,7 +2028,7 @@ assert (Hx2 : x mod p = (fact (p - 1) * a ^ (p - 1)) mod p). {
   rewrite <- (map_map (λ i, i * a) (λ j, j mod p)).
   rewrite fold_left_mul_map_mod.
   rewrite fold_left_mul_map_mul.
-  rewrite seq_length.
+  rewrite length_seq.
   f_equal; f_equal.
   symmetry.
   apply fact_eq_fold_left.
@@ -2061,9 +2053,9 @@ induction a. {
 rewrite <- Nat.add_1_r.
 rewrite sum_power_prime_mod; [ | easy ].
 rewrite Nat.pow_1_l.
-rewrite <- Nat.add_mod_idemp_l; [ | now intros H; rewrite H in Hp ].
+rewrite <- Nat.Div0.add_mod_idemp_l.
 rewrite IHa.
-rewrite Nat.add_mod_idemp_l; [ easy | now intros H; rewrite H in Hp ].
+now rewrite Nat.Div0.add_mod_idemp_l.
 Qed.
 
 (* inverse modulo (true when n is prime) *)
@@ -2112,7 +2104,7 @@ split. {
   specialize (H1 H); clear H.
   replace (p - 1) with (S (p - 2)) in H1 by flia Hip.
   cbn in H1.
-  rewrite <- Nat.mul_mod_idemp_r in H1; [ | easy ].
+  rewrite <- Nat.Div0.mul_mod_idemp_r in H1.
   rewrite Hj, Nat.mul_1_r in H1.
   rewrite Nat.mod_small in H1; [ flia Hip H1 | flia Hip ].
 } {
@@ -2128,7 +2120,7 @@ split. {
   specialize (H1 H); clear H.
   replace (p - 1) with (S (p - 2)) in H1 by flia Hip.
   cbn in H1.
-  rewrite <- Nat.mul_mod_idemp_r in H1; [ | easy ].
+  rewrite <- Nat.Div0.mul_mod_idemp_r in H1.
   rewrite Hj in H1.
   replace 1 with (1 mod p) in H1 at 2; [ | rewrite Nat.mod_small; flia Hip ].
   apply Nat_eq_mod_sub_0 in H1.
@@ -2168,7 +2160,7 @@ replace p with (p - 2 + 2) in H1 at 1 by flia Hip.
 rewrite <- (Nat.mul_1_r (_ ^ (p - 2))) in H1.
 rewrite Nat.pow_add_r in H1.
 rewrite <- Nat.mul_sub_distr_l in H1.
-rewrite <- Nat.mul_mod_idemp_l in H1; [ | easy ].
+rewrite <- Nat.Div0.mul_mod_idemp_l in H1.
 rewrite Hcon in H1.
 apply Nat.Lcm0.mod_divide in H1.
 specialize (Nat.gauss _ _ _ H1) as H2.
@@ -2192,7 +2184,7 @@ intros * Hp * Hip.
 assert (Hpz : p ≠ 0) by now intros H; rewrite H in Hp.
 unfold inv_mod.
 rewrite Nat_pow_mod_is_pow_mod; [ | easy ].
-rewrite Nat.mul_mod_idemp_l; [ | easy ].
+rewrite Nat.Div0.mul_mod_idemp_l.
 replace i with (i ^ 1) at 2 by now rewrite Nat.pow_1_r.
 rewrite <- Nat.pow_add_r.
 replace (p - 2 + 1) with (p - 1) by flia Hip.
@@ -2294,7 +2286,7 @@ rewrite fold_left_mul_from_1.
 do 2 rewrite Nat.mul_assoc.
 remember (i2 * 2) as x.
 rewrite <- Nat.mul_assoc; subst x.
-rewrite <- Nat.mul_mod_idemp_l; [ | flia H3p ].
+rewrite <- Nat.Div0.mul_mod_idemp_l.
 rewrite (Nat.mul_comm i2).
 rewrite Hai2p, Nat.mul_1_l.
 rewrite Nat.mul_comm.
@@ -2304,7 +2296,7 @@ apply (IHlen (len - 1)); [ flia | | | ]. 3: {
   cbn in Hlen.
   apply Nat.succ_inj in Hlen.
   rewrite <- Hlen, Hll.
-  do 2 rewrite app_length.
+  do 2 rewrite length_app.
   cbn; flia.
 } {
   apply NoDup_cons_iff in Hnd.
@@ -2384,7 +2376,7 @@ split.
  replace (n - 1) with (S (n - 2)) at 1 by flia H3n.
  rewrite Nat_fact_succ.
  replace (S (n - 2)) with (n - 1) by flia H3n.
- rewrite <- Nat.mul_mod_idemp_r; [ | flia H3n ].
+ rewrite <- Nat.Div0.mul_mod_idemp_r.
  enough (H : fact (n - 2) mod n = 1). {
    rewrite H, Nat.mul_1_r.
    apply Nat.mod_small; flia H3n.
@@ -2451,11 +2443,11 @@ rewrite Nat.add_sub_swap. 2: {
 rewrite <- Nat.mul_sub_distr_r.
 rewrite Nat.pow_add_r.
 rewrite Nat.pow_mul_r.
-rewrite <- Nat.mul_mod_idemp_l; [ | easy ].
+rewrite <- Nat.Div0.mul_mod_idemp_l.
 rewrite <- Nat_mod_pow_mod.
 rewrite fermat_little_1; [ | easy ].
-rewrite Nat.mod_mod; [ | easy ].
-rewrite Nat.mul_mod_idemp_l; [ | easy ].
+rewrite Nat.Div0.mod_mod.
+rewrite Nat.Div0.mul_mod_idemp_l.
 rewrite <- Nat.pow_add_r.
 rewrite Nat.sub_add; [ | flia Hip ].
 rewrite fermat_little_1; [ | easy ].
