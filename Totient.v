@@ -230,7 +230,7 @@ rewrite <- Nat.mul_max_distr_r in Hv.
 rewrite <- Nat.add_max_distr_r in Hv.
 apply Nat.max_lub_iff in Hv.
 destruct Hv as (Hvb, Huv).
-rewrite Nat.div_div in Huv; [ | easy | easy ].
+rewrite Nat.Div0.div_div in Huv.
 apply Nat.nlt_ge in Hvb.
 exfalso; apply Hvb; clear Hvb.
 rewrite Nat.mul_comm.
@@ -283,7 +283,7 @@ rewrite <- Nat_sub_sub_distr. 2: {
     destruct (Nat.lt_trichotomy (v / b) (w / a)) as [H| H]. {
       rewrite max_r in Hk; [ | now apply Nat.lt_le_incl ].
       rewrite Hk.
-      apply Nat.div_lt_upper_bound; [ now rewrite Nat.add_comm | ].
+      apply Nat.Div0.div_lt_upper_bound.
       rewrite Nat.mul_add_distr_r, Nat.mul_1_l, Nat.mul_comm.
       specialize (Nat.div_mod w a Haz) as H1.
       apply (Nat.add_lt_mono_r _ _ (w mod a)).
@@ -300,7 +300,7 @@ rewrite <- Nat_sub_sub_distr. 2: {
         split; [ flia | ].
         now apply Nat.add_le_mono_r.
       }
-      apply Nat.div_lt_upper_bound; [ now rewrite Nat.add_comm | ].
+      apply Nat.Div0.div_lt_upper_bound.
       rewrite Nat.mul_add_distr_r, Nat.mul_1_l, Nat.mul_comm.
       specialize (Nat.div_mod w a Haz) as H1.
       rewrite H1 at 1.
@@ -322,7 +322,7 @@ rewrite <- Nat_sub_sub_distr. 2: {
           transitivity (a + b + 1); [ | easy ].
           rewrite (Nat.add_comm b).
           do 2 apply Nat.add_le_mono_r.
-          now apply Nat.mod_le.
+          now apply Nat.Div0.mod_le.
         }
       } {
         now apply Nat.mod_upper_bound.
@@ -359,17 +359,17 @@ apply IHn in Hgb; [ | easy | | | ]; cycle 1. {
   now rewrite Nat.gcd_comm.
 }
 rewrite <- Hw.
-rewrite <- Nat.divide_div_mul_exact; [ | easy | ]. 2: {
+rewrite <- Nat.Lcm0.divide_div_mul_exact. 2: {
   exists (u + v * (a - a mod b) / b).
   rewrite Nat.mul_add_distr_r; f_equal.
-  rewrite Nat.divide_div_mul_exact; [ | easy | ]. 2: {
+  rewrite Nat.Lcm0.divide_div_mul_exact. 2: {
     exists (a / b).
     rewrite (Nat.div_mod a b Hbz) at 1.
     now rewrite Nat.add_sub, Nat.mul_comm.
   }
   rewrite <- Nat.mul_assoc; f_equal.
   rewrite Nat.mul_comm.
-  rewrite <- Nat.divide_div_mul_exact; [ | easy | ]. 2: {
+  rewrite <- Nat.Lcm0.divide_div_mul_exact. 2: {
     exists (a / b).
     rewrite (Nat.div_mod a b Hbz) at 1.
     now rewrite Nat.add_sub, Nat.mul_comm.
@@ -383,7 +383,7 @@ rewrite Nat.mul_sub_distr_l, (Nat.mul_comm v).
 rewrite Nat.add_sub_assoc. 2: {
   rewrite Nat.mul_comm.
   apply Nat.mul_le_mono_r.
-  now apply Nat.mod_le.
+  now apply Nat.Div0.mod_le.
 }
 symmetry; apply Nat.add_sub_eq_l.
 symmetry; apply Nat.add_sub_eq_l.
@@ -435,7 +435,7 @@ rewrite <- Nat_sub_sub_distr. 2: {
     destruct (Nat.lt_trichotomy (v / b) (w / a)) as [H| H]. {
       rewrite max_r in Hk; [ | now apply Nat.lt_le_incl ].
       rewrite Hk.
-      apply Nat.div_lt_upper_bound; [ now rewrite Nat.add_comm | ].
+      apply Nat.Div0.div_lt_upper_bound.
       rewrite Nat.mul_add_distr_r, Nat.mul_1_l, Nat.mul_comm.
       specialize (Nat.div_mod w a Haz) as H1.
       apply (Nat.add_lt_mono_r _ _ (w mod a)).
@@ -452,7 +452,7 @@ rewrite <- Nat_sub_sub_distr. 2: {
         split; [ flia | ].
         now apply Nat.add_le_mono_r.
       }
-      apply Nat.div_lt_upper_bound; [ now rewrite Nat.add_comm | ].
+      apply Nat.Div0.div_lt_upper_bound.
       rewrite Nat.mul_add_distr_r, Nat.mul_1_l, Nat.mul_comm.
       specialize (Nat.div_mod w a Haz) as H1.
       rewrite H1 at 1.
@@ -479,12 +479,12 @@ rewrite <- Nat_sub_sub_distr. 2: {
 }
 f_equal.
 rewrite <- Hw.
-rewrite <- Nat.divide_div_mul_exact; [ | easy | ]. 2: {
+rewrite <- Nat.Lcm0.divide_div_mul_exact. 2: {
   exists (u + v * ((a - a mod b) / b)).
   rewrite Nat.mul_add_distr_r; f_equal.
   rewrite <- Nat.mul_assoc; f_equal.
   rewrite Nat.mul_comm.
-    rewrite <- Nat.divide_div_mul_exact; [ | easy | ]. 2: {
+    rewrite <- Nat.Lcm0.divide_div_mul_exact. 2: {
       exists (a / b).
       rewrite (Nat.div_mod a b) at 1; [ | easy ].
       now rewrite Nat.add_sub, Nat.mul_comm.
@@ -502,7 +502,7 @@ rewrite <- Nat.divide_div_mul_exact; [ | easy | ]. 2: {
       rewrite Nat.Div0.mod_same.
       apply Nat.le_0_l.
     }
-    now apply Nat.mod_le.
+    now apply Nat.Div0.mod_le.
   }
   rewrite Nat.add_comm, (Nat.mul_comm (a mod b)).
   now rewrite Nat.add_sub, Nat.mul_comm.
@@ -571,7 +571,7 @@ specialize (in_split (f x) (y :: l') (Hf x (or_introl eq_refl))) as H.
 destruct H as (l1 & l2 & Hll).
 rewrite Hll.
 transitivity (length (f x :: l1 ++ l2)). 2: {
-  cbn; do 2 rewrite app_length; cbn; flia.
+  cbn; do 2 rewrite length_app; cbn; flia.
 }
 cbn; f_equal.
 apply IHl. {
@@ -673,7 +673,7 @@ apply in_prod. {
     split. {
       remember (a mod m) as r eqn:Hr; symmetry in Hr.
       destruct r; [ | flia ].
-      apply Nat.mod_divides in Hr; [ | easy ].
+      apply Nat.Div0.mod_divides in Hr.
       destruct Hr as (k, Hk).
       rewrite Hk in Hga.
       rewrite Nat.gcd_mul_mono_l in Hga.
@@ -708,7 +708,7 @@ apply in_prod. {
     split. {
       remember (a mod n) as r eqn:Hr; symmetry in Hr.
       destruct r; [ | flia ].
-      apply Nat.mod_divides in Hr; [ | easy ].
+      apply Nat.Div0.mod_divides in Hr.
       destruct Hr as (k, Hk).
       rewrite Hk in Hga.
       rewrite Nat.gcd_mul_mono_l in Hga.
@@ -774,7 +774,7 @@ assert (Hnmz : (n * a * v + m * (n - 1) * b * u) mod (m * n) ≠ 0). {
   rewrite Nat_mod_add_r_mul_l; [ | easy ].
   remember ((n * a * v) mod m) as p eqn:Hp; symmetry in Hp.
   destruct p. {
-    apply Nat.mod_divides in Hp; [ | easy ].
+    apply Nat.Div0.mod_divides in Hp.
     destruct Hp as (k, Hk).
     rewrite Nat.mul_shuffle0 in Hk.
     replace (n * v) with (m * u - 1) in Hk by flia Hmng.
@@ -1413,7 +1413,7 @@ assert (Ha : a mod n ∈ coprimes n). {
   split. {
     remember (a mod n) as b eqn:Hb; symmetry in Hb.
     destruct b; [ | flia ].
-    apply Nat.mod_divides in Hb; [ | easy ].
+    apply Nat.Div0.mod_divides in Hb.
     replace n with (n * 1) in Hg by flia.
     destruct Hb as (k, Hk); subst a.
     rewrite Nat.gcd_mul_mono_l in Hg.
@@ -1526,7 +1526,7 @@ induction p; [ easy | ].
 rewrite <- (Nat.add_1_r p).
 rewrite seq_app.
 rewrite filter_app.
-now rewrite app_length, IHp.
+now rewrite length_app, IHp.
 Qed.
 
 Corollary fermat_little_again : ∀ p,
