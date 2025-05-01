@@ -299,7 +299,7 @@ Theorem gcd_1_div_mul_exact : ∀ m p q kp kq,
   → kp = q * (kp / q).
 Proof.
 intros * Hqz Hg Hkp Hkq.
-rewrite <- Nat.divide_div_mul_exact; [ | easy | ]. 2: {
+rewrite <- Nat.Lcm0.divide_div_mul_exact; [ | easy | ]. 2: {
   apply (Nat.gauss _ p). {
     rewrite Nat.mul_comm, <- Hkp, Hkq.
     now exists kq.
@@ -343,7 +343,7 @@ rewrite Nat.div_mul_cancel_l; [ | easy | ]. 2: {
   now subst kq.
 }
 rewrite (Nat.mul_comm p), <- Nat.mul_assoc.
-rewrite <- Nat.divide_div_mul_exact; [ | easy | ]. 2: {
+rewrite <- Nat.Lcm0.divide_div_mul_exact; [ | easy | ]. 2: {
   exists (kq / p).
   rewrite Nat.mul_comm.
   rewrite Nat.gcd_comm in Hg.
@@ -752,7 +752,7 @@ assert (Hrr : r1 = r). {
     rewrite Hk in Hob.
     now apply ord_mod_neq_0 in Hob.
   }
-  rewrite <- Nat.divide_div_mul_exact in Habo; [ | easy | easy ].
+  rewrite <- Nat.Lcm0.divide_div_mul_exact in Habo; [ | easy | easy ].
   rewrite (Nat.mul_comm s1), Nat.div_mul in Habo; [ | easy ].
   rewrite (Nat.mul_comm r1) in Habo.
   rewrite Nat.pow_mul_r in Habo.
@@ -786,7 +786,7 @@ assert (Hss : s1 = s). {
     rewrite Hk in Hoa.
     now apply ord_mod_neq_0 in Hoa.
   }
-  rewrite <- Nat.divide_div_mul_exact in Habo; [ | easy | easy ].
+  rewrite <- Nat.Lcm0.divide_div_mul_exact in Habo; [ | easy | easy ].
   rewrite (Nat.mul_comm r1), Nat.div_mul in Habo; [ | easy ].
   rewrite Nat.pow_mul_r in Habo.
   rewrite Nat.pow_mul_l in Habo.

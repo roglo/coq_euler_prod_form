@@ -5,7 +5,7 @@
    ending theorem proves its correctness. *)
 
 Set Nested Proofs Allowed.
-Require Import Utf8 Arith ZArith.
+From Stdlib Require Import Utf8 Arith ZArith.
 Import List List.ListNotations.
 Require Import Misc Primes FourSquareEuler.
 Require Import Pigeonhole.
@@ -95,18 +95,18 @@ intros * Hp Hp2 Ha Ha' Haa.
 intros H1.
 apply Nat_eq_mod_sub_0 in H1.
 rewrite Nat_sqr_sub_sqr, Nat.mul_comm in H1.
-apply Nat.mod_divide in H1; [ | now intros H2; subst p ].
+apply Nat.Lcm0.mod_divide in H1.
 specialize (Nat.gauss _ _ _ H1) as H2.
 apply (Nat.mul_le_mono_l _ _ 2) in Ha.
 apply (Nat.mul_le_mono_l _ _ 2) in Ha'.
-rewrite <- Nat.divide_div_mul_exact in Ha; [ | easy | ]. 2: {
+rewrite <- Nat.Lcm0.divide_div_mul_exact in Ha. 2: {
   specialize (Nat.div_mod p 2 (Nat.neq_succ_0 _)) as H3.
   rewrite Hp2 in H3.
   rewrite H3, Nat.add_sub.
   apply Nat.divide_factor_l.
 }
 rewrite (Nat.mul_comm _ (p - 1)), Nat.div_mul in Ha; [ | easy ].
-rewrite <- Nat.divide_div_mul_exact in Ha'; [ | easy | ]. 2: {
+rewrite <- Nat.Lcm0.divide_div_mul_exact in Ha'. 2: {
   specialize (Nat.div_mod p 2 (Nat.neq_succ_0 _)) as H3.
   rewrite Hp2 in H3.
   rewrite H3, Nat.add_sub.
@@ -144,18 +144,18 @@ assert (Hpz : p ≠ 0) by now intros H; subst p.
 apply Nat_eq_mod_sub_0 in Hb1.
 replace (b' ^ 2 + 1 - (b ^ 2 + 1)) with (b' ^ 2 - b ^ 2) in Hb1 by flia.
 rewrite Nat_sqr_sub_sqr, Nat.mul_comm in Hb1.
-apply Nat.mod_divide in Hb1; [ | easy ].
+apply Nat.Lcm0.mod_divide in Hb1.
 specialize (Nat.gauss _ _ _ Hb1) as H2.
 apply (Nat.mul_le_mono_l _ _ 2) in Hb.
 apply (Nat.mul_le_mono_l _ _ 2) in Hb'.
-rewrite <- Nat.divide_div_mul_exact in Hb; [ | easy | ]. 2: {
+rewrite <- Nat.Lcm0.divide_div_mul_exact in Hb. 2: {
   specialize (Nat.div_mod p 2 (Nat.neq_succ_0 _)) as H3.
   rewrite Hp2 in H3.
   rewrite H3, Nat.add_sub.
   apply Nat.divide_factor_l.
 }
 rewrite (Nat.mul_comm _ (p - 1)), Nat.div_mul in Hb; [ | easy ].
-rewrite <- Nat.divide_div_mul_exact in Hb'; [ | easy | ]. 2: {
+rewrite <- Nat.Lcm0.divide_div_mul_exact in Hb'. 2: {
   specialize (Nat.div_mod p 2 (Nat.neq_succ_0 _)) as H3.
   rewrite Hp2 in H3.
   rewrite H3, Nat.add_sub.
@@ -192,11 +192,11 @@ destruct (le_dec n (a + b mod n)) as [Hpx| Hpx]. {
     split; [ | easy ].
     now apply Nat.lt_le_incl, Nat.mod_upper_bound.
   }
-  rewrite <- (Nat.mod_add _ 1) in Hab; [ | easy ].
+  rewrite <- (Nat.Div0.mod_add _ 1) in Hab.
   rewrite Nat.mul_1_l in Hab.
   rewrite Nat.sub_add in Hab; [ | easy ].
   rewrite Nat.add_mod_idemp_r in Hab; [ | easy ].
-  now apply Nat.mod_divide in Hab.
+  now apply Nat.Lcm0.mod_divide in Hab.
 } {
   apply Nat.nle_gt in Hpx.
   symmetry in Hab.
@@ -214,7 +214,7 @@ destruct (le_dec n (a + b mod n)) as [Hpx| Hpx]. {
   apply Nat.eq_add_0 in Hv.
   destruct Hv as (Hxz, Hx'uz).
   subst a; cbn.
-  now apply Nat.mod_divide in Hx'uz.
+  now apply Nat.Lcm0.mod_divide in Hx'uz.
 }
 Qed.
 
@@ -240,8 +240,8 @@ assert (Hpz : p ≠ 0) by now (intros H1; subst p).
     rewrite Nat.add_assoc.
     replace (u + u) with (2 * u) by flia.
     unfold u.
-    rewrite <- Nat.divide_div_mul_exact; [ | easy | ]. 2: {
-      apply Nat.mod_divide; [ easy | ].
+    rewrite <- Nat.Lcm0.divide_div_mul_exact. 2: {
+      apply Nat.Lcm0.mod_divide.
       specialize (Nat.div_mod p 2 (Nat.neq_succ_0 _)) as H2.
       rewrite Hp2 in H2.
       rewrite H2, Nat.add_sub, Nat.mul_comm.
@@ -346,7 +346,7 @@ assert
       rewrite <- Hb'1 in H1.
       flia Hbb' H1.
     }
-    apply Nat.mod_divide in H; [ | easy ].
+    apply Nat.Lcm0.mod_divide in H.
     destruct H as (k, Hk).
     destruct k; [ flia Hk Hbb' | ].
     apply Nat.add_sub_eq_nz in Hk. 2: {
@@ -364,7 +364,7 @@ assert
       rewrite <- Hb1 in H1.
       flia Hbb' H1.
     }
-    apply Nat.mod_divide in H; [ | easy ].
+    apply Nat.Lcm0.mod_divide in H.
     destruct H as (k, Hk).
     destruct k; [ flia Hk Hbb'1 | ].
     apply Nat.add_sub_eq_nz in Hk. 2: {
@@ -459,8 +459,8 @@ exfalso; apply H1; [ | | | easy ]. {
   rewrite Nat.sub_add; [ | flia Hxu ].
   replace (u + (u + 1)) with (2 * u + 1) by flia.
   unfold u.
-  rewrite <- Nat.divide_div_mul_exact; [ | easy | ]. 2: {
-    apply Nat.mod_divide; [ easy | ].
+  rewrite <- Nat.Lcm0.divide_div_mul_exact. 2: {
+    apply Nat.Lcm0.mod_divide.
     specialize (Nat.div_mod p 2 (Nat.neq_succ_0 _)) as H2.
     rewrite Hp2 in H2.
     rewrite H2, Nat.add_sub, Nat.mul_comm.
@@ -473,8 +473,8 @@ exfalso; apply H1; [ | | | easy ]. {
   rewrite Nat.sub_add; [ | flia Hx'u ].
   replace (u + (u + 1)) with (2 * u + 1) by flia.
   unfold u.
-  rewrite <- Nat.divide_div_mul_exact; [ | easy | ]. 2: {
-    apply Nat.mod_divide; [ easy | ].
+  rewrite <- Nat.Lcm0.divide_div_mul_exact. 2: {
+    apply Nat.Lcm0.mod_divide.
     specialize (Nat.div_mod p 2 (Nat.neq_succ_0 _)) as H2.
     rewrite Hp2 in H2.
     rewrite H2, Nat.add_sub, Nat.mul_comm.
@@ -575,7 +575,7 @@ assert (Hxy2 : ∀ x, x ^ 2 ≡ f x mod m). {
       now apply Nat.lt_le_incl, Nat.mod_upper_bound.
     }
     symmetry.
-    rewrite <- (Nat.mod_add _ (2 * (x mod m))); [ | easy ].
+    rewrite <- (Nat.Div0.mod_add _ (2 * (x mod m))).
     rewrite Nat.mul_shuffle0.
     rewrite Nat.sub_add. 2: {
       remember (x mod m) as y.
@@ -851,8 +851,8 @@ specialize (Nat.div_mod x4 m Hmz) as Hx4.
   move Hq4 before Hq1; move Hq3 before Hq1; move Hq2 before Hq1.
   unfold v in Hm.
   setoid_rewrite (Nat.mul_shuffle0 2) in Hm.
-  rewrite <- (Nat.divide_div_mul_exact m) in Hm; [ | easy | ]. 2: {
-    now apply Nat.mod_divide in Hme.
+  rewrite <- (Nat.Lcm0.divide_div_mul_exact m) in Hm. 2: {
+    now apply Nat.Lcm0.mod_divide in Hme.
   }
   rewrite (Nat.mul_comm 2) in Hm.
   rewrite Nat.div_mul in Hm; [ | easy ].
@@ -1034,7 +1034,7 @@ Local Ltac z2_case_1 :=
     rewrite Zminus_mod;
     rewrite <- Nat2Z.inj_mod;
     rewrite <- Nat2Z.inj_mod;
-    try (rewrite Nat.mod_add; [ | easy ]);
+    try rewrite Nat.Div0.mod_add;
     repeat (rewrite Nat_mod_add_l_mul_r; [ | easy ]);
     end_z2_case
   ).
@@ -1051,7 +1051,7 @@ Local Ltac z2_case_2 :=
     rewrite Zminus_mod;
     rewrite <- Nat2Z.inj_mod;
     rewrite <- Nat2Z.inj_mod;
-    try (rewrite Nat.mod_add; [ | easy ]);
+    try (rewrite Nat.Div0.mod_add; [ | easy ]);
     repeat (rewrite Nat_mod_add_l_mul_r; [ | easy ]);
     repeat (
       rewrite <- Nat.add_mod_idemp_r; [ | easy ];
@@ -1399,10 +1399,10 @@ destruct (Nat.eq_dec r 0) as [Hrz| Hrz]. {
   }
   clear Hx4v.
   move Hmp at bottom.
-  apply Nat.mod_divide in Hx1; [ | easy ].
-  apply Nat.mod_divide in Hx2; [ | easy ].
-  apply Nat.mod_divide in Hx3; [ | easy ].
-  apply Nat.mod_divide in Hx4; [ | easy ].
+  apply Nat.Lcm0.mod_divide in Hx1.
+  apply Nat.Lcm0.mod_divide in Hx2.
+  apply Nat.Lcm0.mod_divide in Hx3.
+  apply Nat.Lcm0.mod_divide in Hx4.
   destruct Hx1 as (l1, Hx1).
   destruct Hx2 as (l2, Hx2).
   destruct Hx3 as (l3, Hx3).

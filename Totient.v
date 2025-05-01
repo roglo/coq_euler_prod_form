@@ -769,7 +769,7 @@ specialize (gcd_and_bezout_prop m n g u v Hmz Hgb) as (Hmng & Hg).
 rewrite Hmn in Hg; subst g.
 apply in_coprimes_iff.
 assert (Hnmz : (n * a * v + m * (n - 1) * b * u) mod (m * n) ≠ 0). {
-  rewrite Nat.mod_mul_r; [ | easy | easy ].
+  rewrite Nat.Div0.mod_mul_r.
   do 2 rewrite <- (Nat.mul_assoc m).
   rewrite Nat_mod_add_r_mul_l; [ | easy ].
   remember ((n * a * v) mod m) as p eqn:Hp; symmetry in Hp.
@@ -926,7 +926,7 @@ rewrite Nat_sub_sub_assoc. 2: {
     apply Nat.mul_le_mono_r; flia Ha.
   }
 }
-rewrite <- (Nat.mod_add _ a); [ | easy ].
+rewrite <- (Nat.Div0.mod_add _ a).
 rewrite Nat.sub_add. 2: {
   replace n with (1 * n) at 4 by flia.
   rewrite <- Nat.mul_sub_distr_r.
@@ -937,14 +937,14 @@ rewrite <- Nat.add_sub_swap. 2: {
   replace n with (1 * n) at 1 by flia.
   apply Nat.mul_le_mono_r; flia Hmn.
 }
-rewrite <- (Nat.mod_add _ 1); [ | easy ].
+rewrite <- (Nat.Div0.mod_add _ 1).
 rewrite Nat.mul_1_l.
 rewrite Nat.sub_add. 2: {
   transitivity (n * n); [ | flia ].
   replace n with (1 * n) at 1 by flia.
   apply Nat.mul_le_mono_r; flia Hmn.
 }
-rewrite Nat.add_comm, Nat.mod_add; [ | easy ].
+rewrite Nat.add_comm, Nat.Div0.mod_add.
 now rewrite Nat.mod_small.
 Qed.
 
@@ -981,7 +981,7 @@ rewrite Nat.add_sub_assoc. 2: {
   now apply Nat.mul_div_le.
 }
 assert (Hmn : m * n ≠ 0) by now apply Nat.neq_mul_0.
-rewrite <- (Nat.mod_add _ (qn * (n - 1) * u)); [ | easy ].
+rewrite <- (Nat.Div0.mod_add _ (qn * (n - 1) * u)).
 replace (qn * (n - 1) * u * (m * n)) with (m * n * qn * (n - 1) * u) by flia.
 rewrite Nat.sub_add. 2: {
   ring_simplify.
@@ -1004,7 +1004,7 @@ rewrite <- Nat.add_sub_swap. 2: {
   subst qm.
   now apply Nat.mul_div_le.
 }
-rewrite <- (Nat.mod_add _ (qm * v)); [ | easy ].
+rewrite <- (Nat.Div0.mod_add _ (qm * v)).
 replace (qm * v * (m * n)) with (n * m * qm * v) by flia.
 rewrite Nat.sub_add. 2: {
   transitivity (n * a * v). 2: {
@@ -1032,7 +1032,7 @@ rewrite Nat.add_comm.
 rewrite Nat.sub_add_distr.
 rewrite (Nat.mul_shuffle0 n a v).
 rewrite Nat.add_sub.
-rewrite <- (Nat.mod_add _ a); [ | easy ].
+rewrite <- (Nat.Div0.mod_add _ a).
 rewrite <- Nat.add_sub_swap. 2: {
   destruct m; [ easy | ].
   destruct n; [ easy | ].
@@ -1053,7 +1053,7 @@ replace a with (a * 1) at 3 by flia.
 rewrite <- Nat.mul_sub_distr_l.
 rewrite Nat.add_comm.
 replace (m * a * n * u) with (a * u * (m * n)) by flia.
-rewrite Nat.mod_add; [ | easy ].
+rewrite Nat.Div0.mod_add.
 apply in_seq in Ha.
 replace (1 + (m * n - 1)) with (m * n) in Ha by flia Hmn.
 rewrite Nat_mul_pred_r_mod; [ | easy | easy ].
@@ -1083,9 +1083,9 @@ specialize (gcd_and_bezout_prop m n g u v Hmz Hgb) as (Hmng & Hg).
 rewrite Hgmn in Hg; subst g.
 remember (n * x * v + m * (n - 1) * y * u) as p eqn:Hp.
 f_equal. {
-  rewrite Nat.mod_mul_r; [ | easy | easy ].
+  rewrite Nat.Div0.mod_mul_r.
   rewrite Nat.sub_add_distr.
-  rewrite <- (Nat.mod_add _ ((p / m) mod n)); [ | easy ].
+  rewrite <- (Nat.Div0.mod_add _ ((p / m) mod n)).
   rewrite (Nat.mul_comm _ m).
   rewrite Nat.sub_add. 2: {
     apply Nat.le_add_le_sub_r.
@@ -1110,7 +1110,7 @@ f_equal. {
   rewrite Nat.mul_shuffle0.
   replace (n * v) with (m * u - 1) by flia Hmng.
   rewrite Nat.mul_sub_distr_r, Nat.mul_1_l.
-  rewrite <- (Nat.mod_add (m * u * x - x) x); [ | easy ].
+  rewrite <- (Nat.Div0.mod_add (m * u * x - x) x).
   rewrite <- Nat.add_sub_swap. 2: {
     destruct m; [ easy | ].
     destruct u; [ now rewrite Nat.mul_0_r, Nat.add_1_r in Hmng | ].
@@ -1127,7 +1127,7 @@ f_equal. {
   rewrite <- Nat.mul_sub_distr_l.
   rewrite Nat.add_comm, <- Nat.mul_assoc.
   rewrite Nat_mod_add_r_mul_l; [ | easy ].
-  rewrite <- (Nat.mod_add _ ((x * (m - 1)) mod m)); [ | easy ].
+  rewrite <- (Nat.Div0.mod_add _ ((x * (m - 1)) mod m)).
   rewrite <- Nat.add_sub_swap. 2: {
     transitivity (pred m). 2: {
       destruct n; [ easy | ].
@@ -1152,21 +1152,21 @@ f_equal. {
   rewrite Nat_sqr_sub; [ | flia Hmz ].
   rewrite Nat.pow_1_l, Nat.mul_1_r, Nat.pow_2_r.
   rewrite <- Nat.mul_mod_idemp_r; [ | easy ].
-  rewrite <- (Nat.mod_add (m * m + 1 - 2 * m) 2); [ | easy ].
+  rewrite <- (Nat.Div0.mod_add (m * m + 1 - 2 * m) 2).
   rewrite Nat.sub_add. 2: {
     destruct m; [ easy | ].
     destruct m; [ easy | ].
     cbn; remember (m * (S (S m))); flia.
   }
-  rewrite Nat.add_comm, Nat.mod_add; [ | easy ].
+  rewrite Nat.add_comm, Nat.Div0.mod_add.
   rewrite Nat.mul_mod_idemp_r; [ | easy ].
   rewrite Nat.mul_1_r.
   now apply Nat.mod_small.
 } {
   rewrite Nat.mul_comm at 2.
-  rewrite Nat.mod_mul_r; [ | easy | easy ].
+  rewrite Nat.Div0.mod_mul_r.
   rewrite Nat.sub_add_distr.
-  rewrite <- (Nat.mod_add _ ((p / n) mod m)); [ | easy ].
+  rewrite <- (Nat.Div0.mod_add _ ((p / n) mod m)).
   rewrite (Nat.mul_comm n).
   rewrite Nat.sub_add. 2: {
     apply Nat.le_add_le_sub_r.
@@ -1200,7 +1200,7 @@ f_equal. {
   rewrite Nat.add_comm.
   rewrite Nat_mod_add_r_mul_l; [ | easy ].
   rewrite Nat.mul_sub_distr_r, Nat.mul_1_l.
-  rewrite <- (Nat.mod_add (n * y - y) y); [ | easy ].
+  rewrite <- (Nat.Div0.mod_add (n * y - y) y).
   rewrite <- Nat.add_sub_swap. 2: {
     destruct n; [ easy | cbn; flia ].
   }
@@ -1212,7 +1212,7 @@ f_equal. {
   rewrite Nat_mod_add_r_mul_l; [ | easy ].
   replace y with (y * 1) at 2 by flia.
   rewrite <- Nat.mul_sub_distr_l.
-  rewrite <- (Nat.mod_add _ ((y * (n - 1)) mod n)); [ | easy ].
+  rewrite <- (Nat.Div0.mod_add _ ((y * (n - 1)) mod n)).
   rewrite <- Nat.add_sub_swap. 2: {
     transitivity (pred n). 2: {
       destruct m; [ easy | ].
@@ -1229,7 +1229,7 @@ f_equal. {
   replace a with (a * 1) at 2 by flia.
   rewrite <- Nat.mul_sub_distr_l.
   rewrite Nat.add_comm.
-  rewrite Nat.mod_add; [ | easy ].
+  rewrite Nat.Div0.mod_add.
   subst a.
   rewrite Nat.mul_mod_idemp_l; [ | easy ].
   rewrite <- Nat.mul_assoc.
@@ -1237,13 +1237,13 @@ f_equal. {
   rewrite Nat_sqr_sub; [ | flia Hnz ].
   rewrite Nat.pow_1_l, Nat.mul_1_r, Nat.pow_2_r.
   rewrite <- Nat.mul_mod_idemp_r; [ | easy ].
-  rewrite <- (Nat.mod_add (n * n + 1 - 2 * n) 2); [ | easy ].
+  rewrite <- (Nat.Div0.mod_add (n * n + 1 - 2 * n) 2).
   rewrite Nat.sub_add. 2: {
     destruct n; [ easy | ].
     destruct n; [ easy | ].
     cbn; remember (n * (S (S n))); flia.
   }
-  rewrite Nat.add_comm, Nat.mod_add; [ | easy ].
+  rewrite Nat.add_comm, Nat.Div0.mod_add.
   rewrite Nat.mul_mod_idemp_r; [ | easy ].
   rewrite Nat.mul_1_r.
   now apply Nat.mod_small.
