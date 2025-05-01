@@ -231,7 +231,7 @@ intros * Hp Hp2 Hx'p Hxu Hx'u Hk.
 assert (Hpz : p ≠ 0) by now (intros H1; subst p).
   apply (Nat.mul_lt_mono_pos_r p); [ flia Hpz | ].
   rewrite <- Hk.
-  apply (le_lt_trans _ (u ^ 2 + u ^ 2 + 1)). {
+  apply (Nat.le_lt_trans _ (u ^ 2 + u ^ 2 + 1)). {
     apply Nat.add_le_mono_r.
     apply Nat.add_le_mono; [ now apply Nat.pow_le_mono_l | ].
     apply Nat.pow_le_mono_l.
@@ -517,7 +517,7 @@ destruct (le_dec (x mod m) v) as [Hx1v| Hx1v]. {
   specialize (Nat.div_mod m 2 (Nat.neq_succ_0 _)) as H1.
   rewrite H1 at 1.
   apply Nat.add_le_mono_l.
-  apply lt_n_Sm_le.
+  apply Nat.lt_succ_r.
   now apply Nat.mod_upper_bound.
 }
 Qed.
@@ -658,7 +658,7 @@ assert (Hx : ∀ x, f x ≤ v ^ 2). {
     specialize (Nat.div_mod m 2 (Nat.neq_succ_0 _)) as H1.
     rewrite H1 at 1.
     apply Nat.add_le_mono_l.
-    apply lt_n_Sm_le.
+    apply Nat.lt_succ_r.
     now apply Nat.mod_upper_bound.
   }
 }
@@ -679,7 +679,7 @@ specialize (Nat.div_mod x4 m Hmz) as Hx4.
     specialize (Nat.div_mod m 2 (Nat.neq_succ_0 _)) as H1.
     rewrite Hm21 in H1.
     assert (sqr_y1 + sqr_y2 + sqr_y3 + sqr_y4 < m * m). {
-      apply (le_lt_trans _ (4 * ((m - 1) / 2) ^ 2)). {
+      apply (Nat.le_lt_trans _ (4 * ((m - 1) / 2) ^ 2)). {
         rewrite H1, Nat.add_sub.
         rewrite (Nat.mul_comm 2), Nat.div_mul; [ | easy ].
         fold v.
@@ -901,7 +901,7 @@ Local Ltac end_z1_case Hz :=
         replace 0%Z with (Z.of_nat 0) in H by easy;
         now apply Nat2Z.inj_iff in H
       |
-        rewrite <- mod_Zmod; [ | easy ];
+        rewrite <- Nat2Z.inj_mod;
         now rewrite Nat.mod_mul
       ]
   ).
@@ -939,7 +939,7 @@ Lemma z1_divides_m : ∀ m x1 x2 x3 x4
 Proof.
 intros * Hmz Hz.
 apply (f_equal Z.of_nat) in Hz.
-rewrite mod_Zmod in Hz; [ | easy ].
+rewrite Nat2Z.inj_mod in Hz.
 set (v := m / 2) in g.
 unfold g.
 destruct (le_dec (x1 mod m) v) as [Hx1v| Hx1v]. {
@@ -1032,8 +1032,8 @@ Local Ltac z2_case_1 :=
   );
   try (
     rewrite Zminus_mod;
-    rewrite <- mod_Zmod; [ | easy ];
-    rewrite <- mod_Zmod; [ | easy ];
+    rewrite <- Nat2Z.inj_mod;
+    rewrite <- Nat2Z.inj_mod;
     try (rewrite Nat.mod_add; [ | easy ]);
     repeat (rewrite Nat_mod_add_l_mul_r; [ | easy ]);
     end_z2_case
@@ -1049,8 +1049,8 @@ Local Ltac z2_case_2 :=
     repeat rewrite <- Z.sub_add_distr;
     repeat rewrite <- Nat2Z.inj_add;
     rewrite Zminus_mod;
-    rewrite <- mod_Zmod; [ | easy ];
-    rewrite <- mod_Zmod; [ | easy ];
+    rewrite <- Nat2Z.inj_mod;
+    rewrite <- Nat2Z.inj_mod;
     try (rewrite Nat.mod_add; [ | easy ]);
     repeat (rewrite Nat_mod_add_l_mul_r; [ | easy ]);
     repeat (

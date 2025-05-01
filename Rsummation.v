@@ -77,8 +77,7 @@ rewrite (IHlen _ (S b₂)).
  do 2 rewrite Nat.add_succ_l, <- Nat.add_succ_r.
  apply Hgh.
  split; [ apply Nat.le_0_l | idtac ].
- apply lt_n_S.
- destruct Hi; assumption.
+ now apply -> Nat.succ_lt_mono.
 Qed.
 
 Theorem summation_compat : ∀ g h b k,
@@ -110,14 +109,14 @@ Proof.
 intros g b len H.
 revert b H.
 induction len; intros; [ reflexivity | simpl ].
-rewrite H; [ idtac | split; auto ].
- rewrite rng_add_0_l, IHlen; [ reflexivity | idtac ].
- intros i (Hbi, Hib); apply H.
- rewrite Nat.add_succ_r, <- Nat.add_succ_l.
- split; [ apply Nat.lt_le_incl; auto | auto ].
-
- rewrite Nat.add_succ_r.
- apply le_n_S, le_plus_l.
+rewrite H; [ idtac | split; auto ]. {
+  rewrite rng_add_0_l, IHlen; [ reflexivity | idtac ].
+  intros i (Hbi, Hib); apply H.
+  rewrite Nat.add_succ_r, <- Nat.add_succ_l.
+  split; [ apply Nat.lt_le_incl; auto | auto ].
+}
+rewrite Nat.add_succ_r.
+apply le_n_S, Nat.le_add_r.
 Qed.
 
 Theorem all_0_summation_0 : ∀ g i₁ i₂,
@@ -131,12 +130,14 @@ apply H.
 split; [ assumption | idtac ].
 destruct (le_dec i₁ (S i₂)) as [H₃| H₃].
  rewrite Nat.add_sub_assoc in H₂; auto.
- rewrite minus_plus in H₂.
+ rewrite Nat.add_comm, Nat.add_sub in H₂.
  apply le_S_n; auto.
 
- apply not_le_minus_0 in H₃.
- rewrite H₃, Nat.add_0_r in H₂.
- apply Nat.nle_gt in H₂; contradiction.
+ apply Nat.nle_gt in H₃.
+ apply Nat.lt_le_incl in H₃.
+ rewrite (proj2 (Nat.sub_0_le _ _)) in H₂; [ | easy ].
+ rewrite Nat.add_0_r in H₂.
+ now apply Nat.nle_gt in H₂.
 Qed.
 
 Theorem summation_aux_succ_last : ∀ g b len,
@@ -190,7 +191,8 @@ destruct b; simpl.
  rewrite Nat.sub_0_r.
  simpl in Hikb.
  eapply Nat.le_lt_trans in Hikb; eauto .
- apply lt_O_minus_lt, Nat.lt_le_incl in Hikb.
+ apply Arith_base.lt_O_minus_lt_stt in Hikb.
+ apply Nat.lt_le_incl in Hikb.
  remember (b + (k - b))%nat as x eqn:H .
  rewrite Nat.add_sub_assoc in H; auto.
  rewrite Nat.add_sub_swap in H; auto.
