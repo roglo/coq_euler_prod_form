@@ -1,5 +1,5 @@
-Require Import Utf8 Arith.
-Require Import Sorting.Permutation.
+From Stdlib Require Import Utf8 Arith.
+From Stdlib Require Import Sorting.Permutation.
 Import List List.ListNotations.
 
 Require Import Misc.
@@ -79,7 +79,7 @@ replace b with (S (b - 1)) at 1 2 by flia Hbz.
 rewrite (gcd_bezout_loop_enough_iter_lt _ (n - 1)); [ easy | | | ]. {
   destruct (Nat.eq_dec a b) as [Habe| Habe]. {
     subst a.
-    rewrite Nat.mod_same; [ | easy ].
+    rewrite Nat.Div0.mod_same.
     flia Habm.
   }
   rewrite Nat.mod_small; [ | flia Hab Habe ].
@@ -87,7 +87,7 @@ rewrite (gcd_bezout_loop_enough_iter_lt _ (n - 1)); [ easy | | | ]. {
 } {
   destruct (Nat.eq_dec a b) as [Habe| Habe]. {
     subst a.
-    rewrite Nat.mod_same; [ | easy ].
+    rewrite Nat.Div0.mod_same.
     flia Habn.
   }
   rewrite Nat.mod_small; [ | flia Hab Habe ].
@@ -113,7 +113,7 @@ destruct (Nat.eq_dec b 0) as [Hbz| Hbz]. {
 replace b with (S (b - 1)) at 1 by flia Hbz.
 remember (gcd_bezout_loop n b (a mod b)) as gb eqn:Hgb; symmetry in Hgb.
 destruct gb as (g, (u, v)).
-rewrite Nat.gcd_comm, <- Nat.gcd_mod; [ | easy ].
+rewrite Nat.gcd_comm, <- Nat.Lcm0.gcd_mod.
 rewrite Nat.gcd_comm.
 cbn.
 replace g with (fst (gcd_bezout_loop n b (a mod b))) by now rewrite Hgb.
@@ -152,12 +152,12 @@ remember (gcd_bezout_loop n b (a mod b)) as gb eqn:Hgb; symmetry in Hgb.
 destruct gb as (g, (u, v)); cbn.
 replace g with (fst (gcd_bezout_loop n b (a mod b))) by now rewrite Hgb.
 rewrite Nat.gcd_comm.
-rewrite <- Nat.gcd_mod; [ | easy ].
+rewrite <- Nat.Lcm0.gcd_mod.
 rewrite Nat.gcd_comm.
 apply fst_gcd_bezout_loop_is_gcd_lt; [ easy | | ]. {
   destruct (Nat.eq_dec a b) as [Habe| Habe]. {
     subst a.
-    rewrite Nat.mod_same; [ | easy ].
+    rewrite Nat.Div0.mod_same.
     flia Hn.
   }
   rewrite Nat.mod_small; [ | flia Hba Habe ].
@@ -295,7 +295,7 @@ rewrite <- Nat_sub_sub_distr. 2: {
       assert (Huv : w / a ≤ v / b) by flia H; clear H.
       rewrite max_l in Hk; [ | easy ].
       rewrite Hk.
-      apply (le_lt_trans _ (w / (w / a + 1))). {
+      apply (Nat.le_lt_trans _ (w / (w / a + 1))). {
         apply Nat.div_le_compat_l.
         split; [ flia | ].
         now apply Nat.add_le_mono_r.
@@ -355,7 +355,7 @@ apply IHn in Hgb; [ | easy | | | ]; cycle 1. {
 } {
   now apply Nat.mod_upper_bound.
 } {
-  rewrite Nat.gcd_comm, Nat.gcd_mod; [ | easy ].
+  rewrite Nat.gcd_comm, Nat.Lcm0.gcd_mod.
   now rewrite Nat.gcd_comm.
 }
 rewrite <- Hw.
@@ -413,7 +413,7 @@ destruct gb as (g', (u', v')).
 apply gcd_bezout_loop_prop_lt in Hgb; [ | easy | | ]; cycle 1. {
   destruct (Nat.eq_dec a b) as [Hab| Hab]. {
     subst b.
-    rewrite Nat.mod_same; [ flia Hn | easy ].
+    rewrite Nat.Div0.mod_same; flia Hn.
   }
   rewrite (Nat.add_comm b).
   rewrite Nat.mod_small; [ easy | flia Hba Hab ].
@@ -447,7 +447,7 @@ rewrite <- Nat_sub_sub_distr. 2: {
       assert (Huv : w / a ≤ v / b) by flia H; clear H.
       rewrite max_l in Hk; [ | easy ].
       rewrite Hk.
-      apply (le_lt_trans _ (w / (w / a + 1))). {
+      apply (Nat.le_lt_trans _ (w / (w / a + 1))). {
         apply Nat.div_le_compat_l.
         split; [ flia | ].
         now apply Nat.add_le_mono_r.
@@ -499,7 +499,8 @@ rewrite <- Nat.divide_div_mul_exact; [ | easy | ]. 2: {
     apply Nat.mul_le_mono_l.
     destruct (Nat.eq_dec a b) as [Hab| Hab]. {
       subst a.
-      rewrite Nat.mod_same; [ apply Nat.le_0_l | easy ].
+      rewrite Nat.Div0.mod_same.
+      apply Nat.le_0_l.
     }
     now apply Nat.mod_le.
   }
@@ -683,7 +684,7 @@ apply in_prod. {
       now apply Nat.mod_upper_bound.
     }
   } {
-    rewrite Nat.gcd_comm, Nat.gcd_mod; [ | easy ].
+    rewrite Nat.gcd_comm, Nat.Lcm0.gcd_mod.
     remember (Nat.gcd m a) as g eqn:Hg; symmetry in Hg.
     destruct g; [ now apply Nat.gcd_eq_0_l in Hg | ].
     destruct g; [ easy | exfalso ].
@@ -718,7 +719,7 @@ apply in_prod. {
       now apply Nat.mod_upper_bound.
     }
   } {
-    rewrite Nat.gcd_comm, Nat.gcd_mod; [ | easy ].
+    rewrite Nat.gcd_comm, Nat.Lcm0.gcd_mod.
     remember (Nat.gcd n a) as g eqn:Hg; symmetry in Hg.
     destruct g; [ now apply Nat.gcd_eq_0_l in Hg | ].
     destruct g; [ easy | exfalso ].
@@ -864,7 +865,7 @@ rewrite Nat_gcd_sub_diag_l. 2: {
   now apply Nat.neq_mul_0.
 }
 rewrite Nat.gcd_comm.
-rewrite Nat.gcd_mod; [ | now apply Nat.neq_mul_0 ].
+rewrite Nat.Lcm0.gcd_mod.
 rewrite Nat.gcd_comm.
 apply Nat_gcd_1_mul_r. {
   rewrite Hp.
@@ -896,7 +897,7 @@ apply Nat_gcd_1_mul_r. {
   }
   apply Nat_gcd_1_mul_r; [ | easy ].
   rewrite Nat_gcd_sub_diag_l; [ | flia Hnz ].
-  apply Nat.gcd_1_r.
+  apply Nat_gcd_1_r.
 }
 Qed.
 
@@ -1366,7 +1367,7 @@ split. {
     now apply Nat.mod_upper_bound.
   }
 } {
-  rewrite Nat.gcd_comm, Nat.gcd_mod; [ | easy ].
+  rewrite Nat.gcd_comm, Nat.Lcm0.gcd_mod.
   now apply Nat_gcd_1_mul_r.
 }
 Qed.
@@ -1387,7 +1388,7 @@ assert (H : ∀ a, a ∈ coprimes n → Nat.gcd n a = 1). {
   now apply in_coprimes_iff in H.
 }
 remember (coprimes n) as l eqn:Hl; symmetry in Hl; clear Hl.
-induction l as [| a l]; intros; [ apply Nat.gcd_1_r | ].
+induction l as [| a l]; intros; [ apply Nat_gcd_1_r | ].
 cbn; rewrite Nat.add_0_r.
 rewrite fold_left_mul_from_1.
 apply Nat_gcd_1_mul_r; [ now apply H; left | ].
@@ -1404,7 +1405,7 @@ intros * Hnz Haz Hg.
 destruct (Nat.eq_dec n 1) as [Hn1| Hn1]; [ now subst n | ].
 assert (Ha : a mod n ∈ coprimes n). {
   apply in_coprimes_iff.
-  rewrite Nat.gcd_comm, Nat.gcd_mod; [ | easy ].
+  rewrite Nat.gcd_comm, Nat.Lcm0.gcd_mod.
   rewrite Nat.gcd_comm.
   split; [ | easy ].
   apply in_seq.
