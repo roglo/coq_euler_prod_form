@@ -335,7 +335,7 @@ Notation "r ~{ i }" := (ls r i) (at level 1, format "r ~{ i }").
 
 Definition lp_add {F : field} p q :=
   {| lp :=
-       List.map (prod_curry f_add) (List_combine_all (lp p) (lp q) 0%F) |}.
+       List.map (uncurry f_add) (List_combine_all (lp p) (lp q) 0%F) |}.
 Definition lp_opp {F : field} p := {| lp := List.map f_opp (lp p) |}.
 Definition lp_sub {F : field} p q := lp_add p (lp_opp q).
 
@@ -1987,11 +1987,11 @@ apply list_of_pow_1_sub_pol_times_series; [ | easy | ]. {
     }
     apply Nat.nlt_ge in Hnb.
     rewrite (nth_overflow _ _ Hnb).
-    apply Nat.gcd_1_r.
+    apply Nat_gcd_1_r.
   }
   apply Nat.nlt_ge in Hna.
   rewrite (nth_overflow _ _ Hna).
-  apply Nat.gcd_1_r.
+  apply Nat_gcd_1_r.
 }
 Qed.
 
@@ -2028,12 +2028,11 @@ remember (nth na (primes_upto k) 1) as pa eqn:Hpa.
 remember (nth nb (primes_upto k) 1) as pb eqn:Hpb.
 move pb before pa.
 destruct (le_dec (length (primes_upto k)) na) as [Hka| Hka]. {
-  rewrite Hpa, nth_overflow; [ | easy ].
-  apply Nat.gcd_1_l.
+  now rewrite Hpa, nth_overflow.
 }
 destruct (le_dec (length (primes_upto k)) nb) as [Hkb| Hkb]. {
   rewrite Hpb, nth_overflow; [ | easy ].
-  apply Nat.gcd_1_r.
+  apply Nat_gcd_1_r.
 }
 apply Nat.nle_gt in Hka.
 apply Nat.nle_gt in Hkb.
@@ -2086,7 +2085,7 @@ assert (Hdn : d ∈ primes_upto n). {
   split. {
     destruct d; [ rewrite Hc in H1i; cbn in H1i; flia H1i | flia ].
   }
-  apply (le_lt_trans _ i); [ | flia Hin ].
+  apply (Nat.le_lt_trans _ i); [ | flia Hin ].
   rewrite Hc.
   destruct c; [ rewrite Hc, Nat.mul_0_r in H1i; flia H1i | ].
   rewrite Nat.mul_succ_r; flia.
