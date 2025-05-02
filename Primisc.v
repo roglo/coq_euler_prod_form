@@ -24,7 +24,7 @@ rewrite (filter_ext_in _ (λ d, negb (d mod p =? 0))). 2: {
   remember (a mod p) as r eqn:Hr; symmetry in Hr.
   destruct r. {
     apply Nat.eqb_neq.
-    apply Nat.mod_divides in Hr; [ | easy ].
+    apply Nat.Div0.mod_divides in Hr; [ | easy ].
     destruct Hr as (d, Hd).
     rewrite Hd.
     destruct k; [ easy | cbn ].
@@ -89,7 +89,7 @@ rewrite Nat.add_comm, Nat.sub_add. 2: {
 replace p with (1 + (p - 1)) at 2 by flia Hpz.
 rewrite seq_app, filter_app, app_length.
 cbn.
-rewrite Nat.mod_mul; [ | easy ]; cbn.
+rewrite Nat.Div0.mod_mul; [ | easy ]; cbn.
 rewrite (filter_ext_in _ (λ d, true)). 2: {
   intros b Hb.
   remember (b mod p) as c eqn:Hc; symmetry in Hc.
@@ -233,7 +233,7 @@ rewrite Nat.add_sub_assoc. 2: {
 rewrite Nat.add_sub_swap; [ | flia ].
 rewrite Nat.add_sub.
 rewrite Nat_mod_add_l_mul_l; [ | easy ].
-rewrite Nat.mod_same; [ cbn | easy ].
+rewrite Nat.Div0.mod_same; [ cbn | easy ].
 rewrite List_filter_all_true. 2: {
   intros c Hc.
   apply Bool.negb_true_iff, Nat.eqb_neq.
@@ -609,7 +609,7 @@ assert (H2 : a ^ (b mod ord_mod n a) ≡ 1 mod n). {
   rewrite H1 in Habn.
   rewrite Nat.pow_add_r in Habn.
   rewrite Nat.pow_mul_r in Habn.
-  rewrite <- Nat.mul_mod_idemp_l in Habn; [ | flia H2n ].
+  rewrite <- Nat.Div0.mul_mod_idemp_l in Habn; [ | flia H2n ].
   rewrite <- Nat_mod_pow_mod in Habn.
   rewrite Han in Habn.
   rewrite Nat.pow_1_l in Habn.
@@ -758,7 +758,7 @@ assert (Hrr : r1 = r). {
   rewrite Nat.pow_mul_r in Habo.
   rewrite Nat.pow_mul_l in Habo.
   rewrite <- Nat_mod_pow_mod in Habo.
-  rewrite <- Nat.mul_mod_idemp_r in Habo; [ | flia H2n ].
+  rewrite <- Nat.Div0.mul_mod_idemp_r in Habo; [ | flia H2n ].
   rewrite Hbo, Nat.mul_1_r in Habo.
   rewrite Nat_mod_pow_mod in Habo.
   rewrite <- Nat.pow_mul_r in Habo.
@@ -791,7 +791,7 @@ assert (Hss : s1 = s). {
   rewrite Nat.pow_mul_r in Habo.
   rewrite Nat.pow_mul_l in Habo.
   rewrite <- Nat_mod_pow_mod in Habo.
-  rewrite <- Nat.mul_mod_idemp_l in Habo; [ | flia H2n ].
+  rewrite <- Nat.Div0.mul_mod_idemp_l in Habo; [ | flia H2n ].
   rewrite Hao, Nat.mul_1_l in Habo.
   rewrite Nat_mod_pow_mod in Habo.
   rewrite <- Nat.pow_mul_r in Habo.
@@ -848,7 +848,7 @@ specialize (H1 H); clear H.
 apply (f_equal (λ x, a ^ x mod n)) in H1.
 rewrite Nat.pow_add_r in H1.
 rewrite Nat.pow_mul_r in H1.
-rewrite <- Nat.mul_mod_idemp_l in H1; [ | flia H2n ].
+rewrite <- Nat.Div0.mul_mod_idemp_l in H1; [ | flia H2n ].
 rewrite <- (Nat_mod_pow_mod (a ^ φ n)) in H1.
 rewrite euler_fermat_little in H1; [ | flia H2n | easy | easy ].
 rewrite Nat.mod_1_l in H1; [ | easy ].
@@ -976,8 +976,8 @@ destruct (Nat.eq_dec n2 0) as [Hnz| Hnz]. {
   now unfold n2 in Hnz; rewrite Nat.add_comm in Hnz.
 }
 apply eq_Zn_eq; cbn.
-rewrite Nat.add_mod_idemp_r; [ | easy ].
-rewrite Nat.add_mod_idemp_l; [ | easy ].
+rewrite Nat.Div0.add_mod_idemp_r; [ | easy ].
+rewrite Nat.Div0.add_mod_idemp_l; [ | easy ].
 now rewrite Nat.add_assoc.
 Qed.
 
@@ -988,7 +988,7 @@ destruct (Nat.eq_dec n2 0) as [Hnz| Hnz]. {
   now unfold n2 in Hnz; rewrite Nat.add_comm in Hnz.
 }
 apply eq_Zn_eq; cbn.
-rewrite Nat.mod_0_l; [ | easy ].
+rewrite Nat.Div0.mod_0_l; [ | easy ].
 rewrite Nat.add_0_l.
 apply Nat.mod_small.
 now destruct a.
@@ -1001,10 +1001,10 @@ destruct (Nat.eq_dec n2 0) as [Hnz| Hnz]. {
   now unfold n2 in Hnz; rewrite Nat.add_comm in Hnz.
 }
 apply eq_Zn_eq; cbn.
-rewrite Nat.add_mod_idemp_l; [ | easy ].
+rewrite Nat.Div0.add_mod_idemp_l; [ | easy ].
 rewrite Nat.sub_add; [ | now destruct a; apply Nat.lt_le_incl ].
-rewrite Nat.mod_0_l; [ | easy ].
-now apply Nat.mod_same.
+rewrite Nat.Div0.mod_0_l; [ | easy ].
+now apply Nat.Div0.mod_same.
 Qed.
 
 Theorem Zn_mul_comm n : ∀ a b : Zn n, Zn_mul a b = Zn_mul b a.
@@ -1022,8 +1022,8 @@ destruct (Nat.eq_dec n2 0) as [Hnz| Hnz]. {
   now unfold n2 in Hnz; rewrite Nat.add_comm in Hnz.
 }
 apply eq_Zn_eq; cbn.
-rewrite Nat.mul_mod_idemp_r; [ | easy ].
-rewrite Nat.mul_mod_idemp_l; [ | easy ].
+rewrite Nat.Div0.mul_mod_idemp_r; [ | easy ].
+rewrite Nat.Div0.mul_mod_idemp_l; [ | easy ].
 now rewrite Nat.mul_assoc.
 Qed.
 
@@ -1049,9 +1049,9 @@ destruct (Nat.eq_dec n2 0) as [Hnz| Hnz]. {
   unfold n2 in Hnz; flia Hnz.
 }
 apply eq_Zn_eq; cbn.
-rewrite Nat.mul_mod_idemp_r; [ | easy ].
-rewrite Nat.add_mod_idemp_l; [ | easy ].
-rewrite Nat.add_mod_idemp_r; [ | easy ].
+rewrite Nat.Div0.mul_mod_idemp_r; [ | easy ].
+rewrite Nat.Div0.add_mod_idemp_l; [ | easy ].
+rewrite Nat.Div0.add_mod_idemp_r; [ | easy ].
 now rewrite Nat.mul_add_distr_l.
 Qed.
 
@@ -1064,7 +1064,7 @@ apply Nat.nle_gt in Hn1.
 intros H10.
 injection H10; intros H.
 rewrite Nat.mod_1_l in H; [ | easy ].
-rewrite Nat.mod_0_l in H; [ easy | flia Hn1 ].
+rewrite Nat.Div0.mod_0_l in H; [ easy | flia Hn1 ].
 Qed.
 
 Theorem Zn_eq_dec {n : nat2} : ∀ a b : Zn n, {a = b} + {a ≠ b}.

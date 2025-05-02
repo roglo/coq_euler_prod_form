@@ -473,25 +473,25 @@ apply Nat.Div0.mod_mul.
 Qed.
 
 Theorem Nat_mod_add_r_mul_l : ∀ a b c,
-  b ≠ 0 → (a + b * c) mod b = a mod b.
+  (a + b * c) mod b = a mod b.
 Proof.
-intros * Hbz.
+intros.
 rewrite Nat.mul_comm.
 apply Nat.Div0.mod_add.
 Qed.
 
 Theorem Nat_mod_add_l_mul_l : ∀ a b c,
-  b ≠ 0 → (b * c + a) mod b = a mod b.
+  (b * c + a) mod b = a mod b.
 Proof.
-intros * Hbz.
+intros.
 rewrite Nat.add_comm, Nat.mul_comm.
 apply Nat.Div0.mod_add.
 Qed.
 
 Theorem Nat_mod_add_l_mul_r : ∀ a b c,
-  b ≠ 0 → (c * b + a) mod b = a mod b.
+  (c * b + a) mod b = a mod b.
 Proof.
-intros * Hbz.
+intros.
 rewrite Nat.add_comm.
 apply Nat.Div0.mod_add.
 Qed.

@@ -536,7 +536,7 @@ destruct k.
    rewrite Nat.add_comm.
    rewrite Nat.Div0.mod_add.
    intros H; apply Hj; clear Hj.
-   apply Nat.mod_divides in H; auto.
+   apply Nat.Div0.mod_divides in H; auto.
    destruct H as (c, Hc).
    destruct c.
     rewrite Nat.mul_0_r in Hc; assumption.

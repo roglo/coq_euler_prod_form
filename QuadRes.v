@@ -1,5 +1,5 @@
-Require Import Utf8 Arith.
-Require Import Sorting.Permutation.
+From Stdlib Require Import Utf8 Arith.
+From Stdlib Require Import Sorting.Permutation.
 Import List List.ListNotations.
 Require Import Misc Primes.
 
@@ -129,10 +129,10 @@ split; intros Hap. 2: {
   split; [ now apply Nat.mod_upper_bound | ].
   rewrite Nat_mod_pow_mod.
   rewrite <- Nat.pow_mul_r.
-  rewrite <- (proj2 (Nat.div_exact _ _ (Nat.neq_succ_0 _))). 2: {
+  rewrite <- (proj2 (Nat.Div0.div_exact _ _)). 2: {
     specialize (odd_prime p Hp Hp2) as H1.
     specialize (Nat.div_mod p 2 (Nat.neq_succ_0 _)) as H2.
-    now rewrite H2, H1, Nat.add_sub, Nat.mul_comm, Nat.mod_mul.
+    now rewrite H2, H1, Nat.add_sub, Nat.mul_comm, Nat.Div0.mod_mul.
   }
   now apply fermat_little.
 } {
@@ -196,12 +196,12 @@ split; intros Hap. 2: {
     assert (H : ¬ (∀ n : nat, 1 ≤ n ≤ p - 1 → (b * n) mod p ≠ a)). {
       intros H; apply Hb'; intros b'.
       destruct (Nat.eq_dec (b' mod p) 0) as [Hb'z| Hb'z]. {
-        rewrite <- Nat.mul_mod_idemp_r; [ | easy ].
+        rewrite <- Nat.Div0.mul_mod_idemp_r.
         rewrite Hb'z, Nat.mul_0_r; cbn.
-        rewrite Nat.mod_0_l; [ | easy ].
+        rewrite Nat.Div0.mod_0_l.
         now apply Nat.neq_sym.
       }
-      rewrite <- Nat.mul_mod_idemp_r; [ | easy ].
+      rewrite <- Nat.Div0.mul_mod_idemp_r.
       apply H.
       split; [ flia Hb'z | ].
       rewrite Nat.sub_1_r.
@@ -213,17 +213,17 @@ split; intros Hap. 2: {
     exists (b' mod p).
     split. {
       split; [ now apply Nat.mod_upper_bound | ].
-      now rewrite Nat.mul_mod_idemp_r.
+      now rewrite Nat.Div0.mul_mod_idemp_r.
     } {
       intros x (Hxp & Hxa).
-      rewrite <- Nat.mul_mod_idemp_r in H2; [ | easy ].
+      rewrite <- Nat.Div0.mul_mod_idemp_r in H2.
       rewrite <- H2 in Hxa.
       destruct (le_dec (b' mod p) x) as [Hbx| Hbx]. {
         apply Nat_mul_mod_cancel_l in Hxa. 2: {
           rewrite Nat.gcd_comm.
           now apply eq_gcd_prime_small_1.
         }
-        rewrite Nat.mod_mod in Hxa; [ | easy ].
+        rewrite Nat.Div0.mod_mod in Hxa.
         rewrite <- Hxa.
         now apply Nat.mod_small.
       } {
@@ -233,7 +233,7 @@ split; intros Hap. 2: {
           rewrite Nat.gcd_comm.
           now apply eq_gcd_prime_small_1.
         }
-        rewrite Nat.mod_mod in Hxa; [ | easy ].
+        rewrite Nat.Div0.mod_mod in Hxa.
         symmetry in Hxa.
         now rewrite Nat.mod_small in Hxa.
       }
@@ -288,7 +288,7 @@ split; intros Hap. 2: {
         split; [ | flia Hj1 ].
         destruct j; [ | flia ].
         symmetry in Hj2.
-        now rewrite Nat.mul_0_r, Nat.mod_0_l in Hj2.
+        now rewrite Nat.mul_0_r, Nat.Div0.mod_0_l in Hj2.
       }
       split; [ easy | ].
       split; [ easy | ].
@@ -309,7 +309,7 @@ split; intros Hap. 2: {
         split; [ | flia Hj1 ].
         destruct j; [ | flia ].
         symmetry in Hj2.
-        now rewrite Nat.mul_0_r, Nat.mod_0_l in Hj2.
+        now rewrite Nat.mul_0_r, Nat.Div0.mod_0_l in Hj2.
       } {
         intros Hkj.
         move Hj2 at bottom.
@@ -320,7 +320,7 @@ split; intros Hap. 2: {
             apply eq_gcd_prime_small_1; [ easy | ].
             split; [ | easy ].
             destruct j; [ | flia ].
-            rewrite Nat.mul_0_r, Nat.mod_0_l in Hkj; [ | easy ].
+            rewrite Nat.mul_0_r, Nat.Div0.mod_0_l in Hkj.
             now symmetry in Hkj.
           }
           rewrite Nat.mod_small in Hj2. 2: {
@@ -338,7 +338,7 @@ split; intros Hap. 2: {
             apply eq_gcd_prime_small_1; [ easy | ].
             split; [ | easy ].
             destruct j; [ | flia ].
-            rewrite Nat.mul_0_r, Nat.mod_0_l in Hkj; [ | easy ].
+            rewrite Nat.mul_0_r, Nat.Div0.mod_0_l in Hkj.
             now symmetry in Hkj.
           }
           rewrite Hl in Hk; apply in_seq in Hk.
@@ -375,7 +375,7 @@ split; intros Hap. 2: {
     do 2 rewrite Nat.mul_assoc.
     remember (i2 * 2) as x.
     rewrite <- Nat.mul_assoc; subst x.
-    rewrite <- Nat.mul_mod_idemp_l; [ | easy ].
+    rewrite <- Nat.Div0.mul_mod_idemp_l.
     rewrite (Nat.mul_comm i2).
     rewrite Hai2p.
     replace (S len) with (len - 1 + 1 * 2). 2: {
@@ -388,8 +388,8 @@ split; intros Hap. 2: {
     }
     rewrite Nat.div_add; [ | easy ].
     rewrite Nat.add_comm, Nat.pow_add_r, Nat.pow_1_r.
-    rewrite <- Nat.mul_mod_idemp_r; [ | easy ].
-    rewrite <- (Nat.mul_mod_idemp_r _ (a ^ _)); [ | easy ].
+    rewrite <- Nat.Div0.mul_mod_idemp_r.
+    rewrite <- (Nat.Div0.mul_mod_idemp_r _ (a ^ _)).
     f_equal; f_equal.
     rewrite Nat.mul_comm.
     rewrite List_fold_left_mul_assoc, Nat.mul_1_l.

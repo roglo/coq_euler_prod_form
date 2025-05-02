@@ -4,7 +4,7 @@
 (* borrowed 2021-01-17 from my development "coq_euler_prod_form" *)
 
 Set Nested Proofs Allowed.
-Require Import Utf8 Arith.
+From Stdlib Require Import Utf8 Arith.
 Import List List.ListNotations.
 Require Import Misc.
 
@@ -216,7 +216,7 @@ destruct fd as [(n, n') |]. {
     specialize (proj1 (NoDup_map_iff 0 _ _) Hfd) as H1.
     apply (NoDup_map_iff 0).
     intros x x' Hx Hx' Hxx.
-    rewrite seq_length in Hx, Hx', H1.
+    rewrite length_seq in Hx, Hx', H1.
     rewrite seq_nth in Hxx; [ | easy ].
     rewrite seq_nth in Hxx; [ cbn | easy ].
     cbn in Hxx.
