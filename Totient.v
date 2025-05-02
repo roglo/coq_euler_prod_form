@@ -1258,7 +1258,7 @@ Theorem φ_multiplicative : ∀ m n,
 Proof.
 intros * H2m H2n Hg.
 unfold φ.
-rewrite <- prod_length.
+rewrite <- length_prod.
 apply
   (bijection_same_length (prod_copr_of_copr_mul m n)
      (copr_mul_of_prod_copr m n)). {
@@ -1353,7 +1353,7 @@ split. {
   split. {
     remember ((i * j) mod n) as a eqn:Ha; symmetry in Ha.
     destruct a; [ | flia ].
-    apply Nat.mod_divide in Ha; [ | easy ].
+    apply Nat.Lcm0.mod_divide in Ha.
     apply Nat.gauss in Ha; [ | easy ].
     destruct Ha as (k, Hk).
     replace n with (1 * n) in Hgj by flia.
@@ -1440,7 +1440,7 @@ assert
   (Hperm :
      Permutation (map (λ i, (i * a) mod n) (coprimes n)) (coprimes n)). {
   apply NoDup_Permutation_bis; cycle 1. {
-    now rewrite map_length.
+    now rewrite length_map.
   } {
     intros i Hi.
     apply in_map_iff in Hi.

@@ -94,7 +94,7 @@ rewrite (filter_ext_in _ (λ d, true)). 2: {
   intros b Hb.
   remember (b mod p) as c eqn:Hc; symmetry in Hc.
   destruct c; [ | easy ].
-  apply Nat.mod_divide in Hc; [ | easy ].
+  apply Nat.Lcm0.mod_divide in Hc; [ | easy ].
   destruct Hc as (c, Hc).
   subst b.
   apply in_seq in Hb.
@@ -365,7 +365,7 @@ split; intros Ha. {
   destruct H as (Hpa, Hna).
   apply Nat.eqb_eq in Hna.
   apply in_seq in Ha.
-  apply Nat.mod_divide in Hna; [ | flia Ha ].
+  apply Nat.Lcm0.mod_divide in Hna; [ | flia Ha ].
   apply prime_decomp_in_iff.
   split; [ | split ]; [ flia Ha | easy | easy ].
 } {
@@ -385,7 +385,7 @@ split; intros Ha. {
   apply Bool.andb_true_iff.
   split; [ easy | ].
   apply Nat.eqb_eq.
-  apply Nat.mod_divide in Han; [ easy | ].
+  apply Nat.Lcm0.mod_divide in Han; [ easy | ].
   now intros H1; subst a.
 }
 Qed.
