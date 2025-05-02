@@ -383,7 +383,7 @@ split; intros Hap. 2: {
       cbn in Hlen.
       apply Nat.succ_inj in Hlen.
       rewrite Hll in Hlen.
-      rewrite app_length in Hlen; cbn in Hlen.
+      rewrite length_app in Hlen; cbn in Hlen.
       now rewrite Nat.add_comm in Hlen.
     }
     rewrite Nat.div_add; [ | easy ].
@@ -398,7 +398,7 @@ split; intros Hap. 2: {
       cbn in Hlen.
       apply Nat.succ_inj in Hlen.
       rewrite <- Hlen, Hll.
-      do 2 rewrite app_length.
+      do 2 rewrite length_app.
       cbn; flia.
     } {
       apply NoDup_cons_iff in Hnd.

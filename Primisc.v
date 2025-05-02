@@ -1149,7 +1149,7 @@ Context {rng : ring A}.
 Example xk_1 : ∀ k, degree (ⓧ^k - 1)%pol = k.
 Proof.
 intros; cbn.
-rewrite rev_length.
+rewrite length_rev.
 destruct (rng_eq_dec (-1%Rng) 0) as [H10|H10]; [ | clear H10 ]. {
   cbn in H10.
   apply (f_equal rng_opp) in H10.
@@ -1191,7 +1191,7 @@ destruct (rng_eq_dec 1 0) as [H1| H1]. {
   now apply rng_1_neq_0 in H1.
 }
 injection Hla; clear Hla; intros; subst a la.
-now rewrite rev_length, repeat_length.
+now rewrite length_rev, repeat_length.
 Qed.
 
 Definition is_polynomial_root pol x :=

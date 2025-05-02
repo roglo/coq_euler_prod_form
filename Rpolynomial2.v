@@ -3,7 +3,7 @@
 (* polynomials on a ring *)
 
 Set Nested Proofs Allowed.
-Require Import Utf8 Arith.
+From Stdlib Require Import Utf8 Arith.
 Import List ListNotations.
 
 Require Import Misc Ring2 Rsummation.
@@ -96,7 +96,7 @@ Definition poly_norm {A} {rng : ring A} la :=
   mkpoly (lap_norm la) (proj2 (eq_poly_prop _) (poly_norm_prop la)).
 
 (**)
-Require Import ZArith.
+From Stdlib Require Import ZArith.
 
 Theorem Z_1_neq_0 : (1 ≠ 0)%Z.
 Proof. easy. Qed.
@@ -753,7 +753,7 @@ intros * Hll Hlen.
 unfold lap_norm in Hll.
 apply (f_equal (@rev α)) in Hll.
 do 2 rewrite rev_involutive in Hll.
-setoid_rewrite <- rev_length in Hlen.
+setoid_rewrite <- length_rev in Hlen.
 enough (H : rev la = rev lb). {
   apply (f_equal (@rev α)) in H.
   now do 2 rewrite rev_involutive in H.
@@ -864,11 +864,11 @@ split; intros H i. {
   destruct (lt_dec i (length la)) as [Hila| Hila]. {
     rewrite rev_nth; [ apply H | easy ].
   }
-  apply nth_overflow; rewrite rev_length; flia Hila.
+  apply nth_overflow; rewrite length_rev; flia Hila.
 } {
   destruct (lt_dec i (length la)) as [Hila| Hila]. {
     rewrite <- (rev_involutive la).
-    rewrite rev_nth; [ apply H | now rewrite rev_length ].
+    rewrite rev_nth; [ apply H | now rewrite length_rev ].
   }
   apply nth_overflow; flia Hila.
 }
@@ -1025,7 +1025,7 @@ assert (H : strip_0s (rev la) = []). {
     now cbn in Hla.
   }
   apply Nat.nlt_ge in Hila.
-  rewrite nth_overflow; [ easy | now rewrite rev_length ].
+  rewrite nth_overflow; [ easy | now rewrite length_rev ].
 }
 now rewrite Hlb in H.
 Qed.
@@ -1048,7 +1048,7 @@ destruct lb as [| b]. {
       specialize (proj1 (eq_strip_0s_nil _) Hlb) as H1.
       destruct (lt_dec i (length la)) as [Hila| Hila]. {
         replace la with (rev (rev la)) by apply rev_involutive.
-        rewrite rev_nth; rewrite rev_length; [ | easy ].
+        rewrite rev_nth; rewrite length_rev; [ | easy ].
         apply H1.
       }
       apply Nat.nlt_ge in Hila.
@@ -1064,7 +1064,7 @@ destruct lb as [| b]. {
       specialize (proj1 (eq_strip_0s_nil _) Hlb) as H1.
       destruct (lt_dec i (length la)) as [Hila| Hila]. {
         replace la with (rev (rev la)) by apply rev_involutive.
-        rewrite rev_nth; rewrite rev_length; [ | easy ].
+        rewrite rev_nth; rewrite length_rev; [ | easy ].
         apply H1.
       }
       apply Nat.nlt_ge in Hila.
@@ -1154,7 +1154,7 @@ Theorem lap_norm_length_le : ∀ la, length (lap_norm la) ≤ length la.
 Proof.
 intros.
 rewrite (lap_norm_repeat_0 la) at 2.
-rewrite app_length; flia.
+rewrite length_app; flia.
 Qed.
 
 Theorem nth_lap_add : ∀ i la lb,
@@ -1191,11 +1191,11 @@ destruct lc as [| c]. {
     specialize (proj1 (eq_strip_0s_nil _) Hlc) as H1.
     destruct (lt_dec i (length la)) as [Hil| Hil]. {
       specialize (H1 (length la - S i)).
-      rewrite <- rev_length in H1.
+      rewrite <- length_rev in H1.
       rewrite <- rev_nth in H1. {
         now rewrite rev_involutive in H1.
       }
-      now rewrite rev_length.
+      now rewrite length_rev.
     }
     apply Nat.nlt_ge in Hil.
     now rewrite nth_overflow.
@@ -1210,11 +1210,11 @@ destruct lc as [| c]. {
     specialize (proj1 (eq_strip_0s_nil _) Hlc) as H1.
     destruct (lt_dec i (length la)) as [Hil| Hil]. {
       specialize (H1 (length la - S i)).
-      rewrite <- rev_length in H1.
+      rewrite <- length_rev in H1.
       rewrite <- rev_nth in H1. {
         now rewrite rev_involutive in H1.
       }
-      now rewrite rev_length.
+      now rewrite length_rev.
     }
     apply Nat.nlt_ge in Hil.
     now rewrite nth_overflow.
