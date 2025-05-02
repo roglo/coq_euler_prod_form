@@ -1105,18 +1105,37 @@ destruct (le_dec (x2 mod m) v) as [Hx2v| Hx2v]. {
       rewrite <- Nat.Div0.add_mod_idemp_r;
       now rewrite Nat.Div0.mod_mul
     ).
-...
-    end_z2_case.
-  ).
-  repeat rewrite Z.add_sub_assoc.
-  repeat rewrite <- Nat2Z.inj_add.
 
-    rewrite <- Z.add_sub_swap.
-    rewrite <- Nat2Z.inj_add.
-...
-      destruct (le_dec (x4 mod m) v); [ z2_case_1 | z2_case_2 ].
-...
-    }
+  setoid_rewrite Nat.Div0.add_mod; try easy.
+  rewrite Nat.Div0.mul_mod_idemp_r.
+  rewrite Nat.Div0.mul_mod_idemp_r.
+  rewrite Nat.Div0.add_mod_idemp_l.
+  rewrite Nat.Div0.add_mod_idemp_l.
+  rewrite Nat.Div0.add_mod_idemp_r.
+  rewrite Nat.Div0.add_mod_idemp_r.
+(**)
+rewrite <- Nat.Div0.add_mod_idemp_l.
+rewrite <- (Nat.Div0.add_mod_idemp_l (x1 * _)).
+  rewrite Nat.Div0.mul_mod_idemp_r.
+  rewrite Nat.Div0.add_mod_idemp_l.
+  rewrite <- Nat.add_assoc.
+  rewrite Nat.Div0.add_mod_idemp_l.
+  rewrite <- Nat.Div0.add_mod_idemp_r.
+  rewrite <- (Nat.Div0.add_mod_idemp_l (x4 * _)).
+  rewrite Nat.Div0.mul_mod_idemp_r.
+  rewrite <- (Nat.Div0.add_mod_idemp_r _ (x2 * m)).
+  rewrite Nat.Div0.mod_mul.
+  rewrite Nat.add_0_r.
+  rewrite Nat.Div0.add_mod_idemp_r.
+  rewrite Nat.Div0.add_mod_idemp_r.
+  rewrite (Nat.mul_comm x1).
+  rewrite (Nat.mul_comm x4).
+  rewrite Z.sub_diag.
+  rewrite Z.mod_0_l; [ easy | ].
+  intros H.
+  replace 0%Z with (Z.of_nat 0) in H by easy.
+  now apply Nat2Z.inj_iff in H.
+}
   } {
     z2_case_2.
     destruct (le_dec (x1 mod m) v) as [Hx1v| Hx1v]. {
@@ -1125,6 +1144,7 @@ destruct (le_dec (x2 mod m) v) as [Hx2v| Hx2v]. {
     } {
       z2_case_2.
       destruct (le_dec (x4 mod m) v); [ z2_case_1 | z2_case_2 ].
+...
     }
   }
 } {
