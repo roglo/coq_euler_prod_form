@@ -106,6 +106,8 @@ Qed.
 Definition poly_norm la :=
   mkpoly (lap_norm la) (proj2 (eq_poly_prop _) (poly_norm_prop la)).
 
+End a.
+
 (**)
 From Stdlib Require Import ZArith.
 
