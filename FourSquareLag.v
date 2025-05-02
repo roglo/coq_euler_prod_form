@@ -1266,23 +1266,22 @@ assert
       x4 * (x4 mod m)) mod m = 0). {
   rewrite <- Nat.Div0.add_mod_idemp_r.
   rewrite Nat.Div0.mul_mod_idemp_r.
-...
-  rewrite Nat.Div0.add_mod_idemp_r; [ | easy ].
+  rewrite Nat.Div0.add_mod_idemp_r.
   rewrite Nat.add_comm.
   do 2 rewrite Nat.add_assoc.
-  rewrite <- Nat.Div0.add_mod_idemp_r; [ | easy ].
-  rewrite Nat.Div0.mul_mod_idemp_r; [ | easy ].
-  rewrite Nat.Div0.add_mod_idemp_r; [ | easy ].
+  rewrite <- Nat.Div0.add_mod_idemp_r.
+  rewrite Nat.Div0.mul_mod_idemp_r.
+  rewrite Nat.Div0.add_mod_idemp_r.
   rewrite Nat.add_comm.
   do 2 rewrite Nat.add_assoc.
-  rewrite <- Nat.Div0.add_mod_idemp_r; [ | easy ].
-  rewrite Nat.Div0.mul_mod_idemp_r; [ | easy ].
-  rewrite Nat.Div0.add_mod_idemp_r; [ | easy ].
+  rewrite <- Nat.Div0.add_mod_idemp_r.
+  rewrite Nat.Div0.mul_mod_idemp_r.
+  rewrite Nat.Div0.add_mod_idemp_r.
   rewrite Nat.add_comm.
   do 2 rewrite Nat.add_assoc.
-  rewrite <- Nat.Div0.add_mod_idemp_r; [ | easy ].
-  rewrite Nat.Div0.mul_mod_idemp_r; [ | easy ].
-  rewrite Nat.Div0.add_mod_idemp_r; [ | easy ].
+  rewrite <- Nat.Div0.add_mod_idemp_r.
+  rewrite Nat.Div0.mul_mod_idemp_r.
+  rewrite Nat.Div0.add_mod_idemp_r.
   rewrite Nat.add_comm.
   do 2 rewrite Nat.add_assoc.
   do 4 rewrite <- Nat.pow_2_r.
