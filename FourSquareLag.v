@@ -1055,7 +1055,7 @@ Local Ltac z2_case_2 :=
     repeat rewrite Nat_mod_add_l_mul_r;
     repeat (
       rewrite <- Nat.Div0.add_mod_idemp_r;
-      now rewrite Nat.Div0.mod_mul
+      rewrite Nat.Div0.mod_mul, Nat.add_0_r
     );
     end_z2_case
   );
@@ -1144,7 +1144,6 @@ rewrite <- (Nat.Div0.add_mod_idemp_l (x1 * _)).
     } {
       z2_case_2.
       destruct (le_dec (x4 mod m) v); [ z2_case_1 | z2_case_2 ].
-...
     }
   }
 } {
@@ -1265,8 +1264,9 @@ assert
   (Hz :
      (x1 * (x1 mod m) + x2 * (x2 mod m) + x3 * (x3 mod m) +
       x4 * (x4 mod m)) mod m = 0). {
-  rewrite <- Nat.Div0.add_mod_idemp_r; [ | easy ].
-  rewrite Nat.Div0.mul_mod_idemp_r; [ | easy ].
+  rewrite <- Nat.Div0.add_mod_idemp_r.
+  rewrite Nat.Div0.mul_mod_idemp_r.
+...
   rewrite Nat.Div0.add_mod_idemp_r; [ | easy ].
   rewrite Nat.add_comm.
   do 2 rewrite Nat.add_assoc.
