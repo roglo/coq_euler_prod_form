@@ -350,7 +350,7 @@ split; intros Hap. 2: {
     }
     clear Hbb Hnres.
     replace (p - 1) with (length l). 2: {
-      now subst l; rewrite seq_length.
+      now subst l; rewrite length_seq.
     }
     clear Hap.
     clear Hl.

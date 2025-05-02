@@ -72,7 +72,7 @@ destruct (Nat.eq_dec a 0) as [Haz| Haz]. {
   rewrite Nat.sub_succ, Nat.sub_0_r.
   induction p; [ easy | ].
   rewrite <- (Nat.add_1_r p).
-  rewrite seq_app, filter_app, app_length.
+  rewrite seq_app, filter_app, length_app.
   now rewrite IHp.
 }
 rewrite <- Nat.add_sub_assoc. 2: {
@@ -80,14 +80,14 @@ rewrite <- Nat.add_sub_assoc. 2: {
   now apply Nat.neq_mul_0.
 }
 rewrite Nat.add_comm.
-rewrite seq_app, filter_app, app_length.
+rewrite seq_app, filter_app, length_app.
 rewrite IHa, Nat.add_comm; f_equal.
 rewrite Nat.add_comm, Nat.sub_add. 2: {
   apply Nat.neq_0_lt_0.
   now apply Nat.neq_mul_0.
 }
 replace p with (1 + (p - 1)) at 2 by flia Hpz.
-rewrite seq_app, filter_app, app_length.
+rewrite seq_app, filter_app, length_app.
 cbn.
 rewrite Nat.Div0.mod_mul; [ | easy ]; cbn.
 rewrite (filter_ext_in _ (λ d, true)). 2: {
@@ -141,7 +141,7 @@ rewrite Nat.sub_succ, Nat.sub_0_r.
 revert b.
 induction p; intros; [ easy | ].
 rewrite <- Nat.add_1_r.
-rewrite seq_app, filter_app, app_length.
+rewrite seq_app, filter_app, length_app.
 now rewrite IHp.
 Qed.
 
@@ -194,7 +194,7 @@ replace b with (b - r + r) at 1. 2: {
   apply Nat.sub_add.
   now rewrite Hr; apply Nat.lt_le_incl, Nat.mod_upper_bound.
 }
-rewrite seq_app, filter_app, app_length.
+rewrite seq_app, filter_app, length_app.
 rewrite List_filter_all_true. 2: {
   intros c Hc.
   apply Bool.negb_true_iff, Nat.eqb_neq.
@@ -222,9 +222,9 @@ rewrite List_filter_all_true. 2: {
   apply (le_lt_trans _ (b * q)); [ | flia Hab1 ].
   now apply Nat.mul_le_mono_l.
 }
-rewrite seq_length.
+rewrite length_seq.
 replace r with (1 + (r - 1)) at 3 by flia Hab1.
-rewrite seq_app, filter_app, app_length; cbn.
+rewrite seq_app, filter_app, length_app; cbn.
 rewrite H1 at 1.
 rewrite Nat.add_sub_assoc. 2: {
   rewrite Hr.
@@ -284,7 +284,7 @@ rewrite List_filter_all_true. 2: {
   rewrite Hr.
   now apply Nat.lt_le_incl, Nat.mod_upper_bound.
 }
-rewrite seq_length.
+rewrite length_seq.
 rewrite Nat.add_sub_assoc; [ | flia Hab1 ].
 rewrite Nat.sub_add; [ easy | ].
 rewrite Hr.
@@ -454,7 +454,7 @@ split. {
   cbn; rewrite Nat.gcd_1_r; cbn; flia.
 } {
   rewrite List_length_filter_negb; [ | apply seq_NoDup ].
-  rewrite seq_length.
+  rewrite length_seq.
   flia H2n.
 }
 Qed.
@@ -1181,7 +1181,7 @@ destruct la as [| a]. {
 }
 cbn.
 rewrite Nat.sub_0_r.
-rewrite app_length; cbn.
+rewrite length_app; cbn.
 rewrite Nat.add_comm; cbn; f_equal.
 rewrite rev_app_distr in Hla.
 cbn - [ "++" ] in Hla.
