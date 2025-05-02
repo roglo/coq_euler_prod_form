@@ -6,21 +6,33 @@ Set Nested Proofs Allowed.
 From Stdlib Require Import Utf8 Arith.
 Import List ListNotations.
 
+(*
 Require Import Misc Ring2 Rsummation.
+*)
+Require Import Misc.
+Require Import RingLike.RingLike.
+(**)
 
 (* definition of a polynomial *)
 
-Definition rng_eqb {A} {rng : ring A} (a b : A) :=
-  if rng_eq_dec a b then true else false.
+Section a.
+
+Context {A : Type}.
+Context {ro : ring_like_op A}.
+Context {rp : ring_like_prop A}.
+Context {Heo : rngl_has_eq_dec_or_order A = true}.
+Context {Hon : rngl_has_1 A = true}.
+Context {Hc1 : rngl_characteristic A ≠ 1}.
+
+Definition rng_eqb (a b : A) :=
+  if rngl_eq_dec Heo a b then true else false.
 
 (* (lap : list as polynomial) *)
-Record poly A {rng : ring A} := mkpoly
+Record poly := mkpoly
   { lap : list A;
-    lap_prop : rng_eqb (last lap 1%Rng) 0%Rng = false }.
+    lap_prop : rng_eqb (last lap 1%L) 0%L = false }.
 
-Arguments lap {A} {rng}.
-
-Theorem eq_poly_eq {A} {rng : ring A} : ∀ p1 p2, p1 = p2 ↔ lap p1 = lap p2.
+Theorem eq_poly_eq : ∀ p1 p2, p1 = p2 ↔ lap p1 = lap p2.
 Proof.
 intros.
 split; [ now intros; subst p1 | ].
@@ -31,37 +43,35 @@ cbn in Hll; subst la; f_equal.
 apply (Eqdep_dec.UIP_dec Bool.bool_dec).
 Qed.
 
-Theorem eq_poly_prop {A} {rng : ring A} : ∀ la,
-  rng_eqb (last la 1%Rng) 0%Rng = false ↔ last la 1%Rng ≠ 0%Rng.
+Theorem eq_poly_prop : ∀ la,
+  rng_eqb (last la 1%L) 0%L = false ↔ last la 1%L ≠ 0%L.
 Proof.
 intros.
 unfold rng_eqb.
-now destruct (rng_eq_dec (last la 1%Rng) 0%Rng).
+now destruct (rngl_eq_dec Heo (last la 1%L) 0%L).
 Qed.
 
-Arguments mkpoly {_} {_}.
-
-Theorem lap_1_0_prop {A} {rng : ring A} :
-  rng_eqb (last [] 1%Rng) 0%Rng = false.
+Theorem lap_1_0_prop :
+  rng_eqb (last [] 1%L) 0%L = false.
 Proof.
 cbn.
 unfold rng_eqb.
-destruct (rng_eq_dec 1%Rng 0%Rng); [ | easy ].
-now apply rng_1_neq_0 in e.
+destruct (rngl_eq_dec Heo 1%L 0%L); [ | easy ].
+now apply (rngl_1_neq_0_iff Hon) in e.
 Qed.
 
-Definition poly_zero {α} {r : ring α} := mkpoly [] lap_1_0_prop.
-Definition poly_one {α} {r : ring α} := mkpoly [1%Rng] lap_1_0_prop.
+Definition poly_zero := mkpoly [] lap_1_0_prop.
+Definition poly_one := mkpoly [1%L] lap_1_0_prop.
 
 (* normalization *)
 
-Fixpoint strip_0s {A} {rng : ring A} la :=
+Fixpoint strip_0s la :=
   match la with
   | [] => []
-  | a :: la' => if rng_eq_dec a 0%Rng then strip_0s la' else la
+  | a :: la' => if rngl_eq_dec Heo a 0%L then strip_0s la' else la
   end.
 
-Lemma strip_0s_app {A} {rng : ring A} : ∀ la lb,
+Lemma strip_0s_app : ∀ la lb,
   strip_0s (la ++ lb) =
   match strip_0s la with
   | [] => strip_0s lb
@@ -71,28 +81,29 @@ Proof.
 intros.
 revert lb.
 induction la as [| a]; intros; [ easy | cbn ].
-destruct (rng_eq_dec a 0%Rng) as [Haz| Haz]; [ apply IHla | easy ].
+destruct (rngl_eq_dec Heo a 0%L) as [Haz| Haz]; [ apply IHla | easy ].
 Qed.
 
-Definition lap_norm {A} {rng : ring A} la := rev (strip_0s (rev la)).
+Definition lap_norm la := rev (strip_0s (rev la)).
 
-Theorem poly_norm_prop {A} {rng : ring A} : ∀ la,
-  last (lap_norm la) 1%Rng ≠ 0%Rng.
+Theorem poly_norm_prop : ∀ la,
+  last (lap_norm la) 1%L ≠ 0%L.
 Proof.
 intros.
 unfold lap_norm.
-induction la as [| a]; [ apply rng_1_neq_0 | cbn ].
+induction la as [| a]; [ now apply (rngl_1_neq_0_iff Hon) | cbn ].
 rewrite strip_0s_app.
 remember (strip_0s (rev la)) as lb eqn:Hlb; symmetry in Hlb.
 destruct lb as [| b]; cbn. {
-  destruct (rng_eq_dec a 0%Rng) as [Haz| Haz]; [ apply rng_1_neq_0 | easy ].
+  destruct (rngl_eq_dec Heo a 0%L) as [Haz| Haz]; [ | easy ].
+  now apply (rngl_1_neq_0_iff Hon).
 }
 cbn in IHla.
 rewrite List_last_app.
 now rewrite List_last_app in IHla.
 Qed.
 
-Definition poly_norm {A} {rng : ring A} la :=
+Definition poly_norm la :=
   mkpoly (lap_norm la) (proj2 (eq_poly_prop _) (poly_norm_prop la)).
 
 (**)
@@ -100,6 +111,8 @@ From Stdlib Require Import ZArith.
 
 Theorem Z_1_neq_0 : (1 ≠ 0)%Z.
 Proof. easy. Qed.
+
+...
 
 Definition Z_ring : ring Z :=
   {| rng_zero := 0%Z;
@@ -128,26 +141,26 @@ Compute (@lap_norm Z Z_ring [3; 4; 0; 5; 0; 0; 0]%Z).
 
 (* addition *)
 
-Fixpoint lap_add {α} {r : ring α} al1 al2 :=
+Fixpoint lap_add al1 al2 :=
   match al1 with
   | [] => al2
   | a1 :: bl1 =>
       match al2 with
       | [] => al1
-      | a2 :: bl2 => (a1 + a2)%Rng :: lap_add bl1 bl2
+      | a2 :: bl2 => (a1 + a2)%L :: lap_add bl1 bl2
       end
   end.
 
-Definition lap_opp {α} {r : ring α} la := List.map rng_opp la.
-Definition lap_sub {A} {rng : ring A} la lb := lap_add la (lap_opp lb).
+Definition lap_opp la := List.map rng_opp la.
+Definition lap_sub la lb := lap_add la (lap_opp lb).
 
-Definition poly_add {A} {rng : ring A} p1 p2 :=
+Definition poly_add p1 p2 :=
   poly_norm (lap_add (lap p1) (lap p2)).
 
-Definition poly_opp {α} {r : ring α} pol :=
+Definition poly_opp pol :=
   poly_norm (lap_opp (lap pol)).
 
-Definition poly_sub {α} {r : ring α} p1 p2 :=
+Definition poly_sub p1 p2 :=
   poly_add p1 (poly_opp p2).
 
 (*
@@ -157,11 +170,11 @@ Compute (@poly_add Z Z_ring (poly_norm [3;4;5]%Z) (poly_norm [2;3;-5]%Z)).
 
 (* multiplication *)
 
-Fixpoint lap_convol_mul {α} {r : ring α} al1 al2 i len :=
+Fixpoint lap_convol_mul al1 al2 i len :=
   match len with
   | O => []
   | S len1 =>
-      (Σ (j = 0, i), List.nth j al1 0 * List.nth (i - j) al2 0)%Rng ::
+      (Σ (j = 0, i), List.nth j al1 0 * List.nth (i - j) al2 0)%L ::
       lap_convol_mul al1 al2 (S i) len1
   end.
 
@@ -175,7 +188,7 @@ Definition lap_mul {α} {R : ring α} la lb :=
       end
   end.
 
-Definition poly_mul {A} {rng : ring A} p1 p2 :=
+Definition poly_mul p1 p2 :=
   poly_norm (lap_mul (lap p1) (lap p2)).
 
 (*
@@ -185,13 +198,13 @@ Compute (@poly_mul Z Z_ring (poly_norm [3;4;5]%Z) (poly_norm [2;3;-4;5]%Z)).
 
 (* power *)
 
-Fixpoint lap_power {α} {r : ring α} la n :=
+Fixpoint lap_power la n :=
   match n with
-  | O => [1%Rng]
+  | O => [1%L]
   | S m => lap_mul la (lap_power la m)
   end.
 
-Definition poly_power {A} {rng : ring A} pol n :=
+Definition poly_power pol n :=
   poly_norm (lap_power (lap pol) n).
 
 (*
@@ -200,13 +213,13 @@ Compute (@poly_power Z Z_ring (poly_norm [1; -1]%Z) 4).
 
 (* composition *)
 
-Definition lap_compose {α} {r : ring α} la lb :=
+Definition lap_compose la lb :=
   List.fold_right (λ c accu, lap_add (lap_mul accu lb) [c]) [] la.
 
-Definition lap_compose2 {α} {r : ring α} la lb :=
+Definition lap_compose2 la lb :=
   List.fold_right
     (λ i accu,
-     lap_add accu (lap_mul [List.nth i la 0] (lap_power lb i)))%Rng
+     lap_add accu (lap_mul [List.nth i la 0] (lap_power lb i)))%L
     [] (List.seq 0 (length la)).
 
 (* *)
@@ -217,8 +230,8 @@ Fixpoint list_pad {α} n (zero : α) rem :=
   | S n1 => zero :: list_pad n1 zero rem
   end.
 
-Theorem xpow_norm {A} {rng : ring A} : ∀ i,
-  rng_eqb (last (repeat 0%Rng i ++ [1%Rng]) 1%Rng) 0%Rng = false.
+Theorem xpow_norm : ∀ i,
+  rng_eqb (last (repeat 0%L i ++ [1%L]) 1%L) 0%L = false.
 Proof.
 intros.
 rewrite List_last_app.
@@ -227,19 +240,19 @@ destruct (rng_eq_dec 1 0) as [H| H]; [ | easy ].
 now apply rng_1_neq_0 in H.
 Qed.
 
-Definition xpow {α} {r : ring α} i :=
-  mkpoly (repeat 0%Rng i ++ [1%Rng]) (xpow_norm i).
+Definition xpow i :=
+  mkpoly (repeat 0%L i ++ [1%L]) (xpow_norm i).
 
 Declare Scope lap_scope.
 Delimit Scope lap_scope with lap.
-Notation "1" := [1%Rng] : lap_scope.
+Notation "1" := [1%L] : lap_scope.
 Notation "- a" := (lap_opp a) : lap_scope.
 Notation "a + b" := (lap_add a b) : lap_scope.
 Notation "a - b" := (lap_sub a b) : lap_scope.
 Notation "a * b" := (lap_mul a b) : lap_scope.
 Notation "a ^ b" := (lap_power a b) : lap_scope.
 
-Definition list_nth_def_0 {α} {R : ring α} n l := List.nth n l 0%Rng.
+Definition list_nth_def_0 {α} {R : ring α} n l := List.nth n l 0%L.
 
 Declare Scope poly_scope.
 Delimit Scope poly_scope with pol.
@@ -283,7 +296,7 @@ rewrite all_0_summation_0. {
   specialize (IHlen (S i)).
   apply List_eq_rev_nil in IHlen.
   rewrite IHlen.
-  now destruct (rng_eq_dec 0%Rng 0%Rng).
+  now destruct (rng_eq_dec 0%L 0%L).
 }
 intros k (_, Hk).
 now rewrite match_id, rng_mul_0_l.
@@ -298,7 +311,7 @@ apply lap_convol_mul_nil_l.
 Qed.
 
 Theorem list_nth_lap_eq : ∀ α (r : ring α) la lb,
-  (∀ i, (List.nth i la 0 = List.nth i lb 0)%Rng)
+  (∀ i, (List.nth i la 0 = List.nth i lb 0)%L)
   → lap_norm la = lap_norm lb.
 Proof.
 intros α r la lb Hi.
@@ -331,7 +344,7 @@ induction la as [| a]; intros. {
   rewrite strip_0s_app.
   remember (strip_0s (rev la)) as lc eqn:Hlc; symmetry in Hlc.
   destruct lc as [| c]. {
-    assert (Hla : ∀ i, nth i la 0%Rng = 0%Rng). {
+    assert (Hla : ∀ i, nth i la 0%L = 0%L). {
       intros i.
       clear - Hlc.
       revert i.
@@ -340,17 +353,17 @@ induction la as [| a]; intros. {
         cbn in Hlc.
         rewrite strip_0s_app in Hlc; cbn in Hlc.
         remember (strip_0s (rev la)) as lb eqn:Hlb; symmetry in Hlb.
-        destruct lb as [| b]; [ now destruct (rng_eq_dec a 0%Rng) | easy ].
+        destruct lb as [| b]; [ now destruct (rng_eq_dec a 0%L) | easy ].
       }
       apply IHla.
       cbn in Hlc.
       rewrite strip_0s_app in Hlc; cbn in Hlc.
       remember (strip_0s (rev la)) as lb eqn:Hlb; symmetry in Hlb.
-      destruct lb as [| b]; [ now destruct (rng_eq_dec a 0%Rng) | easy ].
+      destruct lb as [| b]; [ now destruct (rng_eq_dec a 0%L) | easy ].
     }
     cbn.
-    destruct (rng_eq_dec a 0%Rng) as [Haz| Haz]. {
-      assert (Hlb : ∀ i, nth i lb 0%Rng = 0%Rng). {
+    destruct (rng_eq_dec a 0%L) as [Haz| Haz]. {
+      assert (Hlb : ∀ i, nth i lb 0%L = 0%L). {
         intros.
         rewrite <- Hi; cbn.
         destruct i; [ easy | ].
@@ -360,7 +373,7 @@ induction la as [| a]; intros. {
       induction lb as [| b]; [ easy | cbn ].
       specialize (Hlb 0) as H1; cbn in H1; subst b.
       rewrite strip_0s_app; cbn.
-      rewrite <- IHlb; [ now destruct (rng_eq_dec 0%Rng 0%Rng) | ].
+      rewrite <- IHlb; [ now destruct (rng_eq_dec 0%L 0%L) | ].
       intros i.
       now specialize (Hlb (S i)).
     }
@@ -368,7 +381,7 @@ induction la as [| a]; intros. {
     rewrite strip_0s_app; cbn.
     remember (strip_0s (rev lb)) as ld eqn:Hld; symmetry in Hld.
     destruct ld as [| d]. {
-      destruct (rng_eq_dec b 0%Rng) as [Hbz| Hbz]. {
+      destruct (rng_eq_dec b 0%L) as [Hbz| Hbz]. {
         subst b.
         now specialize (Hi 0).
       }
@@ -376,7 +389,7 @@ induction la as [| a]; intros. {
       now specialize (Hi 0).
     }
     specialize (IHla lb).
-    assert (H : ∀ i : nat, nth i la 0%Rng = nth i lb 0%Rng). {
+    assert (H : ∀ i : nat, nth i la 0%L = nth i lb 0%L). {
       intros i.
       now specialize (Hi (S i)); cbn in Hi.
     }
@@ -385,7 +398,7 @@ induction la as [| a]; intros. {
   }
   destruct lb as [| b]. {
     specialize (IHla []).
-    assert (H : ∀ i : nat, nth i la 0%Rng = nth i [] 0%Rng). {
+    assert (H : ∀ i : nat, nth i la 0%L = nth i [] 0%L). {
       intros i; cbn; rewrite match_id.
       now specialize (Hi (S i)).
     }
@@ -395,10 +408,10 @@ induction la as [| a]; intros. {
   rewrite strip_0s_app; cbn.
   remember (strip_0s (rev lb)) as ld eqn:Hld; symmetry in Hld.
   destruct ld as [| d]. {
-    destruct (rng_eq_dec b 0%Rng) as [Hbz| Hbz]. {
+    destruct (rng_eq_dec b 0%L) as [Hbz| Hbz]. {
       subst b.
       specialize (IHla lb).
-      assert (H : ∀ i : nat, nth i la 0%Rng = nth i lb 0%Rng). {
+      assert (H : ∀ i : nat, nth i la 0%L = nth i lb 0%L). {
         intros i.
         now specialize (Hi (S i)); cbn in Hi.
       }
@@ -406,7 +419,7 @@ induction la as [| a]; intros. {
       now rewrite Hld in IHla.
     }
     specialize (IHla lb).
-    assert (H : ∀ i : nat, nth i la 0%Rng = nth i lb 0%Rng). {
+    assert (H : ∀ i : nat, nth i la 0%L = nth i lb 0%L). {
       intros i.
       now specialize (Hi (S i)); cbn in Hi.
     }
@@ -421,17 +434,17 @@ induction la as [| a]; intros. {
 }
 Qed.
 
-Theorem fold_lap_norm {A} {rng : ring A} :
+Theorem fold_lap_norm :
   ∀ la, rev (strip_0s (rev la)) = lap_norm la.
 Proof. easy. Qed.
 
-Theorem lap_add_0_l {α} {r : ring α} : ∀ la, lap_add [] la = la.
+Theorem lap_add_0_l : ∀ la, lap_add [] la = la.
 Proof. easy. Qed.
 
-Theorem lap_add_0_r {α} {r : ring α} : ∀ la, lap_add la [] = la.
+Theorem lap_add_0_r : ∀ la, lap_add la [] = la.
 Proof. intros; now destruct la. Qed.
 
-Theorem poly_add_0_l {α} {r : ring α} : ∀ p, (0 + p)%pol = p.
+Theorem poly_add_0_l : ∀ p, (0 + p)%pol = p.
 Proof.
 intros (la, lapr).
 apply eq_poly_eq; cbn.
@@ -454,10 +467,10 @@ rewrite IHla; cbn. {
 }
 Qed.
 
-Theorem lap_mul_0_l {α} {r : ring α} : ∀ la, lap_norm (lap_mul [] la) = [].
+Theorem lap_mul_0_l : ∀ la, lap_norm (lap_mul [] la) = [].
 Proof. easy. Qed.
 
-Theorem lap_mul_0_r {α} {r : ring α} : ∀ la, lap_norm (lap_mul la []) = [].
+Theorem lap_mul_0_r : ∀ la, lap_norm (lap_mul la []) = [].
 Proof. now intros; destruct la. Qed.
 
 Section lap.
@@ -469,8 +482,8 @@ Theorem strip_0s_idemp : ∀ la, strip_0s (strip_0s la) = strip_0s la.
 Proof.
 intros.
 induction la as [| a]; [ easy | cbn ].
-destruct (rng_eq_dec a 0%Rng) as [Haz| Haz]; [ easy | cbn ].
-now destruct (rng_eq_dec a 0%Rng).
+destruct (rng_eq_dec a 0%L) as [Haz| Haz]; [ easy | cbn ].
+now destruct (rng_eq_dec a 0%L).
 Qed.
 
 Theorem lap_norm_idemp : ∀ la, lap_norm (lap_norm la) = lap_norm la.
@@ -593,9 +606,9 @@ Qed.
 
 Theorem list_nth_lap_convol_mul_aux : ∀ la lb n i len,
   List.length la + List.length lb - 1 = (i + len)%nat
-  → (List.nth n (lap_convol_mul la lb i len) 0%Rng =
+  → (List.nth n (lap_convol_mul la lb i len) 0%L =
      Σ (j = 0, n + i),
-     List.nth j la 0 * List.nth (n + i - j) lb 0)%Rng.
+     List.nth j la 0 * List.nth (n + i - j) lb 0)%L.
 Proof.
 intros la lb n i len Hlen.
 revert la lb i n Hlen.
@@ -628,7 +641,7 @@ Qed.
 Theorem list_nth_lap_convol_mul : ∀ la lb i len,
   len = length la + length lb - 1
   → (List.nth i (lap_convol_mul la lb 0 len) 0 =
-     Σ (j = 0, i), List.nth j la 0 * List.nth (i - j) lb 0)%Rng.
+     Σ (j = 0, i), List.nth j la 0 * List.nth (i - j) lb 0)%L.
 Proof.
 intros la lb i len Hlen.
 symmetry in Hlen.
@@ -645,7 +658,7 @@ Theorem summation_mul_list_nth_lap_convol_mul : ∀ la lb lc k,
    Σ (i = 0, k),
      List.nth i la 0 *
      Σ (j = 0, k - i),
-       List.nth j lb 0 * List.nth (k - i - j) lc 0)%Rng.
+       List.nth j lb 0 * List.nth (k - i - j) lc 0)%L.
 Proof.
 intros la lb lc k.
 apply summation_compat; intros i (_, Hi).
@@ -661,7 +674,7 @@ Theorem summation_mul_list_nth_lap_convol_mul_2 : ∀ la lb lc k,
     Σ (i = 0, k),
       List.nth (k - i) lc 0 *
       Σ (j = 0, i),
-        List.nth j la 0 * List.nth (i - j) lb 0)%Rng.
+        List.nth j la 0 * List.nth (i - j) lb 0)%L.
 Proof.
 intros la lb lc k.
 rewrite summation_rtl.
@@ -767,8 +780,8 @@ induction lb as [| b]; intros. {
 destruct la as [| a]; [ easy | ].
 cbn in Hll, Hlen.
 apply Nat.succ_inj in Hlen.
-destruct (rng_eq_dec a 0%Rng) as [Haz| Haz]. {
-  destruct (rng_eq_dec b 0%Rng) as [Hbz| Hbz]. {
+destruct (rng_eq_dec a 0%L) as [Haz| Haz]. {
+  destruct (rng_eq_dec b 0%L) as [Hbz| Hbz]. {
     subst a b; f_equal.
     now apply IHlb.
   }
@@ -777,7 +790,7 @@ destruct (rng_eq_dec a 0%Rng) as [Haz| Haz]. {
   clear Hlen; rename H into Hlen.
   induction la as [| a]; [ easy | ].
   cbn in Hll.
-  destruct (rng_eq_dec a 0%Rng) as [Haz| Haz]. {
+  destruct (rng_eq_dec a 0%L) as [Haz| Haz]. {
     cbn in Hlen.
     clear a Haz.
     apply IHla; [ easy | flia Hlen ].
@@ -785,14 +798,14 @@ destruct (rng_eq_dec a 0%Rng) as [Haz| Haz]. {
   rewrite Hll in Hlen; cbn in Hlen.
   flia Hlen.
 }
-destruct (rng_eq_dec b 0%Rng) as [Hbz| Hbz]. {
+destruct (rng_eq_dec b 0%L) as [Hbz| Hbz]. {
   exfalso; clear b Hbz.
   clear - Haz Hll Hlen.
   assert (H : length lb ≤ length la) by flia Hlen.
   clear Hlen; rename H into Hlen.
   induction lb as [| b]; [ easy | ].
   cbn in Hll.
-  destruct (rng_eq_dec b 0%Rng) as [Hbz| Hbz]. {
+  destruct (rng_eq_dec b 0%L) as [Hbz| Hbz]. {
     cbn in Hlen.
     clear b Hbz.
     apply IHlb; [ easy | flia Hlen ].
@@ -832,7 +845,7 @@ apply Nat.add_assoc.
 Qed.
 
 Theorem lap_convol_mul_0_l : ∀ la lb i len,
-  (∀ i, nth i la 0%Rng = 0%Rng)
+  (∀ i, nth i la 0%L = 0%L)
   → lap_norm (lap_convol_mul la lb i len) = [].
 Proof.
 intros * Ha.
@@ -847,7 +860,7 @@ destruct lc as [| c]. {
     now rewrite Ha, rng_mul_0_l.
   }
   cbn.
-  now destruct (rng_eq_dec 0%Rng 0%Rng).
+  now destruct (rng_eq_dec 0%L 0%L).
 }
 unfold lap_norm in IHlen.
 specialize (IHlen (S i)).
@@ -856,8 +869,8 @@ now apply List_eq_rev_nil in IHlen.
 Qed.
 
 Theorem all_0_all_rev_0 : ∀ la,
-  (∀ i, nth i la 0%Rng = 0%Rng)
-  ↔ (∀ i, nth i (rev la) 0%Rng = 0%Rng).
+  (∀ i, nth i la 0%L = 0%L)
+  ↔ (∀ i, nth i (rev la) 0%L = 0%L).
 Proof.
 intros *.
 split; intros H i. {
@@ -875,7 +888,7 @@ split; intros H i. {
 Qed.
 
 Theorem eq_strip_0s_nil : ∀ la,
-  strip_0s la = [] ↔ ∀ i, nth i la 0%Rng = 0%Rng.
+  strip_0s la = [] ↔ ∀ i, nth i la 0%L = 0%L.
 Proof.
 intros.
 split. {
@@ -883,13 +896,13 @@ split. {
   revert i.
   induction la as [| a]; intros; [ now destruct i | cbn ].
   cbn in Hla.
-  destruct (rng_eq_dec a 0%Rng) as [Haz| Haz]; [ | easy ].
+  destruct (rng_eq_dec a 0%L) as [Haz| Haz]; [ | easy ].
   destruct i; [ easy | ].
   now apply IHla.
 } {
   intros Hla.
   induction la as [| a]; [ easy | cbn ].
-  destruct (rng_eq_dec a 0%Rng) as [Haz| Haz]. {
+  destruct (rng_eq_dec a 0%L) as [Haz| Haz]. {
     apply IHla.
     intros i.
     now specialize (Hla (S i)).
@@ -899,7 +912,7 @@ split. {
 Qed.
 
 Theorem eq_strip_0s_rev_nil : ∀ la,
-  strip_0s (rev la) = [] ↔ ∀ i, nth i la 0%Rng = 0%Rng.
+  strip_0s (rev la) = [] ↔ ∀ i, nth i la 0%L = 0%L.
 Proof.
 intros.
 split; intros Hla. {
@@ -913,7 +926,7 @@ split; intros Hla. {
 Qed.
 
 Lemma lap_convol_mul_cons_with_0_l : ∀ a la lb i len,
-  (∀ i, nth i la 0%Rng = 0%Rng)
+  (∀ i, nth i la 0%L = 0%L)
   → lap_convol_mul (a :: la) lb i len = lap_convol_mul [a] lb i len.
 Proof.
 intros * Hla.
@@ -932,7 +945,7 @@ Theorem lap_convol_mul_succ : ∀ la lb i len,
   lap_convol_mul la lb i (S len) =
   lap_convol_mul la lb i len ++
     [Σ (j = 0, i + len),
-     List.nth j la 0 * List.nth (i + len - j) lb 0]%Rng.
+     List.nth j la 0 * List.nth (i + len - j) lb 0]%L.
 Proof.
 intros.
 cbn - [ summation ].
@@ -949,7 +962,7 @@ apply IHlen.
 Qed.
 
 Theorem lap_norm_app_0_r : ∀ la lb,
-  (∀ i, nth i lb 0%Rng = 0%Rng)
+  (∀ i, nth i lb 0%L = 0%L)
   → lap_norm la = lap_norm (la ++ lb).
 Proof.
 intros * Hlb.
@@ -963,7 +976,7 @@ induction la as [| a]. {
     now specialize (Hlb (S i)).
   }
   specialize (Hlb 0); cbn in Hlb; rewrite Hlb; cbn.
-  now destruct (rng_eq_dec 0%Rng 0%Rng).
+  now destruct (rng_eq_dec 0%L 0%L).
 }
 cbn.
 do 2 rewrite strip_0s_app.
@@ -1002,7 +1015,7 @@ destruct (le_dec (length la) j) as [H1| H1]. {
 Qed.
 
 Theorem all_0_lap_norm_nil : ∀ la,
-  (∀ i, nth i la 0%Rng = 0%Rng)
+  (∀ i, nth i la 0%L = 0%L)
   → lap_norm la = [].
 Proof.
 intros * Hla.
@@ -1011,7 +1024,7 @@ rewrite strip_0s_app.
 remember (strip_0s (rev la)) as lb eqn:Hlb; symmetry in Hlb.
 destruct lb as [| b]. {
   cbn.
-  destruct (rng_eq_dec a 0%Rng) as [H1| H1]; [ easy | exfalso ].
+  destruct (rng_eq_dec a 0%L) as [H1| H1]; [ easy | exfalso ].
   now specialize (Hla 0); cbn in Hla.
 }
 exfalso.
@@ -1031,7 +1044,7 @@ now rewrite Hlb in H.
 Qed.
 
 Theorem lap_norm_repeat_0 : ∀ la,
-  la = lap_norm la ++ repeat 0%Rng (length la - length (lap_norm la)).
+  la = lap_norm la ++ repeat 0%L (length la - length (lap_norm la)).
 Proof.
 intros.
 induction la as [| a]; [ easy | ].
@@ -1040,7 +1053,7 @@ rewrite strip_0s_app.
 remember (strip_0s (rev la)) as lb eqn:Hlb; symmetry in Hlb.
 destruct lb as [| b]. {
   cbn.
-  destruct (rng_eq_dec a 0%Rng) as [Haz| Haz]. {
+  destruct (rng_eq_dec a 0%L) as [Haz| Haz]. {
     cbn; subst a; f_equal.
     assert (H : lap_norm la = []). {
       apply all_0_lap_norm_nil.
@@ -1082,7 +1095,7 @@ destruct lb as [| b]. {
 Qed.
 
 Theorem lap_convol_mul_app_rep_0_l : ∀ la lb i len n,
-  lap_norm (lap_convol_mul (la ++ repeat 0%Rng n) lb i len) =
+  lap_norm (lap_convol_mul (la ++ repeat 0%L n) lb i len) =
   lap_norm (lap_convol_mul la lb i len).
 Proof.
 intros.
@@ -1091,7 +1104,7 @@ induction n; intros. {
   now cbn; rewrite app_nil_r.
 }
 cbn.
-replace (0%Rng :: repeat 0%Rng n) with ([0%Rng] ++ repeat 0%Rng n) by easy.
+replace (0%L :: repeat 0%L n) with ([0%L] ++ repeat 0%L n) by easy.
 rewrite app_assoc.
 rewrite IHn; clear n IHn.
 revert la i.
@@ -1158,7 +1171,7 @@ rewrite length_app; flia.
 Qed.
 
 Theorem nth_lap_add : ∀ i la lb,
-  nth i (la + lb)%lap 0%Rng = (nth i la 0 + nth i lb 0)%Rng.
+  nth i (la + lb)%lap 0%L = (nth i la 0 + nth i lb 0)%L.
 Proof.
 intros.
 revert i lb.
@@ -1182,7 +1195,7 @@ rewrite strip_0s_app.
 remember (strip_0s (rev la)) as lc eqn:Hlc; symmetry in Hlc.
 destruct lc as [| c]. {
   cbn.
-  destruct (rng_eq_dec a 0%Rng) as [Haz| Haz]. {
+  destruct (rng_eq_dec a 0%L) as [Haz| Haz]. {
     cbn.
     destruct lb as [| b]; [ easy | cbn ].
     rewrite lap_convol_mul_0_l; [ easy | ].
@@ -1286,7 +1299,7 @@ Fixpoint lap_convol_mul_add al1 al2 al3 i len :=
   | S len1 =>
       (Σ (j = 0, i),
        List.nth j al1 0 *
-       (List.nth (i - j) al2 0 + List.nth (i - j) al3 0))%Rng ::
+       (List.nth (i - j) al2 0 + List.nth (i - j) al3 0))%L ::
        lap_convol_mul_add al1 al2 al3 (S i) len1
   end.
 
@@ -1294,7 +1307,7 @@ Fixpoint lap_convol_mul_add al1 al2 al3 i len :=
 
 Theorem list_nth_add : ∀ k la lb,
   (List.nth k (lap_add la lb) 0 =
-   List.nth k la 0 + List.nth k lb 0)%Rng.
+   List.nth k la 0 + List.nth k lb 0)%L.
 Proof.
 intros k la lb.
 revert la lb.
@@ -1429,7 +1442,7 @@ Qed.
 
 Lemma lap_convol_mul_1_l : ∀ la i len,
   length la = i + len
-  → lap_convol_mul [1%Rng] la i len = skipn i la.
+  → lap_convol_mul [1%L] la i len = skipn i la.
 Proof.
 intros * Hlen.
 revert i Hlen.
@@ -1458,7 +1471,7 @@ rewrite IHla; [ easy | ].
 cbn in Hlen; flia Hlen.
 Qed.
 
-Theorem lap_mul_1_l : ∀ la, ([1%Rng] * la)%lap = la.
+Theorem lap_mul_1_l : ∀ la, ([1%L] * la)%lap = la.
 Proof.
 intros la.
 unfold lap_mul.
@@ -1467,7 +1480,7 @@ rewrite rng_mul_1_l, rng_add_0_r; f_equal.
 now rewrite lap_convol_mul_1_l.
 Qed.
 
-Theorem lap_mul_1_r : ∀ la, (la * [1%Rng])%lap = la.
+Theorem lap_mul_1_r : ∀ la, (la * [1%L])%lap = la.
 Proof.
 intros la.
 rewrite lap_mul_comm.
@@ -1482,7 +1495,7 @@ rewrite lap_mul_1_l; cbn.
 apply eq_poly_eq; cbn.
 unfold rng_eqb in lapr.
 unfold lap_norm.
-destruct (rng_eq_dec (last la 1%Rng) 0) as [Hlaz| Hlaz]; [ easy | ].
+destruct (rng_eq_dec (last la 1%L) 0) as [Hlaz| Hlaz]; [ easy | ].
 clear lapr.
 induction la as [| a]; [ easy | cbn ].
 rewrite strip_0s_app.
@@ -1512,7 +1525,7 @@ Qed.
 
 End lap.
 
-Lemma lap_add_opp_l {α} {r : ring α} : ∀ la, lap_norm (- la + la)%lap = [].
+Lemma lap_add_opp_l : ∀ la, lap_norm (- la + la)%lap = [].
 Proof.
 intros.
 unfold lap_norm.
@@ -1527,7 +1540,7 @@ rewrite rng_add_opp_l.
 now destruct (rng_eq_dec 0 0).
 Qed.
 
-Theorem poly_add_opp_l {α} {r : ring α} : ∀ p, (- p + p)%pol = 0%pol.
+Theorem poly_add_opp_l : ∀ p, (- p + p)%pol = 0%pol.
 Proof.
 intros p.
 unfold "+"%pol; cbn.
@@ -1536,7 +1549,7 @@ rewrite lap_add_norm_idemp_l.
 apply lap_add_opp_l.
 Qed.
 
-Theorem poly_add_opp_r {α} {r : ring α} : ∀ p, (p - p)%pol = 0%pol.
+Theorem poly_add_opp_r : ∀ p, (p - p)%pol = 0%pol.
 Proof.
 intros p.
 unfold poly_sub.
@@ -1544,10 +1557,10 @@ rewrite poly_add_comm.
 apply poly_add_opp_l.
 Qed.
 
-Theorem poly_1_neq_0 {A} {rng : ring A} : 1%pol ≠ 0%pol.
+Theorem poly_1_neq_0 : 1%pol ≠ 0%pol.
 Proof. easy. Qed.
 
-Fixpoint lap_eqb {A} {rng : ring A} la lb :=
+Fixpoint lap_eqb la lb :=
   match la with
   | [] =>
       match lb with
@@ -1561,7 +1574,7 @@ Fixpoint lap_eqb {A} {rng : ring A} la lb :=
       end
   end.
 
-Theorem lap_eqb_eq {A} {rng : ring A} : ∀ la lb,
+Theorem lap_eqb_eq : ∀ la lb,
   lap_eqb la lb = true ↔ la = lb.
 Proof.
 intros.
@@ -1579,7 +1592,7 @@ destruct (rng_eq_dec a b) as [Hab| Hab]. {
 }
 Qed.
 
-Theorem lap_eqb_neq {A} {rng : ring A} : ∀ la lb,
+Theorem lap_eqb_neq : ∀ la lb,
   lap_eqb la lb = false ↔ la ≠ lb.
 Proof.
 intros.
@@ -1604,7 +1617,7 @@ destruct (rng_eq_dec a b) as [Hab| Hab]. {
 }
 Qed.
 
-Lemma lap_eq_dec {A} {rng : ring A} : ∀ la lb : list A,
+Lemma lap_eq_dec : ∀ la lb : list A,
   {la = lb} + {la ≠ lb}.
 Proof.
 intros.
@@ -1616,7 +1629,7 @@ destruct lab. {
 }
 Qed.
 
-Theorem poly_eq_dec {A} {rng : ring A} : ∀ pa pb : poly _,
+Theorem poly_eq_dec : ∀ pa pb : poly _,
   {pa = pb} + {pa ≠ pb}.
 Proof.
 intros (la, lapr) (lb, lbpr).
@@ -1629,7 +1642,7 @@ destruct (lap_eq_dec la lb) as [Hll| Hll]. {
 }
 Qed.
 
-Definition polynomial_ring {α} {r : ring α} : ring (poly α) :=
+Definition polynomial_ring : ring (poly α) :=
   {| rng_zero := poly_zero;
      rng_one := poly_one;
      rng_add := poly_add;
@@ -1652,7 +1665,7 @@ Canonical Structure polynomial_ring.
 (* *)
 
 Definition eval_lap {α} {R : ring α} la x :=
-  (List.fold_right (λ c accu, accu * x + c) 0 la)%Rng.
+  (List.fold_right (λ c accu, accu * x + c) 0 la)%L.
 
 Definition eval_poly {α} {R : ring α} pol :=
   eval_lap (lap pol).
