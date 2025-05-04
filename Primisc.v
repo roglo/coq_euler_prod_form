@@ -280,7 +280,7 @@ rewrite List_filter_all_true. 2: {
   apply Nat.add_lt_mono_l in Hc2.
   apply Nat.nle_gt in Hc2; apply Hc2; clear Hc2.
   rewrite Nat.mul_comm; cbn.
-  transitivity b; [ | flia Hc1 ].
+  transitivity b; [ | apply Nat.le_add_r ].
   rewrite Hr.
   now apply Nat.lt_le_incl, Nat.mod_upper_bound.
 }
@@ -428,6 +428,7 @@ Definition prim_roots n := filter (is_prim_root n) (seq 1 (n - 1)).
 
 Compute (prim_roots 14, φ (φ 14)).
 Compute (prim_root_cycle 14 5).
+...
 Compute (sort Nat.leb (map (λ i, Nat_pow_mod 5 i 14) (seq 1 14))).
 
 Fixpoint in_list_nat n l :=
