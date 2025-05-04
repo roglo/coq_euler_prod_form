@@ -575,17 +575,12 @@ flia H2.
 Qed.
 
 Theorem ord_mod_divisor : ∀ n a b,
-  Nat.gcd a n = 1
+  2 ≤ n
+  → Nat.gcd a n = 1
   → a ^ b mod n = 1
   → Nat.divide (ord_mod n a) b.
 Proof.
-intros * Hg Habn.
-destruct (lt_dec n 2) as [H2n| H2n]. {
-...
-  destruct n; [ easy | ].
-  destruct n; [ easy | flia H2n ].
-}
-apply Nat.nlt_ge in H2n.
+intros * H2n Hg Habn.
 specialize (ord_mod_prop n a H2n Hg) as H1.
 destruct H1 as (Han, Ham).
 destruct (Nat.eq_dec b 0) as [Hbz| Hbz]. {
@@ -610,7 +605,7 @@ assert (H2 : a ^ (b mod ord_mod n a) ≡ 1 mod n). {
   rewrite H1 in Habn.
   rewrite Nat.pow_add_r in Habn.
   rewrite Nat.pow_mul_r in Habn.
-  rewrite <- Nat.Div0.mul_mod_idemp_l in Habn; [ | flia H2n ].
+  rewrite <- Nat.Div0.mul_mod_idemp_l in Habn.
   rewrite <- Nat_mod_pow_mod in Habn.
   rewrite Han in Habn.
   rewrite Nat.pow_1_l in Habn.
@@ -697,7 +692,7 @@ rewrite Nat.mul_1_l in H2.
 rewrite (Nat.mod_small 1) in H2; [ | easy ].
 rewrite (Nat.mul_comm s r) in H2.
 move H2 at bottom.
-apply ord_mod_divisor; [ | easy ].
+apply ord_mod_divisor; [ easy | | easy ].
 now apply Nat_gcd_1_mul_l.
 Qed.
 
@@ -753,13 +748,13 @@ assert (Hrr : r1 = r). {
     rewrite Hk in Hob.
     now apply ord_mod_neq_0 in Hob.
   }
-  rewrite <- Nat.Lcm0.divide_div_mul_exact in Habo; [ | easy | easy ].
+  rewrite <- Nat.Lcm0.divide_div_mul_exact in Habo; [ | easy ].
   rewrite (Nat.mul_comm s1), Nat.div_mul in Habo; [ | easy ].
   rewrite (Nat.mul_comm r1) in Habo.
   rewrite Nat.pow_mul_r in Habo.
   rewrite Nat.pow_mul_l in Habo.
   rewrite <- Nat_mod_pow_mod in Habo.
-  rewrite <- Nat.Div0.mul_mod_idemp_r in Habo; [ | flia H2n ].
+  rewrite <- Nat.Div0.mul_mod_idemp_r in Habo.
   rewrite Hbo, Nat.mul_1_r in Habo.
   rewrite Nat_mod_pow_mod in Habo.
   rewrite <- Nat.pow_mul_r in Habo.
@@ -787,12 +782,12 @@ assert (Hss : s1 = s). {
     rewrite Hk in Hoa.
     now apply ord_mod_neq_0 in Hoa.
   }
-  rewrite <- Nat.Lcm0.divide_div_mul_exact in Habo; [ | easy | easy ].
+  rewrite <- Nat.Lcm0.divide_div_mul_exact in Habo; [ | easy ].
   rewrite (Nat.mul_comm r1), Nat.div_mul in Habo; [ | easy ].
   rewrite Nat.pow_mul_r in Habo.
   rewrite Nat.pow_mul_l in Habo.
   rewrite <- Nat_mod_pow_mod in Habo.
-  rewrite <- Nat.Div0.mul_mod_idemp_l in Habo; [ | flia H2n ].
+  rewrite <- Nat.Div0.mul_mod_idemp_l in Habo.
   rewrite Hao, Nat.mul_1_l in Habo.
   rewrite Nat_mod_pow_mod in Habo.
   rewrite <- Nat.pow_mul_r in Habo.
@@ -849,7 +844,7 @@ specialize (H1 H); clear H.
 apply (f_equal (λ x, a ^ x mod n)) in H1.
 rewrite Nat.pow_add_r in H1.
 rewrite Nat.pow_mul_r in H1.
-rewrite <- Nat.Div0.mul_mod_idemp_l in H1; [ | flia H2n ].
+rewrite <- Nat.Div0.mul_mod_idemp_l in H1.
 rewrite <- (Nat_mod_pow_mod (a ^ φ n)) in H1.
 rewrite euler_fermat_little in H1; [ | flia H2n | easy | easy ].
 rewrite Nat.mod_1_l in H1; [ | easy ].
@@ -871,8 +866,8 @@ Definition prim_roots' p :=
   fold_left (λ l1 l2, map (λ '(x, y), x * y mod p) (list_prod l1 l2))
      l'' [1].
 
-Compute (let p := 31 in (sort Nat.leb (prim_roots' p), (prim_roots p))).
-Compute (let p := 31 in combine (sort Nat.leb (prim_roots' p)) (prim_roots p)).
+Compute (let p := 31 in (bsort Nat.leb (prim_roots' p), (prim_roots p))).
+Compute (let p := 31 in combine (bsort Nat.leb (prim_roots' p)) (prim_roots p)).
 
 (* j'aimerais bien prouver que prim_roots'(p) donne les racines primitives
    modulo p et/ou qu'il en existe au moins une (prim_roots'(p)≠[]) *)
@@ -888,7 +883,7 @@ Compute (let p := 31 in combine (sort Nat.leb (prim_roots' p)) (prim_roots p)).
 
 Compute (prim_roots 29, prim_roots' 29).
 Compute (prim_roots 14, prim_roots' 14).
-Compute (sort Nat.leb (map (λ i, Nat_pow_mod 5 i 14) (seq 1 14))).
+Compute (bsort Nat.leb (map (λ i, Nat_pow_mod 5 i 14) (seq 1 14))).
 
 Compute (let n := 9 in (prim_roots n, length (prim_roots n), φ (φ n))).
 Compute (let n := 9 in (prim_roots' n, length (prim_roots' n), φ (φ n))).
@@ -900,8 +895,8 @@ Compute (nth_roots_of_unity_modulo 13 27, nth_roots_of_unity_modulo 13 27).
 
 (* prim_roots seem to work but not prim_roots' (that works only on primes) *)
 
-Compute (let n := 26 in (prim_roots n, sort Nat.leb (prim_roots' n))).
-Compute (let n := 6 in sort Nat.leb (map (λ i, Nat_pow_mod 5 i n) (seq 1 (n - 1)))).
+Compute (let n := 26 in (prim_roots n, bsort Nat.leb (prim_roots' n))).
+Compute (let n := 6 in bsort Nat.leb (map (λ i, Nat_pow_mod 5 i n) (seq 1 (n - 1)))).
 
 Require Import Ring2 Rpolynomial2 Rsummation.
 
@@ -950,7 +945,7 @@ Theorem Zn_prop {n : nat2} : ∀ op, op mod n2 < n2.
 Proof.
 intros.
 apply Nat.mod_upper_bound, Nat.neq_0_lt_0.
-apply (lt_le_trans _ 2); [ apply Nat.lt_0_succ | ].
+apply (Nat.lt_le_trans _ 2); [ apply Nat.lt_0_succ | ].
 unfold n2; flia.
 Qed.
 
@@ -973,23 +968,17 @@ Theorem Zn_add_assoc n : ∀ a b c : Zn n,
   Zn_add a (Zn_add b c) = Zn_add (Zn_add a b) c.
 Proof.
 intros.
-destruct (Nat.eq_dec n2 0) as [Hnz| Hnz]. {
-  now unfold n2 in Hnz; rewrite Nat.add_comm in Hnz.
-}
 apply eq_Zn_eq; cbn.
-rewrite Nat.Div0.add_mod_idemp_r; [ | easy ].
-rewrite Nat.Div0.add_mod_idemp_l; [ | easy ].
+rewrite Nat.Div0.add_mod_idemp_r.
+rewrite Nat.Div0.add_mod_idemp_l.
 now rewrite Nat.add_assoc.
 Qed.
 
 Theorem Zn_add_0_l n : ∀ a : Zn n, Zn_add Zn_zero a = a.
 Proof.
 intros.
-destruct (Nat.eq_dec n2 0) as [Hnz| Hnz]. {
-  now unfold n2 in Hnz; rewrite Nat.add_comm in Hnz.
-}
 apply eq_Zn_eq; cbn.
-rewrite Nat.Div0.mod_0_l; [ | easy ].
+rewrite Nat.Div0.mod_0_l.
 rewrite Nat.add_0_l.
 apply Nat.mod_small.
 now destruct a.
@@ -998,13 +987,10 @@ Qed.
 Theorem Zn_add_opp_l n : ∀ a : Zn n, Zn_add (Zn_opp a) a = Zn_zero.
 Proof.
 intros.
-destruct (Nat.eq_dec n2 0) as [Hnz| Hnz]. {
-  now unfold n2 in Hnz; rewrite Nat.add_comm in Hnz.
-}
 apply eq_Zn_eq; cbn.
-rewrite Nat.Div0.add_mod_idemp_l; [ | easy ].
+rewrite Nat.Div0.add_mod_idemp_l.
 rewrite Nat.sub_add; [ | now destruct a; apply Nat.lt_le_incl ].
-rewrite Nat.Div0.mod_0_l; [ | easy ].
+rewrite Nat.Div0.mod_0_l.
 now apply Nat.Div0.mod_same.
 Qed.
 
@@ -1019,12 +1005,9 @@ Theorem Zn_mul_assoc n : ∀ a b c : Zn n,
   Zn_mul a (Zn_mul b c) = Zn_mul (Zn_mul a b) c.
 Proof.
 intros.
-destruct (Nat.eq_dec n2 0) as [Hnz| Hnz]. {
-  now unfold n2 in Hnz; rewrite Nat.add_comm in Hnz.
-}
 apply eq_Zn_eq; cbn.
-rewrite Nat.Div0.mul_mod_idemp_r; [ | easy ].
-rewrite Nat.Div0.mul_mod_idemp_l; [ | easy ].
+rewrite Nat.Div0.mul_mod_idemp_r.
+rewrite Nat.Div0.mul_mod_idemp_l.
 now rewrite Nat.mul_assoc.
 Qed.
 
@@ -1046,13 +1029,10 @@ Theorem Zn_mul_add_distr_l n : ∀ a b c : Zn n,
   Zn_mul a (Zn_add b c) = Zn_add (Zn_mul a b) (Zn_mul a c).
 Proof.
 intros.
-destruct (Nat.eq_dec n2 0) as [Hnz| Hnz]. {
-  unfold n2 in Hnz; flia Hnz.
-}
 apply eq_Zn_eq; cbn.
-rewrite Nat.Div0.mul_mod_idemp_r; [ | easy ].
-rewrite Nat.Div0.add_mod_idemp_l; [ | easy ].
-rewrite Nat.Div0.add_mod_idemp_r; [ | easy ].
+rewrite Nat.Div0.mul_mod_idemp_r.
+rewrite Nat.Div0.add_mod_idemp_l.
+rewrite Nat.Div0.add_mod_idemp_r.
 now rewrite Nat.mul_add_distr_l.
 Qed.
 
@@ -1065,7 +1045,7 @@ apply Nat.nle_gt in Hn1.
 intros H10.
 injection H10; intros H.
 rewrite Nat.mod_1_l in H; [ | easy ].
-rewrite Nat.Div0.mod_0_l in H; [ easy | flia Hn1 ].
+now rewrite Nat.Div0.mod_0_l in H.
 Qed.
 
 Theorem Zn_eq_dec {n : nat2} : ∀ a b : Zn n, {a = b} + {a ≠ b}.
@@ -1747,8 +1727,8 @@ Compute (let p := 11 in let d := 5 in map (λ x, Nat_pow_mod x d p) (seq 1 (p - 
 Compute (divisors 12).
 Compute (let p := 19 in map (λ d, (d, map (λ x, Nat_pow_mod x d p) (seq 1 (p - 1)))) (divisors (p - 1))).
 Compute (prim_roots 19).
-Compute (sort Nat.ltb (map (λ n, (n * 18) mod 19) [4; 5; 6; 9; 16; 17])).
-Compute (sort Nat.ltb (prim_roots' 71)).
+Compute (bsort Nat.ltb (map (λ n, (n * 18) mod 19) [4; 5; 6; 9; 16; 17])).
+Compute (bsort Nat.ltb (prim_roots' 71)).
 Compute (length (prim_roots 71)).
 Compute (φ (φ 71)).
 Time Compute (map (λ i, (i, prim_roots (2^i+1))) (seq 1 5)).
