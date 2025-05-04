@@ -682,7 +682,7 @@ apply (f_equal (λ x, x mod n)) in H2.
 rewrite (Nat.pow_mul_r a) in H2.
 rewrite (Nat.mul_comm r s) in H2.
 rewrite (Nat.pow_mul_r b) in H2.
-rewrite Nat.mul_mod in H2; [ | flia H2n ].
+rewrite Nat.Div0.mul_mod in H2.
 rewrite <- (Nat_mod_pow_mod (a ^ r)) in H2.
 rewrite <- (Nat_mod_pow_mod (b ^ s)) in H2.
 rewrite Har, Hbs in H2.
@@ -929,7 +929,7 @@ Definition mkn n := mknat2 (n - 2).
 
 Class Zn (n : nat2) := mkZn { zn : nat; zn_prop : zn < n2 }.
 
-Arguments zn {_} Zn%nat.
+Arguments zn {_} Zn%_nat.
 
 Theorem eq_Zn_eq n : ∀ a b : Zn n, zn a = zn b ↔ a = b.
 Proof.
@@ -1234,7 +1234,7 @@ Definition poly_quot_by_x_sub_a pol a :=
 End In_ring_A.
 
 (**)
-Require Import ZArith.
+From Stdlib Require Import ZArith.
 Example ex_pol1 (r := Z_ring) :
   rng_eqb (last [1%Z; 2%Z; 1%Z] 1%Rng) 0%Rng = false.
 Proof.
