@@ -1,7 +1,7 @@
 (* experiments with primes... *)
 
 Set Nested Proofs Allowed.
-Require Import Utf8 Arith.
+From Stdlib Require Import Utf8 Arith.
 Import List List.ListNotations.
 Require Import Misc Primes.
 Require Import Totient QuadRes.
@@ -36,7 +36,7 @@ rewrite (filter_ext_in _ (λ d, negb (d mod p =? 0))). 2: {
   } {
     apply Nat.eqb_eq.
     assert (Hg : Nat.gcd p a = 1). {
-      rewrite <- Nat.gcd_mod; [ | easy ].
+      rewrite <- Nat.Lcm0.gcd_mod.
       rewrite Nat.gcd_comm.
       apply eq_gcd_prime_small_1; [ easy | ].
       split; [ rewrite Hr; flia | ].
@@ -335,7 +335,7 @@ destruct Hqm as (kq, Hkq).
 exists (kp * kq / m).
 rewrite Nat.mul_comm.
 rewrite Hkp at 2.
-rewrite Nat.div_mul_cancel_l; [ | easy | ]. 2: {
+rewrite Nat.Div0.div_mul_cancel_l. 2: {
   intros H; subst kp.
   rewrite Hkp in Hkq; cbn in Hkq.
   symmetry in Hkq.
@@ -428,8 +428,7 @@ Definition prim_roots n := filter (is_prim_root n) (seq 1 (n - 1)).
 
 Compute (prim_roots 14, φ (φ 14)).
 Compute (prim_root_cycle 14 5).
-...
-Compute (sort Nat.leb (map (λ i, Nat_pow_mod 5 i 14) (seq 1 14))).
+Compute (bsort Nat.leb (map (λ i, Nat_pow_mod 5 i 14) (seq 1 14))).
 
 Fixpoint in_list_nat n l :=
   match l with
@@ -452,7 +451,7 @@ split. {
   rewrite Nat.sub_succ, Nat.sub_0_r.
   destruct n; [ flia H2n | ].
   remember (S (S n)) as ssn.
-  cbn; rewrite Nat.gcd_1_r; cbn; flia.
+  cbn; rewrite Nat_gcd_1_r; cbn; flia.
 } {
   rewrite List_length_filter_negb; [ | apply seq_NoDup ].
   rewrite length_seq.
@@ -582,6 +581,7 @@ Theorem ord_mod_divisor : ∀ n a b,
 Proof.
 intros * Hg Habn.
 destruct (lt_dec n 2) as [H2n| H2n]. {
+...
   destruct n; [ easy | ].
   destruct n; [ easy | flia H2n ].
 }
