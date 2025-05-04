@@ -24,7 +24,7 @@ rewrite (filter_ext_in _ (λ d, negb (d mod p =? 0))). 2: {
   remember (a mod p) as r eqn:Hr; symmetry in Hr.
   destruct r. {
     apply Nat.eqb_neq.
-    apply Nat.Div0.mod_divides in Hr; [ | easy ].
+    apply Nat.Div0.mod_divides in Hr.
     destruct Hr as (d, Hd).
     rewrite Hd.
     destruct k; [ easy | cbn ].
@@ -89,12 +89,12 @@ rewrite Nat.add_comm, Nat.sub_add. 2: {
 replace p with (1 + (p - 1)) at 2 by flia Hpz.
 rewrite seq_app, filter_app, length_app.
 cbn.
-rewrite Nat.Div0.mod_mul; [ | easy ]; cbn.
+rewrite Nat.Div0.mod_mul; cbn.
 rewrite (filter_ext_in _ (λ d, true)). 2: {
   intros b Hb.
   remember (b mod p) as c eqn:Hc; symmetry in Hc.
   destruct c; [ | easy ].
-  apply Nat.Lcm0.mod_divide in Hc; [ | easy ].
+  apply Nat.Lcm0.mod_divide in Hc.
   destruct Hc as (c, Hc).
   subst b.
   apply in_seq in Hb.
@@ -125,7 +125,7 @@ rewrite (filter_ext_in _ (λ d, true)). 2: {
   specialize (H1 H); clear H.
   apply H1.
   apply (Nat.add_lt_mono_l _ _ p).
-  eapply lt_le_trans; [ apply Hb2 | ].
+  eapply Nat.lt_le_trans; [ apply Hb2 | ].
   ring_simplify.
   do 2 apply Nat.add_le_mono_r.
   rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
@@ -219,7 +219,7 @@ rewrite List_filter_all_true. 2: {
   apply Nat.succ_le_mono in Hc2.
   apply Nat.nlt_ge in Hc1.
   apply Hc1; clear Hc1.
-  apply (le_lt_trans _ (b * q)); [ | flia Hab1 ].
+  apply (Nat.le_lt_trans _ (b * q)); [ | flia Hab1 ].
   now apply Nat.mul_le_mono_l.
 }
 rewrite length_seq.
@@ -232,8 +232,8 @@ rewrite Nat.add_sub_assoc. 2: {
 }
 rewrite Nat.add_sub_swap; [ | flia ].
 rewrite Nat.add_sub.
-rewrite Nat_mod_add_l_mul_l; [ | easy ].
-rewrite Nat.Div0.mod_same; [ cbn | easy ].
+rewrite Nat_mod_add_l_mul_l.
+rewrite Nat.Div0.mod_same.
 rewrite List_filter_all_true. 2: {
   intros c Hc.
   apply Bool.negb_true_iff, Nat.eqb_neq.
@@ -247,7 +247,7 @@ rewrite List_filter_all_true. 2: {
   destruct Hc as (Hc1, Hc2).
   rewrite Nat.add_sub_assoc in Hc2. 2: {
     rewrite Hr.
-    rewrite Nat_mod_add_l_mul_l; [ | easy ].
+    rewrite Nat_mod_add_l_mul_l.
     rewrite Nat.mod_small; [ flia Hab1 | ].
     rewrite Hr.
     now apply Nat.mod_upper_bound.
@@ -280,11 +280,12 @@ rewrite List_filter_all_true. 2: {
   apply Nat.add_lt_mono_l in Hc2.
   apply Nat.nle_gt in Hc2; apply Hc2; clear Hc2.
   rewrite Nat.mul_comm; cbn.
-  transitivity b; [ | flia Hc1 ].
+  transitivity b; [ | apply Nat.le_add_r ].
   rewrite Hr.
   now apply Nat.lt_le_incl, Nat.mod_upper_bound.
 }
 rewrite length_seq.
+cbn.
 rewrite Nat.add_sub_assoc; [ | flia Hab1 ].
 rewrite Nat.sub_add; [ easy | ].
 rewrite Hr.
@@ -299,7 +300,7 @@ Theorem gcd_1_div_mul_exact : ∀ m p q kp kq,
   → kp = q * (kp / q).
 Proof.
 intros * Hqz Hg Hkp Hkq.
-rewrite <- Nat.Lcm0.divide_div_mul_exact; [ | easy | ]. 2: {
+rewrite <- Nat.Lcm0.divide_div_mul_exact. 2: {
   apply (Nat.gauss _ p). {
     rewrite Nat.mul_comm, <- Hkp, Hkq.
     now exists kq.
@@ -343,7 +344,7 @@ rewrite Nat.div_mul_cancel_l; [ | easy | ]. 2: {
   now subst kq.
 }
 rewrite (Nat.mul_comm p), <- Nat.mul_assoc.
-rewrite <- Nat.Lcm0.divide_div_mul_exact; [ | easy | ]. 2: {
+rewrite <- Nat.Lcm0.divide_div_mul_exact. 2: {
   exists (kq / p).
   rewrite Nat.mul_comm.
   rewrite Nat.gcd_comm in Hg.
@@ -365,7 +366,7 @@ split; intros Ha. {
   destruct H as (Hpa, Hna).
   apply Nat.eqb_eq in Hna.
   apply in_seq in Ha.
-  apply Nat.Lcm0.mod_divide in Hna; [ | flia Ha ].
+  apply Nat.Lcm0.mod_divide in Hna.
   apply prime_decomp_in_iff.
   split; [ | split ]; [ flia Ha | easy | easy ].
 } {
@@ -385,8 +386,7 @@ split; intros Ha. {
   apply Bool.andb_true_iff.
   split; [ easy | ].
   apply Nat.eqb_eq.
-  apply Nat.Lcm0.mod_divide in Han; [ easy | ].
-  now intros H1; subst a.
+  now apply Nat.Lcm0.mod_divide in Han.
 }
 Qed.
 
@@ -428,6 +428,7 @@ Definition prim_roots n := filter (is_prim_root n) (seq 1 (n - 1)).
 
 Compute (prim_roots 14, φ (φ 14)).
 Compute (prim_root_cycle 14 5).
+...
 Compute (sort Nat.leb (map (λ i, Nat_pow_mod 5 i 14) (seq 1 14))).
 
 Fixpoint in_list_nat n l :=
