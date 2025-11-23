@@ -1699,6 +1699,7 @@ Theorem glop : ∀ p, prime p → ∃ a, is_prim_root p a = true.
 Proof.
 intros * Hp.
 unfold is_prim_root.
+...
 Check Nat_pow_mod.
 Search Nat_pow_mod.
 Compute (map (λ i, Nat_pow_mod i 21 43) (seq 1 42)).
