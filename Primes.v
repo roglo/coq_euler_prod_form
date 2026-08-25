@@ -2509,3 +2509,138 @@ Definition divisors n := List.filter (λ a, n mod a =? 0) (List.seq 1 n).
 
 Definition prime_divisors n :=
   filter (λ d, (is_prime d && (n mod d =? 0))%bool) (seq 1 n).
+
+(**)
+
+Global Hint Resolve Nat.le_0_l : core.
+Global Hint Resolve Nat.lt_0_succ : core.
+
+Theorem  Nat_neg_neg_mod :
+  ∀ a b n, a ≤ n → b ≤ n → (n - a) * (n - b) ≡ (a * b) mod n.
+Proof.
+intros * Han Hbn.
+rewrite Nat.mul_sub_distr_l.
+do 2 rewrite Nat.mul_sub_distr_r.
+rewrite Nat_sub_sub_swap.
+rewrite <- (Nat.Div0.mod_add _ a).
+rewrite Nat.sub_add; cycle 1. {
+  rewrite Nat.sub_sub_distr; cycle 1. {
+    now apply Nat.mul_le_mono_nonneg_r.
+  } {
+    now apply Nat.mul_le_mono_nonneg_l.
+  }
+  rewrite <- Nat.mul_sub_distr_l.
+  apply Nat.le_sub_le_add_r.
+  rewrite <- Nat.mul_sub_distr_l.
+  apply Nat.mul_le_mono_nonneg_r; [ | easy ].
+  apply Nat.le_add_le_sub_l.
+  now rewrite Nat.add_0_r.
+}
+rewrite Nat.sub_sub_distr; cycle 1. {
+  now apply Nat.mul_le_mono_nonneg_r.
+} {
+  now apply Nat.mul_le_mono_nonneg_l.
+}
+rewrite <- Nat.mul_sub_distr_l.
+rewrite Nat.mul_comm.
+rewrite Nat.add_comm.
+now rewrite Nat.Div0.mod_add.
+Qed.
+
+Fixpoint sqrt_mod_loop a p i :=
+  match i with
+  | 0 => None
+  | S i' =>
+      if i * i mod p =? a mod p then Some (p - i)
+      else sqrt_mod_loop a p i'
+  end.
+
+Definition sqrt_mod a p := sqrt_mod_loop a p (p - 1).
+
+Definition legendre_symbol a p :=
+  if a =? 0 then 0
+  else
+    match sqrt_mod a p with
+    | Some _ => 1
+    | None => p - 1
+    end.
+
+(*
+Definition is_quadratic_residue a p := legendre_symbol a p =? 1.
+
+Compute (let p := 17 in List.map (λ a, (sqrt_mod a p, a)) (List.seq 0 p)).
+Compute (let p := 17 in List.filter (λ a, is_quadratic_residue a p) (List.seq 0 p)).
+*)
+
+Theorem eq_sqrt_mod_loop_Some :
+  ∀ a b p i,
+  i < p
+  → sqrt_mod_loop a p i = Some b
+  → 1 ≤ b < p ∧ b * b ≡ a mod p.
+Proof.
+intros * Hip Hsm.
+induction i; [ easy | ].
+cbn - [ "*" ] in Hsm.
+remember ((S i * S i) mod p =? a mod p) as e eqn:He.
+symmetry in He.
+destruct e; cycle 1. {
+  apply IHi; [ flia Hip | easy ].
+}
+injection Hsm; clear Hsm; intros; subst b.
+apply Nat.eqb_eq in He.
+split; [ | now apply Nat.lt_le_incl in Hip; rewrite Nat_neg_neg_mod ].
+split; [ | now apply Nat.lt_le_incl in Hip; apply Nat.sub_lt ].
+flia Hip.
+Qed.
+
+Theorem eq_sqrt_mod_Some :
+  ∀ a b p,
+  p ≠ 0
+  → sqrt_mod a p = Some b
+  → 1 ≤ b < p ∧ b * b ≡ a mod p.
+Proof.
+intros * Hp Hsm.
+apply eq_sqrt_mod_loop_Some in Hsm; [ easy | ].
+apply Nat.sub_lt; [ | easy ].
+now apply Nat.neq_0_lt_0.
+Qed.
+
+(* to be completed
+Theorem euler_criterion : ∀ p,
+  prime p
+  → ∀ a, 1 ≤ a < p
+  → a ^ ((p - 1) / 2) ≡ legendre_symbol a p mod p.
+Proof.
+intros * Hp * Hap.
+progress unfold legendre_symbol.
+remember (a =? 0) as az eqn:Haz.
+symmetry in Haz.
+destruct az. {
+  now apply Nat.eqb_eq in Haz; subst a.
+}
+apply Nat.eqb_neq in Haz.
+remember (sqrt_mod a p) as sm eqn:Hsm.
+symmetry in Hsm.
+destruct sm as [b| ]. {
+  apply eq_sqrt_mod_Some in Hsm; [ | flia Hap ].
+  destruct Hsm as (Hbp, Hsm).
+  rewrite <- Nat_mod_pow_mod.
+  rewrite <- Hsm.
+  rewrite Nat_mod_pow_mod.
+  rewrite <- Nat.pow_2_r.
+  rewrite <- Nat.pow_mul_r.
+  destruct (Nat.eq_dec p 2) as [Hp2| Hp2]; [ now subst p | ].
+  rewrite <- (proj2 (Nat.Div0.div_exact _ _)). {
+    rewrite fermat_little; [ | easy | easy ].
+    symmetry.
+    apply Nat.mod_1_l.
+    now apply (Nat.le_lt_trans _ a).
+  }
+  specialize (odd_prime _ Hp Hp2) as H1.
+  specialize (Nat.div_mod p 2 (Nat.neq_succ_0 _)) as H2.
+  rewrite H1 in H2.
+  rewrite H2, Nat.add_sub, Nat.mul_comm.
+  apply Nat.Div0.mod_mul.
+}
+...
+*)
