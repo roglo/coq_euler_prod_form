@@ -2616,12 +2616,15 @@ intros * Hp Hsm * Hbb.
 progress unfold sqrt_mod in Hsm.
 remember (p - 1) as i eqn:Hi.
 symmetry in Hi.
+assert (H : p - 1 ≤ i) by flia Hi.
+clear Hi; rename H into Hi.
 revert p Hp Hi Hsm Hbb.
 induction i; intros; [ flia Hp Hi | ].
 cbn - [ "*" ] in Hsm.
 remember ((S i * S i) mod p =? a mod p) as sip eqn:Hsip.
 symmetry in Hsip.
 destruct sip; [ easy | ].
+apply Nat.eqb_neq in Hsip.
 ...
 
 Theorem euler_criterion : ∀ p,
