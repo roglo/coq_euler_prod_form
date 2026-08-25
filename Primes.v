@@ -2617,7 +2617,16 @@ intros * Hap Hp Hsm * Hbb.
 progress unfold sqrt_mod in Hsm.
 remember (p - 1) as i eqn:Hi.
 symmetry in Hi.
-(**)
+symmetry in Hbb.
+rewrite <- Nat.Div0.mul_mod_idemp_l in Hbb.
+rewrite <- Nat.Div0.mul_mod_idemp_r in Hbb.
+remember (b mod p) as d eqn:Hd.
+assert (Ha3 : d < p). {
+  subst d.
+  apply Nat.mod_upper_bound.
+  flia Hp.
+}
+clear b Hd.
 destruct i; [ flia Hp Hi | ].
 cbn - [ "*" ] in Hsm.
 remember ((S i * S i) mod p =? a mod p) as sip eqn:Hsip.
@@ -2633,15 +2642,6 @@ apply Nat.eqb_neq in Hsip2.
 apply Nat.neq_sym in Hsip, Hsip2.
 replace p with (S (S (S i))) in * by flia Hp Hi.
 clear p Hp Hi.
-symmetry in Hbb.
-rewrite <- Nat.Div0.mul_mod_idemp_l in Hbb.
-rewrite <- Nat.Div0.mul_mod_idemp_r in Hbb.
-remember (b mod S (S (S i))) as d eqn:Hd.
-assert (Ha3 : d < S (S (S i))). {
-  subst d.
-  now apply Nat.mod_upper_bound.
-}
-clear b Hd.
 destruct i. {
   destruct d; [ easy | ].
   destruct d; [ easy | ].
