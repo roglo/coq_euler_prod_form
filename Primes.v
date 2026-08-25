@@ -2726,6 +2726,56 @@ destruct i. {
   destruct d; [ easy | ].
   flia Ha3.
 }
+destruct i. {
+  rewrite <- Nat.Div0.mul_mod_idemp_l in Hbb.
+  rewrite <- Nat.Div0.mul_mod_idemp_r in Hbb.
+  symmetry in Hbb.
+  remember (b mod 8) as d eqn:Hd.
+  assert (Ha3 : d < 8). {
+    subst d.
+    now apply Nat.mod_upper_bound.
+  }
+  destruct d; [ easy | ].
+  destruct d; [ easy | ].
+  destruct d; [ easy | ].
+  destruct d; [ easy | ].
+  destruct d; [ easy | ].
+  destruct d; [ easy | ].
+  destruct d; [ easy | ].
+  destruct d; [ easy | ].
+  flia Ha3.
+}
+destruct i. {
+  rewrite <- Nat.Div0.mul_mod_idemp_l in Hbb.
+  rewrite <- Nat.Div0.mul_mod_idemp_r in Hbb.
+  symmetry in Hbb.
+  remember (b mod 9) as d eqn:Hd.
+  assert (Ha3 : d < 9). {
+    subst d.
+    now apply Nat.mod_upper_bound.
+  }
+  destruct d; [ easy | ].
+  destruct d; [ easy | ].
+  destruct d; [ easy | ].
+  destruct d; [ easy | ].
+  destruct d. {
+    cbn - [ "mod" ] in Hsm, Hbb.
+    rewrite <- Hbb in Hsm.
+    rewrite Nat.eqb_refl in Hsm.
+    destruct (_ =? _) in Hsm; [ easy | ].
+    now destruct (_ =? _) in Hsm.
+  }
+  destruct d. {
+    cbn - [ "mod" ] in Hsm, Hbb.
+    rewrite <- Hbb in Hsm.
+    rewrite Nat.eqb_refl in Hsm.
+    now destruct (_ =? _) in Hsm.
+  }
+  destruct d; [ easy | ].
+  destruct d; [ easy | ].
+  destruct d; [ easy | ].
+  flia Ha3.
+}
 ...
 
 Theorem euler_criterion : ∀ p,
