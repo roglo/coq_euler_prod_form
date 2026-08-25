@@ -2608,23 +2608,39 @@ Qed.
 (* to be completed
 Theorem eq_sqrt_mod_None :
   ∀ a p,
-  2 < p
+  a ≢ 0 mod p
+  → 2 < p
   → sqrt_mod a p = None
   → ∀ b, b * b ≢ a mod p.
 Proof.
-intros * Hp Hsm * Hbb.
+intros * Hap Hp Hsm * Hbb.
 progress unfold sqrt_mod in Hsm.
 remember (p - 1) as i eqn:Hi.
 symmetry in Hi.
-assert (H : p - 1 ≤ i) by flia Hi.
-clear Hi; rename H into Hi.
-revert p Hp Hi Hsm Hbb.
-induction i; intros; [ flia Hp Hi | ].
+(**)
+destruct i; [ flia Hp Hi | ].
 cbn - [ "*" ] in Hsm.
 remember ((S i * S i) mod p =? a mod p) as sip eqn:Hsip.
 symmetry in Hsip.
 destruct sip; [ easy | ].
 apply Nat.eqb_neq in Hsip.
+destruct i; [ flia Hp Hi | ].
+cbn - [ "*" ] in Hsm.
+remember ((S i * S i) mod p =? a mod p) as sip2 eqn:Hsip2.
+symmetry in Hsip2.
+destruct sip2; [ easy | ].
+apply Nat.eqb_neq in Hsip2.
+apply Nat.neq_sym in Hsip, Hsip2.
+destruct i. {
+  replace p with 3 in * by flia Hp Hi.
+  clear Hp Hi Hsm Hsip.
+  rewrite Nat.mul_1_l in Hsip2.
+  remember (a mod 3) as c eqn:Hc.
+  cbn in Hap, Hsip2.
+  destruct c; [ easy | clear Hap ].
+  destruct c; [ easy | clear Hsip2 ].
+  destruct c. {
+    clear a Hc.
 ...
 
 Theorem euler_criterion : ∀ p,
