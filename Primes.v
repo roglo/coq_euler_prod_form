@@ -2633,10 +2633,10 @@ apply Nat.eqb_neq in Hsip2.
 apply Nat.neq_sym in Hsip, Hsip2.
 replace p with (S (S (S i))) in * by flia Hp Hi.
 clear p Hp Hi.
+symmetry in Hbb.
 destruct i. {
   rewrite <- Nat.Div0.mul_mod_idemp_l in Hbb.
   rewrite <- Nat.Div0.mul_mod_idemp_r in Hbb.
-  symmetry in Hbb.
   remember (b mod 3) as d eqn:Hd.
   assert (Ha3 : d < 3). {
     subst d.
@@ -2650,7 +2650,6 @@ destruct i. {
 destruct i. {
   rewrite <- Nat.Div0.mul_mod_idemp_l in Hbb.
   rewrite <- Nat.Div0.mul_mod_idemp_r in Hbb.
-  symmetry in Hbb.
   remember (b mod 4) as d eqn:Hd.
   assert (Ha3 : d < 4). {
     subst d.
@@ -2665,7 +2664,6 @@ destruct i. {
 destruct i. {
   rewrite <- Nat.Div0.mul_mod_idemp_l in Hbb.
   rewrite <- Nat.Div0.mul_mod_idemp_r in Hbb.
-  symmetry in Hbb.
   remember (b mod 5) as d eqn:Hd.
   assert (Ha3 : d < 5). {
     subst d.
@@ -2681,7 +2679,6 @@ destruct i. {
 destruct i. {
   rewrite <- Nat.Div0.mul_mod_idemp_l in Hbb.
   rewrite <- Nat.Div0.mul_mod_idemp_r in Hbb.
-  symmetry in Hbb.
   remember (b mod 6) as d eqn:Hd.
   assert (Ha3 : d < 6). {
     subst d.
@@ -2692,8 +2689,7 @@ destruct i. {
   destruct d; [ easy | ].
   destruct d. {
     cbn - [ "mod" ] in Hsm, Hbb.
-    rewrite <- Hbb in Hsm.
-    now rewrite Nat.eqb_refl in Hsm.
+    now rewrite Hbb in Hsm.
   }
   destruct d; [ easy | ].
   destruct d; [ easy | ].
@@ -2702,7 +2698,6 @@ destruct i. {
 destruct i. {
   rewrite <- Nat.Div0.mul_mod_idemp_l in Hbb.
   rewrite <- Nat.Div0.mul_mod_idemp_r in Hbb.
-  symmetry in Hbb.
   remember (b mod 7) as d eqn:Hd.
   assert (Ha3 : d < 7). {
     subst d.
@@ -2713,14 +2708,11 @@ destruct i. {
   destruct d; [ easy | ].
   destruct d. {
     cbn - [ "mod" ] in Hsm, Hbb.
-    rewrite <- Hbb in Hsm.
-    rewrite Nat.eqb_refl in Hsm.
-    now destruct (_ =? _) in Hsm.
+    now rewrite Hbb in Hsm.
   }
   destruct d. {
     cbn - [ "mod" ] in Hsm, Hbb.
-    rewrite <- Hbb in Hsm.
-    now rewrite Nat.eqb_refl in Hsm.
+    now rewrite Hbb in Hsm.
   }
   destruct d; [ easy | ].
   destruct d; [ easy | ].
@@ -2729,7 +2721,6 @@ destruct i. {
 destruct i. {
   rewrite <- Nat.Div0.mul_mod_idemp_l in Hbb.
   rewrite <- Nat.Div0.mul_mod_idemp_r in Hbb.
-  symmetry in Hbb.
   remember (b mod 8) as d eqn:Hd.
   assert (Ha3 : d < 8). {
     subst d.
@@ -2748,7 +2739,6 @@ destruct i. {
 destruct i. {
   rewrite <- Nat.Div0.mul_mod_idemp_l in Hbb.
   rewrite <- Nat.Div0.mul_mod_idemp_r in Hbb.
-  symmetry in Hbb.
   remember (b mod 9) as d eqn:Hd.
   assert (Ha3 : d < 9). {
     subst d.
@@ -2760,16 +2750,11 @@ destruct i. {
   destruct d; [ easy | ].
   destruct d. {
     cbn - [ "mod" ] in Hsm, Hbb.
-    rewrite <- Hbb in Hsm.
-    rewrite Nat.eqb_refl in Hsm.
-    destruct (_ =? _) in Hsm; [ easy | ].
-    now destruct (_ =? _) in Hsm.
+    now rewrite Hbb in Hsm.
   }
   destruct d. {
     cbn - [ "mod" ] in Hsm, Hbb.
-    rewrite <- Hbb in Hsm.
-    rewrite Nat.eqb_refl in Hsm.
-    now destruct (_ =? _) in Hsm.
+    now rewrite Hbb in Hsm.
   }
   destruct d; [ easy | ].
   destruct d; [ easy | ].
@@ -2777,9 +2762,13 @@ destruct i. {
   flia Ha3.
 }
 destruct i. {
+  rewrite Nat.Div0.mod_0_l in Hap.
+  remember ((9 * 9) mod 10) as x.
+  cbn in Heqx; subst x.
+  remember ((8 * 8) mod 10) as x.
+  cbn in Heqx; subst x.
   rewrite <- Nat.Div0.mul_mod_idemp_l in Hbb.
   rewrite <- Nat.Div0.mul_mod_idemp_r in Hbb.
-  symmetry in Hbb.
   remember (b mod 10) as d eqn:Hd.
   assert (Ha3 : d < 10). {
     subst d.
@@ -2790,37 +2779,23 @@ destruct i. {
   destruct d; [ easy | ].
   destruct d. {
     cbn - [ "mod" ] in Hsm, Hbb.
-    rewrite <- Hbb in Hsm.
-    rewrite Nat.eqb_refl in Hsm.
-    destruct (_ =? _) in Hsm; [ easy | ].
-    destruct (_ =? _) in Hsm; [ easy | ].
-    now destruct (_ =? _) in Hsm.
+    now rewrite Hbb in Hsm.
   }
   destruct d. {
     cbn - [ "mod" ] in Hsm, Hbb.
-    rewrite <- Hbb in Hsm.
-    rewrite Nat.eqb_refl in Hsm.
-    destruct (_ =? _) in Hsm; [ easy | ].
-    destruct (_ =? _) in Hsm; [ easy | ].
-    now destruct (_ =? _) in Hsm.
+    now rewrite Hbb in Hsm.
   }
   destruct d. {
     cbn - [ "mod" ] in Hsm, Hbb.
-    rewrite <- Hbb in Hsm.
-    rewrite Nat.eqb_refl in Hsm.
-    destruct (_ =? _) in Hsm; [ easy | ].
-    now destruct (_ =? _) in Hsm.
+    now rewrite Hbb in Hsm.
   }
   destruct d. {
     cbn - [ "mod" ] in Hsm, Hbb.
-    rewrite <- Hbb in Hsm.
-    rewrite Nat.eqb_refl in Hsm.
-    now destruct (_ =? _) in Hsm.
+    now rewrite Hbb in Hsm.
   }
   destruct d. {
     cbn - [ "mod" ] in Hsm, Hbb.
-    rewrite <- Hbb in Hsm.
-    now rewrite Nat.eqb_refl in Hsm.
+    now rewrite Hbb in Hsm.
   }
   destruct d; [ easy | ].
   destruct d; [ easy | ].
