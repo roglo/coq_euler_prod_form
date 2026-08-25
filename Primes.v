@@ -2706,6 +2706,41 @@ destruct i. {
     destruct a; [ easy | ].
     flia Ha3.
   }
+  flia Hcc.
+}
+destruct i. {
+  remember (a mod 5) as c eqn:Hc.
+  assert (Hcc : c < 5). {
+    subst c.
+    now apply Nat.mod_upper_bound.
+  }
+  destruct c; [ easy | ].
+  destruct c; [ easy | ].
+  clear Hap.
+  rewrite <- Nat.Div0.mul_mod_idemp_l in Hbb.
+  rewrite <- Nat.Div0.mul_mod_idemp_r in Hbb.
+  clear a Hc Hsm Hcc.
+  remember (b mod 5) as a eqn:Ha.
+  assert (Ha3 : a < 5). {
+    subst a.
+    now apply Nat.mod_upper_bound.
+  }
+  destruct a; [ easy | ].
+  destruct a; [ easy | ].
+  destruct a. {
+    destruct c; [ easy | ].
+    destruct c; [ easy | now destruct c ].
+  }
+  destruct a. {
+    destruct c; [ easy | ].
+    destruct c; [ easy | now destruct c ].
+  }
+  destruct a. {
+    destruct c; [ easy | ].
+    destruct c; [ easy | now destruct c ].
+  }
+  flia Ha3.
+}
 ...
 
 Theorem euler_criterion : ∀ p,
