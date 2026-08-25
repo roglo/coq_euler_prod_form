@@ -2631,9 +2631,10 @@ symmetry in Hsip2.
 destruct sip2; [ easy | ].
 apply Nat.eqb_neq in Hsip2.
 apply Nat.neq_sym in Hsip, Hsip2.
+replace p with (S (S (S i))) in * by flia Hp Hi.
+clear p Hp Hi.
 destruct i. {
-  replace p with 3 in * by flia Hp Hi.
-  clear Hp Hi Hsm Hsip.
+  clear Hsm.
   rewrite Nat.mul_1_l in Hsip2.
   remember (a mod 3) as c eqn:Hc.
   cbn in Hap, Hsip2.
@@ -2641,6 +2642,31 @@ destruct i. {
   destruct c; [ easy | clear Hsip2 ].
   destruct c. {
     clear a Hc.
+    rewrite <- Nat.Div0.mul_mod_idemp_l in Hbb.
+    rewrite <- Nat.Div0.mul_mod_idemp_r in Hbb.
+    remember (b mod 3) as a eqn:Ha.
+    assert (Ha3 : a < 3). {
+      subst a.
+      now apply Nat.mod_upper_bound.
+    }
+    clear b Ha.
+    destruct a; [ easy | ].
+    destruct a; [ easy | ].
+    destruct a; [ easy | flia Ha3 ].
+  }
+  specialize (Nat.mod_upper_bound (b * b) 3 (Nat.neq_succ_0 _)) as H1.
+  rewrite Hbb in H1.
+  flia H1.
+}
+destruct i. {
+  cbn - [ "mod" ] in Hsm.
+  rewrite Nat.mod_small in Hsm; [ | flia ].
+  rewrite Nat.eqb_sym in Hsm.
+  remember (a mod 4 =? 1) as a1 eqn:Ha1.
+  symmetry in Ha1.
+  destruct a1; [ easy | clear Hsm ].
+  apply Nat.eqb_neq in Ha1.
+  rewrite Nat.Div0.mod_0_l in Hap.
 ...
 
 Theorem euler_criterion : ∀ p,
