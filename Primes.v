@@ -2667,6 +2667,45 @@ destruct i. {
   destruct a1; [ easy | clear Hsm ].
   apply Nat.eqb_neq in Ha1.
   rewrite Nat.Div0.mod_0_l in Hap.
+  remember (a mod 4) as c eqn:Hc.
+  assert (Hcc : c < 4). {
+    subst c.
+    now apply Nat.mod_upper_bound.
+  }
+  destruct c; [ easy | ].
+  destruct c; [ easy | ].
+  clear Hap Ha1.
+  destruct c. {
+    clear Hcc Hsip Hsip2 a Hc.
+    rewrite <- Nat.Div0.mul_mod_idemp_l in Hbb.
+    rewrite <- Nat.Div0.mul_mod_idemp_r in Hbb.
+    remember (b mod 4) as a eqn:Ha.
+    assert (Ha3 : a < 4). {
+      subst a.
+      now apply Nat.mod_upper_bound.
+    }
+    clear b Ha.
+    destruct a; [ easy | ].
+    destruct a; [ easy | ].
+    destruct a; [ easy | ].
+    destruct a; [ easy | ].
+    flia Ha3.
+  }
+  destruct c. {
+    rewrite <- Nat.Div0.mul_mod_idemp_l in Hbb.
+    rewrite <- Nat.Div0.mul_mod_idemp_r in Hbb.
+    clear a Hc.
+    remember (b mod 4) as a eqn:Ha.
+    assert (Ha3 : a < 4). {
+      subst a.
+      now apply Nat.mod_upper_bound.
+    }
+    destruct a; [ easy | ].
+    destruct a; [ easy | ].
+    destruct a; [ easy | ].
+    destruct a; [ easy | ].
+    flia Ha3.
+  }
 ...
 
 Theorem euler_criterion : ∀ p,
