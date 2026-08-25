@@ -2606,6 +2606,24 @@ now apply Nat.neq_0_lt_0.
 Qed.
 
 (* to be completed
+Theorem eq_sqrt_mod_None :
+  ∀ a p,
+  2 < p
+  → sqrt_mod a p = None
+  → ∀ b, b * b ≢ a mod p.
+Proof.
+intros * Hp Hsm * Hbb.
+progress unfold sqrt_mod in Hsm.
+remember (p - 1) as i eqn:Hi.
+symmetry in Hi.
+revert p Hp Hi Hsm Hbb.
+induction i; intros; [ flia Hp Hi | ].
+cbn - [ "*" ] in Hsm.
+remember ((S i * S i) mod p =? a mod p) as sip eqn:Hsip.
+symmetry in Hsip.
+destruct sip; [ easy | ].
+...
+
 Theorem euler_criterion : ∀ p,
   prime p
   → ∀ a, 1 ≤ a < p
