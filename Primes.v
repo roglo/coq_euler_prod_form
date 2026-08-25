@@ -2642,6 +2642,7 @@ apply Nat.eqb_neq in Hsip2.
 apply Nat.neq_sym in Hsip, Hsip2.
 replace p with (S (S (S i))) in * by flia Hp Hi.
 clear p Hp Hi.
+clear Hsip.
 destruct i. {
   destruct d; [ easy | ].
   destruct d; [ easy | ].
@@ -2650,34 +2651,56 @@ destruct i. {
 }
 destruct i. {
   destruct d; [ easy | ].
+  destruct d. {
+    cbn - [ "mod" ] in Hsm, Hbb.
+    now rewrite Hbb in Hsm.
+  }
   destruct d; [ easy | ].
-  destruct d; [ easy | ].
+  destruct d. {
+    cbn - [ "mod" ] in Hsm, Hbb.
+    now rewrite Hbb in Hsm.
+  }
   destruct d; [ easy | ].
   flia Ha3.
 }
 destruct i. {
   destruct d; [ easy | ].
+  destruct d. {
+    cbn - [ "mod" ] in Hsm, Hbb.
+    now rewrite Hbb in Hsm.
+  }
   destruct d; [ easy | ].
   destruct d; [ easy | ].
-  destruct d; [ easy | ].
-  destruct d; [ easy | ].
+  destruct d. {
+    cbn - [ "mod" ] in Hsm, Hbb.
+    now rewrite Hbb in Hsm.
+  }
   flia Ha3.
 }
 destruct i. {
   destruct d; [ easy | ].
-  destruct d; [ easy | ].
+  destruct d. {
+    cbn - [ "mod" ] in Hsm, Hbb.
+    now rewrite Hbb in Hsm.
+  }
   destruct d; [ easy | ].
   destruct d. {
     cbn - [ "mod" ] in Hsm, Hbb.
     now rewrite Hbb in Hsm.
   }
   destruct d; [ easy | ].
-  destruct d; [ easy | ].
+  destruct d. {
+    cbn - [ "mod" ] in Hsm, Hbb.
+    now rewrite Hbb in Hsm.
+  }
   flia Ha3.
 }
 destruct i. {
   destruct d; [ easy | ].
-  destruct d; [ easy | ].
+  destruct d. {
+    cbn - [ "mod" ] in Hsm, Hbb.
+    now rewrite Hbb in Hsm.
+  }
   destruct d; [ easy | ].
   destruct d. {
     cbn - [ "mod" ] in Hsm, Hbb.
@@ -2688,23 +2711,41 @@ destruct i. {
     now rewrite Hbb in Hsm.
   }
   destruct d; [ easy | ].
-  destruct d; [ easy | ].
+  destruct d. {
+    cbn - [ "mod" ] in Hsm, Hbb.
+    now rewrite Hbb in Hsm.
+  }
   flia Ha3.
 }
 destruct i. {
   destruct d; [ easy | ].
+  destruct d. {
+    cbn - [ "mod" ] in Hsm, Hbb.
+    now rewrite Hbb in Hsm.
+  }
   destruct d; [ easy | ].
+  destruct d. {
+    cbn - [ "mod" ] in Hsm, Hbb.
+    now rewrite Hbb in Hsm.
+  }
   destruct d; [ easy | ].
+  destruct d. {
+    cbn - [ "mod" ] in Hsm, Hbb.
+    now rewrite Hbb in Hsm.
+  }
   destruct d; [ easy | ].
-  destruct d; [ easy | ].
-  destruct d; [ easy | ].
-  destruct d; [ easy | ].
-  destruct d; [ easy | ].
+  destruct d. {
+    cbn - [ "mod" ] in Hsm, Hbb.
+    now rewrite Hbb in Hsm.
+  }
   flia Ha3.
 }
 destruct i. {
   destruct d; [ easy | ].
-  destruct d; [ easy | ].
+  destruct d. {
+    cbn - [ "mod" ] in Hsm, Hbb.
+    now rewrite Hbb in Hsm.
+  }
   destruct d; [ easy | ].
   destruct d; [ easy | ].
   destruct d. {
@@ -2717,35 +2758,44 @@ destruct i. {
   }
   destruct d; [ easy | ].
   destruct d; [ easy | ].
-  destruct d; [ easy | ].
+  destruct d. {
+    cbn - [ "mod" ] in Hsm, Hbb.
+    now rewrite Hbb in Hsm.
+  }
   flia Ha3.
 }
 destruct i. {
   destruct d; [ easy | ].
-  destruct d; [ easy | ].
-  destruct d; [ easy | ].
-  destruct d. {
-    cbn - [ "mod" ] in Hsm, Hbb.
-    now rewrite Hbb in Hsm.
-  }
-  destruct d. {
-    cbn - [ "mod" ] in Hsm, Hbb.
-    now rewrite Hbb in Hsm.
-  }
-  destruct d. {
-    cbn - [ "mod" ] in Hsm, Hbb.
-    now rewrite Hbb in Hsm.
-  }
-  destruct d. {
-    cbn - [ "mod" ] in Hsm, Hbb.
-    now rewrite Hbb in Hsm.
-  }
   destruct d. {
     cbn - [ "mod" ] in Hsm, Hbb.
     now rewrite Hbb in Hsm.
   }
   destruct d; [ easy | ].
+  destruct d. {
+    cbn - [ "mod" ] in Hsm, Hbb.
+    now rewrite Hbb in Hsm.
+  }
+  destruct d. {
+    cbn - [ "mod" ] in Hsm, Hbb.
+    now rewrite Hbb in Hsm.
+  }
+  destruct d. {
+    cbn - [ "mod" ] in Hsm, Hbb.
+    now rewrite Hbb in Hsm.
+  }
+  destruct d. {
+    cbn - [ "mod" ] in Hsm, Hbb.
+    now rewrite Hbb in Hsm.
+  }
+  destruct d. {
+    cbn - [ "mod" ] in Hsm, Hbb.
+    now rewrite Hbb in Hsm.
+  }
   destruct d; [ easy | ].
+  destruct d. {
+    cbn - [ "mod" ] in Hsm, Hbb.
+    now rewrite Hbb in Hsm.
+  }
   flia Ha3.
 }
 ...
