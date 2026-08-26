@@ -2652,6 +2652,11 @@ destruct i. {
 }
 clear Hsip2.
 (**)
+revert a i Hap Hsm Hbb Ha3.
+induction d; intros; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+apply IHd in Hsm; try easy; [ | flia Ha3 ].
+(* ouais, bon, ça marche pas *)
+...
 remember 0 as j eqn:Hj in |-*.
 progress replace (S (S (S (S i)))) with (j + i + 4) in Hap, Hsm, Hbb, Ha3
   by flia Hj.
