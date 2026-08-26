@@ -2604,7 +2604,7 @@ apply Nat.sub_lt; [ | easy ].
 now apply Nat.neq_0_lt_0.
 Qed.
 
-(* to be completed
+(* to be completed *)
 Theorem eq_sqrt_mod_None :
   ∀ a p,
   a ≢ 0 mod p
@@ -2628,26 +2628,28 @@ assert (Hbp : d < p). {
 clear b Hd.
 rename d into b.
 move b before a.
-destruct i; [ flia Hp Hi | ].
+assert (Hip : 1 < i < p) by flia Hi Hp.
+clear Hi.
+destruct i; [ easy | ].
 cbn - [ "*" ] in Hsm.
 remember ((S i * S i) mod p =? a mod p) as sip eqn:Hsip.
 symmetry in Hsip.
 destruct sip; [ easy | ].
 apply Nat.eqb_neq in Hsip.
-destruct i; [ flia Hp Hi | ].
+destruct i; [ flia Hip | ].
+destruct Hip as (_, Hip).
 cbn - [ "*" ] in Hsm.
 remember ((S i * S i) mod p =? a mod p) as sip2 eqn:Hsip2.
 symmetry in Hsip2.
 destruct sip2; [ easy | ].
 apply Nat.eqb_neq in Hsip2.
 apply Nat.neq_sym in Hsip, Hsip2.
-replace p with (S (S (S i))) in * by flia Hp Hi.
-clear p Hp Hi.
-clear Hsip.
+clear Hp.
 destruct i. {
   destruct b; [ easy | ].
   destruct b; [ easy | ].
   destruct b; [ easy | ].
+cbn in *.
   flia Hbp.
 }
 clear Hsip2.
