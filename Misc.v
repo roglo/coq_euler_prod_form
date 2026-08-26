@@ -943,8 +943,10 @@ rewrite IHc; [ | easy ].
 now rewrite Nat.Div0.mul_mod_idemp_r.
 Qed.
 
-Notation "a ≡ b 'mod' c" := (a mod c = b mod c) (at level 70, b at level 36).
-Notation "a ≢ b 'mod' c" := (a mod c ≠ b mod c) (at level 70, b at level 36).
+Notation "a ≡ b 'mod' c" :=
+  (a mod c = b mod c) (at level 70, b at level 36, c at level 36).
+Notation "a ≢ b 'mod' c" :=
+  (a mod c ≠ b mod c) (at level 70, b at level 36, c at level 36).
 
 Theorem Nat_mul_mod_cancel_r : ∀ a b c n,
   Nat.gcd c n = 1
