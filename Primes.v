@@ -2650,46 +2650,6 @@ destruct i. {
   flia Ha3.
 }
 clear Hsip2.
-(**)
-revert a i Hap Hsm Hbb Ha3.
-induction d; intros; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-apply Nat.succ_lt_mono in Ha3.
-cbn - [ "*" "mod" ] in Hsm.
-remember (_ =? _) as x eqn:Hx in Hsm.
-symmetry in Hx.
-destruct x; [ easy | ].
-apply Nat.eqb_neq in Hx.
-apply Nat.neq_sym in Hx.
-...
-apply IHd in Hsm; try easy; [ | flia Ha3 ].
-(* ouais, bon, ça marche pas *)
-...
-remember 0 as j eqn:Hj in |-*.
-progress replace (S (S (S (S i)))) with (j + i + 4) in Hap, Hsm, Hbb, Ha3
-  by flia Hj.
-progress replace (S i) with (j + i + 1) in Hsm by flia Hj.
-clear Hj.
-revert a d j Hap Hsm Hbb Ha3.
-induction i; intros. {
-  destruct d. {
-    rewrite Nat.add_0_r in Hap, Hsm, Hbb, Ha3.
-    cbn in Hsm, Hbb.
-...
-    destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-    destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-    destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-    destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-    flia Ha3.
-  }
-  destruct d. {
-    cbn in Hsm, Hbb.
-    rewrite Nat.add_comm in Hbb.
-    do 2 rewrite (Nat.add_comm i) in Hsm.
-    cbn in Hsm, Hbb.
-    rewrite Hbb in Hsm.
-...
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-...
 progress replace (S (S (S (S i)))) with (i + 4) in Hap, Hsm, Hbb, Ha3 by flia.
 progress replace (S i) with (i + 1) in Hsm by flia.
 destruct i. {
