@@ -2649,153 +2649,75 @@ destruct i. {
   destruct d; [ easy | ].
   flia Ha3.
 }
+clear Hsip2.
 destruct i. {
-  destruct d; [ easy | ].
-  destruct d. {
-    cbn - [ "mod" ] in Hsm, Hbb.
-    now rewrite Hbb in Hsm.
-  }
-  destruct d; [ easy | ].
-  destruct d. {
-    cbn - [ "mod" ] in Hsm, Hbb.
-    now rewrite Hbb in Hsm.
-  }
-  destruct d; [ easy | ].
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
   flia Ha3.
 }
 destruct i. {
-  destruct d; [ easy | ].
-  destruct d. {
-    cbn - [ "mod" ] in Hsm, Hbb.
-    now rewrite Hbb in Hsm.
-  }
-  destruct d; [ easy | ].
-  destruct d; [ easy | ].
-  destruct d. {
-    cbn - [ "mod" ] in Hsm, Hbb.
-    now rewrite Hbb in Hsm.
-  }
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
   flia Ha3.
 }
 destruct i. {
-  destruct d; [ easy | ].
-  destruct d. {
-    cbn - [ "mod" ] in Hsm, Hbb.
-    now rewrite Hbb in Hsm.
-  }
-  destruct d; [ easy | ].
-  destruct d. {
-    cbn - [ "mod" ] in Hsm, Hbb.
-    now rewrite Hbb in Hsm.
-  }
-  destruct d; [ easy | ].
-  destruct d. {
-    cbn - [ "mod" ] in Hsm, Hbb.
-    now rewrite Hbb in Hsm.
-  }
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
   flia Ha3.
 }
 destruct i. {
-  destruct d; [ easy | ].
-  destruct d. {
-    cbn - [ "mod" ] in Hsm, Hbb.
-    now rewrite Hbb in Hsm.
-  }
-  destruct d; [ easy | ].
-  destruct d. {
-    cbn - [ "mod" ] in Hsm, Hbb.
-    now rewrite Hbb in Hsm.
-  }
-  destruct d. {
-    cbn - [ "mod" ] in Hsm, Hbb.
-    now rewrite Hbb in Hsm.
-  }
-  destruct d; [ easy | ].
-  destruct d. {
-    cbn - [ "mod" ] in Hsm, Hbb.
-    now rewrite Hbb in Hsm.
-  }
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
   flia Ha3.
 }
 destruct i. {
-  destruct d; [ easy | ].
-  destruct d. {
-    cbn - [ "mod" ] in Hsm, Hbb.
-    now rewrite Hbb in Hsm.
-  }
-  destruct d; [ easy | ].
-  destruct d. {
-    cbn - [ "mod" ] in Hsm, Hbb.
-    now rewrite Hbb in Hsm.
-  }
-  destruct d; [ easy | ].
-  destruct d. {
-    cbn - [ "mod" ] in Hsm, Hbb.
-    now rewrite Hbb in Hsm.
-  }
-  destruct d; [ easy | ].
-  destruct d. {
-    cbn - [ "mod" ] in Hsm, Hbb.
-    now rewrite Hbb in Hsm.
-  }
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
   flia Ha3.
 }
 destruct i. {
-  destruct d; [ easy | ].
-  destruct d. {
-    cbn - [ "mod" ] in Hsm, Hbb.
-    now rewrite Hbb in Hsm.
-  }
-  destruct d; [ easy | ].
-  destruct d; [ easy | ].
-  destruct d. {
-    cbn - [ "mod" ] in Hsm, Hbb.
-    now rewrite Hbb in Hsm.
-  }
-  destruct d. {
-    cbn - [ "mod" ] in Hsm, Hbb.
-    now rewrite Hbb in Hsm.
-  }
-  destruct d; [ easy | ].
-  destruct d; [ easy | ].
-  destruct d. {
-    cbn - [ "mod" ] in Hsm, Hbb.
-    now rewrite Hbb in Hsm.
-  }
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
   flia Ha3.
 }
 destruct i. {
-  destruct d; [ easy | ].
-  destruct d. {
-    cbn - [ "mod" ] in Hsm, Hbb.
-    now rewrite Hbb in Hsm.
-  }
-  destruct d; [ easy | ].
-  destruct d. {
-    cbn - [ "mod" ] in Hsm, Hbb.
-    now rewrite Hbb in Hsm.
-  }
-  destruct d. {
-    cbn - [ "mod" ] in Hsm, Hbb.
-    now rewrite Hbb in Hsm.
-  }
-  destruct d. {
-    cbn - [ "mod" ] in Hsm, Hbb.
-    now rewrite Hbb in Hsm.
-  }
-  destruct d. {
-    cbn - [ "mod" ] in Hsm, Hbb.
-    now rewrite Hbb in Hsm.
-  }
-  destruct d. {
-    cbn - [ "mod" ] in Hsm, Hbb.
-    now rewrite Hbb in Hsm.
-  }
-  destruct d; [ easy | ].
-  destruct d. {
-    cbn - [ "mod" ] in Hsm, Hbb.
-    now rewrite Hbb in Hsm.
-  }
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
   flia Ha3.
 }
 ...
