@@ -2547,15 +2547,15 @@ rewrite Nat.add_comm.
 now rewrite Nat.Div0.mod_add.
 Qed.
 
-Fixpoint sqrt_mod_loop cnt a p i :=
-  match cnt with
+Fixpoint sqrt_mod_loop a p i :=
+  match i with
   | 0 => None
-  | S cnt' =>
-      if i * i mod p =? a mod p then Some i
-      else sqrt_mod_loop cnt' a p (i + 1)
+  | S i' =>
+      if i * i mod p =? a mod p then Some (p - i)
+      else sqrt_mod_loop a p i'
   end.
 
-Definition sqrt_mod a p := sqrt_mod_loop (p - 1) a p 0.
+Definition sqrt_mod a p := sqrt_mod_loop a p (p - 1).
 
 Definition legendre_symbol a p :=
   if a =? 0 then 0
@@ -2572,34 +2572,22 @@ Compute (let p := 17 in List.map (λ a, (sqrt_mod a p, a)) (List.seq 0 p)).
 Compute (let p := 17 in List.filter (λ a, is_quadratic_residue a p) (List.seq 0 p)).
 *)
 
-(* to be completed
 Theorem eq_sqrt_mod_loop_Some :
-  ∀ cnt a b p i,
-  0 < i < p
-  → sqrt_mod_loop cnt a p i = Some b
+  ∀ a b p i,
+  i < p
+  → sqrt_mod_loop a p i = Some b
   → 1 ≤ b < p ∧ b * b ≡ a mod p.
 Proof.
 intros * Hip Hsm.
-revert i Hip Hsm.
-induction cnt; intros; [ easy | ].
+induction i; [ easy | ].
 cbn - [ "*" ] in Hsm.
-remember ((i * i) mod p =? a mod p) as e eqn:He.
+remember ((S i * S i) mod p =? a mod p) as e eqn:He.
 symmetry in He.
 destruct e; cycle 1. {
-  apply IHcnt in Hsm; [ easy | ].
-  split; [ flia | ].
-  apply Nat.eqb_neq in He.
-...
-  cbn in Hsm.
+  apply IHi; [ flia Hip | easy ].
 }
 injection Hsm; clear Hsm; intros; subst b.
 apply Nat.eqb_eq in He.
-split; [ | easy ].
-split; [ | flia Hci ].
-...
-destruct i. {
-  cbn in He; symmetry in He.
-...
 split; [ | now apply Nat.lt_le_incl in Hip; rewrite Nat_neg_neg_mod ].
 split; [ | now apply Nat.lt_le_incl in Hip; apply Nat.sub_lt ].
 flia Hip.
@@ -2617,6 +2605,7 @@ apply Nat.sub_lt; [ | easy ].
 now apply Nat.neq_0_lt_0.
 Qed.
 
+(* to be completed
 Theorem eq_sqrt_mod_None :
   ∀ a p,
   a ≢ 0 mod p
