@@ -2653,7 +2653,6 @@ destruct i. {
 clear Hsip2.
 progress replace (S (S (S (S i)))) with (i + 4) in Hap, Hsm, Hbb, Ha3 by flia.
 progress replace (S i) with (i + 1) in Hsm by flia.
-...
 destruct i. {
   destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
   destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
