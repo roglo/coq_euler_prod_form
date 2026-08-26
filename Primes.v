@@ -2551,7 +2551,7 @@ Fixpoint sqrt_mod_loop a p i :=
   match i with
   | 0 => None
   | S i' =>
-      if i * i mod p =? a mod p then Some (p - i)
+      if i * i mod p =? a mod p then Some i
       else sqrt_mod_loop a p i'
   end.
 
@@ -2588,9 +2588,8 @@ destruct e; cycle 1. {
 }
 injection Hsm; clear Hsm; intros; subst b.
 apply Nat.eqb_eq in He.
-split; [ | now apply Nat.lt_le_incl in Hip; rewrite Nat_neg_neg_mod ].
-split; [ | now apply Nat.lt_le_incl in Hip; apply Nat.sub_lt ].
-flia Hip.
+split; [ | easy ].
+split; [ flia | easy ].
 Qed.
 
 Theorem eq_sqrt_mod_Some :
@@ -2654,6 +2653,14 @@ clear Hsip2.
 (**)
 revert a i Hap Hsm Hbb Ha3.
 induction d; intros; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+apply Nat.succ_lt_mono in Ha3.
+cbn - [ "*" "mod" ] in Hsm.
+remember (_ =? _) as x eqn:Hx in Hsm.
+symmetry in Hx.
+destruct x; [ easy | ].
+apply Nat.eqb_neq in Hx.
+apply Nat.neq_sym in Hx.
+...
 apply IHd in Hsm; try easy; [ | flia Ha3 ].
 (* ouais, bon, ça marche pas *)
 ...
