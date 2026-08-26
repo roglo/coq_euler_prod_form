@@ -2620,12 +2620,14 @@ symmetry in Hbb.
 rewrite <- Nat.Div0.mul_mod_idemp_l in Hbb.
 rewrite <- Nat.Div0.mul_mod_idemp_r in Hbb.
 remember (b mod p) as d eqn:Hd.
-assert (Ha3 : d < p). {
+assert (Hbp : d < p). {
   subst d.
   apply Nat.mod_upper_bound.
   flia Hp.
 }
 clear b Hd.
+rename d into b.
+move b before a.
 destruct i; [ flia Hp Hi | ].
 cbn - [ "*" ] in Hsm.
 remember ((S i * S i) mod p =? a mod p) as sip eqn:Hsip.
@@ -2642,99 +2644,98 @@ apply Nat.neq_sym in Hsip, Hsip2.
 replace p with (S (S (S i))) in * by flia Hp Hi.
 clear p Hp Hi.
 clear Hsip.
-move d before a.
 destruct i. {
-  destruct d; [ easy | ].
-  destruct d; [ easy | ].
-  destruct d; [ easy | ].
-  flia Ha3.
+  destruct b; [ easy | ].
+  destruct b; [ easy | ].
+  destruct b; [ easy | ].
+  flia Hbp.
 }
 clear Hsip2.
-progress replace (S (S (S (S i)))) with (i + 4) in Hap, Hsm, Hbb, Ha3 by flia.
+progress replace (S (S (S (S i)))) with (i + 4) in Hap, Hsm, Hbb, Hbp by flia.
 progress replace (S i) with (i + 1) in Hsm by flia.
 destruct i. {
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  flia Ha3.
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  flia Hbp.
 }
-progress replace (S i + 4) with (i + 5) in Hap, Hsm, Hbb, Ha3 by flia.
+progress replace (S i + 4) with (i + 5) in Hap, Hsm, Hbb, Hbp by flia.
 progress replace (S i + 1) with (i + 2) in Hsm by flia.
 destruct i. {
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  flia Ha3.
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  flia Hbp.
 }
-progress replace (S i + 5) with (i + 6) in Hap, Hsm, Hbb, Ha3 by flia.
+progress replace (S i + 5) with (i + 6) in Hap, Hsm, Hbb, Hbp by flia.
 progress replace (S i + 2) with (i + 3) in Hsm by flia.
 destruct i. {
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  flia Ha3.
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  flia Hbp.
 }
-progress replace (S i + 6) with (i + 7) in Hap, Hsm, Hbb, Ha3 by flia.
+progress replace (S i + 6) with (i + 7) in Hap, Hsm, Hbb, Hbp by flia.
 progress replace (S i + 3) with (i + 4) in Hsm by flia.
 destruct i. {
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  flia Ha3.
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  flia Hbp.
 }
-progress replace (S i + 7) with (i + 8) in Hap, Hsm, Hbb, Ha3 by flia.
+progress replace (S i + 7) with (i + 8) in Hap, Hsm, Hbb, Hbp by flia.
 progress replace (S i + 4) with (i + 5) in Hsm by flia.
 destruct i. {
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  flia Ha3.
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  flia Hbp.
 }
-progress replace (S i + 8) with (i + 9) in Hap, Hsm, Hbb, Ha3 by flia.
+progress replace (S i + 8) with (i + 9) in Hap, Hsm, Hbb, Hbp by flia.
 progress replace (S i + 5) with (i + 6) in Hsm by flia.
 destruct i. {
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  flia Ha3.
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  flia Hbp.
 }
-progress replace (S i + 9) with (i + 10) in Hap, Hsm, Hbb, Ha3 by flia.
+progress replace (S i + 9) with (i + 10) in Hap, Hsm, Hbb, Hbp by flia.
 progress replace (S i + 6) with (i + 7) in Hsm by flia.
 destruct i. {
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct d; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  flia Ha3.
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
+  flia Hbp.
 }
-progress replace (S i + 10) with (i + 11) in Hap, Hsm, Hbb, Ha3 by flia.
+progress replace (S i + 10) with (i + 11) in Hap, Hsm, Hbb, Hbp by flia.
 progress replace (S i + 7) with (i + 8) in Hsm by flia.
 ...
 
