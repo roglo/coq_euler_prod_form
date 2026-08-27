@@ -2547,15 +2547,15 @@ rewrite Nat.add_comm.
 now rewrite Nat.Div0.mod_add.
 Qed.
 
-Fixpoint sqrt_mod_loop a p i :=
-  match i with
+Fixpoint sqrt_mod_loop cnt a p i :=
+  match cnt with
   | 0 => None
-  | S i' =>
+  | S cnt' =>
       if i * i mod p =? a mod p then Some i
-      else sqrt_mod_loop a p i'
+      else sqrt_mod_loop cnt' a p (S i)
   end.
 
-Definition sqrt_mod a p := sqrt_mod_loop a p (p - 1).
+Definition sqrt_mod a p := sqrt_mod_loop (p - 1) a p 0.
 
 Definition legendre_symbol a p :=
   if a =? 0 then 0
@@ -2573,38 +2573,33 @@ Compute (let p := 17 in List.filter (λ a, is_quadratic_residue a p) (List.seq 0
 *)
 
 Theorem eq_sqrt_mod_loop_Some :
-  ∀ a b p i,
-  i < p
-  → sqrt_mod_loop a p i = Some b
-  → 1 ≤ b < p ∧ b * b ≡ a mod p.
+  ∀ cnt a b p i,
+  sqrt_mod_loop cnt a p i = Some b
+  → b * b ≡ a mod p.
 Proof.
-intros * Hip Hsm.
-induction i; [ easy | ].
+intros * Hsm.
+revert i Hsm.
+induction cnt; intros; [ easy | ].
 cbn - [ "*" ] in Hsm.
-remember ((S i * S i) mod p =? a mod p) as e eqn:He.
+remember ((i * i) mod p =? a mod p) as e eqn:He.
 symmetry in He.
 destruct e; cycle 1. {
-  apply IHi; [ flia Hip | easy ].
+  now apply IHcnt with (i := S i).
 }
 injection Hsm; clear Hsm; intros; subst b.
-apply Nat.eqb_eq in He.
-split; [ | easy ].
-split; [ flia | easy ].
+now apply Nat.eqb_eq in He.
 Qed.
 
 Theorem eq_sqrt_mod_Some :
   ∀ a b p,
-  p ≠ 0
-  → sqrt_mod a p = Some b
-  → 1 ≤ b < p ∧ b * b ≡ a mod p.
+  sqrt_mod a p = Some b
+  → b * b ≡ a mod p.
 Proof.
-intros * Hp Hsm.
-apply eq_sqrt_mod_loop_Some in Hsm; [ easy | ].
-apply Nat.sub_lt; [ | easy ].
-now apply Nat.neq_0_lt_0.
+intros * Hsm.
+now apply eq_sqrt_mod_loop_Some in Hsm.
 Qed.
 
-(* to be completed *)
+(* to be completed
 Theorem eq_sqrt_mod_None :
   ∀ a p,
   a ≢ 0 mod p
@@ -2740,7 +2735,9 @@ destruct i. {
 progress replace (S i + 10) with (i + 11) in Hap, Hsm, Hbb, Hbp by flia.
 progress replace (S i + 7) with (i + 8) in Hsm by flia.
 ...
+*)
 
+(* to be completed
 Theorem euler_criterion : ∀ p,
   prime p
   → ∀ a, 1 ≤ a < p
@@ -2757,8 +2754,7 @@ apply Nat.eqb_neq in Haz.
 remember (sqrt_mod a p) as sm eqn:Hsm.
 symmetry in Hsm.
 destruct sm as [b| ]. {
-  apply eq_sqrt_mod_Some in Hsm; [ | flia Hap ].
-  destruct Hsm as (Hbp, Hsm).
+  apply eq_sqrt_mod_Some in Hsm.
   rewrite <- Nat_mod_pow_mod.
   rewrite <- Hsm.
   rewrite Nat_mod_pow_mod.
@@ -2766,7 +2762,8 @@ destruct sm as [b| ]. {
   rewrite <- Nat.pow_mul_r.
   destruct (Nat.eq_dec p 2) as [Hp2| Hp2]; [ now subst p | ].
   rewrite <- (proj2 (Nat.Div0.div_exact _ _)). {
-    rewrite fermat_little; [ | easy | easy ].
+    rewrite fermat_little; [ | easy | ].
+...
     symmetry.
     apply Nat.mod_1_l.
     now apply (Nat.le_lt_trans _ a).
