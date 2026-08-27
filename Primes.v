@@ -2715,5 +2715,28 @@ Theorem glop :
   prime p
   → List.length (List.filter (is_quadratic_residue p) (List.seq 1 (p - 1))) =
        (p - 1) / 2.
+Proof.
+intros * Hp.
+remember (seq 1 (p - 1)) as l eqn:Hl.
+symmetry in Hl.
+revert p Hp Hl.
+induction l as [| a]; intros. {
+  destruct p; [ easy | now destruct p ].
+}
+cbn - [ "/" ].
+remember (is_quadratic_residue p a) as qr eqn:Hqr.
+symmetry in Hqr.
+destruct qr. {
+  cbn - [ "/" ].
+  progress unfold is_quadratic_residue in Hqr.
+  remember (sqrt_mod a p) as ap eqn:Hap.
+  symmetry in Hap.
+  destruct ap as [b| ]; [ clear Hqr | easy ].
+  apply eq_sqrt_mod_Some in Hap.
+  destruct Hap as (Hbp, Hap).
+    destruct p; [ easy | ].
+    destruct p; [ easy | ].
+    cbn in Hl.
+    injection Hl; clear Hl; intros H1 H2; subst a.
 ...
 *)
