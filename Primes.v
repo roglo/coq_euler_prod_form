@@ -2555,7 +2555,7 @@ Fixpoint sqrt_mod_loop cnt a p i :=
       else sqrt_mod_loop cnt' a p (S i)
   end.
 
-Definition sqrt_mod a p := sqrt_mod_loop (p - 1) a p 0.
+Definition sqrt_mod a p := sqrt_mod_loop p a p 0.
 
 Definition legendre_symbol a p :=
   if a =? 0 then 0
@@ -2575,7 +2575,7 @@ Compute (let p := 17 in List.filter (λ a, is_quadratic_residue a p) (List.seq 0
 Theorem eq_sqrt_mod_loop_Some :
   ∀ cnt a b p i,
   sqrt_mod_loop cnt a p i = Some b
-  → b * b ≡ a mod p.
+  → i ≤ b < i + cnt ∧ b * b ≡ a mod p.
 Proof.
 intros * Hsm.
 revert i Hsm.
@@ -2584,16 +2584,20 @@ cbn - [ "*" ] in Hsm.
 remember ((i * i) mod p =? a mod p) as e eqn:He.
 symmetry in He.
 destruct e; cycle 1. {
-  now apply IHcnt with (i := S i).
+  apply IHcnt in Hsm.
+  split; [ | easy ].
+  rewrite Nat.add_succ_r, <- Nat.add_succ_l.
+  split; [ flia Hsm | easy ].
 }
 injection Hsm; clear Hsm; intros; subst b.
-now apply Nat.eqb_eq in He.
+apply Nat.eqb_eq in He.
+split; [ flia | easy ].
 Qed.
 
 Theorem eq_sqrt_mod_Some :
   ∀ a b p,
   sqrt_mod a p = Some b
-  → b * b ≡ a mod p.
+  → b < p ∧ b * b ≡ a mod p.
 Proof.
 intros * Hsm.
 now apply eq_sqrt_mod_loop_Some in Hsm.
@@ -2755,6 +2759,7 @@ remember (sqrt_mod a p) as sm eqn:Hsm.
 symmetry in Hsm.
 destruct sm as [b| ]. {
   apply eq_sqrt_mod_Some in Hsm.
+  destruct Hsm as (Hbp, Hsm).
   rewrite <- Nat_mod_pow_mod.
   rewrite <- Hsm.
   rewrite Nat_mod_pow_mod.
@@ -2762,11 +2767,16 @@ destruct sm as [b| ]. {
   rewrite <- Nat.pow_mul_r.
   destruct (Nat.eq_dec p 2) as [Hp2| Hp2]; [ now subst p | ].
   rewrite <- (proj2 (Nat.Div0.div_exact _ _)). {
-    rewrite fermat_little; [ | easy | ].
-...
-    symmetry.
-    apply Nat.mod_1_l.
-    now apply (Nat.le_lt_trans _ a).
+    rewrite fermat_little; [ | easy | ]. {
+      symmetry.
+      apply Nat.mod_1_l.
+      now apply (Nat.le_lt_trans _ a).
+    }
+    split; [ | easy ].
+    destruct b; [ | flia ].
+    rewrite Nat.mod_small in Hsm; [ | easy ].
+    symmetry in Hsm.
+    now rewrite Nat.mod_small in Hsm.
   }
   specialize (odd_prime _ Hp Hp2) as H1.
   specialize (Nat.div_mod p 2 (Nat.neq_succ_0 _)) as H2.
