@@ -2603,152 +2603,59 @@ intros * Hsm.
 now apply eq_sqrt_mod_loop_Some in Hsm.
 Qed.
 
-(* to be completed
 Theorem eq_sqrt_mod_loop_None :
   ∀ cnt a i p,
   a ≢ 0 mod p
-  → 2 < p
   → sqrt_mod_loop cnt a p i = None
-  → ∀ b, b * b ≢ a mod p.
+  → ∀ b, i ≤ b < i + cnt → b * b ≢ a mod p.
 Proof.
-intros * Hap Hp Hsm * Hbb.
+intros * Hap Hsm * Hib Hbb.
 symmetry in Hbb.
-rewrite <- Nat.Div0.mul_mod_idemp_l in Hbb.
-rewrite <- Nat.Div0.mul_mod_idemp_r in Hbb.
-remember (b mod p) as d eqn:Hd.
-assert (Hbp : d < p). {
-  subst d.
-  apply Nat.mod_upper_bound.
-  flia Hp.
-}
-clear b Hd.
-rename d into b.
-move b before a.
-...
-assert (Hip : 1 < i < p) by flia Hi Hp.
-clear Hi.
-destruct i; [ easy | ].
-cbn - [ "*" ] in Hsm.
-remember ((S i * S i) mod p =? a mod p) as sip eqn:Hsip.
+revert i Hib Hsm.
+induction cnt; intros; [ flia Hib | ].
+cbn in Hsm.
+remember ((i * i) mod p =? a mod p) as sip eqn:Hsip.
 symmetry in Hsip.
 destruct sip; [ easy | ].
-apply Nat.eqb_neq in Hsip.
-destruct i; [ flia Hip | ].
-destruct Hip as (_, Hip).
-cbn - [ "*" ] in Hsm.
-remember ((S i * S i) mod p =? a mod p) as sip2 eqn:Hsip2.
-symmetry in Hsip2.
-destruct sip2; [ easy | ].
-apply Nat.eqb_neq in Hsip2.
-apply Nat.neq_sym in Hsip, Hsip2.
-clear Hp.
-destruct i. {
-  destruct b; [ easy | ].
-  destruct b; [ easy | ].
-  destruct b; [ easy | ].
-cbn in *.
-  flia Hbp.
+destruct (Nat.eq_dec i b) as [Hib1| Hib1]; cycle 1. {
+  apply IHcnt in Hsm; [ easy | ].
+  split; [ | flia Hib ].
+  flia Hib Hib1.
 }
-clear Hsip2.
-progress replace (S (S (S (S i)))) with (i + 4) in Hap, Hsm, Hbb, Hbp by flia.
-progress replace (S i) with (i + 1) in Hsm by flia.
-destruct i. {
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  flia Hbp.
-}
-progress replace (S i + 4) with (i + 5) in Hap, Hsm, Hbb, Hbp by flia.
-progress replace (S i + 1) with (i + 2) in Hsm by flia.
-destruct i. {
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  flia Hbp.
-}
-progress replace (S i + 5) with (i + 6) in Hap, Hsm, Hbb, Hbp by flia.
-progress replace (S i + 2) with (i + 3) in Hsm by flia.
-destruct i. {
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  flia Hbp.
-}
-progress replace (S i + 6) with (i + 7) in Hap, Hsm, Hbb, Hbp by flia.
-progress replace (S i + 3) with (i + 4) in Hsm by flia.
-destruct i. {
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  flia Hbp.
-}
-progress replace (S i + 7) with (i + 8) in Hap, Hsm, Hbb, Hbp by flia.
-progress replace (S i + 4) with (i + 5) in Hsm by flia.
-destruct i. {
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  flia Hbp.
-}
-progress replace (S i + 8) with (i + 9) in Hap, Hsm, Hbb, Hbp by flia.
-progress replace (S i + 5) with (i + 6) in Hsm by flia.
-destruct i. {
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  flia Hbp.
-}
-progress replace (S i + 9) with (i + 10) in Hap, Hsm, Hbb, Hbp by flia.
-progress replace (S i + 6) with (i + 7) in Hsm by flia.
-destruct i. {
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  destruct b; [ now cbn in Hsm, Hbb; rewrite Hbb in Hsm | ].
-  flia Hbp.
-}
-progress replace (S i + 10) with (i + 11) in Hap, Hsm, Hbb, Hbp by flia.
-progress replace (S i + 7) with (i + 8) in Hsm by flia.
-...
+subst i.
+clear Hib.
+rewrite Hbb in Hsip.
+now rewrite Nat.eqb_refl in Hsip.
+Qed.
 
 Theorem eq_sqrt_mod_None :
   ∀ a p,
-  a ≢ 0 mod p
-  → 2 < p
+  p ≠ 0
   → sqrt_mod a p = None
   → ∀ b, b * b ≢ a mod p.
 Proof.
-intros * Hap Hp Hsm * Hbb.
-now apply eq_sqrt_mod_loop_None with (b := b) in Hsm.
-...
-*)
+intros * Hpz Hsm * Hbb.
+apply eq_sqrt_mod_loop_None with (b := b mod p) in Hsm. {
+  rewrite Nat.Div0.mul_mod_idemp_l in Hsm.
+  rewrite Nat.Div0.mul_mod_idemp_r in Hsm.
+  easy.
+} {
+  intros H.
+  rewrite Nat.Div0.mod_0_l in H.
+  rewrite H in Hbb.
+  progress unfold sqrt_mod in Hsm.
+  destruct p; [ easy | ].
+  cbn - [ "mod" ] in Hsm.
+  remember (_ =? _) as x eqn:Hx.
+  symmetry in Hx.
+  destruct x; [ easy | ].
+  rewrite H in Hx.
+  apply Nat.eqb_neq in Hx.
+  now rewrite Nat.Div0.mod_0_l in Hx.
+}
+split; [ easy | ].
+now apply Nat.mod_upper_bound.
+Qed.
 
 (* to be completed
 Theorem euler_criterion : ∀ p,
@@ -2793,5 +2700,7 @@ destruct sm as [b| ]. {
   rewrite H2, Nat.add_sub, Nat.mul_comm.
   apply Nat.Div0.mod_mul.
 }
+assert (Hpz : p ≠ 0) by flia Hap.
+specialize (eq_sqrt_mod_None a p Hpz Hsm) as H1.
 ...
 *)
