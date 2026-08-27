@@ -2657,6 +2657,14 @@ split; [ easy | ].
 now apply Nat.mod_upper_bound.
 Qed.
 
+Definition bool_of_option {T} (x : option T) :=
+  match x with
+  | Some _ => true
+  | None => false
+  end.
+
+Definition is_quadratic_residue p a := bool_of_option (sqrt_mod a p).
+
 (* to be completed
 Theorem euler_criterion : ∀ p,
   prime p
@@ -2702,5 +2710,10 @@ destruct sm as [b| ]. {
 }
 assert (Hpz : p ≠ 0) by flia Hap.
 specialize (eq_sqrt_mod_None a p Hpz Hsm) as H1.
+Theorem glop :
+  ∀ p,
+  prime p
+  → List.length (List.filter (is_quadratic_residue p) (List.seq 1 (p - 1))) =
+       (p - 1) / 2.
 ...
 *)
