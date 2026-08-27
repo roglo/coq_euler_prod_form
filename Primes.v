@@ -2604,17 +2604,14 @@ now apply eq_sqrt_mod_loop_Some in Hsm.
 Qed.
 
 (* to be completed
-Theorem eq_sqrt_mod_None :
-  ∀ a p,
+Theorem eq_sqrt_mod_loop_None :
+  ∀ cnt a i p,
   a ≢ 0 mod p
   → 2 < p
-  → sqrt_mod a p = None
+  → sqrt_mod_loop cnt a p i = None
   → ∀ b, b * b ≢ a mod p.
 Proof.
 intros * Hap Hp Hsm * Hbb.
-progress unfold sqrt_mod in Hsm.
-remember (p - 1) as i eqn:Hi.
-symmetry in Hi.
 symmetry in Hbb.
 rewrite <- Nat.Div0.mul_mod_idemp_l in Hbb.
 rewrite <- Nat.Div0.mul_mod_idemp_r in Hbb.
@@ -2627,6 +2624,7 @@ assert (Hbp : d < p). {
 clear b Hd.
 rename d into b.
 move b before a.
+...
 assert (Hip : 1 < i < p) by flia Hi Hp.
 clear Hi.
 destruct i; [ easy | ].
@@ -2738,6 +2736,17 @@ destruct i. {
 }
 progress replace (S i + 10) with (i + 11) in Hap, Hsm, Hbb, Hbp by flia.
 progress replace (S i + 7) with (i + 8) in Hsm by flia.
+...
+
+Theorem eq_sqrt_mod_None :
+  ∀ a p,
+  a ≢ 0 mod p
+  → 2 < p
+  → sqrt_mod a p = None
+  → ∀ b, b * b ≢ a mod p.
+Proof.
+intros * Hap Hp Hsm * Hbb.
+now apply eq_sqrt_mod_loop_None with (b := b) in Hsm.
 ...
 *)
 
