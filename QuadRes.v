@@ -473,6 +473,9 @@ Qed.
 
 (**)
 
+Global Hint Resolve Nat.le_0_l : core.
+Global Hint Resolve Nat.lt_0_succ : core.
+
 Fixpoint sqrt_mod_loop cnt a p i :=
   match cnt with
   | 0 => None
@@ -491,6 +494,91 @@ Definition legendre_symbol a p :=
     | None => p - 1
     end.
 
+Theorem eq_sqrt_mod_loop_Some :
+  ∀ cnt a b p i,
+  sqrt_mod_loop cnt a p i = Some b
+  → i ≤ b < i + cnt ∧ b * b ≡ a mod p.
+Proof.
+intros * Hsm.
+revert i Hsm.
+induction cnt; intros; [ easy | ].
+cbn - [ "*" ] in Hsm.
+remember ((i * i) mod p =? a mod p) as e eqn:He.
+symmetry in He.
+destruct e; cycle 1. {
+  apply IHcnt in Hsm.
+  split; [ | easy ].
+  rewrite Nat.add_succ_r, <- Nat.add_succ_l.
+  split; [ flia Hsm | easy ].
+}
+injection Hsm; clear Hsm; intros; subst b.
+apply Nat.eqb_eq in He.
+split; [ flia | easy ].
+Qed.
+
+Theorem eq_sqrt_mod_loop_None :
+  ∀ cnt a i p,
+  a ≢ 0 mod p
+  → sqrt_mod_loop cnt a p i = None
+  → ∀ b, i ≤ b < i + cnt → b * b ≢ a mod p.
+Proof.
+intros * Hap Hsm * Hib Hbb.
+symmetry in Hbb.
+revert i Hib Hsm.
+induction cnt; intros; [ flia Hib | ].
+cbn in Hsm.
+remember ((i * i) mod p =? a mod p) as sip eqn:Hsip.
+symmetry in Hsip.
+destruct sip; [ easy | ].
+destruct (Nat.eq_dec i b) as [Hib1| Hib1]; cycle 1. {
+  apply IHcnt in Hsm; [ easy | ].
+  split; [ | flia Hib ].
+  flia Hib Hib1.
+}
+subst i.
+clear Hib.
+rewrite Hbb in Hsip.
+now rewrite Nat.eqb_refl in Hsip.
+Qed.
+
+Theorem eq_sqrt_mod_Some :
+  ∀ a b p,
+  sqrt_mod a p = Some b
+  → b < p ∧ b * b ≡ a mod p.
+Proof.
+intros * Hsm.
+now apply eq_sqrt_mod_loop_Some in Hsm.
+Qed.
+
+Theorem eq_sqrt_mod_None :
+  ∀ a p,
+  p ≠ 0
+  → sqrt_mod a p = None
+  → ∀ b, b * b ≢ a mod p.
+Proof.
+intros * Hpz Hsm * Hbb.
+apply eq_sqrt_mod_loop_None with (b := b mod p) in Hsm. {
+  rewrite Nat.Div0.mul_mod_idemp_l in Hsm.
+  rewrite Nat.Div0.mul_mod_idemp_r in Hsm.
+  easy.
+} {
+  intros H.
+  rewrite Nat.Div0.mod_0_l in H.
+  rewrite H in Hbb.
+  progress unfold sqrt_mod in Hsm.
+  destruct p; [ easy | ].
+  cbn - [ "mod" ] in Hsm.
+  remember (_ =? _) as x eqn:Hx.
+  symmetry in Hx.
+  destruct x; [ easy | ].
+  rewrite H in Hx.
+  apply Nat.eqb_neq in Hx.
+  now rewrite Nat.Div0.mod_0_l in Hx.
+}
+split; [ easy | ].
+now apply Nat.mod_upper_bound.
+Qed.
+
 (* to be completed
 Theorem Euler_criterion : ∀ p,
   prime p
@@ -505,7 +593,82 @@ destruct (Nat.eq_dec p 2) as [Hp2| Hp2]. {
 assert (Haz : a ≠ 0) by flia Hap.
 specialize (euler_criterion_quadratic_residue_iff p a Hp Hp2 Haz) as H1.
 destruct H1 as (H1, H2).
-Search euler_crit.
+destruct (Nat.eq_dec (legendre_symbol a p) 1) as [Hls1| Hls1]. {
+  rewrite Hls1.
+  assert (H3 : a ∈ quad_res p). {
+    apply quad_res_iff.
+    progress unfold legendre_symbol in Hls1.
+    remember (a =? 0) as az eqn:Haz1.
+    symmetry in Haz1.
+    destruct az; [ easy | clear Haz1 ].
+    remember (sqrt_mod a p) as sm eqn:Hsm.
+    symmetry in Hsm.
+    destruct sm as [b| ]; [ clear Hls1 | flia Hp2 Hls1 ].
+    apply eq_sqrt_mod_loop_Some in Hsm.
+    destruct Hsm as ((_, Hbp), Hsm).
+    exists b.
+    split. {
+      split; [ | easy ].
+      apply Nat.neq_0_lt_0.
+      intros H; subst b.
+      symmetry in Hsm; cbn in Hsm.
+      rewrite Nat.mod_small in Hsm; [ | easy ].
+      now rewrite Nat.mod_small in Hsm.
+    }
+    rewrite Nat.pow_2_r, Hsm.
+    now apply Nat.mod_small.
+  }
+  specialize (H2 H3).
+  apply euler_crit_iff in H2.
+  destruct H2 as (H2, H4).
+  rewrite H4; symmetry.
+  apply Nat.mod_small; flia Hap.
+}
+destruct (Nat.eq_dec (legendre_symbol a p) (p - 1)) as [Hlsp1| Hlsp1]. {
+  rewrite Hlsp1.
+  progress unfold legendre_symbol in Hlsp1.
+  generalize Haz; intros H.
+  apply Nat.eqb_neq in H.
+  rewrite H in Hlsp1; clear H.
+  remember (sqrt_mod a p) as sm eqn:Hsm.
+  symmetry in Hsm.
+  destruct sm; [ flia Hp2 Hlsp1 | ].
+  assert (Hpz : p ≠ 0) by flia Hap.
+  specialize (eq_sqrt_mod_None a p Hpz Hsm) as H3.
+...
+  assert (H3 : a ∉ quad_res p). {
+    intros H3.
+    apply quad_res_iff in H3.
+    destruct H3 as (b & Hb & Hbp).
+    apply Hls1.
+    rewrite <- Hbp.
+    progress unfold legendre_symbol.
+    rewrite Hbp.
+    generalize Haz; intros H.
+    apply Nat.eqb_neq in H.
+    rewrite H; clear H.
+    remember (sqrt_mod a p) as sm eqn:Hsm.
+    symmetry in Hsm.
+    destruct sm; [ easy | ].
+    assert (Hpz : p ≠ 0) by flia Hap.
+    specialize (eq_sqrt_mod_None a p Hpz Hsm b) as H3.
+    rewrite Nat.pow_2_r in Hbp.
+    rewrite <- Hbp in H3.
+    now rewrite Nat.Div0.mod_mod in H3.
+  }
+...
+    apply eq_sqrt_mod_None in Hsm.
+...
+    destruct Hsm as ((_, Hbp), Hsm).
+    exists b.
+    split. {
+      split; [ | easy ].
+      apply Nat.neq_0_lt_0.
+      intros H; subst b.
+      symmetry in Hsm; cbn in Hsm.
+      rewrite Nat.mod_small in Hsm; [ | easy ].
+      now rewrite Nat.mod_small in Hsm.
+    }
 ...
 progress unfold euler_crit in H1.
 

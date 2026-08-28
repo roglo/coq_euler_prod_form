@@ -2514,9 +2514,6 @@ Definition prime_divisors n :=
 
 (* Euler's criterion *)
 
-Global Hint Resolve Nat.le_0_l : core.
-Global Hint Resolve Nat.lt_0_succ : core.
-
 Theorem  Nat_neg_neg_mod :
   ∀ a b n, a ≤ n → b ≤ n → (n - a) * (n - b) ≡ (a * b) mod n.
 Proof.
@@ -2573,91 +2570,6 @@ Definition is_quadratic_residue a p := legendre_symbol a p =? 1.
 Compute (let p := 17 in List.map (λ a, (sqrt_mod a p, a)) (List.seq 0 p)).
 Compute (let p := 17 in List.filter (λ a, is_quadratic_residue a p) (List.seq 0 p)).
 *)
-
-Theorem eq_sqrt_mod_loop_Some :
-  ∀ cnt a b p i,
-  sqrt_mod_loop cnt a p i = Some b
-  → i ≤ b < i + cnt ∧ b * b ≡ a mod p.
-Proof.
-intros * Hsm.
-revert i Hsm.
-induction cnt; intros; [ easy | ].
-cbn - [ "*" ] in Hsm.
-remember ((i * i) mod p =? a mod p) as e eqn:He.
-symmetry in He.
-destruct e; cycle 1. {
-  apply IHcnt in Hsm.
-  split; [ | easy ].
-  rewrite Nat.add_succ_r, <- Nat.add_succ_l.
-  split; [ flia Hsm | easy ].
-}
-injection Hsm; clear Hsm; intros; subst b.
-apply Nat.eqb_eq in He.
-split; [ flia | easy ].
-Qed.
-
-Theorem eq_sqrt_mod_Some :
-  ∀ a b p,
-  sqrt_mod a p = Some b
-  → b < p ∧ b * b ≡ a mod p.
-Proof.
-intros * Hsm.
-now apply eq_sqrt_mod_loop_Some in Hsm.
-Qed.
-
-Theorem eq_sqrt_mod_loop_None :
-  ∀ cnt a i p,
-  a ≢ 0 mod p
-  → sqrt_mod_loop cnt a p i = None
-  → ∀ b, i ≤ b < i + cnt → b * b ≢ a mod p.
-Proof.
-intros * Hap Hsm * Hib Hbb.
-symmetry in Hbb.
-revert i Hib Hsm.
-induction cnt; intros; [ flia Hib | ].
-cbn in Hsm.
-remember ((i * i) mod p =? a mod p) as sip eqn:Hsip.
-symmetry in Hsip.
-destruct sip; [ easy | ].
-destruct (Nat.eq_dec i b) as [Hib1| Hib1]; cycle 1. {
-  apply IHcnt in Hsm; [ easy | ].
-  split; [ | flia Hib ].
-  flia Hib Hib1.
-}
-subst i.
-clear Hib.
-rewrite Hbb in Hsip.
-now rewrite Nat.eqb_refl in Hsip.
-Qed.
-
-Theorem eq_sqrt_mod_None :
-  ∀ a p,
-  p ≠ 0
-  → sqrt_mod a p = None
-  → ∀ b, b * b ≢ a mod p.
-Proof.
-intros * Hpz Hsm * Hbb.
-apply eq_sqrt_mod_loop_None with (b := b mod p) in Hsm. {
-  rewrite Nat.Div0.mul_mod_idemp_l in Hsm.
-  rewrite Nat.Div0.mul_mod_idemp_r in Hsm.
-  easy.
-} {
-  intros H.
-  rewrite Nat.Div0.mod_0_l in H.
-  rewrite H in Hbb.
-  progress unfold sqrt_mod in Hsm.
-  destruct p; [ easy | ].
-  cbn - [ "mod" ] in Hsm.
-  remember (_ =? _) as x eqn:Hx.
-  symmetry in Hx.
-  destruct x; [ easy | ].
-  rewrite H in Hx.
-  apply Nat.eqb_neq in Hx.
-  now rewrite Nat.Div0.mod_0_l in Hx.
-}
-split; [ easy | ].
-now apply Nat.mod_upper_bound.
-Qed.
 
 Definition bool_of_option {T} (x : option T) :=
   match x with
