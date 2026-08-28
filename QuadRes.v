@@ -592,7 +592,6 @@ destruct (Nat.eq_dec p 2) as [Hp2| Hp2]. {
 }
 assert (Haz : a ≠ 0) by flia Hap.
 specialize (euler_criterion_quadratic_residue_iff p a Hp Hp2 Haz) as H1.
-destruct H1 as (H1, H2).
 destruct (Nat.eq_dec (legendre_symbol a p) 1) as [Hls1| Hls1]. {
   rewrite Hls1.
   assert (H3 : a ∈ quad_res p). {
@@ -618,6 +617,7 @@ destruct (Nat.eq_dec (legendre_symbol a p) 1) as [Hls1| Hls1]. {
     rewrite Nat.pow_2_r, Hsm.
     now apply Nat.mod_small.
   }
+  destruct H1 as (H1, H2).
   specialize (H2 H3).
   apply euler_crit_iff in H2.
   destruct H2 as (H2, H4).
@@ -626,6 +626,7 @@ destruct (Nat.eq_dec (legendre_symbol a p) 1) as [Hls1| Hls1]. {
 }
 destruct (Nat.eq_dec (legendre_symbol a p) (p - 1)) as [Hlsp1| Hlsp1]. {
   rewrite Hlsp1.
+  apply not_iff_compat in H1.
   progress unfold legendre_symbol in Hlsp1.
   generalize Haz; intros H.
   apply Nat.eqb_neq in H.
@@ -651,10 +652,10 @@ destruct (Nat.eq_dec (legendre_symbol a p) (p - 1)) as [Hlsp1| Hlsp1]. {
     rewrite <- Hbp in H4.
     now rewrite Nat.Div0.mod_mod in H4.
   }
-  progress unfold quad_res in H4.
-Search (_ ∈ map _ _).
-...
-    apply eq_sqrt_mod_None in Hsm.
+  destruct H1 as (H1, H2).
+  specialize (H2 H4).
+Print euler_crit.
+Search (_ ∈ filter _ _).
 ...
     destruct Hsm as ((_, Hbp), Hsm).
     exists b.
