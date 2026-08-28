@@ -635,11 +635,10 @@ destruct (Nat.eq_dec (legendre_symbol a p) (p - 1)) as [Hlsp1| Hlsp1]. {
   destruct sm; [ flia Hp2 Hlsp1 | ].
   assert (Hpz : p ≠ 0) by flia Hap.
   specialize (eq_sqrt_mod_None a p Hpz Hsm) as H3.
-...
-  assert (H3 : a ∉ quad_res p). {
-    intros H3.
-    apply quad_res_iff in H3.
-    destruct H3 as (b & Hb & Hbp).
+  assert (H4 : a ∉ quad_res p). {
+    intros H4.
+    apply quad_res_iff in H4.
+    destruct H4 as (b & Hb & Hbp).
     apply Hls1.
     rewrite <- Hbp.
     progress unfold legendre_symbol.
@@ -647,15 +646,13 @@ destruct (Nat.eq_dec (legendre_symbol a p) (p - 1)) as [Hlsp1| Hlsp1]. {
     generalize Haz; intros H.
     apply Nat.eqb_neq in H.
     rewrite H; clear H.
-    remember (sqrt_mod a p) as sm eqn:Hsm.
-    symmetry in Hsm.
-    destruct sm; [ easy | ].
-    assert (Hpz : p ≠ 0) by flia Hap.
-    specialize (eq_sqrt_mod_None a p Hpz Hsm b) as H3.
+    specialize (eq_sqrt_mod_None a p Hpz Hsm b) as H4.
     rewrite Nat.pow_2_r in Hbp.
-    rewrite <- Hbp in H3.
-    now rewrite Nat.Div0.mod_mod in H3.
+    rewrite <- Hbp in H4.
+    now rewrite Nat.Div0.mod_mod in H4.
   }
+  progress unfold quad_res in H4.
+Search (_ ∈ map _ _).
 ...
     apply eq_sqrt_mod_None in Hsm.
 ...
