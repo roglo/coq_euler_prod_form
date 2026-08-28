@@ -1945,7 +1945,7 @@ rewrite fold_left_app.
 now rewrite <- IHn, Nat_fact_succ, Nat.mul_comm.
 Qed.
 
-Theorem fermat_little : ∀ p,
+Theorem Fermat_little : ∀ p,
   prime p → ∀ a, 1 ≤ a < p → a ^ (p - 1) mod p = 1.
 Proof.
 intros * Hp * Hap.
@@ -2042,8 +2042,8 @@ apply Nat_mul_mod_cancel_l in Hx1. 2: {
 rewrite (Nat.mod_small 1) in Hx1; [ easy | flia Hap ].
 Qed.
 
-(* proof simpler than fermat_little; but could be a corollary *)
-Theorem fermat_little_1 : ∀ p, prime p → ∀ a, a ^ p mod p = a mod p.
+(* proof simpler than Fermat_little; but could be a corollary *)
+Theorem Fermat_little_1 : ∀ p, prime p → ∀ a, a ^ p mod p = a mod p.
 Proof.
 intros * Hp *.
 induction a. {
@@ -2099,7 +2099,7 @@ split. {
     apply pow_mod_prime_ne_0; [ easy | flia Hip ].
   }
   destruct j; [ clear Hi | flia Hi ].
-  specialize (fermat_little p Hp i) as H1.
+  specialize (Fermat_little p Hp i) as H1.
   assert (H : 1 ≤ i < p) by flia Hip.
   specialize (H1 H); clear H.
   replace (p - 1) with (S (p - 2)) in H1 by flia Hip.
@@ -2115,7 +2115,7 @@ split. {
     rewrite Hj in H1; flia Hi H1.
   }
   clear j Hi.
-  specialize (fermat_little p Hp i) as H1.
+  specialize (Fermat_little p Hp i) as H1.
   assert (H : 1 ≤ i < p) by flia Hip.
   specialize (H1 H); clear H.
   replace (p - 1) with (S (p - 2)) in H1 by flia Hip.
@@ -2152,7 +2152,7 @@ intros * Hp * Hip Hcon.
 assert (Hpz : p ≠ 0) by now intros H; rewrite H in Hp.
 unfold inv_mod in Hcon.
 rewrite Nat_pow_mod_is_pow_mod in Hcon; [ | now intros H; subst p ].
-specialize (fermat_little_1 p Hp i) as H1.
+specialize (Fermat_little_1 p Hp i) as H1.
 rewrite (Nat.mod_small i) in H1; [ | flia Hip ].
 rewrite <- Hcon in H1 at 2.
 apply Nat_eq_mod_sub_0 in H1.
@@ -2188,7 +2188,7 @@ rewrite Nat.Div0.mul_mod_idemp_l.
 replace i with (i ^ 1) at 2 by now rewrite Nat.pow_1_r.
 rewrite <- Nat.pow_add_r.
 replace (p - 2 + 1) with (p - 1) by flia Hip.
-apply fermat_little; [ easy | flia Hip ].
+apply Fermat_little; [ easy | flia Hip ].
 Qed.
 
 Theorem mul_inv_diag_r_mod : ∀ p,
@@ -2445,12 +2445,12 @@ rewrite Nat.pow_add_r.
 rewrite Nat.pow_mul_r.
 rewrite <- Nat.Div0.mul_mod_idemp_l.
 rewrite <- Nat_mod_pow_mod.
-rewrite fermat_little_1; [ | easy ].
+rewrite Fermat_little_1; [ | easy ].
 rewrite Nat.Div0.mod_mod.
 rewrite Nat.Div0.mul_mod_idemp_l.
 rewrite <- Nat.pow_add_r.
 rewrite Nat.sub_add; [ | flia Hip ].
-rewrite fermat_little_1; [ | easy ].
+rewrite Fermat_little_1; [ | easy ].
 apply Nat.mod_small; flia Hip.
 Qed.
 
@@ -2666,7 +2666,7 @@ Definition bool_of_option {T} (x : option T) :=
 Definition is_quadratic_residue p a := bool_of_option (sqrt_mod a p).
 
 (* to be completed
-Theorem euler_criterion : ∀ p,
+Theorem Euler_criterion : ∀ p,
   prime p
   → ∀ a, 1 ≤ a < p
   → a ^ ((p - 1) / 2) ≡ legendre_symbol a p mod p.
@@ -2691,7 +2691,7 @@ destruct sm as [b| ]. {
   rewrite <- Nat.pow_mul_r.
   destruct (Nat.eq_dec p 2) as [Hp2| Hp2]; [ now subst p | ].
   rewrite <- (proj2 (Nat.Div0.div_exact _ _)). {
-    rewrite fermat_little; [ | easy | ]. {
+    rewrite Fermat_little; [ | easy | ]. {
       symmetry.
       apply Nat.mod_1_l.
       now apply (Nat.le_lt_trans _ a).
@@ -2710,6 +2710,7 @@ destruct sm as [b| ]. {
 }
 assert (Hpz : p ≠ 0) by flia Hap.
 specialize (eq_sqrt_mod_None a p Hpz Hsm) as H1.
+...
 Theorem glop :
   ∀ p,
   prime p

@@ -134,7 +134,7 @@ split; intros Hap. 2: {
     specialize (Nat.div_mod p 2 (Nat.neq_succ_0 _)) as H2.
     now rewrite H2, H1, Nat.add_sub, Nat.mul_comm, Nat.Div0.mod_mul.
   }
-  now apply fermat_little.
+  now apply Fermat_little.
 } {
   apply euler_crit_iff in Hap.
   apply quad_res_iff.
