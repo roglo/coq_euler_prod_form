@@ -250,18 +250,19 @@ split; intros Hap. 2: {
     split; [ flia Hn | easy ].
   }
   clear H.
-  assert (Hbb : ∀ b, 1 ≤ b < p → ∃! b', b' < p ∧ (b * b') mod p = a). {
-    intros b Hb.
-    apply congruence_has_unique_solution; [ easy | | easy ].
-    split; [ | easy ].
-    now apply Nat.neq_0_lt_0.
-  }
   (* https://proofwiki.org/wiki/Euler%27s_Criterion *)
   (* Note that 𝑏′≢𝑏, because otherwise we would have 𝑏2≡𝑎(mod𝑝) and 𝑎 would be
      a quadratic residue of 𝑝. *)
   assert
-    (H : ∀ b, 1 ≤ b < p → ∃! b', b' < p ∧ (b * b') mod p = a ∧ b ≠ b'). {
+    (Hbb : ∀ b, 1 ≤ b < p → ∃! b', b' < p ∧ (b * b') mod p = a ∧ b ≠ b'). {
     intros b Hbp.
+    assert (Hbb : ∀ b, 1 ≤ b < p → ∃! b', b' < p ∧ (b * b') mod p = a). {
+      clear b Hbp.
+      intros b Hb.
+      apply congruence_has_unique_solution; [ easy | | easy ].
+      split; [ | easy ].
+      now apply Nat.neq_0_lt_0.
+    }
     specialize (Hbb b Hbp).
     destruct Hbb as (b' & (H1 & H2) & H3).
     exists b'.
@@ -277,7 +278,6 @@ split; intros Hap. 2: {
       now apply H3.
     }
   }
-  clear Hbb; rename H into Hbb.
   (* https://proofwiki.org/wiki/Euler%27s_Criterion *)
   (* It follows that the residue classes {1,2,…,𝑝−1} modulo 𝑝 fall into
      (𝑝−1)/2 pairs 𝑏,𝑏′ such that 𝑏𝑏′≡𝑎(mod𝑝). *)
