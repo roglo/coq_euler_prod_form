@@ -470,3 +470,46 @@ split; intros Hap. 2: {
   flia Hp2 H.
 }
 Qed.
+
+(**)
+
+Fixpoint sqrt_mod_loop cnt a p i :=
+  match cnt with
+  | 0 => None
+  | S cnt' =>
+      if i * i mod p =? a mod p then Some i
+      else sqrt_mod_loop cnt' a p (S i)
+  end.
+
+Definition sqrt_mod a p := sqrt_mod_loop p a p 0.
+
+Definition legendre_symbol a p :=
+  if a =? 0 then 0
+  else
+    match sqrt_mod a p with
+    | Some _ => 1
+    | None => p - 1
+    end.
+
+(* to be completed
+Theorem Euler_criterion : ∀ p,
+  prime p
+  → ∀ a, 1 ≤ a < p
+  → a ^ ((p - 1) / 2) ≡ legendre_symbol a p mod p.
+Proof.
+intros * Hp * Hap.
+destruct (Nat.eq_dec p 2) as [Hp2| Hp2]. {
+  replace a with 1 by flia Hap Hp2.
+  now subst p.
+}
+assert (Haz : a ≠ 0) by flia Hap.
+specialize (euler_criterion_quadratic_residue_iff p a Hp Hp2 Haz) as H1.
+destruct H1 as (H1, H2).
+Search euler_crit.
+...
+progress unfold euler_crit in H1.
+
+Search Nat_pow_mod.
+rewrite Nat_pow_mod_is_pow_mod in H1.
+...
+*)
