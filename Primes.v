@@ -2510,7 +2510,9 @@ Definition divisors n := List.filter (λ a, n mod a =? 0) (List.seq 1 n).
 Definition prime_divisors n :=
   filter (λ d, (is_prime d && (n mod d =? 0))%bool) (seq 1 n).
 
-(**)
+(* chuis nul, j'ai déjà bossé dessus dans QuadRes.v
+
+(* Euler's criterion *)
 
 Global Hint Resolve Nat.le_0_l : core.
 Global Hint Resolve Nat.lt_0_succ : core.
@@ -2740,4 +2742,5 @@ destruct qr. {
     cbn in Hl.
     injection Hl; clear Hl; intros H1 H2; subst a.
 ...
+*)
 *)
