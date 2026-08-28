@@ -1,3 +1,4 @@
+Set Nested Proofs Allowed.
 From Stdlib Require Import Utf8 Arith.
 From Stdlib Require Import Sorting.Permutation.
 Import List List.ListNotations.
@@ -113,6 +114,96 @@ destruct H1 as (x & Hax & Hx).
 destruct (lt_dec x n) as [Hxn| Hxn]; [ now exists x | now subst x ].
 Qed.
 
+(* https://proofwiki.org/wiki/Euler%27s_Criterion *)
+(* The congruence 𝑏𝑥≡𝑎(mod𝑝) has (modulo 𝑝) a unique solution 𝑏′ by Solution
+   of Linear Congruence. *)
+
+Theorem congruence_has_unique_solution :
+  ∀ p a b,
+  prime p
+  → 0 < a < p
+  → 1 ≤ b < p
+  → ∃! b', b' < p ∧ (b * b') mod p = a.
+Proof.
+intros * Hp (Ha, Hap) Hb.
+assert (Hpz : p ≠ 0) by flia Hb.
+apply Nat.neq_0_lt_0 in Ha.
+specialize (smaller_than_prime_all_different_multiples p Hp b Hb) as H1.
+specialize (not_forall_in_interv_imp_exist 1 (p - 1)) as H2.
+specialize (H2 (λ b', (b * b') mod p = a)).
+cbn in H2.
+assert (H : ∀ n, Decidable.decidable ((b * n) mod p = a)). {
+  intros n.
+  apply Nat.eq_decidable.
+}
+specialize (H2 H); clear H.
+assert (H : 1 ≤ p - 1). {
+  destruct p; [ easy | ].
+  destruct p; [ easy | flia ].
+}
+specialize (H2 H); clear H.
+assert (Hb' : ¬ (∀ b', (b * b') mod p ≠ a)). {
+  move H1 at bottom.
+  intros H3.
+  specialize (all_different_exist (λ b', (b' * b) mod p)) as H4.
+  cbn in H4.
+  specialize (H4 p).
+  assert (H : ∀ i, i < p → (i * b) mod p < p). {
+    intros.
+    now apply Nat.mod_upper_bound.
+  }
+  specialize (H4 H H1 a Hap); clear H.
+  destruct H4 as (b', Hb').
+  specialize (H3 b').
+  now rewrite Nat.mul_comm in H3.
+}
+assert (H : ¬ (∀ n : nat, 1 ≤ n ≤ p - 1 → (b * n) mod p ≠ a)). {
+  intros H; apply Hb'; intros b'.
+  destruct (Nat.eq_dec (b' mod p) 0) as [Hb'z| Hb'z]. {
+    rewrite <- Nat.Div0.mul_mod_idemp_r.
+    rewrite Hb'z, Nat.mul_0_r; cbn.
+    rewrite Nat.Div0.mod_0_l.
+    now apply Nat.neq_sym.
+  }
+  rewrite <- Nat.Div0.mul_mod_idemp_r.
+  apply H.
+  split; [ flia Hb'z | ].
+  rewrite Nat.sub_1_r.
+  apply Nat.lt_le_pred.
+  now apply Nat.mod_upper_bound.
+}
+specialize (H2 H); clear H.
+destruct H2 as (b', H2).
+exists (b' mod p).
+split. {
+  split; [ now apply Nat.mod_upper_bound | ].
+  now rewrite Nat.Div0.mul_mod_idemp_r.
+} {
+  intros x (Hxp & Hxa).
+  rewrite <- Nat.Div0.mul_mod_idemp_r in H2.
+  rewrite <- H2 in Hxa.
+  destruct (le_dec (b' mod p) x) as [Hbx| Hbx]. {
+    apply Nat_mul_mod_cancel_l in Hxa. 2: {
+      rewrite Nat.gcd_comm.
+      now apply eq_gcd_prime_small_1.
+    }
+    rewrite Nat.Div0.mod_mod in Hxa.
+    rewrite <- Hxa.
+    now apply Nat.mod_small.
+  } {
+    apply Nat.nle_gt in Hbx.
+    symmetry in Hxa.
+    apply Nat_mul_mod_cancel_l in Hxa. 2: {
+      rewrite Nat.gcd_comm.
+      now apply eq_gcd_prime_small_1.
+    }
+    rewrite Nat.Div0.mod_mod in Hxa.
+    symmetry in Hxa.
+    now rewrite Nat.mod_small in Hxa.
+  }
+}
+Qed.
+
 Theorem euler_criterion_quadratic_residue_iff : ∀ p a,
   prime p
   → p ≠ 2
@@ -159,85 +250,11 @@ split; intros Hap. 2: {
     split; [ flia Hn | easy ].
   }
   clear H.
-  (* https://proofwiki.org/wiki/Euler%27s_Criterion *)
-  (* The congruence 𝑏𝑥≡𝑎(mod𝑝) has (modulo 𝑝) a unique solution 𝑏′ by Solution
-     of Linear Congruence. *)
   assert (Hbb : ∀ b, 1 ≤ b < p → ∃! b', b' < p ∧ (b * b') mod p = a). {
     intros b Hb.
-    specialize (smaller_than_prime_all_different_multiples p Hp b Hb) as H1.
-    specialize (not_forall_in_interv_imp_exist 1 (p - 1)) as H2.
-    specialize (H2 (λ b', (b * b') mod p = a)).
-    cbn in H2.
-    assert (H : ∀ n, Decidable.decidable ((b * n) mod p = a)). {
-      intros n.
-      apply Nat.eq_decidable.
-    }
-    specialize (H2 H); clear H.
-    assert (H : 1 ≤ p - 1). {
-      destruct p; [ easy | ].
-      destruct p; [ easy | flia ].
-    }
-    specialize (H2 H); clear H.
-    assert (Hb' : ¬ (∀ b', (b * b') mod p ≠ a)). {
-      move H1 at bottom.
-      intros H3.
-      specialize (all_different_exist (λ b', (b' * b) mod p)) as H4.
-      cbn in H4.
-      specialize (H4 p).
-      assert (H : ∀ i, i < p → (i * b) mod p < p). {
-        intros.
-        now apply Nat.mod_upper_bound.
-      }
-      specialize (H4 H H1 a Ha); clear H.
-      destruct H4 as (b', Hb').
-      specialize (H3 b').
-      now rewrite Nat.mul_comm in H3.
-    }
-    assert (H : ¬ (∀ n : nat, 1 ≤ n ≤ p - 1 → (b * n) mod p ≠ a)). {
-      intros H; apply Hb'; intros b'.
-      destruct (Nat.eq_dec (b' mod p) 0) as [Hb'z| Hb'z]. {
-        rewrite <- Nat.Div0.mul_mod_idemp_r.
-        rewrite Hb'z, Nat.mul_0_r; cbn.
-        rewrite Nat.Div0.mod_0_l.
-        now apply Nat.neq_sym.
-      }
-      rewrite <- Nat.Div0.mul_mod_idemp_r.
-      apply H.
-      split; [ flia Hb'z | ].
-      rewrite Nat.sub_1_r.
-      apply Nat.lt_le_pred.
-      now apply Nat.mod_upper_bound.
-    }
-    specialize (H2 H); clear H.
-    destruct H2 as (b', H2).
-    exists (b' mod p).
-    split. {
-      split; [ now apply Nat.mod_upper_bound | ].
-      now rewrite Nat.Div0.mul_mod_idemp_r.
-    } {
-      intros x (Hxp & Hxa).
-      rewrite <- Nat.Div0.mul_mod_idemp_r in H2.
-      rewrite <- H2 in Hxa.
-      destruct (le_dec (b' mod p) x) as [Hbx| Hbx]. {
-        apply Nat_mul_mod_cancel_l in Hxa. 2: {
-          rewrite Nat.gcd_comm.
-          now apply eq_gcd_prime_small_1.
-        }
-        rewrite Nat.Div0.mod_mod in Hxa.
-        rewrite <- Hxa.
-        now apply Nat.mod_small.
-      } {
-        apply Nat.nle_gt in Hbx.
-        symmetry in Hxa.
-        apply Nat_mul_mod_cancel_l in Hxa. 2: {
-          rewrite Nat.gcd_comm.
-          now apply eq_gcd_prime_small_1.
-        }
-        rewrite Nat.Div0.mod_mod in Hxa.
-        symmetry in Hxa.
-        now rewrite Nat.mod_small in Hxa.
-      }
-    }
+    apply congruence_has_unique_solution; [ easy | | easy ].
+    split; [ | easy ].
+    now apply Nat.neq_0_lt_0.
   }
   (* https://proofwiki.org/wiki/Euler%27s_Criterion *)
   (* Note that 𝑏′≢𝑏, because otherwise we would have 𝑏2≡𝑎(mod𝑝) and 𝑎 would be
@@ -264,7 +281,7 @@ split; intros Hap. 2: {
   (* https://proofwiki.org/wiki/Euler%27s_Criterion *)
   (* It follows that the residue classes {1,2,…,𝑝−1} modulo 𝑝 fall into
      (𝑝−1)/2 pairs 𝑏,𝑏′ such that 𝑏𝑏′≡𝑎(mod𝑝). *)
-  assert (H : fact (p - 1) mod p = a ^ ((p - 1) / 2) mod p). {
+  assert (fact (p - 1) ≡ a ^ ((p - 1) / 2) mod p). {
     rewrite fact_eq_fold_left.
     (* very similar with eq_fold_left_mul_seq_2_prime_sub_3_1;
        perhaps a common lemma could be useful *)
@@ -654,6 +671,11 @@ destruct (Nat.eq_dec (legendre_symbol a p) (p - 1)) as [Hlsp1| Hlsp1]. {
   }
   destruct H1 as (H1, H2).
   specialize (H2 H4).
+  clear Hlsp1.
+  specialize (proj1 (Wilson p (prime_ge_2 p Hp)) Hp) as HW.
+  rewrite <- HW at 2.
+  rewrite Nat.Div0.mod_mod.
+...
 Print euler_crit.
 Search (_ ∈ filter _ _).
 ...
