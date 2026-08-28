@@ -119,13 +119,13 @@ Qed.
    of Linear Congruence. *)
 
 Theorem congruence_has_unique_solution :
-  ∀ p a b,
+  ∀ p a,
   prime p
   → 0 < a < p
-  → 1 ≤ b < p
+  → ∀ b, 1 ≤ b < p
   → ∃! b', b' < p ∧ (b * b') mod p = a.
 Proof.
-intros * Hp (Ha, Hap) Hb.
+intros * Hp (Ha, Hap) * Hb.
 assert (Hpz : p ≠ 0) by flia Hb.
 apply Nat.neq_0_lt_0 in Ha.
 specialize (smaller_than_prime_all_different_multiples p Hp b Hb) as H1.
@@ -675,6 +675,7 @@ destruct (Nat.eq_dec (legendre_symbol a p) (p - 1)) as [Hlsp1| Hlsp1]. {
   specialize (proj1 (Wilson p (prime_ge_2 p Hp)) Hp) as HW.
   rewrite <- HW at 2.
   rewrite Nat.Div0.mod_mod.
+  specialize (congruence_has_unique_solution p a Hp Hap) as H5.
 ...
 Print euler_crit.
 Search (_ ∈ filter _ _).
