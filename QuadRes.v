@@ -689,8 +689,8 @@ destruct (Nat.eq_dec (legendre_symbol a p) 1) as [Hls1| Hls1]. {
     remember (sqrt_mod a p) as sm eqn:Hsm.
     symmetry in Hsm.
     destruct sm as [b| ]; [ clear Hls1 | flia Hp2 Hls1 ].
-    apply eq_sqrt_mod_loop_Some in Hsm.
-    destruct Hsm as ((_, Hbp), Hsm).
+    apply eq_sqrt_mod_Some in Hsm.
+    destruct Hsm as (Hbp, Hsm).
     exists b.
     split. {
       split; [ | easy ].
