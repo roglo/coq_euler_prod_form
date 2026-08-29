@@ -238,6 +238,225 @@ split. {
 }
 Qed.
 
+  (* https://proofwiki.org/wiki/Euler%27s_Criterion *)
+  (* It follows that the residue classes {1,2,…,𝑝−1} modulo 𝑝 fall into
+     (𝑝−1)/2 pairs 𝑏,𝑏′ such that 𝑏𝑏′≡𝑎(mod𝑝). *)
+Theorem fact_pred_p_equiv :
+  ∀ p a,
+  prime p
+  → 0 < a < p
+  → (∀ n, 1 ≤ n ≤ p - 1 → n ^ 2 mod p ≠ a)
+  → fact (p - 1) ≡ a ^ ((p - 1) / 2) mod p.
+Proof.
+intros * Hp (Haz, Hap) Hnres.
+assert
+  (Hbb : ∀ b, 1 ≤ b < p → ∃! b', b' < p ∧ (b * b') mod p = a ∧ b ≠ b'). {
+  now apply congruence_has_unique_solution'.
+}
+rewrite fact_eq_fold_left.
+(* very similar with eq_fold_left_mul_seq_2_prime_sub_3_1;
+   perhaps a common lemma could be useful *)
+specialize (seq_NoDup (p - 1) 1) as Hnd.
+remember (seq 1 (p - 1)) as l eqn:Hl.
+assert
+  (Hij : ∀ i, i ∈ l →
+   ∃j, j ∈ l ∧ i ≠ j ∧ (i * j) mod p = a ∧
+    ∀ k, k ∈ l → k ≠ i → (k * j) mod p ≠ a). {
+  intros i Hi.
+  specialize (Hbb i) as H1.
+  assert (H : 1 ≤ i < p). {
+    subst l.
+    apply in_seq in Hi; flia Hi.
+  }
+  specialize (H1 H); clear H.
+  destruct H1 as (j & (Hj1 & Hj2 & Hj3) & Hj4).
+  exists j.
+  split. {
+    subst l; apply in_seq.
+    split; [ | flia Hj1 ].
+    destruct j; [ | flia ].
+    symmetry in Hj2.
+    apply Nat.neq_0_lt_0 in Haz.
+    now rewrite Nat.mul_0_r, Nat.Div0.mod_0_l in Hj2.
+  }
+  split; [ easy | ].
+  split; [ easy | ].
+  intros k Hk Hki.
+  specialize (Hj4 k) as H1.
+  destruct (Nat.eq_dec ((i * k) mod p) a) as [Hka| Hka]. {
+    assert (H : k < p ∧ (i * k) mod p = a ∧ i ≠ k). {
+      apply Nat.neq_sym in Hki.
+      split; [ | easy ].
+      rewrite Hl in Hk.
+      apply in_seq in Hk.
+      flia Hk.
+    }
+    specialize (H1 H); clear H.
+    subst k.
+    rewrite <- Nat.pow_2_r.
+    apply Hnres.
+    split; [ | flia Hj1 ].
+    destruct j; [ | flia ].
+    symmetry in Hj2.
+    apply Nat.neq_0_lt_0 in Haz.
+    now rewrite Nat.mul_0_r, Nat.Div0.mod_0_l in Hj2.
+  } {
+    intros Hkj.
+    move Hj2 at bottom.
+    rewrite <- Hkj in Hj2.
+    destruct (le_dec k i) as [Hik| Hik]. {
+      apply Nat_mul_mod_cancel_r in Hj2. 2: {
+        rewrite Nat.gcd_comm.
+        apply eq_gcd_prime_small_1; [ easy | ].
+        split; [ | easy ].
+        destruct j; [ | flia ].
+        rewrite Nat.mul_0_r, Nat.Div0.mod_0_l in Hkj.
+        apply Nat.neq_0_lt_0 in Haz.
+        now symmetry in Hkj.
+      }
+      rewrite Nat.mod_small in Hj2. 2: {
+        rewrite Hl in Hi; apply in_seq in Hi; flia Hi.
+      }
+      rewrite Nat.mod_small in Hj2. 2: {
+        rewrite Hl in Hk; apply in_seq in Hk; flia Hk.
+      }
+      now symmetry in Hj2.
+    } {
+      apply Nat.nle_gt in Hik.
+      symmetry in Hj2.
+      apply Nat_mul_mod_cancel_r in Hj2. 2: {
+        rewrite Nat.gcd_comm.
+        apply eq_gcd_prime_small_1; [ easy | ].
+        split; [ | easy ].
+        destruct j; [ | flia ].
+        rewrite Nat.mul_0_r, Nat.Div0.mod_0_l in Hkj.
+        apply Nat.neq_0_lt_0 in Haz.
+        now symmetry in Hkj.
+      }
+      rewrite Hl in Hk; apply in_seq in Hk.
+      rewrite Nat.mod_small in Hj2; [ | flia Hk ].
+      rewrite Nat.mod_small in Hj2; [ flia Hj2 Hik | ].
+      rewrite Hl in Hi; apply in_seq in Hi; flia Hi.
+    }
+  }
+}
+clear Hbb Hnres.
+replace (p - 1) with (length l). 2: {
+  now subst l; rewrite length_seq.
+}
+clear Hl.
+remember (length l) as len eqn:Hlen; symmetry in Hlen.
+revert l Hnd Hij Hlen.
+induction len as (len, IHlen) using lt_wf_rec; intros.
+destruct len. {
+  apply length_zero_iff_nil in Hlen.
+  now rewrite Hlen.
+}
+destruct l as [| b l]; [ easy | ].
+specialize (Hij b (or_introl (eq_refl _))) as H1.
+destruct H1 as (i2 & Hi2l & Hai2 & Hai2p & Hk).
+destruct Hi2l as [Hi2l| Hi2l]; [ easy | ].
+specialize (in_split i2 l Hi2l) as (l1 & l2 & Hll).
+rewrite Hll.
+cbn - [ "/" ]; rewrite Nat.add_0_r.
+rewrite fold_left_app; cbn - [ "/" ].
+rewrite fold_left_mul_from_1.
+rewrite Nat.mul_shuffle0, Nat.mul_comm.
+rewrite fold_left_mul_from_1.
+do 2 rewrite Nat.mul_assoc.
+remember (i2 * 2) as x.
+rewrite <- Nat.mul_assoc; subst x.
+rewrite <- Nat.Div0.mul_mod_idemp_l.
+rewrite (Nat.mul_comm i2).
+rewrite Hai2p.
+replace (S len) with (len - 1 + 1 * 2). 2: {
+  destruct len; [ | flia ].
+  cbn in Hlen.
+  apply Nat.succ_inj in Hlen.
+  rewrite Hll in Hlen.
+  rewrite length_app in Hlen; cbn in Hlen.
+  now rewrite Nat.add_comm in Hlen.
+}
+rewrite Nat.div_add; [ | easy ].
+rewrite Nat.add_comm, Nat.pow_add_r, Nat.pow_1_r.
+rewrite <- Nat.Div0.mul_mod_idemp_r.
+rewrite <- (Nat.Div0.mul_mod_idemp_r _ (a ^ _)).
+f_equal; f_equal.
+rewrite Nat.mul_comm.
+rewrite List_fold_left_mul_assoc, Nat.mul_1_l.
+rewrite <- fold_left_app.
+apply (IHlen (len - 1)); [ flia | | | ]. 3: {
+  cbn in Hlen.
+  apply Nat.succ_inj in Hlen.
+  rewrite <- Hlen, Hll.
+  do 2 rewrite length_app.
+  cbn; flia.
+} {
+  apply NoDup_cons_iff in Hnd.
+  destruct Hnd as (_, Hnd).
+  rewrite Hll in Hnd.
+  now apply NoDup_remove_1 in Hnd.
+}
+intros i Hi.
+specialize (Hij i) as H1.
+assert (H : i ∈ b :: l). {
+  right; rewrite Hll.
+  apply in_app_or in Hi.
+  apply in_or_app.
+  destruct Hi as [Hi| Hi]; [ now left | now right; right ].
+}
+specialize (H1 H); clear H.
+destruct H1 as (j & Hjall & Hinj & Hijp & Hk').
+exists j.
+split. {
+  destruct Hjall as [Hjall| Hjall]. {
+    subst j; exfalso.
+    specialize (Hk' i2) as H1.
+    assert (H : i2 ∈ b :: l). {
+      now rewrite Hll; right; apply in_or_app; right; left.
+    }
+    specialize (H1 H); clear H.
+    assert (H : i2 ≠ i). {
+      intros H; subst i2.
+      move Hnd at bottom; move Hi at bottom.
+      apply NoDup_cons_iff in Hnd.
+      destruct Hnd as (_, Hnd).
+      rewrite Hll in Hnd.
+      now apply NoDup_remove_2 in Hnd.
+    }
+    specialize (H1 H).
+    now rewrite Nat.mul_comm in H1.
+  }
+  rewrite Hll in Hjall.
+  apply in_app_or in Hjall.
+  apply in_or_app.
+  destruct Hjall as [Hjall| Hjall]; [ now left | ].
+  destruct Hjall as [Hjall| Hjall]; [ | now right ].
+  subst j.
+  destruct (Nat.eq_dec b i) as [Hbi| Hbi]. {
+    subst i.
+    move Hnd at bottom.
+    apply NoDup_cons_iff in Hnd.
+    destruct Hnd as (Hnd, _).
+    exfalso; apply Hnd; clear Hnd.
+    rewrite Hll.
+    apply in_app_or in Hi.
+    apply in_or_app.
+    destruct Hi as [Hi| Hi]; [ now left | now right; right ].
+  }
+  now specialize (Hk' b (or_introl eq_refl) Hbi) as H2.
+}
+split; [ easy | ].
+split; [ easy | ].
+intros k Hkll Hki.
+apply Hk'; [ | easy ].
+right.
+rewrite Hll.
+apply in_app_or in Hkll.
+apply in_or_app.
+destruct Hkll as [Hkll| Hkll]; [ now left | now right; right ].
+Qed.
+
 Theorem euler_criterion_quadratic_residue_iff : ∀ p a,
   prime p
   → p ≠ 2
@@ -284,217 +503,9 @@ split; intros Hap. 2: {
     split; [ flia Hn | easy ].
   }
   clear H.
-  (* https://proofwiki.org/wiki/Euler%27s_Criterion *)
-  (* Note that 𝑏′≢𝑏, because otherwise we would have 𝑏2≡𝑎(mod𝑝) and 𝑎 would be
-     a quadratic residue of 𝑝. *)
-  assert
-    (Hbb : ∀ b, 1 ≤ b < p → ∃! b', b' < p ∧ (b * b') mod p = a ∧ b ≠ b'). {
-    apply Nat.neq_0_lt_0 in Haz.
-    now apply congruence_has_unique_solution'.
-  }
-  (* https://proofwiki.org/wiki/Euler%27s_Criterion *)
-  (* It follows that the residue classes {1,2,…,𝑝−1} modulo 𝑝 fall into
-     (𝑝−1)/2 pairs 𝑏,𝑏′ such that 𝑏𝑏′≡𝑎(mod𝑝). *)
   assert (fact (p - 1) ≡ a ^ ((p - 1) / 2) mod p). {
-    rewrite fact_eq_fold_left.
-    (* very similar with eq_fold_left_mul_seq_2_prime_sub_3_1;
-       perhaps a common lemma could be useful *)
-    specialize (seq_NoDup (p - 1) 1) as Hnd.
-    remember (seq 1 (p - 1)) as l eqn:Hl.
-    assert
-      (Hij : ∀ i, i ∈ l →
-       ∃j, j ∈ l ∧ i ≠ j ∧ (i * j) mod p = a ∧
-        ∀ k, k ∈ l → k ≠ i → (k * j) mod p ≠ a). {
-      intros i Hi.
-      specialize (Hbb i) as H1.
-      assert (H : 1 ≤ i < p). {
-        subst l.
-        apply in_seq in Hi; flia Hi.
-      }
-      specialize (H1 H); clear H.
-      destruct H1 as (j & (Hj1 & Hj2 & Hj3) & Hj4).
-      exists j.
-      split. {
-        subst l; apply in_seq.
-        split; [ | flia Hj1 ].
-        destruct j; [ | flia ].
-        symmetry in Hj2.
-        now rewrite Nat.mul_0_r, Nat.Div0.mod_0_l in Hj2.
-      }
-      split; [ easy | ].
-      split; [ easy | ].
-      intros k Hk Hki.
-      specialize (Hj4 k) as H1.
-      destruct (Nat.eq_dec ((i * k) mod p) a) as [Hka| Hka]. {
-        assert (H : k < p ∧ (i * k) mod p = a ∧ i ≠ k). {
-          apply Nat.neq_sym in Hki.
-          split; [ | easy ].
-          rewrite Hl in Hk.
-          apply in_seq in Hk.
-          flia Hk.
-        }
-        specialize (H1 H); clear H.
-        subst k.
-        rewrite <- Nat.pow_2_r.
-        apply Hnres.
-        split; [ | flia Hj1 ].
-        destruct j; [ | flia ].
-        symmetry in Hj2.
-        now rewrite Nat.mul_0_r, Nat.Div0.mod_0_l in Hj2.
-      } {
-        intros Hkj.
-        move Hj2 at bottom.
-        rewrite <- Hkj in Hj2.
-        destruct (le_dec k i) as [Hik| Hik]. {
-          apply Nat_mul_mod_cancel_r in Hj2. 2: {
-            rewrite Nat.gcd_comm.
-            apply eq_gcd_prime_small_1; [ easy | ].
-            split; [ | easy ].
-            destruct j; [ | flia ].
-            rewrite Nat.mul_0_r, Nat.Div0.mod_0_l in Hkj.
-            now symmetry in Hkj.
-          }
-          rewrite Nat.mod_small in Hj2. 2: {
-            rewrite Hl in Hi; apply in_seq in Hi; flia Hi.
-          }
-          rewrite Nat.mod_small in Hj2. 2: {
-            rewrite Hl in Hk; apply in_seq in Hk; flia Hk.
-          }
-          now symmetry in Hj2.
-        } {
-          apply Nat.nle_gt in Hik.
-          symmetry in Hj2.
-          apply Nat_mul_mod_cancel_r in Hj2. 2: {
-            rewrite Nat.gcd_comm.
-            apply eq_gcd_prime_small_1; [ easy | ].
-            split; [ | easy ].
-            destruct j; [ | flia ].
-            rewrite Nat.mul_0_r, Nat.Div0.mod_0_l in Hkj.
-            now symmetry in Hkj.
-          }
-          rewrite Hl in Hk; apply in_seq in Hk.
-          rewrite Nat.mod_small in Hj2; [ | flia Hk ].
-          rewrite Nat.mod_small in Hj2; [ flia Hj2 Hik | ].
-          rewrite Hl in Hi; apply in_seq in Hi; flia Hi.
-        }
-      }
-    }
-    clear Hbb Hnres.
-    replace (p - 1) with (length l). 2: {
-      now subst l; rewrite length_seq.
-    }
-    clear Hap.
-    clear Hl.
-    remember (length l) as len eqn:Hlen; symmetry in Hlen.
-    revert l Hnd Hij Hlen.
-    induction len as (len, IHlen) using lt_wf_rec; intros.
-    destruct len. {
-      apply length_zero_iff_nil in Hlen.
-      now rewrite Hlen.
-    }
-    destruct l as [| b l]; [ easy | ].
-    specialize (Hij b (or_introl (eq_refl _))) as H1.
-    destruct H1 as (i2 & Hi2l & Hai2 & Hai2p & Hk).
-    destruct Hi2l as [Hi2l| Hi2l]; [ easy | ].
-    specialize (in_split i2 l Hi2l) as (l1 & l2 & Hll).
-    rewrite Hll.
-    cbn - [ "/" ]; rewrite Nat.add_0_r.
-    rewrite fold_left_app; cbn - [ "/" ].
-    rewrite fold_left_mul_from_1.
-    rewrite Nat.mul_shuffle0, Nat.mul_comm.
-    rewrite fold_left_mul_from_1.
-    do 2 rewrite Nat.mul_assoc.
-    remember (i2 * 2) as x.
-    rewrite <- Nat.mul_assoc; subst x.
-    rewrite <- Nat.Div0.mul_mod_idemp_l.
-    rewrite (Nat.mul_comm i2).
-    rewrite Hai2p.
-    replace (S len) with (len - 1 + 1 * 2). 2: {
-      destruct len; [ | flia ].
-      cbn in Hlen.
-      apply Nat.succ_inj in Hlen.
-      rewrite Hll in Hlen.
-      rewrite length_app in Hlen; cbn in Hlen.
-      now rewrite Nat.add_comm in Hlen.
-    }
-    rewrite Nat.div_add; [ | easy ].
-    rewrite Nat.add_comm, Nat.pow_add_r, Nat.pow_1_r.
-    rewrite <- Nat.Div0.mul_mod_idemp_r.
-    rewrite <- (Nat.Div0.mul_mod_idemp_r _ (a ^ _)).
-    f_equal; f_equal.
-    rewrite Nat.mul_comm.
-    rewrite List_fold_left_mul_assoc, Nat.mul_1_l.
-    rewrite <- fold_left_app.
-    apply (IHlen (len - 1)); [ flia | | | ]. 3: {
-      cbn in Hlen.
-      apply Nat.succ_inj in Hlen.
-      rewrite <- Hlen, Hll.
-      do 2 rewrite length_app.
-      cbn; flia.
-    } {
-      apply NoDup_cons_iff in Hnd.
-      destruct Hnd as (_, Hnd).
-      rewrite Hll in Hnd.
-      now apply NoDup_remove_1 in Hnd.
-    }
-    intros i Hi.
-    specialize (Hij i) as H1.
-    assert (H : i ∈ b :: l). {
-      right; rewrite Hll.
-      apply in_app_or in Hi.
-      apply in_or_app.
-      destruct Hi as [Hi| Hi]; [ now left | now right; right ].
-    }
-    specialize (H1 H); clear H.
-    destruct H1 as (j & Hjall & Hinj & Hijp & Hk').
-    exists j.
-    split. {
-      destruct Hjall as [Hjall| Hjall]. {
-        subst j; exfalso.
-        specialize (Hk' i2) as H1.
-        assert (H : i2 ∈ b :: l). {
-          now rewrite Hll; right; apply in_or_app; right; left.
-        }
-        specialize (H1 H); clear H.
-        assert (H : i2 ≠ i). {
-          intros H; subst i2.
-          move Hnd at bottom; move Hi at bottom.
-          apply NoDup_cons_iff in Hnd.
-          destruct Hnd as (_, Hnd).
-          rewrite Hll in Hnd.
-          now apply NoDup_remove_2 in Hnd.
-        }
-        specialize (H1 H).
-        now rewrite Nat.mul_comm in H1.
-      }
-      rewrite Hll in Hjall.
-      apply in_app_or in Hjall.
-      apply in_or_app.
-      destruct Hjall as [Hjall| Hjall]; [ now left | ].
-      destruct Hjall as [Hjall| Hjall]; [ | now right ].
-      subst j.
-      destruct (Nat.eq_dec b i) as [Hbi| Hbi]. {
-        subst i.
-        move Hnd at bottom.
-        apply NoDup_cons_iff in Hnd.
-        destruct Hnd as (Hnd, _).
-        exfalso; apply Hnd; clear Hnd.
-        rewrite Hll.
-        apply in_app_or in Hi.
-        apply in_or_app.
-        destruct Hi as [Hi| Hi]; [ now left | now right; right ].
-      }
-      now specialize (Hk' b (or_introl eq_refl) Hbi) as H2.
-    }
-    split; [ easy | ].
-    split; [ easy | ].
-    intros k Hkll Hki.
-    apply Hk'; [ | easy ].
-    right.
-    rewrite Hll.
-    apply in_app_or in Hkll.
-    apply in_or_app.
-    destruct Hkll as [Hkll| Hkll]; [ now left | now right; right ].
+    apply Nat.neq_0_lt_0 in Haz.
+    now apply fact_pred_p_equiv.
   }
   specialize (proj1 (Wilson p (prime_ge_2 p Hp)) Hp) as HW.
   rewrite Hap, HW in H.
@@ -610,7 +621,6 @@ split; [ easy | ].
 now apply Nat.mod_upper_bound.
 Qed.
 
-(* to be completed
 Theorem Euler_criterion : ∀ p,
   prime p
   → ∀ a, 1 ≤ a < p
@@ -689,26 +699,24 @@ destruct (Nat.eq_dec (legendre_symbol a p) (p - 1)) as [Hlsp1| Hlsp1]. {
   specialize (proj1 (Wilson p (prime_ge_2 p Hp)) Hp) as HW.
   rewrite <- HW at 2.
   rewrite Nat.Div0.mod_mod.
-  specialize (congruence_has_unique_solution p a Hp Hap) as H5.
-  specialize (congruence_has_unique_solution' p a Hp Hap) as H6.
-...
-Print euler_crit.
-Search (_ ∈ filter _ _).
-...
-    destruct Hsm as ((_, Hbp), Hsm).
-    exists b.
-    split. {
-      split; [ | easy ].
-      apply Nat.neq_0_lt_0.
-      intros H; subst b.
-      symmetry in Hsm; cbn in Hsm.
-      rewrite Nat.mod_small in Hsm; [ | easy ].
-      now rewrite Nat.mod_small in Hsm.
-    }
-...
-progress unfold euler_crit in H1.
+  symmetry.
+  apply fact_pred_p_equiv; [ easy | easy | ].
+  intros n Hn.
+  rewrite Nat.pow_2_r.
+  rewrite Nat.mod_small in H3; [ | easy ].
+  apply H3.
+}
+destruct (Nat.eq_dec (legendre_symbol a p) 0) as [Hlsz| Hlsz]. {
+  rewrite Hlsz.
+  progress unfold legendre_symbol in Hlsz.
+  apply Nat.eqb_neq in Haz.
+  rewrite Haz in Hlsz.
+  destruct (sqrt_mod a p); [ easy | flia Hap Hlsz ].
+}
+progress unfold legendre_symbol in Hls1, Hlsp1, Hlsz.
+apply Nat.eqb_neq in Haz.
+rewrite Haz in Hls1, Hlsp1, Hlsz.
+now destruct (sqrt_mod a p).
+Qed.
 
-Search Nat_pow_mod.
-rewrite Nat_pow_mod_is_pow_mod in H1.
-...
-*)
+Inspect 1.
