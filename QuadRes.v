@@ -204,6 +204,40 @@ split. {
 }
 Qed.
 
+Theorem congruence_has_unique_solution' :
+  ∀ p a,
+  prime p
+  → 0 < a < p
+  → (∀ n, 1 ≤ n ≤ p - 1 → n ^ 2 mod p ≠ a)
+  → ∀ b, 1 ≤ b < p
+  → ∃! b' : nat, b' < p ∧ (b * b') mod p = a ∧ b ≠ b'.
+Proof.
+intros * Hp (Haz, Hap) Hnres.
+apply Nat.neq_0_lt_0 in Haz.
+intros b Hbp.
+assert (Hbb : ∀ b, 1 ≤ b < p → ∃! b', b' < p ∧ (b * b') mod p = a). {
+  clear b Hbp.
+  intros b Hb.
+  apply congruence_has_unique_solution; [ easy | | easy ].
+  split; [ | easy ].
+  now apply Nat.neq_0_lt_0.
+}
+specialize (Hbb b Hbp).
+destruct Hbb as (b' & (H1 & H2) & H3).
+exists b'.
+split. {
+  split; [ easy | ].
+  split; [ easy | ].
+  intros H; subst b'.
+  revert H2.
+  rewrite <- Nat.pow_2_r.
+  apply Hnres; flia Hbp.
+} {
+  intros x' (Hx1 & Hx2 & Hx3).
+  now apply H3.
+}
+Qed.
+
 Theorem euler_criterion_quadratic_residue_iff : ∀ p a,
   prime p
   → p ≠ 2
@@ -255,28 +289,8 @@ split; intros Hap. 2: {
      a quadratic residue of 𝑝. *)
   assert
     (Hbb : ∀ b, 1 ≤ b < p → ∃! b', b' < p ∧ (b * b') mod p = a ∧ b ≠ b'). {
-    intros b Hbp.
-    assert (Hbb : ∀ b, 1 ≤ b < p → ∃! b', b' < p ∧ (b * b') mod p = a). {
-      clear b Hbp.
-      intros b Hb.
-      apply congruence_has_unique_solution; [ easy | | easy ].
-      split; [ | easy ].
-      now apply Nat.neq_0_lt_0.
-    }
-    specialize (Hbb b Hbp).
-    destruct Hbb as (b' & (H1 & H2) & H3).
-    exists b'.
-    split. {
-      split; [ easy | ].
-      split; [ easy | ].
-      intros H; subst b'.
-      revert H2.
-      rewrite <- Nat.pow_2_r.
-      apply Hnres; flia Hbp.
-    } {
-      intros x' (Hx1 & Hx2 & Hx3).
-      now apply H3.
-    }
+    apply Nat.neq_0_lt_0 in Haz.
+    now apply congruence_has_unique_solution'.
   }
   (* https://proofwiki.org/wiki/Euler%27s_Criterion *)
   (* It follows that the residue classes {1,2,…,𝑝−1} modulo 𝑝 fall into
@@ -676,6 +690,7 @@ destruct (Nat.eq_dec (legendre_symbol a p) (p - 1)) as [Hlsp1| Hlsp1]. {
   rewrite <- HW at 2.
   rewrite Nat.Div0.mod_mod.
   specialize (congruence_has_unique_solution p a Hp Hap) as H5.
+  specialize (congruence_has_unique_solution' p a Hp Hap) as H6.
 ...
 Print euler_crit.
 Search (_ ∈ filter _ _).
