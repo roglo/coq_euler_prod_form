@@ -624,24 +624,31 @@ Qed.
 
 Theorem Euler_criterion : ∀ p,
   prime p
-  → ∀ a, 1 ≤ a < p
-  → a ^ ((p - 1) / 2) ≡ legendre_symbol a p mod p.
+  → p ≠ 2
+  → ∀ a, a < p → a ^ ((p - 1) / 2) ≡ legendre_symbol a p mod p.
 Proof.
-intros * Hp * Hap.
-destruct (Nat.eq_dec p 2) as [Hp2| Hp2]. {
-  replace a with 1 by flia Hap Hp2.
-  now subst p.
+intros * Hp Hp2 * Hap.
+destruct (Nat.eq_dec a 0) as [Haz| Haz]. {
+  subst a.
+  destruct p; [ easy | ].
+  destruct p; [ easy | ].
+  destruct p; [ easy | ].
+  cbn - [ "/" "mod" ].
+  rewrite Nat.pow_0_l; cycle 1. {
+    intros H.
+    apply Nat.div_small_iff in H; [ | easy ].
+    flia H.
+  }
+  now rewrite Nat.Div0.mod_0_l.
 }
-assert (Haz : a ≠ 0) by flia Hap.
 specialize (euler_criterion_quadratic_residue_iff p a Hp Hp2 Haz) as H1.
 destruct (Nat.eq_dec (legendre_symbol a p) 1) as [Hls1| Hls1]. {
   rewrite Hls1.
   assert (H3 : a ∈ quad_res p). {
     apply quad_res_iff.
     progress unfold legendre_symbol in Hls1.
-    remember (a =? 0) as az eqn:Haz1.
-    symmetry in Haz1.
-    destruct az; [ easy | clear Haz1 ].
+    generalize Haz; intros H.
+    apply Nat.eqb_neq in H; rewrite H in Hls1; clear H.
     remember (sqrt_mod a p) as sm eqn:Hsm.
     symmetry in Hsm.
     destruct sm as [b| ]; [ clear Hls1 | flia Hp2 Hls1 ].
@@ -664,7 +671,7 @@ destruct (Nat.eq_dec (legendre_symbol a p) 1) as [Hls1| Hls1]. {
   apply euler_crit_iff in H2.
   destruct H2 as (H2, H4).
   rewrite H4; symmetry.
-  apply Nat.mod_small; flia Hap.
+  apply Nat.mod_small; flia Haz Hap.
 }
 destruct (Nat.eq_dec (legendre_symbol a p) (p - 1)) as [Hlsp1| Hlsp1]. {
   rewrite Hlsp1.
@@ -701,6 +708,7 @@ destruct (Nat.eq_dec (legendre_symbol a p) (p - 1)) as [Hlsp1| Hlsp1]. {
   rewrite <- HW at 2.
   rewrite Nat.Div0.mod_mod.
   symmetry.
+  apply Nat.neq_0_lt_0 in Haz.
   apply fact_pred_p_equiv; [ easy | easy | ].
   intros n Hn.
   rewrite Nat.pow_2_r.
@@ -712,7 +720,8 @@ destruct (Nat.eq_dec (legendre_symbol a p) 0) as [Hlsz| Hlsz]. {
   progress unfold legendre_symbol in Hlsz.
   apply Nat.eqb_neq in Haz.
   rewrite Haz in Hlsz.
-  destruct (sqrt_mod a p); [ easy | flia Hap Hlsz ].
+  apply Nat.eqb_neq in Haz.
+  destruct (sqrt_mod a p); [ easy | flia Hap Haz Hlsz ].
 }
 progress unfold legendre_symbol in Hls1, Hlsp1, Hlsz.
 apply Nat.eqb_neq in Haz.
