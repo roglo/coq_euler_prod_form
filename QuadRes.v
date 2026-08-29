@@ -530,7 +530,7 @@ Fixpoint sqrt_mod_loop cnt a p i :=
 Definition sqrt_mod a p := sqrt_mod_loop p a p 0.
 
 Definition legendre_symbol a p :=
-  if a =? 0 then 0
+  if a mod p =? 0 then 0
   else
     match sqrt_mod a p with
     | Some _ => 1
@@ -622,14 +622,41 @@ split; [ easy | ].
 now apply Nat.mod_upper_bound.
 Qed.
 
+Theorem sqrt_mod_loop_mod :
+  ∀ cnt a p i, sqrt_mod_loop cnt a p i = sqrt_mod_loop cnt (a mod p) p i.
+Proof.
+intros.
+revert i.
+induction cnt; intros; [ easy | cbn ].
+rewrite Nat.Div0.mod_mod.
+now rewrite IHcnt.
+Qed.
+
+Theorem sqrt_mod_mod : ∀ p a, sqrt_mod a p = sqrt_mod (a mod p) p.
+Proof.
+intros.
+apply sqrt_mod_loop_mod.
+Qed.
+
+Theorem legendre_symbol_mod :
+  ∀ p a, legendre_symbol a p = legendre_symbol (a mod p) p.
+Proof.
+intros.
+progress unfold legendre_symbol.
+rewrite Nat.Div0.mod_mod.
+destruct (a mod p =? 0); [ easy | ].
+now rewrite sqrt_mod_mod.
+Qed.
+
 Theorem Euler_criterion : ∀ p,
   prime p
   → p ≠ 2
-  → ∀ a, a < p → a ^ ((p - 1) / 2) ≡ legendre_symbol a p mod p.
+  → ∀ a, a ^ ((p - 1) / 2) ≡ legendre_symbol a p mod p.
 Proof.
-intros * Hp Hp2 * Hap.
-destruct (Nat.eq_dec a 0) as [Haz| Haz]. {
-  subst a.
+intros * Hp Hp2 *.
+destruct (Nat.eq_dec (a mod p) 0) as [Haz| Haz]. {
+  progress unfold legendre_symbol.
+  rewrite <- Nat_mod_pow_mod, Haz; cbn - [ "/" ].
   destruct p; [ easy | ].
   destruct p; [ easy | ].
   destruct p; [ easy | ].
@@ -641,14 +668,24 @@ destruct (Nat.eq_dec a 0) as [Haz| Haz]. {
   }
   now rewrite Nat.Div0.mod_0_l.
 }
+rewrite <- Nat_mod_pow_mod.
+rewrite legendre_symbol_mod.
+remember (a mod p) as b eqn:Hb.
+symmetry in Hb.
+assert (Hap : b < p). {
+  subst b; apply Nat.mod_upper_bound.
+  now intros H; subst p.
+}
+clear a Hb; rename b into a.
 specialize (euler_criterion_quadratic_residue_iff p a Hp Hp2 Haz) as H1.
 destruct (Nat.eq_dec (legendre_symbol a p) 1) as [Hls1| Hls1]. {
   rewrite Hls1.
   assert (H3 : a ∈ quad_res p). {
     apply quad_res_iff.
     progress unfold legendre_symbol in Hls1.
-    generalize Haz; intros H.
-    apply Nat.eqb_neq in H; rewrite H in Hls1; clear H.
+    remember (a mod p =? 0) as apz eqn:Hapz.
+    symmetry in Hapz.
+    destruct apz; [ easy | ].
     remember (sqrt_mod a p) as sm eqn:Hsm.
     symmetry in Hsm.
     destruct sm as [b| ]; [ clear Hls1 | flia Hp2 Hls1 ].
@@ -677,9 +714,9 @@ destruct (Nat.eq_dec (legendre_symbol a p) (p - 1)) as [Hlsp1| Hlsp1]. {
   rewrite Hlsp1.
   apply not_iff_compat in H1.
   progress unfold legendre_symbol in Hlsp1.
+  rewrite Nat.mod_small in Hlsp1; [ | easy ].
   generalize Haz; intros H.
-  apply Nat.eqb_neq in H.
-  rewrite H in Hlsp1; clear H.
+  apply Nat.eqb_neq in H; rewrite H in Hlsp1; clear H.
   remember (sqrt_mod a p) as sm eqn:Hsm.
   symmetry in Hsm.
   destruct sm; [ flia Hp2 Hlsp1 | ].
@@ -693,9 +730,10 @@ destruct (Nat.eq_dec (legendre_symbol a p) (p - 1)) as [Hlsp1| Hlsp1]. {
     rewrite <- Hbp.
     progress unfold legendre_symbol.
     rewrite Hbp.
+    rewrite Nat.mod_small; [ | easy ].
     generalize Haz; intros H.
-    apply Nat.eqb_neq in H.
-    rewrite H; clear H.
+    apply Nat.eqb_neq in H; rewrite H; clear H.
+    rewrite Hsm.
     specialize (eq_sqrt_mod_None a p Hpz Hsm b) as H4.
     rewrite Nat.pow_2_r in Hbp.
     rewrite <- Hbp in H4.
@@ -718,14 +756,16 @@ destruct (Nat.eq_dec (legendre_symbol a p) (p - 1)) as [Hlsp1| Hlsp1]. {
 destruct (Nat.eq_dec (legendre_symbol a p) 0) as [Hlsz| Hlsz]. {
   rewrite Hlsz.
   progress unfold legendre_symbol in Hlsz.
-  apply Nat.eqb_neq in Haz.
-  rewrite Haz in Hlsz.
-  apply Nat.eqb_neq in Haz.
+  rewrite Nat.mod_small in Hlsz; [ | easy ].
+  generalize Haz; intros H.
+  apply Nat.eqb_neq in H.
+  rewrite H in Hlsz; clear H.
   destruct (sqrt_mod a p); [ easy | flia Hap Haz Hlsz ].
 }
-progress unfold legendre_symbol in Hls1, Hlsp1, Hlsz.
+progress unfold legendre_symbol in Hls1, Hlsp1.
+rewrite Nat.mod_small in Hls1, Hlsp1; [ | easy | easy ].
 apply Nat.eqb_neq in Haz.
-rewrite Haz in Hls1, Hlsp1, Hlsz.
+rewrite Haz in Hls1, Hlsp1.
 now destruct (sqrt_mod a p).
 Qed.
 
