@@ -238,9 +238,10 @@ split. {
 }
 Qed.
 
-  (* https://proofwiki.org/wiki/Euler%27s_Criterion *)
-  (* It follows that the residue classes {1,2,…,𝑝−1} modulo 𝑝 fall into
-     (𝑝−1)/2 pairs 𝑏,𝑏′ such that 𝑏𝑏′≡𝑎(mod𝑝). *)
+(* https://proofwiki.org/wiki/Euler%27s_Criterion *)
+(* It follows that the residue classes {1,2,…,𝑝−1} modulo 𝑝 fall into
+   (𝑝−1)/2 pairs 𝑏,𝑏′ such that 𝑏𝑏′≡𝑎(mod𝑝). *)
+
 Theorem fact_pred_p_equiv :
   ∀ p a,
   prime p
