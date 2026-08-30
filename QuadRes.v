@@ -4,6 +4,8 @@ From Stdlib Require Import Sorting.Permutation.
 Import List List.ListNotations.
 Require Import Misc Primes.
 
+(* Euler criterion *)
+
 Theorem all_different_exist : ∀ f n,
   (∀ i, i < n → f i < n)
   → (∀ i j, i < j < n → f i ≠ f j)
