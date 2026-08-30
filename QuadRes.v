@@ -59,7 +59,7 @@ Qed.
 (* The congruence 𝑏𝑥≡𝑎(mod𝑝) has (modulo 𝑝) a unique solution 𝑏′ by Solution
    of Linear Congruence. *)
 
-Theorem congruence_has_unique_solution :
+Theorem congruence_inverse_has_unique_solution :
   ∀ p a,
   prime p
   → 0 < a < p
@@ -145,7 +145,7 @@ split. {
 }
 Qed.
 
-Theorem congruence_has_unique_solution' :
+Theorem congruence_inverse_has_unique_different_solution :
   ∀ p a,
   prime p
   → 0 < a < p
@@ -159,7 +159,7 @@ intros b Hbp.
 assert (Hbb : ∀ b, 1 ≤ b < p → ∃! b', b' < p ∧ (b * b') mod p = a). {
   clear b Hbp.
   intros b Hb.
-  apply congruence_has_unique_solution; [ easy | | easy ].
+  apply congruence_inverse_has_unique_solution; [ easy | | easy ].
   split; [ | easy ].
   now apply Nat.neq_0_lt_0.
 }
@@ -193,7 +193,7 @@ Proof.
 intros * Hp (Haz, Hap) Hnres.
 assert
   (Hbb : ∀ b, 1 ≤ b < p → ∃! b', b' < p ∧ (b * b') mod p = a ∧ b ≠ b'). {
-  now apply congruence_has_unique_solution'.
+  now apply congruence_inverse_has_unique_different_solution.
 }
 rewrite fact_eq_fold_left.
 (* very similar with eq_fold_left_mul_seq_2_prime_sub_3_1;
