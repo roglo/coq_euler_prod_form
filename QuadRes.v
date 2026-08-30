@@ -4,65 +4,6 @@ From Stdlib Require Import Sorting.Permutation.
 Import List List.ListNotations.
 Require Import Misc Primes.
 
-Definition euler_crit p :=
-  filter (λ a, Nat_pow_mod a ((p - 1) / 2) p =? 1) (seq 0 p).
-
-Definition quad_res p :=
-  map (λ a, Nat_pow_mod a 2 p) (seq 1 (p - 1)).
-
-Theorem euler_crit_iff : ∀ p a,
-  a ∈ euler_crit p ↔ a < p ∧ a ^ ((p - 1) / 2) mod p = 1.
-Proof.
-intros.
-split. {
-  intros Hap.
-  destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
-  unfold euler_crit in Hap.
-  apply filter_In in Hap.
-  destruct Hap as (Ha, Hap).
-  rewrite Nat_pow_mod_is_pow_mod in Hap; [ | easy ].
-  apply in_seq in Ha.
-  now apply Nat.eqb_eq in Hap.
-} {
-  intros (Hzap, Hap).
-  destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
-  unfold euler_crit.
-  apply filter_In.
-  rewrite Nat_pow_mod_is_pow_mod; [ | easy ].
-  split; [ apply in_seq; flia Hzap | now apply Nat.eqb_eq ].
-}
-Qed.
-
-Theorem quad_res_iff : ∀ p a,
-  a ∈ quad_res p ↔ ∃ q, 1 ≤ q < p ∧ q ^ 2 mod p = a.
-Proof.
-intros.
-split. {
-  intros Hap.
-  destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
-  unfold quad_res in Hap.
-  apply in_map_iff in Hap.
-  destruct Hap as (b & Hpa & Hb).
-  rewrite Nat_pow_mod_is_pow_mod in Hpa; [ | easy ].
-  apply in_seq in Hb.
-  replace (1 + (p - 1)) with p in Hb by flia Hpz.
-  now exists b.
-} {
-  intros (q & Hqp & Hq).
-  destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
-  unfold quad_res.
-  apply in_map_iff.
-  exists (q mod p).
-  rewrite Nat_pow_mod_is_pow_mod; [ | easy ].
-  rewrite Nat_mod_pow_mod.
-  split; [ easy | ].
-  apply in_seq.
-  replace (1 + (p - 1)) with p  by flia Hpz.
-  split; [ now rewrite Nat.mod_small | ].
-  now apply Nat.mod_upper_bound.
-}
-Qed.
-
 Theorem all_different_exist : ∀ f n,
   (∀ i, i < n → f i < n)
   → (∀ i j, i < j < n → f i ≠ f j)
@@ -458,62 +399,6 @@ apply in_or_app.
 destruct Hkll as [Hkll| Hkll]; [ now left | now right; right ].
 Qed.
 
-Theorem euler_criterion_quadratic_residue_iff : ∀ p a,
-  prime p
-  → p ≠ 2
-  → a ≠ 0
-  → a ∈ euler_crit p ↔ a ∈ quad_res p.
-Proof.
-intros * Hp Hp2 Haz.
-destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
-split; intros Hap. 2: {
-  apply quad_res_iff in Hap.
-  apply euler_crit_iff.
-  destruct Hap as (q & Hqp & Hqpa).
-  rewrite <- Hqpa.
-  split; [ now apply Nat.mod_upper_bound | ].
-  rewrite Nat_mod_pow_mod.
-  rewrite <- Nat.pow_mul_r.
-  rewrite <- (proj2 (Nat.Div0.div_exact _ _)). 2: {
-    specialize (odd_prime p Hp Hp2) as H1.
-    specialize (Nat.div_mod p 2 (Nat.neq_succ_0 _)) as H2.
-    now rewrite H2, H1, Nat.add_sub, Nat.mul_comm, Nat.Div0.mod_mul.
-  }
-  now apply Fermat_little.
-} {
-  apply euler_crit_iff in Hap.
-  apply quad_res_iff.
-  destruct Hap as (Ha, Hap).
-  apply (not_forall_in_interv_imp_exist 1 (p - 1)). {
-    intros n.
-    apply Decidable.dec_and. {
-      apply Decidable.dec_and; [ apply dec_le | apply dec_lt ].
-    } {
-      apply Nat.eq_decidable.
-    }
-  } {
-    destruct p; [ easy | cbn ].
-    destruct p; [ | flia ].
-    flia Haz Ha.
-  }
-  intros H.
-  assert (Hnres : ∀ n, 1 ≤ n ≤ p - 1 → n ^ 2 mod p ≠ a). {
-    intros n Hn.
-    specialize (H n Hn).
-    intros H1; apply H.
-    split; [ flia Hn | easy ].
-  }
-  clear H.
-  assert (fact (p - 1) ≡ a ^ ((p - 1) / 2) mod p). {
-    apply Nat.neq_0_lt_0 in Haz.
-    now apply fact_pred_p_equiv.
-  }
-  specialize (proj1 (Wilson p (prime_ge_2 p Hp)) Hp) as HW.
-  rewrite Hap, HW in H.
-  flia Hp2 H.
-}
-Qed.
-
 (**)
 
 Global Hint Resolve Nat.le_0_l : core.
@@ -638,6 +523,7 @@ intros.
 apply sqrt_mod_loop_mod.
 Qed.
 
+(*
 Theorem legendre_symbol_mod :
   ∀ p a, legendre_symbol a p = legendre_symbol (a mod p) p.
 Proof.
@@ -647,6 +533,7 @@ rewrite Nat.Div0.mod_mod.
 destruct (a mod p =? 0); [ easy | ].
 now rewrite sqrt_mod_mod.
 Qed.
+*)
 
 Theorem Euler_criterion : ∀ p,
   prime p
@@ -683,7 +570,7 @@ clear a Hb; rename b into a.
 remember (sqrt_mod a p) as sm eqn:Hsm.
 symmetry in Hsm.
 destruct sm as [b| ]. {
-  apply eq_sqrt_mod_loop_Some in Hsm.
+  apply eq_sqrt_mod_Some in Hsm.
   cbn in Hsm.
   destruct Hsm as (Hb, Hsm).
   rewrite <- Nat_mod_pow_mod.
