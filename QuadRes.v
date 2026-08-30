@@ -523,18 +523,6 @@ intros.
 apply sqrt_mod_loop_mod.
 Qed.
 
-(*
-Theorem legendre_symbol_mod :
-  ∀ p a, legendre_symbol a p = legendre_symbol (a mod p) p.
-Proof.
-intros.
-progress unfold legendre_symbol.
-rewrite Nat.Div0.mod_mod.
-destruct (a mod p =? 0); [ easy | ].
-now rewrite sqrt_mod_mod.
-Qed.
-*)
-
 Theorem Euler_criterion : ∀ p,
   prime p
   → p ≠ 2
