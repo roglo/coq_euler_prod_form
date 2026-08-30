@@ -605,3 +605,22 @@ destruct sm as [b| ]. {
 Qed.
 
 Inspect 1.
+
+(* Gauss Lemma *)
+
+Definition nb_of_mult_gt_half a p :=
+  List.length
+    (List.filter (λ m, (p - 1) / 2 <? ((m * a) mod p)) (seq 1 ((p - 1) / 2))).
+
+Definition is_quadratic_residue a p := legendre_symbol a p =? 1.
+
+(*
+Compute (let p := 29 in List.filter (λ a, (nb_of_mult_gt_half a p mod 2 =? 0)) (seq 1 (p - 1))).
+Compute (let p := 29 in List.filter (λ a, is_quadratic_residue a p) (seq 1 p)).
+*)
+
+(* to be completed
+Theorem Gauss_lemma :
+  ∀ a p,
+  legendre_symbol a p = if nb_of_mult_gt_half a p mod 2 =? 0 then 1 else p - 1.
+*)
