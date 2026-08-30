@@ -669,7 +669,10 @@ destruct (Nat.eq_dec (a mod p) 0) as [Haz| Haz]. {
   now rewrite Nat.Div0.mod_0_l.
 }
 rewrite <- Nat_mod_pow_mod.
-rewrite legendre_symbol_mod.
+progress unfold legendre_symbol.
+generalize Haz; intros H.
+apply Nat.eqb_neq in H; rewrite H; clear H.
+rewrite sqrt_mod_mod.
 remember (a mod p) as b eqn:Hb.
 symmetry in Hb.
 assert (Hap : b < p). {
@@ -677,96 +680,51 @@ assert (Hap : b < p). {
   now intros H; subst p.
 }
 clear a Hb; rename b into a.
-specialize (euler_criterion_quadratic_residue_iff p a Hp Hp2 Haz) as H1.
-destruct (Nat.eq_dec (legendre_symbol a p) 1) as [Hls1| Hls1]. {
-  rewrite Hls1.
-  assert (H3 : a ∈ quad_res p). {
-    apply quad_res_iff.
-    progress unfold legendre_symbol in Hls1.
-    remember (a mod p =? 0) as apz eqn:Hapz.
-    symmetry in Hapz.
-    destruct apz; [ easy | ].
-    remember (sqrt_mod a p) as sm eqn:Hsm.
-    symmetry in Hsm.
-    destruct sm as [b| ]; [ clear Hls1 | flia Hp2 Hls1 ].
-    apply eq_sqrt_mod_Some in Hsm.
-    destruct Hsm as (Hbp, Hsm).
-    exists b.
-    split. {
-      split; [ | easy ].
-      apply Nat.neq_0_lt_0.
-      intros H; subst b.
-      symmetry in Hsm; cbn in Hsm.
-      rewrite Nat.mod_small in Hsm; [ | easy ].
-      now rewrite Nat.mod_small in Hsm.
+remember (sqrt_mod a p) as sm eqn:Hsm.
+symmetry in Hsm.
+destruct sm as [b| ]. {
+  apply eq_sqrt_mod_loop_Some in Hsm.
+  cbn in Hsm.
+  destruct Hsm as (Hb, Hsm).
+  rewrite <- Nat_mod_pow_mod.
+  rewrite <- Hsm.
+  rewrite Nat_mod_pow_mod.
+  rewrite <- Nat.pow_2_r.
+  rewrite <- Nat.pow_mul_r.
+  rewrite <- (proj2 (Nat.Div0.div_exact _ _)). {
+    rewrite Fermat_little; [ | easy | ]. {
+      symmetry.
+      apply Nat.mod_1_l.
+      now apply prime_ge_2.
     }
-    rewrite Nat.pow_2_r, Hsm.
-    now apply Nat.mod_small.
+    split; [ | easy ].
+    destruct b; [ | now apply -> Nat.succ_le_mono ].
+    rewrite Nat.mod_small in Hsm; [ | easy ].
+    symmetry in Hsm.
+    now rewrite Nat.mod_small in Hsm.
   }
-  destruct H1 as (H1, H2).
-  specialize (H2 H3).
-  apply euler_crit_iff in H2.
-  destruct H2 as (H2, H4).
-  rewrite H4; symmetry.
-  apply Nat.mod_small; flia Haz Hap.
-}
-destruct (Nat.eq_dec (legendre_symbol a p) (p - 1)) as [Hlsp1| Hlsp1]. {
-  rewrite Hlsp1.
-  apply not_iff_compat in H1.
-  progress unfold legendre_symbol in Hlsp1.
-  rewrite Nat.mod_small in Hlsp1; [ | easy ].
-  generalize Haz; intros H.
-  apply Nat.eqb_neq in H; rewrite H in Hlsp1; clear H.
-  remember (sqrt_mod a p) as sm eqn:Hsm.
-  symmetry in Hsm.
-  destruct sm; [ flia Hp2 Hlsp1 | ].
+  specialize (odd_prime _ Hp Hp2) as H1.
+  specialize (Nat.div_mod p 2 (Nat.neq_succ_0 _)) as H2.
+  rewrite H1 in H2.
+  rewrite H2, Nat.add_sub, Nat.mul_comm.
+  apply Nat.Div0.mod_mul.
+} {
   assert (Hpz : p ≠ 0) by flia Hap.
   specialize (eq_sqrt_mod_None a p Hpz Hsm) as H3.
-  assert (H4 : a ∉ quad_res p). {
-    intros H4.
-    apply quad_res_iff in H4.
-    destruct H4 as (b & Hb & Hbp).
-    apply Hls1.
-    rewrite <- Hbp.
-    progress unfold legendre_symbol.
-    rewrite Hbp.
-    rewrite Nat.mod_small; [ | easy ].
-    generalize Haz; intros H.
-    apply Nat.eqb_neq in H; rewrite H; clear H.
-    rewrite Hsm.
-    specialize (eq_sqrt_mod_None a p Hpz Hsm b) as H4.
-    rewrite Nat.pow_2_r in Hbp.
-    rewrite <- Hbp in H4.
-    now rewrite Nat.Div0.mod_mod in H4.
+  assert (Hzap : 0 < a < p) by flia Haz Hap.
+  specialize (fact_pred_p_equiv p a Hp Hzap) as H1.
+  assert (H : ∀ n, 1 ≤ n ≤ p - 1 → n ^ 2 mod p ≠ a). {
+    intros n Hn.
+    rewrite Nat.pow_2_r.
+    rewrite <- (Nat.mod_small a p); [ | easy ].
+    apply H3.
   }
-  destruct H1 as (H1, H2).
-  specialize (H2 H4).
-  clear Hlsp1.
-  specialize (proj1 (Wilson p (prime_ge_2 p Hp)) Hp) as HW.
-  rewrite <- HW at 2.
-  rewrite Nat.Div0.mod_mod.
-  symmetry.
-  apply Nat.neq_0_lt_0 in Haz.
-  apply fact_pred_p_equiv; [ easy | easy | ].
-  intros n Hn.
-  rewrite Nat.pow_2_r.
-  rewrite Nat.mod_small in H3; [ | easy ].
-  apply H3.
+  specialize (H1 H); clear H.
+  rewrite <- H1.
+  rewrite (Nat.mod_small (p - 1)); [ | flia Hap ].
+  apply Wilson; [ | easy ].
+  now apply prime_ge_2.
 }
-destruct (Nat.eq_dec (legendre_symbol a p) 0) as [Hlsz| Hlsz]. {
-  rewrite Hlsz.
-  progress unfold legendre_symbol in Hlsz.
-  rewrite Nat.mod_small in Hlsz; [ | easy ].
-  generalize Haz; intros H.
-  apply Nat.eqb_neq in H.
-  rewrite H in Hlsz; clear H.
-  destruct (sqrt_mod a p); [ easy | flia Hap Haz Hlsz ].
-}
-progress unfold legendre_symbol in Hls1, Hlsp1.
-rewrite Nat.mod_small in Hls1, Hlsp1; [ | easy | easy ].
-apply Nat.eqb_neq in Haz.
-rewrite Haz in Hls1, Hlsp1.
-now destruct (sqrt_mod a p).
 Qed.
 
 Inspect 1.
