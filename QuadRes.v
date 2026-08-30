@@ -444,6 +444,15 @@ apply Nat.eqb_eq in He.
 split; [ flia | easy ].
 Qed.
 
+Theorem eq_sqrt_mod_Some :
+  ∀ a b p,
+  sqrt_mod a p = Some b
+  → b < p ∧ b * b ≡ a mod p.
+Proof.
+intros * Hsm.
+now apply eq_sqrt_mod_loop_Some in Hsm.
+Qed.
+
 Theorem eq_sqrt_mod_loop_None :
   ∀ cnt a i p,
   a ≢ 0 mod p
@@ -467,15 +476,6 @@ subst i.
 clear Hib.
 rewrite Hbb in Hsip.
 now rewrite Nat.eqb_refl in Hsip.
-Qed.
-
-Theorem eq_sqrt_mod_Some :
-  ∀ a b p,
-  sqrt_mod a p = Some b
-  → b < p ∧ b * b ≡ a mod p.
-Proof.
-intros * Hsm.
-now apply eq_sqrt_mod_loop_Some in Hsm.
 Qed.
 
 Theorem eq_sqrt_mod_None :
