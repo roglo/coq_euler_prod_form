@@ -621,8 +621,35 @@ Compute (let p := 29 in List.filter (λ a, (nb_of_mult_gt_half a p mod 2 =? 0)) 
 Compute (let p := 29 in List.filter (λ a, is_quadratic_residue a p) (seq 1 p)).
 *)
 
+Theorem Nat_mul_pred_mod : ∀ a n, a ≤ n → (n - a) * (n - 1) ≡ a mod n.
+Proof.
+intros * Han.
+destruct (Nat.eq_dec a n) as [Ha| Ha]. {
+  subst a; rewrite Nat.sub_diag, Nat.Div0.mod_same.
+  apply Nat.Div0.mod_0_l.
+}
+rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
+rewrite Nat.mul_sub_distr_r.
+rewrite Nat_sub_sub_swap.
+rewrite Nat.sub_sub_distr; [ | easy | ]; cycle 1. {
+  destruct n; [ easy | cbn ].
+  apply -> Nat.succ_le_mono.
+  apply Nat.le_add_r.
+}
+rewrite <- Nat.mul_pred_r.
+rewrite <- Nat.sub_1_r.
+rewrite Nat.add_comm, Nat.mul_comm.
+rewrite <- Nat.add_sub_assoc; cycle 1. {
+  apply Nat.mul_le_mono_r.
+  flia Han Ha.
+}
+rewrite <- Nat.mul_sub_distr_r.
+apply Nat.Div0.mod_add.
+Qed.
+
 (* to be completed
 Theorem Gauss_lemma :
-  ∀ a p,
-  legendre_symbol a p = if nb_of_mult_gt_half a p mod 2 =? 0 then 1 else p - 1.
+  ∀ a p n,
+  n = nb_of_mult_gt_half a p
+  → legendre_symbol a p = (p - 1) ^ n mod p.
 *)
