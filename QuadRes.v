@@ -417,7 +417,8 @@ Fixpoint sqrt_mod_loop cnt a p i :=
 Definition sqrt_mod a p := sqrt_mod_loop p a p 0.
 
 Definition legendre_symbol a p :=
-  if a mod p =? 0 then 0
+  if p =? 2 then 1
+  else if a mod p =? 0 then 0
   else
     match sqrt_mod a p with
     | Some _ => 1
@@ -527,12 +528,14 @@ Qed.
 
 Theorem Euler_criterion : ∀ p,
   prime p
-  → p ≠ 2
   → ∀ a, a ^ ((p - 1) / 2) ≡ legendre_symbol a p mod p.
 Proof.
-intros * Hp Hp2 *.
+intros * Hp *.
+destruct (Nat.eq_dec p 2) as [Hp2| Hp2]; [ now subst p | ].
+progress unfold legendre_symbol.
+generalize Hp2; intros H.
+apply Nat.eqb_neq in H; rewrite H; clear H.
 destruct (Nat.eq_dec (a mod p) 0) as [Haz| Haz]. {
-  progress unfold legendre_symbol.
   rewrite <- Nat_mod_pow_mod, Haz; cbn - [ "/" ].
   destruct p; [ easy | ].
   destruct p; [ easy | ].
@@ -546,7 +549,6 @@ destruct (Nat.eq_dec (a mod p) 0) as [Haz| Haz]. {
   now rewrite Nat.Div0.mod_0_l.
 }
 rewrite <- Nat_mod_pow_mod.
-progress unfold legendre_symbol.
 generalize Haz; intros H.
 apply Nat.eqb_neq in H; rewrite H; clear H.
 rewrite sqrt_mod_mod.
