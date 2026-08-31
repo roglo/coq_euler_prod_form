@@ -698,6 +698,18 @@ assert
         List.fold_left (λ acc i, acc * abs (i * a) p) (List.seq 1 h) 1)
          mod p). {
   subst z.
+Search (List.fold_left _ _ _ mod _).
+Theorem List_fold_left_mod :
+  ∀ A a b (f : nat → A → nat) l,
+  List.fold_left f l a ≡ List.fold_left (λ x y, f x y mod b) l a mod b.
+Proof.
+intros.
+revert a.
+induction l as [| c]; intros; [ easy | cbn ].
+rewrite <- IHl.
+...
+rewrite List_fold_left_mod.
+...
   erewrite List_fold_left_ext_in; cycle 1. {
     intros * Hb.
     rewrite <- Nat.mul_assoc.
