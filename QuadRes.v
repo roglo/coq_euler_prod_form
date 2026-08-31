@@ -621,17 +621,13 @@ Compute (let p := 29 in List.filter (λ a, (nb_of_mult_gt_half a p mod 2 =? 0)) 
 Compute (let p := 29 in List.filter (λ a, is_quadratic_residue a p) (seq 1 p)).
 *)
 
-Theorem Nat_mul_pred_mod : ∀ a n, a ≤ n → (n - a) * (n - 1) ≡ a mod n.
+Theorem Nat_mul_pred_mod : ∀ a n, a < n → (n - a) * (n - 1) mod n = a.
 Proof.
 intros * Han.
-destruct (Nat.eq_dec a n) as [Ha| Ha]. {
-  subst a; rewrite Nat.sub_diag, Nat.Div0.mod_same.
-  apply Nat.Div0.mod_0_l.
-}
 rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
 rewrite Nat.mul_sub_distr_r.
 rewrite Nat_sub_sub_swap.
-rewrite Nat.sub_sub_distr; [ | easy | ]; cycle 1. {
+rewrite Nat.sub_sub_distr; [ | now apply Nat.lt_le_incl | ]; cycle 1. {
   destruct n; [ easy | cbn ].
   apply -> Nat.succ_le_mono.
   apply Nat.le_add_r.
@@ -641,10 +637,11 @@ rewrite <- Nat.sub_1_r.
 rewrite Nat.add_comm, Nat.mul_comm.
 rewrite <- Nat.add_sub_assoc; cycle 1. {
   apply Nat.mul_le_mono_r.
-  flia Han Ha.
+  flia Han.
 }
 rewrite <- Nat.mul_sub_distr_r.
-apply Nat.Div0.mod_add.
+rewrite Nat.Div0.mod_add.
+now apply Nat.mod_small.
 Qed.
 
 (* to be completed
