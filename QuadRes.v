@@ -649,4 +649,9 @@ Theorem Gauss_lemma :
   ∀ a p n,
   n = nb_of_mult_gt_half a p
   → legendre_symbol a p = (p - 1) ^ n mod p.
+Proof.
+intros * Hn.
+remember ((p - 1) / 2) as h eqn:Hh.
+remember (List.fold_left (λ acc i, acc * i * a) (List.seq 1 h) 0) as z eqn:Hz.
+assert (H1 : z = a ^ h * fact h). {
 *)
