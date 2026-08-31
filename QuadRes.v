@@ -683,6 +683,6 @@ assert
        ((p - 1) ^ n *
         List.fold_left (λ acc i, acc * abs (i * a) p) (List.seq 1 h) 1)
          mod p). {
-
+  subst z.
 ...
 *)
