@@ -659,7 +659,21 @@ symmetry.
 apply List_fold_left_mul_assoc.
 Qed.
 
+Definition sign a p := if a <=? (p - 1) / 2 then 1 else p - 1.
 Definition abs a p := if a <=? (p - 1) / 2 then a else p - a.
+
+Theorem sign_abs : ∀ a n, a < n → a = (sign a n * abs a n) mod n.
+Proof.
+intros * Han.
+progress unfold sign.
+progress unfold abs.
+destruct (_ <=? _). {
+  rewrite Nat.mul_1_l; symmetry.
+  now apply Nat.mod_small.
+}
+rewrite Nat.mul_comm; symmetry.
+now apply Nat_mul_pred_mod.
+Qed.
 
 (* to be completed
 Theorem Gauss_lemma :
@@ -684,5 +698,11 @@ assert
         List.fold_left (λ acc i, acc * abs (i * a) p) (List.seq 1 h) 1)
          mod p). {
   subst z.
+  erewrite List_fold_left_ext_in; cycle 1. {
+    intros * Hb.
+    rewrite <- Nat.mul_assoc.
+    rewrite (sign_abs (b * a) p).
+(* ah merde, chiasse de pute, faut d'abord foutre un mod à l'intérieur
+   du List.fold_left *)
 ...
 *)
