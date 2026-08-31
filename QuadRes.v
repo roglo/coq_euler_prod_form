@@ -659,6 +659,8 @@ symmetry.
 apply List_fold_left_mul_assoc.
 Qed.
 
+Definition abs a p := if a <=? (p - 1) / 2 then a else p - a.
+
 (* to be completed
 Theorem Gauss_lemma :
   ∀ a p n,
@@ -675,5 +677,12 @@ assert (H1 : z = a ^ h * fact h). {
   f_equal; symmetry.
   apply fact_eq_fold_left.
 }
+assert
+  (H2 :
+     z ≡
+       ((p - 1) ^ n *
+        List.fold_left (λ acc i, acc * abs (i * a) p) (List.seq 1 h) 1)
+         mod p). {
+
 ...
 *)
