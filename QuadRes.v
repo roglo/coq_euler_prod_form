@@ -675,6 +675,18 @@ rewrite Nat.mul_comm; symmetry.
 now apply Nat_mul_pred_mod.
 Qed.
 
+Theorem List_fold_left_mod :
+  ∀ A a b (f : nat → A → nat) l,
+  (∀ a l, List.fold_left f l a ≡ List.fold_left f l (a mod b) mod b)
+  → List.fold_left f l a ≡ List.fold_left (λ x y, f x y mod b) l a mod b.
+Proof.
+intros * Hf.
+revert a.
+induction l as [| c]; intros; [ easy | cbn ].
+rewrite <- IHl.
+apply Hf.
+Qed.
+
 (* to be completed
 Theorem Gauss_lemma :
   ∀ a p n,
@@ -683,9 +695,14 @@ Theorem Gauss_lemma :
 Proof.
 intros * Hn.
 remember ((p - 1) / 2) as h eqn:Hh.
-remember (List.fold_left (λ acc i, acc * i * a) (List.seq 1 h) 1) as z eqn:Hz.
+remember (List.fold_left (λ acc i, acc * (i * a)) (List.seq 1 h) 1) as z
+  eqn:Hz.
 assert (H1 : z = a ^ h * fact h). {
   subst z.
+  erewrite List_fold_left_ext_in; cycle 1. {
+    intros * Hb.
+    now rewrite Nat.mul_assoc.
+  }
   rewrite List_fold_left_mul_const_r.
   rewrite List.length_seq, Nat.mul_comm.
   f_equal; symmetry.
@@ -698,23 +715,49 @@ assert
         List.fold_left (λ acc i, acc * abs (i * a) p) (List.seq 1 h) 1)
          mod p). {
   subst z.
-Search (List.fold_left _ _ _ mod _).
-Theorem List_fold_left_mod :
-  ∀ A a b (f : nat → A → nat) l,
-  List.fold_left f l a ≡ List.fold_left (λ x y, f x y mod b) l a mod b.
-Proof.
-intros.
-revert a.
-induction l as [| c]; intros; [ easy | cbn ].
-rewrite <- IHl.
-...
-rewrite List_fold_left_mod.
-...
+  rewrite List_fold_left_mod; cycle 1. {
+    intros b l.
+    revert b.
+    induction l as [| d]; intros; cbn. {
+      symmetry; apply Nat.Div0.mod_mod.
+    }
+    rewrite IHl.
+    rewrite <- Nat.Div0.mul_mod_idemp_l.
+    symmetry.
+    rewrite IHl.
+    rewrite <- Nat.Div0.mul_mod_idemp_r.
+    easy.
+  }
   erewrite List_fold_left_ext_in; cycle 1. {
     intros * Hb.
-    rewrite <- Nat.mul_assoc.
-    rewrite (sign_abs (b * a) p).
-(* ah merde, chiasse de pute, faut d'abord foutre un mod à l'intérieur
-   du List.fold_left *)
+...
+    rewrite <- Nat.Div0.mul_mod_idemp_r.
+    rewrite (sign_abs ((b * a) mod p) p); cycle 1. {
+      apply Nat.mod_upper_bound.
+      intros H; subst p h.
+      easy.
+    }
+(*
+  (c * ((sign ((b * a) mod p) p * abs ((b * a) mod p) p) mod p)) mod p = ?g c b
+*)
+    rewrite <- (Nat.Div0.mul_mod_idemp_l (sign _ _)).
+Theorem sign_mod : ∀ a n, 2 ≤ n → sign a n mod n = sign a n.
+Proof.
+intros * H2n.
+progress unfold sign.
+destruct (_ <=? _); [ now apply Nat.mod_1_l | ].
+apply Nat.mod_small.
+flia H2n.
+Qed.
+rewrite sign_mod.
+...
+    rewrite Nat.Div0.mul_mod_idemp_r.
+    rewrite Nat.mul_assoc.
+    rewrite <- Nat.Div0.mul_mod_idemp_l.
+...
+
+    easy.
+  }
+  remember (λ acc i, _) as g in |-*; subst g.
 ...
 *)
