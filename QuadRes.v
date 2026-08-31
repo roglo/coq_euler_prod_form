@@ -652,6 +652,55 @@ Theorem Gauss_lemma :
 Proof.
 intros * Hn.
 remember ((p - 1) / 2) as h eqn:Hh.
-remember (List.fold_left (λ acc i, acc * i * a) (List.seq 1 h) 0) as z eqn:Hz.
+remember (List.fold_left (λ acc i, acc * i * a) (List.seq 1 h) 1) as z eqn:Hz.
 assert (H1 : z = a ^ h * fact h). {
+  subst z.
+Theorem List_fold_left_mul_const_r :
+  ∀ c d (f : nat → nat → nat) l,
+  List.fold_left (λ a b, f b a * c) l d =
+  List.fold_left f l d * c ^ List.length l.
+Proof.
+intros.
+revert d.
+induction l as [| a]; intros; [ symmetry; apply Nat.mul_1_r | cbn ].
+rewrite IHl.
+rewrite Nat.mul_assoc.
+f_equal.
+Search (fold_left _ _ _ * _).
+... bon, fait chier...
+Search (fold_left _ _ (_ * _)).
+Check List_fold_left_mul_assoc.
+...
+rewrite <- List_fold_left_mul_assoc.
+
+rewrite List_fold_left_mul_const_r.
+...
+specialize (List_fold_left_map) as H1.
+specialize (H1 nat nat nat).
+specialize (H1 (λ acc i, acc * i * a)).
+cbn in H1.
+specialize (H1 (λ i, i)).
+cbn in H1.
+rewrite <- H1.
+rewrite map_id.
+  erewrite List_fold_left_ext_in; cycle 1. {
+    intros b c Hbc.
+    rewrite (Nat.mul_comm c).
+    rewrite <- Nat.mul_assoc.
+    easy.
+  }
+rewrite <- List_fold_left_map.
+Search fold_left.
+Check fold_left_mul_map_mul.
+  rewrite fold_left_mul_map_mul.
+...
+Search (fold_left (λ _ _, _ * _)).
+  rewrite fold_left_mul_map_mul.
+Locate "∑".
+Locate "Σ".
+rewrite fold_left_mul_fun_from_1.
+rewrite <- List_fold_left_map.
+...
+  rewrite fold_left_mul_map_mul.
+rewrite <- List_fold_left_mul_assoc.
 *)
