@@ -712,7 +712,7 @@ assert
   (H2 :
      z ≡
        ((p - 1) ^ n *
-        List.fold_left (λ acc i, acc * abs (i * a) p) (List.seq 1 h) 1)
+        List.fold_left (λ acc i, acc * abs (i * a mod p) p) (List.seq 1 h) 1)
          mod p). {
   subst z.
   rewrite List_fold_left_mod; cycle 1. {
@@ -730,17 +730,19 @@ assert
   }
   erewrite List_fold_left_ext_in; cycle 1. {
     intros * Hb.
-...
     rewrite <- Nat.Div0.mul_mod_idemp_r.
     rewrite (sign_abs ((b * a) mod p) p); cycle 1. {
       apply Nat.mod_upper_bound.
       intros H; subst p h.
       easy.
     }
-(*
-  (c * ((sign ((b * a) mod p) p * abs ((b * a) mod p) p) mod p)) mod p = ?g c b
-*)
-    rewrite <- (Nat.Div0.mul_mod_idemp_l (sign _ _)).
+    rewrite Nat.Div0.mul_mod_idemp_r.
+    rewrite (Nat.mul_comm (sign _ _)).
+    rewrite Nat.mul_assoc.
+    easy.
+  }
+  remember (λ acc i, _) as g in |-*; subst g.
+...
 Theorem sign_mod : ∀ a n, 2 ≤ n → sign a n mod n = sign a n.
 Proof.
 intros * H2n.
@@ -749,6 +751,15 @@ destruct (_ <=? _); [ now apply Nat.mod_1_l | ].
 apply Nat.mod_small.
 flia H2n.
 Qed.
+
+    rewrite <- Nat.Div0.mul_mod_idemp_l.
+
+
+    rewrite <- (Nat.Div0.mul_mod_idemp_l (sign _ _)).
+(*
+  (c * ((sign ((b * a) mod p) p * abs ((b * a) mod p) p) mod p)) mod p = ?g c b
+*)
+    rewrite <- (Nat.Div0.mul_mod_idemp_l (sign _ _)).
 rewrite sign_mod.
 ...
     rewrite Nat.Div0.mul_mod_idemp_r.
