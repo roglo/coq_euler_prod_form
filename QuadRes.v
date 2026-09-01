@@ -623,6 +623,10 @@ Definition is_quadratic_residue a p := legendre_symbol a p =? 1.
 (*
 Compute (let p := 29 in List.map (λ a, (sqrt_mod a p, a)) (List.seq 0 p)).
 
+Compute (let n := 3 in map (λ p, (p, List.filter (λ a, match nth_sqrt_mod n a p with Some _ => true | None => false end) (List.seq 1 (p - 1)))) (List.seq 1 20)).
+
+1,2,3,5,6,10,11,15,17
+
 Compute (let p := 29 in List.filter (λ a, match sqrt_mod a p with Some _ => true | None => false end) (List.seq 1 (p - 1))).
 Compute (let p := 29 in List.filter (λ a, (nb_of_mult_gt_half a p mod 2 =? 0)) (seq 1 (p - 1))).
 Compute (let p := 29 in List.filter (λ a, is_quadratic_residue a p) (seq 1 p)).
