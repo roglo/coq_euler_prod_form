@@ -753,7 +753,8 @@ assert
         List.fold_left (λ acc i, acc * abs (i * a mod p) p) (List.seq 1 h) 1)
          mod p). {
   subst z.
-  rewrite List_fold_left_mul_filter_filter with (g := λ a, sign a p =? 1).
+...
+  rewrite List_fold_left_mul_filter_filter with (g := λ c, sign (c * a) p =? 1).
   do 2 rewrite List_fold_left_filter.
   erewrite List_fold_left_ext_in; cycle 1. {
     intros * Hb.
