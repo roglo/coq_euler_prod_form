@@ -753,12 +753,49 @@ assert
         List.fold_left (λ acc i, acc * abs (i * a mod p) p) (List.seq 1 h) 1)
          mod p). {
   subst z.
-...
-  rewrite List_fold_left_mul_filter_filter with (g := λ c, sign (c * a) p =? 1).
+  rewrite <- List_fold_left_map.
+  rewrite List_fold_left_mod; cycle 1. {
+    intros b l.
+    revert b.
+    induction l as [| d]; intros; cbn. {
+      symmetry; apply Nat.Div0.mod_mod.
+    }
+    rewrite IHl.
+    rewrite <- Nat.Div0.mul_mod_idemp_l.
+    symmetry.
+    rewrite IHl.
+    rewrite <- Nat.Div0.mul_mod_idemp_r.
+    easy.
+  }
+  erewrite List_fold_left_ext_in; cycle 1. {
+    intros * Hb.
+    rewrite <- Nat.Div0.mul_mod_idemp_r.
+    easy.
+  }
+  rewrite <- List_fold_left_mod; cycle 1. {
+    intros b l.
+    revert b.
+    induction l as [| d]; intros; cbn. {
+      symmetry; apply Nat.Div0.mod_mod.
+    }
+    rewrite IHl.
+    rewrite <- Nat.Div0.mul_mod_idemp_l.
+    symmetry.
+    rewrite IHl.
+    rewrite <- Nat.Div0.mul_mod_idemp_r.
+    easy.
+  }
+  rewrite List_fold_left_mul_filter_filter with (g := λ a, sign a p =? 1).
   do 2 rewrite List_fold_left_filter.
   erewrite List_fold_left_ext_in; cycle 1. {
     intros * Hb.
+...
+(* merde chiasse *)
     progress unfold sign.
+    rewrite <- Hh.
+    apply in_map_iff in Hb.
+    destruct Hb as (x & Hx & Hxs).
+    apply in_map in Hb.
     apply List.in_seq in Hb.
     rewrite <- Hh.
     destruct Hb as (H2, H3).
