@@ -687,6 +687,33 @@ rewrite <- IHl.
 apply Hf.
 Qed.
 
+Theorem List_fold_left_mul_filter_filter :
+  ∀ A c l (f : A → _) g,
+  fold_left (λ a b, a * f b) l c =
+  fold_left (λ a b, a * f b) (filter g l) c *
+  fold_left (λ a b, a * f b) (filter (λ a, negb (g a)) l) 1.
+Proof.
+intros.
+revert c.
+induction l as [| a]; intros; cbn. {
+  symmetry; apply Nat.mul_1_r.
+}
+rewrite IHl.
+rename a into d.
+remember (g d) as gd eqn:Hgd; symmetry in Hgd.
+destruct gd; [ easy | cbn ].
+rewrite Nat.add_0_r.
+rewrite (fold_left_mul_fun_from_1 (c * f d)).
+rewrite (fold_left_mul_fun_from_1 c).
+rewrite (fold_left_mul_fun_from_1 (f d)).
+do 3 rewrite <- Nat.mul_assoc.
+f_equal.
+rewrite Nat.mul_comm.
+rewrite <- Nat.mul_assoc.
+f_equal.
+apply Nat.mul_comm.
+Qed.
+
 (* to be completed
 Theorem Gauss_lemma :
   ∀ a p n,
@@ -715,6 +742,8 @@ assert
         List.fold_left (λ acc i, acc * abs (i * a mod p) p) (List.seq 1 h) 1)
          mod p). {
   subst z.
+  rewrite List_fold_left_mul_filter_filter with (g := λ a, sign a p =? 1).
+...
   rewrite List_fold_left_mod; cycle 1. {
     intros b l.
     revert b.
