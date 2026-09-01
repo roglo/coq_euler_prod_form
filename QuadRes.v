@@ -406,15 +406,16 @@ Qed.
 Global Hint Resolve Nat.le_0_l : core.
 Global Hint Resolve Nat.lt_0_succ : core.
 
-Fixpoint sqrt_mod_loop cnt a p i :=
+Fixpoint nth_sqrt_mod_loop cnt n a p i :=
   match cnt with
   | 0 => None
   | S cnt' =>
-      if i * i mod p =? a mod p then Some i
-      else sqrt_mod_loop cnt' a p (S i)
+      if i ^ n mod p =? a mod p then Some i
+      else nth_sqrt_mod_loop cnt' n a p (S i)
   end.
 
-Definition sqrt_mod a p := sqrt_mod_loop p a p 0.
+Definition nth_sqrt_mod n a p := nth_sqrt_mod_loop p n a p 0.
+Definition sqrt_mod a p := nth_sqrt_mod_loop p 2 a p 0.
 
 Definition legendre_symbol a p :=
   if p =? 2 then 1
@@ -426,15 +427,15 @@ Definition legendre_symbol a p :=
     end.
 
 Theorem eq_sqrt_mod_loop_Some :
-  ∀ cnt a b p i,
-  sqrt_mod_loop cnt a p i = Some b
-  → i ≤ b < i + cnt ∧ b * b ≡ a mod p.
+  ∀ cnt n a b p i,
+  nth_sqrt_mod_loop cnt n a p i = Some b
+  → i ≤ b < i + cnt ∧ b ^ n ≡ a mod p.
 Proof.
 intros * Hsm.
 revert i Hsm.
 induction cnt; intros; [ easy | ].
 cbn - [ "*" ] in Hsm.
-remember ((i * i) mod p =? a mod p) as e eqn:He.
+remember ((i ^ n) mod p =? a mod p) as e eqn:He.
 symmetry in He.
 destruct e; cycle 1. {
   apply IHcnt in Hsm.
@@ -453,21 +454,22 @@ Theorem eq_sqrt_mod_Some :
   → b < p ∧ b * b ≡ a mod p.
 Proof.
 intros * Hsm.
+rewrite <- Nat.pow_2_r.
 now apply eq_sqrt_mod_loop_Some in Hsm.
 Qed.
 
 Theorem eq_sqrt_mod_loop_None :
-  ∀ cnt a i p,
+  ∀ cnt n a i p,
   a ≢ 0 mod p
-  → sqrt_mod_loop cnt a p i = None
-  → ∀ b, i ≤ b < i + cnt → b * b ≢ a mod p.
+  → nth_sqrt_mod_loop cnt n a p i = None
+  → ∀ b, i ≤ b < i + cnt → b ^ n ≢ a mod p.
 Proof.
 intros * Hap Hsm * Hib Hbb.
 symmetry in Hbb.
 revert i Hib Hsm.
 induction cnt; intros; [ flia Hib | ].
 cbn in Hsm.
-remember ((i * i) mod p =? a mod p) as sip eqn:Hsip.
+remember ((i ^ n) mod p =? a mod p) as sip eqn:Hsip.
 symmetry in Hsip.
 destruct sip; [ easy | ].
 destruct (Nat.eq_dec i b) as [Hib1| Hib1]; cycle 1. {
@@ -489,6 +491,7 @@ Theorem eq_sqrt_mod_None :
 Proof.
 intros * Hpz Hsm * Hbb.
 apply eq_sqrt_mod_loop_None with (b := b mod p) in Hsm. {
+  rewrite Nat.pow_2_r in Hsm.
   rewrite Nat.Div0.mul_mod_idemp_l in Hsm.
   rewrite Nat.Div0.mul_mod_idemp_r in Hsm.
   easy.
@@ -511,7 +514,8 @@ now apply Nat.mod_upper_bound.
 Qed.
 
 Theorem sqrt_mod_loop_mod :
-  ∀ cnt a p i, sqrt_mod_loop cnt a p i = sqrt_mod_loop cnt (a mod p) p i.
+  ∀ cnt n a p i,
+  nth_sqrt_mod_loop cnt n a p i = nth_sqrt_mod_loop cnt n (a mod p) p i.
 Proof.
 intros.
 revert i.
@@ -617,6 +621,9 @@ Definition nb_of_mult_gt_half a p :=
 Definition is_quadratic_residue a p := legendre_symbol a p =? 1.
 
 (*
+Compute (let p := 29 in List.map (λ a, (sqrt_mod a p, a)) (List.seq 0 p)).
+
+Compute (let p := 29 in List.filter (λ a, match sqrt_mod a p with Some _ => true | None => false end) (List.seq 1 (p - 1))).
 Compute (let p := 29 in List.filter (λ a, (nb_of_mult_gt_half a p mod 2 =? 0)) (seq 1 (p - 1))).
 Compute (let p := 29 in List.filter (λ a, is_quadratic_residue a p) (seq 1 p)).
 *)
