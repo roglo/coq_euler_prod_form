@@ -714,6 +714,17 @@ f_equal.
 apply Nat.mul_comm.
 Qed.
 
+Theorem List_fold_left_filter :
+  ∀ A B a (f : A → B → A) g l,
+  List.fold_left f (List.filter g l) a =
+  List.fold_left (λ b c, if g c then f b c else b) l a.
+Proof.
+intros.
+revert a.
+induction l as [| b]; intros; [ easy | cbn ].
+destruct (g b); [ apply IHl | easy ].
+Qed.
+
 (* to be completed
 Theorem Gauss_lemma :
   ∀ a p n,
@@ -743,6 +754,31 @@ assert
          mod p). {
   subst z.
   rewrite List_fold_left_mul_filter_filter with (g := λ a, sign a p =? 1).
+  do 2 rewrite List_fold_left_filter.
+  erewrite List_fold_left_ext_in; cycle 1. {
+    intros * Hb.
+    progress unfold sign.
+    apply List.in_seq in Hb.
+    rewrite <- Hh.
+    destruct Hb as (H2, H3).
+    apply <- Nat.succ_le_mono in H3.
+    apply Nat.leb_le in H3.
+    rewrite H3, Nat.eqb_refl.
+    easy.
+  }
+  rewrite Nat.mul_comm.
+  erewrite List_fold_left_ext_in; cycle 1. {
+    intros * Hb.
+    progress unfold sign.
+    apply List.in_seq in Hb.
+    rewrite <- Hh.
+    destruct Hb as (H2, H3).
+    apply <- Nat.succ_le_mono in H3.
+    apply Nat.leb_le in H3.
+    rewrite H3, Nat.eqb_refl.
+    now cbn.
+  }
+(* n'importe n'awak *)
 ...
   rewrite List_fold_left_mod; cycle 1. {
     intros b l.
