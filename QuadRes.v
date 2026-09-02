@@ -764,6 +764,100 @@ assert
         List.fold_left (λ acc i, acc * abs (i * a mod p) p) (List.seq 1 h) 1)
          mod p). {
   subst z.
+  destruct (Nat.eq_dec p 0) as [Hpz| Hpz]. {
+    subst p.
+    now cbn in Hn, Hh; subst n h.
+  }
+  rewrite List_fold_left_mod; cycle 1. {
+    intros b l.
+    revert b.
+    induction l as [| d]; intros; cbn. {
+      symmetry; apply Nat.Div0.mod_mod.
+    }
+    rewrite IHl.
+    rewrite <- Nat.Div0.mul_mod_idemp_l.
+    symmetry.
+    rewrite IHl.
+    rewrite <- Nat.Div0.mul_mod_idemp_r.
+    easy.
+  }
+  erewrite List_fold_left_ext_in; cycle 1. {
+    intros * Hb.
+    rewrite <- Nat.Div0.mul_mod_idemp_r.
+    easy.
+  }
+  rewrite <- List_fold_left_mod; cycle 1. {
+    intros b l.
+    revert b.
+    induction l as [| d]; intros; cbn. {
+      symmetry; apply Nat.Div0.mod_mod.
+    }
+    rewrite IHl.
+    rewrite <- Nat.Div0.mul_mod_idemp_l.
+    symmetry.
+    rewrite IHl.
+    rewrite <- Nat.Div0.mul_mod_idemp_r.
+    easy.
+  }
+  erewrite List_fold_left_ext_in; cycle 1. {
+    intros * Hb.
+    rewrite (sign_abs ((b * a) mod p) p); cycle 1. {
+      now apply Nat.mod_upper_bound.
+    }
+    easy.
+  }
+  rewrite List_fold_left_mod; cycle 1. {
+    intros b l.
+    revert b.
+    induction l as [| d]; intros; cbn. {
+      symmetry; apply Nat.Div0.mod_mod.
+    }
+    rewrite IHl.
+    rewrite <- Nat.Div0.mul_mod_idemp_l.
+    symmetry.
+    rewrite IHl.
+    rewrite <- Nat.Div0.mul_mod_idemp_r.
+    easy.
+  }
+  erewrite List_fold_left_ext_in; cycle 1. {
+    intros * Hb.
+    rewrite Nat.Div0.mul_mod_idemp_r.
+    rewrite -> Nat.Div0.mul_mod_idemp_l.
+    rewrite Nat.mul_assoc.
+    easy.
+  }
+  rewrite <- List_fold_left_mod; cycle 1. {
+    intros b l.
+    revert b.
+    induction l as [| d]; intros; cbn. {
+      symmetry; apply Nat.Div0.mod_mod.
+    }
+    rewrite IHl.
+    rewrite <- Nat.Div0.mul_mod_idemp_l.
+    symmetry.
+    rewrite IHl.
+    rewrite <- Nat.Div0.mul_mod_idemp_r.
+    remember (λ c l, _) as f eqn:Hf in |-*.
+    f_equal.
+    f_equal.
+    remember ((d * a) mod p) as da.
+    rewrite <- (Nat.Div0.mul_mod_idemp_l b).
+    rewrite <- Nat.Div0.mul_mod_idemp_l.
+    rewrite Nat.Div0.mul_mod_idemp_r.
+    easy.
+  }
+Search (List.fold_left (λ _ _, _ * _)).
+...
+  rewrite <- List_fold_left_map.
+  rewrite List_fold_left_mul_filter_filter with
+    (g := λ b, sign (b mod p) p =? 1).
+...
+  rewrite List_fold_left_mod; cycle 1. {
+    intros b l.
+...
+    erewrite List_fold_left_ext_in; cycle 1. {
+      intros c d Hc.
+     remember ((c * a) mod p) as ca.
 ...
   rewrite <- List_fold_left_map.
   rewrite List_fold_left_mul_filter_filter with
