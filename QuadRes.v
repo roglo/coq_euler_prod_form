@@ -764,8 +764,19 @@ assert
         List.fold_left (λ acc i, acc * abs (i * a mod p) p) (List.seq 1 h) 1)
          mod p). {
   subst z.
-(*
+...
   rewrite <- List_fold_left_map.
+  rewrite List_fold_left_mul_filter_filter with
+    (g := λ b, sign (b mod p) p =? 1).
+  remember (λ c b, _) as x in |-*; subst x.
+Search (filter _ (map _ _)).
+...
+Search (fold_left _ (seq _ _) _).
+Print seq.
+Theorem glop :
+  List.fold_left (λ b c, b * (a * c)) (seq sta len) d =
+...
+(*
   rewrite List_fold_left_mod; cycle 1. {
     intros b l.
     revert b.
@@ -799,7 +810,16 @@ assert
   }
 *)
   rewrite List_fold_left_mul_filter_filter with
-    (g := λ b, sign (a * b mod p) p =? 1).
+    (g := λ b, sign (b mod p) p =? 1).
+  rewrite List.filter_map_swap.
+  rewrite List_fold_left_map.
+  remember (filter (λ b, _)) as x; subst x.
+  rewrite Nat.mul_comm.
+  rewrite List.filter_map_swap.
+  rewrite List_fold_left_map.
+  remember (filter (λ b, _)) as x; subst x.
+  rewrite Nat.mul_comm.
+...
   do 2 rewrite List_fold_left_filter.
 ...
   erewrite List_fold_left_ext_in; cycle 1. {
