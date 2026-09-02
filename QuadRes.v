@@ -846,7 +846,26 @@ assert
     rewrite Nat.Div0.mul_mod_idemp_r.
     easy.
   }
-Search (List.fold_left (λ _ _, _ * _)).
+Theorem List_fold_left_mul_mul :
+  ∀ A c l f (g : A → _),
+  List.fold_left (λ a b, a * f b * g b) l c =
+  List.fold_left (λ a b, a * f b) l c *
+  List.fold_left (λ a b, a * g b) l 1.
+Proof.
+intros.
+revert c.
+induction l as [| a]; intros; [ symmetry; apply Nat.mul_1_r | cbn ].
+rewrite IHl.
+rewrite Nat.add_0_r.
+Search  (List.fold_left _ _ (_ * _)).
+Admitted.
+  rewrite List_fold_left_mul_mul.
+...
+rewrite Nat.mul_assoc.
+f_equal.
+symmetry.
+apply List_fold_left_mul_assoc.
+Qed.
 ...
   rewrite <- List_fold_left_map.
   rewrite List_fold_left_mul_filter_filter with
