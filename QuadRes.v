@@ -764,6 +764,7 @@ assert
         List.fold_left (λ acc i, acc * abs (i * a mod p) p) (List.seq 1 h) 1)
          mod p). {
   subst z.
+(*
   rewrite <- List_fold_left_map.
   rewrite List_fold_left_mod; cycle 1. {
     intros b l.
@@ -796,16 +797,24 @@ assert
     rewrite <- Nat.Div0.mul_mod_idemp_r.
     easy.
   }
-  rewrite List_fold_left_mul_filter_filter with (g := λ a, sign a p =? 1).
+*)
+  rewrite List_fold_left_mul_filter_filter with
+    (g := λ b, sign (a * b mod p) p =? 1).
   do 2 rewrite List_fold_left_filter.
+...
   erewrite List_fold_left_ext_in; cycle 1. {
     intros * Hb.
-...
-(* merde chiasse *)
     progress unfold sign.
     rewrite <- Hh.
+    remember (_ <=? _) as x eqn:Hx; symmetry in Hx.
+    destruct x. {
+      rewrite Nat.eqb_refl.
+      easy.
+    }
+...
     apply in_map_iff in Hb.
     destruct Hb as (x & Hx & Hxs).
+...
     apply in_map in Hb.
     apply List.in_seq in Hb.
     rewrite <- Hh.
