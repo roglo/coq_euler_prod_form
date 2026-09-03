@@ -736,6 +736,26 @@ induction l as [| b]; intros; [ easy | cbn ].
 destruct (g b); [ apply IHl | easy ].
 Qed.
 
+Theorem List_fold_left_mul_mul :
+  ∀ A c l f (g : A → _),
+  List.fold_left (λ a b, a * f b * g b) l c =
+  List.fold_left (λ a b, a * f b) l c *
+  List.fold_left (λ a b, a * g b) l 1.
+Proof.
+intros.
+revert c.
+induction l as [| a]; intros; [ symmetry; apply Nat.mul_1_r | cbn ].
+rewrite IHl.
+rewrite Nat.add_0_r.
+do 4 rewrite <- (List_fold_left_map  _ _ _ _ _ l).
+do 2 rewrite <- List_fold_left_mul_assoc.
+do 3 rewrite <- Nat.mul_assoc.
+f_equal.
+f_equal.
+symmetry.
+apply fold_left_mul_from_1.
+Qed.
+
 (* to be completed
 Theorem Gauss_lemma :
   ∀ a p n,
@@ -845,51 +865,10 @@ assert
     rewrite Nat.Div0.mul_mod_idemp_r.
     easy.
   }
-Theorem List_fold_left_mul_mul :
-  ∀ A c l f (g : A → _),
-  List.fold_left (λ a b, a * f b * g b) l c =
-  List.fold_left (λ a b, a * f b) l c *
-  List.fold_left (λ a b, a * g b) l 1.
-Proof.
-intros.
-revert c.
-induction l as [| a]; intros; [ symmetry; apply Nat.mul_1_r | cbn ].
-rewrite IHl.
-rewrite Nat.add_0_r.
-... ...
-rewrite List_fold_left_mul_mul.
+  rewrite List_fold_left_mul_mul.
+  remember (λ acc i, _) as x in |-*.
+  remember (λ acc i, _) as y in |-*; subst x y.
 ...
-specialize (List_fold_left_mul_mul nat 1 (seq 1 h)) as H2.
-specialize (H2 (λ y, sign ((y * a) mod p) p)).
-specialize (H2 (λ y, abs ((y * a) mod p) p)).
-cbn in H2.
-remember (λ x y, _) as x in H2; subst x.
-...
-rewrite Nat.mul_assoc.
-f_equal.
-symmetry.
-apply List_fold_left_mul_assoc.
-Qed.
-...
-  rewrite <- List_fold_left_map.
-  rewrite List_fold_left_mul_filter_filter with
-    (g := λ b, sign (b mod p) p =? 1).
-...
-  rewrite List_fold_left_mod; cycle 1. {
-    intros b l.
-...
-    erewrite List_fold_left_ext_in; cycle 1. {
-      intros c d Hc.
-     remember ((c * a) mod p) as ca.
-...
-  rewrite <- List_fold_left_map.
-  rewrite List_fold_left_mul_filter_filter with
-    (g := λ b, sign (b mod p) p =? 1).
-  remember (λ c b, _) as x in |-*; subst x.
-Search (filter _ (map _ _)).
-...
-Search (fold_left _ (seq _ _) _).
-Print seq.
 Theorem glop :
   List.fold_left (λ b c, b * (a * c)) (seq sta len) d =
 ...
