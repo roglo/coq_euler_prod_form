@@ -868,9 +868,19 @@ assert
   rewrite List_fold_left_mul_mul.
   remember (λ acc i, _) as x in |-*.
   remember (λ acc i, _) as y in |-*; subst x y.
-...
+  rewrite <- Nat.Div0.mul_mod_idemp_l.
 Theorem glop :
-  List.fold_left (λ b c, b * (a * c)) (seq sta len) d =
+  ∀ a p n h,
+  n = nb_of_mult_gt_half a p
+  → h = (p - 1) / 2
+  → fold_left (λ acc i : nat, acc * sign ((i * a) mod p) p) (seq 1 h) 1
+    ≡ (p - 1) ^ n mod p.
+Proof.
+intros * Hn Hh.
+... ...
+rewrite (glop a p n); [ | easy | easy ].
+now rewrite Nat.Div0.mul_mod_idemp_l.
+}
 ...
 (*
   rewrite List_fold_left_mod; cycle 1. {
