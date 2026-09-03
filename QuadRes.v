@@ -814,11 +814,12 @@ Qed.
 
 (* to be completed
 Theorem Gauss_lemma :
-  ∀ a p n,
+  ∀ p, prime p →
+  ∀ a n,
   n = nb_of_mult_gt_half a p
   → legendre_symbol a p = (p - 1) ^ n mod p.
 Proof.
-intros * Hn.
+intros * Hp * Hn.
 remember ((p - 1) / 2) as h eqn:Hh.
 remember (List.fold_left (λ acc i, acc * (i * a)) (List.seq 1 h) 1) as z
   eqn:Hz.
@@ -928,5 +929,25 @@ assert
   rewrite (List_fold_left_mul_sign _ _ n); [ | easy | easy ].
   now rewrite Nat.Div0.mul_mod_idemp_l.
 }
+specialize (Euler_criterion p Hp a) as H3.
+symmetry in H3.
+rewrite Nat.mod_small in H3; cycle 1. {
+  progress unfold legendre_symbol.
+  remember (p =? 2) as p2 eqn:Hp2; symmetry in Hp2.
+  destruct p2. {
+    apply Nat.eqb_eq in Hp2; subst p.
+    apply Nat.lt_succ_diag_r.
+  }
+  apply Nat.eqb_neq in Hp2.
+  remember (a mod p =? 0) as ap eqn:Hap; symmetry in Hap.
+  destruct ap; [ now  destruct p | ].
+  apply Nat.eqb_neq in Hap.
+  destruct (sqrt_mod a p). {
+    destruct p; [ easy | ].
+    destruct p; [ easy | flia ].
+  }
+  destruct p; [ easy | flia ].
+}
+rewrite H3, <- Hh.
 ...
 *)
