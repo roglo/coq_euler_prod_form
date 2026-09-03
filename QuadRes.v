@@ -766,6 +766,52 @@ Theorem if_mul_negb :
   (if b then a * d else e).
 Proof. now intros; destruct b. Qed.
 
+Theorem List_fold_left_if_equiv_filter  :
+  ∀ a p l (g : _ → bool),
+  fold_left (λ c b : nat, if g b then c * (p - 1) else c) l a
+  ≡ (a * (p - 1) ^ length (filter g l)) mod p.
+Proof.
+intros.
+revert a.
+induction l as [| b]; intros; cbn; [ now rewrite Nat.mul_1_r | ].
+destruct (g b); cbn; [ | easy ].
+now rewrite IHl, Nat.mul_assoc.
+Qed.
+
+Theorem List_fold_left_mul_sign :
+  ∀ a p n h,
+  n = nb_of_mult_gt_half a p
+  → h = (p - 1) / 2
+  → fold_left (λ acc i : nat, acc * sign ((i * a) mod p) p) (seq 1 h) 1
+    ≡ (p - 1) ^ n mod p.
+Proof.
+intros * Hn Hh.
+progress unfold nb_of_mult_gt_half in Hn.
+rewrite <- Hh in Hn.
+set (g := λ m, h <? (m * a) mod p) in Hn.
+progress unfold sign.
+rewrite <- Hh.
+rewrite (List_fold_left_mul_filter_filter _ _ _ _ g).
+do 2 rewrite List_fold_left_filter.
+unfold g.
+erewrite List_fold_left_ext_in; [ | now intros; rewrite Nat.leb_antisym ].
+rewrite Nat.mul_comm.
+erewrite List_fold_left_ext_in; [ | now intros; rewrite Nat.leb_antisym ].
+rewrite List_fold_left_ext_in with (g := λ c _, c). 2: {
+  intros * Hb.
+  destruct (h <? (b * a) mod p); [ easy | cbn ].
+  apply Nat.mul_1_r.
+}
+rewrite List_fold_left_const, Nat.mul_1_l.
+erewrite List_fold_left_ext_in; cycle 1. {
+  intros * Hb.
+  fold (g b).
+  now rewrite if_mul_negb.
+}
+subst n.
+now rewrite List_fold_left_if_equiv_filter, Nat.mul_1_l.
+Qed.
+
 (* to be completed
 Theorem Gauss_lemma :
   ∀ a p n,
@@ -879,180 +925,8 @@ assert
   remember (λ acc i, _) as x in |-*.
   remember (λ acc i, _) as y in |-*; subst x y.
   rewrite <- Nat.Div0.mul_mod_idemp_l.
-Theorem glop :
-  ∀ a p n h,
-  n = nb_of_mult_gt_half a p
-  → h = (p - 1) / 2
-  → fold_left (λ acc i : nat, acc * sign ((i * a) mod p) p) (seq 1 h) 1
-    ≡ (p - 1) ^ n mod p.
-Proof.
-intros * Hn Hh.
-progress unfold nb_of_mult_gt_half in Hn.
-rewrite <- Hh in Hn.
-set (g := λ m, h <? (m * a) mod p) in Hn.
-progress unfold sign.
-rewrite <- Hh.
-rewrite (List_fold_left_mul_filter_filter _ _ _ _ g).
-do 2 rewrite List_fold_left_filter.
-unfold g.
-erewrite List_fold_left_ext_in; [ | now intros; rewrite Nat.leb_antisym ].
-rewrite Nat.mul_comm.
-erewrite List_fold_left_ext_in; [ | now intros; rewrite Nat.leb_antisym ].
-rewrite List_fold_left_ext_in with (g := λ c _, c). 2: {
-  intros * Hb.
-  destruct (h <? (b * a) mod p); [ easy | cbn ].
-  apply Nat.mul_1_r.
+  rewrite (List_fold_left_mul_sign _ _ n); [ | easy | easy ].
+  now rewrite Nat.Div0.mul_mod_idemp_l.
 }
-rewrite List_fold_left_const, Nat.mul_1_l.
-erewrite List_fold_left_ext_in; cycle 1. {
-  intros * Hb.
-  fold (g b).
-  now rewrite if_mul_negb.
-}
-...
-  destruct x; cbn. {
-    apply Nat.ltb_lt in Hx.
-... ...
-rewrite (glop a p n); [ | easy | easy ].
-now rewrite Nat.Div0.mul_mod_idemp_l.
-}
-...
-(*
-  rewrite List_fold_left_mod; cycle 1. {
-    intros b l.
-    revert b.
-    induction l as [| d]; intros; cbn. {
-      symmetry; apply Nat.Div0.mod_mod.
-    }
-    rewrite IHl.
-    rewrite <- Nat.Div0.mul_mod_idemp_l.
-    symmetry.
-    rewrite IHl.
-    rewrite <- Nat.Div0.mul_mod_idemp_r.
-    easy.
-  }
-  erewrite List_fold_left_ext_in; cycle 1. {
-    intros * Hb.
-    rewrite <- Nat.Div0.mul_mod_idemp_r.
-    easy.
-  }
-  rewrite <- List_fold_left_mod; cycle 1. {
-    intros b l.
-    revert b.
-    induction l as [| d]; intros; cbn. {
-      symmetry; apply Nat.Div0.mod_mod.
-    }
-    rewrite IHl.
-    rewrite <- Nat.Div0.mul_mod_idemp_l.
-    symmetry.
-    rewrite IHl.
-    rewrite <- Nat.Div0.mul_mod_idemp_r.
-    easy.
-  }
-*)
-  rewrite List_fold_left_mul_filter_filter with
-    (g := λ b, sign (b mod p) p =? 1).
-  rewrite List.filter_map_swap.
-  rewrite List_fold_left_map.
-  remember (filter (λ b, _)) as x; subst x.
-  rewrite Nat.mul_comm.
-  rewrite List.filter_map_swap.
-  rewrite List_fold_left_map.
-  remember (filter (λ b, _)) as x; subst x.
-  rewrite Nat.mul_comm.
-...
-  do 2 rewrite List_fold_left_filter.
-...
-  erewrite List_fold_left_ext_in; cycle 1. {
-    intros * Hb.
-    progress unfold sign.
-    rewrite <- Hh.
-    remember (_ <=? _) as x eqn:Hx; symmetry in Hx.
-    destruct x. {
-      rewrite Nat.eqb_refl.
-      easy.
-    }
-...
-    apply in_map_iff in Hb.
-    destruct Hb as (x & Hx & Hxs).
-...
-    apply in_map in Hb.
-    apply List.in_seq in Hb.
-    rewrite <- Hh.
-    destruct Hb as (H2, H3).
-    apply <- Nat.succ_le_mono in H3.
-    apply Nat.leb_le in H3.
-    rewrite H3, Nat.eqb_refl.
-    easy.
-  }
-  rewrite Nat.mul_comm.
-  erewrite List_fold_left_ext_in; cycle 1. {
-    intros * Hb.
-    progress unfold sign.
-    apply List.in_seq in Hb.
-    rewrite <- Hh.
-    destruct Hb as (H2, H3).
-    apply <- Nat.succ_le_mono in H3.
-    apply Nat.leb_le in H3.
-    rewrite H3, Nat.eqb_refl.
-    now cbn.
-  }
-(* n'importe n'awak *)
-...
-  rewrite List_fold_left_mod; cycle 1. {
-    intros b l.
-    revert b.
-    induction l as [| d]; intros; cbn. {
-      symmetry; apply Nat.Div0.mod_mod.
-    }
-    rewrite IHl.
-    rewrite <- Nat.Div0.mul_mod_idemp_l.
-    symmetry.
-    rewrite IHl.
-    rewrite <- Nat.Div0.mul_mod_idemp_r.
-    easy.
-  }
-  erewrite List_fold_left_ext_in; cycle 1. {
-    intros * Hb.
-    rewrite <- Nat.Div0.mul_mod_idemp_r.
-    rewrite (sign_abs ((b * a) mod p) p); cycle 1. {
-      apply Nat.mod_upper_bound.
-      intros H; subst p h.
-      easy.
-    }
-    rewrite Nat.Div0.mul_mod_idemp_r.
-    rewrite (Nat.mul_comm (sign _ _)).
-    rewrite Nat.mul_assoc.
-    easy.
-  }
-  remember (λ acc i, _) as g in |-*; subst g.
-...
-Theorem sign_mod : ∀ a n, 2 ≤ n → sign a n mod n = sign a n.
-Proof.
-intros * H2n.
-progress unfold sign.
-destruct (_ <=? _); [ now apply Nat.mod_1_l | ].
-apply Nat.mod_small.
-flia H2n.
-Qed.
-
-    rewrite <- Nat.Div0.mul_mod_idemp_l.
-
-
-    rewrite <- (Nat.Div0.mul_mod_idemp_l (sign _ _)).
-(*
-  (c * ((sign ((b * a) mod p) p * abs ((b * a) mod p) p) mod p)) mod p = ?g c b
-*)
-    rewrite <- (Nat.Div0.mul_mod_idemp_l (sign _ _)).
-rewrite sign_mod.
-...
-    rewrite Nat.Div0.mul_mod_idemp_r.
-    rewrite Nat.mul_assoc.
-    rewrite <- Nat.Div0.mul_mod_idemp_l.
-...
-
-    easy.
-  }
-  remember (λ acc i, _) as g in |-*; subst g.
 ...
 *)
