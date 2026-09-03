@@ -756,6 +756,10 @@ symmetry.
 apply fold_left_mul_from_1.
 Qed.
 
+Theorem List_fold_left_const :
+  ∀ A B (b : A) (l : list B), List.fold_left (λ a _, a) l b = b.
+Proof. now intros; induction l. Qed.
+
 (* to be completed
 Theorem Gauss_lemma :
   ∀ a p n,
@@ -877,6 +881,29 @@ Theorem glop :
     ≡ (p - 1) ^ n mod p.
 Proof.
 intros * Hn Hh.
+progress unfold nb_of_mult_gt_half in Hn.
+rewrite <- Hh in Hn.
+set (g := λ m, h <? (m * a) mod p) in Hn.
+progress unfold sign.
+rewrite <- Hh.
+rewrite (List_fold_left_mul_filter_filter _ _ _ _ g).
+do 2 rewrite List_fold_left_filter.
+unfold g.
+erewrite List_fold_left_ext_in; [ | now intros; rewrite Nat.leb_antisym ].
+rewrite Nat.mul_comm.
+erewrite List_fold_left_ext_in; [ | now intros; rewrite Nat.leb_antisym ].
+rewrite List_fold_left_ext_in with (g := λ c _, c). 2: {
+  intros * Hb.
+  destruct (h <? (b * a) mod p); [ easy | cbn ].
+  apply Nat.mul_1_r.
+}
+rewrite List_fold_left_const, Nat.mul_1_l.
+erewrite List_fold_left_ext_in; cycle 1. {
+  intros * Hb.
+  remember (h <? (b * a) mod p) as x eqn:Hx.
+  symmetry in Hx.
+  destruct x; cbn. {
+    apply Nat.ltb_lt in Hx.
 ... ...
 rewrite (glop a p n); [ | easy | easy ].
 now rewrite Nat.Div0.mul_mod_idemp_l.
