@@ -760,6 +760,12 @@ Theorem List_fold_left_const :
   ∀ A B (b : A) (l : list B), List.fold_left (λ a _, a) l b = b.
 Proof. now intros; induction l. Qed.
 
+Theorem if_mul_negb :
+  ∀ a (b : bool) c d e,
+  (if b then a * (if negb b then c else d) else e) =
+  (if b then a * d else e).
+Proof. now intros; destruct b. Qed.
+
 (* to be completed
 Theorem Gauss_lemma :
   ∀ a p n,
@@ -900,8 +906,10 @@ rewrite List_fold_left_ext_in with (g := λ c _, c). 2: {
 rewrite List_fold_left_const, Nat.mul_1_l.
 erewrite List_fold_left_ext_in; cycle 1. {
   intros * Hb.
-  remember (h <? (b * a) mod p) as x eqn:Hx.
-  symmetry in Hx.
+  fold (g b).
+  now rewrite if_mul_negb.
+}
+...
   destruct x; cbn. {
     apply Nat.ltb_lt in Hx.
 ... ...
