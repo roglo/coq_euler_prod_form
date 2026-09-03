@@ -821,10 +821,8 @@ assert
   }
   erewrite List_fold_left_ext_in; cycle 1. {
     intros * Hb.
-    rewrite <- Nat.Div0.mul_mod_idemp_l.
-...
-ah, fait chier, tiens, merde...
-    rewrite <- Nat.mul_assoc.
+    rewrite Nat.Div0.mul_mod_idemp_r.
+    rewrite Nat.mul_assoc.
     easy.
   }
   rewrite <- List_fold_left_mod; cycle 1. {
@@ -858,8 +856,9 @@ revert c.
 induction l as [| a]; intros; [ symmetry; apply Nat.mul_1_r | cbn ].
 rewrite IHl.
 rewrite Nat.add_0_r.
-Search  (List.fold_left _ _ (_ * _)).
-Admitted.
+... ...
+rewrite List_fold_left_mul_mul.
+...
 specialize (List_fold_left_mul_mul nat 1 (seq 1 h)) as H2.
 specialize (H2 (λ y, sign ((y * a) mod p) p)).
 specialize (H2 (λ y, abs ((y * a) mod p) p)).
