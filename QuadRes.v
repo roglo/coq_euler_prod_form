@@ -949,5 +949,15 @@ rewrite Nat.mod_small in H3; cycle 1. {
   destruct p; [ easy | flia ].
 }
 rewrite H3, <- Hh.
+assert
+  (H4 :
+     fold_left (λ acc i, acc * abs ((i * a) mod p) p) (seq 1 h) 1 ≡
+     fact h mod p). {
+...
+}
+... ...
+rewrite <- Nat.Div0.mul_mod_idemp_r in H2.
+rewrite H4 in H2.
+rewrite Nat.Div0.mul_mod_idemp_r in H2.
 ...
 *)
