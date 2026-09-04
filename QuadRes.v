@@ -839,6 +839,7 @@ Theorem Gauss_lemma :
   → legendre_symbol a p = (p - 1) ^ n mod p.
 Proof.
 intros * Hp * Hn.
+destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
 remember ((p - 1) / 2) as h eqn:Hh.
 remember (List.fold_left (λ acc i, acc * (i * a)) (List.seq 1 h) 1) as z
   eqn:Hz.
@@ -860,10 +861,6 @@ assert
         List.fold_left (λ acc i, acc * abs (i * a mod p) p) (List.seq 1 h) 1)
          mod p). {
   subst z.
-  destruct (Nat.eq_dec p 0) as [Hpz| Hpz]. {
-    subst p.
-    now cbn in Hn, Hh; subst n h.
-  }
   rewrite List_fold_left_mod; cycle 1. {
     intros b l.
     revert b.
@@ -978,8 +975,23 @@ assert
   rewrite <- List_fold_left_map.
   f_equal.
   apply Permutation_fold_mul.
-  apply Permutation_map_same_l.
-Print incl.
+  apply Permutation_map_same_l; cycle 1. {
+    intros b Hb.
+    apply List.in_map_iff in Hb.
+    destruct Hb as (c & Hcb & Hc).
+    subst b.
+    progress unfold abs.
+    rewrite <- Hh.
+    remember (_ <=? _) as x eqn:Hx; symmetry in Hx.
+    destruct x. {
+      apply Nat.leb_le in Hx.
+      apply List.in_seq.
+      split; [ | flia Hx ].
+      apply Nat.neq_0_lt_0.
+      intros H.
+      apply Nat.Lcm0.mod_divide in H.
+      apply prime_divide_mul in H; [ | easy ].
+      destruct H as [H| H]. {
 ...
 }
 ... ...
