@@ -812,6 +812,25 @@ subst n.
 now rewrite List_fold_left_if_equiv_filter, Nat.mul_1_l.
 Qed.
 
+Theorem abs_all_different_multiples : ∀ p,
+  prime p
+  → ∀ a, 1 ≤ a < p
+  → ∀ i j, i < j < p → (i * abs a p) mod p ≠ (j * abs a p) mod p.
+Proof.
+intros * Hp * Hap * Hijp.
+intros Haa; symmetry in Haa.
+apply Nat_mul_mod_cancel_r in Haa. 2: {
+  rewrite Nat.gcd_comm.
+  apply eq_gcd_prime_small_1; [ easy | ].
+  progress unfold abs.
+  destruct (_ <=? _); [ easy | ].
+  flia Hap.
+}
+rewrite Nat.mod_small in Haa; [ | easy ].
+rewrite Nat.mod_small in Haa; [ | flia Hijp ].
+flia Hijp Haa.
+Qed.
+
 (* to be completed
 Theorem Gauss_lemma :
   ∀ p, prime p →
@@ -953,26 +972,10 @@ assert
   (H4 :
      fold_left (λ acc i, acc * abs ((i * a) mod p) p) (seq 1 h) 1 ≡
      fact h mod p). {
-Theorem abs_all_different_multiples : ∀ p,
-  prime p
-  → ∀ a, 1 ≤ a < p
-  → ∀ i j, i < j < p → (i * abs a p) mod p ≠ (j * abs a p) mod p.
-Proof.
-intros * Hp * Hap * Hijp.
-intros Haa; symmetry in Haa.
-apply Nat_mul_mod_cancel_r in Haa. 2: {
-  rewrite Nat.gcd_comm.
-  apply eq_gcd_prime_small_1; [ easy | ].
-  progress unfold abs.
-  destruct (_ <=? _); [ easy | ].
-  flia Hap.
-}
-rewrite Nat.mod_small in Haa; [ | easy ].
-rewrite Nat.mod_small in Haa; [ | flia Hijp ].
-flia Hijp Haa.
-Qed.
   specialize abs_all_different_multiples as H4.
   specialize (H4 p Hp).
+  rewrite fact_eq_fold_left.
+Search (fold_left _ _ _ = fold_left _ _ _).
 ...
 }
 ... ...
