@@ -831,14 +831,30 @@ rewrite Nat.mod_small in Haa; [ | flia Hijp ].
 flia Hijp Haa.
 Qed.
 
+Theorem nb_of_mult_gt_half_0_l : ∀ n, nb_of_mult_gt_half 0 n = 0.
+Proof.
+intros.
+progress unfold nb_of_mult_gt_half.
+erewrite List.filter_ext; cycle 1. {
+  intros; rewrite Nat.mul_0_r.
+  rewrite Nat.Div0.mod_0_l.
+  remember (_ <? 0) as x eqn:Hx; symmetry in Hx.
+  destruct x; [ | easy ].
+  apply Nat.ltb_lt in Hx.
+  now apply Nat.nlt_0_r in Hx.
+}
+now rewrite List.filter_false.
+Qed.
+
 (* to be completed
 Theorem Gauss_lemma :
   ∀ p, prime p →
   ∀ a n,
-  n = nb_of_mult_gt_half a p
+  a ≠ 0
+  → n = nb_of_mult_gt_half a p
   → legendre_symbol a p = (p - 1) ^ n mod p.
 Proof.
-intros * Hp * Hn.
+intros * Hp * Haz Hn.
 destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
 remember ((p - 1) / 2) as h eqn:Hh.
 remember (List.fold_left (λ acc i, acc * (i * a)) (List.seq 1 h) 1) as z
@@ -992,6 +1008,9 @@ assert
       apply Nat.Lcm0.mod_divide in H.
       apply prime_divide_mul in H; [ | easy ].
       destruct H as [H| H]. {
+        destruct H as (d, Hd).
+        apply List.in_seq in Hc.
+        destruct a; [ easy | clear Haz ].
 ...
 }
 ... ...
