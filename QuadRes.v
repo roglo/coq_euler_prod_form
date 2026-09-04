@@ -975,7 +975,11 @@ assert
   specialize abs_all_different_multiples as H4.
   specialize (H4 p Hp).
   rewrite fact_eq_fold_left.
-Search (fold_left _ _ _ = fold_left _ _ _).
+  rewrite <- List_fold_left_map.
+  f_equal.
+  apply Permutation_fold_mul.
+  apply Permutation_map_same_l.
+Print incl.
 ...
 }
 ... ...
