@@ -850,11 +850,11 @@ Qed.
 Theorem Gauss_lemma :
   ∀ p, prime p →
   ∀ a n,
-  a ≠ 0
+  0 < a < p
   → n = nb_of_mult_gt_half a p
   → legendre_symbol a p = (p - 1) ^ n mod p.
 Proof.
-intros * Hp * Haz Hn.
+intros * Hp * (Haz, Hap) Hn.
 destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
 remember ((p - 1) / 2) as h eqn:Hh.
 remember (List.fold_left (λ acc i, acc * (i * a)) (List.seq 1 h) 1) as z
@@ -971,9 +971,9 @@ rewrite Nat.mod_small in H3; cycle 1. {
     apply Nat.lt_succ_diag_r.
   }
   apply Nat.eqb_neq in Hp2.
-  remember (a mod p =? 0) as ap eqn:Hap; symmetry in Hap.
-  destruct ap; [ now  destruct p | ].
-  apply Nat.eqb_neq in Hap.
+  remember (a mod p =? 0) as apz eqn:Hapz; symmetry in Hapz.
+  destruct apz; [ now  destruct p | ].
+  apply Nat.eqb_neq in Hapz.
   destruct (sqrt_mod a p). {
     destruct p; [ easy | ].
     destruct p; [ easy | flia ].
@@ -1011,6 +1011,44 @@ assert
         destruct H as (d, Hd).
         apply List.in_seq in Hc.
         destruct a; [ easy | clear Haz ].
+        destruct d; [ flia Hd Hc | ].
+        destruct Hc as (H1c, Hch).
+        apply Nat.nle_gt in Hch; apply Hch; clear Hch.
+        subst c h.
+        destruct p; [ easy | ].
+        rewrite Nat.sub_succ, Nat.sub_0_r.
+        cbn - [ "/" ].
+        apply -> Nat.succ_le_mono.
+        apply Nat.Div0.div_le_upper_bound; cbn.
+        do 2 rewrite <- Nat.add_assoc.
+        apply Nat.le_add_r.
+      } {
+        destruct H as (d, Hd).
+        apply Nat.nle_gt in Hap; apply Hap; clear Hap.
+        subst a.
+        destruct d; [ easy | cbn ].
+        apply Nat.le_add_r.
+      }
+    }
+    apply Nat.leb_gt in Hx.
+    apply List.in_seq.
+    specialize (Nat.mod_upper_bound (c * a) p Hpz) as H5.
+    subst h.
+    split; [ flia H5 | ].
+    destruct p; [ easy | ].
+    rewrite Nat.sub_succ, Nat.sub_0_r in Hx |-*.
+    cbn - [ "mod" "/" "-" ].
+    apply Nat.lt_succ_r.
+    apply Nat.le_sub_le_add_l.
+    apply Nat.le_succ_l.
+(* ah bin tiens, ça marche pas *)
+...
+    apply (Nat.le_lt_trans _ (p / 2 + p / 2)); cycle 1. {
+      apply Nat.add_le_mono_r.
+      now apply Nat.lt_le_incl.
+    }
+
+    apply Nat.    remember (p / 2) as q.
 ...
 }
 ... ...
