@@ -1005,6 +1005,7 @@ assert
       split; [ | flia Hx ].
       apply Nat.neq_0_lt_0.
       intros H.
+      clear Hx.
       apply Nat.Lcm0.mod_divide in H.
       apply prime_divide_mul in H; [ | easy ].
       destruct H as [H| H]. {
@@ -1032,10 +1033,23 @@ assert
     }
     apply Nat.leb_gt in Hx.
     apply List.in_seq.
-    specialize (Nat.mod_upper_bound (c * a) p Hpz) as H5.
-    subst h.
-    split; [ flia H5 | ].
+    split. {
+      apply Nat.le_add_le_sub_r.
+      now apply Nat.mod_upper_bound.
+    }
     destruct p; [ easy | ].
+    apply Nat.lt_succ_r.
+    apply Nat.le_sub_le_add_l.
+    subst h.
+    rewrite Nat.sub_succ, Nat.sub_0_r in Hx, Hc |-*.
+...
+    apply (Nat.le_trans _ (2 + h + h)). {
+      subst h.
+      rewrite Nat.sub_succ, Nat.sub_0_r.
+...
+    }
+    apply Nat.add_le_mono_r.
+...
     rewrite Nat.sub_succ, Nat.sub_0_r in Hx |-*.
     cbn - [ "mod" "/" "-" ].
     apply Nat.lt_succ_r.
