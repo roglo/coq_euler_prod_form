@@ -846,6 +846,17 @@ erewrite List.filter_ext; cycle 1. {
 now rewrite List.filter_false.
 Qed.
 
+Theorem Nat_eq_succ_mod_2_1 : ∀ n, S n mod 2 = 1 → n mod 2 = 0.
+Proof.
+intros * Hn.
+destruct n; [ easy | ].
+do 2 rewrite <- Nat.add_1_r in Hn.
+rewrite <- Nat.add_assoc, Nat.add_1_r in Hn.
+rewrite <- Nat.Div0.add_mod_idemp_r, Nat.add_0_r in Hn.
+rewrite <- Nat.add_1_r.
+now rewrite <- Nat.Div0.add_mod_idemp_l, Hn.
+Qed.
+
 (* to be completed
 Theorem Gauss_lemma :
   ∀ p, prime p →
@@ -1051,38 +1062,13 @@ assert
     rewrite <- Nat.add_assoc.
     rewrite Nat_add_div_same; cycle 1. {
       specialize (odd_prime (S p) Hp Hp2) as Hpo.
-      exists (p / 2).
-      symmetry.
-Search (_ / _ * _).
-...
-      subst h.
-      rewrite Nat.sub_succ, Nat.sub_0_r.
-...
-en fait, ici, p est pair, c'est S p qui est premier.
-1 + p / 2 + p / 2
-3 ≤ 1 + 1 + 1
-5 ≤ 1 + 2 + 2
-...
-    apply (Nat.le_trans _ (2 + h + h)). {
-      subst h.
-      rewrite Nat.sub_succ, Nat.sub_0_r.
-...
+      apply Nat_eq_succ_mod_2_1 in Hpo.
+      now apply Nat.Lcm0.mod_divide in Hpo.
     }
-    apply Nat.add_le_mono_r.
-...
-    rewrite Nat.sub_succ, Nat.sub_0_r in Hx |-*.
-    cbn - [ "mod" "/" "-" ].
-    apply Nat.lt_succ_r.
-    apply Nat.le_sub_le_add_l.
-    apply Nat.le_succ_l.
-(* ah bin tiens, ça marche pas *)
-...
-    apply (Nat.le_lt_trans _ (p / 2 + p / 2)); cycle 1. {
-      apply Nat.add_le_mono_r.
-      now apply Nat.lt_le_incl.
-    }
-
-    apply Nat.    remember (p / 2) as q.
+    cbn - [ "/" ].
+    replace (p + p) with (2 * p) by now cbn; rewrite Nat.add_0_r.
+    now rewrite Nat.mul_comm, Nat.div_mul.
+  }
 ...
 }
 ... ...
