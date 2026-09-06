@@ -1037,11 +1037,26 @@ assert
       apply Nat.le_add_le_sub_r.
       now apply Nat.mod_upper_bound.
     }
+    destruct (Nat.eq_dec p 1) as [Hp1| Hp1]; [ now subst p | ].
+    destruct (Nat.eq_dec p 2) as [Hp2| Hp2]. {
+      now subst p; cbn in Hh; subst h.
+    }
     destruct p; [ easy | ].
+    rewrite Nat.sub_succ, Nat.sub_0_r in Hh; subst h.
     apply Nat.lt_succ_r.
     apply Nat.le_sub_le_add_l.
-    subst h.
-    rewrite Nat.sub_succ, Nat.sub_0_r in Hx, Hc |-*.
+    apply (Nat.le_trans _ (1 + p / 2 + p / 2)); cycle 1. {
+      now apply Nat.add_le_mono_r.
+    }
+    rewrite <- Nat.add_assoc.
+    rewrite Nat_add_div_same; cycle 1. {
+      specialize (odd_prime (S p) Hp Hp2) as Hpo.
+      exists (p / 2).
+      symmetry.
+Search (_ / _ * _).
+...
+      subst h.
+      rewrite Nat.sub_succ, Nat.sub_0_r.
 ...
 en fait, ici, p est pair, c'est S p qui est premier.
 1 + p / 2 + p / 2
