@@ -1043,6 +1043,11 @@ assert
     subst h.
     rewrite Nat.sub_succ, Nat.sub_0_r in Hx, Hc |-*.
 ...
+en fait, ici, p est pair, c'est S p qui est premier.
+1 + p / 2 + p / 2
+3 ≤ 1 + 1 + 1
+5 ≤ 1 + 2 + 2
+...
     apply (Nat.le_trans _ (2 + h + h)). {
       subst h.
       rewrite Nat.sub_succ, Nat.sub_0_r.
