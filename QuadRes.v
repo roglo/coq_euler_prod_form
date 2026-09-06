@@ -1069,6 +1069,35 @@ assert
     replace (p + p) with (2 * p) by now cbn; rewrite Nat.add_0_r.
     now rewrite Nat.mul_comm, Nat.div_mul.
   }
+  apply FinFun.Injective_map_NoDup; [ | apply seq_NoDup ].
+  intros i j Hij.
+  progress unfold abs in Hij.
+  remember (_ <=? _) as x eqn:Hx in Hij; symmetry in Hx.
+  remember (_ <=? _) as y eqn:Hy in Hij; symmetry in Hy.
+  destruct x, y. {
+    apply Nat.leb_le in Hx.
+    apply Nat.leb_le in Hy.
+    destruct (lt_dec (i mod p) (j mod p)) as [Hlij| Hlij]. {
+      rewrite <- (Nat.Div0.mul_mod_idemp_l i) in Hij.
+      rewrite <- (Nat.Div0.mul_mod_idemp_l j) in Hij.
+      exfalso; revert Hij.
+      apply smaller_than_prime_all_different_multiples; [ easy | easy | ].
+      split; [ easy | ].
+      now apply Nat.mod_upper_bound.
+    }
+...
+...
+  specialize smaller_than_prime_all_different_multiples as H5.
+  specialize (H5 p Hp).
+
+  specialize abs_all_different_multiples as H5.
+  specialize (H5 p Hp).
+Search (abs (_ mod _)).
+      apply H5 in Hij; [ easy | easy | ].
+      apply H5; [ easy | ].
+Search ((_ * _) ≡ (_ * _) mod _).
+...
+...
 ...
 }
 ... ...
