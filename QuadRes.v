@@ -1069,23 +1069,66 @@ assert
     replace (p + p) with (2 * p) by now cbn; rewrite Nat.add_0_r.
     now rewrite Nat.mul_comm, Nat.div_mul.
   }
+  apply (NoDup_map_iff 0).
+  rewrite List.length_seq.
+  intros i j Hi Hj Hij.
+  do 2 rewrite seq_nth in Hij; [ | easy | easy | easy ].
+  cbn - [ "*" ] in Hij.
+(*
+...... no:
   apply FinFun.Injective_map_NoDup; [ | apply seq_NoDup ].
   intros i j Hij.
+*)
   progress unfold abs in Hij.
   remember (_ <=? _) as x eqn:Hx in Hij; symmetry in Hx.
   remember (_ <=? _) as y eqn:Hy in Hij; symmetry in Hy.
   destruct x, y. {
     apply Nat.leb_le in Hx.
     apply Nat.leb_le in Hy.
-    destruct (lt_dec (i mod p) (j mod p)) as [Hlij| Hlij]. {
-      rewrite <- (Nat.Div0.mul_mod_idemp_l i) in Hij.
-      rewrite <- (Nat.Div0.mul_mod_idemp_l j) in Hij.
+    destruct (lt_dec (S i mod p) (S j mod p)) as [Hlij| Hlij]. {
+      rewrite <- (Nat.Div0.mul_mod_idemp_l (S i)) in Hij.
+      rewrite <- (Nat.Div0.mul_mod_idemp_l (S j)) in Hij.
       exfalso; revert Hij.
       apply smaller_than_prime_all_different_multiples; [ easy | easy | ].
       split; [ easy | ].
       now apply Nat.mod_upper_bound.
     }
-...
+    destruct (lt_dec (S j mod p) (S i mod p)) as [Hlji| Hlji]. {
+      rewrite <- (Nat.Div0.mul_mod_idemp_l (S i)) in Hij.
+      rewrite <- (Nat.Div0.mul_mod_idemp_l (S j)) in Hij.
+      symmetry in Hij.
+      exfalso; revert Hij.
+      apply smaller_than_prime_all_different_multiples; [ easy | easy | ].
+      split; [ easy | ].
+      now apply Nat.mod_upper_bound.
+    }
+    apply Nat.nlt_ge in Hlij, Hlji.
+    apply Nat.le_antisymm in Hlij; [ clear Hlji | easy ].
+    rewrite Nat.mod_small in Hlij; cycle 1. {
+      apply (Nat.lt_le_trans _ (S h)); [ now apply -> Nat.succ_lt_mono | ].
+      subst h.
+      apply Nat.le_succ_l.
+      apply Nat.Div0.div_lt_upper_bound.
+      flia Hpz.
+    }
+    rewrite Nat.mod_small in Hlij; cycle 1. {
+      apply (Nat.lt_le_trans _ (S h)); [ now apply -> Nat.succ_lt_mono | ].
+      subst h.
+      apply Nat.le_succ_l.
+      apply Nat.Div0.div_lt_upper_bound.
+      flia Hpz.
+    }
+    now injection Hlij.
+  } {
+est-ce qu'on pourrait pas reprendre tout ça avec H4 et voir si on peut
+pas transformer i * abs a p en abs (i * a) p...
+....
+    apply Nat.leb_le in Hx.
+    apply Nat.leb_gt in Hy.
+    apply (f_equal (λ x, x + (S j * a mod p))) in Hij.
+    rewrite Nat.sub_add in Hij; cycle 1. {
+      now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+    }
 ...
   specialize smaller_than_prime_all_different_multiples as H5.
   specialize (H5 p Hp).
