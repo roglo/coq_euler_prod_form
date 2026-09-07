@@ -997,7 +997,8 @@ assert
      fold_left (λ acc i, acc * abs ((i * a) mod p) p) (seq 1 h) 1 ≡
      fact h mod p). {
   specialize abs_all_different_multiples as H4.
-  specialize (H4 p Hp).
+  assert (H: 1 ≤ a < p) by easy.
+  specialize (H4 p Hp a H); clear H.
   rewrite fact_eq_fold_left.
   rewrite <- List_fold_left_map.
   f_equal.
@@ -1079,10 +1080,12 @@ assert
   apply FinFun.Injective_map_NoDup; [ | apply seq_NoDup ].
   intros i j Hij.
 *)
-  progress unfold abs in Hij.
-  remember (_ <=? _) as x eqn:Hx in Hij; symmetry in Hx.
-  remember (_ <=? _) as y eqn:Hy in Hij; symmetry in Hy.
+  remember ((S i) * a mod p <=? h) as x eqn:Hx in Hij; symmetry in Hx.
+  remember ((S j) * a mod p <=? h) as y eqn:Hy in Hij; symmetry in Hy.
   destruct x, y. {
+    progress unfold abs in Hij.
+    rewrite <- Hh in Hij.
+    rewrite Hx, Hy in Hij.
     apply Nat.leb_le in Hx.
     apply Nat.leb_le in Hy.
     destruct (lt_dec (S i mod p) (S j mod p)) as [Hlij| Hlij]. {
@@ -1120,15 +1123,30 @@ assert
     }
     now injection Hlij.
   } {
-est-ce qu'on pourrait pas reprendre tout ça avec H4 et voir si on peut
-pas transformer i * abs a p en abs (i * a) p...
-....
+    progress unfold abs in Hij.
+    rewrite <- Hh in Hij.
+    rewrite Hx, Hy in Hij.
     apply Nat.leb_le in Hx.
     apply Nat.leb_gt in Hy.
     apply (f_equal (λ x, x + (S j * a mod p))) in Hij.
     rewrite Nat.sub_add in Hij; cycle 1. {
       now apply Nat.lt_le_incl, Nat.mod_upper_bound.
     }
+    apply (f_equal (λ x, x mod p)) in Hij.
+    rewrite Nat.Div0.mod_same in Hij.
+    rewrite Nat.Div0.add_mod_idemp_l in Hij.
+    rewrite Nat.Div0.add_mod_idemp_r in Hij.
+    rewrite <- Nat.mul_add_distr_r in Hij.
+    apply Nat.Lcm0.mod_divide in Hij.
+    apply (prime_divide_mul _ Hp) in Hij.
+    destruct Hij as [Hij| Hij]; cycle 1. {
+      destruct Hij as (k, Hpa).
+      destruct k; [ now apply Nat.neq_0_lt_0 in Hpa | ].
+      rewrite Hpa in Hap.
+      flia Hap.
+    }
+    destruct Hij as (k, Hij).
+    destruct k; [ easy | ].
 ...
   specialize smaller_than_prime_all_different_multiples as H5.
   specialize (H5 p Hp).
