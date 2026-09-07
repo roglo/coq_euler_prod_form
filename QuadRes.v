@@ -1126,8 +1126,10 @@ assert
     progress unfold abs in Hij.
     rewrite <- Hh in Hij.
     rewrite Hx, Hy in Hij.
-    apply Nat.leb_le in Hx.
-    apply Nat.leb_gt in Hy.
+    subst h.
+clear - Hij Hp Haz Hap Hi Hj.
+... lemma to do
+    destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
     apply (f_equal (λ x, x + (S j * a mod p))) in Hij.
     rewrite Nat.sub_add in Hij; cycle 1. {
       now apply Nat.lt_le_incl, Nat.mod_upper_bound.
@@ -1148,33 +1150,35 @@ assert
     destruct Hij as (k, Hij).
     destruct k; [ easy | ].
     destruct p; [ easy | ].
-    rewrite Nat.sub_succ, Nat.sub_0_r in Hh.
-    subst h.
+    rewrite Nat.sub_succ, Nat.sub_0_r in Hi, Hj.
     assert (H2i : 2 * i < p). {
       apply (Nat.mul_lt_mono_pos_l 2) in Hi; [ | easy ].
       rewrite <- Nat.Lcm0.divide_div_mul_exact in Hi; cycle 1. {
-Search (_ * (_ / _)).
-...
         destruct p; [ easy | ].
         destruct p; [ easy | ].
         specialize (odd_prime _ Hp) as H5.
-
-Search prime.
-...
-    enough (H2j : 2 * j < p).
-flia H2i H2j Hij.
-...
-  specialize smaller_than_prime_all_different_multiples as H5.
-  specialize (H5 p Hp).
-
-  specialize abs_all_different_multiples as H5.
-  specialize (H5 p Hp).
-Search (abs (_ mod _)).
-      apply H5 in Hij; [ easy | easy | ].
-      apply H5; [ easy | ].
-Search ((_ * _) ≡ (_ * _) mod _).
-...
-...
+        assert (H : S (S (S p)) ≠ 2) by easy.
+        specialize (H5 H); clear H.
+        apply Nat_eq_succ_mod_2_1 in H5.
+        now apply Nat.Lcm0.mod_divide.
+      }
+      now rewrite (Nat.mul_comm 2 p), Nat.div_mul in Hi.
+    }
+    assert (H2j : 2 * j < p). {
+      apply (Nat.mul_lt_mono_pos_l 2) in Hj; [ | easy ].
+      rewrite <- Nat.Lcm0.divide_div_mul_exact in Hj; cycle 1. {
+        destruct p; [ easy | ].
+        destruct p; [ easy | ].
+        specialize (odd_prime _ Hp) as H5.
+        assert (H : S (S (S p)) ≠ 2) by easy.
+        specialize (H5 H); clear H.
+        apply Nat_eq_succ_mod_2_1 in H5.
+        now apply Nat.Lcm0.mod_divide.
+      }
+      now rewrite (Nat.mul_comm 2 p), Nat.div_mul in Hj.
+    }
+    flia H2i H2j Hij.
+  }
 ...
 }
 ... ...
