@@ -1138,8 +1138,6 @@ assert
     progress unfold abs in Hij.
     rewrite <- Hh in Hij.
     rewrite Hx, Hy in Hij.
-    apply Nat.leb_le in Hx.
-    apply Nat.leb_le in Hy.
     destruct (lt_dec (S i mod p) (S j mod p)) as [Hlij| Hlij]. {
       rewrite <- (Nat.Div0.mul_mod_idemp_l (S i)) in Hij.
       rewrite <- (Nat.Div0.mul_mod_idemp_l (S j)) in Hij.
@@ -1185,11 +1183,56 @@ assert
     progress unfold abs in Hij.
     rewrite <- Hh in Hij.
     now rewrite Hx, Hy in Hij.
+  } {
+    progress unfold abs in Hij.
+    rewrite <- Hh in Hij.
+    rewrite Hx, Hy in Hij.
+    apply (f_equal (λ x, p - x)) in Hij.
+    rewrite Nat.sub_sub_distr in Hij; [ | | easy ]; cycle 1. {
+      now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+    }
+    rewrite Nat.sub_sub_distr in Hij; [ | | easy ]; cycle 1. {
+      now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+    }
+    rewrite Nat.sub_diag in Hij.
+    do 2 rewrite Nat.add_0_l in Hij.
+... lemma to do with the 1st case...
+    destruct (lt_dec (S i mod p) (S j mod p)) as [Hlij| Hlij]. {
+      rewrite <- (Nat.Div0.mul_mod_idemp_l (S i)) in Hij.
+      rewrite <- (Nat.Div0.mul_mod_idemp_l (S j)) in Hij.
+      exfalso; revert Hij.
+      apply smaller_than_prime_all_different_multiples; [ easy | easy | ].
+      split; [ easy | ].
+      now apply Nat.mod_upper_bound.
+    }
+    destruct (lt_dec (S j mod p) (S i mod p)) as [Hlji| Hlji]. {
+      rewrite <- (Nat.Div0.mul_mod_idemp_l (S i)) in Hij.
+      rewrite <- (Nat.Div0.mul_mod_idemp_l (S j)) in Hij.
+      symmetry in Hij.
+      exfalso; revert Hij.
+      apply smaller_than_prime_all_different_multiples; [ easy | easy | ].
+      split; [ easy | ].
+      now apply Nat.mod_upper_bound.
+    }
+    apply Nat.nlt_ge in Hlij, Hlji.
+    apply Nat.le_antisymm in Hlij; [ clear Hlji | easy ].
+    rewrite Nat.mod_small in Hlij; cycle 1. {
+      apply (Nat.lt_le_trans _ (S h)); [ now apply -> Nat.succ_lt_mono | ].
+      subst h.
+      apply Nat.le_succ_l.
+      apply Nat.Div0.div_lt_upper_bound.
+      flia Hpz.
+    }
+    rewrite Nat.mod_small in Hlij; cycle 1. {
+      apply (Nat.lt_le_trans _ (S h)); [ now apply -> Nat.succ_lt_mono | ].
+      subst h.
+      apply Nat.le_succ_l.
+      apply Nat.Div0.div_lt_upper_bound.
+      flia Hpz.
+    }
+    now injection Hlij.
   }
-  apply Nat.leb_gt in Hx, Hy.
-...
 }
-... ...
 rewrite <- Nat.Div0.mul_mod_idemp_r in H2.
 rewrite H4 in H2.
 rewrite Nat.Div0.mul_mod_idemp_r in H2.
