@@ -1147,6 +1147,22 @@ assert
     }
     destruct Hij as (k, Hij).
     destruct k; [ easy | ].
+    destruct p; [ easy | ].
+    rewrite Nat.sub_succ, Nat.sub_0_r in Hh.
+    subst h.
+    assert (H2i : 2 * i < p). {
+      apply (Nat.mul_lt_mono_pos_l 2) in Hi; [ | easy ].
+      rewrite <- Nat.Lcm0.divide_div_mul_exact in Hi; cycle 1. {
+Search (_ * (_ / _)).
+...
+        destruct p; [ easy | ].
+        destruct p; [ easy | ].
+        specialize (odd_prime _ Hp) as H5.
+
+Search prime.
+...
+    enough (H2j : 2 * j < p).
+flia H2i H2j Hij.
 ...
   specialize smaller_than_prime_all_different_multiples as H5.
   specialize (H5 p Hp).
