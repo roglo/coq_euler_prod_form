@@ -1265,7 +1265,24 @@ erewrite filter_ext_in; cycle 1. {
   }
   easy.
 }
+(*
 rewrite Nat_sqr_sub_1.
+*)
+replace ((p - 1) / 2) with ((p - 1) / 2 - (p² - 1) / 8 + (p² - 1) / 8);
+  cycle 1. {
+  apply Nat.sub_add.
+  admit.
+}
+rewrite List.seq_app.
+rewrite List.filter_app.
+rewrite List_filter_all_false; cycle 1. {
+  intros a Ha.
+  apply Nat.ltb_ge.
+  apply List.in_seq in Ha.
+  destruct Ha as (H1a, Ha).
+  rewrite Nat_sqr_sub_1 at 1.
+...
+Search (length (filter _ _)).
 ...
 replace ((p² - 1) / 8) with ((p - 1) / 2 * ((p + 1) / 4)); cycle 1. {
   rewrite Nat.mul_comm.
