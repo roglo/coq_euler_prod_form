@@ -147,11 +147,13 @@ split. {
 }
 Qed.
 
+Notation "a '²'" := (a ^ 2) (at level 1, format "a ²").
+
 Theorem congruence_inverse_has_unique_different_solution :
   ∀ p a,
   prime p
   → 0 < a < p
-  → (∀ n, 1 ≤ n ≤ p - 1 → n ^ 2 mod p ≠ a)
+  → (∀ n, 1 ≤ n ≤ p - 1 → n² mod p ≠ a)
   → ∀ b, 1 ≤ b < p
   → ∃! b' : nat, b' < p ∧ (b * b') mod p = a ∧ b ≠ b'.
 Proof.
@@ -189,7 +191,7 @@ Theorem fact_pred_p_equiv :
   ∀ p a,
   prime p
   → 0 < a < p
-  → (∀ n, 1 ≤ n ≤ p - 1 → n ^ 2 mod p ≠ a)
+  → (∀ n, 1 ≤ n ≤ p - 1 → n² mod p ≠ a)
   → fact (p - 1) ≡ a ^ ((p - 1) / 2) mod p.
 Proof.
 intros * Hp (Haz, Hap) Hnres.
@@ -596,7 +598,7 @@ destruct sm as [b| ]. {
   specialize (eq_sqrt_mod_None a p Hpz Hsm) as H3.
   assert (Hzap : 0 < a < p) by flia Haz Hap.
   specialize (fact_pred_p_equiv p a Hp Hzap) as H1.
-  assert (H : ∀ n, 1 ≤ n ≤ p - 1 → n ^ 2 mod p ≠ a). {
+  assert (H : ∀ n, 1 ≤ n ≤ p - 1 → n² mod p ≠ a). {
     intros n Hn.
     rewrite Nat.pow_2_r.
     rewrite <- (Nat.mod_small a p); [ | easy ].
@@ -857,7 +859,6 @@ rewrite <- Nat.add_1_r.
 now rewrite <- Nat.Div0.add_mod_idemp_l, Hn.
 Qed.
 
-(* to be completed *)
 Theorem Gauss_lemma :
   ∀ p, prime p →
   ∀ a n,
@@ -1225,3 +1226,21 @@ now apply Nat.neq_0_lt_0.
 Qed.
 
 Inspect 1.
+
+(* to be completed
+Theorem quadratic_reciprocity_2 :
+  ∀ p, prime p → legendre_symbol 2 p = (p - 1) ^ ((p² - 1) / 8) mod p.
+Proof.
+intros * Hp.
+destruct (Nat.eq_dec p 2) as [Hp2| Hp2]; [ now subst p | ].
+apply Gauss_lemma; [ easy | | ]. {
+  split; [ easy | ].
+  destruct p; [ easy | ].
+  destruct p; [ easy | ].
+  do 2 apply -> Nat.succ_lt_mono.
+  now destruct p.
+}
+symmetry.
+progress unfold nb_of_mult_gt_half.
+...
+*)
