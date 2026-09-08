@@ -1211,6 +1211,7 @@ assert
 }
 rewrite <- Nat.Div0.mul_mod_idemp_r in H2.
 rewrite H4 in H2.
+rewrite H1 in H2.
 rewrite Nat.Div0.mul_mod_idemp_r in H2.
 ...
 *)
