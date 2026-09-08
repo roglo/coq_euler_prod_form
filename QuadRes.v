@@ -1242,5 +1242,21 @@ apply Gauss_lemma; [ easy | | ]. {
 }
 symmetry.
 progress unfold nb_of_mult_gt_half.
+erewrite filter_ext_in; cycle 1. {
+  intros * Ha.
+  rewrite Nat.mod_small; cycle 1. {
+    apply List.in_seq in Ha.
+    destruct Ha as (_, Ha).
+    apply -> Nat.lt_succ_r in Ha.
+    apply (Nat.mul_le_mono_pos_r _ _ 2) in Ha; [ | easy ].
+    eapply Nat.le_lt_trans; [ apply Ha | ].
+    rewrite Nat.mul_comm.
+    eapply Nat.le_lt_trans; [ apply Nat.Div0.mul_div_le | ].
+    apply Nat.sub_lt; [ | easy ].
+    destruct p; [ easy | ].
+    now apply -> Nat.succ_le_mono.
+  }
+  easy.
+}
 ...
 *)
