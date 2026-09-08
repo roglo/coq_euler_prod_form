@@ -857,7 +857,7 @@ rewrite <- Nat.add_1_r.
 now rewrite <- Nat.Div0.add_mod_idemp_l, Hn.
 Qed.
 
-(* to be completed
+(* to be completed *)
 Theorem Gauss_lemma :
   ∀ p, prime p →
   ∀ a n,
@@ -1213,5 +1213,15 @@ rewrite <- Nat.Div0.mul_mod_idemp_r in H2.
 rewrite H4 in H2.
 rewrite H1 in H2.
 rewrite Nat.Div0.mul_mod_idemp_r in H2.
-...
-*)
+apply Nat_mul_mod_cancel_r in H2; [ easy | ].
+rewrite Nat.gcd_comm.
+apply Nat_gcd_prime_fact_lt; [ easy | ].
+subst h.
+apply Nat.Div0.div_lt_upper_bound.
+cbn; rewrite Nat.add_0_r.
+apply (Nat.lt_le_trans _ p); [ | apply Nat.le_add_l ].
+apply Nat.sub_lt; [ | easy ].
+now apply Nat.neq_0_lt_0.
+Qed.
+
+Inspect 1.
