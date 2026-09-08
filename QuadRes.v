@@ -1079,6 +1079,49 @@ assert
   remember ((S j) * a mod p <=? h) as y eqn:Hy in Hij; symmetry in Hy.
   assert (Hija :
     ∀ i j,
+      i < h
+      → j < h
+      → S i * a ≡ (S j * a) mod p
+      → i = j). {
+    clear i j Hi Hj Hij Hx Hy.
+    intros * Hi Hj Hij.
+    destruct (lt_dec (S i mod p) (S j mod p)) as [Hlij| Hlij]. {
+      rewrite <- (Nat.Div0.mul_mod_idemp_l (S i)) in Hij.
+      rewrite <- (Nat.Div0.mul_mod_idemp_l (S j)) in Hij.
+      exfalso; revert Hij.
+      apply smaller_than_prime_all_different_multiples; [ easy | easy | ].
+      split; [ easy | ].
+      now apply Nat.mod_upper_bound.
+    }
+    destruct (lt_dec (S j mod p) (S i mod p)) as [Hlji| Hlji]. {
+      rewrite <- (Nat.Div0.mul_mod_idemp_l (S i)) in Hij.
+      rewrite <- (Nat.Div0.mul_mod_idemp_l (S j)) in Hij.
+      symmetry in Hij.
+      exfalso; revert Hij.
+      apply smaller_than_prime_all_different_multiples; [ easy | easy | ].
+      split; [ easy | ].
+      now apply Nat.mod_upper_bound.
+    }
+    apply Nat.nlt_ge in Hlij, Hlji.
+    apply Nat.le_antisymm in Hlij; [ clear Hlji | easy ].
+    rewrite Nat.mod_small in Hlij; cycle 1. {
+      apply (Nat.lt_le_trans _ (S h)); [ now apply -> Nat.succ_lt_mono | ].
+      subst h.
+      apply Nat.le_succ_l.
+      apply Nat.Div0.div_lt_upper_bound.
+      flia Hpz.
+    }
+    rewrite Nat.mod_small in Hlij; cycle 1. {
+      apply (Nat.lt_le_trans _ (S h)); [ now apply -> Nat.succ_lt_mono | ].
+      subst h.
+      apply Nat.le_succ_l.
+      apply Nat.Div0.div_lt_upper_bound.
+      flia Hpz.
+    }
+    now injection Hlij.
+  }
+  assert (Hijap :
+    ∀ i j,
       i < (p - 1) / 2
       → j < (p - 1) / 2
       → (S i * a) mod p = p - (S j * a) mod p
@@ -1138,48 +1181,15 @@ assert
     progress unfold abs in Hij.
     rewrite <- Hh in Hij.
     rewrite Hx, Hy in Hij.
-    destruct (lt_dec (S i mod p) (S j mod p)) as [Hlij| Hlij]. {
-      rewrite <- (Nat.Div0.mul_mod_idemp_l (S i)) in Hij.
-      rewrite <- (Nat.Div0.mul_mod_idemp_l (S j)) in Hij.
-      exfalso; revert Hij.
-      apply smaller_than_prime_all_different_multiples; [ easy | easy | ].
-      split; [ easy | ].
-      now apply Nat.mod_upper_bound.
-    }
-    destruct (lt_dec (S j mod p) (S i mod p)) as [Hlji| Hlji]. {
-      rewrite <- (Nat.Div0.mul_mod_idemp_l (S i)) in Hij.
-      rewrite <- (Nat.Div0.mul_mod_idemp_l (S j)) in Hij.
-      symmetry in Hij.
-      exfalso; revert Hij.
-      apply smaller_than_prime_all_different_multiples; [ easy | easy | ].
-      split; [ easy | ].
-      now apply Nat.mod_upper_bound.
-    }
-    apply Nat.nlt_ge in Hlij, Hlji.
-    apply Nat.le_antisymm in Hlij; [ clear Hlji | easy ].
-    rewrite Nat.mod_small in Hlij; cycle 1. {
-      apply (Nat.lt_le_trans _ (S h)); [ now apply -> Nat.succ_lt_mono | ].
-      subst h.
-      apply Nat.le_succ_l.
-      apply Nat.Div0.div_lt_upper_bound.
-      flia Hpz.
-    }
-    rewrite Nat.mod_small in Hlij; cycle 1. {
-      apply (Nat.lt_le_trans _ (S h)); [ now apply -> Nat.succ_lt_mono | ].
-      subst h.
-      apply Nat.le_succ_l.
-      apply Nat.Div0.div_lt_upper_bound.
-      flia Hpz.
-    }
-    now injection Hlij.
+    now apply Hija.
   } {
-    apply Hija; [ now subst h | now subst h | ].
+    apply Hijap; [ now subst h | now subst h | ].
     progress unfold abs in Hij.
     rewrite <- Hh in Hij.
     now rewrite Hx, Hy in Hij.
   } {
     symmetry.
-    apply Hija; [ now subst h | now subst h | ].
+    apply Hijap; [ now subst h | now subst h | ].
     progress unfold abs in Hij.
     rewrite <- Hh in Hij.
     now rewrite Hx, Hy in Hij.
@@ -1196,41 +1206,7 @@ assert
     }
     rewrite Nat.sub_diag in Hij.
     do 2 rewrite Nat.add_0_l in Hij.
-... lemma to do with the 1st case...
-    destruct (lt_dec (S i mod p) (S j mod p)) as [Hlij| Hlij]. {
-      rewrite <- (Nat.Div0.mul_mod_idemp_l (S i)) in Hij.
-      rewrite <- (Nat.Div0.mul_mod_idemp_l (S j)) in Hij.
-      exfalso; revert Hij.
-      apply smaller_than_prime_all_different_multiples; [ easy | easy | ].
-      split; [ easy | ].
-      now apply Nat.mod_upper_bound.
-    }
-    destruct (lt_dec (S j mod p) (S i mod p)) as [Hlji| Hlji]. {
-      rewrite <- (Nat.Div0.mul_mod_idemp_l (S i)) in Hij.
-      rewrite <- (Nat.Div0.mul_mod_idemp_l (S j)) in Hij.
-      symmetry in Hij.
-      exfalso; revert Hij.
-      apply smaller_than_prime_all_different_multiples; [ easy | easy | ].
-      split; [ easy | ].
-      now apply Nat.mod_upper_bound.
-    }
-    apply Nat.nlt_ge in Hlij, Hlji.
-    apply Nat.le_antisymm in Hlij; [ clear Hlji | easy ].
-    rewrite Nat.mod_small in Hlij; cycle 1. {
-      apply (Nat.lt_le_trans _ (S h)); [ now apply -> Nat.succ_lt_mono | ].
-      subst h.
-      apply Nat.le_succ_l.
-      apply Nat.Div0.div_lt_upper_bound.
-      flia Hpz.
-    }
-    rewrite Nat.mod_small in Hlij; cycle 1. {
-      apply (Nat.lt_le_trans _ (S h)); [ now apply -> Nat.succ_lt_mono | ].
-      subst h.
-      apply Nat.le_succ_l.
-      apply Nat.Div0.div_lt_upper_bound.
-      flia Hpz.
-    }
-    now injection Hlij.
+    now apply Hija.
   }
 }
 rewrite <- Nat.Div0.mul_mod_idemp_r in H2.
