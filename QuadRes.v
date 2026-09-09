@@ -4,6 +4,9 @@ From Stdlib Require Import Sorting.Permutation.
 Import List List.ListNotations.
 Require Import Misc Primes.
 
+Theorem Nat_mul_2_l : ∀ a, 2 * a = a + a.
+Proof. flia. Qed.
+
 (* Euler criterion *)
 
 Theorem all_different_exist : ∀ f n,
@@ -1227,6 +1230,25 @@ Qed.
 
 Inspect 1.
 
+Theorem Nat_sub_1_squ : ∀ a, a ≠ 0 → (a - 1)² ≡ 1 mod a.
+Proof.
+intros * Haz.
+destruct (Nat.eq_dec a 1) as [Ha1| Ha1]; [ now subst a | ].
+rewrite Nat_squ_sub; [ | now apply Nat.neq_0_lt_0 ].
+cbn.
+do 2 rewrite Nat.mul_1_r.
+rewrite Nat.add_0_r.
+rewrite <- Nat_mul_2_l.
+rewrite Nat.add_sub_swap; cycle 1. {
+  apply Nat.mul_le_mono_r.
+  destruct a; [ easy | ].
+  destruct a; [ easy | ].
+  now do 2 apply -> Nat.succ_le_mono.
+}
+rewrite <- Nat.mul_sub_distr_r.
+apply Nat_mod_add_l_mul_r.
+Qed.
+
 (* to be completed
 Theorem quadratic_reciprocity_2 :
   ∀ p, prime p → legendre_symbol 2 p = (p - 1) ^ ((p² - 1) / 8) mod p.
@@ -1242,9 +1264,37 @@ erewrite (Gauss_lemma p Hp); [ | | easy ]; cycle 1. {
   now destruct p.
 }
 Theorem Nat_same_parity_same_opp_1_pow :
-  ∀ p, prime p → ∀ a b,
+  ∀ n, n ≠ 0 → ∀ a b,
   a ≡ b mod 2
-  → (p - 1) ^ a ≡ (p - 1) ^ b mod p.
+  ↔ (n - 1) ^ a ≡ (n - 1) ^ b mod n.
+Proof.
+intros * Hnz *.
+split; intros Hab. {
+  remember (a mod 2) as a2 eqn:Ha2; symmetry in Ha2.
+  remember (b mod 2) as b2 eqn:Hb2; symmetry in Hb2.
+  move b2 before a2.
+  destruct a2. {
+    move Hab at top; subst b2.
+    apply Nat.Lcm0.mod_divide in Ha2.
+    apply Nat.Lcm0.mod_divide in Hb2.
+    destruct Ha2 as (u, Hu).
+    destruct Hb2 as (v, Hv).
+    subst a b.
+    do 2 rewrite (Nat.mul_comm _ 2).
+    do 2 rewrite Nat.pow_mul_r.
+    do 2 rewrite <- (Nat_mod_pow_mod _²).
+    rewrite Nat_sub_1_squ; [ | easy ].
+    destruct (Nat.eq_dec n 1) as [Hn1| Hn1]; [ now subst n | ].
+    rewrite Nat.mod_1_l; [ | flia Hnz Hn1 ].
+    now do 2 rewrite Nat.pow_1_l.
+  }
+  destruct a2. {
+    move Hab at top; subst b2.
+Search (_ mod _ = 1).
+...
+  rewrite <- Nat_mul_2_l.
+
+rewrite Nat.sub_squ.
 ...
 apply (Nat_same_parity_same_opp_1_pow _ Hp).
 ...
