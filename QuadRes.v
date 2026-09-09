@@ -1233,13 +1233,6 @@ Theorem quadratic_reciprocity_2 :
 Proof.
 intros * Hp.
 destruct (Nat.eq_dec p 2) as [Hp2| Hp2]; [ now subst p | ].
-(*
-specialize (Euler_criterion p Hp 2) as H1.
-symmetry in H1.
-rewrite <- (Nat.mod_small (legendre_symbol 2 p) p).
-rewrite H1.
-...
-*)
 apply Gauss_lemma; [ easy | | ]. {
   split; [ easy | ].
   destruct p; [ easy | ].
@@ -1248,6 +1241,10 @@ apply Gauss_lemma; [ easy | | ]. {
   now destruct p.
 }
 symmetry.
+(**)
+Compute (let p := 7 in nb_of_mult_gt_half 2 p = (p² - 1) / 8).
+(* tiens ? c'est faux *)
+...
 progress unfold nb_of_mult_gt_half.
 erewrite filter_ext_in; cycle 1. {
   intros * Ha.
