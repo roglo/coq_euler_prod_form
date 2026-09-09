@@ -1233,6 +1233,23 @@ Theorem quadratic_reciprocity_2 :
 Proof.
 intros * Hp.
 destruct (Nat.eq_dec p 2) as [Hp2| Hp2]; [ now subst p | ].
+(**)
+erewrite (Gauss_lemma p Hp); [ | | easy ]; cycle 1. {
+  split; [ easy | ].
+  destruct p; [ easy | ].
+  destruct p; [ easy | ].
+  do 2 apply -> Nat.succ_lt_mono.
+  now destruct p.
+}
+Search (_ ^ _ mod _).
+...
+Print Nat_pow_mod.
+Print Nat_pow_mod_loop.
+Search Nat_pow_mod_loop.
+...
+Compute (let p := 11 in
+(p - 1) ^ nb_of_mult_gt_half 2 p ≡ (p - 1) ^ ((p² - 1) / 8) mod p).
+...
 apply Gauss_lemma; [ easy | | ]. {
   split; [ easy | ].
   destruct p; [ easy | ].
