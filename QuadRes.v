@@ -1249,6 +1249,52 @@ rewrite <- Nat.mul_sub_distr_r.
 apply Nat_mod_add_l_mul_r.
 Qed.
 
+Theorem Nat_same_parity_same_opp_1_pow :
+  ∀ n, n ≠ 0 → ∀ a b,
+  a ≡ b mod 2
+  → (n - 1) ^ a ≡ (n - 1) ^ b mod n.
+Proof.
+intros * Hnz * Hab.
+destruct (Nat.eq_dec n 1) as [Hn1| Hn1]. {
+  subst n.
+  rewrite Nat.sub_diag.
+  now do 2 rewrite Nat.mod_1_r.
+}
+remember (a mod 2) as a2 eqn:Ha2; symmetry in Ha2.
+remember (b mod 2) as b2 eqn:Hb2; symmetry in Hb2.
+move b2 before a2.
+destruct a2. {
+  move Hab at top; subst b2.
+  apply Nat.Lcm0.mod_divide in Ha2.
+  apply Nat.Lcm0.mod_divide in Hb2.
+  destruct Ha2 as (u, Hu).
+  destruct Hb2 as (v, Hv).
+  subst a b.
+  do 2 rewrite (Nat.mul_comm _ 2).
+  do 2 rewrite Nat.pow_mul_r.
+  do 2 rewrite <- (Nat_mod_pow_mod _²).
+  rewrite Nat_sub_1_squ; [ | easy ].
+  rewrite Nat.mod_1_l; [ | flia Hnz Hn1 ].
+  now do 2 rewrite Nat.pow_1_l.
+}
+destruct a2. {
+  move Hab at top; subst b2.
+  specialize (Nat.div_mod a 2 (Nat.neq_succ_0 _)) as Ha.
+  specialize (Nat.div_mod b 2 (Nat.neq_succ_0 _)) as Hb.
+  rewrite Ha, Hb, Ha2, Hb2.
+  do 2 rewrite Nat.pow_add_r.
+  rewrite Nat.pow_1_r.
+  do 2 rewrite Nat.pow_mul_r.
+  do 2 rewrite <- (Nat.Div0.mul_mod_idemp_l (_ ^ _)).
+  do 2 rewrite <- (Nat_mod_pow_mod _²).
+  rewrite Nat_sub_1_squ; [ | easy ].
+  rewrite Nat.mod_1_l; [ | flia Hnz Hn1 ].
+  now do 2 rewrite Nat.pow_1_l.
+}
+specialize (Nat.mod_upper_bound a 2 (Nat.neq_succ_0 _)) as H.
+flia Ha2 H.
+Qed.
+
 (* to be completed
 Theorem quadratic_reciprocity_2 :
   ∀ p, prime p → legendre_symbol 2 p = (p - 1) ^ ((p² - 1) / 8) mod p.
@@ -1263,60 +1309,7 @@ erewrite (Gauss_lemma p Hp); [ | | easy ]; cycle 1. {
   do 2 apply -> Nat.succ_lt_mono.
   now destruct p.
 }
-Theorem Nat_same_parity_same_opp_1_pow :
-  ∀ n, n ≠ 0 → ∀ a b,
-  a ≡ b mod 2
-  ↔ (n - 1) ^ a ≡ (n - 1) ^ b mod n.
-Proof.
-intros * Hnz *.
-split; intros Hab. {
-  remember (a mod 2) as a2 eqn:Ha2; symmetry in Ha2.
-  remember (b mod 2) as b2 eqn:Hb2; symmetry in Hb2.
-  move b2 before a2.
-  destruct a2. {
-    move Hab at top; subst b2.
-    apply Nat.Lcm0.mod_divide in Ha2.
-    apply Nat.Lcm0.mod_divide in Hb2.
-    destruct Ha2 as (u, Hu).
-    destruct Hb2 as (v, Hv).
-    subst a b.
-    do 2 rewrite (Nat.mul_comm _ 2).
-    do 2 rewrite Nat.pow_mul_r.
-    do 2 rewrite <- (Nat_mod_pow_mod _²).
-    rewrite Nat_sub_1_squ; [ | easy ].
-    destruct (Nat.eq_dec n 1) as [Hn1| Hn1]; [ now subst n | ].
-    rewrite Nat.mod_1_l; [ | flia Hnz Hn1 ].
-    now do 2 rewrite Nat.pow_1_l.
-  }
-  destruct a2. {
-    move Hab at top; subst b2.
-Search (_ mod _ = 1).
-...
-  rewrite <- Nat_mul_2_l.
-
-rewrite Nat.sub_squ.
-...
-apply (Nat_same_parity_same_opp_1_pow _ Hp).
-...
-Print Nat_pow_mod.
-Print Nat_pow_mod_loop.
-Search Nat_pow_mod_loop.
-...
-Compute (let p := 11 in
-(p - 1) ^ nb_of_mult_gt_half 2 p ≡ (p - 1) ^ ((p² - 1) / 8) mod p).
-...
-apply Gauss_lemma; [ easy | | ]. {
-  split; [ easy | ].
-  destruct p; [ easy | ].
-  destruct p; [ easy | ].
-  do 2 apply -> Nat.succ_lt_mono.
-  now destruct p.
-}
-symmetry.
-(**)
-Compute (let p := 7 in nb_of_mult_gt_half 2 p = (p² - 1) / 8).
-(* tiens ? c'est faux *)
-...
+apply Nat_same_parity_same_opp_1_pow; [ now destruct p | ].
 progress unfold nb_of_mult_gt_half.
 erewrite filter_ext_in; cycle 1. {
   intros * Ha.
@@ -1373,7 +1366,7 @@ destruct (Nat.eq_dec ((p - 1) mod 4) 0) as [Hp4z| Hp4z]. {
   }
   replace 4 with (2 * 2) at 1 by easy.
   rewrite Nat.mul_assoc, Nat.div_mul; [ | easy ].
-  replace (k * 2) with (k + k) by flia.
+  rewrite Nat.mul_comm, Nat_mul_2_l.
   rewrite List.seq_app.
   rewrite List.filter_app.
   rewrite List_filter_all_false; cycle 1. {
@@ -1398,5 +1391,8 @@ destruct (Nat.eq_dec ((p - 1) mod 4) 0) as [Hp4z| Hp4z]. {
   rewrite Nat.add_comm in Hk.
   subst p.
   rewrite Nat_squ_add.
+  cbn - [ "/" "mod" ].
+  do 2 rewrite Nat.mul_1_r.
+  rewrite Nat.add_0_r.
 ...
 *)
