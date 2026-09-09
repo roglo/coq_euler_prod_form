@@ -1394,5 +1394,29 @@ destruct (Nat.eq_dec ((p - 1) mod 4) 0) as [Hp4z| Hp4z]. {
   cbn - [ "/" "mod" ].
   do 2 rewrite Nat.mul_1_r.
   rewrite Nat.add_0_r.
+  rewrite Nat.add_shuffle0, Nat.add_sub.
+  rewrite <- Nat_mul_2_l.
+  rewrite <- Nat.mul_add_distr_r.
+  rewrite Nat.mul_assoc.
+  replace 8 with (4 * 2) by easy.
+  rewrite <- Nat.Div0.div_div.
+  rewrite Nat.div_mul; [ | easy ].
+  rewrite Nat.mul_comm.
+  rewrite <- (Nat.mul_1_l 2) at 3.
+  replace 4 with (2 * 2) by easy.
+  rewrite Nat.mul_assoc, <- Nat.mul_add_distr_r.
+  rewrite Nat.mul_assoc.
+  rewrite Nat.div_mul; [ | easy ].
+  rewrite <- Nat.Div0.mul_mod_idemp_r.
+  rewrite <- (Nat.Div0.add_mod_idemp_l (k * 2)).
+  rewrite Nat.Div0.mod_mul.
+  rewrite Nat.add_0_l.
+  rewrite Nat.mod_1_l; [ | flia ].
+  now rewrite Nat.mul_1_r.
+}
+destruct (Nat.eq_dec ((p - 1) mod 4) 1) as [Hp41| Hp41]. {
+  (* c'est censé pas être possible *)
+  specialize (Nat.div_mod (p - 1) 4 (Nat.neq_succ_0 _)) as Ha.
+  rewrite Hp41 in Ha.
 ...
 *)
