@@ -1243,7 +1243,7 @@ erewrite (Gauss_lemma p Hp); [ | | easy ]; cycle 1. {
 }
 Theorem Nat_same_parity_same_opp_1_pow :
   ∀ p, prime p → ∀ a b,
-  Nat.odd a = Nat.odd b
+  a ≡ b mod 2
   → (p - 1) ^ a ≡ (p - 1) ^ b mod p.
 ...
 apply (Nat_same_parity_same_opp_1_pow _ Hp).
