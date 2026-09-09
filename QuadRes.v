@@ -1241,7 +1241,12 @@ erewrite (Gauss_lemma p Hp); [ | | easy ]; cycle 1. {
   do 2 apply -> Nat.succ_lt_mono.
   now destruct p.
 }
-Search (_ ^ _ mod _).
+Theorem Nat_same_parity_same_opp_1_pow :
+  ∀ p, prime p → ∀ a b,
+  Nat.odd a = Nat.odd b
+  → (p - 1) ^ a ≡ (p - 1) ^ b mod p.
+...
+apply (Nat_same_parity_same_opp_1_pow _ Hp).
 ...
 Print Nat_pow_mod.
 Print Nat_pow_mod_loop.
