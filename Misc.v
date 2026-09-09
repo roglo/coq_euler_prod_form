@@ -539,17 +539,17 @@ Qed.
 Theorem Nat_fact_succ : ∀ n, fact (S n) = S n * fact n.
 Proof. easy. Qed.
 
-Theorem Nat_div_lt_le_mul : ∀ a b c, b ≠ 0 → a / b < c → a ≤ b * c.
+Theorem Nat_div_lt_mul : ∀ a b c, b ≠ 0 → a / b < c → a < b * c.
 Proof.
 intros * Hbz Habc.
 apply (Nat.mul_le_mono_l _ _ b) in Habc.
-transitivity (b * S (a / b)); [ | easy ].
+apply (Nat.lt_le_trans _ (b * S (a / b))); [ | easy ].
 specialize (Nat.div_mod a b Hbz) as H1.
 rewrite <- Nat.add_1_r.
 rewrite Nat.mul_add_distr_l, Nat.mul_1_r.
 rewrite H1 at 1.
-apply Nat.add_le_mono_l.
-now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+apply Nat.add_lt_mono_l.
+now apply Nat.mod_upper_bound.
 Qed.
 
 Theorem Nat_divide_fact_fact : ∀ n d, Nat.divide (fact (n - d)) (fact n).

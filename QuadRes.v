@@ -1263,15 +1263,33 @@ erewrite filter_ext_in; cycle 1. {
     destruct p; [ easy | ].
     now apply -> Nat.succ_le_mono.
   }
+  replace ((p - 1) / 2 <? a * 2) with (p - 1 <? a * 4); cycle 1. {
+    remember (p - 1 <? a * 4) as a4 eqn:Ha4; symmetry in Ha4.
+    remember ((p - 1) / 2 <? a * 2) as a2 eqn:Ha2; symmetry in Ha2.
+    destruct a4, a2; [ easy | | | easy ]; exfalso. {
+      apply Nat.ltb_lt in Ha4.
+      apply Nat.ltb_nlt in Ha2.
+      apply Ha2; clear Ha2.
+      apply Nat.Div0.div_lt_upper_bound.
+      now rewrite Nat.mul_comm, <- Nat.mul_assoc.
+    } {
+      apply Nat.ltb_nlt in Ha4.
+      apply Nat.ltb_lt in Ha2.
+      apply Ha4; clear Ha4.
+      apply Nat_div_lt_mul in Ha2; [ | easy ].
+      now rewrite Nat.mul_comm, <- Nat.mul_assoc in Ha2.
+    }
+  }
   easy.
 }
 (*
 rewrite Nat_sqr_sub_1.
 *)
+...
 replace ((p - 1) / 2) with ((p - 1) / 2 - (p² - 1) / 8 + (p² - 1) / 8);
   cycle 1. {
   apply Nat.sub_add.
-  admit.
+  __admit.
 }
 rewrite List.seq_app.
 rewrite List.filter_app.

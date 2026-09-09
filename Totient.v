@@ -279,7 +279,8 @@ rewrite <- Nat_sub_sub_distr. 2: {
   split. 2: {
     rewrite Nat.mul_comm.
     apply Nat.mul_le_mono_r.
-    apply Nat_div_lt_le_mul; [ flia Hk | ].
+    apply Nat.lt_le_incl.
+    apply Nat_div_lt_mul; [ flia Hk | ].
     destruct (Nat.lt_trichotomy (v / b) (w / a)) as [H| H]. {
       rewrite max_r in Hk; [ | now apply Nat.lt_le_incl ].
       rewrite Hk.
@@ -431,7 +432,8 @@ rewrite <- Nat_sub_sub_distr. 2: {
   split. 2: {
     rewrite Nat.mul_comm.
     apply Nat.mul_le_mono_r.
-    apply Nat_div_lt_le_mul; [ flia Hk | ].
+    apply Nat.lt_le_incl.
+    apply Nat_div_lt_mul; [ flia Hk | ].
     destruct (Nat.lt_trichotomy (v / b) (w / a)) as [H| H]. {
       rewrite max_r in Hk; [ | now apply Nat.lt_le_incl ].
       rewrite Hk.
