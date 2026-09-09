@@ -1151,7 +1151,7 @@ f_equal. {
   rewrite Nat.Div0.mul_mod_idemp_l.
   rewrite <- Nat.mul_assoc.
   rewrite <- Nat.pow_2_r.
-  rewrite Nat_sqr_sub; [ | flia Hmz ].
+  rewrite Nat_squ_sub; [ | flia Hmz ].
   rewrite Nat.pow_1_l, Nat.mul_1_r, Nat.pow_2_r.
   rewrite <- Nat.Div0.mul_mod_idemp_r.
   rewrite <- (Nat.Div0.mod_add (m * m + 1 - 2 * m) 2).
@@ -1236,7 +1236,7 @@ f_equal. {
   rewrite Nat.Div0.mul_mod_idemp_l.
   rewrite <- Nat.mul_assoc.
   rewrite <- Nat.pow_2_r.
-  rewrite Nat_sqr_sub; [ | flia Hnz ].
+  rewrite Nat_squ_sub; [ | flia Hnz ].
   rewrite Nat.pow_1_l, Nat.mul_1_r, Nat.pow_2_r.
   rewrite <- Nat.Div0.mul_mod_idemp_r.
   rewrite <- (Nat.Div0.mod_add (n * n + 1 - 2 * n) 2).

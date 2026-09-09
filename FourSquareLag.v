@@ -94,7 +94,7 @@ Proof.
 intros * Hp Hp2 Ha Ha' Haa.
 intros H1.
 apply Nat_eq_mod_sub_0 in H1.
-rewrite Nat_sqr_sub_sqr, Nat.mul_comm in H1.
+rewrite Nat_squ_sub_squ, Nat.mul_comm in H1.
 apply Nat.Lcm0.mod_divide in H1.
 specialize (Nat.gauss _ _ _ H1) as H2.
 apply (Nat.mul_le_mono_l _ _ 2) in Ha.
@@ -143,7 +143,7 @@ intros * Hp Hp2 Hb Hb' Hbb' Hb1.
 assert (Hpz : p ≠ 0) by now intros H; subst p.
 apply Nat_eq_mod_sub_0 in Hb1.
 replace (b' ^ 2 + 1 - (b ^ 2 + 1)) with (b' ^ 2 - b ^ 2) in Hb1 by flia.
-rewrite Nat_sqr_sub_sqr, Nat.mul_comm in Hb1.
+rewrite Nat_squ_sub_squ, Nat.mul_comm in Hb1.
 apply Nat.Lcm0.mod_divide in Hb1.
 specialize (Nat.gauss _ _ _ Hb1) as H2.
 apply (Nat.mul_le_mono_l _ _ 2) in Hb.
@@ -551,7 +551,7 @@ specialize (Nat.div_mod m 2 (Nat.neq_succ_0 _)) as H1.
 replace (_ + _ + _ + _) with (4 * (m / 2) ^ 2) by flia.
 rewrite <- Nat.pow_2_r.
 rewrite H1 at 2.
-rewrite Nat_sqr_add.
+rewrite Nat_squ_add.
 rewrite Nat.pow_mul_l.
 replace (2 ^ 2) with 4 by easy.
 flia.
@@ -571,7 +571,7 @@ assert (Hxy2 : ∀ x, x ^ 2 ≡ f x mod m). {
   destruct (le_dec (x mod m) v) as [Hxv| Hxv]. {
     now rewrite Nat_mod_pow_mod.
   } {
-    rewrite Nat_sqr_sub. 2: {
+    rewrite Nat_squ_sub. 2: {
       now apply Nat.lt_le_incl, Nat.mod_upper_bound.
     }
     symmetry.
@@ -584,7 +584,7 @@ assert (Hxy2 : ∀ x, x ^ 2 ≡ f x mod m). {
         rewrite Heqy.
         now apply Nat.lt_le_incl, Nat.mod_upper_bound.
       }
-      rewrite Nat_sqr_add.
+      rewrite Nat_squ_add.
       rewrite Nat.mul_add_distr_l.
       rewrite <- Nat.mul_assoc, <- Nat.pow_2_r.
       flia.
@@ -842,7 +842,7 @@ specialize (Nat.div_mod x4 m Hmz) as Hx4.
      = m²Σ qi² + m² + Σ m²qi = m² (Σ qi² + 1 + Σ qi) = mp *)
   move Hm at bottom.
   rewrite Hx1, Hx2, Hx3, Hx4 in Hm.
-  do 4 rewrite Nat_sqr_add in Hm.
+  do 4 rewrite Nat_squ_add in Hm.
   remember (x1 / m) as q1 eqn:Hq1.
   remember (x2 / m) as q2 eqn:Hq2.
   remember (x3 / m) as q3 eqn:Hq3.

@@ -2168,7 +2168,7 @@ assert (H : Nat.gcd p i = 1). {
   apply eq_gcd_prime_small_1; [ easy | flia Hip ].
 }
 specialize (H2 H); clear H.
-rewrite Nat_sqr_sub_1 in H2.
+rewrite Nat_squ_sub_1 in H2.
 specialize (Nat.gauss _ _ _ H2) as H3.
 assert (H : Nat.gcd p (i + 1) = 1). {
   apply eq_gcd_prime_small_1; [ easy | flia Hip ].
@@ -2431,7 +2431,7 @@ rewrite Nat_pow_mod_is_pow_mod; [ | now intros H; subst p ].
 rewrite Nat_mod_pow_mod.
 rewrite <- Nat.pow_mul_r.
 rewrite <- Nat.pow_2_r.
-rewrite Nat_sqr_sub; [ | flia Hip ].
+rewrite Nat_squ_sub; [ | flia Hip ].
 rewrite Nat.mul_shuffle0.
 replace (2 ^ 2) with 4 by easy.
 replace (2 * 2) with 4 by easy.

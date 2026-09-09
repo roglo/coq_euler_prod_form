@@ -841,7 +841,7 @@ rewrite <- Nat.pow_add_r.
 f_equal; flia Hi.
 Qed.
 
-Theorem Nat_sqr_sub_sqr : ∀ a b, a ^ 2 - b ^ 2 = (a + b) * (a - b).
+Theorem Nat_squ_sub_squ : ∀ a b, a ^ 2 - b ^ 2 = (a + b) * (a - b).
 Proof.
 intros.
 destruct (lt_dec a b) as [Hab| Hba]. {
@@ -863,7 +863,7 @@ rewrite Nat.sub_add; [ | now apply Nat.mul_le_mono_l ].
 now do 2 rewrite Nat.pow_2_r.
 Qed.
 
-Theorem Nat_sqr_sub_1 : ∀ a, a ^ 2 - 1 = (a + 1) * (a - 1).
+Theorem Nat_squ_sub_1 : ∀ a, a ^ 2 - 1 = (a + 1) * (a - 1).
 Proof.
 intros.
 destruct (Nat.eq_dec a 0) as [Haz| Haz]; [ now subst a | ].
@@ -904,7 +904,7 @@ apply (Nat.le_trans _ a); [ easy | ].
 apply Nat.le_add_r.
 Qed.
 
-Theorem Nat_sqr_sub : ∀ a b, b ≤ a → (a - b) ^ 2 = a ^ 2 + b ^ 2 - 2 * a * b.
+Theorem Nat_squ_sub : ∀ a b, b ≤ a → (a - b) ^ 2 = a ^ 2 + b ^ 2 - 2 * a * b.
 Proof.
 intros * Hba.
 do 3 rewrite Nat.pow_2_r.
@@ -925,7 +925,7 @@ rewrite Nat.add_sub_swap; [ easy | ].
 now apply Nat.mul_le_mono_l.
 Qed.
 
-Theorem Nat_sqr_add : ∀ a b, (a + b) ^ 2 = a ^ 2 + b ^ 2 + 2 * a * b.
+Theorem Nat_squ_add : ∀ a b, (a + b) ^ 2 = a ^ 2 + b ^ 2 + 2 * a * b.
 Proof.
 intros.
 do 3 rewrite Nat.pow_2_r; flia.

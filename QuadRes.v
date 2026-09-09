@@ -1282,39 +1282,52 @@ erewrite filter_ext_in; cycle 1. {
   }
   easy.
 }
-(*
-rewrite Nat_sqr_sub_1.
-*)
-...
-replace ((p - 1) / 2) with ((p - 1) / 2 - (p² - 1) / 8 + (p² - 1) / 8);
-  cycle 1. {
-  apply Nat.sub_add.
-  __admit.
-}
-rewrite List.seq_app.
-rewrite List.filter_app.
-rewrite List_filter_all_false; cycle 1. {
-  intros a Ha.
-  apply Nat.ltb_ge.
-  apply List.in_seq in Ha.
-  destruct Ha as (H1a, Ha).
-  rewrite Nat_sqr_sub_1 at 1.
-...
-Search (length (filter _ _)).
-...
-replace ((p² - 1) / 8) with ((p - 1) / 2 * ((p + 1) / 4)); cycle 1. {
-  rewrite Nat.mul_comm.
-  rewrite <- Nat.Lcm0.divide_div_mul_exact. {
-    rewrite Nat.mul_comm.
-Search (_ * _ / _).
-    rewrite Nat.Lcm0.divide_div_mul_exact.
-...
-  rewrite Nat_sqr_sub_1.
-  replace 8 with (2 * 4) by easy.
-  rewrite <- Nat.Div0.div_div.
-  rewrite (Nat.mul_comm (p + 1)).
-Search (_ / _ * _).
-Search (_ / _ * _ / _).
-  remember ((p - 1) / 2) as h eqn:Hh.
+destruct (Nat.eq_dec ((p - 1) mod 4) 0) as [Hp4z| Hp4z]. {
+  apply Nat.Lcm0.mod_divide in Hp4z.
+  destruct Hp4z as (k, Hk).
+  rewrite Hk.
+  erewrite List.filter_ext_in; cycle 1. {
+    intros a Ha.
+    replace (k * 4 <? a * 4) with (k <? a); cycle 1. {
+      remember (k <? a) as ka eqn:Hka; symmetry in Hka |-*.
+      destruct ka. {
+        apply Nat.ltb_lt in Hka.
+        apply Nat.ltb_lt.
+        now apply Nat.mul_lt_mono_pos_r.
+      }
+      apply Nat.ltb_nlt in Hka.
+      apply Nat.ltb_nlt.
+      intros H; apply Hka; clear Hka.
+      now apply Nat.mul_lt_mono_pos_r in H.
+    }
+    easy.
+  }
+  replace 4 with (2 * 2) at 1 by easy.
+  rewrite Nat.mul_assoc, Nat.div_mul; [ | easy ].
+  replace (k * 2) with (k + k) by flia.
+  rewrite List.seq_app.
+  rewrite List.filter_app.
+  rewrite List_filter_all_false; cycle 1. {
+    intros a Ha.
+    apply List.in_seq in Ha.
+    apply Nat.ltb_ge.
+    now apply Nat.lt_succ_r.
+  }
+  rewrite List.app_nil_l.
+  rewrite List_filter_all_true; cycle 1. {
+    intros a Ha.
+    apply List.in_seq in Ha.
+    now apply Nat.ltb_lt.
+  }
+  rewrite List.length_seq.
+  apply Nat.add_sub_eq_nz in Hk; cycle 1. {
+    destruct p; [ easy | ].
+    destruct p; [ easy | ].
+    rewrite Nat.sub_succ, Nat.sub_0_r in Hk.
+    congruence.
+  }
+  rewrite Nat.add_comm in Hk.
+  subst p.
+  rewrite Nat_squ_add.
 ...
 *)
