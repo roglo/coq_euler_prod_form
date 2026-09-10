@@ -1391,6 +1391,7 @@ destruct (Nat.eq_dec ((p - 1) mod 4) 0) as [Hp4z| Hp4z]. {
   replace 4 with (2 * 2) at 1 by easy.
   rewrite Nat.mul_assoc, Nat.div_mul; [ | easy ].
   rewrite Nat.mul_comm, Nat_mul_2_l.
+  (* k = (p - 1) / 4 *)
   rewrite List.seq_app.
   rewrite List.filter_app.
   rewrite List_filter_all_false; cycle 1. {
@@ -1480,6 +1481,10 @@ destruct (Nat.eq_dec ((p - 1) mod 4) 2) as [Hp42| Hp42]. {
     rewrite Nat.mul_assoc.
     now rewrite <- Nat_mul_ltb_mono_pos_r.
   }
+(*
+Compute (List.map (λ p, (p, (p - 1) / 4, (p + 1) / 4 - 1)) (List.filter is_prime (List.seq 1 50))).
+*)
+  (* k = (p + 1) / 4 - 1 *)
   replace (2 * k + 1) with (k + (k + 1)) at 1 by flia.
   rewrite List.seq_app.
   rewrite List.filter_app.
