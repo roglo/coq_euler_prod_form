@@ -1322,13 +1322,11 @@ specialize (Nat.mod_upper_bound a 2 (Nat.neq_succ_0 _)) as H.
 flia Ha2 H.
 Qed.
 
-(* to be completed *)
 Theorem quadratic_reciprocity_2 :
   ∀ p, prime p → legendre_symbol 2 p = (p - 1) ^ ((p² - 1) / 8) mod p.
 Proof.
 intros * Hp.
 destruct (Nat.eq_dec p 2) as [Hp2| Hp2]; [ now subst p | ].
-(**)
 erewrite (Gauss_lemma p Hp); [ | | easy ]; cycle 1. {
   split; [ easy | ].
   destruct p; [ easy | ].
@@ -1485,9 +1483,6 @@ destruct (Nat.eq_dec ((p - 1) mod 4) 2) as [Hp42| Hp42]. {
     rewrite Nat.mul_assoc.
     now rewrite <- Nat_mul_ltb_mono_pos_r.
   }
-(*
-Compute (List.map (λ p, (p, (p - 1) / 4, (p + 1) / 4 - 1)) (List.filter is_prime (List.seq 1 50))).
-*)
   (* k = (p + 1) / 4 - 1 *)
   replace (2 * k + 1) with (k + (k + 1)) at 1 by flia.
   rewrite List.seq_app.
@@ -1523,8 +1518,16 @@ destruct (Nat.eq_dec ((p - 1) mod 4) 3) as [Hp43| Hp43]. {
   specialize (odd_prime _ Hp Hp2) as H1.
   rewrite <- Ha in H1.
   rewrite Nat_4_eq_2_mul_2 in H1.
-...
+  rewrite <- Nat.mul_assoc in H1.
   now rewrite Nat.mul_comm, Nat.Div0.mod_mul in H1.
 }
-...
-*)
+specialize (Nat.mod_upper_bound (p - 1) 4 (Nat.neq_succ_0 _)) as H1.
+destruct ((p - 1) mod 4) as [| n]; [ easy | ].
+destruct n; [ easy | ].
+destruct n; [ easy | ].
+destruct n; [ easy | ].
+do 4 apply Nat.succ_lt_mono in H1.
+easy.
+Qed.
+
+Inspect 1.
