@@ -1415,8 +1415,21 @@ destruct (Nat.eq_dec ((p - 1) mod 4) 0) as [Hp4z| Hp4z]. {
   now rewrite Nat.mul_1_r.
 }
 destruct (Nat.eq_dec ((p - 1) mod 4) 1) as [Hp41| Hp41]. {
-  (* c'est censé pas être possible *)
   specialize (Nat.div_mod (p - 1) 4 (Nat.neq_succ_0 _)) as Ha.
   rewrite Hp41 in Ha.
+  rewrite Nat.add_comm in Ha.
+  apply Nat.add_sub_eq_nz in Ha; [ | easy ].
+  rewrite Nat.add_assoc in Ha.
+  replace 4 with (2 * 2) in Ha by easy.
+  replace (1 + 1) with (2 * 1) in Ha by easy.
+  rewrite <- Nat.mul_assoc in Ha.
+  rewrite <- Nat.mul_add_distr_l in Ha.
+  specialize (odd_prime _ Hp Hp2) as H1.
+  rewrite <- Ha in H1.
+  now rewrite Nat.mul_comm, Nat.Div0.mod_mul in H1.
+}
+destruct (Nat.eq_dec ((p - 1) mod 4) 2) as [Hp42| Hp42]. {
+  specialize (Nat.div_mod (p - 1) 4 (Nat.neq_succ_0 _)) as Ha.
+  rewrite Hp42 in Ha.
 ...
 *)
