@@ -479,7 +479,7 @@ Fixpoint nth_sqrt_mod_loop cnt n a p i :=
 Definition nth_sqrt_mod n a p := nth_sqrt_mod_loop p n a p 0.
 Definition sqrt_mod a p := nth_sqrt_mod_loop p 2 a p 0.
 
-Definition legendre_symbol a p :=
+Definition Legendre_symbol a p :=
   if p =? 2 then 1
   else if a mod p =? 0 then 0
   else
@@ -594,11 +594,11 @@ Qed.
 
 Theorem Euler_criterion : ∀ p,
   prime p
-  → ∀ a, a ^ ((p - 1) / 2) ≡ legendre_symbol a p mod p.
+  → ∀ a, a ^ ((p - 1) / 2) ≡ Legendre_symbol a p mod p.
 Proof.
 intros * Hp *.
 destruct (Nat.eq_dec p 2) as [Hp2| Hp2]; [ now subst p | ].
-progress unfold legendre_symbol.
+progress unfold Legendre_symbol.
 generalize Hp2; intros H.
 apply Nat.eqb_neq in H; rewrite H; clear H.
 destruct (Nat.eq_dec (a mod p) 0) as [Haz| Haz]. {
@@ -680,7 +680,7 @@ Definition nb_of_mult_gt_half a p :=
   List.length
     (List.filter (λ m, (p - 1) / 2 <? ((m * a) mod p)) (seq 1 ((p - 1) / 2))).
 
-Definition is_quadratic_residue a p := legendre_symbol a p =? 1.
+Definition is_quadratic_residue a p := Legendre_symbol a p =? 1.
 
 (*
 Compute (let p := 29 in List.map (λ a, (sqrt_mod a p, a)) (List.seq 0 p)).
@@ -913,7 +913,7 @@ Theorem Gauss_lemma :
   ∀ a n,
   0 < a < p
   → n = nb_of_mult_gt_half a p
-  → legendre_symbol a p = (p - 1) ^ n mod p.
+  → Legendre_symbol a p = (p - 1) ^ n mod p.
 Proof.
 intros * Hp * (Haz, Hap) Hn.
 destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
@@ -1025,7 +1025,7 @@ assert
 specialize (Euler_criterion p Hp a) as H3.
 symmetry in H3.
 rewrite Nat.mod_small in H3; cycle 1. {
-  progress unfold legendre_symbol.
+  progress unfold Legendre_symbol.
   remember (p =? 2) as p2 eqn:Hp2; symmetry in Hp2.
   destruct p2. {
     apply Nat.eqb_eq in Hp2; subst p.
@@ -1323,7 +1323,7 @@ flia Ha2 H.
 Qed.
 
 Theorem quadratic_reciprocity_2 :
-  ∀ p, prime p → legendre_symbol 2 p = (p - 1) ^ ((p² - 1) / 8) mod p.
+  ∀ p, prime p → Legendre_symbol 2 p = (p - 1) ^ ((p² - 1) / 8) mod p.
 Proof.
 intros * Hp.
 destruct (Nat.eq_dec p 2) as [Hp2| Hp2]; [ now subst p | ].
@@ -1531,3 +1531,22 @@ easy.
 Qed.
 
 Inspect 1.
+
+(* to be completed
+Compute (let p := 3 in let q := 7 in
+  Legendre_symbol p q * Legendre_symbol q p).
+
+Theorem quadratic_reciprocity :
+  ∀ p q, prime p → prime p →
+  (Legendre_symbol p q * Legendre_symbol q p) mod 2 =
+non, c'est pas ça...
+...
+  opp_1_pow (((p -1) / 2) * ((q - 1) / 2)).
+
+...
+
+Theorem quadratic_reciprocity :
+  ∀ p q, prime p → prime p →
+  Legendre_symbol p q * Legendre_symbol q p =
+  opp_1_pow (((p -1) / 2) * ((q - 1) / 2)).
+*)
