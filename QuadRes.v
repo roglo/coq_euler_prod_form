@@ -1480,17 +1480,26 @@ destruct (Nat.eq_dec ((p - 1) mod 4) 2) as [Hp42| Hp42]. {
     rewrite Nat.mul_assoc.
     now rewrite <- Nat_mul_ltb_mono_pos_r.
   }
-...
-Search (_ * _ < (_ * _)).
-Nat.mul_lt_mono_pos_r: ∀ p n m : nat, 0 < p → n < m ↔ n * p < m * p
-
-Search (_ * _ <? _ * _).
-Search (_ * _ <=? _ * _).
-Search (_ * _ <? (_ * _)).
-Search (_ * _ <=? _ * _).
-
-...
-  specialize (Nat.div_mod (p + 1) 4 (Nat.neq_succ_0 _)) as Hb.
-  rewrite Hp42 in Ha.
+  replace (2 * k + 1) with (k + (k + 1)) at 1 by flia.
+  rewrite List.seq_app.
+  rewrite List.filter_app.
+  rewrite List_filter_all_false; cycle 1. {
+    intros a Ha.
+    apply List.in_seq in Ha.
+    apply Nat.ltb_ge.
+    flia Ha.
+  }
+  rewrite List.app_nil_l.
+  rewrite List_filter_all_true; cycle 1. {
+    intros a Ha.
+    apply List.in_seq in Ha.
+    apply Nat.ltb_lt.
+    flia Ha.
+  }
+  rewrite List.length_seq.
+  rewrite Nat.mul_add_distr_l, Nat.mul_1_r.
+  rewrite (Nat.mul_comm 2), Nat.mul_assoc.
+  now rewrite Nat_mod_add_l_mul_r.
+}
 ...
 *)
