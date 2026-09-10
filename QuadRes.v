@@ -4,8 +4,67 @@ From Stdlib Require Import Sorting.Permutation.
 Import List List.ListNotations.
 Require Import Misc Primes.
 
+Global Hint Resolve Nat.le_0_l : core.
+Global Hint Resolve Nat.lt_0_succ : core.
+
+Notation "a '²'" := (a ^ 2) (at level 1, format "a ²").
+
 Theorem Nat_mul_2_l : ∀ a, 2 * a = a + a.
 Proof. flia. Qed.
+
+Theorem Nat_mul_add_1_distr_l : ∀ a b, a * (b + 1) = a * b + a.
+Proof.
+intros.
+rewrite Nat.mul_add_distr_l.
+now rewrite Nat.mul_1_r.
+Qed.
+
+Theorem Nat_mul_ltb_mono_pos_r :
+  ∀ p n m : nat, 0 < p → (n <? m) = (n * p <? m * p).
+Proof.
+intros * Hp.
+remember (_ * _ <? _) as b eqn:Hb; symmetry in Hb.
+destruct b. {
+  apply Nat.ltb_lt in Hb.
+  apply Nat.ltb_lt.
+  now apply Nat.mul_lt_mono_pos_r in Hb.
+} {
+  apply Nat.ltb_nlt in Hb.
+  apply Nat.ltb_nlt.
+  intros H; apply Hb; clear Hb.
+  now apply Nat.mul_lt_mono_pos_r.
+}
+Qed.
+
+Theorem Nat_eq_succ_mod_2_1 : ∀ n, S n mod 2 = 1 → n mod 2 = 0.
+Proof.
+intros * Hn.
+destruct n; [ easy | ].
+do 2 rewrite <- Nat.add_1_r in Hn.
+rewrite <- Nat.add_assoc, Nat.add_1_r in Hn.
+rewrite <- Nat.Div0.add_mod_idemp_r, Nat.add_0_r in Hn.
+rewrite <- Nat.add_1_r.
+now rewrite <- Nat.Div0.add_mod_idemp_l, Hn.
+Qed.
+
+Theorem Nat_sub_1_squ : ∀ a, a ≠ 0 → (a - 1)² ≡ 1 mod a.
+Proof.
+intros * Haz.
+destruct (Nat.eq_dec a 1) as [Ha1| Ha1]; [ now subst a | ].
+rewrite Nat_squ_sub; [ | now apply Nat.neq_0_lt_0 ].
+cbn.
+do 2 rewrite Nat.mul_1_r.
+rewrite Nat.add_0_r.
+rewrite <- Nat_mul_2_l.
+rewrite Nat.add_sub_swap; cycle 1. {
+  apply Nat.mul_le_mono_r.
+  destruct a; [ easy | ].
+  destruct a; [ easy | ].
+  now do 2 apply -> Nat.succ_le_mono.
+}
+rewrite <- Nat.mul_sub_distr_r.
+apply Nat_mod_add_l_mul_r.
+Qed.
 
 (* Euler criterion *)
 
@@ -149,8 +208,6 @@ split. {
   }
 }
 Qed.
-
-Notation "a '²'" := (a ^ 2) (at level 1, format "a ²").
 
 Theorem congruence_inverse_has_unique_different_solution :
   ∀ p a,
@@ -407,9 +464,6 @@ destruct Hkll as [Hkll| Hkll]; [ now left | now right; right ].
 Qed.
 
 (**)
-
-Global Hint Resolve Nat.le_0_l : core.
-Global Hint Resolve Nat.lt_0_succ : core.
 
 Fixpoint nth_sqrt_mod_loop cnt n a p i :=
   match cnt with
@@ -851,17 +905,6 @@ erewrite List.filter_ext; cycle 1. {
 now rewrite List.filter_false.
 Qed.
 
-Theorem Nat_eq_succ_mod_2_1 : ∀ n, S n mod 2 = 1 → n mod 2 = 0.
-Proof.
-intros * Hn.
-destruct n; [ easy | ].
-do 2 rewrite <- Nat.add_1_r in Hn.
-rewrite <- Nat.add_assoc, Nat.add_1_r in Hn.
-rewrite <- Nat.Div0.add_mod_idemp_r, Nat.add_0_r in Hn.
-rewrite <- Nat.add_1_r.
-now rewrite <- Nat.Div0.add_mod_idemp_l, Hn.
-Qed.
-
 Theorem Gauss_lemma :
   ∀ p, prime p →
   ∀ a n,
@@ -1071,7 +1114,7 @@ assert
       now apply Nat.Lcm0.mod_divide in Hpo.
     }
     cbn - [ "/" ].
-    replace (p + p) with (2 * p) by now cbn; rewrite Nat.add_0_r.
+    rewrite <- Nat_mul_2_l.
     now rewrite Nat.mul_comm, Nat.div_mul.
   }
   apply (NoDup_map_iff 0).
@@ -1229,25 +1272,6 @@ now apply Nat.neq_0_lt_0.
 Qed.
 
 Inspect 1.
-
-Theorem Nat_sub_1_squ : ∀ a, a ≠ 0 → (a - 1)² ≡ 1 mod a.
-Proof.
-intros * Haz.
-destruct (Nat.eq_dec a 1) as [Ha1| Ha1]; [ now subst a | ].
-rewrite Nat_squ_sub; [ | now apply Nat.neq_0_lt_0 ].
-cbn.
-do 2 rewrite Nat.mul_1_r.
-rewrite Nat.add_0_r.
-rewrite <- Nat_mul_2_l.
-rewrite Nat.add_sub_swap; cycle 1. {
-  apply Nat.mul_le_mono_r.
-  destruct a; [ easy | ].
-  destruct a; [ easy | ].
-  now do 2 apply -> Nat.succ_le_mono.
-}
-rewrite <- Nat.mul_sub_distr_r.
-apply Nat_mod_add_l_mul_r.
-Qed.
 
 Theorem Nat_same_parity_same_opp_1_pow :
   ∀ n, n ≠ 0 → ∀ a b,
@@ -1420,16 +1444,53 @@ destruct (Nat.eq_dec ((p - 1) mod 4) 1) as [Hp41| Hp41]. {
   rewrite Nat.add_comm in Ha.
   apply Nat.add_sub_eq_nz in Ha; [ | easy ].
   rewrite Nat.add_assoc in Ha.
-  replace 4 with (2 * 2) in Ha by easy.
-  replace (1 + 1) with (2 * 1) in Ha by easy.
+  rewrite Nat.add_comm in Ha.
+  cbn - [ "/" "*" ] in Ha.
+  replace 4 with (2 * 2) in Ha at 1 by easy.
   rewrite <- Nat.mul_assoc in Ha.
-  rewrite <- Nat.mul_add_distr_l in Ha.
+  rewrite <- Nat_mul_add_1_distr_l in Ha.
   specialize (odd_prime _ Hp Hp2) as H1.
   rewrite <- Ha in H1.
   now rewrite Nat.mul_comm, Nat.Div0.mod_mul in H1.
 }
 destruct (Nat.eq_dec ((p - 1) mod 4) 2) as [Hp42| Hp42]. {
-  specialize (Nat.div_mod (p - 1) 4 (Nat.neq_succ_0 _)) as Ha.
+  specialize (Nat.div_mod (p - 1) 4 (Nat.neq_succ_0 _)) as H1.
+  rewrite Hp42 in H1.
+  remember ((p - 1) / 4) as k eqn:Hk.
+  generalize H1; intros H2.
+  apply Nat.add_sub_eq_nz in H1; [ | flia ].
+  symmetry in H1.
+  rewrite Nat.add_comm, <- Nat.add_assoc in H1.
+  apply (f_equal (λ a, a + 1)) in H1.
+  rewrite <- Nat.add_assoc in H1.
+  cbn - [ "*" ] in H1.
+  replace 4 with (2 * 2) in H2 by easy.
+  rewrite <- Nat.mul_assoc in H2.
+  rewrite <- Nat_mul_add_1_distr_l in H1, H2.
+  rewrite Nat_squ_sub_1.
+  rewrite H1, H2.
+  rewrite Nat.mul_comm, Nat.div_mul; [ | easy ].
+  rewrite (Nat.mul_comm 4), Nat.mul_shuffle0.
+  rewrite Nat.mul_assoc.
+  rewrite <- Nat.mul_assoc.
+  rewrite Nat.div_mul; [ | easy ].
+  erewrite List.filter_ext_in; cycle 1. {
+    intros a Ha.
+    replace 4 with (2 * 2) by easy.
+    rewrite Nat.mul_assoc.
+    now rewrite <- Nat_mul_ltb_mono_pos_r.
+  }
+...
+Search (_ * _ < (_ * _)).
+Nat.mul_lt_mono_pos_r: ∀ p n m : nat, 0 < p → n < m ↔ n * p < m * p
+
+Search (_ * _ <? _ * _).
+Search (_ * _ <=? _ * _).
+Search (_ * _ <? (_ * _)).
+Search (_ * _ <=? _ * _).
+
+...
+  specialize (Nat.div_mod (p + 1) 4 (Nat.neq_succ_0 _)) as Hb.
   rewrite Hp42 in Ha.
 ...
 *)
