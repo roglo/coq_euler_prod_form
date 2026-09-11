@@ -513,10 +513,9 @@ Qed.
 Theorem eq_sqrt_mod_Some :
   ∀ a b p,
   sqrt_mod a p = Some b
-  → b < p ∧ b * b ≡ a mod p.
+  → b < p ∧ b² ≡ a mod p.
 Proof.
 intros * Hsm.
-rewrite <- Nat.pow_2_r.
 now apply eq_sqrt_mod_loop_Some in Hsm.
 Qed.
 
@@ -630,6 +629,7 @@ symmetry in Hsm.
 destruct sm as [b| ]. {
   apply eq_sqrt_mod_Some in Hsm.
   cbn in Hsm.
+  rewrite Nat.mul_1_r in Hsm.
   destruct Hsm as (Hb, Hsm).
   rewrite <- Nat_mod_pow_mod.
   rewrite <- Hsm.
@@ -1534,12 +1534,49 @@ Inspect 1.
 
 (* to be completed
 Theorem quadratic_reciprocity :
+  ∀ p q, prime p → prime q → 2 < p < q →
+  is_quadratic_residue p q = is_quadratic_residue q p ↔
+    p mod 4 = 1 ∨ q mod 4 = 1.
+Proof.
+intros * Hp Hq Hpq.
+split; intros H1. {
+  rename H1 into Hx.
+  remember (is_quadratic_residue q p) as b eqn:Hy; symmetry in Hy.
+  move Hx after Hy.
+  destruct b. {
+    progress unfold is_quadratic_residue in Hx, Hy.
+    apply Nat.eqb_eq in Hx, Hy.
+    progress unfold Legendre_symbol in Hx, Hy.
+    remember (p =? 2) as p2 eqn:Hp2; symmetry in Hp2.
+    destruct p2; [ apply Nat.eqb_eq in Hp2; flia Hpq Hp2 | ].
+    remember (q =? 2) as q2 eqn:Hq2; symmetry in Hq2.
+    destruct q2; [ apply Nat.eqb_eq in Hq2; flia Hpq Hq2 | ].
+    clear Hp2 Hq2.
+    remember (p mod q =? 0) as pqz eqn:Hpqz; symmetry in Hpqz.
+    destruct pqz; [ easy | ].
+    remember (q mod p =? 0) as qpz eqn:Hqpz; symmetry in Hqpz.
+    destruct qpz; [ easy | ].
+    move Hqpz before Hpqz.
+    apply Nat.eqb_neq in Hpqz, Hqpz.
+    remember (sqrt_mod p q) as smpq eqn:Hsmpq; symmetry in Hsmpq.
+    remember (sqrt_mod q p) as smqp eqn:Hsmqp; symmetry in Hsmqp.
+    destruct smpq as [u| ]; [ clear Hx | flia Hx Hpq ].
+    destruct smqp as [v| ]; [ clear Hy | flia Hy Hpq ].
+    move u before q; move v before u.
+    apply eq_sqrt_mod_Some in Hsmpq.
+    apply eq_sqrt_mod_Some in Hsmqp.
+    destruct Hsmpq as (Huq, Hu).
+    destruct Hsmqp as (Hvp, Hv).
+    move Hvp before Huq.
+...
+
+Theorem quadratic_reciprocity :
   ∀ p q, prime p → prime q → 2 < p → 2 < q → p ≠ q →
   is_quadratic_residue p q = is_quadratic_residue q p ↔
     p mod 4 = 1 ∨ q mod 4 = 1.
 Proof.
 intros * Hp Hq Hp2 Hq2 Hpq.
-
+....
 (*
 Compute (List.map (λ p, List.map (λ q,
   (p, q, Bool.eqb (is_quadratic_residue p q) (is_quadratic_residue q p),
