@@ -1546,6 +1546,9 @@ split; intros H1. {
   destruct b. {
     progress unfold is_quadratic_residue in Hx, Hy.
     apply Nat.eqb_eq in Hx, Hy.
+    assert (Hzpq : 0 < p < q) by flia Hpq.
+    specialize (Gauss_lemma q Hq p _ Hzpq eq_refl) as H1.
+    progress unfold Legendre_symbol in H1.
     progress unfold Legendre_symbol in Hx, Hy.
     remember (p =? 2) as p2 eqn:Hp2; symmetry in Hp2.
     destruct p2; [ apply Nat.eqb_eq in Hp2; flia Hpq Hp2 | ].
@@ -1558,6 +1561,8 @@ split; intros H1. {
     destruct qpz; [ easy | ].
     move Hqpz before Hpqz.
     apply Nat.eqb_neq in Hpqz, Hqpz.
+    rewrite Hx in H1.
+    symmetry in H1.
     remember (sqrt_mod p q) as smpq eqn:Hsmpq; symmetry in Hsmpq.
     remember (sqrt_mod q p) as smqp eqn:Hsmqp; symmetry in Hsmqp.
     destruct smpq as [u| ]; [ clear Hx | flia Hx Hpq ].
