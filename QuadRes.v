@@ -1533,18 +1533,24 @@ Qed.
 Inspect 1.
 
 (* to be completed
-Compute (let p := 3 in let q := 7 in
-  Legendre_symbol p q * Legendre_symbol q p).
-
 Theorem quadratic_reciprocity :
-  ∀ p q, prime p → prime p →
-  (Legendre_symbol p q * Legendre_symbol q p) mod 2 =
-non, c'est pas ça...
-...
-  opp_1_pow (((p -1) / 2) * ((q - 1) / 2)).
+  ∀ p q, prime p → prime q → 2 < p → 2 < q → p ≠ q →
+  is_quadratic_residue p q = is_quadratic_residue q p ↔
+    p mod 4 = 1 ∨ q mod 4 = 1.
+Proof.
+intros * Hp Hq Hp2 Hq2 Hpq.
 
+(*
+Compute (List.map (λ p, List.map (λ q,
+  (p, q, Bool.eqb (is_quadratic_residue p q) (is_quadratic_residue q p),
+   orb (p mod 4 =? 1) (q mod 4 =? 1)))
+  (List.filter (Nat.ltb p) (List.filter is_prime (List.seq 3 30))))
+  (List.filter is_prime (List.seq 3 30))).
 ...
+*)
 
+(* attempt to define it with Legendre symbols but the problem is that
+   my Legendre symbol is not "1 or -1" but "1 or p-1" *)
 Theorem quadratic_reciprocity :
   ∀ p q, prime p → prime p →
   Legendre_symbol p q * Legendre_symbol q p =
