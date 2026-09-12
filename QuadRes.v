@@ -1533,6 +1533,20 @@ Qed.
 Inspect 1.
 
 (* to be completed
+Theorem Eisenstein_lemma :
+  ∀ p q, prime p → prime q →
+  nb_of_mult_gt_half q p ≡ (Σ (k = 1, (p - 1) / 2), k * q / p) mod 2.
+Proof.
+intros * Hp Hq.
+(* seems true and p and q must be primes, indeed
+Compute (List.map (λ p, List.map (λ q,
+  (p, q,
+  nb_of_mult_gt_half q p ≡ (Σ (k = 1, (p - 1) / 2), k * q / p) mod 2))
+  (List.filter (Nat.ltb p) (List.filter is_prime (List.seq 3 30))))
+  (List.filter is_prime (List.seq 3 30))).
+*)
+...
+
 Theorem quadratic_reciprocity :
   ∀ p q, prime p → prime q → 2 < p < q →
   is_quadratic_residue p q = is_quadratic_residue q p ↔
