@@ -1552,7 +1552,10 @@ Compute (List.map (λ p, List.map (λ a,
   ((*List.filter (Nat.ltb p)*) (List.filter (are_coprimes p) (List.seq 1 30))))
   (List.filter is_prime (List.seq 3 30))).
 *)
-Search (∑ (_ = _, _), _ = ∑ (_ = _, _), _).
+assert (Hpz : p ≠ 0) by now intros H; subst p.
+erewrite summation_eq_compat; cycle 1. {
+  intros k Hk.
+  specialize (Nat.div_mod (k * q) p Hpz) as H1.
 ...
 
 Theorem quadratic_reciprocity :
