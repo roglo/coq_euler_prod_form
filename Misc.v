@@ -50,7 +50,7 @@ Qed.
 
 (* summations *)
 
-Notation "'Σ' ( i = b , e ) , g" :=
+Notation "'∑' ( i = b , e ) , g" :=
   (fold_left (λ c i, c + g) (seq b (S e - b)) 0)
   (at level 45, i at level 0, b at level 60, e at level 60) : nat_scope.
 
@@ -98,7 +98,7 @@ Qed.
 
 Theorem summation_split_first : ∀ b e f,
   b ≤ e
-  → Σ (i = b, e), f i = f b + Σ (i = S b, e), f i.
+  → ∑ (i = b, e), f i = f b + ∑ (i = S b, e), f i.
 Proof.
 intros * Hbe.
 rewrite Nat.sub_succ.
@@ -110,7 +110,7 @@ Qed.
 Theorem summation_split_last : ∀ b e f,
   b ≤ e
   → 1 ≤ e
-  → Σ (i = b, e), f i = Σ (i = b, e - 1), f i + f e.
+  → ∑ (i = b, e), f i = ∑ (i = b, e - 1), f i + f e.
 Proof.
 intros * Hbe He.
 destruct e; [ flia He | clear He ].
@@ -130,7 +130,7 @@ Qed.
 
 Theorem all_0_summation_0 : ∀ b e f,
   (∀ i, b ≤ i ≤ e → f i = 0)
-  → Σ (i = b, e), f i = 0.
+  → ∑ (i = b, e), f i = 0.
 Proof.
 intros * Hz.
 remember (S e - b) as n eqn:Hn.
@@ -158,7 +158,7 @@ Ltac rewrite_in_summation th :=
 
 Theorem summation_eq_compat : ∀ b e g h,
   (∀ i, b ≤ i ≤ e → g i = h i)
-  → Σ (i = b, e), g i = Σ (i = b, e), h i.
+  → ∑ (i = b, e), g i = ∑ (i = b, e), h i.
 Proof.
 intros * Hgh.
 remember (S e - b) as n eqn:Hn.
@@ -172,7 +172,7 @@ apply Hgh; flia Hbie.
 Qed.
 
 Theorem summation_le_compat: ∀ b e g h,
-  (∀ i, b ≤ i ≤ e → g i ≤ h i) → Σ (i = b, e), g i ≤ Σ (i = b, e), h i.
+  (∀ i, b ≤ i ≤ e → g i ≤ h i) → ∑ (i = b, e), g i ≤ ∑ (i = b, e), h i.
 Proof.
 intros * Hgh.
 remember (S e - b) as n eqn:Hn.
@@ -189,15 +189,15 @@ apply Hgh; flia Hbie.
 Qed.
 
 Theorem mul_add_distr_r_in_summation : ∀ b e f g h,
-  Σ (i = b, e), (f i + g i) * h i =
-  Σ (i = b, e), (f i * h i + g i * h i).
+  ∑ (i = b, e), (f i + g i) * h i =
+  ∑ (i = b, e), (f i * h i + g i * h i).
 Proof.
 intros; revert b e.
 rewrite_in_summation Nat.mul_add_distr_r.
 Qed.
 
 Theorem double_mul_assoc_in_summation : ∀ b e f g h k,
-  Σ (i = b, e), f i * g i * h i * k i = Σ (i = b, e), f i * (g i * h i * k i).
+  ∑ (i = b, e), f i * g i * h i * k i = ∑ (i = b, e), f i * (g i * h i * k i).
 Proof.
 intros.
 assert (H : ∀ a b c d, a * b * c * d = a * (b * c * d)) by flia.
@@ -206,7 +206,7 @@ rewrite_in_summation H.
 Qed.
 
 Theorem mul_assoc_in_summation : ∀ b e f g h,
-  Σ (i = b, e), f i * g i * h i = Σ (i = b, e), f i * (g i * h i).
+  ∑ (i = b, e), f i * g i * h i = ∑ (i = b, e), f i * (g i * h i).
 Proof.
 intros.
 assert (H : ∀ a b c, a * b * c = a * (b * c)) by flia.
@@ -215,7 +215,7 @@ rewrite_in_summation H.
 Qed.
 
 Theorem mul_comm_in_summation : ∀ b e f g,
-  Σ (i = b, e), f i * g i = Σ (i = b, e), g i * f i.
+  ∑ (i = b, e), f i * g i = ∑ (i = b, e), g i * f i.
 Proof.
 intros.
 assert (H : ∀ a b, a * b = b * a) by flia.
@@ -224,7 +224,7 @@ rewrite_in_summation H.
 Qed.
 
 Theorem mul_summation_distr_l : ∀ a b e f,
-  a * (Σ (i = b, e), f i) = Σ (i = b, e), a * f i.
+  a * (∑ (i = b, e), f i) = ∑ (i = b, e), a * f i.
 Proof.
 intros.
 remember (S e - b) as n eqn:Hn.
@@ -238,7 +238,7 @@ apply fold_left_add_fun_from_0.
 Qed.
 
 Theorem mul_summation_distr_r : ∀ a b e f,
-  (Σ (i = b, e), f i) * a = Σ (i = b, e), f i * a.
+  (∑ (i = b, e), f i) * a = ∑ (i = b, e), f i * a.
 Proof.
 intros.
 rewrite Nat.mul_comm.
@@ -247,8 +247,8 @@ now rewrite mul_comm_in_summation.
 Qed.
 
 Theorem power_shuffle1_in_summation : ∀ b e a f g,
-  Σ (i = b, e), a * f i * a ^ (e - i) * g i =
-  Σ (i = b, e), f i * a ^ (S e - i) * g i.
+  ∑ (i = b, e), a * f i * a ^ (e - i) * g i =
+  ∑ (i = b, e), f i * a ^ (S e - i) * g i.
 Proof.
 intros.
 (* failed to be able to use "rewrite_in_summation" here *)
@@ -273,8 +273,8 @@ f_equal; f_equal; f_equal; flia Hn.
 Qed.
 
 Theorem power_shuffle2_in_summation : ∀ b e a c f,
-  Σ (i = b, e), c * f i * a ^ (e - i) * c ^ i =
-  Σ (i = b, e), f i * a ^ (e - i) * c ^ S i.
+  ∑ (i = b, e), c * f i * a ^ (e - i) * c ^ i =
+  ∑ (i = b, e), f i * a ^ (e - i) * c ^ S i.
 Proof.
 intros.
 remember (S e - b) as n eqn:Hn.
@@ -292,7 +292,7 @@ apply Nat.mul_comm.
 Qed.
 
 Theorem summation_add : ∀ b e f g,
-  Σ (i = b, e), (f i + g i) = Σ (i = b, e), f i + Σ (i = b, e), g i.
+  ∑ (i = b, e), (f i + g i) = ∑ (i = b, e), f i + ∑ (i = b, e), g i.
 Proof.
 intros.
 remember (S e - b) as n eqn:Hn.
@@ -307,7 +307,7 @@ Qed.
 
 Theorem summation_sub : ∀ b e f g,
   (∀ i, b ≤ i ≤ e → g i ≤ f i)
-  → Σ (i = b, e), (f i - g i) = Σ (i = b, e), f i - Σ (i = b, e), g i.
+  → ∑ (i = b, e), (f i - g i) = ∑ (i = b, e), f i - ∑ (i = b, e), g i.
 Proof.
 intros * Hgf.
 remember (S e - b) as n eqn:Hn.
@@ -344,7 +344,7 @@ apply IHn; [ easy | flia Hbe ].
 Qed.
 
 Theorem summation_succ_succ : ∀ b e f,
-  Σ (i = S b, S e), f i = Σ (i = b, e), f (S i).
+  ∑ (i = S b, S e), f i = ∑ (i = b, e), f (S i).
 Proof.
 intros.
 rewrite Nat.sub_succ.
@@ -356,7 +356,7 @@ rewrite IHn; [ easy | flia Hn ].
 Qed.
 
 Theorem summation_mod_idemp : ∀ b e f n,
-  (Σ (i = b, e), f i) mod n = (Σ (i = b, e), f i mod n) mod n.
+  (∑ (i = b, e), f i) mod n = (∑ (i = b, e), f i mod n) mod n.
 Proof.
 intros.
 destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
@@ -384,7 +384,7 @@ now rewrite IHlen, Nat.add_succ_comm.
 Qed.
 
 Theorem summation_rtl : ∀ g b k,
-  Σ (i = b, k), g i = Σ (i = b, k), g (k + b - i).
+  ∑ (i = b, k), g i = ∑ (i = b, k), g (k + b - i).
 Proof.
 intros g b k.
 destruct (le_dec (S k) b) as [Hkb| Hkb]. {
@@ -807,7 +807,7 @@ Theorem Nat_pow_sub_pow : ∀ a b n,
   n ≠ 0
   → b ≤ a
   → a ^ n - b ^ n =
-     (a - b) * Σ (i = 0, n - 1), a ^ (n - i - 1) * b ^ i.
+     (a - b) * ∑ (i = 0, n - 1), a ^ (n - i - 1) * b ^ i.
 Proof.
 intros * Hnz Hba.
 destruct n; [ easy | clear Hnz ].

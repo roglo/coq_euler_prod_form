@@ -1786,7 +1786,7 @@ flia Hkn.
 Qed.
 
 Theorem newton_binomial : ∀ n a b,
-  (a + b) ^ n = Σ (k = 0, n), binomial n k * a ^ (n - k) * b ^ k.
+  (a + b) ^ n = ∑ (k = 0, n), binomial n k * a ^ (n - k) * b ^ k.
 Proof.
 intros.
 induction n; [ easy | ].
