@@ -1532,17 +1532,27 @@ Qed.
 
 Inspect 1.
 
+Definition coprimes a b := Nat.gcd a b = 1.
+Definition are_coprimes a b := Nat.gcd a b =? 1.
+
 (* to be completed
 Theorem Eisenstein_lemma :
-  ∀ p q, prime p → prime q →
-  nb_of_mult_gt_half q p ≡ (Σ (k = 1, (p - 1) / 2), k * q / p) mod 2.
+  ∀ a p, prime p → coprimes a p →
+  nb_of_mult_gt_half a p ≡ (Σ (k = 1, (p - 1) / 2), k * a / p) mod 2.
 Proof.
-intros * Hp Hq.
-(* seems true and p and q must be primes, indeed
+intros * Hp Hap.
+(*
+(* version que m'a donnée Claude en partant de p et q tous deux premiers *)
 Compute (List.map (λ p, List.map (λ q,
   (p, q,
   nb_of_mult_gt_half q p ≡ (Σ (k = 1, (p - 1) / 2), k * q / p) mod 2))
   (List.filter (Nat.ltb p) (List.filter is_prime (List.seq 3 30))))
+  (List.filter is_prime (List.seq 3 30))).
+(* version de wikipedia en partant de p premier et a premier avec p *)
+Compute (List.map (λ p, List.map (λ a,
+  (p, a,
+  nb_of_mult_gt_half a p ≡ (Σ (k = 1, (p - 1) / 2), 2 * k * a / p) mod 2))
+  ((*List.filter (Nat.ltb p)*) (List.filter (are_coprimes p) (List.seq 1 30))))
   (List.filter is_prime (List.seq 3 30))).
 *)
 ...
