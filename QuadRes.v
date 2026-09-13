@@ -1555,7 +1555,7 @@ Compute (List.map (λ p, List.map (λ a,
   ((*List.filter (Nat.ltb p)*) (List.filter (are_coprimes p) (List.seq 1 30))))
   (List.filter is_prime (List.seq 3 30))).
 *)
-S
+Search iter_seq.
 ...
 
 Theorem quadratic_reciprocity :

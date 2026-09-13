@@ -50,9 +50,24 @@ Qed.
 
 (* summations *)
 
+Definition iter_list {A B} (l : list B) f (d : A) := List.fold_left f l d.
+
+Definition iter_seq {T} b e f (d : T) := iter_list (List.seq b (S e - b)) f d.
+
+Arguments iter_seq : simpl never.
+Arguments iter_list : simpl never.
+
+Notation "'∑' ( i = b , e ) , g" :=
+  (iter_seq b e (λ c i, (c + g)%nat) 0%nat)
+  (at level 45, i at level 0, b at level 60, e at level 60,
+   right associativity,
+   format "'[hv  ' ∑  ( i  =  b ,  e ) ,  '/' '[' g ']' ']'").
+
+(*
 Notation "'∑' ( i = b , e ) , g" :=
   (fold_left (λ c i, c + g) (seq b (S e - b)) 0)
   (at level 45, i at level 0, b at level 60, e at level 60) : nat_scope.
+*)
 
 Theorem fold_left_add_fun_from_0 {A} : ∀ a l (f : A → nat),
   fold_left (λ c i, c + f i) l a =
@@ -101,6 +116,8 @@ Theorem summation_split_first : ∀ b e f,
   → ∑ (i = b, e), f i = f b + ∑ (i = S b, e), f i.
 Proof.
 intros * Hbe.
+progress unfold iter_seq.
+progress unfold iter_list.
 rewrite Nat.sub_succ.
 replace (S e - b) with (S (e - b)) by flia Hbe.
 cbn.
@@ -113,6 +130,8 @@ Theorem summation_split_last : ∀ b e f,
   → ∑ (i = b, e), f i = ∑ (i = b, e - 1), f i + f e.
 Proof.
 intros * Hbe He.
+progress unfold iter_seq.
+progress unfold iter_list.
 destruct e; [ flia He | clear He ].
 rewrite Nat.sub_succ, Nat.sub_0_r.
 replace (S (S e) - b) with (S (S e - b)) by flia Hbe.
@@ -133,6 +152,8 @@ Theorem all_0_summation_0 : ∀ b e f,
   → ∑ (i = b, e), f i = 0.
 Proof.
 intros * Hz.
+progress unfold iter_seq.
+progress unfold iter_list.
 remember (S e - b) as n eqn:Hn.
 revert b Hz Hn.
 induction n; intros; [ easy | cbn ].
@@ -161,6 +182,8 @@ Theorem summation_eq_compat : ∀ b e g h,
   → ∑ (i = b, e), g i = ∑ (i = b, e), h i.
 Proof.
 intros * Hgh.
+progress unfold iter_seq.
+progress unfold iter_list.
 remember (S e - b) as n eqn:Hn.
 remember 0 as a eqn:Ha; clear Ha.
 revert e a b Hn Hgh.
@@ -175,6 +198,8 @@ Theorem summation_le_compat: ∀ b e g h,
   (∀ i, b ≤ i ≤ e → g i ≤ h i) → ∑ (i = b, e), g i ≤ ∑ (i = b, e), h i.
 Proof.
 intros * Hgh.
+progress unfold iter_seq.
+progress unfold iter_list.
 remember (S e - b) as n eqn:Hn.
 remember 0 as a eqn:Ha; clear Ha.
 revert a b Hn Hgh.
@@ -193,6 +218,8 @@ Theorem mul_add_distr_r_in_summation : ∀ b e f g h,
   ∑ (i = b, e), (f i * h i + g i * h i).
 Proof.
 intros; revert b e.
+progress unfold iter_seq.
+progress unfold iter_list.
 rewrite_in_summation Nat.mul_add_distr_r.
 Qed.
 
@@ -201,6 +228,8 @@ Theorem double_mul_assoc_in_summation : ∀ b e f g h k,
 Proof.
 intros.
 assert (H : ∀ a b c d, a * b * c * d = a * (b * c * d)) by flia.
+progress unfold iter_seq.
+progress unfold iter_list.
 revert b e.
 rewrite_in_summation H.
 Qed.
@@ -209,6 +238,8 @@ Theorem mul_assoc_in_summation : ∀ b e f g h,
   ∑ (i = b, e), f i * g i * h i = ∑ (i = b, e), f i * (g i * h i).
 Proof.
 intros.
+progress unfold iter_seq.
+progress unfold iter_list.
 assert (H : ∀ a b c, a * b * c = a * (b * c)) by flia.
 revert b e.
 rewrite_in_summation H.
@@ -218,6 +249,8 @@ Theorem mul_comm_in_summation : ∀ b e f g,
   ∑ (i = b, e), f i * g i = ∑ (i = b, e), g i * f i.
 Proof.
 intros.
+progress unfold iter_seq.
+progress unfold iter_list.
 assert (H : ∀ a b, a * b = b * a) by flia.
 revert b e.
 rewrite_in_summation H.
@@ -227,6 +260,8 @@ Theorem mul_summation_distr_l : ∀ a b e f,
   a * (∑ (i = b, e), f i) = ∑ (i = b, e), a * f i.
 Proof.
 intros.
+progress unfold iter_seq.
+progress unfold iter_list.
 remember (S e - b) as n eqn:Hn.
 revert e a b Hn.
 induction n; intros; [ apply Nat.mul_0_r | cbn ].
@@ -251,6 +286,8 @@ Theorem power_shuffle1_in_summation : ∀ b e a f g,
   ∑ (i = b, e), f i * a ^ (S e - i) * g i.
 Proof.
 intros.
+progress unfold iter_seq.
+progress unfold iter_list.
 (* failed to be able to use "rewrite_in_summation" here *)
 assert
   (H : ∀ i e,
@@ -277,6 +314,8 @@ Theorem power_shuffle2_in_summation : ∀ b e a c f,
   ∑ (i = b, e), f i * a ^ (e - i) * c ^ S i.
 Proof.
 intros.
+progress unfold iter_seq.
+progress unfold iter_list.
 remember (S e - b) as n eqn:Hn.
 remember 0 as z eqn:Hz; clear Hz.
 revert e z b Hn.
@@ -295,6 +334,8 @@ Theorem summation_add : ∀ b e f g,
   ∑ (i = b, e), (f i + g i) = ∑ (i = b, e), f i + ∑ (i = b, e), g i.
 Proof.
 intros.
+progress unfold iter_seq.
+progress unfold iter_list.
 remember (S e - b) as n eqn:Hn.
 revert b Hn.
 induction n; intros; [ easy | cbn ].
@@ -310,6 +351,8 @@ Theorem summation_sub : ∀ b e f g,
   → ∑ (i = b, e), (f i - g i) = ∑ (i = b, e), f i - ∑ (i = b, e), g i.
 Proof.
 intros * Hgf.
+progress unfold iter_seq.
+progress unfold iter_list.
 remember (S e - b) as n eqn:Hn.
 revert b Hn Hgf.
 induction n; intros; [ easy | cbn ].
@@ -347,6 +390,8 @@ Theorem summation_succ_succ : ∀ b e f,
   ∑ (i = S b, S e), f i = ∑ (i = b, e), f (S i).
 Proof.
 intros.
+progress unfold iter_seq.
+progress unfold iter_list.
 rewrite Nat.sub_succ.
 remember (S e - b) as n eqn:Hn.
 revert b Hn.
@@ -359,6 +404,8 @@ Theorem summation_mod_idemp : ∀ b e f n,
   (∑ (i = b, e), f i) mod n = (∑ (i = b, e), f i mod n) mod n.
 Proof.
 intros.
+progress unfold iter_seq.
+progress unfold iter_list.
 destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
 remember (S e - b) as m eqn:Hm.
 revert b Hm.
@@ -387,6 +434,8 @@ Theorem summation_rtl : ∀ g b k,
   ∑ (i = b, k), g i = ∑ (i = b, k), g (k + b - i).
 Proof.
 intros g b k.
+progress unfold iter_seq.
+progress unfold iter_list.
 destruct (le_dec (S k) b) as [Hkb| Hkb]. {
   cbn - [ "-" ].
   now replace (S k - b) with 0 by flia Hkb.
