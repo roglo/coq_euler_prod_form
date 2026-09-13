@@ -1537,10 +1537,10 @@ Definition are_coprimes a b := Nat.gcd a b =? 1.
 
 (* to be completed
 Theorem Eisenstein_lemma :
-  ∀ a p, prime p → coprimes a p →
-  nb_of_mult_gt_half a p ≡ (Σ (k = 1, (p - 1) / 2), k * a / p) mod 2.
+  ∀ p q, prime p → prime q →
+  nb_of_mult_gt_half q p ≡ (Σ (k = 1, (p - 1) / 2), k * q / p) mod 2.
 Proof.
-intros * Hp Hap.
+intros * Hp Hq.
 (*
 (* version que m'a donnée Claude en partant de p et q tous deux premiers *)
 Compute (List.map (λ p, List.map (λ q,
@@ -1555,6 +1555,7 @@ Compute (List.map (λ p, List.map (λ a,
   ((*List.filter (Nat.ltb p)*) (List.filter (are_coprimes p) (List.seq 1 30))))
   (List.filter is_prime (List.seq 3 30))).
 *)
+S
 ...
 
 Theorem quadratic_reciprocity :
