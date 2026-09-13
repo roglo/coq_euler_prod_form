@@ -4,9 +4,6 @@ From Stdlib Require Import Sorting.Permutation.
 Import List List.ListNotations.
 Require Import Misc Primes.
 
-Global Hint Resolve Nat.le_0_l : core.
-Global Hint Resolve Nat.lt_0_succ : core.
-
 Notation "a '²'" := (a ^ 2) (at level 1, format "a ²").
 
 Theorem Nat_4_eq_2_mul_2 : 4 = 2 * 2.
@@ -1555,7 +1552,7 @@ Compute (List.map (λ p, List.map (λ a,
   ((*List.filter (Nat.ltb p)*) (List.filter (are_coprimes p) (List.seq 1 30))))
   (List.filter is_prime (List.seq 3 30))).
 *)
-Search iter_seq.
+Search (∑ (_ = _, _), _ = ∑ (_ = _, _), _).
 ...
 
 Theorem quadratic_reciprocity :

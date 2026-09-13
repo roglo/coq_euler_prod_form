@@ -4,6 +4,9 @@ Set Nested Proofs Allowed.
 From Stdlib Require Import Utf8 Arith Psatz Sorted Permutation Decidable.
 Import List List.ListNotations.
 
+Global Hint Resolve Nat.le_0_l : core.
+Global Hint Resolve Nat.lt_0_succ : core.
+
 (* "fast" lia, to improve compilation speed *)
 Tactic Notation "flia" hyp_list(Hs) := clear - Hs; lia.
 
@@ -62,12 +65,6 @@ Notation "'∑' ( i = b , e ) , g" :=
   (at level 45, i at level 0, b at level 60, e at level 60,
    right associativity,
    format "'[hv  ' ∑  ( i  =  b ,  e ) ,  '/' '[' g ']' ']'").
-
-(*
-Notation "'∑' ( i = b , e ) , g" :=
-  (fold_left (λ c i, c + g) (seq b (S e - b)) 0)
-  (at level 45, i at level 0, b at level 60, e at level 60) : nat_scope.
-*)
 
 Theorem fold_left_add_fun_from_0 {A} : ∀ a l (f : A → nat),
   fold_left (λ c i, c + f i) l a =
@@ -165,18 +162,6 @@ intros i Hi.
 apply Hz; flia Hi.
 Qed.
 
-Ltac rewrite_in_summation th :=
-  let b := fresh "b" in
-  let e := fresh "e" in
-  let a := fresh "a" in
-  intros b e;
-  remember (S e - b) as n eqn:Hn;
-  remember 0 as a eqn:Ha; clear Ha;
-  revert e a b Hn;
-  induction n as [| n IHn]; intros; [ easy | cbn ];
-  rewrite th;
-  apply (IHn e); flia Hn.
-
 Theorem summation_eq_compat : ∀ b e g h,
   (∀ i, b ≤ i ≤ e → g i = h i)
   → ∑ (i = b, e), g i = ∑ (i = b, e), h i.
@@ -217,43 +202,37 @@ Theorem mul_add_distr_r_in_summation : ∀ b e f g h,
   ∑ (i = b, e), (f i + g i) * h i =
   ∑ (i = b, e), (f i * h i + g i * h i).
 Proof.
-intros; revert b e.
-progress unfold iter_seq.
-progress unfold iter_list.
-rewrite_in_summation Nat.mul_add_distr_r.
+intros.
+apply summation_eq_compat.
+intros * Hbe.
+apply Nat.mul_add_distr_r.
 Qed.
 
 Theorem double_mul_assoc_in_summation : ∀ b e f g h k,
   ∑ (i = b, e), f i * g i * h i * k i = ∑ (i = b, e), f i * (g i * h i * k i).
 Proof.
 intros.
-assert (H : ∀ a b c d, a * b * c * d = a * (b * c * d)) by flia.
-progress unfold iter_seq.
-progress unfold iter_list.
-revert b e.
-rewrite_in_summation H.
+apply summation_eq_compat.
+intros * Hbe.
+now do 2 rewrite Nat.mul_assoc.
 Qed.
 
 Theorem mul_assoc_in_summation : ∀ b e f g h,
   ∑ (i = b, e), f i * g i * h i = ∑ (i = b, e), f i * (g i * h i).
 Proof.
 intros.
-progress unfold iter_seq.
-progress unfold iter_list.
-assert (H : ∀ a b c, a * b * c = a * (b * c)) by flia.
-revert b e.
-rewrite_in_summation H.
+apply summation_eq_compat.
+intros * Hbe.
+symmetry; apply Nat.mul_assoc.
 Qed.
 
 Theorem mul_comm_in_summation : ∀ b e f g,
   ∑ (i = b, e), f i * g i = ∑ (i = b, e), g i * f i.
 Proof.
 intros.
-progress unfold iter_seq.
-progress unfold iter_list.
-assert (H : ∀ a b, a * b = b * a) by flia.
-revert b e.
-rewrite_in_summation H.
+apply summation_eq_compat.
+intros * Hbd.
+apply Nat.mul_comm.
 Qed.
 
 Theorem mul_summation_distr_l : ∀ a b e f,
