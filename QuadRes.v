@@ -1028,6 +1028,21 @@ now rewrite Nat.Div0.mul_mod_idemp_r.
 Qed.
 
 Theorem Legendre_symbol_mod :
+  ∀ a p, 2 ≤ p → Legendre_symbol a p = Legendre_symbol a p mod p.
+Proof.
+intros * H2p.
+progress unfold Legendre_symbol.
+symmetry.
+remember (p =? 2) as p2 eqn:Hp2; symmetry in Hp2.
+destruct p2; [ now apply Nat.eqb_eq in Hp2; subst p | ].
+destruct (a mod p =? 0); [ apply Nat.Div0.mod_0_l | ].
+apply Nat.eqb_neq in Hp2.
+destruct (sqrt_mod a p); [ now apply Nat.mod_small | ].
+apply Nat.mod_small.
+flia H2p.
+Qed.
+
+Theorem Legendre_symbol_mod_r :
   ∀ a p, Legendre_symbol a p = Legendre_symbol (a mod p) p.
 Proof.
 intros.
@@ -1046,7 +1061,7 @@ Theorem Gauss_lemma :
 Proof.
 intros * Hp Hap *  Hn.
 rewrite nb_of_mult_gt_half_mod in Hn.
-rewrite Legendre_symbol_mod.
+rewrite Legendre_symbol_mod_r.
 remember (a mod p) as b eqn:Hb.
 assert (H : 0 < b < p). {
   subst b.
@@ -1085,6 +1100,12 @@ assert
 }
 specialize (Euler_criterion p Hp a) as H3.
 symmetry in H3.
+rewrite <- Legendre_symbol_mod in H3; cycle 1. {
+  destruct p; [ easy | ].
+  destruct p; [ easy | ].
+  now do 2 apply -> Nat.succ_le_mono.
+}
+(*
 rewrite Nat.mod_small in H3; cycle 1. {
   progress unfold Legendre_symbol.
   remember (p =? 2) as p2 eqn:Hp2; symmetry in Hp2.
@@ -1102,6 +1123,7 @@ rewrite Nat.mod_small in H3; cycle 1. {
   }
   destruct p; [ easy | flia ].
 }
+*)
 rewrite H3, <- Hh.
 assert
   (H4 :
@@ -1595,6 +1617,9 @@ Theorem Eisenstein_lemma :
   nb_of_mult_gt_half a p ≡ (∑ (k = 1, (p - 1) / 2), 2 * k * a / p) mod 2.
 Proof.
 intros * Hp Hap.
+progress unfold iter_seq.
+progress unfold iter_list.
+Check List_fold_left_mul_mul_seq.
 progress unfold nb_of_mult_gt_half.
 ...
 (*
