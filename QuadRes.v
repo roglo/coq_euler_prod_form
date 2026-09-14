@@ -6,6 +6,12 @@ Require Import Misc Primes.
 
 Notation "a '²'" := (a ^ 2) (at level 1, format "a ²").
 
+Theorem if_mul_negb :
+  ∀ a (b : bool) c d e,
+  (if b then a * (if negb b then c else d) else e) =
+  (if b then a * d else e).
+Proof. now intros; destruct b. Qed.
+
 Theorem Nat_4_eq_2_mul_2 : 4 = 2 * 2.
 Proof. easy. Qed.
 
@@ -64,6 +70,122 @@ rewrite Nat.add_sub_swap; cycle 1. {
 }
 rewrite <- Nat.mul_sub_distr_r.
 apply Nat_mod_add_l_mul_r.
+Qed.
+
+Theorem Nat_mul_pred_mod : ∀ a n, a < n → (n - a) * (n - 1) mod n = a.
+Proof.
+intros * Han.
+rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
+rewrite Nat.mul_sub_distr_r.
+rewrite Nat_sub_sub_swap.
+rewrite Nat.sub_sub_distr; [ | now apply Nat.lt_le_incl | ]; cycle 1. {
+  destruct n; [ easy | cbn ].
+  apply -> Nat.succ_le_mono.
+  apply Nat.le_add_r.
+}
+rewrite <- Nat.mul_pred_r.
+rewrite <- Nat.sub_1_r.
+rewrite Nat.add_comm, Nat.mul_comm.
+rewrite <- Nat.add_sub_assoc; cycle 1. {
+  apply Nat.mul_le_mono_r.
+  flia Han.
+}
+rewrite <- Nat.mul_sub_distr_r.
+rewrite Nat.Div0.mod_add.
+now apply Nat.mod_small.
+Qed.
+
+Theorem List_fold_left_mul_filter_filter :
+  ∀ A c l (f : A → _) g,
+  fold_left (λ a b, a * f b) l c =
+  fold_left (λ a b, a * f b) (filter g l) c *
+  fold_left (λ a b, a * f b) (filter (λ a, negb (g a)) l) 1.
+Proof.
+intros.
+revert c.
+induction l as [| a]; intros; cbn. {
+  symmetry; apply Nat.mul_1_r.
+}
+rewrite IHl.
+rename a into d.
+remember (g d) as gd eqn:Hgd; symmetry in Hgd.
+destruct gd; [ easy | cbn ].
+rewrite Nat.add_0_r.
+rewrite (fold_left_mul_fun_from_1 (c * f d)).
+rewrite (fold_left_mul_fun_from_1 c).
+rewrite (fold_left_mul_fun_from_1 (f d)).
+do 3 rewrite <- Nat.mul_assoc.
+f_equal.
+rewrite Nat.mul_comm.
+rewrite <- Nat.mul_assoc.
+f_equal.
+apply Nat.mul_comm.
+Qed.
+
+Theorem List_fold_left_mul_mul :
+  ∀ A c l f (g : A → _),
+  List.fold_left (λ a b, a * f b * g b) l c =
+  List.fold_left (λ a b, a * f b) l c *
+  List.fold_left (λ a b, a * g b) l 1.
+Proof.
+intros.
+revert c.
+induction l as [| a]; intros; [ symmetry; apply Nat.mul_1_r | cbn ].
+rewrite IHl.
+rewrite Nat.add_0_r.
+do 4 rewrite <- (List_fold_left_map  _ _ _ _ _ l).
+do 2 rewrite <- List_fold_left_mul_assoc.
+do 3 rewrite <- Nat.mul_assoc.
+f_equal.
+f_equal.
+symmetry.
+apply fold_left_mul_from_1.
+Qed.
+
+Theorem List_fold_left_const :
+  ∀ A B (b : A) (l : list B), List.fold_left (λ a _, a) l b = b.
+Proof. now intros; induction l. Qed.
+
+Theorem List_fold_left_mul_const_r :
+  ∀ c d l,
+  List.fold_left (λ a b, a * b * c) l d =
+  List.fold_left Nat.mul l d * c ^ List.length l.
+Proof.
+intros.
+revert d.
+induction l as [| a]; intros; [ symmetry; apply Nat.mul_1_r | cbn ].
+rewrite IHl.
+rewrite Nat.mul_assoc.
+f_equal.
+symmetry.
+apply List_fold_left_mul_assoc.
+Qed.
+
+Theorem List_fold_left_mul_mul_seq :
+  ∀ a n,
+  fold_left (λ acc i : nat, acc * (i * a)) (seq 1 n) 1 = a ^ n * fact n.
+Proof.
+intros.
+erewrite List_fold_left_ext_in; cycle 1. {
+  intros * Hb.
+  now rewrite Nat.mul_assoc.
+}
+rewrite List_fold_left_mul_const_r.
+rewrite List.length_seq, Nat.mul_comm.
+f_equal; symmetry.
+apply fact_eq_fold_left.
+Qed.
+
+Theorem List_fold_left_mod :
+  ∀ A a b (f : nat → A → nat) l,
+  (∀ a l, List.fold_left f l a ≡ List.fold_left f l (a mod b) mod b)
+  → List.fold_left f l a ≡ List.fold_left (λ x y, f x y mod b) l a mod b.
+Proof.
+intros * Hf.
+revert a.
+induction l as [| c]; intros; [ easy | cbn ].
+rewrite <- IHl.
+apply Hf.
 Qed.
 
 (* Euler criterion *)
@@ -677,58 +799,6 @@ Definition nb_of_mult_gt_half a p :=
   List.length
     (List.filter (λ m, (p - 1) / 2 <? ((m * a) mod p)) (seq 1 ((p - 1) / 2))).
 
-Definition is_quadratic_residue a p := Legendre_symbol a p =? 1.
-
-(*
-Compute (let p := 29 in List.map (λ a, (sqrt_mod a p, a)) (List.seq 0 p)).
-
-Compute (let n := 3 in map (λ p, (p, List.filter (λ a, match nth_sqrt_mod n a p with Some _ => true | None => false end) (List.seq 1 (p - 1)))) (List.seq 1 20)).
-
-1,2,3,5,6,10,11,15,17
-
-Compute (let p := 29 in List.filter (λ a, match sqrt_mod a p with Some _ => true | None => false end) (List.seq 1 (p - 1))).
-Compute (let p := 29 in List.filter (λ a, (nb_of_mult_gt_half a p mod 2 =? 0)) (seq 1 (p - 1))).
-Compute (let p := 29 in List.filter (λ a, is_quadratic_residue a p) (seq 1 p)).
-*)
-
-Theorem Nat_mul_pred_mod : ∀ a n, a < n → (n - a) * (n - 1) mod n = a.
-Proof.
-intros * Han.
-rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
-rewrite Nat.mul_sub_distr_r.
-rewrite Nat_sub_sub_swap.
-rewrite Nat.sub_sub_distr; [ | now apply Nat.lt_le_incl | ]; cycle 1. {
-  destruct n; [ easy | cbn ].
-  apply -> Nat.succ_le_mono.
-  apply Nat.le_add_r.
-}
-rewrite <- Nat.mul_pred_r.
-rewrite <- Nat.sub_1_r.
-rewrite Nat.add_comm, Nat.mul_comm.
-rewrite <- Nat.add_sub_assoc; cycle 1. {
-  apply Nat.mul_le_mono_r.
-  flia Han.
-}
-rewrite <- Nat.mul_sub_distr_r.
-rewrite Nat.Div0.mod_add.
-now apply Nat.mod_small.
-Qed.
-
-Theorem List_fold_left_mul_const_r :
-  ∀ c d l,
-  List.fold_left (λ a b, a * b * c) l d =
-  List.fold_left Nat.mul l d * c ^ List.length l.
-Proof.
-intros.
-revert d.
-induction l as [| a]; intros; [ symmetry; apply Nat.mul_1_r | cbn ].
-rewrite IHl.
-rewrite Nat.mul_assoc.
-f_equal.
-symmetry.
-apply List_fold_left_mul_assoc.
-Qed.
-
 Definition sign a p := if a <=? (p - 1) / 2 then 1 else p - 1.
 Definition abs a p := if a <=? (p - 1) / 2 then a else p - a.
 
@@ -745,45 +815,6 @@ rewrite Nat.mul_comm; symmetry.
 now apply Nat_mul_pred_mod.
 Qed.
 
-Theorem List_fold_left_mod :
-  ∀ A a b (f : nat → A → nat) l,
-  (∀ a l, List.fold_left f l a ≡ List.fold_left f l (a mod b) mod b)
-  → List.fold_left f l a ≡ List.fold_left (λ x y, f x y mod b) l a mod b.
-Proof.
-intros * Hf.
-revert a.
-induction l as [| c]; intros; [ easy | cbn ].
-rewrite <- IHl.
-apply Hf.
-Qed.
-
-Theorem List_fold_left_mul_filter_filter :
-  ∀ A c l (f : A → _) g,
-  fold_left (λ a b, a * f b) l c =
-  fold_left (λ a b, a * f b) (filter g l) c *
-  fold_left (λ a b, a * f b) (filter (λ a, negb (g a)) l) 1.
-Proof.
-intros.
-revert c.
-induction l as [| a]; intros; cbn. {
-  symmetry; apply Nat.mul_1_r.
-}
-rewrite IHl.
-rename a into d.
-remember (g d) as gd eqn:Hgd; symmetry in Hgd.
-destruct gd; [ easy | cbn ].
-rewrite Nat.add_0_r.
-rewrite (fold_left_mul_fun_from_1 (c * f d)).
-rewrite (fold_left_mul_fun_from_1 c).
-rewrite (fold_left_mul_fun_from_1 (f d)).
-do 3 rewrite <- Nat.mul_assoc.
-f_equal.
-rewrite Nat.mul_comm.
-rewrite <- Nat.mul_assoc.
-f_equal.
-apply Nat.mul_comm.
-Qed.
-
 Theorem List_fold_left_filter :
   ∀ A B a (f : A → B → A) g l,
   List.fold_left f (List.filter g l) a =
@@ -794,36 +825,6 @@ revert a.
 induction l as [| b]; intros; [ easy | cbn ].
 destruct (g b); [ apply IHl | easy ].
 Qed.
-
-Theorem List_fold_left_mul_mul :
-  ∀ A c l f (g : A → _),
-  List.fold_left (λ a b, a * f b * g b) l c =
-  List.fold_left (λ a b, a * f b) l c *
-  List.fold_left (λ a b, a * g b) l 1.
-Proof.
-intros.
-revert c.
-induction l as [| a]; intros; [ symmetry; apply Nat.mul_1_r | cbn ].
-rewrite IHl.
-rewrite Nat.add_0_r.
-do 4 rewrite <- (List_fold_left_map  _ _ _ _ _ l).
-do 2 rewrite <- List_fold_left_mul_assoc.
-do 3 rewrite <- Nat.mul_assoc.
-f_equal.
-f_equal.
-symmetry.
-apply fold_left_mul_from_1.
-Qed.
-
-Theorem List_fold_left_const :
-  ∀ A B (b : A) (l : list B), List.fold_left (λ a _, a) l b = b.
-Proof. now intros; induction l. Qed.
-
-Theorem if_mul_negb :
-  ∀ a (b : bool) c d e,
-  (if b then a * (if negb b then c else d) else e) =
-  (if b then a * d else e).
-Proof. now intros; destruct b. Qed.
 
 Theorem List_fold_left_if_equiv_filter  :
   ∀ a p l (g : _ → bool),
@@ -870,6 +871,116 @@ erewrite List_fold_left_ext_in; cycle 1. {
 subst n.
 now rewrite List_fold_left_if_equiv_filter, Nat.mul_1_l.
 Qed.
+
+Theorem List_fold_left_mul_mul_seq_fold_left_abs :
+  ∀ a p n h,
+  p ≠ 0
+  → n = nb_of_mult_gt_half a p
+  → h = (p - 1) / 2
+  → fold_left (λ acc i : nat, acc * (i * a)) (seq 1 h) 1 ≡
+      ((p - 1) ^ n *
+       fold_left (λ acc i : nat, acc * abs ((i * a) mod p) p) (seq 1 h) 1)
+      mod p.
+Proof.
+intros  * Hpz Hn Hh.
+rewrite List_fold_left_mod; cycle 1. {
+  intros b l.
+  revert b.
+  induction l as [| d]; intros; cbn. {
+    symmetry; apply Nat.Div0.mod_mod.
+  }
+  rewrite IHl.
+  rewrite <- Nat.Div0.mul_mod_idemp_l.
+  symmetry.
+  rewrite IHl.
+  rewrite <- Nat.Div0.mul_mod_idemp_r.
+  easy.
+}
+erewrite List_fold_left_ext_in; cycle 1. {
+  intros * Hb.
+  rewrite <- Nat.Div0.mul_mod_idemp_r.
+  easy.
+}
+rewrite <- List_fold_left_mod; cycle 1. {
+  intros b l.
+  revert b.
+  induction l as [| d]; intros; cbn. {
+    symmetry; apply Nat.Div0.mod_mod.
+  }
+  rewrite IHl.
+  rewrite <- Nat.Div0.mul_mod_idemp_l.
+  symmetry.
+  rewrite IHl.
+  rewrite <- Nat.Div0.mul_mod_idemp_r.
+  easy.
+}
+erewrite List_fold_left_ext_in; cycle 1. {
+  intros * Hb.
+  rewrite (sign_abs ((b * a) mod p) p); cycle 1. {
+    now apply Nat.mod_upper_bound.
+  }
+  easy.
+}
+rewrite List_fold_left_mod; cycle 1. {
+  intros b l.
+  revert b.
+  induction l as [| d]; intros; cbn. {
+    symmetry; apply Nat.Div0.mod_mod.
+  }
+  rewrite IHl.
+  rewrite <- Nat.Div0.mul_mod_idemp_l.
+  symmetry.
+  rewrite IHl.
+  rewrite <- Nat.Div0.mul_mod_idemp_r.
+  easy.
+}
+erewrite List_fold_left_ext_in; cycle 1. {
+  intros * Hb.
+  rewrite Nat.Div0.mul_mod_idemp_r.
+  rewrite Nat.mul_assoc.
+  easy.
+}
+rewrite <- List_fold_left_mod; cycle 1. {
+  intros b l.
+  revert b.
+  induction l as [| d]; intros; cbn. {
+    symmetry; apply Nat.Div0.mod_mod.
+  }
+  rewrite IHl.
+  rewrite <- Nat.Div0.mul_mod_idemp_l.
+  symmetry.
+  rewrite IHl.
+  rewrite <- Nat.Div0.mul_mod_idemp_r.
+  remember (λ c l, _) as f eqn:Hf in |-*.
+  f_equal.
+  f_equal.
+  remember ((d * a) mod p) as da.
+  rewrite <- (Nat.Div0.mul_mod_idemp_l b).
+  rewrite <- Nat.Div0.mul_mod_idemp_l.
+  rewrite Nat.Div0.mul_mod_idemp_r.
+  easy.
+}
+rewrite List_fold_left_mul_mul.
+remember (λ acc i, _) as x in |-*.
+remember (λ acc i, _) as y in |-*; subst x y.
+rewrite <- Nat.Div0.mul_mod_idemp_l.
+rewrite (List_fold_left_mul_sign _ _ n); [ | easy | easy ].
+now rewrite Nat.Div0.mul_mod_idemp_l.
+Qed.
+
+Definition is_quadratic_residue a p := Legendre_symbol a p =? 1.
+
+(*
+Compute (let p := 29 in List.map (λ a, (sqrt_mod a p, a)) (List.seq 0 p)).
+
+Compute (let n := 3 in map (λ p, (p, List.filter (λ a, match nth_sqrt_mod n a p with Some _ => true | None => false end) (List.seq 1 (p - 1)))) (List.seq 1 20)).
+
+1,2,3,5,6,10,11,15,17
+
+Compute (let p := 29 in List.filter (λ a, match sqrt_mod a p with Some _ => true | None => false end) (List.seq 1 (p - 1))).
+Compute (let p := 29 in List.filter (λ a, (nb_of_mult_gt_half a p mod 2 =? 0)) (seq 1 (p - 1))).
+Compute (let p := 29 in List.filter (λ a, is_quadratic_residue a p) (seq 1 p)).
+*)
 
 Theorem abs_all_different_multiples : ∀ p,
   prime p
@@ -961,14 +1072,7 @@ remember (List.fold_left (λ acc i, acc * (i * a)) (List.seq 1 h) 1) as z
   eqn:Hz.
 assert (H1 : z = a ^ h * fact h). {
   subst z.
-  erewrite List_fold_left_ext_in; cycle 1. {
-    intros * Hb.
-    now rewrite Nat.mul_assoc.
-  }
-  rewrite List_fold_left_mul_const_r.
-  rewrite List.length_seq, Nat.mul_comm.
-  f_equal; symmetry.
-  apply fact_eq_fold_left.
+  apply List_fold_left_mul_mul_seq.
 }
 assert
   (H2 :
@@ -977,89 +1081,7 @@ assert
         List.fold_left (λ acc i, acc * abs (i * a mod p) p) (List.seq 1 h) 1)
          mod p). {
   subst z.
-  rewrite List_fold_left_mod; cycle 1. {
-    intros b l.
-    revert b.
-    induction l as [| d]; intros; cbn. {
-      symmetry; apply Nat.Div0.mod_mod.
-    }
-    rewrite IHl.
-    rewrite <- Nat.Div0.mul_mod_idemp_l.
-    symmetry.
-    rewrite IHl.
-    rewrite <- Nat.Div0.mul_mod_idemp_r.
-    easy.
-  }
-  erewrite List_fold_left_ext_in; cycle 1. {
-    intros * Hb.
-    rewrite <- Nat.Div0.mul_mod_idemp_r.
-    easy.
-  }
-  rewrite <- List_fold_left_mod; cycle 1. {
-    intros b l.
-    revert b.
-    induction l as [| d]; intros; cbn. {
-      symmetry; apply Nat.Div0.mod_mod.
-    }
-    rewrite IHl.
-    rewrite <- Nat.Div0.mul_mod_idemp_l.
-    symmetry.
-    rewrite IHl.
-    rewrite <- Nat.Div0.mul_mod_idemp_r.
-    easy.
-  }
-  erewrite List_fold_left_ext_in; cycle 1. {
-    intros * Hb.
-    rewrite (sign_abs ((b * a) mod p) p); cycle 1. {
-      now apply Nat.mod_upper_bound.
-    }
-    easy.
-  }
-  rewrite List_fold_left_mod; cycle 1. {
-    intros b l.
-    revert b.
-    induction l as [| d]; intros; cbn. {
-      symmetry; apply Nat.Div0.mod_mod.
-    }
-    rewrite IHl.
-    rewrite <- Nat.Div0.mul_mod_idemp_l.
-    symmetry.
-    rewrite IHl.
-    rewrite <- Nat.Div0.mul_mod_idemp_r.
-    easy.
-  }
-  erewrite List_fold_left_ext_in; cycle 1. {
-    intros * Hb.
-    rewrite Nat.Div0.mul_mod_idemp_r.
-    rewrite Nat.mul_assoc.
-    easy.
-  }
-  rewrite <- List_fold_left_mod; cycle 1. {
-    intros b l.
-    revert b.
-    induction l as [| d]; intros; cbn. {
-      symmetry; apply Nat.Div0.mod_mod.
-    }
-    rewrite IHl.
-    rewrite <- Nat.Div0.mul_mod_idemp_l.
-    symmetry.
-    rewrite IHl.
-    rewrite <- Nat.Div0.mul_mod_idemp_r.
-    remember (λ c l, _) as f eqn:Hf in |-*.
-    f_equal.
-    f_equal.
-    remember ((d * a) mod p) as da.
-    rewrite <- (Nat.Div0.mul_mod_idemp_l b).
-    rewrite <- Nat.Div0.mul_mod_idemp_l.
-    rewrite Nat.Div0.mul_mod_idemp_r.
-    easy.
-  }
-  rewrite List_fold_left_mul_mul.
-  remember (λ acc i, _) as x in |-*.
-  remember (λ acc i, _) as y in |-*; subst x y.
-  rewrite <- Nat.Div0.mul_mod_idemp_l.
-  rewrite (List_fold_left_mul_sign _ _ n); [ | easy | easy ].
-  now rewrite Nat.Div0.mul_mod_idemp_l.
+  now apply List_fold_left_mul_mul_seq_fold_left_abs.
 }
 specialize (Euler_criterion p Hp a) as H3.
 symmetry in H3.
