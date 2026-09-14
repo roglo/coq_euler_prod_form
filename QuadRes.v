@@ -29,6 +29,34 @@ Notation "'∏' ( i ∈ l ) , g" :=
    right associativity,
    format "'[hv  ' ∏  ( i  ∈  l ) ,  '/' '[' g ']' ']'").
 
+Theorem fold_iter_list : ∀ {A B} (f : A → B → A) l d,
+  List.fold_left f l d = iter_list l f d.
+Proof. easy. Qed.
+
+Theorem fold_iter_seq : ∀ A b len f (d : A),
+  iter_list (List.seq b len) f d =
+    if b + len =? 0 then d
+    else iter_seq b (b + len - 1) f d.
+Proof.
+intros.
+progress unfold iter_seq.
+f_equal; f_equal.
+remember (b + len =? 0) as x eqn:Hx; symmetry in Hx.
+destruct x. {
+  apply Nat.eqb_eq in Hx.
+  now apply Nat.eq_add_0 in Hx; destruct Hx; subst b len.
+}
+apply Nat.eqb_neq in Hx.
+destruct len. {
+  rewrite Nat.add_0_r in Hx.
+  destruct b; [ easy | cbn ].
+  now rewrite Nat.add_sub, Nat.sub_diag.
+}
+rewrite Nat.sub_succ_l; [ cbn | flia ].
+f_equal; f_equal; f_equal.
+flia.
+Qed.
+
 Theorem if_mul_negb :
   ∀ a (b : bool) c d e,
   (if b then a * (if negb b then c else d) else e) =
@@ -902,7 +930,6 @@ subst n.
 now rewrite List_fold_left_if_equiv_filter, Nat.mul_1_l.
 Qed.
 
-(* to be completed
 Theorem List_fold_left_mul_mul_seq_fold_left_abs :
   ∀ a p n h,
   p ≠ 0
@@ -995,11 +1022,13 @@ rewrite List_fold_left_mul_mul.
 remember (λ acc i, _) as x in |-*.
 remember (λ acc i, _) as y in |-*; subst x y.
 rewrite <- Nat.Div0.mul_mod_idemp_l.
-...
+do 2 rewrite fold_iter_list.
+do 2 rewrite fold_iter_seq.
+rewrite Nat_sub_succ_1; cbn.
+rewrite Nat.sub_0_r.
 rewrite (List_fold_left_mul_sign _ _ n); [ | easy | easy ].
 now rewrite Nat.Div0.mul_mod_idemp_l.
 Qed.
-*)
 
 Definition is_quadratic_residue a p := Legendre_symbol a p =? 1.
 
