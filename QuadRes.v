@@ -1534,6 +1534,28 @@ Definition are_coprimes a b := Nat.gcd a b =? 1.
 
 (* to be completed
 Theorem Eisenstein_lemma :
+  ∀ a p, prime p → coprimes a p →
+  nb_of_mult_gt_half a p ≡ (∑ (k = 1, (p - 1) / 2), 2 * k * a / p) mod 2.
+Proof.
+intros * Hp Hap.
+progress unfold nb_of_mult_gt_half.
+(*
+Compute (List.map (λ p, List.map (λ a,
+let h := (p - 1) / 2 in
+  ((*p, a,*)
+Nat.eqb (
+  length
+    (filter (λ m : nat, h <? (m * a) mod p) (seq 1 h))
+    mod 2
+) (
+  (∑ (k = 1, h), 2 * k * a / p) mod 2
+)))
+  (List.filter (are_coprimes p) (List.seq 1 30)))
+  (List.filter is_prime (List.seq 3 30))).
+*)
+...
+
+Theorem Eisenstein_lemma :
   ∀ p q, prime p → prime q →
   nb_of_mult_gt_half q p ≡ (∑ (k = 1, (p - 1) / 2), k * q / p) mod 2.
 Proof.
