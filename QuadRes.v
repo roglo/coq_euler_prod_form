@@ -6,6 +6,7 @@ Require Import Misc Primes.
 
 Notation "a '²'" := (a ^ 2) (at level 1, format "a ²").
 
+(*
 Notation "'∏' ( i = b , e ) , g" :=
   (List.fold_left (λ c i, (c * g)%nat) (seq b e) 1%nat)
   (at level 35, i at level 0, b at level 60, e at level 60,
@@ -16,7 +17,7 @@ Notation "'∏' ( i ∈ l ) , g" :=
   (at level 35, i at level 0, l at level 60,
    right associativity,
    format "'[hv  ' ∏  ( i  ∈  l ) ,  '/' '[' g ']' ']'").
-(*
+*)
 Notation "'∏' ( i = b , e ) , g" :=
   (iter_seq b e (λ c i, (c * g)%nat) 1%nat)
   (at level 35, i at level 0, b at level 60, e at level 60,
@@ -27,7 +28,6 @@ Notation "'∏' ( i ∈ l ) , g" :=
   (at level 35, i at level 0, l at level 60,
    right associativity,
    format "'[hv  ' ∏  ( i  ∈  l ) ,  '/' '[' g ']' ']'").
-*)
 
 Theorem if_mul_negb :
   ∀ a (b : bool) c d e,
@@ -125,6 +125,7 @@ Theorem List_fold_left_mul_filter_filter :
   ∏ (b ∈ filter (λ a : A, negb (g a)) l), f b.
 Proof.
 intros.
+progress unfold iter_list.
 revert c.
 induction l as [| a]; intros; cbn. {
   symmetry; apply Nat.mul_1_r.
@@ -152,6 +153,7 @@ Theorem List_fold_left_mul_mul :
   ∏ (b ∈ l), g b.
 Proof.
 intros.
+progress unfold iter_list.
 revert c.
 induction l as [| a]; intros; [ symmetry; apply Nat.mul_1_r | cbn ].
 rewrite IHl.
@@ -188,6 +190,9 @@ Theorem List_fold_left_mul_mul_seq :
   ∀ a n, ∏ (i = 1, n), (i * a) = a ^ n * fact n.
 Proof.
 intros.
+progress unfold iter_seq.
+progress unfold iter_list.
+rewrite Nat_sub_succ_1.
 erewrite List_fold_left_ext_in; cycle 1. {
   intros * Hb.
   now rewrite Nat.mul_assoc.
@@ -872,7 +877,11 @@ rewrite <- Hh in Hn.
 set (g := λ m, h <? (m * a) mod p) in Hn.
 progress unfold sign.
 rewrite <- Hh.
+progress unfold iter_seq.
+progress unfold iter_list.
+rewrite Nat_sub_succ_1.
 rewrite (List_fold_left_mul_filter_filter _ _ _ _ g).
+progress unfold iter_list.
 do 2 rewrite List_fold_left_filter.
 unfold g.
 erewrite List_fold_left_ext_in; [ | now intros; rewrite Nat.leb_antisym ].
@@ -893,6 +902,7 @@ subst n.
 now rewrite List_fold_left_if_equiv_filter, Nat.mul_1_l.
 Qed.
 
+(* to be completed
 Theorem List_fold_left_mul_mul_seq_fold_left_abs :
   ∀ a p n h,
   p ≠ 0
@@ -902,6 +912,8 @@ Theorem List_fold_left_mul_mul_seq_fold_left_abs :
       ((p - 1) ^ n * ∏ (i = 1, h), abs ((i * a) mod p) p) mod p.
 Proof.
 intros  * Hpz Hn Hh.
+progress unfold iter_seq.
+progress unfold iter_list.
 rewrite List_fold_left_mod; cycle 1. {
   intros b l.
   revert b.
@@ -983,9 +995,11 @@ rewrite List_fold_left_mul_mul.
 remember (λ acc i, _) as x in |-*.
 remember (λ acc i, _) as y in |-*; subst x y.
 rewrite <- Nat.Div0.mul_mod_idemp_l.
+...
 rewrite (List_fold_left_mul_sign _ _ n); [ | easy | easy ].
 now rewrite Nat.Div0.mul_mod_idemp_l.
 Qed.
+*)
 
 Definition is_quadratic_residue a p := Legendre_symbol a p =? 1.
 
@@ -1073,6 +1087,7 @@ Qed.
 Definition coprimes a b := Nat.gcd a b = 1.
 Definition are_coprimes a b := Nat.gcd a b =? 1.
 
+(* to be completed
 Theorem Gauss_lemma :
   ∀ a p, prime p → coprimes a p →
   ∀ n, n = nb_of_mult_gt_half a p →
@@ -1350,6 +1365,7 @@ now apply Nat.neq_0_lt_0.
 Qed.
 
 Inspect 1.
+*)
 
 Theorem Nat_same_parity_same_opp_1_pow :
   ∀ n, n ≠ 0 → ∀ a b,
@@ -1397,6 +1413,7 @@ specialize (Nat.mod_upper_bound a 2 (Nat.neq_succ_0 _)) as H.
 flia Ha2 H.
 Qed.
 
+(* to be completed
 Theorem quadratic_reciprocity_2 :
   ∀ p, prime p → Legendre_symbol 2 p = (p - 1) ^ ((p² - 1) / 8) mod p.
 Proof.
@@ -1603,7 +1620,6 @@ Qed.
 
 Inspect 1.
 
-(* to be completed
 Theorem Eisenstein_lemma :
   ∀ a p, prime p → coprimes a p →
   nb_of_mult_gt_half a p ≡ (∑ (k = 1, (p - 1) / 2), 2 * k * a / p) mod 2.
