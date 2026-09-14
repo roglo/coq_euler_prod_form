@@ -6,6 +6,19 @@ Require Import Misc Primes.
 
 Notation "a '²'" := (a ^ 2) (at level 1, format "a ²").
 
+Notation "'∏' ( i = b , e ) , g" :=
+  (List.fold_left (λ c i, (c * g)%nat) (seq b e) 1%nat)
+  (at level 35, i at level 0, b at level 60, e at level 60,
+   right associativity,
+   format "'[hv  ' ∏  ( i  =  b ,  e ) ,  '/' '[' g ']' ']'").
+(*
+Notation "'∏' ( i = b , e ) , g" :=
+  (iter_seq b e (λ c i, (c * g)%nat) 1%nat)
+  (at level 35, i at level 0, b at level 60, e at level 60,
+   right associativity,
+   format "'[hv  ' ∏  ( i  =  b ,  e ) ,  '/' '[' g ']' ']'").
+*)
+
 Theorem if_mul_negb :
   ∀ a (b : bool) c d e,
   (if b then a * (if negb b then c else d) else e) =
@@ -162,8 +175,7 @@ apply List_fold_left_mul_assoc.
 Qed.
 
 Theorem List_fold_left_mul_mul_seq :
-  ∀ a n,
-  fold_left (λ acc i : nat, acc * (i * a)) (seq 1 n) 1 = a ^ n * fact n.
+  ∀ a n, ∏ (i = 1, n), (i * a) = a ^ n * fact n.
 Proof.
 intros.
 erewrite List_fold_left_ext_in; cycle 1. {
@@ -842,8 +854,7 @@ Theorem List_fold_left_mul_sign :
   ∀ a p n h,
   n = nb_of_mult_gt_half a p
   → h = (p - 1) / 2
-  → fold_left (λ acc i : nat, acc * sign ((i * a) mod p) p) (seq 1 h) 1
-    ≡ (p - 1) ^ n mod p.
+  → ∏ (i = 1, h), sign ((i * a) mod p) p ≡ (p - 1) ^ n mod p.
 Proof.
 intros * Hn Hh.
 progress unfold nb_of_mult_gt_half in Hn.
@@ -877,10 +888,8 @@ Theorem List_fold_left_mul_mul_seq_fold_left_abs :
   p ≠ 0
   → n = nb_of_mult_gt_half a p
   → h = (p - 1) / 2
-  → fold_left (λ acc i : nat, acc * (i * a)) (seq 1 h) 1 ≡
-      ((p - 1) ^ n *
-       fold_left (λ acc i : nat, acc * abs ((i * a) mod p) p) (seq 1 h) 1)
-      mod p.
+  → ∏ (i = 1, h), (i * a) ≡
+      ((p - 1) ^ n * ∏ (i = 1, h), abs ((i * a) mod p) p) mod p.
 Proof.
 intros  * Hpz Hn Hh.
 rewrite List_fold_left_mod; cycle 1. {
@@ -1089,12 +1098,7 @@ assert (H1 : z = a ^ h * fact h). {
   subst z.
   apply List_fold_left_mul_mul_seq.
 }
-assert
-  (H2 :
-     z ≡
-       ((p - 1) ^ n *
-        List.fold_left (λ acc i, acc * abs (i * a mod p) p) (List.seq 1 h) 1)
-         mod p). {
+assert (H2 : z ≡ ((p - 1) ^ n * ∏ (i = 1, h), abs ((i * a) mod p) p) mod p). {
   subst z.
   now apply List_fold_left_mul_mul_seq_fold_left_abs.
 }
