@@ -1105,25 +1105,6 @@ rewrite <- Legendre_symbol_mod in H3; cycle 1. {
   destruct p; [ easy | ].
   now do 2 apply -> Nat.succ_le_mono.
 }
-(*
-rewrite Nat.mod_small in H3; cycle 1. {
-  progress unfold Legendre_symbol.
-  remember (p =? 2) as p2 eqn:Hp2; symmetry in Hp2.
-  destruct p2. {
-    apply Nat.eqb_eq in Hp2; subst p.
-    apply Nat.lt_succ_diag_r.
-  }
-  apply Nat.eqb_neq in Hp2.
-  remember (a mod p =? 0) as apz eqn:Hapz; symmetry in Hapz.
-  destruct apz; [ now  destruct p | ].
-  apply Nat.eqb_neq in Hapz.
-  destruct (sqrt_mod a p). {
-    destruct p; [ easy | ].
-    destruct p; [ easy | flia ].
-  }
-  destruct p; [ easy | flia ].
-}
-*)
 rewrite H3, <- Hh.
 assert
   (H4 :
