@@ -11,12 +11,22 @@ Notation "'∏' ( i = b , e ) , g" :=
   (at level 35, i at level 0, b at level 60, e at level 60,
    right associativity,
    format "'[hv  ' ∏  ( i  =  b ,  e ) ,  '/' '[' g ']' ']'").
+Notation "'∏' ( i ∈ l ) , g" :=
+  (List.fold_left (λ c i, (c * g)%nat) l 1%nat)
+  (at level 35, i at level 0, l at level 60,
+   right associativity,
+   format "'[hv  ' ∏  ( i  ∈  l ) ,  '/' '[' g ']' ']'").
 (*
 Notation "'∏' ( i = b , e ) , g" :=
   (iter_seq b e (λ c i, (c * g)%nat) 1%nat)
   (at level 35, i at level 0, b at level 60, e at level 60,
    right associativity,
    format "'[hv  ' ∏  ( i  =  b ,  e ) ,  '/' '[' g ']' ']'").
+Notation "'∏' ( i ∈ l ) , g" :=
+  (iter_list l (λ c i, (c * g)%nat) 1%nat)
+  (at level 35, i at level 0, l at level 60,
+   right associativity,
+   format "'[hv  ' ∏  ( i  ∈  l ) ,  '/' '[' g ']' ']'").
 *)
 
 Theorem if_mul_negb :
@@ -112,7 +122,7 @@ Theorem List_fold_left_mul_filter_filter :
   ∀ A c l (f : A → _) g,
   fold_left (λ a b, a * f b) l c =
   fold_left (λ a b, a * f b) (filter g l) c *
-  fold_left (λ a b, a * f b) (filter (λ a, negb (g a)) l) 1.
+  ∏ (b ∈ filter (λ a : A, negb (g a)) l), f b.
 Proof.
 intros.
 revert c.
@@ -139,7 +149,7 @@ Theorem List_fold_left_mul_mul :
   ∀ A c l f (g : A → _),
   List.fold_left (λ a b, a * f b * g b) l c =
   List.fold_left (λ a b, a * f b) l c *
-  List.fold_left (λ a b, a * g b) l 1.
+  ∏ (b ∈ l), g b.
 Proof.
 intros.
 revert c.
@@ -1110,10 +1120,7 @@ rewrite <- Legendre_symbol_mod in H3; cycle 1. {
   now do 2 apply -> Nat.succ_le_mono.
 }
 rewrite H3, <- Hh.
-assert
-  (H4 :
-     fold_left (λ acc i, acc * abs ((i * a) mod p) p) (seq 1 h) 1 ≡
-     fact h mod p). {
+assert (H4 : ∏ (i = 1, h), abs ((i * a) mod p) p ≡ fact h mod p). {
   specialize abs_all_different_multiples as H4.
   assert (H: 1 ≤ a < p) by easy.
   specialize (H4 p Hp a H); clear H.
