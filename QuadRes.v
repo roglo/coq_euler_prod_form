@@ -905,14 +905,56 @@ erewrite List.filter_ext; cycle 1. {
 now rewrite List.filter_false.
 Qed.
 
-Theorem Gauss_lemma :
-  ∀ p, prime p →
-  ∀ a n,
-  0 < a < p
-  → n = nb_of_mult_gt_half a p
-  → Legendre_symbol a p = (p - 1) ^ n mod p.
+Theorem nb_of_mult_gt_half_mod :
+  ∀ a p, nb_of_mult_gt_half a p = nb_of_mult_gt_half (a mod p) p.
 Proof.
-intros * Hp * (Haz, Hap) Hn.
+intros.
+progress unfold nb_of_mult_gt_half.
+f_equal.
+apply filter_ext.
+intros m.
+now rewrite Nat.Div0.mul_mod_idemp_r.
+Qed.
+
+Theorem Legendre_symbol_mod :
+  ∀ a p, Legendre_symbol a p = Legendre_symbol (a mod p) p.
+Proof.
+intros.
+progress unfold Legendre_symbol.
+rewrite Nat.Div0.mod_mod.
+now rewrite sqrt_mod_mod.
+Qed.
+
+Definition coprimes a b := Nat.gcd a b = 1.
+Definition are_coprimes a b := Nat.gcd a b =? 1.
+
+Theorem Gauss_lemma :
+  ∀ a p, prime p → coprimes a p →
+  ∀ n, n = nb_of_mult_gt_half a p →
+  Legendre_symbol a p = (p - 1) ^ n mod p.
+Proof.
+intros * Hp Hap *  Hn.
+rewrite nb_of_mult_gt_half_mod in Hn.
+rewrite Legendre_symbol_mod.
+remember (a mod p) as b eqn:Hb.
+assert (H : 0 < b < p). {
+  subst b.
+  destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
+  split; [ | now apply Nat.mod_upper_bound ].
+  apply Nat.neq_0_lt_0.
+  intros H.
+  apply Nat.Div0.mod_divides in H.
+  destruct H as (c, H); subst a.
+  progress unfold coprimes in Hap.
+  rewrite <- (Nat.mul_1_r p) in Hap at 2.
+  rewrite Nat.gcd_mul_mono_l in Hap.
+  rewrite Nat_gcd_1_r, Nat.mul_1_r in Hap.
+  now subst p.
+}
+move H before Hap; clear Hap; rename H into Hap.
+clear a Hb; rename b into a.
+move n before a.
+destruct Hap as (Haz, Hap).
 destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
 remember ((p - 1) / 2) as h eqn:Hh.
 remember (List.fold_left (λ acc i, acc * (i * a)) (List.seq 1 h) 1) as z
@@ -1324,12 +1366,8 @@ Theorem quadratic_reciprocity_2 :
 Proof.
 intros * Hp.
 destruct (Nat.eq_dec p 2) as [Hp2| Hp2]; [ now subst p | ].
-erewrite (Gauss_lemma p Hp); [ | | easy ]; cycle 1. {
-  split; [ easy | ].
-  destruct p; [ easy | ].
-  destruct p; [ easy | ].
-  do 2 apply -> Nat.succ_lt_mono.
-  now destruct p.
+erewrite (Gauss_lemma _ p Hp); [ | | easy ]; cycle 1. {
+  now apply eq_primes_gcd_1.
 }
 apply Nat_same_parity_same_opp_1_pow; [ now destruct p | ].
 progress unfold nb_of_mult_gt_half.
@@ -1529,9 +1567,6 @@ Qed.
 
 Inspect 1.
 
-Definition coprimes a b := Nat.gcd a b = 1.
-Definition are_coprimes a b := Nat.gcd a b =? 1.
-
 (* to be completed
 Theorem Eisenstein_lemma :
   ∀ a p, prime p → coprimes a p →
@@ -1539,6 +1574,7 @@ Theorem Eisenstein_lemma :
 Proof.
 intros * Hp Hap.
 progress unfold nb_of_mult_gt_half.
+...
 (*
 Compute (List.map (λ p, List.map (λ a,
 let h := (p - 1) / 2 in
