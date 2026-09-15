@@ -57,6 +57,27 @@ f_equal; f_equal; f_equal.
 flia.
 Qed.
 
+Theorem fold_iter_seq_succ_l : ∀ A b len f (d : A),
+  iter_list (List.seq (S b) (S len - 1)) f d =
+    iter_seq (S b) (b + len) f d.
+Proof.
+intros.
+rewrite fold_iter_seq; cbn.
+now do 2 rewrite Nat.sub_0_r.
+Qed.
+
+Theorem fold_iter_seq_1 : ∀ A len f (d : A),
+  iter_list (List.seq 1 len) f d = iter_seq 1 len f d.
+Proof.
+intros.
+progress unfold iter_seq.
+now rewrite Nat_sub_succ_1.
+Qed.
+
+Theorem fold_iter_seq_1_succ_sub : ∀ A len f (d : A),
+  iter_list (List.seq 1 (S len - 1)) f d = iter_seq 1 len f d.
+Proof. easy. Qed.
+
 Theorem if_mul_negb :
   ∀ a (b : bool) c d e,
   (if b then a * (if negb b then c else d) else e) =
@@ -1023,9 +1044,7 @@ remember (λ acc i, _) as x in |-*.
 remember (λ acc i, _) as y in |-*; subst x y.
 rewrite <- Nat.Div0.mul_mod_idemp_l.
 do 2 rewrite fold_iter_list.
-do 2 rewrite fold_iter_seq.
-rewrite Nat_sub_succ_1; cbn.
-rewrite Nat.sub_0_r.
+do 2 rewrite fold_iter_seq_1_succ_sub.
 rewrite (List_fold_left_mul_sign _ _ n); [ | easy | easy ].
 now rewrite Nat.Div0.mul_mod_idemp_l.
 Qed.
@@ -1116,7 +1135,6 @@ Qed.
 Definition coprimes a b := Nat.gcd a b = 1.
 Definition are_coprimes a b := Nat.gcd a b =? 1.
 
-(* to be completed
 Theorem Gauss_lemma :
   ∀ a p, prime p → coprimes a p →
   ∀ n, n = nb_of_mult_gt_half a p →
@@ -1150,10 +1168,14 @@ remember (List.fold_left (λ acc i, acc * (i * a)) (List.seq 1 h) 1) as z
   eqn:Hz.
 assert (H1 : z = a ^ h * fact h). {
   subst z.
+  rewrite fold_iter_list.
+  rewrite fold_iter_seq_1.
   apply List_fold_left_mul_mul_seq.
 }
 assert (H2 : z ≡ ((p - 1) ^ n * ∏ (i = 1, h), abs ((i * a) mod p) p) mod p). {
   subst z.
+  rewrite fold_iter_list.
+  rewrite fold_iter_seq_1.
   now apply List_fold_left_mul_mul_seq_fold_left_abs.
 }
 specialize (Euler_criterion p Hp a) as H3.
@@ -1169,8 +1191,11 @@ assert (H4 : ∏ (i = 1, h), abs ((i * a) mod p) p ≡ fact h mod p). {
   assert (H: 1 ≤ a < p) by easy.
   specialize (H4 p Hp a H); clear H.
   rewrite fact_eq_fold_left.
+  progress unfold iter_seq.
+  progress unfold iter_list.
   rewrite <- List_fold_left_map.
   f_equal.
+  rewrite Nat_sub_succ_1.
   apply Permutation_fold_mul.
   apply Permutation_map_same_l; cycle 1. {
     intros b Hb.
@@ -1394,7 +1419,6 @@ now apply Nat.neq_0_lt_0.
 Qed.
 
 Inspect 1.
-*)
 
 Theorem Nat_same_parity_same_opp_1_pow :
   ∀ n, n ≠ 0 → ∀ a b,
@@ -1442,7 +1466,6 @@ specialize (Nat.mod_upper_bound a 2 (Nat.neq_succ_0 _)) as H.
 flia Ha2 H.
 Qed.
 
-(* to be completed
 Theorem quadratic_reciprocity_2 :
   ∀ p, prime p → Legendre_symbol 2 p = (p - 1) ^ ((p² - 1) / 8) mod p.
 Proof.
@@ -1649,6 +1672,7 @@ Qed.
 
 Inspect 1.
 
+(* to be completed
 Theorem Eisenstein_lemma :
   ∀ a p, prime p → coprimes a p →
   nb_of_mult_gt_half a p ≡ (∑ (k = 1, (p - 1) / 2), 2 * k * a / p) mod 2.
