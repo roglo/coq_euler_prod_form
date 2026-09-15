@@ -1656,6 +1656,23 @@ Qed.
 
 Inspect 1.
 
+Theorem Nat_div_less_small : ∀ n a b,
+  n * b ≤ a < (n + 1) * b
+  → a / b = n.
+Proof.
+intros * Hab.
+assert (Hb : b ≠ 0). {
+  now intros Hb; rewrite Hb, (Nat.mul_comm (n + 1)) in Hab.
+}
+replace a with (a - n * b + n * b) at 1 by now apply Nat.sub_add.
+rewrite Nat.div_add; [ | easy ].
+replace n with (0 + n) at 3 by easy; f_equal.
+apply Nat.div_small.
+apply Nat.add_lt_mono_r with (p := n * b).
+rewrite Nat.add_comm in Hab; cbn in Hab.
+now rewrite Nat.sub_add.
+Qed.
+
 (* to be completed
 Theorem Eisenstein_lemma :
   ∀ a p, prime p → coprimes a p →
@@ -1663,6 +1680,17 @@ Theorem Eisenstein_lemma :
 Proof.
 intros * Hp Hap.
 progress unfold coprimes in Hap.
+remember ((p - 1) / 2) as h eqn:Hh.
+erewrite summation_eq_compat; cycle 1. {
+  intros i Hi.
+  replace (2 * i * a / p) with (if h <? i * a then 1 else 0); cycle 1. {
+    symmetry.
+    remember (h <? i * a) as b eqn:Hb; symmetry in Hb.
+    destruct b. {
+      apply Nat.ltb_lt in Hb.
+      apply Nat_div_less_small.
+      rewrite Nat.mul_1_l; cbn - [ "*" ].
+Search (_ / _ = 1).
 ...
 
 Theorem Eisenstein_lemma :
