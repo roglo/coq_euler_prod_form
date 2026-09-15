@@ -1656,7 +1656,7 @@ Qed.
 
 Inspect 1.
 
-(* to be completed *)
+(* to be completed
 Theorem Eisenstein_lemma :
   ∀ a p, prime p → coprimes a p →
   nb_of_mult_gt_half a p ≡ (∑ (k = 1, (p - 1) / 2), 2 * k * a / p) mod 2.
