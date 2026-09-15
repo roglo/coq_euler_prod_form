@@ -1164,18 +1164,13 @@ move n before a.
 destruct Hap as (Haz, Hap).
 destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
 remember ((p - 1) / 2) as h eqn:Hh.
-remember (List.fold_left (λ acc i, acc * (i * a)) (List.seq 1 h) 1) as z
-  eqn:Hz.
+remember (∏ (i = 1, h), (i * a)) as z eqn:Hz.
 assert (H1 : z = a ^ h * fact h). {
   subst z.
-  rewrite fold_iter_list.
-  rewrite fold_iter_seq_1.
   apply List_fold_left_mul_mul_seq.
 }
 assert (H2 : z ≡ ((p - 1) ^ n * ∏ (i = 1, h), abs ((i * a) mod p) p) mod p). {
   subst z.
-  rewrite fold_iter_list.
-  rewrite fold_iter_seq_1.
   now apply List_fold_left_mul_mul_seq_fold_left_abs.
 }
 specialize (Euler_criterion p Hp a) as H3.
