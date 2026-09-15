@@ -1221,7 +1221,8 @@ Qed.
 
 Theorem List_length_filter_negb {A} : ∀ f (l : list A),
   List.NoDup l
-  → length (List.filter f l) = length l - length (List.filter (λ x, negb (f x)) l).
+  → length (List.filter f l) =
+    length l - length (List.filter (λ x, negb (f x)) l).
 Proof.
 intros * Hl.
 induction l as [| a l]; [ easy | ].
@@ -1279,7 +1280,8 @@ Qed.
 Theorem not_equiv_imp_False : ∀ P : Prop, (P → False) ↔ ¬ P.
 Proof. easy. Qed.
 
-Theorem Sorted_Sorted_seq : ∀ start len, Sorted.Sorted lt (List.seq start len).
+Theorem Sorted_Sorted_seq :
+  ∀ start len, Sorted.Sorted lt (List.seq start len).
 Proof.
 intros.
 revert start.
@@ -1406,7 +1408,8 @@ destruct n; [ easy | cbn; apply IHl ].
 Qed.
 
 Theorem List_skipn_seq : ∀ n start len,
-  n ≤ len → List.skipn n (List.seq start len) = List.seq (start + n) (len - n).
+  n ≤ len
+  → List.skipn n (List.seq start len) = List.seq (start + n) (len - n).
 Proof.
 intros * Hnlen.
 revert n start Hnlen.
