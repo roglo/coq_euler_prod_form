@@ -1140,7 +1140,7 @@ Theorem Gauss_lemma :
   ∀ n, n = nb_of_mult_gt_half a p →
   Legendre_symbol a p = (p - 1) ^ n mod p.
 Proof.
-intros * Hp Hap *  Hn.
+intros * Hp Hap * Hn.
 rewrite nb_of_mult_gt_half_mod in Hn.
 rewrite Legendre_symbol_mod_r.
 remember (a mod p) as b eqn:Hb.
@@ -1677,6 +1677,7 @@ progress unfold iter_seq.
 progress unfold iter_list.
 Check List_fold_left_mul_mul_seq.
 progress unfold nb_of_mult_gt_half.
+Check List_fold_left_mul_mul_seq_fold_left_abs.
 ...
 (*
 Compute (List.map (λ p, List.map (λ a,
