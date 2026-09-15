@@ -1681,16 +1681,26 @@ Proof.
 intros * Hp Hap.
 progress unfold coprimes in Hap.
 remember ((p - 1) / 2) as h eqn:Hh.
+rewrite summation_mod_idemp.
 erewrite summation_eq_compat; cycle 1. {
   intros i Hi.
-  replace (2 * i * a / p) with (if h <? i * a then 1 else 0); cycle 1. {
+  replace ((2 * i * a / p) mod 2) with (if h <? i * a then 1 else 0);
+    cycle 1. {
     symmetry.
     remember (h <? i * a) as b eqn:Hb; symmetry in Hb.
     destruct b. {
       apply Nat.ltb_lt in Hb.
+Search (_ mod _ = _).
+...
       apply Nat_div_less_small.
       rewrite Nat.mul_1_l; cbn - [ "*" ].
-Search (_ / _ = 1).
+      split. {
+        rewrite Hh in Hb.
+        apply Nat_div_lt_mul in Hb; [ | easy ].
+        apply Nat.lt_sub_lt_add_l in Hb.
+        apply -> Nat.lt_succ_r in Hb.
+        now rewrite Nat.mul_assoc in Hb.
+      }
 ...
 
 Theorem Eisenstein_lemma :
