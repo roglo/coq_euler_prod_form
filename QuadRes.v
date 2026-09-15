@@ -1,23 +1,11 @@
 Set Nested Proofs Allowed.
 From Stdlib Require Import Utf8 Arith.
 From Stdlib Require Import Sorting.Permutation.
-Import List List.ListNotations.
+Import List.ListNotations.
 Require Import Misc Primes.
 
 Notation "a '²'" := (a ^ 2) (at level 1, format "a ²").
 
-(*
-Notation "'∏' ( i = b , e ) , g" :=
-  (List.fold_left (λ c i, (c * g)%nat) (seq b e) 1%nat)
-  (at level 35, i at level 0, b at level 60, e at level 60,
-   right associativity,
-   format "'[hv  ' ∏  ( i  =  b ,  e ) ,  '/' '[' g ']' ']'").
-Notation "'∏' ( i ∈ l ) , g" :=
-  (List.fold_left (λ c i, (c * g)%nat) l 1%nat)
-  (at level 35, i at level 0, l at level 60,
-   right associativity,
-   format "'[hv  ' ∏  ( i  ∈  l ) ,  '/' '[' g ']' ']'").
-*)
 Notation "'∏' ( i = b , e ) , g" :=
   (iter_seq b e (λ c i, (c * g)%nat) 1%nat)
   (at level 35, i at level 0, b at level 60, e at level 60,
@@ -169,9 +157,9 @@ Qed.
 
 Theorem List_fold_left_mul_filter_filter :
   ∀ A c l (f : A → _) g,
-  fold_left (λ a b, a * f b) l c =
-  fold_left (λ a b, a * f b) (filter g l) c *
-  ∏ (b ∈ filter (λ a : A, negb (g a)) l), f b.
+  List.fold_left (λ a b, a * f b) l c =
+  List.fold_left (λ a b, a * f b) (List.filter g l) c *
+  ∏ (b ∈ List.filter (λ a : A, negb (g a)) l), f b.
 Proof.
 intros.
 progress unfold iter_list.
@@ -184,9 +172,9 @@ rename a into d.
 remember (g d) as gd eqn:Hgd; symmetry in Hgd.
 destruct gd; [ easy | cbn ].
 rewrite Nat.add_0_r.
-rewrite (fold_left_mul_fun_from_1 (c * f d)).
-rewrite (fold_left_mul_fun_from_1 c).
-rewrite (fold_left_mul_fun_from_1 (f d)).
+rewrite (List_fold_left_mul_fun_from_1 (c * f d)).
+rewrite (List_fold_left_mul_fun_from_1 c).
+rewrite (List_fold_left_mul_fun_from_1 (f d)).
 do 3 rewrite <- Nat.mul_assoc.
 f_equal.
 rewrite Nat.mul_comm.
@@ -213,7 +201,7 @@ do 3 rewrite <- Nat.mul_assoc.
 f_equal.
 f_equal.
 symmetry.
-apply fold_left_mul_from_1.
+apply List_fold_left_mul_from_1.
 Qed.
 
 Theorem List_fold_left_const :
@@ -272,9 +260,9 @@ Theorem all_different_exist : ∀ f n,
   → ∀ a, a < n → ∃ x, f x = a.
 Proof.
 intros * Hn Hf * Han.
-remember (seq 0 n) as l eqn:Hl.
+remember (List.seq 0 n) as l eqn:Hl.
 set (g := λ i, if lt_dec i n then f i else i).
-assert (Hperm : Permutation l (map g l)). {
+assert (Hperm : Permutation l (List.map g l)). {
   apply Permutation_sym.
   subst l.
   apply nat_bijection_Permutation. {
@@ -308,11 +296,11 @@ assert (Hperm : Permutation l (map g l)). {
 specialize (Permutation_in a Hperm) as H1.
 assert (H : a ∈ l). {
   subst l.
-  apply in_seq; flia Han.
+  apply List.in_seq; flia Han.
 }
 specialize (H1 H); clear H.
 subst g; cbn in H1.
-apply in_map_iff in H1.
+apply List.in_map_iff in H1.
 destruct H1 as (x & Hax & Hx).
 destruct (lt_dec x n) as [Hxn| Hxn]; [ now exists x | now subst x ].
 Qed.
@@ -460,8 +448,8 @@ assert
 rewrite fact_eq_fold_left.
 (* very similar with eq_fold_left_mul_seq_2_prime_sub_3_1;
    perhaps a common lemma could be useful *)
-specialize (seq_NoDup (p - 1) 1) as Hnd.
-remember (seq 1 (p - 1)) as l eqn:Hl.
+specialize (List.seq_NoDup (p - 1) 1) as Hnd.
+remember (List.seq 1 (p - 1)) as l eqn:Hl.
 assert
   (Hij : ∀ i, i ∈ l →
    ∃j, j ∈ l ∧ i ≠ j ∧ (i * j) mod p = a ∧
@@ -470,13 +458,13 @@ assert
   specialize (Hbb i) as H1.
   assert (H : 1 ≤ i < p). {
     subst l.
-    apply in_seq in Hi; flia Hi.
+    apply List.in_seq in Hi; flia Hi.
   }
   specialize (H1 H); clear H.
   destruct H1 as (j & (Hj1 & Hj2 & Hj3) & Hj4).
   exists j.
   split. {
-    subst l; apply in_seq.
+    subst l; apply List.in_seq.
     split; [ | flia Hj1 ].
     destruct j; [ | flia ].
     symmetry in Hj2.
@@ -492,7 +480,7 @@ assert
       apply Nat.neq_sym in Hki.
       split; [ | easy ].
       rewrite Hl in Hk.
-      apply in_seq in Hk.
+      apply List.in_seq in Hk.
       flia Hk.
     }
     specialize (H1 H); clear H.
@@ -519,10 +507,10 @@ assert
         now symmetry in Hkj.
       }
       rewrite Nat.mod_small in Hj2. 2: {
-        rewrite Hl in Hi; apply in_seq in Hi; flia Hi.
+        rewrite Hl in Hi; apply List.in_seq in Hi; flia Hi.
       }
       rewrite Nat.mod_small in Hj2. 2: {
-        rewrite Hl in Hk; apply in_seq in Hk; flia Hk.
+        rewrite Hl in Hk; apply List.in_seq in Hk; flia Hk.
       }
       now symmetry in Hj2.
     } {
@@ -537,36 +525,36 @@ assert
         apply Nat.neq_0_lt_0 in Haz.
         now symmetry in Hkj.
       }
-      rewrite Hl in Hk; apply in_seq in Hk.
+      rewrite Hl in Hk; apply List.in_seq in Hk.
       rewrite Nat.mod_small in Hj2; [ | flia Hk ].
       rewrite Nat.mod_small in Hj2; [ flia Hj2 Hik | ].
-      rewrite Hl in Hi; apply in_seq in Hi; flia Hi.
+      rewrite Hl in Hi; apply List.in_seq in Hi; flia Hi.
     }
   }
 }
 clear Hbb Hnres.
 replace (p - 1) with (length l). 2: {
-  now subst l; rewrite length_seq.
+  now subst l; rewrite List.length_seq.
 }
 clear Hl.
 remember (length l) as len eqn:Hlen; symmetry in Hlen.
 revert l Hnd Hij Hlen.
 induction len as (len, IHlen) using lt_wf_rec; intros.
 destruct len. {
-  apply length_zero_iff_nil in Hlen.
+  apply List.length_zero_iff_nil in Hlen.
   now rewrite Hlen.
 }
 destruct l as [| b l]; [ easy | ].
 specialize (Hij b (or_introl (eq_refl _))) as H1.
 destruct H1 as (i2 & Hi2l & Hai2 & Hai2p & Hk).
 destruct Hi2l as [Hi2l| Hi2l]; [ easy | ].
-specialize (in_split i2 l Hi2l) as (l1 & l2 & Hll).
+specialize (List.in_split i2 l Hi2l) as (l1 & l2 & Hll).
 rewrite Hll.
 cbn - [ "/" ]; rewrite Nat.add_0_r.
-rewrite fold_left_app; cbn - [ "/" ].
-rewrite fold_left_mul_from_1.
+rewrite List.fold_left_app; cbn - [ "/" ].
+rewrite List_fold_left_mul_from_1.
 rewrite Nat.mul_shuffle0, Nat.mul_comm.
-rewrite fold_left_mul_from_1.
+rewrite List_fold_left_mul_from_1.
 do 2 rewrite Nat.mul_assoc.
 remember (i2 * 2) as x.
 rewrite <- Nat.mul_assoc; subst x.
@@ -578,7 +566,7 @@ replace (S len) with (len - 1 + 1 * 2). 2: {
   cbn in Hlen.
   apply Nat.succ_inj in Hlen.
   rewrite Hll in Hlen.
-  rewrite length_app in Hlen; cbn in Hlen.
+  rewrite List.length_app in Hlen; cbn in Hlen.
   now rewrite Nat.add_comm in Hlen.
 }
 rewrite Nat.div_add; [ | easy ].
@@ -588,25 +576,25 @@ rewrite <- (Nat.Div0.mul_mod_idemp_r _ (a ^ _)).
 f_equal; f_equal.
 rewrite Nat.mul_comm.
 rewrite List_fold_left_mul_assoc, Nat.mul_1_l.
-rewrite <- fold_left_app.
+rewrite <- List.fold_left_app.
 apply (IHlen (len - 1)); [ flia | | | ]. 3: {
   cbn in Hlen.
   apply Nat.succ_inj in Hlen.
   rewrite <- Hlen, Hll.
-  do 2 rewrite length_app.
+  do 2 rewrite List.length_app.
   cbn; flia.
 } {
-  apply NoDup_cons_iff in Hnd.
+  apply List.NoDup_cons_iff in Hnd.
   destruct Hnd as (_, Hnd).
   rewrite Hll in Hnd.
-  now apply NoDup_remove_1 in Hnd.
+  now apply List.NoDup_remove_1 in Hnd.
 }
 intros i Hi.
 specialize (Hij i) as H1.
 assert (H : i ∈ b :: l). {
   right; rewrite Hll.
-  apply in_app_or in Hi.
-  apply in_or_app.
+  apply List.in_app_or in Hi.
+  apply List.in_or_app.
   destruct Hi as [Hi| Hi]; [ now left | now right; right ].
 }
 specialize (H1 H); clear H.
@@ -617,35 +605,35 @@ split. {
     subst j; exfalso.
     specialize (Hk' i2) as H1.
     assert (H : i2 ∈ b :: l). {
-      now rewrite Hll; right; apply in_or_app; right; left.
+      now rewrite Hll; right; apply List.in_or_app; right; left.
     }
     specialize (H1 H); clear H.
     assert (H : i2 ≠ i). {
       intros H; subst i2.
       move Hnd at bottom; move Hi at bottom.
-      apply NoDup_cons_iff in Hnd.
+      apply List.NoDup_cons_iff in Hnd.
       destruct Hnd as (_, Hnd).
       rewrite Hll in Hnd.
-      now apply NoDup_remove_2 in Hnd.
+      now apply List.NoDup_remove_2 in Hnd.
     }
     specialize (H1 H).
     now rewrite Nat.mul_comm in H1.
   }
   rewrite Hll in Hjall.
-  apply in_app_or in Hjall.
-  apply in_or_app.
+  apply List.in_app_or in Hjall.
+  apply List.in_or_app.
   destruct Hjall as [Hjall| Hjall]; [ now left | ].
   destruct Hjall as [Hjall| Hjall]; [ | now right ].
   subst j.
   destruct (Nat.eq_dec b i) as [Hbi| Hbi]. {
     subst i.
     move Hnd at bottom.
-    apply NoDup_cons_iff in Hnd.
+    apply List.NoDup_cons_iff in Hnd.
     destruct Hnd as (Hnd, _).
     exfalso; apply Hnd; clear Hnd.
     rewrite Hll.
-    apply in_app_or in Hi.
-    apply in_or_app.
+    apply List.in_app_or in Hi.
+    apply List.in_or_app.
     destruct Hi as [Hi| Hi]; [ now left | now right; right ].
   }
   now specialize (Hk' b (or_introl eq_refl) Hbi) as H2.
@@ -656,8 +644,8 @@ intros k Hkll Hki.
 apply Hk'; [ | easy ].
 right.
 rewrite Hll.
-apply in_app_or in Hkll.
-apply in_or_app.
+apply List.in_app_or in Hkll.
+apply List.in_or_app.
 destruct Hkll as [Hkll| Hkll]; [ now left | now right; right ].
 Qed.
 
@@ -873,7 +861,8 @@ Inspect 1.
 
 Definition nb_of_mult_gt_half a p :=
   List.length
-    (List.filter (λ m, (p - 1) / 2 <? ((m * a) mod p)) (seq 1 ((p - 1) / 2))).
+    (List.filter (λ m, (p - 1) / 2 <? ((m * a) mod p))
+       (List.seq 1 ((p - 1) / 2))).
 
 Definition sign a p := if a <=? (p - 1) / 2 then 1 else p - 1.
 Definition abs a p := if a <=? (p - 1) / 2 then a else p - a.
@@ -904,8 +893,8 @@ Qed.
 
 Theorem List_fold_left_if_equiv_filter  :
   ∀ a p l (g : _ → bool),
-  fold_left (λ c b : nat, if g b then c * (p - 1) else c) l a
-  ≡ (a * (p - 1) ^ length (filter g l)) mod p.
+  List.fold_left (λ c b : nat, if g b then c * (p - 1) else c) l a
+  ≡ (a * (p - 1) ^ length (List.filter g l)) mod p.
 Proof.
 intros.
 revert a.
@@ -1103,7 +1092,7 @@ Proof.
 intros.
 progress unfold nb_of_mult_gt_half.
 f_equal.
-apply filter_ext.
+apply List.filter_ext.
 intros m.
 now rewrite Nat.Div0.mul_mod_idemp_r.
 Qed.
@@ -1262,7 +1251,7 @@ assert (H4 : ∏ (i = 1, h), abs ((i * a) mod p) p ≡ fact h mod p). {
   apply (NoDup_map_iff 0).
   rewrite List.length_seq.
   intros i j Hi Hj Hij.
-  do 2 rewrite seq_nth in Hij; [ | easy | easy | easy ].
+  do 2 rewrite List.seq_nth in Hij; [ | easy | easy | easy ].
   cbn - [ "*" ] in Hij.
   remember ((S i) * a mod p <=? h) as x eqn:Hx in Hij; symmetry in Hx.
   remember ((S j) * a mod p <=? h) as y eqn:Hy in Hij; symmetry in Hy.
@@ -1471,7 +1460,7 @@ erewrite (Gauss_lemma _ p Hp); [ | | easy ]; cycle 1. {
 }
 apply Nat_same_parity_same_opp_1_pow; [ now destruct p | ].
 progress unfold nb_of_mult_gt_half.
-erewrite filter_ext_in; cycle 1. {
+erewrite List.filter_ext_in; cycle 1. {
   intros * Ha.
   rewrite Nat.mod_small; cycle 1. {
     apply List.in_seq in Ha.

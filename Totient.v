@@ -1392,7 +1392,7 @@ assert (H : ∀ a, a ∈ coprimes n → Nat.gcd n a = 1). {
 remember (coprimes n) as l eqn:Hl; symmetry in Hl; clear Hl.
 induction l as [| a l]; intros; [ apply Nat_gcd_1_r | ].
 cbn; rewrite Nat.add_0_r.
-rewrite fold_left_mul_from_1.
+rewrite List_fold_left_mul_from_1.
 apply Nat_gcd_1_mul_r; [ now apply H; left | ].
 apply IHl.
 intros b Hb.

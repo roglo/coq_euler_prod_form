@@ -2280,9 +2280,9 @@ specialize (in_split i2 l Hi2l) as (l1 & l2 & Hll).
 rewrite Hll.
 cbn; rewrite Nat.add_0_r.
 rewrite fold_left_app; cbn.
-rewrite fold_left_mul_from_1.
+rewrite List_fold_left_mul_from_1.
 rewrite Nat.mul_shuffle0, Nat.mul_comm.
-rewrite fold_left_mul_from_1.
+rewrite List_fold_left_mul_from_1.
 do 2 rewrite Nat.mul_assoc.
 remember (i2 * 2) as x.
 rewrite <- Nat.mul_assoc; subst x.

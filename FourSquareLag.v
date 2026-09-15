@@ -1557,8 +1557,8 @@ assert (H : ∀ d, d ∈ p :: l → d = 1 ∨ prime d). {
   destruct Hr as [Hr| Hr]; [ now left | now right; right ].
 }
 specialize (IHl H Hxyzt); clear H.
-rewrite fold_left_mul_from_1 in IHl.
-rewrite fold_left_mul_from_1.
+rewrite List_fold_left_mul_from_1 in IHl.
+rewrite List_fold_left_mul_from_1.
 rewrite Nat.mul_shuffle0.
 rewrite Nat2Z.inj_mul.
 rewrite <- IHl.
