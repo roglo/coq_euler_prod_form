@@ -1679,18 +1679,20 @@ Theorem Eisenstein_lemma :
   nb_of_mult_gt_half a p ≡ (∑ (k = 1, (p - 1) / 2), 2 * k * a / p) mod 2.
 Proof.
 intros * Hp Hap.
+assert (Hpz : p ≠ 0) by now intros H; subst p.
 progress unfold coprimes in Hap.
 remember ((p - 1) / 2) as h eqn:Hh.
 rewrite summation_mod_idemp.
 erewrite summation_eq_compat; cycle 1. {
   intros i Hi.
+  specialize (Nat.div_mod (2 * i * a / p) 2 (Nat.neq_succ_0 _)) as H1.
+...
   replace ((2 * i * a / p) mod 2) with (if h <? i * a then 1 else 0);
     cycle 1. {
     symmetry.
     remember (h <? i * a) as b eqn:Hb; symmetry in Hb.
     destruct b. {
       apply Nat.ltb_lt in Hb.
-Search (_ mod _ = _).
 ...
       apply Nat_div_less_small.
       rewrite Nat.mul_1_l; cbn - [ "*" ].
