@@ -1682,11 +1682,56 @@ intros * Hp Hap.
 assert (Hpz : p ≠ 0) by now intros H; subst p.
 progress unfold coprimes in Hap.
 remember ((p - 1) / 2) as h eqn:Hh.
+move h before p.
+(**)
 rewrite summation_mod_idemp.
 erewrite summation_eq_compat; cycle 1. {
   intros i Hi.
-  specialize (Nat.div_mod (2 * i * a / p) 2 (Nat.neq_succ_0 _)) as H1.
+  replace ((2 * i * a / p) mod 2) with
+    (if h <? i * a mod p then 1 else 0); cycle 1. {
+    symmetry.
+    rewrite <- Nat.mul_assoc.
+    remember (h <? i * a mod p) as b eqn:Hb; symmetry in Hb.
+    destruct b. {
+      apply Nat.ltb_lt in Hb.
 ...
+      rewrite (Nat_div_less_small 1); [ easy | ].
+      rewrite Nat.mul_1_l; cbn - [ "*" ].
+      split. {
+        rewrite Hh in Hb.
+        apply Nat_div_lt_mul in Hb; [ | easy ].
+        apply Nat.lt_sub_lt_add_l in Hb.
+        apply -> Nat.lt_succ_r in Hb.
+        now rewrite Nat.mul_assoc in Hb.
+
+        eapply Nat.lt_le_trans; [ apply Hb | ].
+        apply Nat.mul_le_mono_pos_l; [ easy | ].
+        apply Nat.Div0.mod_le.
+      }
+      apply Nat.mul_lt_mono_pos_l; [ easy | ].
+...
+rewrite summation_mod_idemp.
+erewrite summation_eq_compat; cycle 1. {
+  intros i Hi.
+...
+  replace ((2 * i * a / p) mod 2) with
+    (if p <? 2 * ((i * a) mod p) then 1 else 0); cycle 1. {
+    symmetry.
+    remember (p <? 2 * ((i * a) mod p)) as b eqn:Hb; symmetry in Hb.
+    destruct b. {
+      apply Nat.ltb_lt in Hb.
+      rewrite (Nat_div_less_small 1); [ easy | ].
+      rewrite Nat.mul_1_l; cbn - [ "*" ].
+      rewrite <- Nat.mul_assoc.
+      split. {
+        apply Nat.lt_le_incl.
+        eapply Nat.lt_le_trans; [ apply Hb | ].
+        apply Nat.mul_le_mono_pos_l; [ easy | ].
+        apply Nat.Div0.mod_le.
+      }
+      apply Nat.mul_lt_mono_pos_l; [ easy | ].
+...
+  specialize (Nat.div_mod (2 * i * a / p) 2 (Nat.neq_succ_0 _)) as H1.
   replace ((2 * i * a / p) mod 2) with (if h <? i * a then 1 else 0);
     cycle 1. {
     symmetry.
