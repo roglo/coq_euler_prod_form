@@ -1694,6 +1694,9 @@ erewrite summation_eq_compat; cycle 1. {
     remember (h <? i * a mod p) as b eqn:Hb; symmetry in Hb.
     destruct b. {
       apply Nat.ltb_lt in Hb.
+Inspect 17.
+specialize (quadratic_reciprocity_2 p Hp) as H1.
+Search Legendre_symbol.
 ...
       rewrite (Nat_div_less_small 1); [ easy | ].
       rewrite Nat.mul_1_l; cbn - [ "*" ].
@@ -1749,7 +1752,9 @@ erewrite summation_eq_compat; cycle 1. {
         now rewrite Nat.mul_assoc in Hb.
       }
 ...
+*)
 
+(* to be completed
 Theorem Eisenstein_lemma :
   ∀ p q, prime p → prime q →
   nb_of_mult_gt_half q p ≡ (∑ (k = 1, (p - 1) / 2), k * q / p) mod 2.
@@ -1770,8 +1775,12 @@ Compute (List.map (λ p, List.map (λ a,
   (List.filter is_prime (List.seq 3 30))).
 *)
 assert (Hpz : p ≠ 0) by now intros H; subst p.
+rewrite summation_mod_idemp.
 erewrite summation_eq_compat; cycle 1. {
   intros k Hk.
+  replace ((k * q / p) mod 2) with
+    (if p <? k * q then 1 else 0); cycle 1. {
+...
   specialize (Nat.div_mod (k * q) p Hpz) as H1.
 ...
 
