@@ -155,6 +155,46 @@ rewrite Nat.Div0.mod_add.
 now apply Nat.mod_small.
 Qed.
 
+Theorem Nat_eq_mod_1 : ∀ a b, a mod b = 1 ↔ (a - 1) mod b = 0 ∧ a ≠ 0 ∧ b ≠ 1.
+Proof.
+intros.
+destruct (Nat.eq_dec b 0) as [Hbz| Hbz]. {
+  subst b; cbn.
+  split; intros Ha; [ now subst a; rewrite Nat.sub_diag | ].
+  destruct Ha as (Ha & Haz & _).
+  apply Nat.sub_0_le in Ha.
+  destruct a; [ easy | ].
+  apply Nat.succ_le_mono in Ha.
+  now apply Nat.le_0_r in Ha; subst a.
+}
+split; intros Hab. {
+  split. {
+    specialize (Nat.div_mod a b Hbz) as H1.
+    rewrite Hab in H1.
+    rewrite H1, Nat.add_sub, Nat.mul_comm.
+    apply Nat.Div0.mod_mul.
+  }
+  split. {
+    intros H; subst a.
+    now rewrite Nat.Div0.mod_0_l in Hab.
+  }
+  now intros H; subst b.
+}
+destruct Hab as (Hab & Haz & Hb1).
+specialize (Nat.div_mod (a - 1) b Hbz) as H1.
+rewrite Hab, Nat.add_0_r in H1.
+apply (f_equal S) in H1.
+rewrite <- Nat.add_1_r in H1.
+rewrite Nat.sub_add in H1; [ | now apply Nat.neq_0_lt_0 ].
+rewrite H1, <- Nat.add_1_r.
+rewrite <- Nat.Div0.add_mod_idemp_l.
+rewrite Nat.mul_comm, Nat.Div0.mod_mul; cbn.
+destruct b; [ easy | ].
+destruct b; [ easy | ].
+apply Nat.mod_1_l.
+now do 2 apply -> Nat.succ_le_mono.
+Qed.
+
 Theorem List_fold_left_mul_filter_filter :
   ∀ A c l (f : A → _) g,
   List.fold_left (λ a b, a * f b) l c =
@@ -1673,44 +1713,6 @@ rewrite Nat.add_comm in Hab; cbn in Hab.
 now rewrite Nat.sub_add.
 Qed.
 
-(* to be completed
-Theorem Eisenstein_lemma :
-  ∀ a p, prime p → coprimes a p →
-  nb_of_mult_gt_half a p ≡ (∑ (k = 1, (p - 1) / 2), 2 * k * a / p) mod 2.
-Proof.
-intros * Hp Hap.
-assert (Hpz : p ≠ 0) by now intros H; subst p.
-progress unfold coprimes in Hap.
-remember ((p - 1) / 2) as h eqn:Hh.
-move h before p.
-(**)
-rewrite summation_mod_idemp.
-erewrite summation_eq_compat; cycle 1. {
-  intros i Hi.
-(**)
-Compute (let a := 8 in let p := 101 in
-(List.map (λ i, ((2 * i * a / p) mod 2)) (List.seq 1 ((p - 1) / 2)))).
-Compute (let a := 18 in let p := 101 in let h := (p - 1) / 2  in
-(List.map (λ i, (
-  (Nat.eqb
-     (if h <? i * a mod p then 1 else 0)
-     ((2 * i * a / p) mod 2))))
-(List.seq 0 (2 * p)))).
-Compute (let a := 18 in let p := 45 in
-List.map (λ p,
-(List.map (λ i, (
-  (Nat.eqb
-     (if (p - 1) / 2 <? i * a mod p then 1 else 0)
-     ((2 * i * a / p) mod 2))))
-(List.seq 0 p)))
-(List.seq 0 50)).
-Compute (let a := 18 in let p := 41 in
-(List.map (λ i, (
-  (Nat.eqb
-     (Nat.b2n ((p - 1) / 2 <? i mod p))
-     ((2 * i / p) mod 2))))
-(List.seq 0 (10*p)))).
-Print Nat.b2n.
 Theorem Nat_eq_mul_2_div_mod_if_then_else :
   ∀ a n,
   n ≠ 0
@@ -1740,18 +1742,46 @@ destruct b; cbn - [ "*" "mod" ]; cycle 1. {
   rewrite (Nat.mul_comm n), Nat.mul_assoc.
   rewrite Nat.div_add_l; [ | easy ].
   rewrite Nat_mod_add_l_mul_l.
-...
-Search (_ * _ / _).
-rewrite (Nat.mul_comm _ 2).
-Check Nat.Lcm0.divide_div_mul_exact.
-apply Nat.Lcm0.divide_div_mul_exact.
-Search (_ < _ mod _).
-...
-Nat.bit0_mod: ∀ a : nat, Nat.b2n (Nat.testbit a 0) = a mod 2
-...
-rewrite <- Nat.mul_assoc.
-rewrite Nat_eq_mul_2_div_mod_if_then_else.
-easy.
+  apply Nat_eq_mod_1.
+  split. {
+    apply Nat.Lcm0.mod_divide.
+    rewrite (Nat_div_less_small 1); [ now exists 0 | ].
+    rewrite Nat.mul_1_l.
+    cbn - [ "*" ].
+    split. {
+      apply Nat_div_lt_mul in Hb; [ | easy ].
+      apply Nat.lt_sub_lt_add_l in Hb.
+      now apply -> Nat.lt_succ_r in Hb.
+    }
+    apply Nat.mul_lt_mono_pos_l; [ easy | ].
+    now apply Nat.mod_upper_bound.
+  }
+  split; [ | easy ].
+  intros H2.
+  apply Nat.div_small_iff in H2; [ | easy ].
+  apply Nat.nle_gt in H2.
+  apply H2; clear H2.
+  apply Nat_div_lt_mul in Hb; [ | easy ].
+  apply Nat.lt_sub_lt_add_l in Hb.
+  now apply -> Nat.lt_succ_r in Hb.
+}
+Qed.
+
+(* to be completed
+Theorem Eisenstein_lemma :
+  ∀ a p, prime p → coprimes a p →
+  nb_of_mult_gt_half a p ≡ (∑ (k = 1, (p - 1) / 2), 2 * k * a / p) mod 2.
+Proof.
+intros * Hp Hap.
+assert (Hpz : p ≠ 0) by now intros H; subst p.
+progress unfold coprimes in Hap.
+remember ((p - 1) / 2) as h eqn:Hh.
+move h before p.
+rewrite summation_mod_idemp.
+erewrite summation_eq_compat; cycle 1. {
+  intros i Hi.
+  rewrite <- Nat.mul_assoc.
+  now rewrite (Nat_eq_mul_2_div_mod_if_then_else _ _ Hpz).
 }
 cbn - [ nb_of_mult_gt_half "<?" "/" "mod" ].
 ...
