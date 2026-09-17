@@ -1707,16 +1707,20 @@ List.map (λ p,
 Compute (let a := 18 in let p := 41 in
 (List.map (λ i, (
   (Nat.eqb
-     (if (p - 1) / 2 <? i mod p then 1 else 0)
+     (Nat.b2n ((p - 1) / 2 <? i mod p))
      ((2 * i / p) mod 2))))
 (List.seq 0 (10*p)))).
+Print Nat.b2n.
 Theorem Nat_eq_mul_2_div_mod_if_then_else :
-  ∀ a n, (2 * a / n) mod 2 = if (n - 1) / 2 <? a mod n then 1 else 0.
+  ∀ a n, (2 * a / n) mod 2 = Nat.b2n ((n - 1) / 2 <? a mod n).
 Proof.
 intros.
 remember ((n - 1) / 2 <? a mod n) as b eqn:Hb; symmetry in Hb.
-destruct b. {
+destruct b; cbn - [ "*" "mod" ]. {
   apply Nat.ltb_lt in Hb.
+Search Nat.b2n.
+...
+Nat.bit0_mod: ∀ a : nat, Nat.b2n (Nat.testbit a 0) = a mod 2
 ...
 rewrite <- Nat.mul_assoc.
 rewrite Nat_eq_mul_2_div_mod_if_then_else.
