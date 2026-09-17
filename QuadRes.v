@@ -1687,16 +1687,25 @@ move h before p.
 rewrite summation_mod_idemp.
 erewrite summation_eq_compat; cycle 1. {
   intros i Hi.
+(*
+Compute (let a := 8 in let p := 101 in
+(List.map (λ i, ((2 * i * a / p) mod 2)) (List.seq 1 ((p - 1) / 2)))).
+Compute (let a := 25 in let p := 101 in let h := (p - 1) / 2  in
+(List.map (λ i, (
+  (Nat.eqb
+     (if h <? i * a mod p then 1 else 0)
+     ((2 * i * a / p) mod 2))))
+(List.seq 1 h))).
+...
+*)
   replace ((2 * i * a / p) mod 2) with
     (if h <? i * a mod p then 1 else 0); cycle 1. {
+    (* ça a l'air d'être bon, d'après les tests ci-dessus *)
     symmetry.
     rewrite <- Nat.mul_assoc.
     remember (h <? i * a mod p) as b eqn:Hb; symmetry in Hb.
     destruct b. {
       apply Nat.ltb_lt in Hb.
-Inspect 17.
-specialize (quadratic_reciprocity_2 p Hp) as H1.
-Search Legendre_symbol.
 ...
       rewrite (Nat_div_less_small 1); [ easy | ].
       rewrite Nat.mul_1_l; cbn - [ "*" ].
