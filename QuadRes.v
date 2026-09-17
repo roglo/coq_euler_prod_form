@@ -1712,13 +1712,40 @@ Compute (let a := 18 in let p := 41 in
 (List.seq 0 (10*p)))).
 Print Nat.b2n.
 Theorem Nat_eq_mul_2_div_mod_if_then_else :
-  ∀ a n, (2 * a / n) mod 2 = Nat.b2n ((n - 1) / 2 <? a mod n).
+  ∀ a n,
+  n ≠ 0
+  → (2 * a / n) mod 2 = Nat.b2n ((n - 1) / 2 <? a mod n).
 Proof.
-intros.
+intros * Hnz.
 remember ((n - 1) / 2 <? a mod n) as b eqn:Hb; symmetry in Hb.
-destruct b; cbn - [ "*" "mod" ]. {
+destruct b; cbn - [ "*" "mod" ]; cycle 1. {
+  apply Nat.ltb_ge in Hb.
+  apply Nat.Lcm0.mod_divide.
+  specialize (Nat.div_mod a n Hnz) as H1.
+  rewrite H1.
+  rewrite Nat.mul_add_distr_l.
+  rewrite (Nat.mul_comm n), Nat.mul_assoc.
+  rewrite Nat.div_add_l; [ | easy ].
+  apply Nat.divide_add_r; [ now apply Nat.divide_mul_l | ].
+  rewrite Nat.div_small; [ now exists 0 | ].
+  apply (Nat.mul_le_mono_l _ _ 2) in Hb.
+  eapply Nat.le_lt_trans; [ apply Hb | ].
+  eapply Nat.le_lt_trans; [ apply Nat.Div0.mul_div_le | ].
+  flia Hnz.
+} {
   apply Nat.ltb_lt in Hb.
-Search Nat.b2n.
+  specialize (Nat.div_mod a n Hnz) as H1.
+  rewrite H1.
+  rewrite Nat.mul_add_distr_l.
+  rewrite (Nat.mul_comm n), Nat.mul_assoc.
+  rewrite Nat.div_add_l; [ | easy ].
+  rewrite Nat_mod_add_l_mul_l.
+...
+Search (_ * _ / _).
+rewrite (Nat.mul_comm _ 2).
+Check Nat.Lcm0.divide_div_mul_exact.
+apply Nat.Lcm0.divide_div_mul_exact.
+Search (_ < _ mod _).
 ...
 Nat.bit0_mod: ∀ a : nat, Nat.b2n (Nat.testbit a 0) = a mod 2
 ...
