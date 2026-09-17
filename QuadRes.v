@@ -195,6 +195,10 @@ apply Nat.mod_1_l.
 now do 2 apply -> Nat.succ_le_mono.
 Qed.
 
+Theorem Nat_add_if_distr_l :
+  ∀ a (b : bool) c d, (a + if b then c else d) = if b then a + c else a + d.
+Proof. now intros; destruct b. Qed.
+
 Theorem List_fold_left_mul_filter_filter :
   ∀ A c l (f : A → _) g,
   List.fold_left (λ a b, a * f b) l c =
@@ -1720,21 +1724,7 @@ Theorem Nat_eq_mul_2_div_mod_if_then_else :
 Proof.
 intros * Hnz.
 remember ((n - 1) / 2 <? a mod n) as b eqn:Hb; symmetry in Hb.
-destruct b; cbn - [ "*" "mod" ]; cycle 1. {
-  apply Nat.ltb_ge in Hb.
-  apply Nat.Lcm0.mod_divide.
-  specialize (Nat.div_mod a n Hnz) as H1.
-  rewrite H1.
-  rewrite Nat.mul_add_distr_l.
-  rewrite (Nat.mul_comm n), Nat.mul_assoc.
-  rewrite Nat.div_add_l; [ | easy ].
-  apply Nat.divide_add_r; [ now apply Nat.divide_mul_l | ].
-  rewrite Nat.div_small; [ now exists 0 | ].
-  apply (Nat.mul_le_mono_l _ _ 2) in Hb.
-  eapply Nat.le_lt_trans; [ apply Hb | ].
-  eapply Nat.le_lt_trans; [ apply Nat.Div0.mul_div_le | ].
-  flia Hnz.
-} {
+destruct b; cbn - [ "*" "mod" ]. {
   apply Nat.ltb_lt in Hb.
   specialize (Nat.div_mod a n Hnz) as H1.
   rewrite H1.
@@ -1764,6 +1754,20 @@ destruct b; cbn - [ "*" "mod" ]; cycle 1. {
   apply Nat_div_lt_mul in Hb; [ | easy ].
   apply Nat.lt_sub_lt_add_l in Hb.
   now apply -> Nat.lt_succ_r in Hb.
+} {
+  apply Nat.ltb_ge in Hb.
+  apply Nat.Lcm0.mod_divide.
+  specialize (Nat.div_mod a n Hnz) as H1.
+  rewrite H1.
+  rewrite Nat.mul_add_distr_l.
+  rewrite (Nat.mul_comm n), Nat.mul_assoc.
+  rewrite Nat.div_add_l; [ | easy ].
+  apply Nat.divide_add_r; [ now apply Nat.divide_mul_l | ].
+  rewrite Nat.div_small; [ now exists 0 | ].
+  apply (Nat.mul_le_mono_l _ _ 2) in Hb.
+  eapply Nat.le_lt_trans; [ apply Hb | ].
+  eapply Nat.le_lt_trans; [ apply Nat.Div0.mul_div_le | ].
+  flia Hnz.
 }
 Qed.
 
@@ -1784,6 +1788,19 @@ erewrite summation_eq_compat; cycle 1. {
   now rewrite (Nat_eq_mul_2_div_mod_if_then_else _ _ Hpz).
 }
 cbn - [ nb_of_mult_gt_half "<?" "/" "mod" ].
+progress unfold Nat.b2n.
+progress unfold iter_seq.
+progress unfold iter_list.
+rewrite Nat_sub_succ_1.
+erewrite List_fold_left_ext_in; cycle 1. {
+  intros * Hb.
+  now rewrite Nat_add_if_distr_l.
+}
+Search (List.fold_left (λ _ _, if _ then _ else _)).
+...
+rewrite <- List_fold_left_filter.
+Search (_ + if _ then _ else _).
+
 ...
   replace ((2 * i * a / p) mod 2) with
     (if h <? i * a mod p then 1 else 0); cycle 1. {
