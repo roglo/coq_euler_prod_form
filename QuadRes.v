@@ -1687,17 +1687,43 @@ move h before p.
 rewrite summation_mod_idemp.
 erewrite summation_eq_compat; cycle 1. {
   intros i Hi.
-(*
+(**)
 Compute (let a := 8 in let p := 101 in
 (List.map (λ i, ((2 * i * a / p) mod 2)) (List.seq 1 ((p - 1) / 2)))).
-Compute (let a := 25 in let p := 101 in let h := (p - 1) / 2  in
+Compute (let a := 18 in let p := 101 in let h := (p - 1) / 2  in
 (List.map (λ i, (
   (Nat.eqb
      (if h <? i * a mod p then 1 else 0)
      ((2 * i * a / p) mod 2))))
-(List.seq 1 h))).
+(List.seq 0 (2 * p)))).
+Compute (let a := 18 in let p := 45 in
+List.map (λ p,
+(List.map (λ i, (
+  (Nat.eqb
+     (if (p - 1) / 2 <? i * a mod p then 1 else 0)
+     ((2 * i * a / p) mod 2))))
+(List.seq 0 p)))
+(List.seq 0 50)).
+Compute (let a := 18 in let p := 41 in
+(List.map (λ i, (
+  (Nat.eqb
+     (if (p - 1) / 2 <? i mod p then 1 else 0)
+     ((2 * i / p) mod 2))))
+(List.seq 0 (10*p)))).
+Theorem Nat_eq_mul_2_div_mod_if_then_else :
+  ∀ a n, (2 * a / n) mod 2 = if (n - 1) / 2 <? a mod n then 1 else 0.
+Proof.
+intros.
+remember ((n - 1) / 2 <? a mod n) as b eqn:Hb; symmetry in Hb.
+destruct b. {
+  apply Nat.ltb_lt in Hb.
 ...
-*)
+rewrite <- Nat.mul_assoc.
+rewrite Nat_eq_mul_2_div_mod_if_then_else.
+easy.
+}
+cbn - [ nb_of_mult_gt_half "<?" "/" "mod" ].
+...
   replace ((2 * i * a / p) mod 2) with
     (if h <? i * a mod p then 1 else 0); cycle 1. {
     (* ça a l'air d'être bon, d'après les tests ci-dessus *)
