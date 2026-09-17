@@ -1771,7 +1771,6 @@ destruct b; cbn - [ "*" "mod" ]. {
 }
 Qed.
 
-(* to be completed
 Theorem Eisenstein_lemma :
   ∀ a p, prime p → coprimes a p →
   nb_of_mult_gt_half a p ≡ (∑ (k = 1, (p - 1) / 2), 2 * k * a / p) mod 2.
@@ -1796,107 +1795,18 @@ erewrite List_fold_left_ext_in; cycle 1. {
   intros * Hb.
   now rewrite Nat_add_if_distr_l.
 }
-Search (List.fold_left (λ _ _, if _ then _ else _)).
-...
-rewrite <- List_fold_left_filter.
-Search (_ + if _ then _ else _).
-
-...
-  replace ((2 * i * a / p) mod 2) with
-    (if h <? i * a mod p then 1 else 0); cycle 1. {
-    (* ça a l'air d'être bon, d'après les tests ci-dessus *)
-    symmetry.
-    rewrite <- Nat.mul_assoc.
-    remember (h <? i * a mod p) as b eqn:Hb; symmetry in Hb.
-    destruct b. {
-      apply Nat.ltb_lt in Hb.
-...
-      rewrite (Nat_div_less_small 1); [ easy | ].
-      rewrite Nat.mul_1_l; cbn - [ "*" ].
-      split. {
-        rewrite Hh in Hb.
-        apply Nat_div_lt_mul in Hb; [ | easy ].
-        apply Nat.lt_sub_lt_add_l in Hb.
-        apply -> Nat.lt_succ_r in Hb.
-        now rewrite Nat.mul_assoc in Hb.
-
-        eapply Nat.lt_le_trans; [ apply Hb | ].
-        apply Nat.mul_le_mono_pos_l; [ easy | ].
-        apply Nat.Div0.mod_le.
-      }
-      apply Nat.mul_lt_mono_pos_l; [ easy | ].
-...
-rewrite summation_mod_idemp.
-erewrite summation_eq_compat; cycle 1. {
-  intros i Hi.
-...
-  replace ((2 * i * a / p) mod 2) with
-    (if p <? 2 * ((i * a) mod p) then 1 else 0); cycle 1. {
-    symmetry.
-    remember (p <? 2 * ((i * a) mod p)) as b eqn:Hb; symmetry in Hb.
-    destruct b. {
-      apply Nat.ltb_lt in Hb.
-      rewrite (Nat_div_less_small 1); [ easy | ].
-      rewrite Nat.mul_1_l; cbn - [ "*" ].
-      rewrite <- Nat.mul_assoc.
-      split. {
-        apply Nat.lt_le_incl.
-        eapply Nat.lt_le_trans; [ apply Hb | ].
-        apply Nat.mul_le_mono_pos_l; [ easy | ].
-        apply Nat.Div0.mod_le.
-      }
-      apply Nat.mul_lt_mono_pos_l; [ easy | ].
-...
-  specialize (Nat.div_mod (2 * i * a / p) 2 (Nat.neq_succ_0 _)) as H1.
-  replace ((2 * i * a / p) mod 2) with (if h <? i * a then 1 else 0);
-    cycle 1. {
-    symmetry.
-    remember (h <? i * a) as b eqn:Hb; symmetry in Hb.
-    destruct b. {
-      apply Nat.ltb_lt in Hb.
-...
-      apply Nat_div_less_small.
-      rewrite Nat.mul_1_l; cbn - [ "*" ].
-      split. {
-        rewrite Hh in Hb.
-        apply Nat_div_lt_mul in Hb; [ | easy ].
-        apply Nat.lt_sub_lt_add_l in Hb.
-        apply -> Nat.lt_succ_r in Hb.
-        now rewrite Nat.mul_assoc in Hb.
-      }
-...
-*)
+progress unfold nb_of_mult_gt_half.
+rewrite <- List.fold_left_S_0.
+rewrite List_fold_left_filter.
+rewrite <- Hh.
+erewrite List_fold_left_ext_in; [ easy | ].
+cbn - [ "<?" ].
+intros * Hb.
+rewrite Nat.add_0_r.
+now rewrite Nat.add_1_r.
+Qed.
 
 (* to be completed
-Theorem Eisenstein_lemma :
-  ∀ p q, prime p → prime q →
-  nb_of_mult_gt_half q p ≡ (∑ (k = 1, (p - 1) / 2), k * q / p) mod 2.
-Proof.
-intros * Hp Hq.
-(*
-(* version que m'a donnée Claude en partant de p et q tous deux premiers *)
-Compute (List.map (λ p, List.map (λ q,
-  (p, q,
-  nb_of_mult_gt_half q p ≡ (∑ (k = 1, (p - 1) / 2), k * q / p) mod 2))
-  (List.filter (Nat.ltb p) (List.filter is_prime (List.seq 3 30))))
-  (List.filter is_prime (List.seq 3 30))).
-(* version de wikipedia en partant de p premier et a premier avec p *)
-Compute (List.map (λ p, List.map (λ a,
-  (p, a,
-  nb_of_mult_gt_half a p ≡ (∑ (k = 1, (p - 1) / 2), 2 * k * a / p) mod 2))
-  ((*List.filter (Nat.ltb p)*) (List.filter (are_coprimes p) (List.seq 1 30))))
-  (List.filter is_prime (List.seq 3 30))).
-*)
-assert (Hpz : p ≠ 0) by now intros H; subst p.
-rewrite summation_mod_idemp.
-erewrite summation_eq_compat; cycle 1. {
-  intros k Hk.
-  replace ((k * q / p) mod 2) with
-    (if p <? k * q then 1 else 0); cycle 1. {
-...
-  specialize (Nat.div_mod (k * q) p Hpz) as H1.
-...
-
 Theorem quadratic_reciprocity :
   ∀ p q, prime p → prime q → 2 < p < q →
   is_quadratic_residue p q = is_quadratic_residue q p ↔
@@ -1911,6 +1821,7 @@ split; intros H1. {
     progress unfold is_quadratic_residue in Hx, Hy.
     apply Nat.eqb_eq in Hx, Hy.
     assert (Hzpq : 0 < p < q) by flia Hpq.
+...
     specialize (Gauss_lemma q Hq p _ Hzpq eq_refl) as H1.
     progress unfold Legendre_symbol in H1.
     progress unfold Legendre_symbol in Hx, Hy.
