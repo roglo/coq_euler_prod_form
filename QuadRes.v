@@ -195,6 +195,45 @@ apply Nat.mod_1_l.
 now do 2 apply -> Nat.succ_le_mono.
 Qed.
 
+Theorem Nat_sub_1_pow_mod :
+  ∀ a b, 1 < a → (a - 1) ^ b mod a = (a - 1) ^ (b mod 2).
+Proof.
+intros * H1a.
+remember (b mod 2) as b2 eqn:Hb2.
+symmetry in Hb2.
+destruct b2; cbn. {
+  apply Nat.Div0.mod_divides in Hb2.
+  destruct Hb2 as (c, Hb); subst b.
+  rewrite Nat.pow_mul_r.
+  rewrite <- Nat_mod_pow_mod.
+  rewrite Nat_sub_1_squ; [ | now intros H; subst a ].
+  rewrite Nat.mod_1_l; [ | easy ].
+  rewrite Nat.pow_1_l.
+  now apply Nat.mod_1_l.
+}
+destruct b2; cbn. {
+  rewrite Nat.mul_1_r.
+  destruct b; [ easy | ].
+  apply Nat_eq_succ_mod_2_1 in Hb2.
+  apply Nat.Div0.mod_divides in Hb2.
+  destruct Hb2 as (c, H); subst b.
+  rewrite Nat.pow_succ_r; [ | easy ].
+  rewrite Nat.pow_mul_r.
+  rewrite <- Nat.Div0.mul_mod_idemp_r.
+  rewrite <- Nat_mod_pow_mod.
+  rewrite Nat_sub_1_squ; [ | flia H1a ].
+  rewrite (Nat.mod_small 1); [ | easy ].
+  rewrite Nat.pow_1_l.
+  rewrite Nat.mod_1_l; [ | easy ].
+  rewrite Nat.mul_1_r.
+  apply Nat.mod_small.
+  flia H1a.
+}
+specialize (Nat.mod_upper_bound b 2 (Nat.neq_succ_0 _)) as H1.
+rewrite Hb2 in H1.
+flia H1.
+Qed.
+
 Theorem Nat_add_if_distr_l :
   ∀ a (b : bool) c d, (a + if b then c else d) = if b then a + c else a + d.
 Proof. now intros; destruct b. Qed.
@@ -1821,8 +1860,12 @@ split; intros H1. {
     progress unfold is_quadratic_residue in Hx, Hy.
     apply Nat.eqb_eq in Hx, Hy.
     assert (Hzpq : 0 < p < q) by flia Hpq.
+    assert (Hcp : coprimes q p) by now apply eq_gcd_prime_small_1.
+    specialize (Gauss_lemma q p Hp Hcp _ eq_refl) as H1.
+specialize (Eisenstein_lemma q p Hp Hcp) as H2.
+rewrite Nat_sub_1_pow_mod in H1; [ | flia Hpq ].
+rewrite H2 in H1.
 ...
-    specialize (Gauss_lemma q Hq p _ Hzpq eq_refl) as H1.
     progress unfold Legendre_symbol in H1.
     progress unfold Legendre_symbol in Hx, Hy.
     remember (p =? 2) as p2 eqn:Hp2; symmetry in Hp2.
