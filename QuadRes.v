@@ -1918,14 +1918,26 @@ rewrite Nat.mul_comm in Hu, Hv.
 progress unfold Legendre_symbol in Hx.
 remember (q =? 2) as q2 eqn:Hq2; symmetry in Hq2.
 destruct q2; [ apply Nat.eqb_eq in Hq2; flia Hpq Hq2 | ].
-apply Nat.eqb_neq in Hq2.
+clear Hq2.
 remember (p mod q =? 0) as pqz eqn:Hpqz; symmetry in Hpqz.
 destruct pqz; [ easy | ].
-apply Nat.eqb_neq in Hpqz.
+clear Hpqz.
 remember (sqrt_mod p q) as spq eqn:Hspq; symmetry in Hspq.
 destruct spq as [a| ]; [ clear Hx | flia Hx Hpq ].
 apply eq_sqrt_mod_Some in Hspq.
 destruct Hspq as (Haq, Hapq).
+progress unfold Legendre_symbol in Hy.
+remember (p =? 2) as p2 eqn:Hp2; symmetry in Hp2.
+destruct p2; [ apply Nat.eqb_eq in Hp2; flia Hpq Hp2 | ].
+clear Hp2.
+remember (q mod p =? 0) as qpz eqn:Hqpz; symmetry in Hqpz.
+destruct qpz; [ easy | ].
+apply Nat.eqb_neq in Hqpz.
+remember (sqrt_mod q p) as sqp eqn:Hsqp; symmetry in Hsqp.
+destruct sqp as [b| ]; [ clear Hy | flia Hy Hpq ].
+apply eq_sqrt_mod_Some in Hsqp.
+destruct Hsqp as (Hbp, Hbqp).
+move b before a; move Hbqp before Hapq; move Hbp before Haq.
 ...
 rewrite <- (Nat.mod_small 3 4) in Hp4 at 2; [ | flia ].
 rewrite <- (Nat.mod_small 3 4) in Hq4 at 2; [ | flia ].
