@@ -1913,13 +1913,19 @@ destruct Hq4 as [Hq4| Hq4]; [ easy | exfalso ].
 apply Nat_eq_mod_exists in Hp4, Hq4.
 destruct Hp4 as (u, Hu).
 destruct Hq4 as (v, Hv).
-...
-Search Legendre_symbol.
-Search (_ ^ _ mod 2).
-Print Legendre_symbol.
-rewrite Hu, Hv in Hx.
+move v before u.
+rewrite Nat.mul_comm in Hu, Hv.
 progress unfold Legendre_symbol in Hx.
-Search (sqrt_mod).
+remember (q =? 2) as q2 eqn:Hq2; symmetry in Hq2.
+destruct q2; [ apply Nat.eqb_eq in Hq2; flia Hpq Hq2 | ].
+apply Nat.eqb_neq in Hq2.
+remember (p mod q =? 0) as pqz eqn:Hpqz; symmetry in Hpqz.
+destruct pqz; [ easy | ].
+apply Nat.eqb_neq in Hpqz.
+remember (sqrt_mod p q) as spq eqn:Hspq; symmetry in Hspq.
+destruct spq as [a| ]; [ clear Hx | flia Hx Hpq ].
+apply eq_sqrt_mod_Some in Hspq.
+destruct Hspq as (Haq, Hapq).
 ...
 rewrite <- (Nat.mod_small 3 4) in Hp4 at 2; [ | flia ].
 rewrite <- (Nat.mod_small 3 4) in Hq4 at 2; [ | flia ].
