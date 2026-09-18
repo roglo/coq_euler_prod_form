@@ -238,6 +238,46 @@ Theorem Nat_add_if_distr_l :
   ∀ a (b : bool) c d, (a + if b then c else d) = if b then a + c else a + d.
 Proof. now intros; destruct b. Qed.
 
+Theorem Nat_eq_mod_exists : ∀ a b c, a mod b = c → ∃ k, a = k * b + c.
+Proof.
+intros * Habc.
+destruct (Nat.eq_dec b 0) as [Hbz| Hbz]. {
+  subst b.
+  cbn in Habc; subst c.
+  now exists 0.
+}
+exists (a / b).
+rewrite Nat.mul_comm, <- Habc.
+now apply Nat.div_mod.
+Qed.
+
+Theorem odd_prime_mod_4 : ∀ p, prime p → p ≠ 2 → p mod 4 = 1 ∨ p mod 4 = 3.
+Proof.
+intros * Hp Hp2.
+remember (p mod 4) as p4 eqn:Hp4; symmetry in Hp4.
+destruct p4. {
+  apply Nat.Lcm0.mod_divide in Hp4.
+  destruct Hp4 as (k, H); subst p.
+  rewrite Nat_4_eq_2_mul_2, Nat.mul_assoc in Hp.
+  apply prime_not_mul in Hp.
+  destruct Hp as [Hp| ]; [ | easy ].
+  now apply Nat.eq_mul_1 in Hp.
+}
+destruct p4; [ now left | right ].
+destruct p4. {
+  specialize (odd_prime p Hp Hp2) as H1.
+  rewrite Nat_4_eq_2_mul_2 in Hp4.
+  rewrite Nat.Div0.mod_mul_r in Hp4.
+  rewrite H1 in Hp4.
+  apply Nat.succ_inj in Hp4.
+  now apply Nat.eq_mul_1 in Hp4.
+}
+destruct p4; [ easy | ].
+specialize (Nat.mod_upper_bound p 4 (Nat.neq_succ_0 _)) as H1.
+rewrite Hp4 in H1.
+now do 4 apply Nat.succ_lt_mono in H1.
+Qed.
+
 Theorem List_fold_left_mul_filter_filter :
   ∀ A c l (f : A → _) g,
   List.fold_left (λ a b, a * f b) l c =
@@ -1864,6 +1904,27 @@ split; intros H1. {
     specialize (Gauss_lemma q p Hp Hcp _ eq_refl) as H1.
 rewrite Nat_sub_1_pow_mod in H1; [ | flia Hpq ].
 rewrite Eisenstein_lemma in H1; [ | easy | easy ].
+assert (H : p ≠ 2) by flia Hpq.
+specialize (odd_prime_mod_4 p Hp H) as Hp4; clear H.
+assert (H : q ≠ 2) by flia Hpq.
+specialize (odd_prime_mod_4 q Hq H) as Hq4; clear H.
+destruct Hp4 as [Hp4| Hp4]; [ now left | right ].
+destruct Hq4 as [Hq4| Hq4]; [ easy | exfalso ].
+apply Nat_eq_mod_exists in Hp4, Hq4.
+destruct Hp4 as (u, Hu).
+destruct Hq4 as (v, Hv).
+...
+Search Legendre_symbol.
+Search (_ ^ _ mod 2).
+Print Legendre_symbol.
+rewrite Hu, Hv in Hx.
+progress unfold Legendre_symbol in Hx.
+Search (sqrt_mod).
+...
+rewrite <- (Nat.mod_small 3 4) in Hp4 at 2; [ | flia ].
+rewrite <- (Nat.mod_small 3 4) in Hq4 at 2; [ | flia ].
+apply Nat_eq_mod_sub_0 in Hp4, Hq4.
+Search (_ mod _ = _ ↔ _).
 ...
     progress unfold Legendre_symbol in H1.
     progress unfold Legendre_symbol in Hx, Hy.
