@@ -1902,6 +1902,7 @@ split; intros H1. {
     assert (Hzpq : 0 < p < q) by flia Hpq.
     assert (Hcp : coprimes q p) by now apply eq_gcd_prime_small_1.
     specialize (Gauss_lemma q p Hp Hcp _ eq_refl) as H1.
+rewrite Hy in H1; symmetry in H1.
 rewrite Nat_sub_1_pow_mod in H1; [ | flia Hpq ].
 rewrite Eisenstein_lemma in H1; [ | easy | easy ].
 assert (H : p ≠ 2) by flia Hpq.
@@ -1915,6 +1916,8 @@ destruct Hp4 as (u, Hu).
 destruct Hq4 as (v, Hv).
 move v before u.
 rewrite Nat.mul_comm in Hu, Hv.
+Search (_ ^ _ = 1).
+...
 progress unfold Legendre_symbol in Hx.
 remember (q =? 2) as q2 eqn:Hq2; symmetry in Hq2.
 destruct q2; [ apply Nat.eqb_eq in Hq2; flia Hpq Hq2 | ].
