@@ -1862,9 +1862,8 @@ split; intros H1. {
     assert (Hzpq : 0 < p < q) by flia Hpq.
     assert (Hcp : coprimes q p) by now apply eq_gcd_prime_small_1.
     specialize (Gauss_lemma q p Hp Hcp _ eq_refl) as H1.
-specialize (Eisenstein_lemma q p Hp Hcp) as H2.
 rewrite Nat_sub_1_pow_mod in H1; [ | flia Hpq ].
-rewrite H2 in H1.
+rewrite Eisenstein_lemma in H1; [ | easy | easy ].
 ...
     progress unfold Legendre_symbol in H1.
     progress unfold Legendre_symbol in Hx, Hy.
