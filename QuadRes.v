@@ -1926,6 +1926,12 @@ rewrite Nat_4_eq_2_mul_2, <- Nat.mul_assoc in Hp1.
 rewrite <- Nat_mul_add_1_distr_l, Nat.mul_comm in Hp1.
 rewrite Nat.div_mul in Hp1; [ | easy ].
 subst p1.
+specialize (List_fold_left_if_equiv_filter 1) as H2.
+rewrite <- (Nat.mod_1_l p) in H1 at 5; [ | flia Hu ].
+rewrite <- (Nat.mul_1_l (_ ^ _)) in H1.
+rewrite <- H2 in H1.
+rewrite Nat.mod_1_l in H1; [ | flia Hu ].
+clear H2.
 ...
 remember (_ ^ _) as a eqn:Ha.
 symmetry in Ha.
