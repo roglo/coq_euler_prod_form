@@ -102,7 +102,6 @@ destruct b. {
 }
 Qed.
 
-(* to be completed
 Theorem Nat_eq_succ_mod_1 : ∀ a b, S a mod b = 1 → a mod b = 0.
 Proof.
 intros * Hab.
@@ -110,66 +109,11 @@ destruct (Nat.eq_dec b 0) as [Hbz| Hbz]. {
   subst b; cbn in Hab |-*.
   now apply Nat.succ_inj in Hab.
 }
-destruct (Nat.eq_dec a 0) as [Haz| Haz]. {
-  subst a.
-  destruct b; [ easy | ].
-  apply Nat.Div0.mod_0_l.
-}
-destruct b; [ easy | clear Hbz ].
-destruct b; [ easy | ].
-destruct b. {
-  destruct a; [ easy | clear Haz ].
-  do 2 rewrite <- Nat.add_1_r in Hab.
-  rewrite <- Nat.add_assoc, Nat.add_1_r in Hab.
-  rewrite <- Nat.Div0.add_mod_idemp_r, Nat.add_0_r in Hab.
-  rewrite <- Nat.add_1_r.
-  now rewrite <- Nat.Div0.add_mod_idemp_l, Hab.
-}
-destruct b. {
-  destruct a; [ easy | clear Haz ].
-  do 2  rewrite <- Nat.add_1_r in Hab.
-  rewrite <- Nat.add_assoc, Nat.add_1_r in Hab.
-  destruct a; [ easy | ].
-  rewrite <- Nat.add_1_r in Hab.
-  rewrite <- Nat.add_assoc in Hab.
-  cbn - [ "mod" ] in Hab.
-  rewrite <- Nat.Div0.add_mod_idemp_r in Hab.
-  rewrite Nat.Div0.mod_same, Nat.add_0_r in Hab.
-  destruct a; [ easy | ].
-  do 3 rewrite <- Nat.add_1_r.
-  do 2 rewrite <- Nat.add_assoc.
-  cbn - [ "mod" ].
-  rewrite <- Nat.Div0.add_mod_idemp_r, Nat.add_0_r.
-  rewrite <- Nat.add_1_r in Hab.
-  rewrite <- Nat.Div0.add_mod_idemp_l in Hab.
-  remember (a mod 3) as a3 eqn:Ha3; symmetry in Ha3.
-  destruct a3; [ easy | exfalso ].
-  destruct a3; [ easy | ].
-  do 2 rewrite <- Nat.add_1_r in Hab.
-  destruct a3; [ easy | ].
-  specialize (Nat.mod_upper_bound a 3 (Nat.neq_succ_0 _)) as H1.
-  flia Ha3 H1.
-}
-...
-destruct n; [ easy | ].
-do 2 rewrite <- Nat.add_1_r in Hn.
-rewrite <- Nat.add_assoc, Nat.add_1_r in Hn.
-rewrite <- Nat.Div0.add_mod_idemp_r, Nat.add_0_r in Hn.
-rewrite <- Nat.add_1_r.
-now rewrite <- Nat.Div0.add_mod_idemp_l, Hn.
-Qed.
-*)
-
-(* to be removed when Nat_eq_succ_mod_1 completed *)
-Theorem Nat_eq_succ_mod_2_1 : ∀ n, S n mod 2 = 1 → n mod 2 = 0.
-Proof.
-intros * Hn.
-destruct n; [ easy | ].
-do 2 rewrite <- Nat.add_1_r in Hn.
-rewrite <- Nat.add_assoc, Nat.add_1_r in Hn.
-rewrite <- Nat.Div0.add_mod_idemp_r, Nat.add_0_r in Hn.
-rewrite <- Nat.add_1_r.
-now rewrite <- Nat.Div0.add_mod_idemp_l, Hn.
+specialize (Nat.div_mod (S a) b Hbz) as H1.
+rewrite Hab, Nat.add_comm in H1.
+apply Nat.succ_inj in H1.
+rewrite H1, Nat.mul_comm.
+apply Nat.Div0.mod_mul.
 Qed.
 
 Theorem Nat_sub_1_squ : ∀ a, a ≠ 0 → (a - 1)² ≡ 1 mod a.
@@ -273,7 +217,7 @@ destruct b2; cbn. {
 destruct b2; cbn. {
   rewrite Nat.mul_1_r.
   destruct b; [ easy | ].
-  apply Nat_eq_succ_mod_2_1 in Hb2.
+  apply Nat_eq_succ_mod_1 in Hb2.
   apply Nat.Div0.mod_divides in Hb2.
   destruct Hb2 as (c, H); subst b.
   rewrite Nat.pow_succ_r; [ | easy ].
@@ -1423,7 +1367,7 @@ assert (H4 : ∏ (i = 1, h), abs ((i * a) mod p) p ≡ fact h mod p). {
     rewrite <- Nat.add_assoc.
     rewrite Nat_add_div_same; cycle 1. {
       specialize (odd_prime (S p) Hp Hp2) as Hpo.
-      apply Nat_eq_succ_mod_2_1 in Hpo.
+      apply Nat_eq_succ_mod_1 in Hpo.
       now apply Nat.Lcm0.mod_divide in Hpo.
     }
     cbn - [ "/" ].
@@ -1517,7 +1461,7 @@ assert (H4 : ∏ (i = 1, h), abs ((i * a) mod p) p ≡ fact h mod p). {
         specialize (odd_prime _ Hp) as H5.
         assert (H : S (S (S p)) ≠ 2) by easy.
         specialize (H5 H); clear H.
-        apply Nat_eq_succ_mod_2_1 in H5.
+        apply Nat_eq_succ_mod_1 in H5.
         now apply Nat.Lcm0.mod_divide.
       }
       now rewrite (Nat.mul_comm 2 p), Nat.div_mul in Hi.
@@ -1530,7 +1474,7 @@ assert (H4 : ∏ (i = 1, h), abs ((i * a) mod p) p ≡ fact h mod p). {
         specialize (odd_prime _ Hp) as H5.
         assert (H : S (S (S p)) ≠ 2) by easy.
         specialize (H5 H); clear H.
-        apply Nat_eq_succ_mod_2_1 in H5.
+        apply Nat_eq_succ_mod_1 in H5.
         now apply Nat.Lcm0.mod_divide.
       }
       now rewrite (Nat.mul_comm 2 p), Nat.div_mul in Hj.
@@ -1965,10 +1909,7 @@ rewrite Hy in H1; symmetry in H1.
 remember (_ ^ _) as a eqn:Ha.
 symmetry in Ha.
 destruct a; [ now rewrite Nat.Div0.mod_0_l in H1 | ].
-Search nb_of_mult_gt_half.
-Search (_ ^ _ mod _ = 1).
-Search (_ mod _ = 1).
-apply Nat_eq_succ_mod_2_1 in H1.
+apply Nat_eq_succ_mod_1 in H1.
 ...
 rewrite Nat_sub_1_pow_mod in H1; [ | flia Hpq ].
 rewrite Eisenstein_lemma in H1; [ | easy | easy ].
