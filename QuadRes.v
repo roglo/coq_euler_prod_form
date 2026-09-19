@@ -102,6 +102,65 @@ destruct b. {
 }
 Qed.
 
+(* to be completed
+Theorem Nat_eq_succ_mod_1 : ∀ a b, S a mod b = 1 → a mod b = 0.
+Proof.
+intros * Hab.
+destruct (Nat.eq_dec b 0) as [Hbz| Hbz]. {
+  subst b; cbn in Hab |-*.
+  now apply Nat.succ_inj in Hab.
+}
+destruct (Nat.eq_dec a 0) as [Haz| Haz]. {
+  subst a.
+  destruct b; [ easy | ].
+  apply Nat.Div0.mod_0_l.
+}
+destruct b; [ easy | clear Hbz ].
+destruct b; [ easy | ].
+destruct b. {
+  destruct a; [ easy | clear Haz ].
+  do 2 rewrite <- Nat.add_1_r in Hab.
+  rewrite <- Nat.add_assoc, Nat.add_1_r in Hab.
+  rewrite <- Nat.Div0.add_mod_idemp_r, Nat.add_0_r in Hab.
+  rewrite <- Nat.add_1_r.
+  now rewrite <- Nat.Div0.add_mod_idemp_l, Hab.
+}
+destruct b. {
+  destruct a; [ easy | clear Haz ].
+  do 2  rewrite <- Nat.add_1_r in Hab.
+  rewrite <- Nat.add_assoc, Nat.add_1_r in Hab.
+  destruct a; [ easy | ].
+  rewrite <- Nat.add_1_r in Hab.
+  rewrite <- Nat.add_assoc in Hab.
+  cbn - [ "mod" ] in Hab.
+  rewrite <- Nat.Div0.add_mod_idemp_r in Hab.
+  rewrite Nat.Div0.mod_same, Nat.add_0_r in Hab.
+  destruct a; [ easy | ].
+  do 3 rewrite <- Nat.add_1_r.
+  do 2 rewrite <- Nat.add_assoc.
+  cbn - [ "mod" ].
+  rewrite <- Nat.Div0.add_mod_idemp_r, Nat.add_0_r.
+  rewrite <- Nat.add_1_r in Hab.
+  rewrite <- Nat.Div0.add_mod_idemp_l in Hab.
+  remember (a mod 3) as a3 eqn:Ha3; symmetry in Ha3.
+  destruct a3; [ easy | exfalso ].
+  destruct a3; [ easy | ].
+  do 2 rewrite <- Nat.add_1_r in Hab.
+  destruct a3; [ easy | ].
+  specialize (Nat.mod_upper_bound a 3 (Nat.neq_succ_0 _)) as H1.
+  flia Ha3 H1.
+}
+...
+destruct n; [ easy | ].
+do 2 rewrite <- Nat.add_1_r in Hn.
+rewrite <- Nat.add_assoc, Nat.add_1_r in Hn.
+rewrite <- Nat.Div0.add_mod_idemp_r, Nat.add_0_r in Hn.
+rewrite <- Nat.add_1_r.
+now rewrite <- Nat.Div0.add_mod_idemp_l, Hn.
+Qed.
+*)
+
+(* to be removed when Nat_eq_succ_mod_1 completed *)
 Theorem Nat_eq_succ_mod_2_1 : ∀ n, S n mod 2 = 1 → n mod 2 = 0.
 Proof.
 intros * Hn.
@@ -1903,6 +1962,14 @@ split; intros H1. {
     assert (Hcp : coprimes q p) by now apply eq_gcd_prime_small_1.
     specialize (Gauss_lemma q p Hp Hcp _ eq_refl) as H1.
 rewrite Hy in H1; symmetry in H1.
+remember (_ ^ _) as a eqn:Ha.
+symmetry in Ha.
+destruct a; [ now rewrite Nat.Div0.mod_0_l in H1 | ].
+Search nb_of_mult_gt_half.
+Search (_ ^ _ mod _ = 1).
+Search (_ mod _ = 1).
+apply Nat_eq_succ_mod_2_1 in H1.
+...
 rewrite Nat_sub_1_pow_mod in H1; [ | flia Hpq ].
 rewrite Eisenstein_lemma in H1; [ | easy | easy ].
 assert (H : p ≠ 2) by flia Hpq.
