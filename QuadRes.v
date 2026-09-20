@@ -158,6 +158,14 @@ rewrite Nat.Div0.mod_add.
 now apply Nat.mod_small.
 Qed.
 
+Theorem Nat_eq_pow_1 : ∀ a b, a ^ b = 1 → a = 1 ∨ b = 0.
+Proof.
+intros * Hab.
+destruct b; [ now right | left ].
+cbn in Hab.
+now apply Nat.eq_mul_1 in Hab.
+Qed.
+
 Theorem Nat_eq_mod_1 : ∀ a b, a mod b = 1 ↔ (a - 1) mod b = 0 ∧ a ≠ 0 ∧ b ≠ 1.
 Proof.
 intros.
@@ -1932,6 +1940,18 @@ rewrite Nat_4_eq_2_mul_2, <- Nat.mul_assoc in Hp1.
 rewrite <- Nat_mul_add_1_distr_l, Nat.mul_comm in Hp1.
 rewrite Nat.div_mul in Hp1; [ | easy ].
 subst p1.
+apply Nat_eq_pow_1 in H1.
+destruct H1 as [H1| H1]. {
+  apply Nat.add_sub_eq_nz in H1; [ subst p | easy ].
+  destruct Hpq as (H, _).
+  now apply Nat.lt_irrefl in H.
+}
+Search (_ mod 2).
+apply Nat.Div0.mod_divides in H1.
+destruct H1 as (c, Hc).
+...
+apply Nat_eq_pow_1 in H1.
+...
 specialize (List_fold_left_if_equiv_filter 1) as H2.
 (*
 rewrite <- (Nat.mod_1_l p) in H1 at 5; [ | flia Hu ].
@@ -1947,7 +1967,7 @@ clear H2.
 remember (_ ^ _) as a eqn:Ha.
 symmetry in Ha.
 destruct a; [ now rewrite Nat.Div0.mod_0_l in H1 | ].
-apply Nat_eq_succ_mod_1 in H1.
+apply Nat_eq_scuc_mod_1 in H1.
 destruct a. {
 Search (_ ^ _ = 1).
 ...
