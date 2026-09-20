@@ -1906,6 +1906,10 @@ split; intros H1. {
     assert (Hcp : coprimes q p) by now apply eq_gcd_prime_small_1.
     specialize (Gauss_lemma q p Hp Hcp _ eq_refl) as H1.
 rewrite Hy in H1; symmetry in H1.
+(**)
+rewrite Nat_sub_1_pow_mod in H1; [ | flia Hpq ].
+rewrite Eisenstein_lemma in H1; [ | easy | easy ].
+(**)
 assert (H : p ≠ 2) by flia Hpq.
 specialize (odd_prime_mod_4 p Hp H) as Hp4; clear H.
 assert (H : q ≠ 2) by flia Hpq.
@@ -1917,7 +1921,9 @@ destruct Hp4 as (u, Hu).
 destruct Hq4 as (v, Hv).
 move v before u.
 rewrite Nat.mul_comm in Hu, Hv.
+(*
 progress unfold nb_of_mult_gt_half in H1.
+*)
 remember ((p - 1) / 2) as p1 eqn:Hp1.
 rewrite Hu in Hp1.
 rewrite <- Nat.add_sub_assoc in Hp1; [ | now apply -> Nat.succ_le_mono ].
@@ -1927,8 +1933,13 @@ rewrite <- Nat_mul_add_1_distr_l, Nat.mul_comm in Hp1.
 rewrite Nat.div_mul in Hp1; [ | easy ].
 subst p1.
 specialize (List_fold_left_if_equiv_filter 1) as H2.
+(*
 rewrite <- (Nat.mod_1_l p) in H1 at 5; [ | flia Hu ].
+*)
+rewrite <- (Nat.mod_1_l p) in H1 at 6; [ | flia Hu ].
+(**)
 rewrite <- (Nat.mul_1_l (_ ^ _)) in H1.
+...
 rewrite <- H2 in H1.
 rewrite Nat.mod_1_l in H1; [ | flia Hu ].
 clear H2.
