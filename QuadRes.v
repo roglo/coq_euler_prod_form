@@ -1947,6 +1947,29 @@ destruct H1 as [H1| H1]. {
   now apply Nat.lt_irrefl in H.
 }
 Search (_ mod 2).
+progress unfold Legendre_symbol in Hx, Hy.
+remember (q =? 2) as q2 eqn:Hq2; symmetry in Hq2.
+destruct q2; [ clear Hx; apply Nat.eqb_eq in Hq2; flia Hq2 Hpq | ].
+clear Hq2.
+remember (p =? 2) as p2 eqn:Hp2; symmetry in Hp2.
+destruct p2; [ clear Hy; apply Nat.eqb_eq in Hp2; flia Hp2 Hpq | ].
+clear Hp2.
+remember (p mod q =? 0) as pmq eqn:Hpmq; symmetry in Hpmq.
+destruct pmq; [ easy | ].
+apply Nat.eqb_neq in Hpmq.
+remember (q mod p =? 0) as qmp eqn:Hqmp; symmetry in Hqmp.
+destruct qmp; [ easy | ].
+apply Nat.eqb_neq in Hqmp.
+remember (sqrt_mod p q) as spq eqn:Hspq; symmetry in Hspq.
+destruct spq as [a| ]; [ clear Hx | flia Hx Hpq ].
+apply eq_sqrt_mod_Some in Hspq.
+destruct Hspq as (Haq, Hapq).
+remember (sqrt_mod q p) as sqp eqn:Hsqp; symmetry in Hsqp.
+destruct sqp as [b| ]; [ clear Hy | flia Hy Hpq ].
+apply eq_sqrt_mod_Some in Hsqp.
+destruct Hsqp as (Hbp, Hbqp).
+move b before a; move Hbqp before Hapq; move Hbp before Haq.
+...
 apply Nat.Div0.mod_divides in H1.
 destruct H1 as (c, Hc).
 ...
