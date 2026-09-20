@@ -1969,6 +1969,7 @@ destruct sqp as [b| ]; [ clear Hy | flia Hy Hpq ].
 apply eq_sqrt_mod_Some in Hsqp.
 destruct Hsqp as (Hbp, Hbqp).
 move b before a; move Hbqp before Hapq; move Hbp before Haq.
+rewrite (Nat.mod_small p) in Hapq; [ | easy ].
 ...
 apply Nat.Div0.mod_divides in H1.
 destruct H1 as (c, Hc).
