@@ -1812,12 +1812,18 @@ do 2 rewrite <- mul_assoc_in_summation.
 rewrite Nat.add_shuffle0.
 f_equal.
 rewrite <- (summation_succ_succ 0 n (λ i, binomial n i * a ^ (S n - i) * b ^ i)).
-rewrite summation_split_last; [ | flia | flia ].
-replace (S n - 1) with n by flia.
+rewrite summation_split_last; [ | flia ].
+rewrite summation_succ_succ.
+rewrite Nat.sub_diag.
+rewrite Nat.pow_0_r, Nat.mul_1_r.
 rewrite binomial_succ_diag_r, Nat.mul_0_l, Nat.add_0_r.
 symmetry.
 rewrite summation_split_first; [ | flia ].
-now rewrite binomial_0_r, Nat.mul_1_l, Nat.sub_0_r, Nat.pow_0_r, Nat.mul_1_r.
+rewrite binomial_0_r, Nat.mul_1_l, Nat.sub_0_r, Nat.pow_0_r, Nat.mul_1_r.
+f_equal.
+apply summation_eq_compat.
+intros i Hi.
+now rewrite Nat_sub_succ_1.
 Qed.
 
 Theorem binomial_prime : ∀ p k,
@@ -1869,7 +1875,12 @@ rewrite newton_binomial.
 rewrite summation_split_first; [ | flia ].
 rewrite binomial_0_r, Nat.mul_1_l, Nat.sub_0_r, Nat.pow_0_r, Nat.mul_1_r.
 specialize (prime_ge_2 p Hp) as H2p.
-rewrite summation_split_last; [ | flia H2p | flia H2p ].
+rewrite summation_split_last; [ | flia H2p ].
+rewrite (summation_shift 1); cycle 1. {
+  split; [ | easy ].
+  now apply -> Nat.succ_le_mono.
+}
+rewrite Nat_sub_succ_1.
 rewrite binomial_diag.
 rewrite Nat.sub_diag, Nat.pow_0_r, Nat.mul_1_r, Nat.mul_1_l.
 rewrite Nat.add_assoc, Nat.add_shuffle0.
@@ -1885,6 +1896,7 @@ rewrite all_0_summation_0. {
   now rewrite Nat.Div0.mod_0_l.
 }
 intros i Hi.
+rewrite Nat.add_comm, Nat.add_sub.
 specialize (binomial_prime _ _ Hp Hi) as (c, Hc).
 rewrite Hc, (Nat.mul_comm c).
 do 2 rewrite <- Nat.mul_assoc.

@@ -1920,16 +1920,44 @@ assert (Hpz : p ≠ 0) by now intros H; subst p.
 rewrite Eisenstein_lemma; [ | easy | ].
 Theorem glop :
   ∀ e f,
-  ∑ (i = 1, e), f (2 * i) e =
-  ∑ (i = 1, 2 * e), if i mod 2 =? 0 then f i e else 0.
+  ∑ (i = 1, e), f (2 * i) =
+  ∑ (i = 1, 2 * e), if i mod 2 =? 0 then f i else 0.
 Proof.
 intros.
+induction e; cbn - [ "*" "mod" ]. {
+  rewrite summation_empty; [ | easy ].
+  now symmetry; apply summation_empty.
+}
+rewrite summation_split_last; [ | now apply -> Nat.succ_le_mono ].
+rewrite summation_succ_succ.
+erewrite summation_eq_compat; cycle 1. {
+  intros i Hi.
+  now rewrite Nat_sub_succ_1.
+}
+cbn - [ "*" "mod" ].
+rewrite IHe.
+symmetry.
+rewrite summation_split_last; [ | now apply -> Nat.succ_le_mono ].
+rewrite (summation_shift 1); [ | flia ].
+rewrite Nat_sub_succ_1.
+rewrite (Nat.mul_comm 2 (S e)).
+rewrite Nat.Div0.mod_mul.
+rewrite Nat.eqb_refl.
+f_equal.
+(* bon, ça a pas l'air d'être ça... *)
+...
+rewrite summation_succ_succ.
+erewrite summation_eq_compat; cycle 1. {
+  intros i Hi.
+  now rewrite Nat_sub_succ_1.
+}
+cbn - [ "*" "mod" ].
+rewrite IHe.
 ...
 specialize (glop ((p - 1) / 2)) as H1.
-specialize (H1 (λ a b, (a * q / p))).
+specialize (H1 (λ a, (a * q / p))).
 cbn - [ "*" "/" "mod" ] in H1.
 rewrite H1.
-Search (_ * (_ / _)).
 rewrite <- Nat.Lcm0.divide_div_mul_exact.
 rewrite Nat.mul_comm.
 rewrite Nat.div_mul; [ | easy ].

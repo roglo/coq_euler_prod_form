@@ -109,6 +109,41 @@ etransitivity; [ apply IHl | ].
 apply Nat.le_max_r.
 Qed.
 
+Theorem List_fold_left_ext_in : ∀ A B (f g : A → B → A) l a,
+  (∀ b c, b ∈ l → f c b = g c b)
+  → List.fold_left f l a = List.fold_left g l a.
+Proof.
+intros * Hfg.
+revert a.
+induction l as [| d]; intros; [ easy | cbn ].
+rewrite (Hfg d a); [ | now left ].
+apply IHl.
+intros b c Hb.
+apply Hfg.
+now right.
+Qed.
+
+Theorem iter_seq_split_last : ∀ T d (op : T → T → T) b k g,
+  b ≤ k
+  → iter_seq b k (λ (c : T) (i : nat), op c (g i)) d =
+    op (iter_seq (S b) k (λ (c : T) (i : nat), op c (g (i - 1)%nat)) d) (g k).
+Proof.
+intros * Hbk.
+progress unfold iter_seq, iter_list.
+remember (S k - S b) as len eqn:Hlen.
+rewrite Nat.sub_succ in Hlen.
+replace (S k - b) with (S len) by flia Hbk Hlen.
+replace k with (b + len) by flia Hbk Hlen.
+rewrite <- List.seq_shift.
+rewrite List_fold_left_map.
+rewrite List.seq_S.
+rewrite List.fold_left_app.
+cbn; f_equal.
+apply List_fold_left_ext_in.
+intros i c Hi.
+now rewrite Nat.sub_0_r.
+Qed.
+
 Theorem summation_split_first : ∀ b e f,
   b ≤ e
   → ∑ (i = b, e), f i = f b + ∑ (i = S b, e), f i.
@@ -122,27 +157,84 @@ cbn.
 apply List_fold_left_add_fun_from_0.
 Qed.
 
-Theorem summation_split_last : ∀ b e f,
-  b ≤ e
-  → 1 ≤ e
-  → ∑ (i = b, e), f i = ∑ (i = b, e - 1), f i + f e.
+Theorem summation_split_last : ∀ b k g,
+  b ≤ k
+  → ∑ (i = b, k), g i = ∑ (i = S b, k), g (i - 1)%nat + g k.
 Proof.
-intros * Hbe He.
+intros * Hbk.
+now apply iter_seq_split_last.
+Qed.
+
+Theorem iter_seq_empty : ∀ T d (op : T → T → T) b k g,
+  k < b
+  → iter_seq b k (λ (c : T) (i : nat), op c (g i)) d = d.
+Proof.
+intros * Hkb.
 progress unfold iter_seq.
-progress unfold iter_list.
-destruct e; [ flia He | clear He ].
-rewrite Nat.sub_succ, Nat.sub_0_r.
-replace (S (S e) - b) with (S (S e - b)) by flia Hbe.
-remember (S e - b) as n eqn:Hn.
-revert b Hbe Hn.
-induction n; intros. {
-  now replace (S e) with b by flia Hbe Hn.
-}
-remember (S n) as sn; cbn; subst sn.
-rewrite List_fold_left_add_fun_from_0.
-rewrite IHn; [ | flia Hn | flia Hn ].
-rewrite Nat.add_assoc; f_equal; cbn.
-now rewrite (List_fold_left_add_fun_from_0 (f b)).
+now replace (S k - b) with 0 by flia Hkb.
+Qed.
+
+Theorem iter_shift : ∀ {T} s b k f (d : T),
+  s ≤ b ≤ k
+  → iter_seq b k f d =
+    iter_seq (b - s) (k - s) (λ c i, f c (s + i)) d.
+Proof.
+intros * (Hsb, Hbk).
+progress unfold iter_seq, iter_list.
+replace (S (k - s) - (b - s)) with (S (k - b)) by flia Hsb Hbk.
+rewrite <- Nat.sub_succ_l; [ | easy ].
+remember (S k - b)%nat as len; clear Heqlen.
+clear k Hbk.
+revert b d Hsb.
+induction len; intros; [ easy | ].
+rewrite List.seq_S; symmetry.
+rewrite List.seq_S; symmetry.
+do 2 rewrite List.fold_left_app; cbn.
+rewrite IHlen; [ | easy ].
+now replace (s + (b - s + len)) with (b + len) by flia Hsb.
+Qed.
+
+Theorem iter_rshift : ∀ {T} s b k f (d : T),
+  iter_seq b k f d =
+  iter_seq (s + b) (s + k) (λ c i, f c (i - s)) d.
+Proof.
+intros.
+progress unfold iter_seq, iter_list.
+progress replace (S (s + k) - (s + b)) with (S k - b) by flia.
+remember (S k - b)%nat as len; clear Heqlen.
+clear k.
+revert b d.
+induction len; intros; [ easy | ].
+rewrite List.seq_S; symmetry.
+rewrite List.seq_S; symmetry.
+do 2 rewrite List.fold_left_app; cbn.
+rewrite IHlen.
+rewrite Nat.add_comm.
+rewrite Nat.add_shuffle0.
+rewrite Nat.add_sub.
+easy.
+Qed.
+
+Theorem summation_empty : ∀ g b k,
+  k < b → ∑ (i = b, k), g i = 0.
+Proof.
+intros * Hkb.
+now apply iter_seq_empty.
+Qed.
+
+Theorem summation_shift : ∀ s b g k,
+  s ≤ b ≤ k
+  → ∑ (i = b, k), g i = ∑ (i = b - s, k - s), g (s + i)%nat.
+Proof.
+intros s b g k Hbk.
+now apply (iter_shift s).
+Qed.
+
+Theorem summation_rshift : ∀ s b e f,
+  ∑ (i = b, e), f i = ∑ (i = s + b, s + e), f (i - s)%nat.
+Proof.
+intros.
+apply (iter_rshift s).
 Qed.
 
 Theorem all_0_summation_0 : ∀ b e f,
@@ -852,19 +944,20 @@ rewrite <- Nat.mul_sub_distr_r.
 rewrite (Nat.mul_comm a).
 rewrite IHn, <- Nat.mul_assoc.
 rewrite <- Nat.mul_add_distr_l; f_equal.
-do 2 rewrite Nat.sub_succ.
-replace (n - 0) with n by now rewrite Nat.sub_0_r.
-replace (S n - 0) with (S n) at 2 by now rewrite Nat.sub_0_r.
-rewrite (summation_split_last _ (S n)); [ | flia | flia ].
+do 2 rewrite Nat_sub_succ_1.
+rewrite (summation_split_last _ (S n)); [ | easy ].
+rewrite summation_succ_succ.
 rewrite Nat.sub_succ.
-replace (n - 0) with n by now rewrite Nat.sub_0_r.
-replace (S (S n) - S n - 1) with 0 by flia.
+rewrite Nat.sub_succ_l; [ | easy ].
+do 2 rewrite Nat.sub_diag.
 rewrite Nat.pow_0_r, Nat.mul_1_l.
 f_equal.
 rewrite mul_summation_distr_r.
 apply summation_eq_compat.
 intros i Hi.
+rewrite Nat_sub_succ_1.
 rewrite Nat.mul_shuffle0; f_equal.
+do 2 rewrite Nat_sub_sub_swap, Nat_sub_succ_1.
 rewrite <- (Nat.pow_1_r a) at 2.
 rewrite <- Nat.pow_add_r.
 f_equal; flia Hi.
@@ -1344,20 +1437,6 @@ cbn in Hx.
 destruct l as [| b]; [ easy | ].
 destruct Hx as [Hx| Hx]; [ now left | right ].
 now apply IHl.
-Qed.
-
-Theorem List_fold_left_ext_in : ∀ A B (f g : A → B → A) l a,
-  (∀ b c, b ∈ l → f c b = g c b)
-  → List.fold_left f l a = List.fold_left g l a.
-Proof.
-intros * Hfg.
-revert a.
-induction l as [| d]; intros; [ easy | cbn ].
-rewrite (Hfg d a); [ | now left ].
-apply IHl.
-intros b c Hb.
-apply Hfg.
-now right.
 Qed.
 
 Theorem List_fold_left_mul_assoc : ∀ a b l,
