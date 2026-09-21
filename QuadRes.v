@@ -1896,6 +1896,65 @@ rewrite Nat.add_0_r.
 now rewrite Nat.add_1_r.
 Qed.
 
+Theorem summation_to_twice_plus_1 :
+  ∀ e f,
+  ∑ (i = 1, e), f (2 * i) =
+  ∑ (i = 1, 2 * e + 1), if i mod 2 =? 0 then f i else 0.
+Proof.
+intros.
+induction e; cbn - [ "*" "mod" ]. {
+  rewrite summation_empty; [ | easy ].
+  now rewrite summation_only_one.
+}
+rewrite summation_split_last; [ | now apply -> Nat.succ_le_mono ].
+rewrite summation_succ_succ.
+erewrite summation_eq_compat; cycle 1. {
+  intros i Hi.
+  now rewrite Nat_sub_succ_1.
+}
+cbn - [ "*" "mod" ].
+rewrite IHe.
+symmetry.
+rewrite summation_split_last; cycle 1. {
+  rewrite Nat.add_1_r.
+  now apply -> Nat.succ_le_mono.
+}
+rewrite (summation_shift 1); cycle 1. {
+  split; [ now apply -> Nat.succ_le_mono | ].
+  rewrite Nat.add_1_r.
+  now do 2 apply -> Nat.succ_le_mono.
+}
+rewrite Nat_sub_succ_1.
+rewrite Nat.add_sub.
+rewrite Nat_mod_add_l_mul_l.
+rewrite Nat.mod_small; [ | now apply -> Nat.succ_lt_mono ].
+cbn - [ "*" "mod" ].
+rewrite Nat.add_0_r.
+rewrite Nat.mul_succ_r.
+rewrite summation_split_last; cycle 1. {
+  rewrite Nat.add_comm; cbn.
+  now apply -> Nat.succ_le_mono.
+}
+rewrite Nat.sub_0_r.
+rewrite (summation_shift 1); cycle 1. {
+  split; [ now apply -> Nat.succ_le_mono | ].
+  rewrite Nat.add_comm; cbn.
+  now do 2 apply -> Nat.succ_le_mono.
+}
+rewrite Nat_sub_succ_1.
+rewrite <- Nat.add_sub_assoc; cycle 1. {
+  now apply -> Nat.succ_le_mono.
+}
+rewrite Nat_sub_succ_1.
+rewrite Nat_mod_add_l_mul_l.
+rewrite Nat.Div0.mod_same, Nat.eqb_refl.
+f_equal.
+apply summation_eq_compat.
+intros i Hi.
+rewrite Nat.sub_0_r.
+now rewrite Nat.add_comm, Nat.add_sub.
+Qed.
+
 (* to be completed
 Theorem Eisenstein_lemma' :
   ∀ p q, prime p → prime q → p < q →
@@ -1918,83 +1977,15 @@ Nat.eqb
 assert (Hpz : p ≠ 0) by now intros H; subst p.
 (**)
 rewrite Eisenstein_lemma; [ | easy | ].
-Theorem glop :
-  ∀ e f,
-  ∑ (i = 1, e), f (2 * i) =
-  ∑ (i = 1, 2 * e), if i mod 2 =? 0 then f i else 0.
-Proof.
-intros.
-induction e; cbn - [ "*" "mod" ]. {
-  rewrite summation_empty; [ | easy ].
-  now symmetry; apply summation_empty.
-}
-rewrite summation_split_last; [ | now apply -> Nat.succ_le_mono ].
-rewrite summation_succ_succ.
-erewrite summation_eq_compat; cycle 1. {
-  intros i Hi.
-  now rewrite Nat_sub_succ_1.
-}
-cbn - [ "*" "mod" ].
-rewrite IHe.
-symmetry.
-rewrite summation_split_last; [ | now apply -> Nat.succ_le_mono ].
-rewrite (summation_shift 1); [ | flia ].
-rewrite Nat_sub_succ_1.
-rewrite (Nat.mul_comm 2 (S e)).
-rewrite Nat.Div0.mod_mul.
-rewrite Nat.eqb_refl.
-f_equal.
-(* bon, ça a pas l'air d'être ça... *)
-...
-rewrite summation_succ_succ.
-erewrite summation_eq_compat; cycle 1. {
-  intros i Hi.
-  now rewrite Nat_sub_succ_1.
-}
-cbn - [ "*" "mod" ].
-rewrite IHe.
-...
-specialize (glop ((p - 1) / 2)) as H1.
+specialize (summation_to_twice_plus_1 ((p - 1) / 2)) as H1.
 specialize (H1 (λ a, (a * q / p))).
 cbn - [ "*" "/" "mod" ] in H1.
-rewrite H1.
+rewrite H1; clear H1.
 rewrite <- Nat.Lcm0.divide_div_mul_exact.
 rewrite Nat.mul_comm.
 rewrite Nat.div_mul; [ | easy ].
+rewrite Nat.sub_add.
 remember (∑ (k = _, _), _) as x in |-*; subst x.
-...
-...
-remember ((p - 1) / 2) as h eqn:Hh.
-move h before p.
-...
-rewrite summation_mod_idemp.
-erewrite summation_eq_compat; cycle 1. {
-  intros i Hi.
-Check Nat_eq_mul_2_div_mod_if_then_else.
-Search (_ mod 2 = _).
-...
-  now rewrite (Nat_eq_mul_2_div_mod_if_then_else _ _ Hpz).
-...
-}
-cbn - [ nb_of_mult_gt_half "<?" "/" "mod" ].
-progress unfold Nat.b2n.
-progress unfold iter_seq.
-progress unfold iter_list.
-rewrite Nat_sub_succ_1.
-erewrite List_fold_left_ext_in; cycle 1. {
-  intros * Hb.
-  now rewrite Nat_add_if_distr_l.
-}
-progress unfold nb_of_mult_gt_half.
-rewrite <- List.fold_left_S_0.
-rewrite List_fold_left_filter.
-rewrite <- Hh.
-erewrite List_fold_left_ext_in; [ easy | ].
-cbn - [ "<?" ].
-intros * Hb.
-rewrite Nat.add_0_r.
-now rewrite Nat.add_1_r.
-Qed.
 ...
 
 Theorem quadratic_reciprocity :
