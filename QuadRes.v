@@ -1916,6 +1916,23 @@ Nat.eqb
 ).
 *)
 assert (Hpz : p ≠ 0) by now intros H; subst p.
+(**)
+rewrite Eisenstein_lemma; [ | easy | ].
+Theorem glop :
+  ∀ e f,
+  ∑ (i = 1, e), f (2 * i) e =
+  ∑ (i = 1, 2 * e), if i mod 2 =? 0 then f i e else 0.
+...Admitted.
+specialize (glop ((p - 1) / 2)) as H1.
+specialize (H1 (λ a b, (a * q / p))).
+cbn - [ "*" "/" "mod" ] in H1.
+rewrite H1.
+Search (_ * (_ / _)).
+rewrite <- Nat.Lcm0.divide_div_mul_exact.
+rewrite Nat.mul_comm.
+rewrite Nat.div_mul; [ | easy ].
+...
+...
 remember ((p - 1) / 2) as h eqn:Hh.
 move h before p.
 ...
