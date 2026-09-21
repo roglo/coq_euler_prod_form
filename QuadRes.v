@@ -1921,7 +1921,7 @@ rewrite Eisenstein_lemma; [ | easy | ].
 Theorem glop :
   ∀ e f,
   ∑ (i = 1, e), f (2 * i) e =
-  ∑ (i = 1, 2 * e), if f i e mod 2 =? 0 then f i e else 0.
+  ∑ (i = 1, 2 * e), if i mod 2 =? 0 then f i e else 0.
 Proof.
 intros.
 ...
@@ -1933,6 +1933,7 @@ Search (_ * (_ / _)).
 rewrite <- Nat.Lcm0.divide_div_mul_exact.
 rewrite Nat.mul_comm.
 rewrite Nat.div_mul; [ | easy ].
+remember (∑ (k = _, _), _) as x in |-*; subst x.
 ...
 ...
 remember ((p - 1) / 2) as h eqn:Hh.
