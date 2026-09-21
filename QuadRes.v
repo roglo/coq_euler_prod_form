@@ -1897,6 +1897,24 @@ now rewrite Nat.add_1_r.
 Qed.
 
 (* to be completed
+Theorem Eisenstein_lemma' :
+  ∀ p q, prime p → prime q → p < q →
+  nb_of_mult_gt_half q p ≡ (∑ (k = 1, (p - 1) / 2), k * q /p) mod 2.
+Proof.
+intros * Hp Hq Hpq.
+Compute (
+  List.map (λ p,
+      List.map (λ q,
+(p, q,
+Nat.eqb
+       ((nb_of_mult_gt_half q p) mod 2)
+       ((∑ (k = 1, (p - 1) / 2), k * q /p) mod 2)
+)
+      ) (List.filter (λ a, (Nat.ltb p a)) (List.filter is_prime (List.seq 2 20)))
+  ) (List.filter is_prime (List.seq 2 20))
+).
+...
+
 Theorem quadratic_reciprocity :
   ∀ p q, prime p → prime q → 2 < p < q →
   is_quadratic_residue p q = is_quadratic_residue q p ↔
