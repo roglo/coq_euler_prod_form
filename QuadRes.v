@@ -1899,9 +1899,10 @@ Qed.
 (* to be completed
 Theorem Eisenstein_lemma' :
   ∀ p q, prime p → prime q → p < q →
-  nb_of_mult_gt_half q p ≡ (∑ (k = 1, (p - 1) / 2), k * q /p) mod 2.
+  nb_of_mult_gt_half q p ≡ (∑ (k = 1, (p - 1) / 2), k * q / p) mod 2.
 Proof.
 intros * Hp Hq Hpq.
+(*
 Compute (
   List.map (λ p,
       List.map (λ q,
@@ -1913,6 +1914,39 @@ Nat.eqb
       ) (List.filter (λ a, (Nat.ltb p a)) (List.filter is_prime (List.seq 2 20)))
   ) (List.filter is_prime (List.seq 2 20))
 ).
+*)
+assert (Hpz : p ≠ 0) by now intros H; subst p.
+remember ((p - 1) / 2) as h eqn:Hh.
+move h before p.
+...
+rewrite summation_mod_idemp.
+erewrite summation_eq_compat; cycle 1. {
+  intros i Hi.
+Check Nat_eq_mul_2_div_mod_if_then_else.
+Search (_ mod 2 = _).
+...
+  now rewrite (Nat_eq_mul_2_div_mod_if_then_else _ _ Hpz).
+...
+}
+cbn - [ nb_of_mult_gt_half "<?" "/" "mod" ].
+progress unfold Nat.b2n.
+progress unfold iter_seq.
+progress unfold iter_list.
+rewrite Nat_sub_succ_1.
+erewrite List_fold_left_ext_in; cycle 1. {
+  intros * Hb.
+  now rewrite Nat_add_if_distr_l.
+}
+progress unfold nb_of_mult_gt_half.
+rewrite <- List.fold_left_S_0.
+rewrite List_fold_left_filter.
+rewrite <- Hh.
+erewrite List_fold_left_ext_in; [ easy | ].
+cbn - [ "<?" ].
+intros * Hb.
+rewrite Nat.add_0_r.
+now rewrite Nat.add_1_r.
+Qed.
 ...
 
 Theorem quadratic_reciprocity :
