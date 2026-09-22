@@ -1977,7 +1977,7 @@ Nat.eqb
 assert (Hpz : p ≠ 0) by now intros H; subst p.
 (**)
 assert
-  (∑ (k = 1, (p - 1) / 2), k * q =
+  (H1 : ∑ (k = 1, (p - 1) / 2), k * q =
      p * (∑ (i = 1, (p - 1) / 2), i * q / p) +
        ∑ (i = 1, (p - 1) / 2), (i * q) mod p). {
   erewrite summation_eq_compat; cycle 1. {
@@ -1989,7 +1989,13 @@ assert
   rewrite summation_add.
   now rewrite <- mul_summation_distr_l.
 }
-Check Eisenstein_lemma.
+rewrite <- mul_summation_distr_r, Nat.mul_comm in H1.
+remember (∑ (k = _, _), _) as s eqn:Hs.
+remember (∑ (k = _, _), _) as t eqn:Ht in H1.
+move t  before s.
+rewrite <- Ht.
+remember (∑ (k = _, _), _) as r eqn:Hr in H1.
+move r  before t.
 ...
 apply (Nat.mul_reg_r _ _ p Hpz).
 remember (∑ (k = _, _), _) as x eqn:Hx.
