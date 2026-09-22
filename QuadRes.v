@@ -1976,6 +1976,45 @@ Nat.eqb
 *)
 assert (Hpz : p ≠ 0) by now intros H; subst p.
 (**)
+remember ((p - 1) / 2) as h eqn:Hh.
+move h before p.
+rewrite summation_mod_idemp.
+progress unfold iter_seq.
+progress unfold iter_list.
+rewrite Nat_sub_succ_1.
+progress unfold nb_of_mult_gt_half.
+rewrite <- Hh.
+rewrite <- List.fold_left_S_0.
+rewrite List_fold_left_filter.
+(**)
+erewrite List_fold_left_ext_in; cycle 1. {
+  intros * Hb.
+  replace (if _ <? _ then _ else _) with
+    (c + Nat.b2n (h <? (b * q) mod p)); cycle 1. {
+    remember (_ <? _) as x eqn:Hx; symmetry in Hx.
+    rewrite Nat.add_comm.
+    now destruct x.
+  }
+  easy.
+}
+(* ouais, chais pas... *)
+...
+erewrite List_fold_left_ext_in; [ easy | ].
+cbn - [ "<?" "mod" ].
+intros * Hb.
+Search (if _ then _ else _).
+remember (_ <? _) as x eqn:Hx; symmetry in Hx.
+destruct x. {
+  apply Nat.ltb_lt in Hx.
+  rewrite <- Nat.add_1_r; f_equal; symmetry.
+  apply Nat_eq_mod_1.
+  split. {
+    apply Nat.Div0.mod_divides.
+    clear c.
+...
+rewrite Nat.add_0_r.
+now rewrite Nat.add_1_r.
+...
 rewrite Eisenstein_lemma; [ | easy | ].
 specialize (summation_to_twice_plus_1 ((p - 1) / 2)) as H1.
 specialize (H1 (λ a, (a * q / p))).
@@ -1986,6 +2025,10 @@ rewrite Nat.mul_comm.
 rewrite Nat.div_mul; [ | easy ].
 rewrite Nat.sub_add.
 remember (∑ (k = _, _), _) as x in |-*; subst x.
+symmetry.
+Check summation_to_twice_plus_1.
+Theorem glop : ∀ e f,
+  ∑ (i = 1, e), f i = ∑ (i = 1, 2 * e + 1), (if i mod 2 =? 0 then f i else 0).
 ...
 
 Theorem quadratic_reciprocity :
