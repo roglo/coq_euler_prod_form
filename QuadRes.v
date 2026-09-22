@@ -1976,6 +1976,10 @@ Nat.eqb
 *)
 assert (Hpz : p ≠ 0) by now intros H; subst p.
 (**)
+destruct (Nat.eq_dec p 2) as [Hp2| Hp2]. {
+  subst p.
+  now rewrite summation_empty.
+}
 assert
   (H1 : ∑ (k = 1, (p - 1) / 2), k * q =
      p * (∑ (i = 1, (p - 1) / 2), i * q / p) +
@@ -1996,6 +2000,16 @@ move t  before s.
 rewrite <- Ht.
 remember (∑ (k = _, _), _) as r eqn:Hr in H1.
 move r  before t.
+symmetry in H1.
+apply Nat.add_sub_eq_r in H1.
+apply (f_equal (λ a, a mod 2)) in H1.
+rewrite <- Nat.Div0.mul_mod_idemp_l in H1.
+replace (p mod 2) with 1 in H1; cycle 1. {
+  symmetry.
+  apply (odd_prime _ Hp Hp2).
+}
+rewrite Nat.mul_1_l in H1.
+rewrite <- H1.
 ...
 apply (Nat.mul_reg_r _ _ p Hpz).
 remember (∑ (k = _, _), _) as x eqn:Hx.
