@@ -2052,6 +2052,10 @@ replace (p mod 2) with 1 in H1; cycle 1. {
   apply (odd_prime _ Hp Hp2).
 }
 rewrite Nat.mul_1_l in H1.
+(**)
+rewrite eq_nb_of_mult_gt_half_summation.
+remember ((p - 1) / 2) as h eqn:Hh.
+...
 remember (nb_of_mult_gt_half q p) as n eqn:Hn.
 assert (s ≡ (r + n * p) mod 2). {
   rewrite Hs, Hr.
