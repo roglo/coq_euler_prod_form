@@ -1956,6 +1956,30 @@ now rewrite Nat.add_comm, Nat.add_sub.
 Qed.
 
 (* to be completed
+Theorem glop :
+  ∀ l f,
+  List.length (List.filter f l) =
+  ∑ (i = 1, List.length l), if f (List.nth (i - 1) l 0) then 1 else 0.
+...
+Theorem nb_of_mult_gt_half_eq_summation :
+  ∀ a p,
+  nb_of_mult_gt_half a p =
+    ∑ (i = 1, (p - 1) / 2), Nat.b2n ((p - 1) / 2 <? (i * a) mod p).
+Proof.
+intros.
+progress unfold nb_of_mult_gt_half.
+remember ((p - 1) / 2) as h eqn:Hh.
+rewrite glop.
+rewrite List.length_seq.
+apply summation_eq_compat.
+intros k Hk.
+rewrite List.seq_nth; cycle 1. {
+  progress unfold "<".
+  rewrite <- Nat.sub_succ_l; [ | easy ].
+  now rewrite Nat_sub_succ_1.
+}
+Qed.
+
 Theorem Eisenstein_lemma' :
   ∀ p q, prime p → prime q → p < q →
   nb_of_mult_gt_half q p ≡ (∑ (k = 1, (p - 1) / 2), k * q / p) mod 2.
@@ -2012,6 +2036,22 @@ rewrite Nat.mul_1_l in H1.
 remember (nb_of_mult_gt_half q p) as n eqn:Hn.
 assert (s ≡ (r + n * p) mod 2). {
   rewrite Hs, Hr.
+  rewrite Hn.
+  progress unfold nb_of_mult_gt_half.
+Search (List.length (List.filter _ _)).
+...
+now rewrite Nat.add_comm, Nat.sub_add.
+...
+rewrite glop.
+rewrite List.length_seq.
+erewrite (summation_eq_compat _ _ (λ _, if _ <? _ then _ else _)); cycle 1. {
+  intros k Hk.
+  rewrite List.seq_nth; [ | flia Hk ].
+  rewrite Nat.add_comm, Nat.sub_add; [ | easy ].
+  progress fold (Nat.b2n ((p - 1) / 2 <? (k * q) mod p)).
+  easy.
+}
+cbn - [ "/" "mod" "<?"].
 ...
 assert (Hzpq : 0 < p < q) by flia Hpq Hpz.
 assert (Hcp : coprimes q p) by now apply eq_gcd_prime_small_1.
