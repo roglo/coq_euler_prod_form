@@ -2009,11 +2009,14 @@ replace (p mod 2) with 1 in H1; cycle 1. {
   apply (odd_prime _ Hp Hp2).
 }
 rewrite Nat.mul_1_l in H1.
-rewrite <- H1.
+remember (nb_of_mult_gt_half q p) as n eqn:Hn.
+assert (s ≡ (r + n * p) mod 2). {
+  rewrite Hs, Hr.
 ...
 assert (Hzpq : 0 < p < q) by flia Hpq Hpz.
 assert (Hcp : coprimes q p) by now apply eq_gcd_prime_small_1.
 specialize (Gauss_lemma q p Hp Hcp _ eq_refl) as H2.
+Search Legendre_symbol.
 ...
 apply (Nat.mul_reg_r _ _ p Hpz).
 remember (∑ (k = _, _), _) as x eqn:Hx.
