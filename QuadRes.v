@@ -2055,6 +2055,35 @@ rewrite Nat.mul_1_l in H1.
 (**)
 rewrite eq_nb_of_mult_gt_half_summation.
 remember ((p - 1) / 2) as h eqn:Hh.
+rewrite Ht.
+rewrite summation_mod_idemp; symmetry.
+rewrite summation_mod_idemp; symmetry.
+f_equal.
+(* m'a l'air bon...
+Compute (List.map (λ p, List.map (λ q,
+let h := (p - 1) / 2 in
+Nat.eqb
+  (∑ (i = 1, h), Nat.b2n (h <? (i * q) mod p) mod 2)
+  (∑ (i = 1, h), (i * q / p) mod 2)
+) (List.filter (Nat.ltb p) (List.filter is_prime (List.seq 3 70))))
+(List.filter is_prime (List.seq 3 70))).
+*)
+...
+apply summation_eq_compat.
+intros k Hk.
+rewrite Hh.
+(* pas bon
+Compute (List.map (λ p, List.map (λ q,
+  List.map (λ k,
+(p, q, k,
+Nat.eqb
+  (Nat.b2n ((p - 1) / 2 <? (k * q) mod p) mod 2)
+  ((k * q / p) mod 2)
+)
+) (List.seq 1 ((p - 1) / 2))
+) (List.filter (Nat.ltb p) (List.filter is_prime (List.seq 3 30))))
+(List.filter is_prime (List.seq 3 30))).
+*)
 ...
 remember (nb_of_mult_gt_half q p) as n eqn:Hn.
 assert (s ≡ (r + n * p) mod 2). {
