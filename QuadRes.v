@@ -2011,6 +2011,10 @@ replace (p mod 2) with 1 in H1; cycle 1. {
 rewrite Nat.mul_1_l in H1.
 rewrite <- H1.
 ...
+assert (Hzpq : 0 < p < q) by flia Hpq Hpz.
+assert (Hcp : coprimes q p) by now apply eq_gcd_prime_small_1.
+specialize (Gauss_lemma q p Hp Hcp _ eq_refl) as H2.
+...
 apply (Nat.mul_reg_r _ _ p Hpz).
 remember (∑ (k = _, _), _) as x eqn:Hx.
 specialize (Nat.Div0.mul_mod_idemp_l x p 2) as H1.
