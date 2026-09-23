@@ -249,6 +249,10 @@ Theorem Nat_add_if_distr_l :
   ∀ a (b : bool) c d, (a + if b then c else d) = if b then a + c else a + d.
 Proof. now intros; destruct b. Qed.
 
+Theorem Nat_mul_if_distr_l :
+  ∀ a (b : bool) c d, (a * if b then c else d) = if b then a * c else a * d.
+Proof. now intros; destruct b. Qed.
+
 Theorem Nat_eq_mod_exists : ∀ a b c, a mod b = c → ∃ k, a = k * b + c.
 Proof.
 intros * Habc.
@@ -2053,8 +2057,19 @@ assert (s ≡ (r + n * p) mod 2). {
   rewrite Hs, Hr.
   rewrite Hn.
   rewrite eq_nb_of_mult_gt_half_summation.
+  remember ((p - 1) / 2) as h eqn:Hh.
+  symmetry.
+  rewrite mul_summation_distr_r.
+  rewrite <- summation_add.
+  erewrite summation_eq_compat; cycle 1. {
+    intros k Hk.
+    progress unfold Nat.b2n.
+    rewrite (Nat.mul_comm _ p), Nat_mul_if_distr_l.
+    rewrite Nat.mul_1_r, Nat.mul_0_r.
+    easy.
+  }
+  cbn - [ "mod" "<?" ].
 ...
-rewrite glop.
 rewrite List.length_seq.
 erewrite (summation_eq_compat _ _ (λ _, if _ <? _ then _ else _)); cycle 1. {
   intros k Hk.
