@@ -1865,6 +1865,45 @@ destruct b; cbn - [ "*" "mod" ]. {
 }
 Qed.
 
+Theorem List_eq_length_filter_summation :
+  ∀ l f,
+  List.length (List.filter f l) =
+  ∑ (i = 1, List.length l), Nat.b2n (f (List.nth (i - 1) l 0)).
+Proof.
+intros.
+induction l as [| a]; [ easy | ].
+cbn - [ List.nth ].
+rewrite summation_split_first; [ | now apply -> Nat.succ_le_mono ].
+rewrite summation_succ_succ.
+erewrite summation_eq_compat; cycle 1. {
+  intros k Hk.
+  rewrite Nat.sub_succ_l; [ | easy ].
+  now cbn.
+}
+remember (f a) as fa eqn:Hfa; symmetry in Hfa.
+now destruct fa; cbn; rewrite Hfa; cbn; [ f_equal | ].
+Qed.
+
+Theorem eq_nb_of_mult_gt_half_summation :
+  ∀ a p,
+  nb_of_mult_gt_half a p =
+    ∑ (i = 1, (p - 1) / 2), Nat.b2n ((p - 1) / 2 <? (i * a) mod p).
+Proof.
+intros.
+progress unfold nb_of_mult_gt_half.
+remember ((p - 1) / 2) as h eqn:Hh.
+rewrite List_eq_length_filter_summation.
+rewrite List.length_seq.
+apply summation_eq_compat.
+intros k Hk.
+rewrite List.seq_nth; cycle 1. {
+  progress unfold "<".
+  rewrite <- Nat.sub_succ_l; [ | easy ].
+  now rewrite Nat_sub_succ_1.
+}
+now rewrite Nat.add_comm, Nat.sub_add.
+Qed.
+
 Theorem Eisenstein_lemma :
   ∀ a p, prime p → coprimes a p →
   nb_of_mult_gt_half a p ≡ (∑ (k = 1, (p - 1) / 2), 2 * k * a / p) mod 2.
@@ -1881,23 +1920,8 @@ erewrite summation_eq_compat; cycle 1. {
   now rewrite (Nat_eq_mul_2_div_mod_if_then_else _ _ Hpz).
 }
 cbn - [ nb_of_mult_gt_half "<?" "/" "mod" ].
-progress unfold Nat.b2n.
-progress unfold iter_seq.
-progress unfold iter_list.
-rewrite Nat_sub_succ_1.
-erewrite List_fold_left_ext_in; cycle 1. {
-  intros * Hb.
-  now rewrite Nat_add_if_distr_l.
-}
-progress unfold nb_of_mult_gt_half.
-rewrite <- List.fold_left_S_0.
-rewrite List_fold_left_filter.
-rewrite <- Hh.
-erewrite List_fold_left_ext_in; [ easy | ].
-cbn - [ "<?" ].
-intros * Hb.
-rewrite Nat.add_0_r.
-now rewrite Nat.add_1_r.
+rewrite Hh.
+now rewrite eq_nb_of_mult_gt_half_summation.
 Qed.
 
 Theorem summation_to_twice_plus_1 :
@@ -1957,45 +1981,6 @@ apply summation_eq_compat.
 intros i Hi.
 rewrite Nat.sub_0_r.
 now rewrite Nat.add_comm, Nat.add_sub.
-Qed.
-
-Theorem List_eq_length_filter_summation :
-  ∀ l f,
-  List.length (List.filter f l) =
-  ∑ (i = 1, List.length l), Nat.b2n (f (List.nth (i - 1) l 0)).
-Proof.
-intros.
-induction l as [| a]; [ easy | ].
-cbn - [ List.nth ].
-rewrite summation_split_first; [ | now apply -> Nat.succ_le_mono ].
-rewrite summation_succ_succ.
-erewrite summation_eq_compat; cycle 1. {
-  intros k Hk.
-  rewrite Nat.sub_succ_l; [ | easy ].
-  now cbn.
-}
-remember (f a) as fa eqn:Hfa; symmetry in Hfa.
-now destruct fa; cbn; rewrite Hfa; cbn; [ f_equal | ].
-Qed.
-
-Theorem eq_nb_of_mult_gt_half_summation :
-  ∀ a p,
-  nb_of_mult_gt_half a p =
-    ∑ (i = 1, (p - 1) / 2), Nat.b2n ((p - 1) / 2 <? (i * a) mod p).
-Proof.
-intros.
-progress unfold nb_of_mult_gt_half.
-remember ((p - 1) / 2) as h eqn:Hh.
-rewrite List_eq_length_filter_summation.
-rewrite List.length_seq.
-apply summation_eq_compat.
-intros k Hk.
-rewrite List.seq_nth; cycle 1. {
-  progress unfold "<".
-  rewrite <- Nat.sub_succ_l; [ | easy ].
-  now rewrite Nat_sub_succ_1.
-}
-now rewrite Nat.add_comm, Nat.sub_add.
 Qed.
 
 (* to be completed
