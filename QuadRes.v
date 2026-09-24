@@ -2045,9 +2045,75 @@ Search ((_ - _) mod _).
 Search ((_ + _) mod _).
 Search ((_ mod _ + _) mod _).
 Theorem Nat_sub_mod_idemp_l :
-  ∀ a b n, a mod n - b ≡ (a - b) mod n.
+  ∀ a b n, b ≤ a → a mod n - b ≡ (a - b) mod n.
 Proof.
-intros. (* il faut peut-être mettre "b mod n" dans le terme de gauche *)
+intros * Hba.
+clear Hba.
+destruct (le_dec a b) as [Hab| Hab]. {
+  replace (a - b) with 0 by flia Hab.
+  replace (a mod n - b) with 0; cycle 1. {
+    symmetry.
+    apply Nat.sub_0_le.
+    apply (Nat.le_trans _ a); [ | easy ].
+    apply Nat.Div0.mod_le.
+  }
+  easy.
+}
+apply Nat.nle_gt in Hab.
+remember (a - b) as c eqn:Hc.
+replace a with (b + c) by flia Hc Hab.
+rewrite <- Nat.Div0.add_mod_idemp_r.
+(* bon, casse-couilles *)
+...
+  rewrite Nat.Div0.mod_0_l.
+  Search (_ mod _ = 0).
+...
+replace a with (b + (a - b)) at 1 by flia Hba.
+rewrite Nat
+...
+destruct (le_dec (a mod n) b) as [Hab| Hab]. {
+  rewrite (proj2 (Nat.sub_0_le (a mod n) b)); [ | easy ].
+  rewrite Nat_eq_mod_sub_0. {
+    apply Nat.Div0.mod_0_l.
+  }
+...
+rewrite (Nat.Div0.mod_eq (a - b) n).
+rewrite (Nat.Div0.mod_eq a n).
+do 2 rewrite <- Nat.sub_add_distr.
+...
+f_equal.
+
+f_equal.
+
+Search ((_ mod _ + _)).
+Print Nat.Div0.add_mod_idemp_r.
+Check Nat.Private_NDivProp.add_mod_idemp_r.
+Print Nat.Private_NDivProp.add_mod_idemp_r.
+Check Nat.Private_NDivProp.Private_NZDiv.add_mod_idemp_r.
+Print Nat.Private_NDivProp.Private_NZDiv.add_mod_idemp_r.
+Check Nat.Private_NDivProp.Private_NZDiv.add_mod_idemp_l.
+Print Nat.Private_NDivProp.Private_NZDiv.add_mod_idemp_l.
+Check Nat.mod_0_r.
+Search (_ mod S _).
+...
+destruct (lt_dec b (a mod n)) as [Hba| Hba]. {
+Search (_ - _).
+...
+  remember (a mod n - b) as c eqn:Hc.
+Search (_ - _ = _ + _).
+...
+  replace b with (a mod n + b - a mod n) at 1 by flia Hba.
+
+rewrite (Nat.Div0.mod_eq (a - b) n).
+rewrite (Nat.Div0.mod_eq a n).
+rewrite Nat_sub_sub_swap.
+Search ((_ - _) mod _).
+
+specialize (Nat.Div0.mod_eq a n) as H1.
+...
+destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
+specialize (Nat.div_mod a n Hnz) as H1.
+Search (_ mod _ = _ - _).
 ...
 rewrite <- Nat_sub_mod_idemp_l.
 ...
