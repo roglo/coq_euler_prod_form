@@ -2037,13 +2037,50 @@ replace (p mod 2) with 1 in H1; cycle 1. {
   apply (odd_prime _ Hp Hp2).
 }
 rewrite Nat.mul_1_l in H1.
-(**)
 rewrite eq_nb_of_mult_gt_half_summation.
 remember ((p - 1) / 2) as h eqn:Hh.
+(**)
+rewrite <- H1, Hs, Hr.
+Search ((_ - _) mod _).
+Search ((_ + _) mod _).
+Search ((_ mod _ + _) mod _).
+Theorem Nat_sub_mod_idemp_l :
+  ∀ a b n, a mod n - b ≡ (a - b) mod n.
+Proof.
+intros. (* il faut peut-être mettre "b mod n" dans le terme de gauche *)
+...
+rewrite <- Nat_sub_mod_idemp_l.
+...
+rewrite mul_summation_distr_l.
+rewrite <- summation_sub; cycle 1. {
+  intros k Hk.
+  rewrite Nat.mul_comm.
+  apply Nat.Div0.mod_le.
+}
+symmetry.
+rewrite summation_mod_idemp.
+f_equal.
+(* c'est bon
+Compute (List.map (λ p, List.map (λ q,
+let h := (p - 1) / 2 in
+(
+Nat.eqb
+  (∑ (i = 1, h), (q * i - (i * q) mod p) mod 2)
+  (∑ (i = 1, h), Nat.b2n (h <? (i * q) mod p))
+(*
+  ((∑ (i = 1, h), Nat.b2n (h <? (i * q) mod p)) mod 2)
+  ((∑ (i = 1, h), (q * i - (i * q) mod p)) mod 2)
+*)
+)
+) (List.filter (Nat.ltb p) (List.filter is_prime (List.seq 3 70))))
+(List.filter is_prime (List.seq 3 70))).
+*)
+...
 rewrite Ht.
 rewrite summation_mod_idemp; symmetry.
 rewrite summation_mod_idemp; symmetry.
 f_equal.
+...
 (* m'a l'air bon...
 Compute (List.map (λ p, List.map (λ q,
 let h := (p - 1) / 2 in
