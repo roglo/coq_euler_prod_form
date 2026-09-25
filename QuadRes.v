@@ -2041,14 +2041,14 @@ rewrite eq_nb_of_mult_gt_half_summation.
 remember ((p - 1) / 2) as h eqn:Hh.
 (**)
 rewrite <- H1, Hs, Hr.
+...
 Search ((_ - _) mod _).
 Search ((_ + _) mod _).
 Search ((_ mod _ + _) mod _).
 Theorem Nat_sub_mod_idemp_l :
-  ∀ a b n, b ≤ a → a mod n - b ≡ (a - b) mod n.
+  ∀ a b n, b mod n ≤ a mod n → a mod n - b mod n ≡ (a - b) mod n.
 Proof.
 intros * Hba.
-clear Hba.
 destruct (le_dec a b) as [Hab| Hab]. {
   replace (a - b) with 0 by flia Hab.
   replace (a mod n - b) with 0; cycle 1. {
@@ -2060,6 +2060,19 @@ destruct (le_dec a b) as [Hab| Hab]. {
   easy.
 }
 apply Nat.nle_gt in Hab.
+destruct (le_dec (a mod n) b) as [Hamb| Hamb]. {
+  replace (a mod n - b) with 0 by flia Hamb.
+  symmetry.
+Search (_ ≡ 0 mod _).
+
+  replace (a mod n - b) with 0; cycle 1. {
+    symmetry.
+    apply Nat.sub_0_le.
+    apply (Nat.le_trans _ a); [ | easy ].
+    apply Nat.Div0.mod_le.
+  }
+  easy.
+...
 remember (a - b) as c eqn:Hc.
 replace a with (b + c) by flia Hc Hab.
 rewrite <- Nat.Div0.add_mod_idemp_r.
