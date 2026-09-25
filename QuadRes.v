@@ -2039,77 +2039,19 @@ replace (p mod 2) with 1 in H1; cycle 1. {
 rewrite Nat.mul_1_l in H1.
 rewrite eq_nb_of_mult_gt_half_summation.
 remember ((p - 1) / 2) as h eqn:Hh.
-(**)
+(*
+rewrite  Ht.
+rewrite summation_mod_idemp; symmetry.
+rewrite summation_mod_idemp; symmetry.
+f_equal.
+...
+*)
 rewrite <- H1, Hs, Hr.
-...
-Theorem Nat_sub_mod_idemp_l :
-  ∀ a b n, b ≤ a → a mod n - b mod n ≡ (a - b) mod n.
-Proof.
-intros * Hba.
-...
-destruct (le_dec (a mod n) b) as [Hamb| Hamb]. {
-  replace (a mod n - b) with 0 by flia Hamb.
-  symmetry.
-Search (_ ≡ 0 mod _).
-
-  replace (a mod n - b) with 0; cycle 1. {
-    symmetry.
-    apply Nat.sub_0_le.
-    apply (Nat.le_trans _ a); [ | easy ].
-    apply Nat.Div0.mod_le.
-  }
-  easy.
-...
-remember (a - b) as c eqn:Hc.
-replace a with (b + c) by flia Hc Hab.
-rewrite <- Nat.Div0.add_mod_idemp_r.
-(* bon, casse-couilles *)
-...
-  rewrite Nat.Div0.mod_0_l.
-  Search (_ mod _ = 0).
-...
-replace a with (b + (a - b)) at 1 by flia Hba.
-rewrite Nat
-...
-destruct (le_dec (a mod n) b) as [Hab| Hab]. {
-  rewrite (proj2 (Nat.sub_0_le (a mod n) b)); [ | easy ].
-  rewrite Nat_eq_mod_sub_0. {
-    apply Nat.Div0.mod_0_l.
-  }
-...
-rewrite (Nat.Div0.mod_eq (a - b) n).
-rewrite (Nat.Div0.mod_eq a n).
-do 2 rewrite <- Nat.sub_add_distr.
-...
-f_equal.
-
-f_equal.
-
-Search ((_ mod _ + _)).
-Print Nat.Div0.add_mod_idemp_r.
-Check Nat.Private_NDivProp.add_mod_idemp_r.
-Print Nat.Private_NDivProp.add_mod_idemp_r.
-Check Nat.Private_NDivProp.Private_NZDiv.add_mod_idemp_r.
-Print Nat.Private_NDivProp.Private_NZDiv.add_mod_idemp_r.
-Check Nat.Private_NDivProp.Private_NZDiv.add_mod_idemp_l.
-Print Nat.Private_NDivProp.Private_NZDiv.add_mod_idemp_l.
-Check Nat.mod_0_r.
-Search (_ mod S _).
-...
-destruct (lt_dec b (a mod n)) as [Hba| Hba]. {
-Search (_ - _).
-...
-  remember (a mod n - b) as c eqn:Hc.
-Search (_ - _ = _ + _).
-...
-  replace b with (a mod n + b - a mod n) at 1 by flia Hba.
-
-rewrite (Nat.Div0.mod_eq (a - b) n).
-rewrite (Nat.Div0.mod_eq a n).
-rewrite Nat_sub_sub_swap.
-Search ((_ - _) mod _).
-
-specialize (Nat.Div0.mod_eq a n) as H1.
+rewrite mul_summation_distr_l.
+rewrite <- summation_sub; cycle 1. {
+  intros; rewrite Nat.mul_comm.
+  apply Nat.Div0.mod_le.
+}
 ...
 destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
 specialize (Nat.div_mod a n Hnz) as H1.
@@ -2143,9 +2085,6 @@ Nat.eqb
 *)
 ...
 rewrite Ht.
-rewrite summation_mod_idemp; symmetry.
-rewrite summation_mod_idemp; symmetry.
-f_equal.
 ...
 (* m'a l'air bon...
 Compute (List.map (λ p, List.map (λ q,
