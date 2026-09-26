@@ -1989,6 +1989,12 @@ Theorem Eisenstein_lemma' :
   nb_of_mult_gt_half q p ≡ (∑ (k = 1, (p - 1) / 2), k * q / p) mod 2.
 Proof.
 intros * Hp Hq Hpq.
+assert (Hpz : p ≠ 0) by now intros H; subst p.
+apply Nat.neq_0_lt_0 in Hpz.
+assert (Hcp : coprimes q p) by now apply eq_gcd_prime_small_1.
+move Hcp before Hq.
+rewrite Eisenstein_lemma; [ | easy | easy ].
+...
 (*
 Compute (
   List.map (λ p,
@@ -2057,7 +2063,15 @@ rewrite <- Hh.
 rewrite Ht.
 rewrite <- summation_mod_idemp.
 (* bon, j'ai l'impression que je tourne en rond *)
-...
+Search ((∑ (_ = _, _), _) mod _).
+erewrite summation_eq_compat; cycle 1. {
+  now intros; rewrite Nat.mul_assoc.
+}
+rewrite Hh.
+rewrite <- Eisenstein_lemma; [ | easy | ].
+  ============================
+  nb_of_mult_gt_half q p ≡ (∑ (k = 1, (p - 1) / 2), k * q / p) mod 2
+..
 rewrite <- H1, Hs, Hr.
 rewrite mul_summation_distr_l.
 rewrite <- summation_sub; cycle 1. {
