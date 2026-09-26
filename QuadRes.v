@@ -2046,6 +2046,18 @@ rewrite summation_mod_idemp; symmetry.
 f_equal.
 ...
 *)
+rewrite  Hh.
+erewrite summation_eq_compat; cycle 1. {
+  intros k Hk.
+  rewrite <- Nat_eq_mul_2_div_mod_if_then_else; [ | easy ].
+  easy.
+}
+cbn - [ "*" "/" "mod" "<?" ].
+rewrite <- Hh.
+rewrite Ht.
+rewrite <- summation_mod_idemp.
+(* bon, j'ai l'impression que je tourne en rond *)
+...
 rewrite <- H1, Hs, Hr.
 rewrite mul_summation_distr_l.
 rewrite <- summation_sub; cycle 1. {
