@@ -1811,6 +1811,50 @@ rewrite Nat.add_comm in Hab; cbn in Hab.
 now rewrite Nat.sub_add.
 Qed.
 
+(* to be completed
+Theorem glop :
+  ∀ a n, n ≠ 0 → (a / n) mod 2 = Nat.b2n ((n - 1) / 2 <? a mod n).
+Proof.
+intros * Hnz.
+remember ((n - 1) / 2 <? a mod n) as b eqn:Hb; symmetry in Hb.
+destruct b; cbn - [ "*" "mod" ]. {
+  apply Nat.ltb_lt in Hb.
+  specialize (Nat.div_mod a n Hnz) as H1.
+  rewrite H1.
+  rewrite (Nat.mul_comm n).
+  rewrite Nat.div_add_l; [ | easy ].
+  rewrite (Nat.div_small (a mod n)); cycle 1. {
+    now apply Nat.mod_upper_bound.
+  }
+  rewrite Nat.add_0_r.
+  apply Nat_eq_mod_1.
+  split. {
+    apply Nat.Lcm0.mod_divide.
+    rewrite (Nat_div_less_small 1); [ now exists 0 | ].
+    rewrite Nat.mul_1_l.
+    cbn - [ "*" ].
+    split. {
+      apply Nat_div_lt_mul in Hb; [ | easy ].
+      apply Nat.lt_sub_lt_add_l in Hb.
+      apply -> Nat.lt_succ_r in Hb.
+      apply (Nat.le_trans ...
+...
+    }
+    apply Nat.mul_lt_mono_pos_l; [ easy | ].
+    now apply Nat.mod_upper_bound.
+  }
+  split; [ | easy ].
+  intros H2.
+  apply Nat.div_small_iff in H2; [ | easy ].
+  apply Nat.nle_gt in H2.
+  apply H2; clear H2.
+  apply Nat_div_lt_mul in Hb; [ | easy ].
+  apply Nat.lt_sub_lt_add_l in Hb.
+  now apply -> Nat.lt_succ_r in Hb.
+} {
+...
+*)
+
 Theorem Nat_eq_mul_2_div_mod_if_then_else :
   ∀ a n,
   n ≠ 0
@@ -1989,11 +2033,23 @@ Theorem Eisenstein_lemma' :
   nb_of_mult_gt_half q p ≡ (∑ (k = 1, (p - 1) / 2), k * q / p) mod 2.
 Proof.
 intros * Hp Hq Hpq.
+(**)
+rewrite summation_mod_idemp.
+erewrite summation_eq_compat; cycle 1. {
+  intros i Hi.
+Check Nat_eq_mul_2_div_mod_if_then_else.
+...
+  rewrite <- Nat.mul_assoc.
+  now rewrite (Nat_eq_mul_2_div_mod_if_then_else _ _ Hpz).
+}
+cbn - [ nb_of_mult_gt_half "<?" "/" "mod" ].
+...
 assert (Hpz : p ≠ 0) by now intros H; subst p.
 apply Nat.neq_0_lt_0 in Hpz.
 assert (Hcp : coprimes q p) by now apply eq_gcd_prime_small_1.
 move Hcp before Hq.
 rewrite Eisenstein_lemma; [ | easy | easy ].
+Search (∑ (_ = _, _), _ / _).
 ...
 (*
 Compute (
