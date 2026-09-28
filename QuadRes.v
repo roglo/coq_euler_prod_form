@@ -1811,28 +1811,40 @@ rewrite Nat.add_comm in Hab; cbn in Hab.
 now rewrite Nat.sub_add.
 Qed.
 
+Definition is_even n := Nat.eqb (n mod 2) 0.
+Definition is_odd n := Nat.eqb (n mod 2) 1.
+
 (* to be completed
 Theorem glop :
-  ∀ a n, n ≠ 0 → (a / n) mod 2 = Nat.b2n ((n - 1) / 2 <? a mod n).
+  ∀ a n, n ≠ 0 → (a / n) mod 2 = Nat.b2n ((n - 1) / 2 <? (a / 2) mod n).
 Proof.
 intros * Hnz.
-remember ((n - 1) / 2 <? a mod n) as b eqn:Hb; symmetry in Hb.
+Compute (List.map (λ n,
+  List.map (λ a,
+(a, n,
+Nat.eqb
+   ((a / n) mod 2)
+   (Nat.b2n (n / 2 <? (a / 2) mod n))
+)
+  ) (List.seq 0 30)
+) (List.filter is_odd (List.seq 1 9))
+).
+...
+faut peut-être faire (a / n), pas (a / n) mod 2
+si a < n alors 0
+si n ≤ a < 2n alors 1
+si 2n < a ≤ 3n alors 0
+...
+remember (_ <? _) as b eqn:Hb; symmetry in Hb.
 destruct b; cbn - [ "*" "mod" ]. {
   apply Nat.ltb_lt in Hb.
-  specialize (Nat.div_mod a n Hnz) as H1.
-  rewrite H1.
-  rewrite (Nat.mul_comm n).
-  rewrite Nat.div_add_l; [ | easy ].
-  rewrite (Nat.div_small (a mod n)); cycle 1. {
-    now apply Nat.mod_upper_bound.
-  }
-  rewrite Nat.add_0_r.
   apply Nat_eq_mod_1.
   split. {
     apply Nat.Lcm0.mod_divide.
     rewrite (Nat_div_less_small 1); [ now exists 0 | ].
     rewrite Nat.mul_1_l.
     cbn - [ "*" ].
+...
     split. {
       apply Nat_div_lt_mul in Hb; [ | easy ].
       apply Nat.lt_sub_lt_add_l in Hb.
