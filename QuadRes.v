@@ -1814,60 +1814,7 @@ Qed.
 Definition is_even n := Nat.eqb (n mod 2) 0.
 Definition is_odd n := Nat.eqb (n mod 2) 1.
 
-(* to be completed
-Theorem glop :
-  ∀ a n, n ≠ 0 → (a / n) mod 2 = Nat.b2n ((n - 1) / 2 <? (a / 2) mod n).
-Proof.
-intros * Hnz.
-Compute (List.map (λ n,
-  List.map (λ a,
-(a, n,
-Nat.eqb
-   ((a / n) mod 2)
-   (Nat.b2n (n / 2 <? (a / 2) mod n))
-)
-  ) (List.seq 0 30)
-) (List.filter is_odd (List.seq 1 9))
-).
-...
-faut peut-être faire (a / n), pas (a / n) mod 2
-si a < n alors 0
-si n ≤ a < 2n alors 1
-si 2n < a ≤ 3n alors 0
-...
-remember (_ <? _) as b eqn:Hb; symmetry in Hb.
-destruct b; cbn - [ "*" "mod" ]. {
-  apply Nat.ltb_lt in Hb.
-  apply Nat_eq_mod_1.
-  split. {
-    apply Nat.Lcm0.mod_divide.
-    rewrite (Nat_div_less_small 1); [ now exists 0 | ].
-    rewrite Nat.mul_1_l.
-    cbn - [ "*" ].
-...
-    split. {
-      apply Nat_div_lt_mul in Hb; [ | easy ].
-      apply Nat.lt_sub_lt_add_l in Hb.
-      apply -> Nat.lt_succ_r in Hb.
-      apply (Nat.le_trans ...
-...
-    }
-    apply Nat.mul_lt_mono_pos_l; [ easy | ].
-    now apply Nat.mod_upper_bound.
-  }
-  split; [ | easy ].
-  intros H2.
-  apply Nat.div_small_iff in H2; [ | easy ].
-  apply Nat.nle_gt in H2.
-  apply H2; clear H2.
-  apply Nat_div_lt_mul in Hb; [ | easy ].
-  apply Nat.lt_sub_lt_add_l in Hb.
-  now apply -> Nat.lt_succ_r in Hb.
-} {
-...
-*)
-
-Theorem Nat_eq_mul_2_div_mod_if_then_else :
+Theorem Nat_eq_mul_2_div_mod_to_bool :
   ∀ a n,
   n ≠ 0
   → (2 * a / n) mod 2 = Nat.b2n ((n - 1) / 2 <? a mod n).
@@ -1973,7 +1920,7 @@ rewrite summation_mod_idemp.
 erewrite summation_eq_compat; cycle 1. {
   intros i Hi.
   rewrite <- Nat.mul_assoc.
-  now rewrite (Nat_eq_mul_2_div_mod_if_then_else _ _ Hpz).
+  now rewrite (Nat_eq_mul_2_div_mod_to_bool _ _ Hpz).
 }
 cbn - [ nb_of_mult_gt_half "<?" "/" "mod" ].
 rewrite Hh.
@@ -2049,10 +1996,10 @@ intros * Hp Hq Hpq.
 rewrite summation_mod_idemp.
 erewrite summation_eq_compat; cycle 1. {
   intros i Hi.
-Check Nat_eq_mul_2_div_mod_if_then_else.
+Check Nat_eq_mul_2_div_mod_to_bool.
 ...
   rewrite <- Nat.mul_assoc.
-  now rewrite (Nat_eq_mul_2_div_mod_if_then_else _ _ Hpz).
+  now rewrite (Nat_eq_mul_2_div_mod_to_bool _ _ Hpz).
 }
 cbn - [ nb_of_mult_gt_half "<?" "/" "mod" ].
 ...
@@ -2123,7 +2070,7 @@ f_equal.
 rewrite  Hh.
 erewrite summation_eq_compat; cycle 1. {
   intros k Hk.
-  rewrite <- Nat_eq_mul_2_div_mod_if_then_else; [ | easy ].
+  rewrite <- Nat_eq_mul_2_div_mod_to_bool; [ | easy ].
   easy.
 }
 cbn - [ "*" "/" "mod" "<?" ].
