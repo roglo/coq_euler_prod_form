@@ -1994,16 +1994,17 @@ Proof.
 intros * Hp Hq Hpq.
 (**)
 rewrite summation_mod_idemp.
-Search (∑ (_ = _, _), _ = ∑ (_ = _, _), _).
-...
 erewrite summation_eq_compat; cycle 1. {
   intros i Hi.
-Check Nat_eq_mul_2_div_mod_to_bool.
+  rewrite Nat.Div0.mod_eq.
+  rewrite Nat.Div0.div_div.
+  easy.
+}
+cbn - [ "*" "/" "mod" ].
 ...
   rewrite <- Nat.mul_assoc.
   now rewrite (Nat_eq_mul_2_div_mod_to_bool _ _ Hpz).
 }
-cbn - [ nb_of_mult_gt_half "<?" "/" "mod" ].
 ...
 assert (Hpz : p ≠ 0) by now intros H; subst p.
 apply Nat.neq_0_lt_0 in Hpz.
