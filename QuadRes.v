@@ -914,9 +914,10 @@ Qed.
 
 Theorem Euler_criterion : ∀ p,
   prime p
-  → ∀ a, a ^ ((p - 1) / 2) ≡ Legendre_symbol a p mod p.
+  → ∀ a, Legendre_symbol a p ≡ a ^ ((p - 1) / 2) mod p.
 Proof.
 intros * Hp *.
+symmetry.
 destruct (Nat.eq_dec p 2) as [Hp2| Hp2]; [ now subst p | ].
 progress unfold Legendre_symbol.
 generalize Hp2; intros H.
@@ -1301,7 +1302,6 @@ assert (H2 : z ≡ ((p - 1) ^ n * ∏ (i = 1, h), abs ((i * a) mod p) p) mod p).
   now apply List_fold_left_mul_mul_seq_fold_left_abs.
 }
 specialize (Euler_criterion p Hp a) as H3.
-symmetry in H3.
 rewrite <- Legendre_symbol_mod in H3; cycle 1. {
   destruct p; [ easy | ].
   destruct p; [ easy | ].
@@ -1994,6 +1994,8 @@ Proof.
 intros * Hp Hq Hpq.
 (**)
 rewrite summation_mod_idemp.
+Search (∑ (_ = _, _), _ = ∑ (_ = _, _), _).
+...
 erewrite summation_eq_compat; cycle 1. {
   intros i Hi.
 Check Nat_eq_mul_2_div_mod_to_bool.
