@@ -2002,6 +2002,9 @@ erewrite summation_eq_compat; cycle 1. {
 }
 cbn - [ "*" "/" "mod" ].
 ...
+Search List.filter.
+Search (∑ (_ = _, _), _).
+...
   rewrite <- Nat.mul_assoc.
   now rewrite (Nat_eq_mul_2_div_mod_to_bool _ _ Hpz).
 }
