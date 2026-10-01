@@ -1992,10 +1992,52 @@ Theorem Eisenstein_lemma' :
   nb_of_mult_gt_half q p ≡ (∑ (k = 1, (p - 1) / 2), k * q / p) mod 2.
 Proof.
 intros * Hp Hq Hpq.
+assert (Hpz : p ≠ 0) by now intros H; subst p.
 (**)
 rewrite summation_mod_idemp.
+...
+Check Nat_eq_mul_2_div_mod_to_bool.
+Theorem Nat_eq_mul_2_div_mod_to_bool' :
+  ∀ a n, n ≠ 0 → ((2 * a + 1) / n) mod 2 = Nat.b2n ((n - 1) / 2 <? a mod n).
+Proof.
+intros * Hnz.
+Compute (
+  List.map (λ n,
+      List.map (λ a,
+(a, n,
+Nat.eqb
+  (((2 * a + 1) / n) mod 2)
+  (Nat.b2n ((n - 1) / 2 <? a mod n))
+)
+) (List.seq 0 20)
+) (List.seq 1 20)).
+...
+Search (∑ (_ = _, _), if _ then _ else _).
+Theorem summation_split_with_fun :
+  ∀ b e f (g : _ → bool),
+  ∑ (i = b, e), f i =
+    (∑ (i = b, e), if g i then f i else 0) +
+    (∑ (i = b, e), if g i then 0 else f i).
+... ...
+rewrite summation_split_with_fun with (g := λ i, i mod 2 =? 0).
+...
 erewrite summation_eq_compat; cycle 1. {
   intros i Hi.
+  remember (i mod 2 =? 0) as i2 eqn:Hi2; symmetry in Hi2.
+  destruct i2. {
+    apply Nat.eqb_eq in Hi2.
+    specialize (Nat.div_mod i 2 (Nat.neq_succ_0 _)) as H1.
+    rewrite H1 at 1.
+    rewrite Hi2, Nat.add_0_r.
+    rewrite <- Nat.mul_assoc.
+    rewrite (Nat_eq_mul_2_div_mod_to_bool _ _ Hpz).
+    easy.
+  }
+  cbn - [ "<?" "/" "mod" ].
+  symmetry.
+...
+
+...
   rewrite Nat.Div0.mod_eq.
   rewrite Nat.Div0.div_div.
   easy.
