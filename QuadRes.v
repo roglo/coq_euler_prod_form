@@ -1993,7 +1993,7 @@ Theorem Eisenstein_lemma' :
 Proof.
 intros * Hp Hq Hpq.
 assert (Hpz : p ≠ 0) by now intros H; subst p.
-(**)
+(*
 rewrite summation_mod_idemp.
 ...
 Check Nat_eq_mul_2_div_mod_to_bool.
@@ -2072,7 +2072,7 @@ Nat.eqb
 ).
 *)
 assert (Hpz : p ≠ 0) by now intros H; subst p.
-(**)
+*)
 destruct (Nat.eq_dec p 2) as [Hp2| Hp2]. {
   subst p.
   now rewrite summation_empty.
@@ -2106,15 +2106,17 @@ replace (p mod 2) with 1 in H1; cycle 1. {
   apply (odd_prime _ Hp Hp2).
 }
 rewrite Nat.mul_1_l in H1.
+rewrite <- H1.
+...
+(*
+...
 rewrite eq_nb_of_mult_gt_half_summation.
 remember ((p - 1) / 2) as h eqn:Hh.
-(*
 rewrite  Ht.
 rewrite summation_mod_idemp; symmetry.
 rewrite summation_mod_idemp; symmetry.
 f_equal.
-...
-*)
+
 rewrite  Hh.
 erewrite summation_eq_compat; cycle 1. {
   intros k Hk.
@@ -2483,6 +2485,7 @@ Compute (List.map (λ p, List.map (λ q,
   (List.filter (Nat.ltb p) (List.filter is_prime (List.seq 3 30))))
   (List.filter is_prime (List.seq 3 30))).
 ...
+*)
 *)
 
 (* attempt to define it with Legendre symbols but the problem is that
