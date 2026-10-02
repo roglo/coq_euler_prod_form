@@ -2006,9 +2006,18 @@ split; intros H1. {
   destruct b. {
     progress unfold is_quadratic_residue in Hx, Hy.
     apply Nat.eqb_eq in Hx, Hy.
-    assert (Hzpq : 0 < p < q) by flia Hpq.
-    assert (Hcp : coprimes q p) by now apply eq_gcd_prime_small_1.
-    specialize (Gauss_lemma q p Hp Hcp _ eq_refl) as H1.
+    progress unfold Legendre_symbol in Hy.
+    remember (p =? 2) as p2 eqn:Hp2; symmetry in Hp2.
+    destruct p2; [ apply Nat.eqb_eq in Hp2; flia Hpq Hp2 | ].
+    clear Hp2.
+    remember (q mod p =? 0) as qpz eqn:Hqpz; symmetry in Hqpz.
+    destruct qpz; [ easy | ].
+    apply Nat.eqb_neq in Hqpz.
+    remember (sqrt_mod q p) as mqp eqn:Hmqp; symmetry in Hmqp.
+    destruct mqp as [a| ]; [ | flia Hy Hpq ].
+    clear Hy; move a before q.
+    apply eq_sqrt_mod_Some in Hmqp.
+    destruct Hmqp as (Hap, Ha2).
 ...
 *)
 
