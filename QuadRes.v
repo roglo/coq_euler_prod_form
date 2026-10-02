@@ -1993,6 +1993,22 @@ Theorem quadratic_reciprocity :
     p mod 4 = 1 ∨ q mod 4 = 1.
 Proof.
 intros * Hp Hq Hpq.
+split; intros H1. {
+  assert (H : p ≠ 2) by flia Hpq.
+  specialize (odd_prime_mod_4 p Hp H) as Hp4; clear H.
+  assert (H : q ≠ 2) by flia Hpq.
+  specialize (odd_prime_mod_4 q Hq H) as Hq4; clear H.
+  destruct Hp4 as [Hp4| Hp4]; [ now left | right ].
+  destruct Hq4 as [Hq4| Hq4]; [ easy | exfalso ].
+  rename H1 into Hx.
+  remember (is_quadratic_residue q p) as b eqn:Hy; symmetry in Hy.
+  move Hx after Hy.
+  destruct b. {
+    progress unfold is_quadratic_residue in Hx, Hy.
+    apply Nat.eqb_eq in Hx, Hy.
+    assert (Hzpq : 0 < p < q) by flia Hpq.
+    assert (Hcp : coprimes q p) by now apply eq_gcd_prime_small_1.
+    specialize (Gauss_lemma q p Hp Hcp _ eq_refl) as H1.
 ...
 *)
 
