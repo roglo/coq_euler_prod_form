@@ -2030,6 +2030,11 @@ destruct mqp as [a| ]. {
   apply eq_sqrt_mod_Some in Hmqp.
   destruct Hmqp as (Hap, Ha2).
   remember (sqrt_mod p q) as mpq eqn:Hmpq; symmetry in Hmpq.
+(*
+  destruct mpq as [b| ]; cycle 1. {
+    assert (H : q ≠ 0) by flia Hap Hpq.
+    specialize (eq_sqrt_mod_None p q H Hmpq) as Hb2; clear H Hmpq.
+*)
   destruct mpq as [b| ]. {
     move b before a.
     rewrite Nat.eqb_refl.
@@ -2037,6 +2042,12 @@ destruct mqp as [a| ]. {
     apply eq_sqrt_mod_Some in Hmpq.
     destruct Hmpq as (Hbp, Hb2).
     move Hbp before Hap.
+    assert (H : p ≠ 2) by flia Hpq.
+    specialize (odd_prime_mod_4 p Hp H) as Hp4; clear H.
+    assert (H : q ≠ 2) by flia Hpq.
+    specialize (odd_prime_mod_4 q Hq H) as Hq4; clear H.
+    destruct Hp4 as [Hp4| Hp4]; [ now left | right ].
+    destruct Hq4 as [Hq4| Hq4]; [ easy | exfalso ].
 ...
 split; intros H1. {
   assert (H : p ≠ 2) by flia Hpq.
