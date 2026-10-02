@@ -2048,6 +2048,16 @@ destruct mqp as [a| ]. {
     specialize (odd_prime_mod_4 q Hq H) as Hq4; clear H.
     destruct Hp4 as [Hp4| Hp4]; [ now left | right ].
     destruct Hq4 as [Hq4| Hq4]; [ easy | exfalso ].
+Theorem glop :
+  ∀ p q a b,
+  a² ≡ q mod p
+  → b² ≡ p mod q
+  → p mod 4 = 3
+  → q mod 4 = 3
+  → False.
+Proof.
+intros * Ha2  Hb2 Hp4 Hq4.
+...
     apply Nat_eq_mod_exists in Hp4, Hq4.
     destruct Hp4 as (u, Hu); rewrite Nat.mul_comm in Hu.
     destruct Hq4 as (v, Hv); rewrite Nat.mul_comm in Hv.
