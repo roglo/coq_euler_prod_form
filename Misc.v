@@ -951,16 +951,19 @@ apply Nat.Div0.mul_mod_idemp_r.
 Qed.
 
 Theorem Nat_pow_sub_pow : ∀ a b n,
-  n ≠ 0
-  → b ≤ a
+  b ≤ a
   → a ^ n - b ^ n =
-     (a - b) * ∑ (i = 0, n - 1), a ^ (n - i - 1) * b ^ i.
+     (a - b) * ∑ (i = 1, n), a ^ (n - i) * b ^ (i - 1).
 Proof.
-intros * Hnz Hba.
-destruct n; [ easy | clear Hnz ].
-induction n; [ now cbn; do 3 rewrite Nat.mul_1_r | ].
-remember (S n) as sn; cbn - [ "-" ]; subst sn.
-rewrite <- (Nat.sub_add (a * b ^ S n) (a * a ^ S n)). 2: {
+intros * Hba.
+induction n; [ easy | ].
+cbn - [ "-" ].
+destruct (Nat.eq_dec n 0) as [Hnz| Hnz]. {
+  subst n; cbn.
+  rewrite summation_only_one; cbn.
+  now do 3 rewrite Nat.mul_1_r.
+}
+rewrite <- (Nat.sub_add (a * b ^ n) (a * a ^ n)). 2: {
   apply Nat.mul_le_mono_l.
   now apply Nat.pow_le_mono_l.
 }
@@ -970,23 +973,21 @@ rewrite <- Nat.mul_sub_distr_r.
 rewrite (Nat.mul_comm a).
 rewrite IHn, <- Nat.mul_assoc.
 rewrite <- Nat.mul_add_distr_l; f_equal.
-do 2 rewrite Nat_sub_succ_1.
-rewrite (summation_split_last _ (S n)); [ | easy ].
+symmetry.
+rewrite (summation_split_last 1 (S n)); [ | now apply -> Nat.succ_le_mono ].
 rewrite summation_succ_succ.
 rewrite Nat.sub_succ.
-rewrite Nat.sub_succ_l; [ | easy ].
-do 2 rewrite Nat.sub_diag.
+rewrite Nat.sub_diag.
 rewrite Nat.pow_0_r, Nat.mul_1_l.
+rewrite Nat_sub_succ_1.
 f_equal.
 rewrite mul_summation_distr_r.
 apply summation_eq_compat.
 intros i Hi.
 rewrite Nat_sub_succ_1.
 rewrite Nat.mul_shuffle0; f_equal.
-do 2 rewrite Nat_sub_sub_swap, Nat_sub_succ_1.
-rewrite <- (Nat.pow_1_r a) at 2.
-rewrite <- Nat.pow_add_r.
-f_equal; flia Hi.
+rewrite Nat.sub_succ_l; [ cbn | easy ].
+apply Nat.mul_comm.
 Qed.
 
 Theorem Nat_squ_sub_squ : ∀ a b, a ^ 2 - b ^ 2 = (a + b) * (a - b).

@@ -2031,7 +2031,27 @@ destruct q1. {
     destruct Hp1 as (d, Hp1).
     move c before q; move d before c.
 Check Nat_pow_sub_pow.
+About Nat_pow_sub_pow.
+...
 (* tu crois que ça peut s'appliquer à Hp1 et Hq1 de manière utile ? *)
+    remember (nb_of_mult_gt_half p q) as npq eqn:Hnpq.
+    remember (nb_of_mult_gt_half q p) as nqp eqn:Hnqp.
+(*
+    destruct (Nat.eq_dec npq 0) as [Hnpqz| Hnpqz]. {
+      move Hnpqz at top; subst npq.
+      clear c Hq1.
+      symmetry in Hnpq.
+      progress unfold nb_of_mult_gt_half in Hnpq.
+      apply List.length_zero_iff_nil in Hnpq.
+      specialize (List_filter_nil _ _ Hnpq) as H1.
+      clear Hnpq.
+      cbn - [ "<?" "/" ] in H1.
+Check Nat_pow_sub_pow.
+...
+*)
+    rewrite <- (Nat.pow_1_l npq) in Hq1 at 2.
+    rewrite <- (Nat.pow_1_l nqp) in Hp1 at 2.
+    rewrite Nat_pow_sub_pow in Hq1; cycle 1. {
 ... 1
 progress unfold is_quadratic_residue.
 progress unfold Legendre_symbol.
