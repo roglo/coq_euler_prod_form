@@ -2048,6 +2048,42 @@ destruct mqp as [a| ]. {
     specialize (odd_prime_mod_4 q Hq H) as Hq4; clear H.
     destruct Hp4 as [Hp4| Hp4]; [ now left | right ].
     destruct Hq4 as [Hq4| Hq4]; [ easy | exfalso ].
+    apply Nat_eq_mod_exists in Hp4, Hq4.
+    destruct Hp4 as (u, Hu); rewrite Nat.mul_comm in Hu.
+    destruct Hq4 as (v, Hv); rewrite Nat.mul_comm in Hv.
+    move u before b; move v before u.
+    apply Nat_eq_mod_exists in Ha2, Hb2.
+    destruct Ha2 as (c, Hc).
+    destruct Hb2 as (d, Hd).
+    move c before b; move d before c.
+    assert (c = a² / p). {
+      assert (H : p ≠ 0) by now intros H; rewrite H in Hp.
+      specialize (Nat.div_mod a² p H) as H1; clear H.
+      rewrite Hc in H1 at 1.
+      rewrite (Nat.mul_comm c) in H1.
+      apply Nat.div_mod_unique in H1; [ easy | | ]. {
+        apply Nat.mod_upper_bound.
+        now intros H; rewrite H in Hp.
+      } {
+        apply Nat.mod_upper_bound.
+        now intros H; rewrite H in Hp.
+      }
+    }
+    subst c; rewrite Nat.mul_comm in Hc.
+    assert (d = b² / q). {
+      assert (H : q ≠ 0) by now intros H; rewrite H in Hq.
+      specialize (Nat.div_mod b² q H) as H1; clear H.
+      rewrite Hd in H1 at 1.
+      rewrite (Nat.mul_comm d) in H1.
+      apply Nat.div_mod_unique in H1; [ easy | | ]. {
+        apply Nat.mod_upper_bound.
+        now intros H; rewrite H in Hq.
+      } {
+        apply Nat.mod_upper_bound.
+        now intros H; rewrite H in Hq.
+      }
+    }
+    subst d; rewrite Nat.mul_comm in Hd.
 ...
 split; intros H1. {
   assert (H : p ≠ 2) by flia Hpq.
