@@ -2007,6 +2007,33 @@ Proof.
 intros * Hp Hq Hpq.
 (**)
 progress unfold is_quadratic_residue.
+erewrite (Gauss_lemma _ p Hp); [ | | easy ]; cycle 1. {
+  apply eq_primes_gcd_1; [ easy | easy | flia Hpq ].
+}
+erewrite (Gauss_lemma _ q Hq); [ | | easy ]; cycle 1. {
+  apply eq_primes_gcd_1; [ easy | easy | flia Hpq ].
+}
+remember (_ mod _ =? 1) as q1 eqn:Hq1; symmetry in Hq1.
+remember (_ mod _ =? 1) as p1 eqn:Hp1 in |-*; symmetry in Hp1.
+move p1 after q1.
+destruct q1. {
+  apply Nat.eqb_eq in Hq1.
+  apply Nat_eq_mod_1 in Hq1.
+  destruct Hq1 as (Hq1, _).
+  apply Nat.Div0.mod_divides in Hq1.
+  destruct Hq1 as (c, Hq1).
+  destruct p1. {
+    apply Nat.eqb_eq in Hp1.
+    split; [ intros _ | easy ].
+    apply Nat_eq_mod_1 in Hp1.
+    destruct Hp1 as (Hp1, _).
+    apply Nat.Div0.mod_divides in Hp1.
+    destruct Hp1 as (d, Hp1).
+    move c before q; move d before c.
+Check Nat_pow_sub_pow.
+(* tu crois que ça peut s'appliquer à Hp1 et Hq1 de manière utile ? *)
+... 1
+progress unfold is_quadratic_residue.
 progress unfold Legendre_symbol.
 remember (p =? 2) as p2 eqn:Hp2; symmetry in Hp2.
 destruct p2; [ apply Nat.eqb_eq in Hp2; flia Hpq Hp2 | ].
@@ -2060,6 +2087,7 @@ destruct mqp as [a| ]. {
     specialize (odd_prime_mod_4 q Hq H) as Hq4; clear H.
     destruct Hp4 as [Hp4| Hp4]; [ now left | right ].
     destruct Hq4 as [Hq4| Hq4]; [ easy | exfalso ].
+...
 Theorem glop :
   ∀ p q a b,
   a² ≡ q mod p
