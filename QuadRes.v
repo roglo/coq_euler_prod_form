@@ -2034,6 +2034,8 @@ Check Nat_pow_sub_pow.
 (* tu crois que ça peut s'appliquer à Hp1 et Hq1 de manière utile ? *)
     remember (nb_of_mult_gt_half p q) as npq eqn:Hnpq.
     remember (nb_of_mult_gt_half q p) as nqp eqn:Hnqp.
+    move npq before d; move nqp before npq.
+    move Hnqp before Hnpq.
     rewrite <- (Nat.pow_1_l npq) in Hq1 at 2.
     rewrite <- (Nat.pow_1_l nqp) in Hp1 at 2.
     rewrite Nat_pow_sub_pow in Hq1; cycle 1. {
@@ -2042,6 +2044,30 @@ Check Nat_pow_sub_pow.
     }
     rewrite <- Nat.sub_add_distr in Hq1.
     rewrite Nat.add_1_r in Hq1.
+    rewrite Nat_pow_sub_pow in Hp1; cycle 1. {
+      apply Nat.le_add_le_sub_l; cbn.
+      flia Hpq.
+    }
+    rewrite <- Nat.sub_add_distr in Hp1.
+    rewrite Nat.add_1_r in Hp1.
+    rewrite summation_rtl in Hq1, Hp1.
+    erewrite summation_eq_compat in Hq1; cycle 1. {
+      intros i Hi.
+      rewrite Nat.pow_1_l, Nat.mul_1_r.
+      rewrite Nat.add_sub_swap; [ | easy ].
+      rewrite Nat.sub_add_distr.
+      rewrite Nat.sub_sub_distr; [ | easy | easy ].
+      now rewrite Nat.sub_diag, Nat.add_0_l.
+    }
+    erewrite summation_eq_compat in Hp1; cycle 1. {
+      intros i Hi.
+      rewrite Nat.pow_1_l, Nat.mul_1_r.
+      rewrite Nat.add_sub_swap; [ | easy ].
+      rewrite Nat.sub_add_distr.
+      rewrite Nat.sub_sub_distr; [ | easy | easy ].
+      now rewrite Nat.sub_diag, Nat.add_0_l.
+    }
+    cbn in Hq1, Hp1.
 ... 1
 progress unfold is_quadratic_residue.
 progress unfold Legendre_symbol.
