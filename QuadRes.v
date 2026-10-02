@@ -2030,28 +2030,15 @@ destruct q1. {
     apply Nat.Div0.mod_divides in Hp1.
     destruct Hp1 as (d, Hp1).
     move c before q; move d before c.
-Check Nat_pow_sub_pow.
-(* tu crois que ça peut s'appliquer à Hp1 et Hq1 de manière utile ? *)
     remember (nb_of_mult_gt_half p q) as npq eqn:Hnpq.
     remember (nb_of_mult_gt_half q p) as nqp eqn:Hnqp.
     symmetry in Hnpq, Hnqp.
     destruct (Nat.eq_dec nqp 0) as [Hnqpz| Hnqpz]. {
       move Hnqpz at top; subst nqp.
-Search nb_of_mult_gt_half.
 Theorem nb_of_mult_gt_half_neq_0 :
   ∀ a b, a ≠ 0 → nb_of_mult_gt_half a b ≠ 0.
 Proof.
 intros * Haz H1.
-(*
-rewrite eq_nb_of_mult_gt_half_summation in H1.
-Search (∑ (_ = _, _), _ = 0).
-Theorem eq_summation_0 :
-  ∀ b e f, ∑ (i = b, e), f i = 0 → ∀ i, b ≤ i ≤ e → f i = 0.
-Admitted.
-specialize (eq_summation_0 _ _ _ H1) as H2.
-cbn - [ "<?" "/" ] in H2.
-...
-*)
 unfold nb_of_mult_gt_half in H1.
 apply List.length_zero_iff_nil in H1.
 specialize (List_filter_nil _ _ H1) as H2; clear H1.
