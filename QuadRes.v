@@ -1260,6 +1260,232 @@ rewrite Nat.Div0.mod_mod.
 now rewrite sqrt_mod_mod.
 Qed.
 
+Theorem eq_product_abs_fact_mod :
+  ∀ h a p,
+  prime p
+  → 0 < a < p
+  → h = (p - 1) / 2
+  → ∏ (i = 1, h), abs ((i * a) mod p) p ≡ fact h mod p.
+Proof.
+intros * Hp (Haz, Hap) Hh.
+destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
+specialize abs_all_different_multiples as H4.
+assert (H: 1 ≤ a < p) by easy.
+specialize (H4 p Hp a H); clear H.
+rewrite fact_eq_fold_left.
+progress unfold iter_seq.
+progress unfold iter_list.
+rewrite <- List_fold_left_map.
+f_equal.
+rewrite Nat_sub_succ_1.
+apply Permutation_fold_mul.
+apply Permutation_map_same_l; cycle 1. {
+  intros b Hb.
+  apply List.in_map_iff in Hb.
+  destruct Hb as (c & Hcb & Hc).
+  subst b.
+  progress unfold abs.
+  rewrite <- Hh.
+  remember (_ <=? _) as x eqn:Hx; symmetry in Hx.
+  destruct x. {
+    apply Nat.leb_le in Hx.
+    apply List.in_seq.
+    split; [ | flia Hx ].
+    apply Nat.neq_0_lt_0.
+    intros H.
+    clear Hx.
+    apply Nat.Lcm0.mod_divide in H.
+    apply prime_divide_mul in H; [ | easy ].
+    destruct H as [H| H]. {
+      destruct H as (d, Hd).
+      apply List.in_seq in Hc.
+      destruct a; [ easy | clear Haz ].
+      destruct d; [ flia Hd Hc | ].
+      destruct Hc as (H1c, Hch).
+      apply Nat.nle_gt in Hch; apply Hch; clear Hch.
+      subst c h.
+      destruct p; [ easy | ].
+      rewrite Nat.sub_succ, Nat.sub_0_r.
+      cbn - [ "/" ].
+      apply -> Nat.succ_le_mono.
+      apply Nat.Div0.div_le_upper_bound; cbn.
+      do 2 rewrite <- Nat.add_assoc.
+      apply Nat.le_add_r.
+    } {
+      destruct H as (d, Hd).
+      apply Nat.nle_gt in Hap; apply Hap; clear Hap.
+      subst a.
+      destruct d; [ easy | cbn ].
+      apply Nat.le_add_r.
+    }
+  }
+  apply Nat.leb_gt in Hx.
+  apply List.in_seq.
+  split. {
+    apply Nat.le_add_le_sub_r.
+    now apply Nat.mod_upper_bound.
+  }
+  destruct (Nat.eq_dec p 1) as [Hp1| Hp1]; [ now subst p | ].
+  destruct (Nat.eq_dec p 2) as [Hp2| Hp2]. {
+    now subst p; cbn in Hh; subst h.
+  }
+  destruct p; [ easy | ].
+  rewrite Nat.sub_succ, Nat.sub_0_r in Hh; subst h.
+  apply Nat.lt_succ_r.
+  apply Nat.le_sub_le_add_l.
+  apply (Nat.le_trans _ (1 + p / 2 + p / 2)); cycle 1. {
+    now apply Nat.add_le_mono_r.
+  }
+  rewrite <- Nat.add_assoc.
+  rewrite Nat_add_div_same; cycle 1. {
+    specialize (odd_prime (S p) Hp Hp2) as Hpo.
+    apply Nat_eq_succ_mod_1 in Hpo.
+    now apply Nat.Lcm0.mod_divide in Hpo.
+  }
+  cbn - [ "/" ].
+  rewrite <- Nat_mul_2_l.
+  now rewrite Nat.mul_comm, Nat.div_mul.
+}
+apply (NoDup_map_iff 0).
+rewrite List.length_seq.
+intros i j Hi Hj Hij.
+do 2 rewrite List.seq_nth in Hij; [ | easy | easy | easy ].
+cbn - [ "*" ] in Hij.
+remember ((S i) * a mod p <=? h) as x eqn:Hx in Hij; symmetry in Hx.
+remember ((S j) * a mod p <=? h) as y eqn:Hy in Hij; symmetry in Hy.
+assert (Hija :
+  ∀ i j,
+    i < h
+    → j < h
+    → S i * a ≡ (S j * a) mod p
+    → i = j). {
+  clear i j Hi Hj Hij Hx Hy.
+  intros * Hi Hj Hij.
+  destruct (lt_dec (S i mod p) (S j mod p)) as [Hlij| Hlij]. {
+    rewrite <- (Nat.Div0.mul_mod_idemp_l (S i)) in Hij.
+    rewrite <- (Nat.Div0.mul_mod_idemp_l (S j)) in Hij.
+    exfalso; revert Hij.
+    apply smaller_than_prime_all_different_multiples; [ easy | easy | ].
+    split; [ easy | ].
+    now apply Nat.mod_upper_bound.
+  }
+  destruct (lt_dec (S j mod p) (S i mod p)) as [Hlji| Hlji]. {
+    rewrite <- (Nat.Div0.mul_mod_idemp_l (S i)) in Hij.
+    rewrite <- (Nat.Div0.mul_mod_idemp_l (S j)) in Hij.
+    symmetry in Hij.
+    exfalso; revert Hij.
+    apply smaller_than_prime_all_different_multiples; [ easy | easy | ].
+    split; [ easy | ].
+    now apply Nat.mod_upper_bound.
+  }
+  apply Nat.nlt_ge in Hlij, Hlji.
+  apply Nat.le_antisymm in Hlij; [ clear Hlji | easy ].
+  rewrite Nat.mod_small in Hlij; cycle 1. {
+    apply (Nat.lt_le_trans _ (S h)); [ now apply -> Nat.succ_lt_mono | ].
+    subst h.
+    apply Nat.le_succ_l.
+    apply Nat.Div0.div_lt_upper_bound.
+    flia Hpz.
+  }
+  rewrite Nat.mod_small in Hlij; cycle 1. {
+    apply (Nat.lt_le_trans _ (S h)); [ now apply -> Nat.succ_lt_mono | ].
+    subst h.
+    apply Nat.le_succ_l.
+    apply Nat.Div0.div_lt_upper_bound.
+    flia Hpz.
+  }
+  now injection Hlij.
+}
+assert (Hijap :
+  ∀ i j,
+    i < (p - 1) / 2
+    → j < (p - 1) / 2
+    → (S i * a) mod p = p - (S j * a) mod p
+    → i = j). {
+  clear i j Hj Hi Hij Hx Hy.
+  intros * Hi Hj Hij.
+  apply (f_equal (λ x, x + (S j * a mod p))) in Hij.
+  rewrite Nat.sub_add in Hij; cycle 1. {
+    now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+  }
+  apply (f_equal (λ x, x mod p)) in Hij.
+  rewrite Nat.Div0.mod_same in Hij.
+  rewrite Nat.Div0.add_mod_idemp_l in Hij.
+  rewrite Nat.Div0.add_mod_idemp_r in Hij.
+  rewrite <- Nat.mul_add_distr_r in Hij.
+  apply Nat.Lcm0.mod_divide in Hij.
+  apply (prime_divide_mul _ Hp) in Hij.
+  destruct Hij as [Hij| Hij]; cycle 1. {
+    destruct Hij as (k, Hpa).
+    destruct k; [ now apply Nat.neq_0_lt_0 in Hpa | ].
+    rewrite Hpa in Hap.
+    flia Hap.
+  }
+  destruct Hij as (k, Hij).
+  destruct k; [ easy | ].
+  destruct p; [ easy | ].
+  rewrite Nat.sub_succ, Nat.sub_0_r in Hi, Hj.
+  assert (H2i : 2 * i < p). {
+    apply (Nat.mul_lt_mono_pos_l 2) in Hi; [ | easy ].
+    rewrite <- Nat.Lcm0.divide_div_mul_exact in Hi; cycle 1. {
+      destruct p; [ easy | ].
+      destruct p; [ easy | ].
+      specialize (odd_prime _ Hp) as H5.
+      assert (H : S (S (S p)) ≠ 2) by easy.
+      specialize (H5 H); clear H.
+      apply Nat_eq_succ_mod_1 in H5.
+      now apply Nat.Lcm0.mod_divide.
+    }
+    now rewrite (Nat.mul_comm 2 p), Nat.div_mul in Hi.
+  }
+  assert (H2j : 2 * j < p). {
+    apply (Nat.mul_lt_mono_pos_l 2) in Hj; [ | easy ].
+    rewrite <- Nat.Lcm0.divide_div_mul_exact in Hj; cycle 1. {
+      destruct p; [ easy | ].
+      destruct p; [ easy | ].
+      specialize (odd_prime _ Hp) as H5.
+      assert (H : S (S (S p)) ≠ 2) by easy.
+      specialize (H5 H); clear H.
+      apply Nat_eq_succ_mod_1 in H5.
+      now apply Nat.Lcm0.mod_divide.
+    }
+    now rewrite (Nat.mul_comm 2 p), Nat.div_mul in Hj.
+  }
+  flia H2i H2j Hij.
+}
+destruct x, y. {
+  progress unfold abs in Hij.
+  rewrite <- Hh in Hij.
+  rewrite Hx, Hy in Hij.
+  now apply Hija.
+} {
+  apply Hijap; [ now subst h | now subst h | ].
+  progress unfold abs in Hij.
+  rewrite <- Hh in Hij.
+  now rewrite Hx, Hy in Hij.
+} {
+  symmetry.
+  apply Hijap; [ now subst h | now subst h | ].
+  progress unfold abs in Hij.
+  rewrite <- Hh in Hij.
+  now rewrite Hx, Hy in Hij.
+} {
+  progress unfold abs in Hij.
+  rewrite <- Hh in Hij.
+  rewrite Hx, Hy in Hij.
+  apply (f_equal (λ x, p - x)) in Hij.
+  rewrite Nat.sub_sub_distr in Hij; [ | | easy ]; cycle 1. {
+    now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+  }
+  rewrite Nat.sub_sub_distr in Hij; [ | | easy ]; cycle 1. {
+    now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+  }
+  rewrite Nat.sub_diag in Hij.
+  do 2 rewrite Nat.add_0_l in Hij.
+  now apply Hija.
+}
+Qed.
+
 Definition coprimes a b := Nat.gcd a b = 1.
 Definition are_coprimes a b := Nat.gcd a b =? 1.
 
@@ -1309,221 +1535,7 @@ rewrite <- Legendre_symbol_mod in H3; cycle 1. {
 }
 rewrite H3, <- Hh.
 assert (H4 : ∏ (i = 1, h), abs ((i * a) mod p) p ≡ fact h mod p). {
-  specialize abs_all_different_multiples as H4.
-  assert (H: 1 ≤ a < p) by easy.
-  specialize (H4 p Hp a H); clear H.
-  rewrite fact_eq_fold_left.
-  progress unfold iter_seq.
-  progress unfold iter_list.
-  rewrite <- List_fold_left_map.
-  f_equal.
-  rewrite Nat_sub_succ_1.
-  apply Permutation_fold_mul.
-  apply Permutation_map_same_l; cycle 1. {
-    intros b Hb.
-    apply List.in_map_iff in Hb.
-    destruct Hb as (c & Hcb & Hc).
-    subst b.
-    progress unfold abs.
-    rewrite <- Hh.
-    remember (_ <=? _) as x eqn:Hx; symmetry in Hx.
-    destruct x. {
-      apply Nat.leb_le in Hx.
-      apply List.in_seq.
-      split; [ | flia Hx ].
-      apply Nat.neq_0_lt_0.
-      intros H.
-      clear Hx.
-      apply Nat.Lcm0.mod_divide in H.
-      apply prime_divide_mul in H; [ | easy ].
-      destruct H as [H| H]. {
-        destruct H as (d, Hd).
-        apply List.in_seq in Hc.
-        destruct a; [ easy | clear Haz ].
-        destruct d; [ flia Hd Hc | ].
-        destruct Hc as (H1c, Hch).
-        apply Nat.nle_gt in Hch; apply Hch; clear Hch.
-        subst c h.
-        destruct p; [ easy | ].
-        rewrite Nat.sub_succ, Nat.sub_0_r.
-        cbn - [ "/" ].
-        apply -> Nat.succ_le_mono.
-        apply Nat.Div0.div_le_upper_bound; cbn.
-        do 2 rewrite <- Nat.add_assoc.
-        apply Nat.le_add_r.
-      } {
-        destruct H as (d, Hd).
-        apply Nat.nle_gt in Hap; apply Hap; clear Hap.
-        subst a.
-        destruct d; [ easy | cbn ].
-        apply Nat.le_add_r.
-      }
-    }
-    apply Nat.leb_gt in Hx.
-    apply List.in_seq.
-    split. {
-      apply Nat.le_add_le_sub_r.
-      now apply Nat.mod_upper_bound.
-    }
-    destruct (Nat.eq_dec p 1) as [Hp1| Hp1]; [ now subst p | ].
-    destruct (Nat.eq_dec p 2) as [Hp2| Hp2]. {
-      now subst p; cbn in Hh; subst h.
-    }
-    destruct p; [ easy | ].
-    rewrite Nat.sub_succ, Nat.sub_0_r in Hh; subst h.
-    apply Nat.lt_succ_r.
-    apply Nat.le_sub_le_add_l.
-    apply (Nat.le_trans _ (1 + p / 2 + p / 2)); cycle 1. {
-      now apply Nat.add_le_mono_r.
-    }
-    rewrite <- Nat.add_assoc.
-    rewrite Nat_add_div_same; cycle 1. {
-      specialize (odd_prime (S p) Hp Hp2) as Hpo.
-      apply Nat_eq_succ_mod_1 in Hpo.
-      now apply Nat.Lcm0.mod_divide in Hpo.
-    }
-    cbn - [ "/" ].
-    rewrite <- Nat_mul_2_l.
-    now rewrite Nat.mul_comm, Nat.div_mul.
-  }
-  apply (NoDup_map_iff 0).
-  rewrite List.length_seq.
-  intros i j Hi Hj Hij.
-  do 2 rewrite List.seq_nth in Hij; [ | easy | easy | easy ].
-  cbn - [ "*" ] in Hij.
-  remember ((S i) * a mod p <=? h) as x eqn:Hx in Hij; symmetry in Hx.
-  remember ((S j) * a mod p <=? h) as y eqn:Hy in Hij; symmetry in Hy.
-  assert (Hija :
-    ∀ i j,
-      i < h
-      → j < h
-      → S i * a ≡ (S j * a) mod p
-      → i = j). {
-    clear i j Hi Hj Hij Hx Hy.
-    intros * Hi Hj Hij.
-    destruct (lt_dec (S i mod p) (S j mod p)) as [Hlij| Hlij]. {
-      rewrite <- (Nat.Div0.mul_mod_idemp_l (S i)) in Hij.
-      rewrite <- (Nat.Div0.mul_mod_idemp_l (S j)) in Hij.
-      exfalso; revert Hij.
-      apply smaller_than_prime_all_different_multiples; [ easy | easy | ].
-      split; [ easy | ].
-      now apply Nat.mod_upper_bound.
-    }
-    destruct (lt_dec (S j mod p) (S i mod p)) as [Hlji| Hlji]. {
-      rewrite <- (Nat.Div0.mul_mod_idemp_l (S i)) in Hij.
-      rewrite <- (Nat.Div0.mul_mod_idemp_l (S j)) in Hij.
-      symmetry in Hij.
-      exfalso; revert Hij.
-      apply smaller_than_prime_all_different_multiples; [ easy | easy | ].
-      split; [ easy | ].
-      now apply Nat.mod_upper_bound.
-    }
-    apply Nat.nlt_ge in Hlij, Hlji.
-    apply Nat.le_antisymm in Hlij; [ clear Hlji | easy ].
-    rewrite Nat.mod_small in Hlij; cycle 1. {
-      apply (Nat.lt_le_trans _ (S h)); [ now apply -> Nat.succ_lt_mono | ].
-      subst h.
-      apply Nat.le_succ_l.
-      apply Nat.Div0.div_lt_upper_bound.
-      flia Hpz.
-    }
-    rewrite Nat.mod_small in Hlij; cycle 1. {
-      apply (Nat.lt_le_trans _ (S h)); [ now apply -> Nat.succ_lt_mono | ].
-      subst h.
-      apply Nat.le_succ_l.
-      apply Nat.Div0.div_lt_upper_bound.
-      flia Hpz.
-    }
-    now injection Hlij.
-  }
-  assert (Hijap :
-    ∀ i j,
-      i < (p - 1) / 2
-      → j < (p - 1) / 2
-      → (S i * a) mod p = p - (S j * a) mod p
-      → i = j). {
-    clear i j Hj Hi Hij Hx Hy.
-    intros * Hi Hj Hij.
-    apply (f_equal (λ x, x + (S j * a mod p))) in Hij.
-    rewrite Nat.sub_add in Hij; cycle 1. {
-      now apply Nat.lt_le_incl, Nat.mod_upper_bound.
-    }
-    apply (f_equal (λ x, x mod p)) in Hij.
-    rewrite Nat.Div0.mod_same in Hij.
-    rewrite Nat.Div0.add_mod_idemp_l in Hij.
-    rewrite Nat.Div0.add_mod_idemp_r in Hij.
-    rewrite <- Nat.mul_add_distr_r in Hij.
-    apply Nat.Lcm0.mod_divide in Hij.
-    apply (prime_divide_mul _ Hp) in Hij.
-    destruct Hij as [Hij| Hij]; cycle 1. {
-      destruct Hij as (k, Hpa).
-      destruct k; [ now apply Nat.neq_0_lt_0 in Hpa | ].
-      rewrite Hpa in Hap.
-      flia Hap.
-    }
-    destruct Hij as (k, Hij).
-    destruct k; [ easy | ].
-    destruct p; [ easy | ].
-    rewrite Nat.sub_succ, Nat.sub_0_r in Hi, Hj.
-    assert (H2i : 2 * i < p). {
-      apply (Nat.mul_lt_mono_pos_l 2) in Hi; [ | easy ].
-      rewrite <- Nat.Lcm0.divide_div_mul_exact in Hi; cycle 1. {
-        destruct p; [ easy | ].
-        destruct p; [ easy | ].
-        specialize (odd_prime _ Hp) as H5.
-        assert (H : S (S (S p)) ≠ 2) by easy.
-        specialize (H5 H); clear H.
-        apply Nat_eq_succ_mod_1 in H5.
-        now apply Nat.Lcm0.mod_divide.
-      }
-      now rewrite (Nat.mul_comm 2 p), Nat.div_mul in Hi.
-    }
-    assert (H2j : 2 * j < p). {
-      apply (Nat.mul_lt_mono_pos_l 2) in Hj; [ | easy ].
-      rewrite <- Nat.Lcm0.divide_div_mul_exact in Hj; cycle 1. {
-        destruct p; [ easy | ].
-        destruct p; [ easy | ].
-        specialize (odd_prime _ Hp) as H5.
-        assert (H : S (S (S p)) ≠ 2) by easy.
-        specialize (H5 H); clear H.
-        apply Nat_eq_succ_mod_1 in H5.
-        now apply Nat.Lcm0.mod_divide.
-      }
-      now rewrite (Nat.mul_comm 2 p), Nat.div_mul in Hj.
-    }
-    flia H2i H2j Hij.
-  }
-  destruct x, y. {
-    progress unfold abs in Hij.
-    rewrite <- Hh in Hij.
-    rewrite Hx, Hy in Hij.
-    now apply Hija.
-  } {
-    apply Hijap; [ now subst h | now subst h | ].
-    progress unfold abs in Hij.
-    rewrite <- Hh in Hij.
-    now rewrite Hx, Hy in Hij.
-  } {
-    symmetry.
-    apply Hijap; [ now subst h | now subst h | ].
-    progress unfold abs in Hij.
-    rewrite <- Hh in Hij.
-    now rewrite Hx, Hy in Hij.
-  } {
-    progress unfold abs in Hij.
-    rewrite <- Hh in Hij.
-    rewrite Hx, Hy in Hij.
-    apply (f_equal (λ x, p - x)) in Hij.
-    rewrite Nat.sub_sub_distr in Hij; [ | | easy ]; cycle 1. {
-      now apply Nat.lt_le_incl, Nat.mod_upper_bound.
-    }
-    rewrite Nat.sub_sub_distr in Hij; [ | | easy ]; cycle 1. {
-      now apply Nat.lt_le_incl, Nat.mod_upper_bound.
-    }
-    rewrite Nat.sub_diag in Hij.
-    do 2 rewrite Nat.add_0_l in Hij.
-    now apply Hija.
-  }
+  now apply eq_product_abs_fact_mod.
 }
 rewrite <- Nat.Div0.mul_mod_idemp_r in H2.
 rewrite H4 in H2.
