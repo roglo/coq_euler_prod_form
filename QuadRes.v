@@ -2036,9 +2036,10 @@ destruct q1. {
     destruct (Nat.eq_dec nqp 0) as [Hnqpz| Hnqpz]. {
       move Hnqpz at top; subst nqp.
 Theorem nb_of_mult_gt_half_neq_0 :
-  ∀ a b, a ≠ 0 → nb_of_mult_gt_half a b ≠ 0.
+  ∀ a b, 1 < a → nb_of_mult_gt_half a b ≠ 0.
 Proof.
 intros * Haz H1.
+(**)
 unfold nb_of_mult_gt_half in H1.
 apply List.length_zero_iff_nil in H1.
 specialize (List_filter_nil _ _ H1) as H2; clear H1.
@@ -2051,6 +2052,21 @@ assert (H : ∀ i, i ∈ List.seq 1 h → (i * a mod b ≤ h)). {
   now apply Nat.ltb_ge in Hi.
 }
 clear H2.
+Compute (
+List.map (λ a,
+  List.map (λ b,
+let h := (b - 1) / 2 in
+List.map (λ i,
+(
+a, b, i,
+  Nat.leb
+    ((i * a) mod b)
+    h
+)
+) (List.filter (λ i, h <? ((i * a) mod b)) (List.seq 1 h))
+) (List.filter (λ b, Nat.gcd a b =? 1) (List.seq 1 10))
+) (List.seq 2 10)
+).
 ...
     move npq before d; move nqp before npq.
     move Hnqp before Hnpq.
