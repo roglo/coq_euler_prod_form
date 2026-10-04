@@ -2087,6 +2087,23 @@ destruct mqp as [a| ]. {
     rewrite Nat.mod_1_l in H1; [ | flia Hpq ].
     rewrite Nat.mod_1_l in H2; [ | flia Hpq ].
 ...
+1 goal (ID 1891)
+  
+  p, q, a, b, u, v : nat
+  Hp : prime p
+  Hq : prime q
+  Hpq : 2 < p < q
+  Hap : a < p
+  Hbp : b < q
+  Ha2 : a² ≡ q mod p
+  Hb2 : b² ≡ p mod q
+  H1 : q ^ (2 * u + 1) mod p = 1
+  H2 : p ^ (2 * v + 1) mod q = 1
+  Hp4 : p = u * 4 + 3
+  Hq4 : q = v * 4 + 3
+  ============================
+  False
+...
 progress unfold is_quadratic_residue.
 erewrite (Gauss_lemma _ p Hp); [ | | easy ]; cycle 1. {
   apply eq_primes_gcd_1; [ easy | easy | flia Hpq ].
