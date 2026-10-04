@@ -2007,6 +2007,9 @@ Proof.
 intros * Hp Hq Hpq.
 (**)
 progress unfold is_quadratic_residue.
+specialize (Euler_criterion p Hp q) as H1.
+progress unfold Legendre_symbol in H1.
+symmetry in H1.
 progress unfold Legendre_symbol.
 remember (p =? 2) as p2 eqn:Hp2; symmetry in Hp2.
 destruct p2; [ apply Nat.eqb_eq in Hp2; flia Hpq Hp2 | ].
