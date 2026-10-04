@@ -869,9 +869,10 @@ Theorem eq_sqrt_mod_None :
   ∀ a p,
   p ≠ 0
   → sqrt_mod a p = None
-  → ∀ b, b * b ≢ a mod p.
+  → ∀ b, b² ≢ a mod p.
 Proof.
 intros * Hpz Hsm * Hbb.
+rewrite Nat.pow_2_r in Hbb.
 apply eq_sqrt_mod_loop_None with (b := b mod p) in Hsm. {
   rewrite Nat.pow_2_r in Hsm.
   rewrite Nat.Div0.mul_mod_idemp_l in Hsm.
@@ -982,7 +983,6 @@ destruct sm as [b| ]. {
   specialize (fact_pred_p_equiv p a Hp Hzap) as H1.
   assert (H : ∀ n, 1 ≤ n ≤ p - 1 → n² mod p ≠ a). {
     intros n Hn.
-    rewrite Nat.pow_2_r.
     rewrite <- (Nat.mod_small a p); [ | easy ].
     apply H3.
   }
@@ -2005,11 +2005,13 @@ Theorem quadratic_reciprocity :
     p mod 4 = 1 ∨ q mod 4 = 1.
 Proof.
 intros * Hp Hq Hpq.
-(**)
 progress unfold is_quadratic_residue.
 specialize (Euler_criterion p Hp q) as H1.
 progress unfold Legendre_symbol in H1.
 symmetry in H1.
+specialize (Euler_criterion q Hq p) as H2.
+progress unfold Legendre_symbol in H2.
+symmetry in H2.
 progress unfold Legendre_symbol.
 remember (p =? 2) as p2 eqn:Hp2; symmetry in Hp2.
 destruct p2; [ apply Nat.eqb_eq in Hp2; flia Hpq Hp2 | ].
@@ -2049,20 +2051,41 @@ destruct mqp as [a| ]. {
   destruct mpq as [b| ]; cycle 1. {
     assert (H : q ≠ 0) by flia Hap Hpq.
     specialize (eq_sqrt_mod_None p q H Hmpq) as Hb2; clear H Hmpq.
+...
 *)
   destruct mpq as [b| ]. {
     move b before a.
+    move H2 before H1.
     rewrite Nat.eqb_refl.
     split; [ intros _ | easy ].
     apply eq_sqrt_mod_Some in Hmpq.
     destruct Hmpq as (Hbp, Hb2).
     move Hbp before Hap.
+    move Hb2 before Ha2.
     assert (H : p ≠ 2) by flia Hpq.
     specialize (odd_prime_mod_4 p Hp H) as Hp4; clear H.
     assert (H : q ≠ 2) by flia Hpq.
     specialize (odd_prime_mod_4 q Hq H) as Hq4; clear H.
     destruct Hp4 as [Hp4| Hp4]; [ now left | right ].
     destruct Hq4 as [Hq4| Hq4]; [ easy | exfalso ].
+    apply Nat_eq_mod_exists in Hp4, Hq4.
+    destruct Hp4 as (u, Hp4).
+    destruct Hq4 as (v, Hq4).
+    move u before b; move v before u.
+    rewrite Hp4 in H1 at 1.
+    rewrite Hq4 in H2 at 1.
+    rewrite <- Nat.add_sub_assoc in H1; [ | now apply -> Nat.succ_le_mono ].
+    rewrite <- Nat.add_sub_assoc in H2; [ | now apply -> Nat.succ_le_mono ].
+    rewrite Nat_sub_succ_1 in H1, H2.
+    rewrite Nat_4_eq_2_mul_2 in H1, H2.
+    rewrite Nat.mul_assoc in H1, H2.
+    rewrite Nat.div_add_l in H1; [ | easy ].
+    rewrite Nat.div_add_l in H2; [ | easy ].
+    rewrite Nat.div_same in H1; [ | easy ].
+    rewrite Nat.div_same in H2; [ | easy ].
+    rewrite Nat.mul_comm in H1, H2.
+    rewrite Nat.mod_1_l in H1; [ | flia Hpq ].
+    rewrite Nat.mod_1_l in H2; [ | flia Hpq ].
 ...
 progress unfold is_quadratic_residue.
 erewrite (Gauss_lemma _ p Hp); [ | | easy ]; cycle 1. {
