@@ -2072,11 +2072,13 @@ destruct mqp as [a| ]. {
     destruct Hp4 as (u, Hp4).
     destruct Hq4 as (v, Hq4).
     move u before b; move v before u.
+    rewrite Nat.mul_comm in Hp4, Hq4.
     rewrite Hp4 in H1 at 1.
     rewrite Hq4 in H2 at 1.
     rewrite <- Nat.add_sub_assoc in H1; [ | now apply -> Nat.succ_le_mono ].
     rewrite <- Nat.add_sub_assoc in H2; [ | now apply -> Nat.succ_le_mono ].
     rewrite Nat_sub_succ_1 in H1, H2.
+    rewrite Nat.mul_comm in H1, H2.
     rewrite Nat_4_eq_2_mul_2 in H1, H2.
     rewrite Nat.mul_assoc in H1, H2.
     rewrite Nat.div_add_l in H1; [ | easy ].
@@ -2086,23 +2088,14 @@ destruct mqp as [a| ]. {
     rewrite Nat.mul_comm in H1, H2.
     rewrite Nat.mod_1_l in H1; [ | flia Hpq ].
     rewrite Nat.mod_1_l in H2; [ | flia Hpq ].
-...
-1 goal (ID 1891)
-  
-  p, q, a, b, u, v : nat
-  Hp : prime p
-  Hq : prime q
-  Hpq : 2 < p < q
-  Hap : a < p
-  Hbp : b < q
-  Ha2 : a² ≡ q mod p
-  Hb2 : b² ≡ p mod q
-  H1 : q ^ (2 * u + 1) mod p = 1
-  H2 : p ^ (2 * v + 1) mod q = 1
-  Hp4 : p = u * 4 + 3
-  Hq4 : q = v * 4 + 3
-  ============================
-  False
+    rewrite Nat.pow_add_r in H1, H2.
+    rewrite Nat.pow_1_r in H1, H2.
+    rewrite (Nat.mul_comm 2) in H1, H2.
+    rewrite Nat.pow_mul_r in H1, H2.
+    apply Nat_eq_mod_exists in H1, H2.
+    destruct H1 as (x, H1).
+    destruct H2 as (y, H2).
+    move x before v; move y before x.
 ...
 progress unfold is_quadratic_residue.
 erewrite (Gauss_lemma _ p Hp); [ | | easy ]; cycle 1. {
