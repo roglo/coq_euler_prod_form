@@ -11,6 +11,8 @@ Global Hint Resolve Nat.lt_0_succ : core.
 (* "fast" lia, to improve compilation speed *)
 Tactic Notation "flia" hyp_list(Hs) := clear - Hs; lia.
 
+Notation "a '²'" := (a ^ 2) (at level 1, format "a ²").
+
 Notation "x '∈' l" := (List.In x l) (at level 70).
 Notation "x '∉' l" := (¬ List.In x l) (at level 70).
 
@@ -52,7 +54,7 @@ revert a.
 induction l as [| c]; intros; [ easy | apply IHl ].
 Qed.
 
-(* summations *)
+(* summations and products *)
 
 Definition iter_list {A B} (l : list B) f (d : A) := List.fold_left f l d.
 
@@ -66,6 +68,22 @@ Notation "'∑' ( i = b , e ) , g" :=
   (at level 45, i at level 0, b at level 60, e at level 60,
    right associativity,
    format "'[hv  ' ∑  ( i  =  b ,  e ) ,  '/' '[' g ']' ']'").
+Notation "'∑' ( i ∈ l ) , g" :=
+  (iter_list l (λ c i, (c + g)%nat) 0%nat)
+  (at level 45, i at level 0, l at level 60,
+   right associativity,
+   format "'[hv  ' ∑  ( i  ∈ l ) ,  '/' '[' g ']' ']'").
+
+Notation "'∏' ( i = b , e ) , g" :=
+  (iter_seq b e (λ c i, (c * g)%nat) 1%nat)
+  (at level 35, i at level 0, b at level 60, e at level 60,
+   right associativity,
+   format "'[hv  ' ∏  ( i  =  b ,  e ) ,  '/' '[' g ']' ']'").
+Notation "'∏' ( i ∈ l ) , g" :=
+  (iter_list l (λ c i, (c * g)%nat) 1%nat)
+  (at level 35, i at level 0, l at level 60,
+   right associativity,
+   format "'[hv  ' ∏  ( i  ∈  l ) ,  '/' '[' g ']' ']'").
 
 Theorem List_fold_left_add_fun_from_0 {A} : ∀ a l (f : A → nat),
   List.fold_left (λ c i, c + f i) l a =

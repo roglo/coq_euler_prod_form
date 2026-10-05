@@ -4,19 +4,6 @@ From Stdlib Require Import Sorting.Permutation.
 Import List.ListNotations.
 Require Import Misc Primes.
 
-Notation "a '²'" := (a ^ 2) (at level 1, format "a ²").
-
-Notation "'∏' ( i = b , e ) , g" :=
-  (iter_seq b e (λ c i, (c * g)%nat) 1%nat)
-  (at level 35, i at level 0, b at level 60, e at level 60,
-   right associativity,
-   format "'[hv  ' ∏  ( i  =  b ,  e ) ,  '/' '[' g ']' ']'").
-Notation "'∏' ( i ∈ l ) , g" :=
-  (iter_list l (λ c i, (c * g)%nat) 1%nat)
-  (at level 35, i at level 0, l at level 60,
-   right associativity,
-   format "'[hv  ' ∏  ( i  ∈  l ) ,  '/' '[' g ']' ']'").
-
 Theorem fold_iter_list : ∀ {A B} (f : A → B → A) l d,
   List.fold_left f l d = iter_list l f d.
 Proof. easy. Qed.
@@ -2012,6 +1999,19 @@ symmetry in H1.
 specialize (Euler_criterion q Hq p) as H2.
 progress unfold Legendre_symbol in H2.
 symmetry in H2.
+assert (H : coprimes p q). {
+  progress unfold coprimes.
+  rewrite Nat.gcd_comm.
+  apply (eq_gcd_prime_small_1 q p Hq); flia Hpq.
+}
+specialize (Gauss_lemma p q Hq H _ eq_refl) as H3; clear H.
+assert (H : coprimes q p). {
+  apply (eq_gcd_prime_small_1 q p Hq); flia Hpq.
+}
+specialize (Gauss_lemma q p Hp H _ eq_refl) as H4; clear H.
+symmetry in H3, H4.
+progress unfold Legendre_symbol in H3.
+progress unfold Legendre_symbol in H4.
 progress unfold Legendre_symbol.
 remember (p =? 2) as p2 eqn:Hp2; symmetry in Hp2.
 destruct p2; [ apply Nat.eqb_eq in Hp2; flia Hpq Hp2 | ].
@@ -2106,6 +2106,16 @@ destruct mqp as [a| ]. {
     rewrite Nat_mod_add_l_mul_r in H1, H2.
     rewrite Nat.mod_1_l in H1; [ | flia Hpq ].
     rewrite Nat.mod_1_l in H2; [ | flia Hpq ].
+    rewrite eq_nb_of_mult_gt_half_summation in H3, H4.
+Search (_ ^ ∑ (_ = _, _), _).
+Search (_ ^ (_ + _)).
+Theorem Nat_pow_summation_r :
+  ∀ a b e f, a ^ (∑ (i = b, e), f i) = ∏ (i = b, e), a ^ f i.
+Proof.
+intros.
+progress unfold iter_seq.
+... ...
+rewrite Nat_pow_summation_r in H3.
 ...
 progress unfold is_quadratic_residue.
 erewrite (Gauss_lemma _ p Hp); [ | | easy ]; cycle 1. {
