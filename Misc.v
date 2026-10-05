@@ -72,7 +72,7 @@ Notation "'∑' ( i ∈ l ) , g" :=
   (iter_list l (λ c i, (c + g)%nat) 0%nat)
   (at level 45, i at level 0, l at level 60,
    right associativity,
-   format "'[hv  ' ∑  ( i  ∈ l ) ,  '/' '[' g ']' ']'").
+   format "'[hv  ' ∑  ( i  ∈  l ) ,  '/' '[' g ']' ']'").
 
 Notation "'∏' ( i = b , e ) , g" :=
   (iter_seq b e (λ c i, (c * g)%nat) 1%nat)

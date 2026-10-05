@@ -2114,6 +2114,8 @@ Theorem Nat_pow_summation_r :
 Proof.
 intros.
 progress unfold iter_seq.
+remember (S e - b) as l eqn:Hl; clear Hl.
+induction l as [| c]; [ easy | cbn ].
 ... ...
 rewrite Nat_pow_summation_r in H3.
 ...
