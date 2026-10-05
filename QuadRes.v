@@ -2115,7 +2115,19 @@ Proof.
 intros.
 progress unfold iter_seq.
 remember (S e - b) as l eqn:Hl; clear Hl.
-induction l as [| c]; [ easy | cbn ].
+revert b.
+induction l as [| c]; intros; [ easy | cbn ].
+Search (∑ (_ ∈ _ :: _), _).
+Search (∏ (_ ∈ _ :: _), _).
+progress unfold iter_list.
+progress unfold iter_list in IHc.
+cbn.
+rewrite Nat.add_0_r.
+rewrite List_fold_left_add_fun_from_0.
+rewrite List_fold_left_mul_fun_from_1.
+rewrite Nat.pow_add_r.
+f_equal.
+apply IHc.
 ... ...
 rewrite Nat_pow_summation_r in H3.
 ...
