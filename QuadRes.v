@@ -59,7 +59,7 @@ Theorem if_mul_negb :
   (if b then a * d else e).
 Proof. now intros; destruct b. Qed.
 
-Theorem Nat_4_eq_2_mul_2 : 4 = 2 * 2.
+Theorem Nat_2_mul_2_eq_4 : 2 * 2 = 4.
 Proof. easy. Qed.
 
 Theorem Nat_mul_2_l : ∀ a, 2 * a = a + a.
@@ -260,7 +260,7 @@ remember (p mod 4) as p4 eqn:Hp4; symmetry in Hp4.
 destruct p4. {
   apply Nat.Lcm0.mod_divide in Hp4.
   destruct Hp4 as (k, H); subst p.
-  rewrite Nat_4_eq_2_mul_2, Nat.mul_assoc in Hp.
+  rewrite <- Nat_2_mul_2_eq_4, Nat.mul_assoc in Hp.
   apply prime_not_mul in Hp.
   destruct Hp as [Hp| ]; [ | easy ].
   now apply Nat.eq_mul_1 in Hp.
@@ -268,7 +268,7 @@ destruct p4. {
 destruct p4; [ now left | right ].
 destruct p4. {
   specialize (odd_prime p Hp Hp2) as H1.
-  rewrite Nat_4_eq_2_mul_2 in Hp4.
+  rewrite <- Nat_2_mul_2_eq_4 in Hp4.
   rewrite Nat.Div0.mod_mul_r in Hp4.
   rewrite H1 in Hp4.
   apply Nat.succ_inj in Hp4.
@@ -1650,7 +1650,7 @@ destruct (Nat.eq_dec ((p - 1) mod 4) 0) as [Hp4z| Hp4z]. {
     }
     easy.
   }
-  rewrite Nat_4_eq_2_mul_2 at 1.
+  rewrite <- Nat_2_mul_2_eq_4 at 1.
   rewrite Nat.mul_assoc, Nat.div_mul; [ | easy ].
   rewrite Nat.mul_comm, Nat_mul_2_l.
   (* k = (p - 1) / 4 *)
@@ -1690,7 +1690,7 @@ destruct (Nat.eq_dec ((p - 1) mod 4) 0) as [Hp4z| Hp4z]. {
   rewrite Nat.div_mul; [ | easy ].
   rewrite Nat.mul_comm.
   rewrite <- (Nat.mul_1_l 2) at 3.
-  rewrite Nat_4_eq_2_mul_2.
+  rewrite <- Nat_2_mul_2_eq_4.
   rewrite Nat.mul_assoc, <- Nat.mul_add_distr_r.
   rewrite Nat.mul_assoc.
   rewrite Nat.div_mul; [ | easy ].
@@ -1710,7 +1710,7 @@ destruct (Nat.eq_dec ((p - 1) mod 4) 1) as [Hp41| Hp41]. {
   rewrite Nat.add_assoc in Ha.
   rewrite Nat.add_comm in Ha.
   cbn - [ "/" "*" ] in Ha.
-  rewrite Nat_4_eq_2_mul_2 in Ha at 1.
+  rewrite <- Nat_2_mul_2_eq_4 in Ha at 1.
   rewrite <- Nat.mul_assoc in Ha.
   rewrite <- Nat_mul_add_1_distr_l in Ha.
   specialize (odd_prime _ Hp Hp2) as H1.
@@ -1728,7 +1728,7 @@ destruct (Nat.eq_dec ((p - 1) mod 4) 2) as [Hp42| Hp42]. {
   apply (f_equal (λ a, a + 1)) in H1.
   rewrite <- Nat.add_assoc in H1.
   cbn - [ "*" ] in H1.
-  rewrite Nat_4_eq_2_mul_2 in H2.
+  rewrite <- Nat_2_mul_2_eq_4 in H2.
   rewrite <- Nat.mul_assoc in H2.
   rewrite <- Nat_mul_add_1_distr_l in H1, H2.
   rewrite Nat_squ_sub_1.
@@ -1740,7 +1740,7 @@ destruct (Nat.eq_dec ((p - 1) mod 4) 2) as [Hp42| Hp42]. {
   rewrite Nat.div_mul; [ | easy ].
   erewrite List.filter_ext_in; cycle 1. {
     intros a Ha.
-    rewrite Nat_4_eq_2_mul_2.
+    rewrite <- Nat_2_mul_2_eq_4.
     rewrite Nat.mul_assoc.
     now rewrite <- Nat_mul_ltb_mono_pos_r.
   }
@@ -1778,7 +1778,7 @@ destruct (Nat.eq_dec ((p - 1) mod 4) 3) as [Hp43| Hp43]. {
   rewrite <- Nat_mul_add_1_distr_l in Ha.
   specialize (odd_prime _ Hp Hp2) as H1.
   rewrite <- Ha in H1.
-  rewrite Nat_4_eq_2_mul_2 in H1.
+  rewrite <- Nat_2_mul_2_eq_4 in H1.
   rewrite <- Nat.mul_assoc in H1.
   now rewrite Nat.mul_comm, Nat.Div0.mod_mul in H1.
 }
@@ -2142,7 +2142,7 @@ destruct mqp as [a| ]. {
     rewrite <- Nat.add_sub_assoc in H2; [ | now apply -> Nat.succ_le_mono ].
     rewrite Nat_sub_succ_1 in H1, H2.
     rewrite Nat.mul_comm in H1, H2.
-    rewrite Nat_4_eq_2_mul_2 in H1, H2.
+    rewrite <- Nat_2_mul_2_eq_4 in H1, H2.
     rewrite Nat.mul_assoc in H1, H2.
     rewrite Nat.div_add_l in H1; [ | easy ].
     rewrite Nat.div_add_l in H2; [ | easy ].
@@ -2171,6 +2171,13 @@ destruct mqp as [a| ]. {
     rewrite Nat.mod_1_l in H2; [ | flia Hpq ].
     rewrite eq_nb_of_mult_gt_half_summation in H3, H4.
     rewrite Nat_pow_summation_r in H3, H4.
+...
+    replace ((q - 1) / 2) with (2 * v + 1) in H3; cycle 1. {
+      rewrite Hq4, <- Nat.add_sub_assoc; [ | now apply -> Nat.succ_le_mono ].
+      rewrite Nat_sub_succ_1.
+      rewrite <- Nat_2_mul_2_eq_4, <- Nat.mul_assoc.
+      now rewrite (Nat.mul_comm _ (_ * _)), Nat.div_add_l.
+    }
 ...
 progress unfold is_quadratic_residue.
 erewrite (Gauss_lemma _ p Hp); [ | | easy ]; cycle 1. {
