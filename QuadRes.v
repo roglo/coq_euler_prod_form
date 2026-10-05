@@ -2097,13 +2097,15 @@ destruct mqp as [a| ]. {
     destruct H2 as (y, H2).
     move x before v; move y before x.
     apply (f_equal (λ x, x mod p)) in H1.
-    rewrite <- Nat.Div0.mul_mod_idemp_r in H1.
+    apply (f_equal (λ x, x mod q)) in H2.
+    rewrite <- Nat.Div0.mul_mod_idemp_r in H1, H2.
     rewrite <- Ha2 in H1.
-    rewrite Nat.Div0.mul_mod_idemp_r in H1.
-    rewrite <- Nat.pow_mul_l in H1.
-    rewrite Nat_mod_add_l_mul_r in H1.
-Search (_ = 1 mod _).
-(* chais pas *)
+    rewrite <- Hb2 in H2.
+    rewrite Nat.Div0.mul_mod_idemp_r in H1, H2.
+    rewrite <- Nat.pow_mul_l in H1, H2.
+    rewrite Nat_mod_add_l_mul_r in H1, H2.
+    rewrite Nat.mod_1_l in H1; [ | flia Hpq ].
+    rewrite Nat.mod_1_l in H2; [ | flia Hpq ].
 ...
 progress unfold is_quadratic_residue.
 erewrite (Gauss_lemma _ p Hp); [ | | easy ]; cycle 1. {
