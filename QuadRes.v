@@ -1867,6 +1867,69 @@ destruct b; cbn - [ "*" "mod" ]. {
 }
 Qed.
 
+Theorem fold_left_op_fun_from_d : ∀ {T A} d op a l (f : A → _)
+  (op_d_l : ∀ x, op d x = x)
+  (op_d_r : ∀ x, op x d = x)
+  (op_assoc : ∀ a b c, op a (op b c) = op (op a b) c),
+  List.fold_left (λ (c : T) i, op c (f i)) l a =
+  op a (List.fold_left (λ (c : T) i, op c (f i)) l d).
+Proof.
+intros.
+revert a.
+induction l as [| x l]; intros; [ symmetry; apply op_d_r | cbn ].
+rewrite IHl; symmetry; rewrite IHl.
+rewrite op_d_l.
+apply op_assoc.
+Qed.
+
+Theorem iter_list_cons : ∀ A B d op (a : B) la f
+  (op_d_l : ∀ x, op d x = x)
+  (op_d_r : ∀ x, op x d = x)
+  (op_assoc : ∀ a b c, op a (op b c) = op (op a b) c),
+  iter_list (a :: la) (λ (c : A) i, op c (f i)) d =
+  op (f a) (iter_list la (λ (c : A) i, op c (f i)) d).
+Proof.
+intros.
+progress unfold iter_list; cbn.
+rewrite op_d_l.
+now apply (fold_left_op_fun_from_d d).
+Qed.
+
+Theorem summation_list_cons : ∀ A (a : A) la f,
+  ∑ (i ∈ a :: la), f i = f a + ∑ (i ∈ la), f i.
+Proof.
+intros.
+apply iter_list_cons.
+apply Nat.add_0_l.
+apply Nat.add_0_r.
+apply Nat.add_assoc.
+Qed.
+
+Theorem product_list_cons : ∀ A (a : A) la f,
+  ∏ (i ∈ a :: la), f i = f a * ∏ (i ∈ la), f i.
+Proof.
+intros.
+apply iter_list_cons.
+apply Nat.mul_1_l.
+apply Nat.mul_1_r.
+apply Nat.mul_assoc.
+Qed.
+
+Theorem Nat_pow_summation_r :
+  ∀ a b e f, a ^ (∑ (i = b, e), f i) = ∏ (i = b, e), a ^ f i.
+Proof.
+intros.
+progress unfold iter_seq.
+remember (S e - b) as l eqn:Hl; clear Hl.
+revert b.
+induction l as [| c]; intros; [ easy | cbn ].
+rewrite summation_list_cons.
+rewrite product_list_cons.
+rewrite Nat.pow_add_r.
+f_equal.
+apply IHc.
+Qed.
+
 Theorem List_eq_length_filter_summation :
   ∀ l f,
   List.length (List.filter f l) =
@@ -2107,29 +2170,7 @@ destruct mqp as [a| ]. {
     rewrite Nat.mod_1_l in H1; [ | flia Hpq ].
     rewrite Nat.mod_1_l in H2; [ | flia Hpq ].
     rewrite eq_nb_of_mult_gt_half_summation in H3, H4.
-Search (_ ^ ∑ (_ = _, _), _).
-Search (_ ^ (_ + _)).
-Theorem Nat_pow_summation_r :
-  ∀ a b e f, a ^ (∑ (i = b, e), f i) = ∏ (i = b, e), a ^ f i.
-Proof.
-intros.
-progress unfold iter_seq.
-remember (S e - b) as l eqn:Hl; clear Hl.
-revert b.
-induction l as [| c]; intros; [ easy | cbn ].
-Search (∑ (_ ∈ _ :: _), _).
-Search (∏ (_ ∈ _ :: _), _).
-progress unfold iter_list.
-progress unfold iter_list in IHc.
-cbn.
-rewrite Nat.add_0_r.
-rewrite List_fold_left_add_fun_from_0.
-rewrite List_fold_left_mul_fun_from_1.
-rewrite Nat.pow_add_r.
-f_equal.
-apply IHc.
-... ...
-rewrite Nat_pow_summation_r in H3.
+    rewrite Nat_pow_summation_r in H3, H4.
 ...
 progress unfold is_quadratic_residue.
 erewrite (Gauss_lemma _ p Hp); [ | | easy ]; cycle 1. {
