@@ -2131,6 +2131,35 @@ destruct mqp as [a| ]. {
     specialize (odd_prime_mod_4 q Hq H) as Hq4; clear H.
     destruct Hp4 as [Hp4| Hp4]; [ now left | right ].
     destruct Hq4 as [Hq4| Hq4]; [ easy | exfalso ].
+Check Eisenstein_lemma.
+Theorem Eisenstein_lemma' : ∀ a l,
+  is_odd a = true
+  → is_odd l = true
+  → nb_of_mult_gt_half a l ≡ (∑ (k = 1, (l - 1) / 2), k * a / l) mod 2.
+Proof.
+intros * Ha Hl.
+destruct (Nat.eq_dec l 0) as [Hlz| Hlz]; [ now subst l | ].
+erewrite summation_eq_compat; cycle 1. {
+  intros  k Hk.
+  specialize (Nat.div_mod (k * a) l Hlz) as H1.
+  apply (f_equal (λ a, a mod 2)) in H1.
+  assert (H2 : k * a ≡ ((k * a / l) + (k * a) mod l) mod 2). {
+    rewrite H1.
+    rewrite <- Nat.Div0.add_mod_idemp_l; symmetry.
+    rewrite <- Nat.Div0.add_mod_idemp_l; symmetry.
+    f_equal.
+    f_equal.
+    progress unfold is_odd in Hl.
+    apply Nat.eqb_eq in Hl.
+    apply Nat_eq_mod_exists in Hl.
+    destruct Hl as (u, Hl); rewrite Hl at 1.
+    rewrite Nat.mul_add_distr_r, Nat.mul_1_l.
+    rewrite (Nat.mul_comm u), <- Nat.mul_assoc.
+    now rewrite Nat_mod_add_l_mul_l.
+  }
+  assert (H3 : k * a ≡ (sign (k * a) l) mod 2). {
+    progress unfold sign.
+...
     apply Nat_eq_mod_exists in Hp4, Hq4.
     destruct Hp4 as (u, Hp4).
     destruct Hq4 as (v, Hq4).
