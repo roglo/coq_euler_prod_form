@@ -2159,6 +2159,19 @@ erewrite summation_eq_compat; cycle 1. {
   }
   assert (H3 : k * a ≡ (sign (k * a) l) mod 2). {
     progress unfold sign.
+    remember (_  <=? _) as x eqn:Hx.
+    symmetry in Hx.
+    destruct x. {
+      apply Nat.leb_le in Hx.
+      rewrite Nat.mod_1_l; [ | apply Nat.lt_1_2 ].
+      progress unfold is_odd in Ha.
+      apply Nat.eqb_eq in Ha.
+      apply Nat_eq_mod_exists in Ha.
+      destruct Ha as (u, Ha); rewrite Ha at 1.
+      rewrite Nat.mul_add_distr_l, Nat.mul_1_r.
+      rewrite Nat.mul_assoc.
+      rewrite Nat_mod_add_l_mul_r.
+(* ah bin non, ça doit pas être ça *)
 ...
     apply Nat_eq_mod_exists in Hp4, Hq4.
     destruct Hp4 as (u, Hp4).
