@@ -2172,6 +2172,16 @@ erewrite summation_eq_compat; cycle 1. {
     rewrite (Nat.mul_comm u), <- Nat.mul_assoc.
     now rewrite Nat_mod_add_l_mul_l.
   }
+  clear H1; rename H2 into H1.
+assert (H2 : k * a ≡ (if (l - 1) / 2 <? k * a then k * a else l - k * a) mod 2).
+...
+  specialize (sign_abs ((k * a) mod l) l) as H2.
+....
+  specialize (Nat.mod_upper_bound ((k * a) mod l) 2 (Nat.neq_succ_0 _)) as H.
+  specialize (sign_abs ((k * a) mod l mod 2) 2 H) as H2; clear H.
+...
+  rewrite (Nat.mod_small _ l) in H2.
+...
   assert (H3 : k * a ≡ (abs (k * a) l) mod 2). {
     progress unfold abs.
     remember (_  <=? _) as x eqn:Hx.
