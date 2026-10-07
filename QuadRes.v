@@ -240,17 +240,32 @@ Theorem Nat_mul_if_distr_l :
   ∀ a (b : bool) c d, (a * if b then c else d) = if b then a * c else a * d.
 Proof. now intros; destruct b. Qed.
 
-Theorem Nat_eq_mod_exists : ∀ a b c, a mod b = c → ∃ k, a = k * b + c.
+Theorem Nat_eq_mod_exists : ∀ a b c,
+  a mod b = c ↔ (∃ k, a = k * b + c) ∧ (b = 0 ∨ c < b).
 Proof.
-intros * Habc.
-destruct (Nat.eq_dec b 0) as [Hbz| Hbz]. {
-  subst b.
-  cbn in Habc; subst c.
-  now exists 0.
+intros.
+split; intros Habc. {
+  destruct (Nat.eq_dec b 0) as [Hbz| Hbz]. {
+    subst b.
+    split; [ | now left ].
+    cbn in Habc; subst c.
+    now exists 0.
+  }
+  split. {
+    exists (a / b).
+    rewrite Nat.mul_comm, <- Habc.
+    now apply Nat.div_mod.
+  }
+  right.
+  rewrite <- Habc.
+  now apply Nat.mod_upper_bound.
+} {
+  destruct Habc as ((k, Ha), Hb).
+  subst a.
+  rewrite Nat_mod_add_l_mul_r.
+  destruct Hb as [Hb| Hb]; [ now subst b | ].
+  now apply Nat.mod_small.
 }
-exists (a / b).
-rewrite Nat.mul_comm, <- Habc.
-now apply Nat.div_mod.
 Qed.
 
 Theorem odd_prime_mod_4 : ∀ p, prime p → p ≠ 2 → p mod 4 = 1 ∨ p mod 4 = 3.
@@ -2152,7 +2167,7 @@ erewrite summation_eq_compat; cycle 1. {
     progress unfold is_odd in Hl.
     apply Nat.eqb_eq in Hl.
     apply Nat_eq_mod_exists in Hl.
-    destruct Hl as (u, Hl); rewrite Hl at 1.
+    destruct Hl as ((u, Hl), _); rewrite Hl at 1.
     rewrite Nat.mul_add_distr_r, Nat.mul_1_l.
     rewrite (Nat.mul_comm u), <- Nat.mul_assoc.
     now rewrite Nat_mod_add_l_mul_l.
@@ -2172,9 +2187,10 @@ erewrite summation_eq_compat; cycle 1. {
         do 2 apply Nat.succ_lt_mono in H.
         easy.
       }
-Search (_ mod _ = _ → _).
       apply Nat_eq_mod_exists in Hy.
-      destruct Hy as (u, Hy).
+      destruct Hy as ((u, Hy), _).
+      apply Nat_eq_mod_exists.
+      split; [ | now right; apply -> Nat.succ_lt_mono ].
 (* bon, pas l'air d'être ça, et l'autre cas, y = 0 n'est pas bon non plus *)
 ...
     apply Nat_eq_mod_exists in Hp4, Hq4.
