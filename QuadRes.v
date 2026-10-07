@@ -2157,21 +2157,25 @@ erewrite summation_eq_compat; cycle 1. {
     rewrite (Nat.mul_comm u), <- Nat.mul_assoc.
     now rewrite Nat_mod_add_l_mul_l.
   }
-  assert (H3 : k * a ≡ (sign (k * a) l) mod 2). {
-    progress unfold sign.
+  assert (H3 : k * a ≡ (abs (k * a) l) mod 2). {
+    progress unfold abs.
     remember (_  <=? _) as x eqn:Hx.
     symmetry in Hx.
-    destruct x. {
-      apply Nat.leb_le in Hx.
-      rewrite Nat.mod_1_l; [ | apply Nat.lt_1_2 ].
-      progress unfold is_odd in Ha.
-      apply Nat.eqb_eq in Ha.
-      apply Nat_eq_mod_exists in Ha.
-      destruct Ha as (u, Ha); rewrite Ha at 1.
-      rewrite Nat.mul_add_distr_l, Nat.mul_1_r.
-      rewrite Nat.mul_assoc.
-      rewrite Nat_mod_add_l_mul_r.
-(* ah bin non, ça doit pas être ça *)
+    destruct x; [ easy | ].
+    apply Nat.leb_gt in Hx.
+    remember ((k * a) mod 2) as y eqn:Hy; symmetry in Hy.
+    symmetry.
+    destruct y; cycle 1. {
+      destruct y; cycle 1. {
+        specialize (Nat.mod_upper_bound (k * a) 2 (Nat.neq_succ_0 _)) as H.
+        rewrite Hy in H.
+        do 2 apply Nat.succ_lt_mono in H.
+        easy.
+      }
+Search (_ mod _ = _ → _).
+      apply Nat_eq_mod_exists in Hy.
+      destruct Hy as (u, Hy).
+(* bon, pas l'air d'être ça, et l'autre cas, y = 0 n'est pas bon non plus *)
 ...
     apply Nat_eq_mod_exists in Hp4, Hq4.
     destruct Hp4 as (u, Hp4).
