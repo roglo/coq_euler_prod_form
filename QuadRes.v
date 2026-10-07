@@ -2173,7 +2173,10 @@ erewrite summation_eq_compat; cycle 1. {
     now rewrite Nat_mod_add_l_mul_l.
   }
   clear H1; rename H2 into H1.
-assert (H2 : k * a ≡ (if (l - 1) / 2 <? k * a then k * a else l - k * a) mod 2).
+assert (H2 : k * a ≡ (if k * a <=? (l - 1) / 2 then k * a else l - k * a) mod 2). {
+  remember (_ <=? _) as x eqn:Hx; symmetry in Hx.
+  destruct x; [ easy | ].
+  apply Nat.leb_gt in Hx.
 ...
   specialize (sign_abs ((k * a) mod l) l) as H2.
 ....
