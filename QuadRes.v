@@ -2173,6 +2173,7 @@ erewrite summation_eq_compat; cycle 1. {
     now rewrite Nat_mod_add_l_mul_l.
   }
   clear H1; rename H2 into H1.
+...
 assert (H2 : k * a ≡ (if k * a <=? (l - 1) / 2 then k * a else l - k * a) mod 2). {
   remember (_ <=? _) as x eqn:Hx; symmetry in Hx.
   destruct x; [ easy | ].
@@ -2180,8 +2181,12 @@ assert (H2 : k * a ≡ (if k * a <=? (l - 1) / 2 then k * a else l - k * a) mod 
   apply Nat_div_lt_mul in Hx; [ | easy ].
   apply Nat.lt_sub_lt_add_l in Hx.
   apply -> Nat.lt_succ_r in Hx.
-  symmetry.
   apply Nat_eq_sub_mod_0; cycle 1. {
+...
+    rewrite Nat_sub_sub_assoc.
+Check Nat.sub_sub_distr.
+    rewrite Nat.sub_sub_distr.
+...
     rewrite <- Nat.sub_add_distr.
     rewrite (proj2 (Nat.sub_0_le  _ _)); [ easy | ].
     now rewrite Nat_mul_2_l in Hx.
