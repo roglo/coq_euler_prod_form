@@ -2177,6 +2177,19 @@ assert (H2 : k * a ≡ (if k * a <=? (l - 1) / 2 then k * a else l - k * a) mod 
   remember (_ <=? _) as x eqn:Hx; symmetry in Hx.
   destruct x; [ easy | ].
   apply Nat.leb_gt in Hx.
+  apply Nat_div_lt_mul in Hx; [ | easy ].
+  apply Nat.lt_sub_lt_add_l in Hx.
+  apply -> Nat.lt_succ_r in Hx.
+  symmetry.
+  apply Nat_eq_sub_mod_0; cycle 1. {
+    rewrite <- Nat.sub_add_distr.
+    rewrite (proj2 (Nat.sub_0_le  _ _)); [ easy | ].
+    now rewrite Nat_mul_2_l in Hx.
+  }
+(* ah merde, c'est à l'envers *)
+...
+Search (_ mod _ = 0).
+apply Nat.Div0.div_exact.
 ...
   specialize (sign_abs ((k * a) mod l) l) as H2.
 ....
