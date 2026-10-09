@@ -2173,19 +2173,22 @@ erewrite summation_eq_compat; cycle 1. {
     now rewrite Nat_mod_add_l_mul_l.
   }
   clear H1; rename H2 into H1.
-...
-assert (H2 : k * a ≡ (if k * a <=? (l - 1) / 2 then k * a else l - k * a) mod 2). {
+remember ((k * a) mod l) as ka eqn:Hka.
+assert (H2 : ka ≡ (if ka <=? (l - 1) / 2 then ka else l - ka) mod 2). {
   remember (_ <=? _) as x eqn:Hx; symmetry in Hx.
   destruct x; [ easy | ].
   apply Nat.leb_gt in Hx.
   apply Nat_div_lt_mul in Hx; [ | easy ].
   apply Nat.lt_sub_lt_add_l in Hx.
   apply -> Nat.lt_succ_r in Hx.
-  apply Nat_eq_sub_mod_0; cycle 1. {
-...
-    rewrite Nat_sub_sub_assoc.
-Check Nat.sub_sub_distr.
-    rewrite Nat.sub_sub_distr.
+  rewrite Nat_mul_2_l in Hx.
+  apply Nat_eq_sub_mod_0; [ now apply Nat.le_sub_le_add_l | ].
+  rewrite Nat_sub_sub_assoc; cycle 1. {
+    split; [ | easy ].
+    rewrite Hka.
+    apply Nat.lt_le_incl.
+    now apply Nat.mod_upper_bound.
+  }
 ...
     rewrite <- Nat.sub_add_distr.
     rewrite (proj2 (Nat.sub_0_le  _ _)); [ easy | ].
