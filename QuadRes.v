@@ -2189,6 +2189,13 @@ assert (H2 : ka ≡ (if ka <=? (l - 1) / 2 then ka else l - ka) mod 2). {
     apply Nat.lt_le_incl.
     now apply Nat.mod_upper_bound.
   }
+Search (_ mod _ = 0).
+Search (_ mod _ = _ ↔ _).
+Search ((_ - _) mod 2).
+  apply Nat.Div0.mod_divides.
+(* bin non, c'est forcément faux, si l est impair *)
+...
+  apply Nat.Lcm0.mod_divide.
 ...
     rewrite <- Nat.sub_add_distr.
     rewrite (proj2 (Nat.sub_0_le  _ _)); [ easy | ].
