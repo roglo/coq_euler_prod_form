@@ -2173,66 +2173,41 @@ erewrite summation_eq_compat; cycle 1. {
     now rewrite Nat_mod_add_l_mul_l.
   }
   clear H1; rename H2 into H1.
-remember ((k * a) mod l) as ka eqn:Hka.
-assert (H2 : ka ≡ (if ka <=? (l - 1) / 2 then ka else l - ka) mod 2). {
-  remember (_ <=? _) as x eqn:Hx; symmetry in Hx.
-  destruct x; [ easy | ].
-  apply Nat.leb_gt in Hx.
-  apply Nat_div_lt_mul in Hx; [ | easy ].
-  apply Nat.lt_sub_lt_add_l in Hx.
-  apply -> Nat.lt_succ_r in Hx.
-  rewrite Nat_mul_2_l in Hx.
-  apply Nat_eq_sub_mod_0; [ now apply Nat.le_sub_le_add_l | ].
-  rewrite Nat_sub_sub_assoc; cycle 1. {
-    split; [ | easy ].
-    rewrite Hka.
-    apply Nat.lt_le_incl.
-    now apply Nat.mod_upper_bound.
-  }
-Search (_ mod _ = 0).
-Search (_ mod _ = _ ↔ _).
-Search ((_ - _) mod 2).
-  apply Nat.Div0.mod_divides.
-(* bin non, c'est forcément faux, si l est impair *)
-...
-  apply Nat.Lcm0.mod_divide.
-...
-    rewrite <- Nat.sub_add_distr.
-    rewrite (proj2 (Nat.sub_0_le  _ _)); [ easy | ].
-    now rewrite Nat_mul_2_l in Hx.
-  }
-(* ah merde, c'est à l'envers *)
-...
-Search (_ mod _ = 0).
-apply Nat.Div0.div_exact.
-...
-  specialize (sign_abs ((k * a) mod l) l) as H2.
-....
-  specialize (Nat.mod_upper_bound ((k * a) mod l) 2 (Nat.neq_succ_0 _)) as H.
-  specialize (sign_abs ((k * a) mod l mod 2) 2 H) as H2; clear H.
-...
-  rewrite (Nat.mod_small _ l) in H2.
-...
-  assert (H3 : k * a ≡ (abs (k * a) l) mod 2). {
-    progress unfold abs.
-    remember (_  <=? _) as x eqn:Hx.
-    symmetry in Hx.
+  remember ((k * a) mod l) as ka eqn:Hka.
+  assert (H2 : ka ≡ (if ka <=? (l - 1) / 2 then ka else l - 1 - ka) mod 2). {
+    remember (_ <=? _) as x eqn:Hx; symmetry in Hx.
     destruct x; [ easy | ].
     apply Nat.leb_gt in Hx.
-    remember ((k * a) mod 2) as y eqn:Hy; symmetry in Hy.
-    symmetry.
-    destruct y; cycle 1. {
-      destruct y; cycle 1. {
-        specialize (Nat.mod_upper_bound (k * a) 2 (Nat.neq_succ_0 _)) as H.
-        rewrite Hy in H.
-        do 2 apply Nat.succ_lt_mono in H.
-        easy.
+    apply Nat_div_lt_mul in Hx; [ | easy ].
+    apply Nat.lt_sub_lt_add_l in Hx.
+    apply -> Nat.lt_succ_r in Hx.
+    rewrite Nat_mul_2_l in Hx.
+    apply Nat_eq_sub_mod_0. {
+      apply Nat.le_sub_le_add_l.
+      apply (Nat.le_trans _ l); [ | easy ].
+      apply Nat.le_sub_l.
+    }
+    rewrite Nat_sub_sub_assoc; cycle 1. {
+      split. {
+        rewrite Hka.
+        rewrite Nat.sub_1_r.
+        apply Nat.lt_le_pred.
+        now apply Nat.mod_upper_bound.
       }
-      apply Nat_eq_mod_exists in Hy.
-      destruct Hy as ((u, Hy), _).
-      apply Nat_eq_mod_exists.
-      split; [ | now right; apply -> Nat.succ_lt_mono ].
-(* bon, pas l'air d'être ça, et l'autre cas, y = 0 n'est pas bon non plus *)
+      apply (Nat.le_trans _ l); [ | easy ].
+      apply Nat.le_sub_l.
+    }
+    progress unfold is_odd in Hl.
+    apply Nat.eqb_eq in Hl.
+    apply Nat_eq_mod_exists in Hl.
+    destruct Hl as ((u, Hl), _).
+    rewrite Hl, Nat.add_sub.
+    rewrite <- Nat_mul_2_l.
+    rewrite (Nat.mul_comm 2).
+    rewrite <- Nat.mul_sub_distr_r.
+    apply Nat.Div0.mod_mul.
+  }
+  subst ka.
 ...
     apply Nat_eq_mod_exists in Hp4, Hq4.
     destruct Hp4 as (u, Hp4).
