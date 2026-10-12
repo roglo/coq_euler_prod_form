@@ -2154,6 +2154,7 @@ Theorem Eisenstein_lemma' : ∀ a l,
 Proof.
 intros * Ha Hl.
 destruct (Nat.eq_dec l 0) as [Hlz| Hlz]; [ now subst l | ].
+rewrite summation_mod_idemp.
 erewrite summation_eq_compat; cycle 1. {
   intros  k Hk.
   specialize (Nat.div_mod (k * a) l Hlz) as H1.
@@ -2173,6 +2174,54 @@ erewrite summation_eq_compat; cycle 1. {
     now rewrite Nat_mod_add_l_mul_l.
   }
   clear H1; rename H2 into H1.
+Theorem Nat_add_sub_eq_l_mod :
+  ∀ a b c d, b ≤ a → b + c ≡ a mod d → a - b ≡ c mod d.
+Proof.
+intros * Hba Hbca.
+Check Nat.add_cancel_r.
+Theorem Nat_add_cancel_r_mod :
+  ∀ a b c d, a + c ≡ (b + c) mod d ↔ a ≡ b mod d.
+Proof.
+intros.
+split; intros Hab; cycle 1. {
+  rewrite <- Nat.Div0.add_mod_idemp_l.
+  rewrite Hab.
+  apply Nat.Div0.add_mod_idemp_l.
+} {
+... ...
+apply (Nat_add_cancel_r_mod _ _ b).
+rewrite Nat.sub_add; [ | easy ].
+now rewrite Nat.add_comm.
+...
+Theorem Nat_sub_cancel_r_mod :
+  ∀ a b c d, c ≤ a → c ≤ b → a ≡ b mod d → a - c ≡ (b - c) mod d.
+Proof.
+intros * Hca  Hcb Hab.
+
+...  ...
+apply (Nat_sub_cancel_r_mod _ _ b) in Hbca.
+...
+Search ((_ mod _) + _).
+Theorem Nat_sub_mod_idemp_l : ∀ a b c, a mod c - b ≡ (a - b) mod c.
+Proof.
+intros.
+...
+replace a with (b + (a - b)) in Hbca |-*; cycle 1. {
+  rewrite Nat.add_sub_assoc; [ | easy ].
+  rewrite Nat.add_comm.
+  apply Nat.add_sub.
+}
+
+...
+Search ((_ + _ ≡ (_ + _) mod _)).
+rewrite <- Hbca.
+...
+Nat.eq_add_1: ∀ n m : nat, n + m = 1 → n = 1 ∧ m = 0 ∨ n = 0 ∧ m = 1
+Nat.div_mod_unique:
+  ∀ b q1 q2 r1 r2 : nat,
+    r1 < b → r2 < b → b * q1 + r1 = b * q2 + r2 → q1 = q2 ∧ r1 = r2
+Theorem glop :
+...
   remember ((k * a) mod l) as ka eqn:Hka.
   assert (H2 : ka ≡ (if ka <=? (l - 1) / 2 then ka else l - 1 - ka) mod 2). {
     remember (_ <=? _) as x eqn:Hx; symmetry in Hx.
@@ -2208,6 +2257,8 @@ erewrite summation_eq_compat; cycle 1. {
     apply Nat.Div0.mod_mul.
   }
   subst ka.
+Search (_ - _ ≡ _ mod _).
+Search (_ ≡ (_ - _) mod _).
 ...
     apply Nat_eq_mod_exists in Hp4, Hq4.
     destruct Hp4 as (u, Hp4).
