@@ -2063,6 +2063,68 @@ rewrite Nat.sub_0_r.
 now rewrite Nat.add_comm, Nat.add_sub.
 Qed.
 
+Theorem Nat_inj_succ_mod_le : ∀ a b c, a ≤ b → S a ≡ S b mod c → a ≡ b mod c.
+Proof.
+intros * Hba Hab.
+  cbn in Hab.
+symmetry in Hab; symmetry.
+apply Nat_eq_mod_sub_0 in Hab.
+cbn in Hab.
+revert b Hab Hba.
+induction a; intros. {
+  rewrite Nat.sub_0_r in Hab.
+  now rewrite Nat.Div0.mod_0_l.
+}
+destruct b; [ easy | ].
+apply Nat.succ_le_mono in Hba.
+cbn in Hab.
+rewrite <- (Nat.add_1_l a).
+rewrite <- (Nat.add_1_l b).
+rewrite <- Nat.Div0.add_mod_idemp_r; symmetry.
+rewrite <- Nat.Div0.add_mod_idemp_r; symmetry.
+f_equal; f_equal.
+now apply IHa.
+Qed.
+
+Theorem Nat_inj_succ_mod : ∀ a b c, S a ≡ S b mod c → a ≡ b mod c.
+Proof.
+intros * Hab.
+destruct (le_dec b a) as [Hba| Hba]. {
+  symmetry.
+  now apply Nat_inj_succ_mod_le.
+} {
+  apply Nat.nle_gt in Hba.
+  apply Nat.lt_le_incl in Hba.
+  now apply Nat_inj_succ_mod_le.
+}
+Qed.
+
+Theorem Nat_add_cancel_r_mod :
+  ∀ a b c d, a + c ≡ (b + c) mod d ↔ a ≡ b mod d.
+Proof.
+intros.
+split; intros Hab; cycle 1. {
+  rewrite <- Nat.Div0.add_mod_idemp_l.
+  rewrite Hab.
+  apply Nat.Div0.add_mod_idemp_l.
+} {
+  revert a b Hab.
+  induction c; intros; [ now do 2 rewrite Nat.add_0_r in Hab | ].
+  do 2 rewrite Nat.add_succ_r, <- Nat.add_succ_l in Hab.
+  apply IHc in Hab.
+  now apply Nat_inj_succ_mod in Hab.
+}
+Qed.
+
+Theorem Nat_add_sub_eq_l_mod :
+  ∀ a b c d, b ≤ a → b + c ≡ a mod d → a - b ≡ c mod d.
+Proof.
+intros * Hba Hbca.
+apply (Nat_add_cancel_r_mod _ _ b).
+rewrite Nat.sub_add; [ | easy ].
+now symmetry; rewrite Nat.add_comm.
+Qed.
+
 (* to be completed
 Theorem quadratic_reciprocity :
   ∀ p q, prime p → prime q → 2 < p < q →
@@ -2174,20 +2236,18 @@ erewrite summation_eq_compat; cycle 1. {
     now rewrite Nat_mod_add_l_mul_l.
   }
   clear H1; rename H2 into H1.
-Theorem Nat_add_sub_eq_l_mod :
-  ∀ a b c d, b ≤ a → b + c ≡ a mod d → a - b ≡ c mod d.
-Proof.
-intros * Hba Hbca.
-Check Nat.add_cancel_r.
-Theorem Nat_add_cancel_r_mod :
-  ∀ a b c d, a + c ≡ (b + c) mod d ↔ a ≡ b mod d.
-Proof.
-intros.
-split; intros Hab; cycle 1. {
-  rewrite <- Nat.Div0.add_mod_idemp_l.
-  rewrite Hab.
-  apply Nat.Div0.add_mod_idemp_l.
-} {
+  symmetry in H1.
+  rewrite Nat.add_comm in H1.
+  apply Nat_add_sub_eq_l_mod in H1; [ | apply Nat.Div0.mod_le ].
+  rewrite <- H1.
+  easy.
+}
+cbn - [ nb_of_mult_gt_half "/" "mod" ].
+...
+Search ((_ - _) mod _).
+Check Nat_eq_mod_sub_0.
+Search ((S _ = S _) mod _).
+Theorem Nat_inj_succ_mod : ∀ a b c, S a ≡ S b mod c → a ≡ b mod c.
 ... ...
 apply (Nat_add_cancel_r_mod _ _ b).
 rewrite Nat.sub_add; [ | easy ].
