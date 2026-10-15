@@ -2248,7 +2248,25 @@ rewrite summation_sub; cycle 1. {
   intros k Hk.
   apply Nat.Div0.mod_le.
 }
-rewrite <- mul_summation_distr_r.
+symmetry.
+apply Nat_add_sub_eq_l_mod. {
+  apply summation_le_compat.
+  intros k Hk.
+  apply Nat.Div0.mod_le.
+}
+symmetry.
+erewrite summation_eq_compat; cycle 1. {
+  intros k Hk.
+  rewrite (Nat.div_mod (k * a) l Hlz).
+  now rewrite Nat.add_comm.
+}
+cbn - [ nb_of_mult_gt_half "/" "mod" ].
+rewrite summation_add.
+rewrite <- Nat.Div0.add_mod_idemp_r; symmetry.
+rewrite <- Nat.Div0.add_mod_idemp_r.
+f_equal.
+f_equal.
+Search nb_of_mult_gt_half.
 ...
 Search ((_ - _) mod _).
 Check Nat_eq_mod_sub_0.
