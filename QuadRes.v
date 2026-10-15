@@ -2243,6 +2243,12 @@ erewrite summation_eq_compat; cycle 1. {
   easy.
 }
 cbn - [ nb_of_mult_gt_half "/" "mod" ].
+rewrite <- summation_mod_idemp.
+rewrite summation_sub; cycle 1. {
+  intros k Hk.
+  apply Nat.Div0.mod_le.
+}
+rewrite <- mul_summation_distr_r.
 ...
 Search ((_ - _) mod _).
 Check Nat_eq_mod_sub_0.
