@@ -2236,9 +2236,31 @@ erewrite summation_eq_compat; cycle 1. {
     now rewrite Nat_mod_add_l_mul_l.
   }
   clear H1; rename H2 into H1.
+  assert
+    (H2 :
+       k * a ≡ ((if k * a <=? (l - 1) / 2 then 1 else l) * (k * a)) mod 2). {
+    destruct (k * a <=? (l - 1) / 2); [ now rewrite Nat.mul_1_l | ].
+    progress unfold is_odd in Hl.
+    apply Nat.eqb_eq in Hl.
+    apply Nat_eq_mod_exists in Hl.
+    destruct Hl as ((u, Hl), _); rewrite Hl at 1.
+    rewrite <- (Nat.Div0.mul_mod_idemp_l (_ + _)).
+    rewrite Nat_mod_add_l_mul_r.
+    rewrite Nat.mod_1_l; [ | apply Nat.lt_1_2 ].
+    now rewrite Nat.mul_1_l.
+  }
   symmetry in H1.
   rewrite Nat.add_comm in H1.
-  apply Nat_add_sub_eq_l_mod in H1; [ | apply Nat.Div0.mod_le ].
+  rewrite H2 in H1 at  1.
+  apply Nat_add_sub_eq_l_mod in H1; cycle 1. {
+    destruct (_ <=? _). {
+      rewrite Nat.mul_1_l.
+      apply Nat.Div0.mod_le.
+    }
+    apply (Nat.le_trans _ (k * a)).
+    apply Nat.Div0.mod_le.
+    now apply Nat.le_mul_l.
+  }
   rewrite <- H1.
   easy.
 }
@@ -2246,13 +2268,13 @@ cbn - [ nb_of_mult_gt_half "/" "mod" ].
 rewrite <- summation_mod_idemp.
 rewrite summation_sub; cycle 1. {
   intros k Hk.
-  apply Nat.Div0.mod_le.
+...
 }
 symmetry.
 apply Nat_add_sub_eq_l_mod. {
   apply summation_le_compat.
   intros k Hk.
-  apply Nat.Div0.mod_le.
+...
 }
 symmetry.
 erewrite summation_eq_compat; cycle 1. {
@@ -2267,44 +2289,6 @@ rewrite <- Nat.Div0.add_mod_idemp_r.
 f_equal.
 f_equal.
 remember (∑ (k = _, _), _) as x; subst x.
-...
-Search ((_ - _) mod _).
-Check Nat_eq_mod_sub_0.
-Search ((S _ = S _) mod _).
-Theorem Nat_inj_succ_mod : ∀ a b c, S a ≡ S b mod c → a ≡ b mod c.
-... ...
-apply (Nat_add_cancel_r_mod _ _ b).
-rewrite Nat.sub_add; [ | easy ].
-now rewrite Nat.add_comm.
-...
-Theorem Nat_sub_cancel_r_mod :
-  ∀ a b c d, c ≤ a → c ≤ b → a ≡ b mod d → a - c ≡ (b - c) mod d.
-Proof.
-intros * Hca  Hcb Hab.
-
-...  ...
-apply (Nat_sub_cancel_r_mod _ _ b) in Hbca.
-...
-Search ((_ mod _) + _).
-Theorem Nat_sub_mod_idemp_l : ∀ a b c, a mod c - b ≡ (a - b) mod c.
-Proof.
-intros.
-...
-replace a with (b + (a - b)) in Hbca |-*; cycle 1. {
-  rewrite Nat.add_sub_assoc; [ | easy ].
-  rewrite Nat.add_comm.
-  apply Nat.add_sub.
-}
-
-...
-Search ((_ + _ ≡ (_ + _) mod _)).
-rewrite <- Hbca.
-...
-Nat.eq_add_1: ∀ n m : nat, n + m = 1 → n = 1 ∧ m = 0 ∨ n = 0 ∧ m = 1
-Nat.div_mod_unique:
-  ∀ b q1 q2 r1 r2 : nat,
-    r1 < b → r2 < b → b * q1 + r1 = b * q2 + r2 → q1 = q2 ∧ r1 = r2
-Theorem glop :
 ...
   remember ((k * a) mod l) as ka eqn:Hka.
   assert (H2 : ka ≡ (if ka <=? (l - 1) / 2 then ka else l - 1 - ka) mod 2). {
