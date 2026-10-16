@@ -2266,7 +2266,7 @@ rewrite <- Nat.Div0.add_mod_idemp_r; symmetry.
 rewrite <- Nat.Div0.add_mod_idemp_r.
 f_equal.
 f_equal.
-Search nb_of_mult_gt_half.
+remember (∑ (k = _, _), _) as x; subst x.
 ...
 Search ((_ - _) mod _).
 Check Nat_eq_mod_sub_0.
