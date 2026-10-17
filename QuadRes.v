@@ -2268,13 +2268,25 @@ cbn - [ nb_of_mult_gt_half "/" "mod" ].
 rewrite <- summation_mod_idemp.
 rewrite summation_sub; cycle 1. {
   intros k Hk.
-...
+  destruct (_ <=? _). {
+    rewrite Nat.mul_1_l.
+    apply Nat.Div0.mod_le.
+  }
+  apply (Nat.le_trans _ (k * a)).
+  apply Nat.Div0.mod_le.
+  now apply Nat.le_mul_l.
 }
 symmetry.
 apply Nat_add_sub_eq_l_mod. {
   apply summation_le_compat.
   intros k Hk.
-...
+  destruct (_ <=? _). {
+    rewrite Nat.mul_1_l.
+    apply Nat.Div0.mod_le.
+  }
+  apply (Nat.le_trans _ (k * a)).
+  apply Nat.Div0.mod_le.
+  now apply Nat.le_mul_l.
 }
 symmetry.
 erewrite summation_eq_compat; cycle 1. {
@@ -2283,6 +2295,7 @@ erewrite summation_eq_compat; cycle 1. {
   now rewrite Nat.add_comm.
 }
 cbn - [ nb_of_mult_gt_half "/" "mod" ].
+...
 rewrite summation_add.
 rewrite <- Nat.Div0.add_mod_idemp_r; symmetry.
 rewrite <- Nat.Div0.add_mod_idemp_r.
