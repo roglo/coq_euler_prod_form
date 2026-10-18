@@ -454,7 +454,7 @@ Theorem congruence_inverse_has_unique_solution :
   prime p
   → 0 < a < p
   → ∀ b, 1 ≤ b < p
-  → ∃! b', b' < p ∧ (b * b') mod p = a.
+  → ∃! b', (b' < p ∧ (b * b') mod p = a).
 Proof.
 intros * Hp (Ha, Hap) * Hb.
 assert (Hpz : p ≠ 0) by flia Hb.
@@ -541,12 +541,12 @@ Theorem congruence_inverse_has_unique_different_solution :
   → 0 < a < p
   → (∀ n, 1 ≤ n ≤ p - 1 → n² mod p ≠ a)
   → ∀ b, 1 ≤ b < p
-  → ∃! b' : nat, b' < p ∧ (b * b') mod p = a ∧ b ≠ b'.
+  → ∃! b' : nat, (b' < p ∧ (b * b') mod p = a ∧ b ≠ b').
 Proof.
 intros * Hp (Haz, Hap) Hnres.
 apply Nat.neq_0_lt_0 in Haz.
 intros b Hbp.
-assert (Hbb : ∀ b, 1 ≤ b < p → ∃! b', b' < p ∧ (b * b') mod p = a). {
+assert (Hbb : ∀ b, 1 ≤ b < p → ∃! b', (b' < p ∧ (b * b') mod p = a)). {
   clear b Hbp.
   intros b Hb.
   apply congruence_inverse_has_unique_solution; [ easy | | easy ].
@@ -582,7 +582,7 @@ Theorem fact_pred_p_equiv :
 Proof.
 intros * Hp (Haz, Hap) Hnres.
 assert
-  (Hbb : ∀ b, 1 ≤ b < p → ∃! b', b' < p ∧ (b * b') mod p = a ∧ b ≠ b'). {
+  (Hbb : ∀ b, 1 ≤ b < p → ∃! b', (b' < p ∧ (b * b') mod p = a ∧ b ≠ b')). {
   now apply congruence_inverse_has_unique_different_solution.
 }
 rewrite fact_eq_fold_left.

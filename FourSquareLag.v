@@ -1158,6 +1158,7 @@ destruct x as [| px| px]; [ easy | | ]. {
 Qed.
 
 Theorem Z_sqr_nonneg : ∀ x, (0 <= x ^ 2)%Z.
+Proof.
 intros.
 now apply Z.pow_even_nonneg, Zeven_equiv.
 Qed.

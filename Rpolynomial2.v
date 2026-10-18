@@ -250,7 +250,7 @@ Notation "a + b" := (poly_add a b) : poly_scope.
 Notation "a - b" := (poly_sub a b) : poly_scope.
 Notation "a * b" := (poly_mul a b) : poly_scope.
 Notation "'ⓧ' ^ a" := (xpow a) (at level 30, format "'ⓧ' ^ a") : poly_scope.
-Notation "'ⓧ'" := (xpow 1) (at level 30, format "'ⓧ'") : poly_scope.
+Notation "'ⓧ'" := (xpow 1) (at level 0, format "'ⓧ'") : poly_scope.
 
 (* *)
 
@@ -644,8 +644,8 @@ Theorem summation_mul_list_nth_lap_convol_mul : ∀ la lb lc k,
        0 =
    Σ (i = 0, k),
      List.nth i la 0 *
-     Σ (j = 0, k - i),
-       List.nth j lb 0 * List.nth (k - i - j) lc 0)%Rng.
+     (Σ (j = 0, k - i),
+        List.nth j lb 0 * List.nth (k - i - j) lc 0))%Rng.
 Proof.
 intros la lb lc k.
 apply summation_compat; intros i (_, Hi).
@@ -660,8 +660,8 @@ Theorem summation_mul_list_nth_lap_convol_mul_2 : ∀ la lb lc k,
         (lap_convol_mul la lb 0 (length la + length lb - 1))  0 =
     Σ (i = 0, k),
       List.nth (k - i) lc 0 *
-      Σ (j = 0, i),
-        List.nth j la 0 * List.nth (i - j) lb 0)%Rng.
+      (Σ (j = 0, i),
+         List.nth j la 0 * List.nth (i - j) lb 0))%Rng.
 Proof.
 intros la lb lc k.
 rewrite summation_rtl.

@@ -25,8 +25,7 @@ Notation "x ≤ y < z" := (x ≤ y ∧ y < z)%nat (at level 70, y at next level)
 Notation "x < y < z" := (x < y ∧ y < z)%nat (at level 70, y at next level).
 
 Notation "∃! x .. y , p" :=
-  (ex (unique (λ x, .. (ex (unique (λ y, p))) ..)))
-    (at level 200, x binder, right associativity)
+  (ex (unique (λ x, .. (ex (unique (λ y, p))) ..))) (at level 10, x binder)
   : type_scope.
 
 Definition List_combine_all {A} (l1 l2 : list A) (d : A) :=
@@ -1010,7 +1009,7 @@ Qed.
 Theorem Nat_pow_sub_pow : ∀ a b n,
   b ≤ a
   → a ^ n - b ^ n =
-     (a - b) * ∑ (i = 1, n), a ^ (n - i) * b ^ (i - 1).
+     (a - b) * (∑ (i = 1, n), a ^ (n - i) * b ^ (i - 1)).
 Proof.
 intros * Hba.
 induction n; [ easy | ].

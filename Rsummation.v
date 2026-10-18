@@ -227,7 +227,7 @@ Qed.
 
 Theorem summation_summation_mul_swap : ∀ g₁ g₂ g₃ k,
   (Σ (i = 0, k), (Σ (j = 0, g₁ i), g₂ i * g₃ i j)
-   = Σ (i = 0, k), g₂ i * Σ (j = 0, g₁ i), g₃ i j)%Rng.
+   = Σ (i = 0, k), g₂ i * (Σ (j = 0, g₁ i), g₃ i j))%Rng.
 Proof.
 intros g₁ g₂ g₃ k.
 apply summation_aux_summation_aux_mul_swap.
@@ -301,7 +301,7 @@ Qed.
 
 Theorem summation_summation_shift : ∀ g k,
   (Σ (i = 0, k), (Σ (j = i, k), g i j) =
-   Σ (i = 0, k), Σ (j = 0, k - i), g i (i + j)%nat)%Rng.
+   Σ (i = 0, k), (Σ (j = 0, k - i), g i (i + j)%nat))%Rng.
 Proof.
 intros g k.
 apply summation_compat; intros i Hi.
@@ -391,7 +391,7 @@ Qed.
 
 Theorem summation_summation_exch : ∀ g k,
   (Σ (j = 0, k), (Σ (i = 0, j), g i j) =
-   Σ (i = 0, k), Σ (j = i, k), g i j)%Rng.
+   Σ (i = 0, k), (Σ (j = i, k), g i j))%Rng.
 Proof.
 intros g k.
 induction k; [ reflexivity | idtac ].
@@ -483,7 +483,7 @@ Theorem summation_mul_summation_summation : ∀ g n k,
   (0 < n)%nat
   → (0 < k)%nat
     → (Σ (i = 0, k * n - 1), g i =
-       Σ (i = 0, k - 1), Σ (j = 0, n - 1), g (i * n + j)%nat)%Rng.
+       Σ (i = 0, k - 1), (Σ (j = 0, n - 1), g (i * n + j)%nat))%Rng.
 Proof.
 intros g n k Hn Hk.
 unfold summation.
