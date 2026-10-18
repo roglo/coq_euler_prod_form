@@ -2216,8 +2216,38 @@ Theorem Eisenstein_lemma' : ∀ a l,
 Proof.
 intros * Ha Hl.
 destruct (Nat.eq_dec l 0) as [Hlz| Hlz]; [ now subst l | ].
-rewrite summation_mod_idemp.
+remember ((a + l) / 2) as c eqn:Hc.
+assert (H : a = 2 * c - l). {
+  subst c.
+  rewrite <- Nat.Lcm0.divide_div_mul_exact; cycle 1. {
+    apply Nat.eqb_eq in Ha, Hl.
+    apply Nat_eq_mod_exists in Ha, Hl.
+    destruct Ha as ((u, Ha), _).
+    destruct Hl as ((v, Hb), _).
+    subst a l.
+    rewrite Nat.add_shuffle0, Nat.add_assoc.
+    rewrite <- Nat.add_assoc, Nat.add_1_r.
+    rewrite <- Nat.mul_add_distr_r.
+    rewrite <- (Nat.mul_1_l 2) at 3.
+    rewrite <- Nat.mul_add_distr_r.
+    apply Nat.divide_factor_r.
+  }
+  rewrite Nat.mul_comm, Nat.div_mul; [ | easy ].
+  symmetry; apply Nat.add_sub.
+}
 erewrite summation_eq_compat; cycle 1. {
+  intros k Hk.
+  rewrite H at 1.
+  rewrite Nat.mul_sub_distr_l.
+Search ((_ + _) / _).
+Check Nat.div_add.
+... ...
+rewrite Nat_div_sub.
+easy.
+easy.
+}
+cbn - [ nb_of_mult_gt_half "/" "mod" ].
+...
   intros  k Hk.
   specialize (Nat.div_mod (k * a) l Hlz) as H1.
   apply (f_equal (λ a, a mod 2)) in H1.
@@ -2264,6 +2294,7 @@ erewrite summation_eq_compat; cycle 1. {
   rewrite <- H1.
   easy.
 }
+...
 cbn - [ nb_of_mult_gt_half "/" "mod" ].
 rewrite <- summation_mod_idemp.
 rewrite summation_sub; cycle 1. {
@@ -2291,11 +2322,11 @@ apply Nat_add_sub_eq_l_mod. {
 symmetry.
 erewrite summation_eq_compat; cycle 1. {
   intros k Hk.
-  rewrite (Nat.div_mod (k * a) l Hlz).
+  rewrite (Nat.div_mod (k * a) l Hlz) at 2.
+  rewrite Nat.mul_add_distr_l.
   now rewrite Nat.add_comm.
 }
 cbn - [ nb_of_mult_gt_half "/" "mod" ].
-...
 rewrite summation_add.
 rewrite <- Nat.Div0.add_mod_idemp_r; symmetry.
 rewrite <- Nat.Div0.add_mod_idemp_r.

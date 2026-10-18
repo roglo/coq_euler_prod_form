@@ -618,6 +618,18 @@ rewrite <- Nat.mul_sub_distr_r.
 now rewrite Nat.div_mul.
 Qed.
 
+Theorem Nat_div_sub : ∀ a b c,
+  c ≠ 0 → b * c ≤ a → (a - b * c) / c = a / c - b.
+Proof.
+intros * Hcz Hbca.
+symmetry.
+apply Nat.add_sub_eq_r.
+rewrite <- (Nat.div_mul b c) at 2; [ | easy ].
+rewrite <- Nat.div_add; [ | easy ].
+rewrite Nat.div_mul; [ | easy ].
+now rewrite Nat.sub_add.
+Qed.
+
 Theorem Nat_sub_succ_1 : ∀ n, S n - 1 = n.
 Proof. now intros; rewrite Nat.sub_succ, Nat.sub_0_r. Qed.
 
