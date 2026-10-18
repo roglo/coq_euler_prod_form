@@ -2217,21 +2217,22 @@ Proof.
 intros * Ha Hl.
 destruct (Nat.eq_dec l 0) as [Hlz| Hlz]; [ now subst l | ].
 remember ((a + l) / 2) as c eqn:Hc.
+assert (H2al : Nat.divide 2 (a + l)). {
+  apply Nat.eqb_eq in Ha, Hl.
+  apply Nat_eq_mod_exists in Ha, Hl.
+  destruct Ha as ((u, Ha), _).
+  destruct Hl as ((v, Hb), _).
+  subst a l.
+  rewrite Nat.add_shuffle0, Nat.add_assoc.
+  rewrite <- Nat.add_assoc, Nat.add_1_r.
+  rewrite <- Nat.mul_add_distr_r.
+  rewrite <- (Nat.mul_1_l 2) at 3.
+  rewrite <- Nat.mul_add_distr_r.
+  apply Nat.divide_factor_r.
+}
 assert (H : a = 2 * c - l). {
   subst c.
-  rewrite <- Nat.Lcm0.divide_div_mul_exact; cycle 1. {
-    apply Nat.eqb_eq in Ha, Hl.
-    apply Nat_eq_mod_exists in Ha, Hl.
-    destruct Ha as ((u, Ha), _).
-    destruct Hl as ((v, Hb), _).
-    subst a l.
-    rewrite Nat.add_shuffle0, Nat.add_assoc.
-    rewrite <- Nat.add_assoc, Nat.add_1_r.
-    rewrite <- Nat.mul_add_distr_r.
-    rewrite <- (Nat.mul_1_l 2) at 3.
-    rewrite <- Nat.mul_add_distr_r.
-    apply Nat.divide_factor_r.
-  }
+  rewrite <- Nat.Lcm0.divide_div_mul_exact; [ | easy ].
   rewrite Nat.mul_comm, Nat.div_mul; [ | easy ].
   symmetry; apply Nat.add_sub.
 }
@@ -2239,14 +2240,19 @@ erewrite summation_eq_compat; cycle 1. {
   intros k Hk.
   rewrite H at 1.
   rewrite Nat.mul_sub_distr_l.
-Search ((_ + _) / _).
-Check Nat.div_add.
-... ...
-rewrite Nat_div_sub.
-easy.
-easy.
+  rewrite Nat_div_sub; [ | easy | ]; cycle 1. {
+    rewrite Hc.
+    rewrite <- Nat.Lcm0.divide_div_mul_exact; [ | easy ].
+    rewrite (Nat.mul_comm 2), Nat.div_mul; [ | easy ].
+    rewrite Nat.mul_add_distr_l.
+    apply Nat.le_add_l.
+  }
+  now rewrite Nat.mul_comm.
 }
-cbn - [ nb_of_mult_gt_half "/" "mod" ].
+cbn - [ nb_of_mult_gt_half "*" "/" "mod" ].
+rewrite summation_sub; cycle 1. {
+  intros k Hk.
+  rewrite Hc.
 ...
   intros  k Hk.
   specialize (Nat.div_mod (k * a) l Hlz) as H1.
