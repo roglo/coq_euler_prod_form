@@ -2239,6 +2239,16 @@ assert (H2 : a = 2 * c - l). {
   rewrite <- H1.
   symmetry; apply Nat.add_sub.
 }
+(**)
+specialize (Eisenstein_lemma c l) as H3.
+enough (H4 : prime l).
+enough (H5 : coprimes c l).
+specialize (H3 H4 H5).
+erewrite summation_eq_compat in H3; cycle 1. {
+  intros k Hk.
+  specialize (Nat.div_mod (2 * k * c) l Hlz) as H6.
+  rewrite H6.
+...
 erewrite summation_eq_compat; cycle 1. {
   intros k Hk.
   rewrite H2 at 1.
@@ -2271,7 +2281,6 @@ erewrite summation_eq_compat; cycle 1. {
 symmetry.
 apply Nat_add_sub_eq_l_mod; cycle 1. {
   rewrite <- Eisenstein_lemma.
-(* Ah bon ? *)
 ...
   intros  k Hk.
   specialize (Nat.div_mod (k * a) l Hlz) as H1.
