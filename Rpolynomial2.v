@@ -250,7 +250,7 @@ Notation "a + b" := (poly_add a b) : poly_scope.
 Notation "a - b" := (poly_sub a b) : poly_scope.
 Notation "a * b" := (poly_mul a b) : poly_scope.
 Notation "'ⓧ' ^ a" := (xpow a) (at level 30, format "'ⓧ' ^ a") : poly_scope.
-Notation "'ⓧ'" := (xpow 1) (at level 0, format "'ⓧ'") : poly_scope.
+Notation "'ⓧ'" := (xpow 1) (at level 30, format "'ⓧ'") : poly_scope.
 
 (* *)
 
