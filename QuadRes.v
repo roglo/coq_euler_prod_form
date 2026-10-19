@@ -2230,15 +2230,18 @@ assert (H2al : Nat.divide 2 (a + l)). {
   rewrite <- Nat.mul_add_distr_r.
   apply Nat.divide_factor_r.
 }
-assert (H : a = 2 * c - l). {
+assert (H1 : a + l = 2 * c). {
   subst c.
   rewrite <- Nat.Lcm0.divide_div_mul_exact; [ | easy ].
-  rewrite Nat.mul_comm, Nat.div_mul; [ | easy ].
+  now rewrite Nat.mul_comm, Nat.div_mul.
+}
+assert (H2 : a = 2 * c - l). {
+  rewrite <- H1.
   symmetry; apply Nat.add_sub.
 }
 erewrite summation_eq_compat; cycle 1. {
   intros k Hk.
-  rewrite H at 1.
+  rewrite H2 at 1.
   rewrite Nat.mul_sub_distr_l.
   rewrite Nat_div_sub; [ | easy | ]; cycle 1. {
     rewrite Hc.
@@ -2253,6 +2256,22 @@ cbn - [ nb_of_mult_gt_half "*" "/" "mod" ].
 rewrite summation_sub; cycle 1. {
   intros k Hk.
   rewrite Hc.
+  rewrite H1.
+  rewrite (Nat.mul_comm _ c), Nat.div_mul; [ | easy ].
+  rewrite <- H1.
+  rewrite Nat.mul_comm.
+  rewrite Nat.mul_add_distr_l.
+  rewrite Nat.div_add; [ | easy ].
+  apply Nat.le_add_l.
+}
+erewrite summation_eq_compat; cycle 1. {
+  intros k Hk.
+  now rewrite Nat.mul_shuffle0.
+}
+symmetry.
+apply Nat_add_sub_eq_l_mod; cycle 1. {
+  rewrite <- Eisenstein_lemma.
+(* Ah bon ? *)
 ...
   intros  k Hk.
   specialize (Nat.div_mod (k * a) l Hlz) as H1.
