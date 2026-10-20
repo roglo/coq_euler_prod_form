@@ -2245,6 +2245,8 @@ erewrite summation_eq_compat; cycle 1. {
 cbn - [ nb_of_mult_gt_half "*" "/" "mod" ].
 rewrite <- summation_mod_idemp.
 rewrite summation_add.
+rewrite eq_nb_of_mult_gt_half_summation.
+Search (∑ (_ = _, _), Nat.b2n _).
 ...
 remember ((a + l) / 2) as c eqn:Hc.
 assert (H2al : Nat.divide 2 (a + l)). {
