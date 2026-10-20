@@ -2216,17 +2216,26 @@ Theorem Eisenstein_lemma' : ∀ a l,
 Proof.
 intros * Ha Hl.
 destruct (Nat.eq_dec l 0) as [Hlz| Hlz]; [ now subst l | ].
-(**)
 (*
 rewrite summation_mod_idemp.
 erewrite summation_eq_compat; cycle 1. {
   intros k Hk.
   specialize (Nat.div_mod (k * a) l Hlz) as H.
-  apply (f_equal (λ x, x / l)) in H.
-  apply (f_equal (λ x, x mod 2)) in H.
   apply Nat.eqb_eq in Hl.
   apply Nat_eq_mod_exists in Hl.
   destruct Hl as ((m, Hl), _).
+  rewrite H, Hl in H at 2.
+  rewrite Nat.mul_add_distr_r, Nat.mul_1_l in H.
+...
+  rewrite <- Nat.add_assoc in H.
+  rewrite <- Nat_mul_2_l in H.
+  rewrite Nat_mod_add_r_mul_l.
+  rewrite (Nat.mul_comm m), <- Nat.mul_assoc.
+  now rewrite Nat_mod_add_l_mul_l.
+...
+
+  apply (f_equal (λ x, x / l)) in H.
+  apply (f_equal (λ x, x mod 2)) in H.
   remember (k * a / l) as q.
   remember ((k * a) mod l) as r.
   rewrite Hl in H at 1.
