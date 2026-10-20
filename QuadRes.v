@@ -2243,6 +2243,7 @@ erewrite summation_eq_compat; cycle 1. {
   now rewrite H.
 }
 cbn - [ nb_of_mult_gt_half "*" "/" "mod" ].
+clear H.
 rewrite <- summation_mod_idemp.
 rewrite summation_add.
 rewrite eq_nb_of_mult_gt_half_summation.
