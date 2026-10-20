@@ -2217,25 +2217,34 @@ Proof.
 intros * Ha Hl.
 destruct (Nat.eq_dec l 0) as [Hlz| Hlz]; [ now subst l | ].
 (**)
-assert (∀ k, k * a / l ≡ (k * a + k * a mod l) mod 2). {
-  intros k.
+(*
+rewrite summation_mod_idemp.
+erewrite summation_eq_compat; cycle 1. {
+  intros k Hk.
   specialize (Nat.div_mod (k * a) l Hlz) as H.
-  remember (k * a / l) as q.
-  remember ((k * a) mod l) as r.
-  remember (k * a) as n.
+  apply (f_equal (λ x, x / l)) in H.
+  apply (f_equal (λ x, x mod 2)) in H.
   apply Nat.eqb_eq in Hl.
   apply Nat_eq_mod_exists in Hl.
   destruct Hl as ((m, Hl), _).
-  clear Heqq Heqr.
-  subst.
-  rewrite H.
+  remember (k * a / l) as q.
+  remember ((k * a) mod l) as r.
+  rewrite Hl in H at 1.
+...
+*)
+assert (∀ k, k * a / l ≡ (k * a + k * a mod l) mod 2). {
+  intros k.
+  specialize (Nat.div_mod (k * a) l Hlz) as H.
+  apply Nat.eqb_eq in Hl.
+  apply Nat_eq_mod_exists in Hl.
+  destruct Hl as ((m, Hl), _).
+  rewrite H, Hl at 2.
   rewrite Nat.mul_add_distr_r, Nat.mul_1_l.
   rewrite <- Nat.add_assoc.
-  rewrite <- Nat_mul_2_l, Nat.add_shuffle0.
-  rewrite Nat.mul_comm, Nat.mul_assoc, Nat.mul_comm.
-  rewrite <- Nat.mul_add_distr_l.
-  symmetry.
-  apply Nat_mod_add_l_mul_l.
+  rewrite <- Nat_mul_2_l.
+  rewrite Nat_mod_add_r_mul_l.
+  rewrite (Nat.mul_comm m), <- Nat.mul_assoc.
+  now rewrite Nat_mod_add_l_mul_l.
 }
 rewrite summation_mod_idemp.
 erewrite summation_eq_compat; cycle 1. {
@@ -2246,6 +2255,7 @@ cbn - [ nb_of_mult_gt_half "*" "/" "mod" ].
 clear H.
 rewrite <- summation_mod_idemp.
 rewrite summation_add.
+...
 rewrite eq_nb_of_mult_gt_half_summation.
 Search (∑ (_ = _, _), Nat.b2n _).
 ...
