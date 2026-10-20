@@ -2216,6 +2216,36 @@ Theorem Eisenstein_lemma' : ∀ a l,
 Proof.
 intros * Ha Hl.
 destruct (Nat.eq_dec l 0) as [Hlz| Hlz]; [ now subst l | ].
+(**)
+assert (∀ k, k * a / l ≡ (k * a + k * a mod l) mod 2). {
+  intros k.
+  specialize (Nat.div_mod (k * a) l Hlz) as H.
+  remember (k * a / l) as q.
+  remember ((k * a) mod l) as r.
+  remember (k * a) as n.
+  apply Nat.eqb_eq in Hl.
+  apply Nat_eq_mod_exists in Hl.
+  destruct Hl as ((m, Hl), _).
+  clear Heqq Heqr.
+  subst.
+  rewrite H.
+  rewrite Nat.mul_add_distr_r, Nat.mul_1_l.
+  rewrite <- Nat.add_assoc.
+  rewrite <- Nat_mul_2_l, Nat.add_shuffle0.
+  rewrite Nat.mul_comm, Nat.mul_assoc, Nat.mul_comm.
+  rewrite <- Nat.mul_add_distr_l.
+  symmetry.
+  apply Nat_mod_add_l_mul_l.
+}
+rewrite summation_mod_idemp.
+erewrite summation_eq_compat; cycle 1. {
+  intros k Hk.
+  now rewrite H.
+}
+cbn - [ nb_of_mult_gt_half "*" "/" "mod" ].
+rewrite <- summation_mod_idemp.
+rewrite summation_add.
+...
 remember ((a + l) / 2) as c eqn:Hc.
 assert (H2al : Nat.divide 2 (a + l)). {
   apply Nat.eqb_eq in Ha, Hl.
@@ -2239,7 +2269,7 @@ assert (H2 : a = 2 * c - l). {
   rewrite <- H1.
   symmetry; apply Nat.add_sub.
 }
-(**)
+(*
 specialize (Eisenstein_lemma c l) as H3.
 enough (H4 : prime l).
 enough (H5 : coprimes c l).
@@ -2249,6 +2279,7 @@ erewrite summation_eq_compat in H3; cycle 1. {
   specialize (Nat.div_mod (2 * k * c) l Hlz) as H6.
   rewrite H6.
 ...
+*)
 erewrite summation_eq_compat; cycle 1. {
   intros k Hk.
   rewrite H2 at 1.
@@ -2278,6 +2309,8 @@ erewrite summation_eq_compat; cycle 1. {
   intros k Hk.
   now rewrite Nat.mul_shuffle0.
 }
+cbn - [ nb_of_mult_gt_half "*" "/" "mod" ].
+...
 symmetry.
 apply Nat_add_sub_eq_l_mod; cycle 1. {
   rewrite <- Eisenstein_lemma.
