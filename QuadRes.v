@@ -2159,6 +2159,39 @@ destruct x. {
 }
 Qed.
 
+Theorem Nat_ltb_mul_l : ∀ a b c, Nat.divide a c → (a * b <? c) = (b <? c / a).
+Proof.
+intros * Hac.
+remember (_ <? _) as x eqn:Hx; symmetry in Hx.
+symmetry.
+destruct x. {
+  apply Nat.ltb_lt in Hx.
+  apply Nat.ltb_lt.
+  apply (Nat.mul_lt_mono_pos_l a). {
+    apply Nat.neq_0_lt_0; intros H; subst a.
+    now apply Nat.divide_0_l in Hac; subst c.
+  }
+  rewrite <- Nat.Lcm0.divide_div_mul_exact; [ | easy ].
+  rewrite (Nat.mul_comm _ c), Nat.div_mul; [ easy | ].
+  intros H; subst a.
+  now apply Nat.divide_0_l in Hac; subst c.
+} {
+  apply Bool.not_true_iff_false in Hx.
+  apply Bool.not_true_iff_false.
+  intros H; apply Hx; clear Hx; rename H into Hx.
+  apply Nat.ltb_lt in Hx.
+  apply Nat.ltb_lt.
+  apply (Nat.mul_lt_mono_pos_l a) in Hx; cycle 1. {
+    apply Nat.neq_0_lt_0; intros Ha; subst a.
+    now apply Nat.divide_0_l in Hac; subst c.
+  }
+  rewrite <- Nat.Lcm0.divide_div_mul_exact in Hx; [ | easy ].
+  rewrite (Nat.mul_comm _ c), Nat.div_mul in Hx; [ easy | ].
+  intros Ha; subst a.
+  now apply Nat.divide_0_l in Hac; subst c.
+}
+Qed.
+
 (* to be completed
 Theorem quadratic_reciprocity :
   ∀ p q, prime p → prime q → 2 < p < q →
@@ -2335,40 +2368,28 @@ assert
       now apply Nat.lt_le_incl, Nat.mod_upper_bound.
     }
     rewrite <- Nat_mul_2_l.
-Search (_ * _ <=? _).
-Theorem Nat_ltb_mul_l : ∀ a b c, Nat.divide a c → (a * b <? c) = (b <? c / a).
+...
+    rewrite Nat_ltb_mul_l.
+Theorem Nat_ltb_leb_pred: ∀ a b, b ≠ 0 → (a <? b) = (a <=? Nat.pred b).
 Proof.
-intros * Hac.
-remember (_ <? _) as x eqn:Hx; symmetry in Hx.
-symmetry.
+intros * Hbz.
+remember (_ <=? _) as x eqn:Hx; symmetry in Hx.
 destruct x. {
-  apply Nat.ltb_lt in Hx.
+  apply Nat.leb_le in Hx.
   apply Nat.ltb_lt.
-  apply (Nat.mul_lt_mono_pos_l a). {
-    apply Nat.neq_0_lt_0; intros H; subst a.
-    now apply Nat.divide_0_l in Hac; subst c.
-  }
-  rewrite <- Nat.Lcm0.divide_div_mul_exact; [ | easy ].
-  rewrite (Nat.mul_comm _ c), Nat.div_mul; [ easy | ].
-  intros H; subst a.
-  now apply Nat.divide_0_l in Hac; subst c.
+  apply (Nat.le_lt_trans _ (Nat.pred b)); [ easy | ].
+  now apply Nat.lt_pred_l.
 } {
   apply Bool.not_true_iff_false in Hx.
   apply Bool.not_true_iff_false.
   intros H; apply Hx; clear Hx; rename H into Hx.
   apply Nat.ltb_lt in Hx.
-  apply Nat.ltb_lt.
+  apply Nat.leb_le.
+  now apply Nat.lt_le_pred.
+}
+Qed.
 ...
-  apply (Nat.mul_lt_mono_pos_l a). {
-    apply Nat.neq_0_lt_0; intros H; subst a.
-    now apply Nat.divide_0_l in Hac; subst c.
-  }
-  rewrite <- Nat.Lcm0.divide_div_mul_exact; [ | easy ].
-  rewrite (Nat.mul_comm _ c), Nat.div_mul; [ easy | ].
-  intros H; subst a.
-  now apply Nat.divide_0_l in Hac; subst c.
-... ...
-rewrite Nat_leb_mul_l.
+    rewrite Nat_ltb_mul_l.
     easy.
   }
   cbn - [ "/" ].
