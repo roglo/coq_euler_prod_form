@@ -2269,11 +2269,27 @@ generalize Ha; intros H.
 apply Nat.eqb_eq in H.
 apply Nat_eq_mod_exists in H.
 destruct H as ((m, H), _).
-rewrite H  at 2.
+rewrite H at 2; clear H.
 rewrite Nat.mul_add_distr_r, Nat.mul_1_l.
 rewrite Nat.mul_comm, Nat.mul_assoc.
 rewrite <- Nat.add_assoc.
 rewrite Nat_mod_add_l_mul_r.
+clear m.
+set (r := λ i, (i * a) mod l).
+set (m := λ i, min (r i) (l - r i)).
+rewrite Nat.add_comm.
+erewrite summation_eq_compat; cycle 1. {
+  intros i Hi.
+  now fold (r i).
+}
+rewrite Nat.add_comm.
+remember (∑ (i = 1, (l - 1) / 2), i) as T.
+remember (nb_of_mult_gt_half a l) as μ.
+move μ before T.
+assert
+  (∑ (i = 1, (l - 1) / 2), r i =
+     (T - ∑ (j = 1, (l - 1) / 2), m j) +
+     (μ * l - ∑ (j = 1, (l - 1) / 2), m j)). {
 ...
 remember ((a + l) / 2) as c eqn:Hc.
 assert (H2al : Nat.divide 2 (a + l)). {
