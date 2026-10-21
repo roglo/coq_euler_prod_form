@@ -2192,6 +2192,43 @@ destruct x. {
 }
 Qed.
 
+Theorem Nat_leb_neq_ltb : ∀ a b, a ≠ b → (a <=? b) = (a <? b).
+Proof.
+intros * Hab.
+remember (_ <? _) as x eqn:Hx; symmetry in Hx.
+destruct x. {
+  apply Nat.ltb_lt in Hx.
+  apply Nat.leb_le.
+  now apply Nat.lt_le_incl.
+} {
+  apply Bool.not_true_iff_false in Hx.
+  apply Bool.not_true_iff_false.
+  intros H; apply Hx; clear Hx; rename H into Hx.
+  apply Nat.leb_le in Hx.
+  apply Nat.ltb_lt.
+  now apply Nat_le_neq_lt.
+}
+Qed.
+
+Theorem Nat_ltb_leb_pred: ∀ a b, b ≠ 0 → (a <? b) = (a <=? Nat.pred b).
+Proof.
+intros * Hbz.
+remember (_ <=? _) as x eqn:Hx; symmetry in Hx.
+destruct x. {
+  apply Nat.leb_le in Hx.
+  apply Nat.ltb_lt.
+  apply (Nat.le_lt_trans _ (Nat.pred b)); [ easy | ].
+  now apply Nat.lt_pred_l.
+} {
+  apply Bool.not_true_iff_false in Hx.
+  apply Bool.not_true_iff_false.
+  intros H; apply Hx; clear Hx; rename H into Hx.
+  apply Nat.ltb_lt in Hx.
+  apply Nat.leb_le.
+  now apply Nat.lt_le_pred.
+}
+Qed.
+
 (* to be completed
 Theorem quadratic_reciprocity :
   ∀ p q, prime p → prime q → 2 < p < q →
@@ -2368,31 +2405,18 @@ assert
       now apply Nat.lt_le_incl, Nat.mod_upper_bound.
     }
     rewrite <- Nat_mul_2_l.
-...
-    rewrite Nat_ltb_mul_l.
-Theorem Nat_ltb_leb_pred: ∀ a b, b ≠ 0 → (a <? b) = (a <=? Nat.pred b).
-Proof.
-intros * Hbz.
-remember (_ <=? _) as x eqn:Hx; symmetry in Hx.
-destruct x. {
-  apply Nat.leb_le in Hx.
-  apply Nat.ltb_lt.
-  apply (Nat.le_lt_trans _ (Nat.pred b)); [ easy | ].
-  now apply Nat.lt_pred_l.
-} {
-  apply Bool.not_true_iff_false in Hx.
-  apply Bool.not_true_iff_false.
-  intros H; apply Hx; clear Hx; rename H into Hx.
-  apply Nat.ltb_lt in Hx.
-  apply Nat.leb_le.
-  now apply Nat.lt_le_pred.
-}
-Qed.
-...
-    rewrite Nat_ltb_mul_l.
-    easy.
-  }
-  cbn - [ "/" ].
+    rewrite Nat_leb_neq_ltb; cycle 1. {
+      apply Nat.eqb_eq in Hl.
+      apply Nat_eq_mod_exists in Hl.
+      destruct Hl as ((u, Hl), _).
+      rewrite Hl at 2.
+      intros H.
+      symmetry in H.
+      apply Nat.add_sub_eq_l in H.
+      rewrite Nat.mul_comm, <- Nat.mul_sub_distr_r in H.
+      now apply Nat.eq_mul_1 in H.
+    }
+    rewrite Nat_ltb_leb_pred; [ | easy ].
 ...
 remember ((a + l) / 2) as c eqn:Hc.
 assert (H2al : Nat.divide 2 (a + l)). {
