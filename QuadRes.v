@@ -1,5 +1,5 @@
 Set Nested Proofs Allowed.
-From Stdlib Require Import Utf8 Arith.
+From Stdlib Require Import Utf8 Arith Init.Nat.
 From Stdlib Require Import Sorting.Permutation.
 Import List.ListNotations.
 Require Import Misc Primes.
@@ -2125,6 +2125,40 @@ rewrite Nat.sub_add; [ | easy ].
 now symmetry; rewrite Nat.add_comm.
 Qed.
 
+Theorem Nat_min_if_then_else :
+  ∀ a b, min a b = if a <=? b then a else b.
+Proof.
+intros.
+remember (a <=? b) as ab eqn:Hab; symmetry in Hab.
+destruct ab. {
+  apply Nat.leb_le in Hab.
+  now apply Nat.min_l.
+} {
+  apply Nat.leb_gt, Nat.lt_le_incl in Hab.
+  now apply Nat.min_r.
+}
+Qed.
+
+Theorem Nat_leb_sub_r : ∀ a b c, (c ≤ b) → (a <=? b - c) = (a + c <=? b).
+Proof.
+intros * Hcb.
+remember (_ <=? _) as x eqn:Hx; symmetry in Hx.
+symmetry.
+destruct x. {
+  apply Nat.leb_le in Hx.
+  apply Nat.leb_le.
+  apply (Nat.add_le_mono_r _ _ c) in Hx.
+  now rewrite Nat.sub_add in Hx.
+} {
+  apply Bool.not_true_iff_false in Hx.
+  apply Bool.not_true_iff_false.
+  intros H; apply Hx; clear Hx; rename H into Hx.
+  apply Nat.leb_le in Hx.
+  apply Nat.leb_le.
+  now apply Nat.le_add_le_sub_r.
+}
+Qed.
+
 (* to be completed
 Theorem quadratic_reciprocity :
   ∀ p q, prime p → prime q → 2 < p < q →
@@ -2291,6 +2325,53 @@ assert
   (∑ (i = 1, (l - 1) / 2), r i =
      (T - ∑ (j = 1, (l - 1) / 2), m j) +
      (μ * l - ∑ (j = 1, (l - 1) / 2), m j)). {
+  rewrite HeqT, Heqμ.
+  progress unfold m.
+  progress unfold r.
+  erewrite (summation_eq_compat _ _ (λ _, min _ _)); cycle 1. {
+    intros i Hi.
+    rewrite Nat_min_if_then_else.
+    rewrite Nat_leb_sub_r; cycle 1. {
+      now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+    }
+    rewrite <- Nat_mul_2_l.
+Search (_ * _ <=? _).
+Theorem Nat_ltb_mul_l : ∀ a b c, Nat.divide a c → (a * b <? c) = (b <? c / a).
+Proof.
+intros * Hac.
+remember (_ <? _) as x eqn:Hx; symmetry in Hx.
+symmetry.
+destruct x. {
+  apply Nat.ltb_lt in Hx.
+  apply Nat.ltb_lt.
+  apply (Nat.mul_lt_mono_pos_l a). {
+    apply Nat.neq_0_lt_0; intros H; subst a.
+    now apply Nat.divide_0_l in Hac; subst c.
+  }
+  rewrite <- Nat.Lcm0.divide_div_mul_exact; [ | easy ].
+  rewrite (Nat.mul_comm _ c), Nat.div_mul; [ easy | ].
+  intros H; subst a.
+  now apply Nat.divide_0_l in Hac; subst c.
+} {
+  apply Bool.not_true_iff_false in Hx.
+  apply Bool.not_true_iff_false.
+  intros H; apply Hx; clear Hx; rename H into Hx.
+  apply Nat.ltb_lt in Hx.
+  apply Nat.ltb_lt.
+...
+  apply (Nat.mul_lt_mono_pos_l a). {
+    apply Nat.neq_0_lt_0; intros H; subst a.
+    now apply Nat.divide_0_l in Hac; subst c.
+  }
+  rewrite <- Nat.Lcm0.divide_div_mul_exact; [ | easy ].
+  rewrite (Nat.mul_comm _ c), Nat.div_mul; [ easy | ].
+  intros H; subst a.
+  now apply Nat.divide_0_l in Hac; subst c.
+... ...
+rewrite Nat_leb_mul_l.
+    easy.
+  }
+  cbn - [ "/" ].
 ...
 remember ((a + l) / 2) as c eqn:Hc.
 assert (H2al : Nat.divide 2 (a + l)). {
