@@ -2264,9 +2264,16 @@ cbn - [ nb_of_mult_gt_half "*" "/" "mod" ].
 clear H.
 rewrite <- summation_mod_idemp.
 rewrite summation_add.
-...
-rewrite eq_nb_of_mult_gt_half_summation.
-Search (∑ (_ = _, _), Nat.b2n _).
+rewrite <- mul_summation_distr_r, Nat.mul_comm.
+generalize Ha; intros H.
+apply Nat.eqb_eq in H.
+apply Nat_eq_mod_exists in H.
+destruct H as ((m, H), _).
+rewrite H  at 2.
+rewrite Nat.mul_add_distr_r, Nat.mul_1_l.
+rewrite Nat.mul_comm, Nat.mul_assoc.
+rewrite <- Nat.add_assoc.
+rewrite Nat_mod_add_l_mul_r.
 ...
 remember ((a + l) / 2) as c eqn:Hc.
 assert (H2al : Nat.divide 2 (a + l)). {
