@@ -2210,11 +2210,12 @@ destruct mqp as [a| ]. {
     destruct Hq4 as [Hq4| Hq4]; [ easy | exfalso ].
 Check Eisenstein_lemma.
 Theorem Eisenstein_lemma' : ∀ a l,
-  is_odd a = true
+  coprimes a l
+  → is_odd a = true
   → is_odd l = true
   → nb_of_mult_gt_half a l ≡ (∑ (k = 1, (l - 1) / 2), k * a / l) mod 2.
 Proof.
-intros * Ha Hl.
+intros * Hal Ha Hl.
 destruct (Nat.eq_dec l 0) as [Hlz| Hlz]; [ now subst l | ].
 (*
 rewrite summation_mod_idemp.
