@@ -2159,36 +2159,31 @@ destruct x. {
 }
 Qed.
 
-Theorem Nat_ltb_mul_l : ∀ a b c, Nat.divide a c → (a * b <? c) = (b <? c / a).
+Theorem Nat_leb_mul_l : ∀ a b c,
+  a ≠ 0 → Nat.divide a c → (a * b <=? c) = (b <=? c / a).
 Proof.
-intros * Hac.
-remember (_ <? _) as x eqn:Hx; symmetry in Hx.
+intros * Haz Hac.
+remember (_ <=? _) as x eqn:Hx; symmetry in Hx.
 symmetry.
 destruct x. {
-  apply Nat.ltb_lt in Hx.
-  apply Nat.ltb_lt.
-  apply (Nat.mul_lt_mono_pos_l a). {
-    apply Nat.neq_0_lt_0; intros H; subst a.
-    now apply Nat.divide_0_l in Hac; subst c.
+  apply Nat.leb_le in Hx.
+  apply Nat.leb_le.
+  apply (Nat.mul_le_mono_pos_l _ _ a). {
+    now apply Nat.neq_0_lt_0.
   }
   rewrite <- Nat.Lcm0.divide_div_mul_exact; [ | easy ].
-  rewrite (Nat.mul_comm _ c), Nat.div_mul; [ easy | ].
-  intros H; subst a.
-  now apply Nat.divide_0_l in Hac; subst c.
+  now rewrite (Nat.mul_comm _ c), Nat.div_mul.
 } {
   apply Bool.not_true_iff_false in Hx.
   apply Bool.not_true_iff_false.
   intros H; apply Hx; clear Hx; rename H into Hx.
-  apply Nat.ltb_lt in Hx.
-  apply Nat.ltb_lt.
-  apply (Nat.mul_lt_mono_pos_l a) in Hx; cycle 1. {
-    apply Nat.neq_0_lt_0; intros Ha; subst a.
-    now apply Nat.divide_0_l in Hac; subst c.
+  apply Nat.leb_le in Hx.
+  apply Nat.leb_le.
+  apply (Nat.mul_le_mono_pos_l _ _ a) in Hx; cycle 1. {
+    now apply Nat.neq_0_lt_0.
   }
   rewrite <- Nat.Lcm0.divide_div_mul_exact in Hx; [ | easy ].
-  rewrite (Nat.mul_comm _ c), Nat.div_mul in Hx; [ easy | ].
-  intros Ha; subst a.
-  now apply Nat.divide_0_l in Hac; subst c.
+  now rewrite (Nat.mul_comm _ c), Nat.div_mul in Hx.
 }
 Qed.
 
@@ -2417,6 +2412,18 @@ assert
       now apply Nat.eq_mul_1 in H.
     }
     rewrite Nat_ltb_leb_pred; [ | easy ].
+    rewrite Nat_leb_mul_l; [ | easy | ]; cycle 1. {
+      apply Nat.eqb_eq in Hl.
+      apply Nat_eq_mod_exists in Hl.
+      destruct Hl as ((u, Hl), _).
+      rewrite Hl, Nat.add_1_r; cbn.
+      apply Nat.divide_factor_r.
+    }
+    rewrite <- Nat.sub_1_r.
+    progress fold (abs ((i * a) mod l) l).
+    easy.
+  }
+  cbn - [ nb_of_mult_gt_half "*" "/" "mod" ].
 ...
 remember ((a + l) / 2) as c eqn:Hc.
 assert (H2al : Nat.divide 2 (a + l)). {
