@@ -2390,6 +2390,23 @@ assert
   (∑ (i = 1, (l - 1) / 2), r i =
      (T - ∑ (j = 1, (l - 1) / 2), m j) +
      (μ * l - ∑ (j = 1, (l - 1) / 2), m j)). {
+  progress unfold r.
+  erewrite summation_eq_compat; cycle 1. {
+    intros i Hi.
+    remember ((i * a) mod l) as x.
+    replace x with
+      ((if x <=? (l - 1) / 2 then x else 0) +
+       (if x <=? (l - 1) / 2 then 0 else x)); cycle 1. {
+      destruct (_ <=? _); [ | easy ].
+      apply Nat.add_0_r.
+    }
+    now subst x.
+  }
+  cbn - [ "/" ].
+  rewrite summation_add.
+  f_equal. {
+    subst T.
+...
   rewrite HeqT, Heqμ.
   progress unfold m.
   progress unfold r.
@@ -2424,6 +2441,7 @@ assert
     easy.
   }
   cbn - [ nb_of_mult_gt_half "*" "/" "mod" ].
+  rewrite eq_nb_of_mult_gt_half_summation.
 ...
 remember ((a + l) / 2) as c eqn:Hc.
 assert (H2al : Nat.divide 2 (a + l)). {
