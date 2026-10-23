@@ -2406,6 +2406,14 @@ assert
   rewrite summation_add.
   f_equal. {
     subst T.
+    erewrite summation_eq_compat; cycle 1. {
+      intros i Hi.
+      progress fold (r i).
+      easy.
+    }
+    cbn - [ "/" ].
+...
+    rewrite <- summation_sub.
 ...
   rewrite HeqT, Heqμ.
   progress unfold m.
