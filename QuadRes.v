@@ -394,6 +394,44 @@ Qed.
 
 (* Euler criterion *)
 
+Theorem permutation_map_if_lt :
+  ∀ n f,
+  (∀ i, i < n → f i < n)
+  → (∀ i j, i < j < n → f i ≠ f j)
+  → Permutation (List.seq 0 n)
+    (ListDef.map (λ i, if lt_dec i n then f i else i) (List.seq 0 n)).
+Proof.
+intros * Hn Hf.
+apply Permutation_sym.
+apply nat_bijection_Permutation. {
+  intros i Hi; cbn.
+  destruct (lt_dec i n) as [Hin| Hin]; [ | easy ].
+  now apply Hn.
+} {
+  intros i j Hfij; cbn in Hfij.
+  destruct (lt_dec i n) as [Hin| Hin]. {
+    destruct (lt_dec j n) as [Hjn| Hjn]. {
+      destruct (lt_dec i j) as [Hij| Hij]. {
+        now specialize (Hf i j (conj Hij Hjn)).
+      } {
+        apply Nat.nlt_ge in Hij.
+        destruct (Nat.eq_dec i j) as [Heij| Heij]; [ easy | ].
+        assert (H : j < i) by flia Hij Heij.
+        specialize (Hf j i (conj H Hin)).
+        now symmetry in Hfij.
+      }
+    } {
+      subst j.
+      now specialize (Hn _ Hin).
+    }
+  } {
+    destruct (lt_dec j n) as [Hjn| Hjn]; [ | easy ].
+    subst i.
+    now specialize (Hn _ Hjn).
+  }
+}
+Qed.
+
 Theorem all_different_exist : ∀ f n,
   (∀ i, i < n → f i < n)
   → (∀ i j, i < j < n → f i ≠ f j)
@@ -403,35 +441,8 @@ intros * Hn Hf * Han.
 remember (List.seq 0 n) as l eqn:Hl.
 set (g := λ i, if lt_dec i n then f i else i).
 assert (Hperm : Permutation l (List.map g l)). {
-  apply Permutation_sym.
-  subst l.
-  apply nat_bijection_Permutation. {
-    intros i Hi; subst g; cbn.
-    destruct (lt_dec i n) as [Hin| Hin]; [ | easy ].
-    now apply Hn.
-  } {
-    intros i j Hfij; subst g; cbn in Hfij.
-    destruct (lt_dec i n) as [Hin| Hin]. {
-      destruct (lt_dec j n) as [Hjn| Hjn]. {
-        destruct (lt_dec i j) as [Hij| Hij]. {
-          now specialize (Hf i j (conj Hij Hjn)).
-        } {
-          apply Nat.nlt_ge in Hij.
-          destruct (Nat.eq_dec i j) as [Heij| Heij]; [ easy | ].
-          assert (H : j < i) by flia Hij Heij.
-          specialize (Hf j i (conj H Hin)).
-          now symmetry in Hfij.
-        }
-      } {
-        subst j.
-        now specialize (Hn _ Hin).
-      }
-    } {
-      destruct (lt_dec j n) as [Hjn| Hjn]; [ | easy ].
-      subst i.
-      now specialize (Hn _ Hjn).
-    }
-  }
+  subst l g.
+  now apply permutation_map_if_lt.
 }
 specialize (Permutation_in a Hperm) as H1.
 assert (H : a ∈ l). {
@@ -2391,6 +2402,20 @@ assert
      (T - ∑ (j = 1, (l - 1) / 2), m j) +
      (μ * l - ∑ (j = 1, (l - 1) / 2), m j)). {
   progress unfold r.
+assert (∑ (i = 1, (l - 1) /2), m i = ∑ (i = 1, (l - 1) / 2), i).
+progress unfold m, r.
+Theorem glop :
+  ∀ l a,
+  ∑ (i = 1, (l - 1) / 2), min ((i * a) mod l) (l - (i * a) mod l) =
+  ∑ (i = 1, (l - 1) / 2), i.
+Proof.
+intros.
+specialize permutation_map_if_lt as H1.
+... ...
+rewrite <- HeqT in H.
+rewrite H.
+rewrite Nat.sub_diag, Nat.add_0_l.
+...
   erewrite summation_eq_compat; cycle 1. {
     intros i Hi.
     remember ((i * a) mod l) as x.
@@ -2404,16 +2429,18 @@ assert
   }
   cbn - [ "/" ].
   rewrite summation_add.
+rewrite <- HeqT in H.
+rewrite H.
+rewrite Nat.sub_diag, Nat.add_0_l.
+...
   f_equal. {
-    subst T.
     erewrite summation_eq_compat; cycle 1. {
       intros i Hi.
       progress fold (r i).
       easy.
     }
     cbn - [ "/" ].
-...
-    rewrite <- summation_sub.
+
 ...
   rewrite HeqT, Heqμ.
   progress unfold m.
