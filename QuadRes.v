@@ -392,6 +392,15 @@ rewrite <- IHl.
 apply Hf.
 Qed.
 
+Theorem summation_list_map :
+  ∀ {A B} (f : A → B) (g : B → _) l,
+  ∑ (j ∈ List.map f l), g j = ∑ (i ∈ l), g (f i).
+Proof.
+intros.
+unfold iter_list.
+now rewrite List_fold_left_map.
+Qed.
+
 (* Euler criterion *)
 
 Theorem permutation_map_if_lt :
@@ -2410,7 +2419,68 @@ Theorem glop :
   ∑ (i = 1, (l - 1) / 2), i.
 Proof.
 intros.
+specialize @summation_list_map as H2.
+specialize (H2 _ _ (λ i, min ((i * a) mod l) (l - (i * a) mod l))).
+progress unfold iter_seq.
+rewrite <- (H2 (λ i, i)).
+clear H2.
+Search (∑ (_ = _, _), _ = ∑ (_ = _, _), _).
+Theorem summation_list_permut :
+  ∀ {A} (la lb : list A) f,
+  Permutation la lb
+  → ∑ (i ∈ la), f i = ∑ (i ∈ lb), f i.
+Proof.
+intros * Hp.
+progress unfold iter_list.
+Search (List.fold_left _ _ _ = List.fold_left _ _ _).
+Theorem iter_list_permut :
+  ∀ {T} (d : T) (op : T → T → T) (l1 l2 : list nat) f,
+  Permutation l1 l2
+  → iter_list l1 (λ (c : T) i, op c (f i)) d =
+    iter_list l2 (λ (c : T) i, op c (f i)) d.
+Proof.
+intros * Hp.
+generalize Hp; intros H1.
+apply Permutation_length in H1.
+remember (List.length l2) as n eqn:H2.
+symmetry in H2.
+revert n l2 Hp H1 H2.
+induction l1  as [| a]; intros. {
+  cbn in H1; subst n.
+  now apply List.length_zero_iff_nil in H2; subst l2.
+}
+destruct l2 as [| b]; [ cbn in H1, H2; congruence | ].
+cbn in H1, H2.
+destruct n; [ easy | ].
+apply Nat.succ_inj in H1, H2.
+destruct (Nat.eq_dec a b) as [Hab| Hab]. {
+  subst a.
+  rewrite iter_list_cons.
+...
+  apply IHl1.
+...
+Search (Permutation (_ :: _) (_ :: _)).
+...
+
+destruct n. {
+  apply List.length_zero_iff_nil in H1.
+  apply List.length_zero_iff_nil in H2.
+  now subst l1 l2.
+}
+induction l1 as [| a]; intros; [ easy | ].
+apply permutation_cons_l_iff in Hl.
+...
+
+apply (iter_list_permut Heqb); [ | | | | easy ].
+apply rngl_add_0_l.
+apply rngl_add_0_r.
+apply rngl_add_comm.
+apply rngl_add_assoc.
+Qed.
+...
 specialize permutation_map_if_lt as H1.
+
+rewrite <- summation_list_map.
 ... ...
 rewrite <- HeqT in H.
 rewrite H.
