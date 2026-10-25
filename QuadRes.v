@@ -2426,42 +2426,69 @@ rewrite <- (H2 (λ i, i)).
 clear H2.
 Search (∑ (_ = _, _), _ = ∑ (_ = _, _), _).
 Theorem summation_list_permut :
-  ∀ {A} (la lb : list A) f,
+  ∀(la lb : list nat) f,
   Permutation la lb
   → ∑ (i ∈ la), f i = ∑ (i ∈ lb), f i.
 Proof.
 intros * Hp.
 progress unfold iter_list.
+generalize Hp; intros Ha.
+apply Permutation_length in Ha.
+remember (List.length lb) as n eqn:Hb.
+symmetry in Hb.
+revert n lb Hp Ha Hb.
+induction la  as [| a]; intros. {
+  cbn in Ha; subst n.
+  now apply List.length_zero_iff_nil in Hb; subst lb.
+}
+destruct lb as [| b]; [ cbn in Ha, Hb; congruence | ].
+cbn in Ha, Hb.
+destruct n; [ easy | ].
+apply Nat.succ_inj in Ha, Hb.
+cbn.
+rewrite List_fold_left_add_fun_from_0; symmetry.
+rewrite List_fold_left_add_fun_from_0; symmetry.
+inversion Hp. {
+  subst.
+  apply Permutation_cons_inv in Hp.
+  f_equal.
+  now apply (IHla (length la)).
+} {
+  subst x y la lb.
+  cbn.
+  rewrite List_fold_left_add_fun_from_0; symmetry.
+  rewrite List_fold_left_add_fun_from_0; symmetry.
+  do 2 rewrite Nat.add_assoc.
+  f_equal.
+  apply Nat.add_comm.
+} {
+  subst  l l''.
+  destruct l' as [| c]. {
+    now apply Permutation_nil_cons in H0.
+  }
+...
+rewrite iter_list_cons; [ | easy | easy | easy ].
+rewrite iter_list_cons; [ | easy | easy | easy ].
+destruct (Nat.eq_dec a b) as [Hab| Hab]. {
+  subst a.
+  apply Permutation_cons_inv in Hp.
+  f_equal.
+  now apply (IHl1 n).
+}
+...
 Search (List.fold_left _ _ _ = List.fold_left _ _ _).
 Theorem iter_list_permut :
-  ∀ {T} (d : T) (op : T → T → T) (l1 l2 : list nat) f,
+  ∀ {T} (d : T) (op : T → T → T) (l1 l2 : list nat) f
+  (op_d_l : ∀ x, op d x = x)
+  (op_d_r : ∀ x, op x d = x)
+  (op_comm : ∀ a b, op a b = op b a)
+  (op_assoc : ∀ a b c, op a (op b c) = op (op a b) c),
   Permutation l1 l2
   → iter_list l1 (λ (c : T) i, op c (f i)) d =
     iter_list l2 (λ (c : T) i, op c (f i)) d.
 Proof.
-intros * Hp.
-generalize Hp; intros H1.
-apply Permutation_length in H1.
-remember (List.length l2) as n eqn:H2.
-symmetry in H2.
-revert n l2 Hp H1 H2.
-induction l1  as [| a]; intros. {
-  cbn in H1; subst n.
-  now apply List.length_zero_iff_nil in H2; subst l2.
-}
-destruct l2 as [| b]; [ cbn in H1, H2; congruence | ].
-cbn in H1, H2.
-destruct n; [ easy | ].
-apply Nat.succ_inj in H1, H2.
-destruct (Nat.eq_dec a b) as [Hab| Hab]. {
-  subst a.
-  rewrite iter_list_cons.
+intros * op_d_l op_d_r op_comm op_assoc Hp.
 ...
-  apply IHl1.
-...
-Search (Permutation (_ :: _) (_ :: _)).
-...
-
 destruct n. {
   apply List.length_zero_iff_nil in H1.
   apply List.length_zero_iff_nil in H2.
