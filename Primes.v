@@ -1893,28 +1893,31 @@ Theorem sum_power_prime_mod : ∀ p, prime p →
 Proof.
 intros * Hp *.
 rewrite newton_binomial.
-...
-rewrite summation_split_first; [ | flia ].
-rewrite binomial_0_r, Nat.mul_1_l, Nat.sub_0_r, Nat.pow_0_r, Nat.mul_1_r.
+rewrite rngl_summation_split_first; [ | flia ].
+rewrite binomial_0_r, Nat.mul_1_l, Nat.sub_0_r, rngl_pow_0_r, Nat.mul_1_r.
 specialize (prime_ge_2 p Hp) as H2p.
-rewrite summation_split_last; [ | flia H2p ].
-rewrite (summation_shift 1); cycle 1. {
+rewrite rngl_summation_split_last; [ | flia H2p ].
+rewrite (rngl_summation_shift 1); cycle 1. {
   split; [ | easy ].
   now apply -> Nat.succ_le_mono.
 }
 rewrite Nat_sub_succ_1.
 rewrite binomial_diag.
-rewrite Nat.sub_diag, Nat.pow_0_r, Nat.mul_1_r, Nat.mul_1_l.
+rewrite Nat.sub_diag, rngl_pow_0_r, Nat.mul_1_r, Nat.mul_1_l.
 rewrite Nat.add_assoc, Nat.add_shuffle0.
 symmetry.
 remember (a ^ p + b ^ p) as x.
 replace x with (x + 0) at 1 by flia.
 rewrite <- Nat.Div0.add_mod_idemp_r; symmetry.
 rewrite <- Nat.Div0.add_mod_idemp_r; symmetry.
-f_equal; f_equal; clear x Heqx; symmetry.
+do 2 rewrite nat_pow_of_rngl_power.
+rewrite <- Heqx.
+progress f_equal.
+progress f_equal.
+clear x Heqx; symmetry.
 rewrite Nat.Div0.mod_0_l.
 rewrite summation_mod_idemp.
-rewrite all_0_summation_0. {
+rewrite all_0_rngl_summation_0. {
   now rewrite Nat.Div0.mod_0_l.
 }
 intros i Hi.

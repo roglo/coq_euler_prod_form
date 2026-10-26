@@ -553,13 +553,14 @@ induction n; intros; [ easy | cbn ].
 setoid_rewrite List_fold_left_add_fun_from_0.
 rewrite IHn; [ easy | flia Hn ].
 Qed.
+*)
 
 Theorem summation_mod_idemp : ∀ b e f n,
   (∑ (i = b, e), f i) mod n = (∑ (i = b, e), f i mod n) mod n.
 Proof.
 intros.
-progress unfold iter_seq.
-progress unfold iter_list.
+progress unfold Utils.iter_seq.
+progress unfold Utils.iter_list.
 destruct (Nat.eq_dec n 0) as [Hnz| Hnz]; [ now subst n | ].
 remember (S e - b) as m eqn:Hm.
 revert b Hm.
@@ -572,7 +573,6 @@ rewrite <- Nat.Div0.add_mod_idemp_r; symmetry.
 f_equal; f_equal.
 apply IHm; flia Hm.
 Qed.
-*)
 
 Lemma List_fold_left_seq_succ_last : ∀ g b len s,
   List.fold_left (λ c i, c + g i) (List.seq b (S len)) s =
