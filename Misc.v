@@ -59,10 +59,10 @@ Qed.
 
 (* summations and products *)
 
-(*
 Arguments rngl_zero : simpl never.
+Arguments rngl_one : simpl never.
 Arguments rngl_add : simpl never.
-*)
+Arguments rngl_mul : simpl never.
 
 (*
 Definition iter_list {A B} (l : list B) f (d : A) := List.fold_left f l d.
@@ -416,6 +416,8 @@ Proof.
 intros.
 induction n; [ easy | ].
 cbn.
+progress unfold rngl_mul.
+cbn.
 progress f_equal.
 apply IHn.
 Qed.
@@ -448,11 +450,14 @@ progress f_equal.
 progress f_equal.
 rewrite nat_pow_of_rngl_power.
 rewrite H.
+progress unfold rngl_mul.
+cbn  - [ "-" ].
 progress f_equal.
 progress f_equal.
 rewrite nat_pow_of_rngl_power.
-progress f_equal.
 rewrite <- Hn.
+cbn.
+progress f_equal.
 progress f_equal.
 apply Nat.add_sub_eq_r.
 symmetry in Hn.
@@ -1085,6 +1090,7 @@ progress unfold nat_ring_like_op.
 f_equal; cycle 1. {
   clear.
   induction n; [ easy | cbn ].
+  progress unfold rngl_mul.
   now progress f_equal.
 }  
 replace Nat.mul with rngl_mul by easy.
@@ -1094,6 +1100,8 @@ intros i Hi.
 rewrite Nat_sub_succ_1.
 rewrite Nat.mul_shuffle0; f_equal.
 rewrite Nat.sub_succ_l; [ cbn | easy ].
+progress unfold rngl_mul.
+cbn.
 progress f_equal.
 apply Nat.mul_comm.
 Qed.

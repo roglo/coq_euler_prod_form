@@ -316,15 +316,15 @@ rewrite IHl.
 rename a into d.
 remember (g d) as gd eqn:Hgd; symmetry in Hgd.
 destruct gd; [ easy | cbn ].
-rewrite Nat.add_0_r.
+rewrite Nat.mul_1_l.
 rewrite (List_fold_left_mul_fun_from_1 (c * f d)).
 rewrite (List_fold_left_mul_fun_from_1 c).
 rewrite (List_fold_left_mul_fun_from_1 (f d)).
 do 3 rewrite <- Nat.mul_assoc.
-f_equal.
+progress f_equal.
 rewrite Nat.mul_comm.
 rewrite <- Nat.mul_assoc.
-f_equal.
+progress f_equal.
 apply Nat.mul_comm.
 Qed.
 
@@ -339,12 +339,12 @@ progress unfold Utils.iter_list.
 revert c.
 induction l as [| a]; intros; [ symmetry; apply Nat.mul_1_r | cbn ].
 rewrite IHl.
-rewrite Nat.add_0_r.
+rewrite Nat.mul_1_l.
 do 4 rewrite <- (List_fold_left_map  _ _ _ _ _ l).
 do 2 rewrite <- List_fold_left_mul_assoc.
 do 3 rewrite <- Nat.mul_assoc.
-f_equal.
-f_equal.
+progress f_equal.
+progress f_equal.
 symmetry.
 apply List_fold_left_mul_from_1.
 Qed.
@@ -1126,9 +1126,7 @@ rewrite List_fold_left_mod; cycle 1. {
   rewrite IHl.
   rewrite <- Nat.Div0.mul_mod_idemp_l.
   symmetry.
-  rewrite IHl.
-  rewrite <- Nat.Div0.mul_mod_idemp_r.
-  easy.
+  now rewrite IHl.
 }
 erewrite List_fold_left_ext_in; cycle 1. {
   intros * Hb.
@@ -1965,13 +1963,13 @@ progress unfold Utils.iter_seq.
 remember (S e - b) as l eqn:Hl; clear Hl.
 revert b.
 induction l as [| c]; intros; [ easy | ].
-cbn - [ rngl_zero rngl_one rngl_add rngl_mul ].
+cbn.
 rewrite rngl_summation_list_cons.
 rewrite rngl_product_list_cons.
 rewrite Nat.pow_add_r.
-f_equal.
-replace Nat.mul with rngl_mul by easy.
 rewrite nat_pow_of_rngl_power.
+progress unfold rngl_mul.
+cbn.
 progress f_equal.
 apply IHc.
 Qed.
@@ -1992,7 +1990,7 @@ erewrite rngl_summation_eq_compat; cycle 1. {
   now cbn.
 }
 remember (f a) as fa eqn:Hfa; symmetry in Hfa.
-now destruct fa; cbn; rewrite Hfa; cbn; [ f_equal | ].
+now destruct fa; cbn; rewrite Hfa, IHl.
 Qed.
 
 Theorem nat_ltb_rngl_ltb : ∀ a b, (a <? b) = (a <? b)%L.
@@ -2077,8 +2075,10 @@ erewrite rngl_summation_eq_compat; cycle 1. {
 }
 cbn - [ nb_of_mult_gt_half "<?" "/" "mod" ].
 rewrite Hh.
-...
-now rewrite eq_nb_of_mult_gt_half_summation.
+rewrite eq_nb_of_mult_gt_half_summation.
+erewrite rngl_summation_eq_compat; [ easy | ].
+intros i Hi.
+now rewrite <- nat_ltb_rngl_ltb.
 Qed.
 
 Theorem summation_to_twice_plus_1 :
@@ -2087,24 +2087,24 @@ Theorem summation_to_twice_plus_1 :
   ∑ (i = 1, 2 * e + 1), if i mod 2 =? 0 then f i else 0.
 Proof.
 intros.
-induction e; cbn - [ "*" "mod" ]. {
-  rewrite summation_empty; [ | easy ].
-  now rewrite summation_only_one.
+induction e; cbn - [ "*" "mod" rngl_zero rngl_add ]. {
+  rewrite rngl_summation_empty; [ | easy ].
+  now rewrite rngl_summation_only_one.
 }
-rewrite summation_split_last; [ | now apply -> Nat.succ_le_mono ].
-rewrite summation_succ_succ.
-erewrite summation_eq_compat; cycle 1. {
+rewrite rngl_summation_split_last; [ | now apply -> Nat.succ_le_mono ].
+rewrite rngl_summation_succ_succ.
+erewrite rngl_summation_eq_compat; cycle 1. {
   intros i Hi.
   now rewrite Nat_sub_succ_1.
 }
 cbn - [ "*" "mod" ].
 rewrite IHe.
 symmetry.
-rewrite summation_split_last; cycle 1. {
+rewrite rngl_summation_split_last; cycle 1. {
   rewrite Nat.add_1_r.
   now apply -> Nat.succ_le_mono.
 }
-rewrite (summation_shift 1); cycle 1. {
+rewrite (rngl_summation_shift 1); cycle 1. {
   split; [ now apply -> Nat.succ_le_mono | ].
   rewrite Nat.add_1_r.
   now do 2 apply -> Nat.succ_le_mono.
@@ -2116,12 +2116,12 @@ rewrite Nat.mod_small; [ | now apply -> Nat.succ_lt_mono ].
 cbn - [ "*" "mod" ].
 rewrite Nat.add_0_r.
 rewrite Nat.mul_succ_r.
-rewrite summation_split_last; cycle 1. {
+rewrite rngl_summation_split_last; cycle 1. {
   rewrite Nat.add_comm; cbn.
   now apply -> Nat.succ_le_mono.
 }
 rewrite Nat.sub_0_r.
-rewrite (summation_shift 1); cycle 1. {
+rewrite (rngl_summation_shift 1); cycle 1. {
   split; [ now apply -> Nat.succ_le_mono | ].
   rewrite Nat.add_comm; cbn.
   now do 2 apply -> Nat.succ_le_mono.
@@ -2132,6 +2132,7 @@ rewrite <- Nat.add_sub_assoc; cycle 1. {
 }
 rewrite Nat_sub_succ_1.
 rewrite Nat_mod_add_l_mul_l.
+...
 rewrite Nat.Div0.mod_same, Nat.eqb_refl.
 f_equal.
 apply summation_eq_compat.
