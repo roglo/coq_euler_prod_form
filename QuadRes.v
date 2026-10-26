@@ -4,17 +4,22 @@ From Stdlib Require Import Sorting.Permutation.
 Import List.ListNotations.
 Require Import Misc Primes.
 
+Require Import RingLike.Core.
+Require Import RingLike.IterAdd.
+Require Import RingLike.IterMul.
+Require Import RingLike.Nat_algebra.
+
 Theorem fold_iter_list : ∀ {A B} (f : A → B → A) l d,
-  List.fold_left f l d = iter_list l f d.
+  List.fold_left f l d = Utils.iter_list l f d.
 Proof. easy. Qed.
 
 Theorem fold_iter_seq : ∀ A b len f (d : A),
-  iter_list (List.seq b len) f d =
+  Utils.iter_list (List.seq b len) f d =
     if b + len =? 0 then d
-    else iter_seq b (b + len - 1) f d.
+    else Utils.iter_seq b (b + len - 1) f d.
 Proof.
 intros.
-progress unfold iter_seq.
+progress unfold Utils.iter_seq.
 f_equal; f_equal.
 remember (b + len =? 0) as x eqn:Hx; symmetry in Hx.
 destruct x. {
@@ -33,8 +38,8 @@ flia.
 Qed.
 
 Theorem fold_iter_seq_succ_l : ∀ A b len f (d : A),
-  iter_list (List.seq (S b) (S len - 1)) f d =
-    iter_seq (S b) (b + len) f d.
+  Utils.iter_list (List.seq (S b) (S len - 1)) f d =
+    Utils.iter_seq (S b) (b + len) f d.
 Proof.
 intros.
 rewrite fold_iter_seq; cbn.
@@ -42,15 +47,15 @@ now do 2 rewrite Nat.sub_0_r.
 Qed.
 
 Theorem fold_iter_seq_1 : ∀ A len f (d : A),
-  iter_list (List.seq 1 len) f d = iter_seq 1 len f d.
+  Utils.iter_list (List.seq 1 len) f d = Utils.iter_seq 1 len f d.
 Proof.
 intros.
-progress unfold iter_seq.
+progress unfold Utils.iter_seq.
 now rewrite Nat_sub_succ_1.
 Qed.
 
 Theorem fold_iter_seq_1_succ_sub : ∀ A len f (d : A),
-  iter_list (List.seq 1 (S len - 1)) f d = iter_seq 1 len f d.
+  Utils.iter_list (List.seq 1 (S len - 1)) f d = Utils.iter_seq 1 len f d.
 Proof. easy. Qed.
 
 Theorem if_mul_negb :
@@ -302,7 +307,7 @@ Theorem List_fold_left_mul_filter_filter :
   ∏ (b ∈ List.filter (λ a : A, negb (g a)) l), f b.
 Proof.
 intros.
-progress unfold iter_list.
+progress unfold Utils.iter_list.
 revert c.
 induction l as [| a]; intros; cbn. {
   symmetry; apply Nat.mul_1_r.
@@ -330,7 +335,7 @@ Theorem List_fold_left_mul_mul :
   ∏ (b ∈ l), g b.
 Proof.
 intros.
-progress unfold iter_list.
+progress unfold Utils.iter_list.
 revert c.
 induction l as [| a]; intros; [ symmetry; apply Nat.mul_1_r | cbn ].
 rewrite IHl.
@@ -367,8 +372,8 @@ Theorem List_fold_left_mul_mul_seq :
   ∀ a n, ∏ (i = 1, n), (i * a) = a ^ n * fact n.
 Proof.
 intros.
-progress unfold iter_seq.
-progress unfold iter_list.
+progress unfold Utils.iter_seq.
+progress unfold Utils.iter_list.
 rewrite Nat_sub_succ_1.
 erewrite List_fold_left_ext_in; cycle 1. {
   intros * Hb.
@@ -397,7 +402,7 @@ Theorem summation_list_map :
   ∑ (j ∈ List.map f l), g j = ∑ (i ∈ l), g (f i).
 Proof.
 intros.
-unfold iter_list.
+unfold Utils.iter_list.
 now rewrite List_fold_left_map.
 Qed.
 
@@ -1076,11 +1081,11 @@ rewrite <- Hh in Hn.
 set (g := λ m, h <? (m * a) mod p) in Hn.
 progress unfold sign.
 rewrite <- Hh.
-progress unfold iter_seq.
-progress unfold iter_list.
+progress unfold Utils.iter_seq.
+progress unfold Utils.iter_list.
 rewrite Nat_sub_succ_1.
 rewrite (List_fold_left_mul_filter_filter _ _ _ _ g).
-progress unfold iter_list.
+progress unfold Utils.iter_list.
 do 2 rewrite List_fold_left_filter.
 unfold g.
 erewrite List_fold_left_ext_in; [ | now intros; rewrite Nat.leb_antisym ].
@@ -1110,8 +1115,8 @@ Theorem List_fold_left_mul_mul_seq_fold_left_abs :
       ((p - 1) ^ n * ∏ (i = 1, h), abs ((i * a) mod p) p) mod p.
 Proof.
 intros  * Hpz Hn Hh.
-progress unfold iter_seq.
-progress unfold iter_list.
+progress unfold Utils.iter_seq.
+progress unfold Utils.iter_list.
 rewrite List_fold_left_mod; cycle 1. {
   intros b l.
   revert b.
@@ -1145,7 +1150,7 @@ rewrite <- List_fold_left_mod; cycle 1. {
 }
 erewrite List_fold_left_ext_in; cycle 1. {
   intros * Hb.
-  rewrite (sign_abs ((b * a) mod p) p); cycle 1. {
+  rewrite (sign_abs ((b * a)%L mod p) p); cycle 1. {
     now apply Nat.mod_upper_bound.
   }
   easy.
@@ -1295,8 +1300,8 @@ specialize abs_all_different_multiples as H4.
 assert (H: 1 ≤ a < p) by easy.
 specialize (H4 p Hp a H); clear H.
 rewrite fact_eq_fold_left.
-progress unfold iter_seq.
-progress unfold iter_list.
+progress unfold Utils.iter_seq.
+progress unfold Utils.iter_list.
 rewrite <- List_fold_left_map.
 f_equal.
 rewrite Nat_sub_succ_1.
@@ -1921,15 +1926,16 @@ Theorem iter_list_cons : ∀ A B d op (a : B) la f
   (op_d_l : ∀ x, op d x = x)
   (op_d_r : ∀ x, op x d = x)
   (op_assoc : ∀ a b c, op a (op b c) = op (op a b) c),
-  iter_list (a :: la) (λ (c : A) i, op c (f i)) d =
-  op (f a) (iter_list la (λ (c : A) i, op c (f i)) d).
+  Utils.iter_list (a :: la) (λ (c : A) i, op c (f i)) d =
+  op (f a) (Utils.iter_list la (λ (c : A) i, op c (f i)) d).
 Proof.
 intros.
-progress unfold iter_list; cbn.
+progress unfold Utils.iter_list; cbn.
 rewrite op_d_l.
 now apply (fold_left_op_fun_from_d d).
 Qed.
 
+(*
 Theorem summation_list_cons : ∀ A (a : A) la f,
   ∑ (i ∈ a :: la), f i = f a + ∑ (i ∈ la), f i.
 Proof.
@@ -1949,19 +1955,24 @@ apply Nat.mul_1_l.
 apply Nat.mul_1_r.
 apply Nat.mul_assoc.
 Qed.
+*)
 
 Theorem Nat_pow_summation_r :
   ∀ a b e f, a ^ (∑ (i = b, e), f i) = ∏ (i = b, e), a ^ f i.
 Proof.
 intros.
-progress unfold iter_seq.
+progress unfold Utils.iter_seq.
 remember (S e - b) as l eqn:Hl; clear Hl.
 revert b.
-induction l as [| c]; intros; [ easy | cbn ].
-rewrite summation_list_cons.
-rewrite product_list_cons.
+induction l as [| c]; intros; [ easy | ].
+cbn - [ rngl_zero rngl_one rngl_add rngl_mul ].
+rewrite rngl_summation_list_cons.
+rewrite rngl_product_list_cons.
 rewrite Nat.pow_add_r.
 f_equal.
+replace Nat.mul with rngl_mul by easy.
+rewrite nat_pow_of_rngl_power.
+progress f_equal.
 apply IHc.
 Qed.
 
@@ -1972,16 +1983,57 @@ Theorem List_eq_length_filter_summation :
 Proof.
 intros.
 induction l as [| a]; [ easy | ].
-cbn - [ List.nth ].
-rewrite summation_split_first; [ | now apply -> Nat.succ_le_mono ].
-rewrite summation_succ_succ.
-erewrite summation_eq_compat; cycle 1. {
+cbn - [ List.nth rngl_zero rngl_add ].
+rewrite rngl_summation_split_first; [ | now apply -> Nat.succ_le_mono ].
+rewrite rngl_summation_succ_succ.
+erewrite rngl_summation_eq_compat; cycle 1. {
   intros k Hk.
   rewrite Nat.sub_succ_l; [ | easy ].
   now cbn.
 }
 remember (f a) as fa eqn:Hfa; symmetry in Hfa.
 now destruct fa; cbn; rewrite Hfa; cbn; [ f_equal | ].
+Qed.
+
+Theorem nat_ltb_rngl_ltb : ∀ a b, (a <? b) = (a <? b)%L.
+Proof.
+intros.
+progress unfold Nat.ltb.
+progress unfold rngl_ltb.
+cbn.
+destruct b. {
+  symmetry.
+  destruct (Nat.eq_dec a 0) as [Haz| Haz]. {
+    apply Bool.andb_false_r.
+  }
+  cbn.
+  rewrite Bool.andb_true_r.
+  apply Nat.leb_gt.
+  now apply Nat.neq_0_lt_0.
+} {
+  symmetry.
+  destruct (Nat.eq_dec a 0) as [Haz| Haz]; [ now subst a | ].
+  destruct (Nat.eq_dec a (S b)) as [Hasb| Hasb]. {
+    cbn.
+    rewrite Bool.andb_false_r; symmetry.
+    subst a.
+    now apply Nat.leb_gt.
+  }
+  rewrite Bool.andb_true_r.
+  remember (a <=? b) as x eqn:Hx.
+  symmetry in Hx.
+  destruct x. {
+    apply Nat.leb_le in Hx.
+    apply Nat.leb_le.
+    flia Hasb Hx.
+  }
+  apply Bool.not_true_iff_false in Hx.
+  apply Bool.not_true_iff_false.
+  intros H; apply Hx; clear Hx; rename H into Hx.
+  apply Nat.leb_le in Hx.
+  apply Nat.leb_le.
+  flia Hasb Hx.
+}
 Qed.
 
 Theorem eq_nb_of_mult_gt_half_summation :
@@ -1994,14 +2046,18 @@ progress unfold nb_of_mult_gt_half.
 remember ((p - 1) / 2) as h eqn:Hh.
 rewrite List_eq_length_filter_summation.
 rewrite List.length_seq.
-apply summation_eq_compat.
+apply rngl_summation_eq_compat.
 intros k Hk.
 rewrite List.seq_nth; cycle 1. {
   progress unfold "<".
   rewrite <- Nat.sub_succ_l; [ | easy ].
   now rewrite Nat_sub_succ_1.
 }
-now rewrite Nat.add_comm, Nat.sub_add.
+rewrite Hh.
+rewrite Nat.add_comm, Nat.sub_add; [ | easy ].
+replace Nat.mul with rngl_mul by easy.
+progress f_equal.
+now rewrite nat_ltb_rngl_ltb.
 Qed.
 
 Theorem Eisenstein_lemma :
@@ -2014,13 +2070,14 @@ progress unfold coprimes in Hap.
 remember ((p - 1) / 2) as h eqn:Hh.
 move h before p.
 rewrite summation_mod_idemp.
-erewrite summation_eq_compat; cycle 1. {
+erewrite rngl_summation_eq_compat; cycle 1. {
   intros i Hi.
   rewrite <- Nat.mul_assoc.
   now rewrite (Nat_eq_mul_2_div_mod_to_bool _ _ Hpz).
 }
 cbn - [ nb_of_mult_gt_half "<?" "/" "mod" ].
 rewrite Hh.
+...
 now rewrite eq_nb_of_mult_gt_half_summation.
 Qed.
 
