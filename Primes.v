@@ -1796,19 +1796,21 @@ intros.
 induction n; [ easy | ].
 cbn - [ "-" binomial rngl_zero rngl_add ].
 rewrite IHn.
-...
-rewrite rngl_mul_summation_distr_l.
+replace Nat.mul with rngl_mul by easy.
+rewrite rngl_mul_summation_distr_l; [ | easy ].
 rewrite mul_add_distr_r_in_summation.
-rewrite summation_add.
+rewrite rngl_summation_add_distr.
 do 2 rewrite <- double_mul_assoc_in_summation.
 rewrite power_shuffle1_in_summation.
 rewrite power_shuffle2_in_summation.
 symmetry.
-rewrite summation_split_first; [ | flia ].
+rewrite rngl_summation_split_first; [ | flia ].
 unfold binomial at 1.
+do 2 rewrite nat_pow_of_rngl_power.
 rewrite Nat.mul_1_l, Nat.sub_0_r, Nat.pow_0_r, Nat.mul_1_r at 1.
-rewrite summation_succ_succ.
-cbn - [ "-" "^" ].
+rewrite rngl_summation_succ_succ.
+cbn - [ "-" "^" rngl_zero rngl_add  ].
+...
 rewrite mul_assoc_in_summation.
 rewrite mul_add_distr_r_in_summation.
 rewrite summation_add.

@@ -345,13 +345,14 @@ apply IHn; [ flia Hn | ].
 intros i Hbie.
 apply Hgh; flia Hbie.
 Qed.
+*)
 
 Theorem mul_add_distr_r_in_summation : ∀ b e f g h,
   ∑ (i = b, e), (f i + g i) * h i =
   ∑ (i = b, e), (f i * h i + g i * h i).
 Proof.
 intros.
-apply summation_eq_compat.
+apply rngl_summation_eq_compat.
 intros * Hbe.
 apply Nat.mul_add_distr_r.
 Qed.
@@ -360,11 +361,12 @@ Theorem double_mul_assoc_in_summation : ∀ b e f g h k,
   ∑ (i = b, e), f i * g i * h i * k i = ∑ (i = b, e), f i * (g i * h i * k i).
 Proof.
 intros.
-apply summation_eq_compat.
+apply rngl_summation_eq_compat.
 intros * Hbe.
 now do 2 rewrite Nat.mul_assoc.
 Qed.
 
+(*
 Theorem mul_assoc_in_summation : ∀ b e f g h,
   ∑ (i = b, e), f i * g i * h i = ∑ (i = b, e), f i * (g i * h i).
 Proof.
@@ -407,14 +409,24 @@ rewrite Nat.mul_comm.
 rewrite [Goal]: .mul_summation_distr_l.
 now rewrite mul_comm_in_summation.
 Qed.
+*)
+
+Theorem nat_pow_of_rngl_power : ∀ a n, (a ^ n)%L = a ^ n.
+Proof.
+intros.
+induction n; [ easy | ].
+cbn.
+progress f_equal.
+apply IHn.
+Qed.
 
 Theorem power_shuffle1_in_summation : ∀ b e a f g,
   ∑ (i = b, e), a * f i * a ^ (e - i) * g i =
   ∑ (i = b, e), f i * a ^ (S e - i) * g i.
 Proof.
 intros.
-progress unfold iter_seq.
-progress unfold iter_list.
+progress unfold Utils.iter_seq.
+progress unfold Utils.iter_list.
 (* failed to be able to use "rewrite_in_summation" here *)
 assert
   (H : ∀ i e,
@@ -427,13 +439,27 @@ assert
   now rewrite <- Nat.pow_add_r.
 }
 remember (S e - b) as n eqn:Hn.
-remember 0 as z eqn:Hz; clear Hz.
+remember 0%L as z eqn:Hz; clear Hz.
 revert e z b Hn.
 induction n as [| n IHn]; intros; [ easy | ].
 cbn - [ "-" ].
 rewrite IHn; [ | flia Hn ].
-f_equal; f_equal; rewrite H.
-f_equal; f_equal; f_equal; flia Hn.
+progress f_equal.
+progress f_equal.
+rewrite nat_pow_of_rngl_power.
+rewrite H.
+progress f_equal.
+progress f_equal.
+rewrite nat_pow_of_rngl_power.
+progress f_equal.
+rewrite <- Hn.
+progress f_equal.
+apply Nat.add_sub_eq_r.
+symmetry in Hn.
+apply Nat.add_sub_eq_nz in Hn; [ | easy ].
+rewrite Nat.add_succ_r in Hn.
+apply Nat.succ_inj in Hn.
+now rewrite Nat.add_comm in Hn.
 Qed.
 
 Theorem power_shuffle2_in_summation : ∀ b e a c f,
@@ -441,10 +467,10 @@ Theorem power_shuffle2_in_summation : ∀ b e a c f,
   ∑ (i = b, e), f i * a ^ (e - i) * c ^ S i.
 Proof.
 intros.
-progress unfold iter_seq.
-progress unfold iter_list.
+progress unfold Utils.iter_seq.
+progress unfold Utils.iter_list.
 remember (S e - b) as n eqn:Hn.
-remember 0 as z eqn:Hz; clear Hz.
+remember 0%L as z eqn:Hz; clear Hz.
 revert e z b Hn.
 induction n as [| n IHn]; intros; [ easy | ].
 cbn.
@@ -457,6 +483,7 @@ f_equal; f_equal.
 apply Nat.mul_comm.
 Qed.
 
+(*
 Theorem summation_add : ∀ b e f g,
   ∑ (i = b, e), (f i + g i) = ∑ (i = b, e), f i + ∑ (i = b, e), g i.
 Proof.
