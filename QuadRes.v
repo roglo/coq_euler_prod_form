@@ -8,6 +8,7 @@ Require Import RingLike.Core.
 Require Import RingLike.IterAdd.
 Require Import RingLike.IterMul.
 Require Import RingLike.Nat_algebra.
+Require Import RingLike.PermutationFun.
 
 Theorem fold_iter_list : ∀ {A B} (f : A → B → A) l d,
   List.fold_left f l d = Utils.iter_list l f d.
@@ -2434,15 +2435,18 @@ assert (∀ k, k * a / l ≡ (k * a + k * a mod l) mod 2). {
   now rewrite Nat_mod_add_l_mul_l.
 }
 rewrite summation_mod_idemp.
-erewrite summation_eq_compat; cycle 1. {
+erewrite rngl_summation_eq_compat; cycle 1. {
   intros k Hk.
   now rewrite H.
 }
 cbn - [ nb_of_mult_gt_half "*" "/" "mod" ].
 clear H.
 rewrite <- summation_mod_idemp.
-rewrite summation_add.
-rewrite <- mul_summation_distr_r, Nat.mul_comm.
+replace Nat.add with rngl_add by easy.
+rewrite rngl_summation_add_distr.
+replace Nat.mul with rngl_mul by easy.
+rewrite <- rngl_mul_summation_distr_r; [ | easy ].
+rewrite Nat.mul_comm.
 generalize Ha; intros H.
 apply Nat.eqb_eq in H.
 apply Nat_eq_mod_exists in H.
@@ -2453,10 +2457,10 @@ rewrite Nat.mul_comm, Nat.mul_assoc.
 rewrite <- Nat.add_assoc.
 rewrite Nat_mod_add_l_mul_r.
 clear m.
-set (r := λ i, (i * a) mod l).
+set (r := λ i, (i * a)%L mod l).
 set (m := λ i, min (r i) (l - r i)).
 rewrite Nat.add_comm.
-erewrite summation_eq_compat; cycle 1. {
+erewrite rngl_summation_eq_compat; cycle 1. {
   intros i Hi.
   now fold (r i).
 }
@@ -2479,10 +2483,12 @@ Proof.
 intros.
 specialize @summation_list_map as H2.
 specialize (H2 _ _ (λ i, min ((i * a) mod l) (l - (i * a) mod l))).
-progress unfold iter_seq.
+progress unfold Utils.iter_seq.
 rewrite <- (H2 (λ i, i)).
 clear H2.
-Search (∑ (_ = _, _), _ = ∑ (_ = _, _), _).
+rewrite Nat_sub_succ_1.
+apply (rngl_summation_list_permut Nat.eqb_eq).
+...
 Theorem summation_list_permut :
   ∀(la lb : list nat) f,
   Permutation la lb
