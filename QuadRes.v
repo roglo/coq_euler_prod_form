@@ -2132,13 +2132,13 @@ rewrite <- Nat.add_sub_assoc; cycle 1. {
 }
 rewrite Nat_sub_succ_1.
 rewrite Nat_mod_add_l_mul_l.
-...
-rewrite Nat.Div0.mod_same, Nat.eqb_refl.
-f_equal.
-apply summation_eq_compat.
+rewrite Nat.Div0.mod_same.
+cbn - [ "*" "mod" "/" "-" ].
+f_equal; [ | now rewrite Nat.mul_succ_r ].
+apply rngl_summation_eq_compat.
 intros i Hi.
 rewrite Nat.sub_0_r.
-now rewrite Nat.add_comm, Nat.add_sub.
+now rewrite Nat_sub_succ_1.
 Qed.
 
 Theorem Nat_inj_succ_mod_le : ∀ a b c, a ≤ b → S a ≡ S b mod c → a ≡ b mod c.
