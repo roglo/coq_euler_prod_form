@@ -366,16 +366,16 @@ intros * Hbe.
 now do 2 rewrite Nat.mul_assoc.
 Qed.
 
-(*
 Theorem mul_assoc_in_summation : ∀ b e f g h,
   ∑ (i = b, e), f i * g i * h i = ∑ (i = b, e), f i * (g i * h i).
 Proof.
 intros.
-apply summation_eq_compat.
+apply rngl_summation_eq_compat.
 intros * Hbe.
 symmetry; apply Nat.mul_assoc.
 Qed.
 
+(*
 Theorem mul_comm_in_summation : ∀ b e f g,
   ∑ (i = b, e), f i * g i = ∑ (i = b, e), g i * f i.
 Proof.
