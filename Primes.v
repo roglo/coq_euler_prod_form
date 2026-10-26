@@ -5,6 +5,10 @@ From Stdlib Require Import Utf8 Arith SetoidList Permutation.
 Require Import Misc.
 Import List ListNotations.
 
+Require Import RingLike.Core.
+Require Import RingLike.IterAdd.
+Require Import RingLike.Nat_algebra.
+
 Fixpoint prime_test cnt n d :=
   match cnt with
   | 0 => true
@@ -1790,9 +1794,10 @@ Theorem newton_binomial : ∀ n a b,
 Proof.
 intros.
 induction n; [ easy | ].
-cbn - [ "-" binomial ].
+cbn - [ "-" binomial rngl_zero rngl_add ].
 rewrite IHn.
-rewrite mul_summation_distr_l.
+...
+rewrite rngl_mul_summation_distr_l.
 rewrite mul_add_distr_r_in_summation.
 rewrite summation_add.
 do 2 rewrite <- double_mul_assoc_in_summation.

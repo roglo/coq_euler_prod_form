@@ -5,6 +5,10 @@ From Stdlib Require Import Utf8 Arith Psatz Sorted Permutation Decidable.
 Import List.ListNotations.
 Open Scope list.
 
+Require Import RingLike.Core.
+Require Import RingLike.IterAdd.
+Require Import RingLike.Nat_algebra.
+
 Global Hint Resolve Nat.le_0_l : core.
 Global Hint Resolve Nat.lt_0_succ : core.
 
@@ -55,6 +59,12 @@ Qed.
 
 (* summations and products *)
 
+(*
+Arguments rngl_zero : simpl never.
+Arguments rngl_add : simpl never.
+*)
+
+(*
 Definition iter_list {A B} (l : list B) f (d : A) := List.fold_left f l d.
 
 Definition iter_seq {T} b e f (d : T) := iter_list (List.seq b (S e - b)) f d.
@@ -83,6 +93,7 @@ Notation "'∏' ( i ∈ l ) , g" :=
   (at level 35, i at level 0, l at level 60,
    right associativity,
    format "'[hv  ' ∏  ( i  ∈  l ) ,  '/' '[' g ']' ']'").
+*)
 
 Theorem List_fold_left_add_fun_from_0 {A} : ∀ a l (f : A → nat),
   List.fold_left (λ c i, c + f i) l a =
@@ -140,6 +151,7 @@ apply Hfg.
 now right.
 Qed.
 
+(*
 Theorem iter_seq_split_last : ∀ T d (op : T → T → T) b k g,
   b ≤ k
   → iter_seq b k (λ (c : T) (i : nat), op c (g i)) d =
@@ -392,7 +404,7 @@ Theorem mul_summation_distr_r : ∀ a b e f,
 Proof.
 intros.
 rewrite Nat.mul_comm.
-rewrite mul_summation_distr_l.
+rewrite [Goal]: .mul_summation_distr_l.
 now rewrite mul_comm_in_summation.
 Qed.
 
@@ -533,6 +545,7 @@ rewrite <- Nat.Div0.add_mod_idemp_r; symmetry.
 f_equal; f_equal.
 apply IHm; flia Hm.
 Qed.
+*)
 
 Lemma List_fold_left_seq_succ_last : ∀ g b len s,
   List.fold_left (λ c i, c + g i) (List.seq b (S len)) s =
@@ -545,6 +558,7 @@ remember (S len) as x; cbn; subst x.
 now rewrite IHlen, Nat.add_succ_comm.
 Qed.
 
+(*
 Theorem summation_rtl : ∀ g b k,
   ∑ (i = b, k), g i = ∑ (i = b, k), g (k + b - i).
 Proof.
@@ -576,6 +590,7 @@ apply summation_eq_compat.
 intros i Hi; f_equal.
 flia.
 Qed.
+*)
 
 (* *)
 
@@ -1013,10 +1028,10 @@ Theorem Nat_pow_sub_pow : ∀ a b n,
 Proof.
 intros * Hba.
 induction n; [ easy | ].
-cbn - [ "-" ].
+cbn - [ "-" rngl_zero rngl_add ].
 destruct (Nat.eq_dec n 0) as [Hnz| Hnz]. {
-  subst n; cbn.
-  rewrite summation_only_one; cbn.
+  subst n; cbn - [ rngl_zero rngl_add ].
+  rewrite rngl_summation_only_one; cbn.
   now do 3 rewrite Nat.mul_1_r.
 }
 rewrite <- (Nat.sub_add (a * b ^ n) (a * a ^ n)). 2: {
@@ -1030,19 +1045,29 @@ rewrite (Nat.mul_comm a).
 rewrite IHn, <- Nat.mul_assoc.
 rewrite <- Nat.mul_add_distr_l; f_equal.
 symmetry.
-rewrite (summation_split_last 1 (S n)); [ | now apply -> Nat.succ_le_mono ].
-rewrite summation_succ_succ.
+rewrite (rngl_summation_split_last 1 (S n)); cycle 1. {
+  now apply -> Nat.succ_le_mono.
+}
+rewrite rngl_summation_succ_succ.
 rewrite Nat.sub_succ.
 rewrite Nat.sub_diag.
-rewrite Nat.pow_0_r, Nat.mul_1_l.
+rewrite rngl_pow_0_r, Nat.mul_1_l.
 rewrite Nat_sub_succ_1.
-f_equal.
-rewrite mul_summation_distr_r.
-apply summation_eq_compat.
+progress unfold rngl_add at 1.
+progress unfold nat_ring_like_op.
+f_equal; cycle 1. {
+  clear.
+  induction n; [ easy | cbn ].
+  now progress f_equal.
+}  
+replace Nat.mul with rngl_mul by easy.
+rewrite rngl_mul_summation_distr_r; [ | easy ].
+apply rngl_summation_eq_compat.
 intros i Hi.
 rewrite Nat_sub_succ_1.
 rewrite Nat.mul_shuffle0; f_equal.
 rewrite Nat.sub_succ_l; [ cbn | easy ].
+progress f_equal.
 apply Nat.mul_comm.
 Qed.
 
