@@ -1814,23 +1814,37 @@ rewrite mul_assoc_in_summation.
 rewrite mul_add_distr_r_in_summation.
 rewrite rngl_summation_add_distr.
 rewrite Nat.add_assoc.
-do 2 rewrite <- mul_assoc_in_summation.
+do 5 rewrite <- mul_assoc_in_summation.
 rewrite Nat.add_shuffle0.
-...
+replace Nat.add with rngl_add by easy.
+replace Nat.mul with rngl_mul by easy.
 progress f_equal.
-rewrite <- (summation_succ_succ 0 n (λ i, binomial n i * a ^ (S n - i) * b ^ i)).
-rewrite summation_split_last; [ | flia ].
-rewrite summation_succ_succ.
+rewrite rngl_summation_split_last; [ | flia ].
 rewrite Nat.sub_diag.
-rewrite Nat.pow_0_r, Nat.mul_1_r.
+rewrite rngl_pow_0_r, rngl_mul_1_r.
 rewrite binomial_succ_diag_r, Nat.mul_0_l, Nat.add_0_r.
 symmetry.
-rewrite summation_split_first; [ | flia ].
-rewrite binomial_0_r, Nat.mul_1_l, Nat.sub_0_r, Nat.pow_0_r, Nat.mul_1_r.
-f_equal.
-apply summation_eq_compat.
+rewrite rngl_summation_split_first; [ | flia ].
+rewrite binomial_0_r, Nat.mul_1_l, Nat.sub_0_r, rngl_pow_0_r, Nat.mul_1_r.
+rewrite nat_pow_of_rngl_power.
+progress f_equal.
+apply rngl_summation_eq_compat.
 intros i Hi.
-now rewrite Nat_sub_succ_1.
+rewrite Nat.sub_succ.
+symmetry.
+rewrite <- Nat.mul_assoc.
+do 2 rewrite nat_pow_of_rngl_power.
+rewrite <- Nat.pow_succ_r'.
+rewrite <- Nat.sub_succ_l; [ | easy ].
+rewrite Nat_sub_succ_1.
+replace rngl_mul with Nat.mul by easy.
+do 2 rewrite nat_pow_of_rngl_power.
+progress f_equal.
+progress f_equal.
+progress f_equal.
+rewrite Nat.sub_sub_distr; [ | easy | easy ].
+rewrite <- Nat.add_sub_swap; [ | easy ].
+now rewrite Nat.add_1_r.
 Qed.
 
 Theorem binomial_prime : ∀ p k,
@@ -1879,6 +1893,7 @@ Theorem sum_power_prime_mod : ∀ p, prime p →
 Proof.
 intros * Hp *.
 rewrite newton_binomial.
+...
 rewrite summation_split_first; [ | flia ].
 rewrite binomial_0_r, Nat.mul_1_l, Nat.sub_0_r, Nat.pow_0_r, Nat.mul_1_r.
 specialize (prime_ge_2 p Hp) as H2p.
