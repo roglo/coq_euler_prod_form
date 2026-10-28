@@ -2473,7 +2473,7 @@ assert
      (μ * l - ∑ (j = 1, (l - 1) / 2), m j)). {
   progress unfold r.
 (**)
-  specialize coprimes_all_different_multiples as H1.
+  specialize (coprimes_all_different_multiples _ _ Hal) as H1.
 ...
 assert (∑ (i = 1, (l - 1) /2), m i = ∑ (i = 1, (l - 1) / 2), i).
 progress unfold m, r.
