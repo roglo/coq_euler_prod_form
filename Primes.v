@@ -27,6 +27,9 @@ Definition is_prime n :=
 
 Definition prime p := is_prime p = true.
 
+Definition coprimes a b := Nat.gcd a b = 1.
+Definition are_coprimes a b := Nat.gcd a b =? 1.
+
 Theorem prime_test_false_exists_div_iff : ∀ n k,
   2 ≤ k
   → (∀ d, 2 ≤ d < k → n mod d ≠ 0)
@@ -1929,16 +1932,15 @@ rewrite Nat.mul_comm.
 apply Nat.Div0.mod_mul; flia H2p.
 Qed.
 
-Theorem smaller_than_prime_all_different_multiples : ∀ p,
-  prime p
-  → ∀ a, 1 ≤ a < p
+Theorem coprimes_all_different_multiples : ∀ a p,
+  coprimes a p
   → ∀ i j, i < j < p → (i * a) mod p ≠ (j * a) mod p.
 Proof.
-intros * Hp * Hap * Hijp.
+intros * Hap * Hijp.
 intros Haa; symmetry in Haa.
 apply Nat_mul_mod_cancel_r in Haa. 2: {
   rewrite Nat.gcd_comm.
-  now apply eq_gcd_prime_small_1.
+  now rewrite Nat.gcd_comm.
 }
 rewrite Nat.mod_small in Haa; [ | easy ].
 rewrite Nat.mod_small in Haa; [ | flia Hijp ].
@@ -1986,13 +1988,17 @@ Theorem Fermat_little : ∀ p,
   prime p → ∀ a, 1 ≤ a < p → a ^ (p - 1) mod p = 1.
 Proof.
 intros * Hp * Hap.
-specialize (smaller_than_prime_all_different_multiples p Hp a Hap) as H1.
+assert (Hcp : coprimes a p). {
+  progress unfold coprimes.
+  rewrite Nat.gcd_comm.
+  now apply eq_gcd_prime_small_1.
+}
+specialize (coprimes_all_different_multiples a p Hcp) as H1.
 assert (Hpz : p ≠ 0) by now intros H; rewrite H in Hp.
 assert
   (Hperm :
      Permutation (map (λ i, (i * a) mod p) (seq 1 (p - 1)))
        (seq 1 (p - 1))). {
-(**)
   apply NoDup_Permutation_bis; cycle 1. {
     now rewrite length_map, length_seq.
   } {
@@ -2011,9 +2017,13 @@ assert
     assert (H : Nat.gcd p j = 1) by now apply eq_gcd_prime_small_1.
     specialize (H2 H); clear H.
     destruct H2 as (c, Hc).
-    rewrite Hc in Hap.
-    destruct c; [ easy | ].
-    cbn in Hap; flia Hap.
+    progress unfold coprimes in Hcp.
+    rewrite <- (Nat.mul_1_l p) in Hcp.
+    rewrite Hc in Hcp.
+    rewrite Nat.gcd_mul_mono_r in Hcp.
+    rewrite Nat_gcd_1_r in Hcp.
+    rewrite Nat.mul_1_l in Hcp.
+    now subst p.
   } {
     remember (λ i, (i * a) mod p) as f eqn:Hf.
     assert (H2 : ∀ i j, i < j < p → f i ≠ f j) by now rewrite Hf.
@@ -2076,7 +2086,8 @@ apply Nat_mul_mod_cancel_l in Hx1. 2: {
   rewrite Nat.gcd_comm.
   apply Nat_gcd_prime_fact_lt; [ easy | flia Hpz ].
 }
-rewrite (Nat.mod_small 1) in Hx1; [ easy | flia Hap ].
+rewrite (Nat.mod_small 1) in Hx1; [ easy | ].
+now apply prime_ge_2.
 Qed.
 
 (* proof simpler than Fermat_little; but could be a corollary *)

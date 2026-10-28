@@ -477,15 +477,14 @@ Qed.
 
 Theorem congruence_inverse_has_unique_solution :
   ∀ p a,
-  prime p
-  → 0 < a < p
-  → ∀ b, 1 ≤ b < p
+  0 < a < p
+  → ∀ b, coprimes b p
   → ∃! b', (b' < p ∧ (b * b') mod p = a).
 Proof.
-intros * Hp (Ha, Hap) * Hb.
-assert (Hpz : p ≠ 0) by flia Hb.
+intros * (Ha, Hap) * Hcp.
+assert (Hpz : p ≠ 0) by now intros H; subst p.
 apply Nat.neq_0_lt_0 in Ha.
-specialize (smaller_than_prime_all_different_multiples p Hp b Hb) as H1.
+specialize (coprimes_all_different_multiples b p Hcp) as H1.
 specialize (not_forall_in_interv_imp_exist 1 (p - 1)) as H2.
 specialize (H2 (λ b', (b * b') mod p = a)).
 cbn in H2.
@@ -496,7 +495,7 @@ assert (H : ∀ n, Decidable.decidable ((b * n) mod p = a)). {
 specialize (H2 H); clear H.
 assert (H : 1 ≤ p - 1). {
   destruct p; [ easy | ].
-  destruct p; [ easy | flia ].
+  destruct p; [ flia Ha Hap | flia ].
 }
 specialize (H2 H); clear H.
 assert (Hb' : ¬ (∀ b', (b * b') mod p ≠ a)). {
@@ -540,20 +539,14 @@ split. {
   rewrite <- Nat.Div0.mul_mod_idemp_r in H2.
   rewrite <- H2 in Hxa.
   destruct (le_dec (b' mod p) x) as [Hbx| Hbx]. {
-    apply Nat_mul_mod_cancel_l in Hxa. 2: {
-      rewrite Nat.gcd_comm.
-      now apply eq_gcd_prime_small_1.
-    }
+    apply Nat_mul_mod_cancel_l in Hxa; [ | easy ].
     rewrite Nat.Div0.mod_mod in Hxa.
     rewrite <- Hxa.
     now apply Nat.mod_small.
   } {
     apply Nat.nle_gt in Hbx.
     symmetry in Hxa.
-    apply Nat_mul_mod_cancel_l in Hxa. 2: {
-      rewrite Nat.gcd_comm.
-      now apply eq_gcd_prime_small_1.
-    }
+    apply Nat_mul_mod_cancel_l in Hxa; [ | easy ].
     rewrite Nat.Div0.mod_mod in Hxa.
     symmetry in Hxa.
     now rewrite Nat.mod_small in Hxa.
@@ -575,7 +568,11 @@ intros b Hbp.
 assert (Hbb : ∀ b, 1 ≤ b < p → ∃! b', (b' < p ∧ (b * b') mod p = a)). {
   clear b Hbp.
   intros b Hb.
-  apply congruence_inverse_has_unique_solution; [ easy | | easy ].
+  apply congruence_inverse_has_unique_solution; cycle 1. {
+    progress unfold coprimes.
+    rewrite Nat.gcd_comm.
+    now apply eq_gcd_prime_small_1.
+  }
   split; [ | easy ].
   now apply Nat.neq_0_lt_0.
 }
@@ -1294,6 +1291,11 @@ Theorem eq_product_abs_fact_mod :
   → ∏ (i = 1, h), abs ((i * a) mod p) p ≡ fact h mod p.
 Proof.
 intros * Hp (Haz, Hap) Hh.
+assert (Hcp : coprimes a p). {
+  progress unfold coprimes.
+  rewrite Nat.gcd_comm.
+  now apply eq_gcd_prime_small_1.
+}
 destruct (Nat.eq_dec p 0) as [Hpz| Hpz]; [ now subst p | ].
 specialize abs_all_different_multiples as H4.
 assert (H: 1 ≤ a < p) by easy.
@@ -1391,7 +1393,7 @@ assert (Hija :
     rewrite <- (Nat.Div0.mul_mod_idemp_l (S i)) in Hij.
     rewrite <- (Nat.Div0.mul_mod_idemp_l (S j)) in Hij.
     exfalso; revert Hij.
-    apply smaller_than_prime_all_different_multiples; [ easy | easy | ].
+    apply coprimes_all_different_multiples; [ easy | ].
     split; [ easy | ].
     now apply Nat.mod_upper_bound.
   }
@@ -1400,7 +1402,7 @@ assert (Hija :
     rewrite <- (Nat.Div0.mul_mod_idemp_l (S j)) in Hij.
     symmetry in Hij.
     exfalso; revert Hij.
-    apply smaller_than_prime_all_different_multiples; [ easy | easy | ].
+    apply coprimes_all_different_multiples; [ easy | ].
     split; [ easy | ].
     now apply Nat.mod_upper_bound.
   }
@@ -1511,9 +1513,6 @@ destruct x, y. {
   now apply Hija.
 }
 Qed.
-
-Definition coprimes a b := Nat.gcd a b = 1.
-Definition are_coprimes a b := Nat.gcd a b =? 1.
 
 Theorem Gauss_lemma :
   ∀ a p, prime p → coprimes a p →
@@ -2473,6 +2472,9 @@ assert
      (T - ∑ (j = 1, (l - 1) / 2), m j) +
      (μ * l - ∑ (j = 1, (l - 1) / 2), m j)). {
   progress unfold r.
+(**)
+  specialize coprimes_all_different_multiples as H1.
+...
 assert (∑ (i = 1, (l - 1) /2), m i = ∑ (i = 1, (l - 1) / 2), i).
 progress unfold m, r.
 Theorem glop :
