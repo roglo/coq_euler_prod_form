@@ -2303,7 +2303,7 @@ destruct x. {
 }
 Qed.
 
-(* to be completed
+(* to be completed *)
 Theorem quadratic_reciprocity :
   ∀ p q, prime p → prime q → 2 < p < q →
   is_quadratic_residue p q = is_quadratic_residue q p ↔
