@@ -2474,6 +2474,53 @@ assert
   progress unfold r.
 (**)
   specialize (coprimes_all_different_multiples _ _ Hal) as H1.
+Print abs.
+assert (∀ a b, abs a b = min a (b - a)). {
+  clear a Hal Ha r m Heqμ H1.
+  intros.
+  progress unfold abs.
+  rewrite Nat_min_if_then_else.
+...
+  remember (a <=? _) as x eqn:Hx; symmetry in Hx.
+  remember (a <=? _) as y eqn:Hy in |-*; symmetry in Hy.
+  destruct x, y; [ easy | | | easy ]. {
+    apply Nat.leb_le in Hx.
+    apply Nat.leb_nle in Hy.
+    exfalso; apply Hy; clear Hy.
+    apply Nat.le_add_le_sub_l.
+    apply (Nat.mul_le_mono_pos_r _ _ 2) in Hx; [ | easy ].
+    rewrite <- Nat_mul_2_l, Nat.mul_comm.
+    eapply Nat.le_trans; [ apply Hx | ].
+    rewrite Nat.mul_comm.
+    eapply Nat.le_trans.
+    apply Nat.Div0.mul_div_le.
+    apply Nat.le_sub_l.
+  } {
+    apply Nat.leb_le in Hy.
+    apply Nat.leb_gt in Hx.
+    apply (Nat.add_le_mono_r _ _ a) in Hy.
+    destruct (le_dec a b) as [Hab| Hab]. {
+      rewrite Nat.sub_add in Hy; [ | easy ].
+      rewrite <- Nat_mul_2_l, Nat.mul_comm in Hy.
+      apply (Nat.mul_lt_mono_pos_r 2) in Hx; [ | easy ].
+...
+    exfalso; apply Hx; clear Hx.
+    apply Nat.div_le_lower_bound; [ easy | ].
+    eapply Nat.le_trans; [ apply Hy | ].
+    destruct (le_dec a b) as [Hab| Hab]. {
+      rewrite Nat.sub_add; [ | easy ].
+      rewrite Nat.sub_add in Hy; [ | easy ].
+...
+    apply Nat.le_add_le_sub_l.
+    apply (Nat.mul_le_mono_pos_r _ _ 2) in Hx; [ | easy ].
+    rewrite <- Nat_mul_2_l, Nat.mul_comm.
+    eapply Nat.le_trans; [ apply Hx | ].
+    rewrite Nat.mul_comm.
+    eapply Nat.le_trans.
+    apply Nat.Div0.mul_div_le.
+    apply Nat.le_sub_l.
+...
+    apply Nat.lt_sub_lt_add_l in Hy.
 ...
 assert (∑ (i = 1, (l - 1) /2), m i = ∑ (i = 1, (l - 1) / 2), i).
 progress unfold m, r.
