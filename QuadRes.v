@@ -1848,9 +1848,6 @@ rewrite Nat.add_comm in Hab; cbn in Hab.
 now rewrite Nat.sub_add.
 Qed.
 
-Definition is_even n := Nat.eqb (n mod 2) 0.
-Definition is_odd n := Nat.eqb (n mod 2) 1.
-
 Theorem Nat_eq_mul_2_div_mod_to_bool :
   ∀ a n,
   n ≠ 0
@@ -2302,6 +2299,55 @@ destruct x. {
 }
 Qed.
 
+Theorem abs_eq_min : ∀ a b, Nat.Odd b → abs a b = min a (b - a).
+Proof.
+intros * Hb.
+progress unfold abs.
+rewrite Nat_min_if_then_else.
+remember (a <=? _) as x eqn:Hx; symmetry in Hx.
+remember (a <=? _) as y eqn:Hy in |-*; symmetry in Hy.
+destruct x, y; [ easy | | | easy ]. {
+  apply Nat.leb_le in Hx.
+  apply Nat.leb_nle in Hy.
+  exfalso; apply Hy; clear Hy.
+  apply Nat.le_add_le_sub_l.
+  apply (Nat.mul_le_mono_pos_r _ _ 2) in Hx; [ | easy ].
+  rewrite <- Nat_mul_2_l, Nat.mul_comm.
+  eapply Nat.le_trans; [ apply Hx | ].
+  rewrite Nat.mul_comm.
+  eapply Nat.le_trans.
+  apply Nat.Div0.mul_div_le.
+  apply Nat.le_sub_l.
+} {
+  apply Nat.leb_le in Hy.
+  apply Nat.leb_gt in Hx.
+  apply (Nat.add_le_mono_r _ _ a) in Hy.
+  destruct (le_dec a b) as [Hab| Hab]. {
+    rewrite Nat.sub_add in Hy; [ | easy ].
+    rewrite <- Nat_mul_2_l, Nat.mul_comm in Hy.
+    apply (Nat.mul_lt_mono_pos_l 2) in Hx; [ | easy ].
+    rewrite <- Nat.Lcm0.divide_div_mul_exact in Hx; cycle 1. {
+      destruct Hb as (m, Hm).
+      rewrite Hm, Nat.add_sub.
+      apply Nat.divide_factor_l.
+    }
+    rewrite Nat.mul_comm, Nat.div_mul in Hx; [ | easy ].
+    apply Nat.lt_sub_lt_add_l in Hx.
+    apply -> Nat.lt_succ_r in Hx.
+    apply Nat.le_antisymm in Hx; [ | now rewrite Nat.mul_comm ].
+    rewrite <- Hx.
+    rewrite Nat_mul_2_l.
+    apply Nat.add_sub.
+  }
+  apply Nat.nle_gt in Hab.
+  rewrite (proj2 (Nat.sub_0_le b a)) in Hy; [ | now apply Nat.lt_le_incl ].
+  cbn in Hy.
+  apply Nat.le_add_le_sub_l in Hy.
+  rewrite Nat.sub_diag in Hy.
+  now apply Nat.le_0_r in Hy; subst a.
+}
+Qed.
+
 (* to be completed
 Theorem quadratic_reciprocity :
   ∀ p q, prime p → prime q → 2 < p < q →
@@ -2386,10 +2432,12 @@ destruct mqp as [a| ]. {
     destruct Hp4 as [Hp4| Hp4]; [ now left | right ].
     destruct Hq4 as [Hq4| Hq4]; [ easy | exfalso ].
 Check Eisenstein_lemma.
+Check Nat.Odd.
+Check Nat.odd.
 Theorem Eisenstein_lemma' : ∀ a l,
   coprimes a l
-  → is_odd a = true
-  → is_odd l = true
+  → Nat.Odd a
+  → Nat.Odd l
   → nb_of_mult_gt_half a l ≡ (∑ (k = 1, (l - 1) / 2), k * a / l) mod 2.
 Proof.
 intros * Hal Ha Hl.
@@ -2422,15 +2470,17 @@ erewrite summation_eq_compat; cycle 1. {
 assert (∀ k, k * a / l ≡ (k * a + k * a mod l) mod 2). {
   intros k.
   specialize (Nat.div_mod (k * a) l Hlz) as H.
+(*
   apply Nat.eqb_eq in Hl.
   apply Nat_eq_mod_exists in Hl.
-  destruct Hl as ((m, Hl), _).
+*)
+  destruct Hl as (m, Hl).
   rewrite H, Hl at 2.
   rewrite Nat.mul_add_distr_r, Nat.mul_1_l.
   rewrite <- Nat.add_assoc.
   rewrite <- Nat_mul_2_l.
   rewrite Nat_mod_add_r_mul_l.
-  rewrite (Nat.mul_comm m), <- Nat.mul_assoc.
+  rewrite <- Nat.mul_assoc.
   now rewrite Nat_mod_add_l_mul_l.
 }
 rewrite summation_mod_idemp.
@@ -2447,14 +2497,12 @@ replace Nat.mul with rngl_mul by easy.
 rewrite <- rngl_mul_summation_distr_r; [ | easy ].
 rewrite Nat.mul_comm.
 generalize Ha; intros H.
-apply Nat.eqb_eq in H.
-apply Nat_eq_mod_exists in H.
-destruct H as ((m, H), _).
+destruct H as (m, H).
 rewrite H at 2; clear H.
 rewrite Nat.mul_add_distr_r, Nat.mul_1_l.
-rewrite Nat.mul_comm, Nat.mul_assoc.
+rewrite <- Nat.mul_assoc.
 rewrite <- Nat.add_assoc.
-rewrite Nat_mod_add_l_mul_r.
+rewrite Nat_mod_add_l_mul_l.
 clear m.
 set (r := λ i, (i * a)%L mod l).
 set (m := λ i, min (r i) (l - r i)).
@@ -2474,35 +2522,7 @@ assert
   progress unfold r.
 (**)
   specialize (coprimes_all_different_multiples _ _ Hal) as H1.
-Print abs.
-assert (∀ a b, abs a b = min a (b - a)). {
-  clear a Hal Ha r m Heqμ H1.
-  intros.
-  progress unfold abs.
-  rewrite Nat_min_if_then_else.
-...
-  remember (a <=? _) as x eqn:Hx; symmetry in Hx.
-  remember (a <=? _) as y eqn:Hy in |-*; symmetry in Hy.
-  destruct x, y; [ easy | | | easy ]. {
-    apply Nat.leb_le in Hx.
-    apply Nat.leb_nle in Hy.
-    exfalso; apply Hy; clear Hy.
-    apply Nat.le_add_le_sub_l.
-    apply (Nat.mul_le_mono_pos_r _ _ 2) in Hx; [ | easy ].
-    rewrite <- Nat_mul_2_l, Nat.mul_comm.
-    eapply Nat.le_trans; [ apply Hx | ].
-    rewrite Nat.mul_comm.
-    eapply Nat.le_trans.
-    apply Nat.Div0.mul_div_le.
-    apply Nat.le_sub_l.
-  } {
-    apply Nat.leb_le in Hy.
-    apply Nat.leb_gt in Hx.
-    apply (Nat.add_le_mono_r _ _ a) in Hy.
-    destruct (le_dec a b) as [Hab| Hab]. {
-      rewrite Nat.sub_add in Hy; [ | easy ].
-      rewrite <- Nat_mul_2_l, Nat.mul_comm in Hy.
-      apply (Nat.mul_lt_mono_pos_r 2) in Hx; [ | easy ].
+Check abs_eq_min.
 ...
     exfalso; apply Hx; clear Hx.
     apply Nat.div_le_lower_bound; [ easy | ].
