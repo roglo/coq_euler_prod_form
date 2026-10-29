@@ -2522,7 +2522,14 @@ assert
   progress unfold r.
 (**)
   specialize (coprimes_all_different_multiples _ _ Hal) as H1.
-Check abs_eq_min.
+  remember (∑ (i = _, _), _) as x in |-*.
+  erewrite rngl_summation_eq_compat; cycle 1. {
+    intros i Hi.
+    progress unfold m.
+    now rewrite <- abs_eq_min.
+  }
+  cbn - [ "/" ].
+Search abs.
 ...
     exfalso; apply Hx; clear Hx.
     apply Nat.div_le_lower_bound; [ easy | ].
