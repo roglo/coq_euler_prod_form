@@ -2529,7 +2529,8 @@ assert
     now rewrite <- abs_eq_min.
   }
   cbn - [ "/" ].
-Search abs.
+  subst x.
+  progress unfold r.
 ...
     exfalso; apply Hx; clear Hx.
     apply Nat.div_le_lower_bound; [ easy | ].
