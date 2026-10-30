@@ -2512,6 +2512,10 @@ erewrite rngl_summation_eq_compat; cycle 1. {
   now fold (r i).
 }
 rewrite Nat.add_comm.
+specialize (coprimes_all_different_multiples _ _ Hal) as H1.
+(**)
+rewrite eq_nb_of_mult_gt_half_summation.
+...
 remember (∑ (i = 1, (l - 1) / 2), i) as T.
 remember (nb_of_mult_gt_half a l) as μ.
 move μ before T.
@@ -2521,7 +2525,6 @@ assert
      (μ * l - ∑ (j = 1, (l - 1) / 2), m j)). {
   progress unfold r.
 (**)
-  specialize (coprimes_all_different_multiples _ _ Hal) as H1.
   remember (∑ (i = _, _), _) as x in |-*.
   erewrite rngl_summation_eq_compat; cycle 1. {
     intros i Hi.
@@ -2531,6 +2534,7 @@ assert
   cbn - [ "/" ].
   subst x.
   progress unfold r.
+rewrite HeqT.
 ...
     exfalso; apply Hx; clear Hx.
     apply Nat.div_le_lower_bound; [ easy | ].
