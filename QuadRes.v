@@ -2442,6 +2442,7 @@ Theorem Eisenstein_lemma' : ∀ a l,
 Proof.
 intros * Hal Ha Hl.
 destruct (Nat.eq_dec l 0) as [Hlz| Hlz]; [ now subst l | ].
+...
 (*
 rewrite summation_mod_idemp.
 erewrite summation_eq_compat; cycle 1. {
@@ -2514,8 +2515,8 @@ erewrite rngl_summation_eq_compat; cycle 1. {
 rewrite Nat.add_comm.
 specialize (coprimes_all_different_multiples _ _ Hal) as H1.
 (**)
-rewrite eq_nb_of_mult_gt_half_summation.
 ...
+rewrite eq_nb_of_mult_gt_half_summation.
 remember (∑ (i = 1, (l - 1) / 2), i) as T.
 remember (nb_of_mult_gt_half a l) as μ.
 move μ before T.
@@ -2524,6 +2525,15 @@ assert
      (T - ∑ (j = 1, (l - 1) / 2), m j) +
      (μ * l - ∑ (j = 1, (l - 1) / 2), m j)). {
   progress unfold r.
+rewrite HeqT.
+progress unfold m.
+progress unfold r.
+Compute (
+    let l := 17 in
+    let a := 5 in
+(∑ (i = 1, (l - 1) / 2), i,
+ ∑ (j = 1, (l - 1) / 2), min ((j * a)%L mod l) (l - (j * a)%L mod l))
+).
 (**)
   remember (∑ (i = _, _), _) as x in |-*.
   erewrite rngl_summation_eq_compat; cycle 1. {
