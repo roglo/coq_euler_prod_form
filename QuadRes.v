@@ -2432,8 +2432,6 @@ destruct mqp as [a| ]. {
     destruct Hp4 as [Hp4| Hp4]; [ now left | right ].
     destruct Hq4 as [Hq4| Hq4]; [ easy | exfalso ].
 Check Eisenstein_lemma.
-Check Nat.Odd.
-Check Nat.odd.
 Theorem Eisenstein_lemma' : ∀ a l,
   coprimes a l
   → Nat.Odd a
@@ -2442,39 +2440,9 @@ Theorem Eisenstein_lemma' : ∀ a l,
 Proof.
 intros * Hal Ha Hl.
 destruct (Nat.eq_dec l 0) as [Hlz| Hlz]; [ now subst l | ].
-...
-(*
-rewrite summation_mod_idemp.
-erewrite summation_eq_compat; cycle 1. {
-  intros k Hk.
-  specialize (Nat.div_mod (k * a) l Hlz) as H.
-  apply Nat.eqb_eq in Hl.
-  apply Nat_eq_mod_exists in Hl.
-  destruct Hl as ((m, Hl), _).
-  rewrite H, Hl in H at 2.
-  rewrite Nat.mul_add_distr_r, Nat.mul_1_l in H.
-...
-  rewrite <- Nat.add_assoc in H.
-  rewrite <- Nat_mul_2_l in H.
-  rewrite Nat_mod_add_r_mul_l.
-  rewrite (Nat.mul_comm m), <- Nat.mul_assoc.
-  now rewrite Nat_mod_add_l_mul_l.
-...
-
-  apply (f_equal (λ x, x / l)) in H.
-  apply (f_equal (λ x, x mod 2)) in H.
-  remember (k * a / l) as q.
-  remember ((k * a) mod l) as r.
-  rewrite Hl in H at 1.
-...
-*)
-assert (∀ k, k * a / l ≡ (k * a + k * a mod l) mod 2). {
+assert (Hka : ∀ k, k * a / l ≡ (k * a + k * a mod l) mod 2). {
   intros k.
   specialize (Nat.div_mod (k * a) l Hlz) as H.
-(*
-  apply Nat.eqb_eq in Hl.
-  apply Nat_eq_mod_exists in Hl.
-*)
   destruct Hl as (m, Hl).
   rewrite H, Hl at 2.
   rewrite Nat.mul_add_distr_r, Nat.mul_1_l.
@@ -2484,6 +2452,39 @@ assert (∀ k, k * a / l ≡ (k * a + k * a mod l) mod 2). {
   rewrite <- Nat.mul_assoc.
   now rewrite Nat_mod_add_l_mul_l.
 }
+(**)
+assert
+  (H1 :
+    ∑ (k = 1, (l - 1) / 2), k * a =
+      l * (∑ (k = 1, (l - 1) / 2), k * a / l) +
+      (∑ (k = 1, (l - 1) / 2),
+         if (k * a) mod l <? (l - 1) / 2 then (k * a)%L mod l else 0) +
+      (∑ (k = 1, (l - 1) / 2),
+         if (k * a) mod l <? (l - 1) / 2 then 0 else (k * a)%L mod l)). {
+  erewrite rngl_summation_eq_compat; cycle 1. {
+    intros k Hk.
+    unfold rngl_mul.
+    cbn.
+    rewrite (Nat.div_mod (k * a) l Hlz).
+    replace Nat.add with rngl_add by easy.
+    replace Nat.mul with rngl_mul by easy.
+    easy.
+  }
+  cbn - [ "/" rngl_mul ].
+  rewrite rngl_summation_add_distr.
+  rewrite <- rngl_mul_summation_distr_l; [ | easy ].
+  rewrite <- Nat.add_assoc.
+  replace Nat.add with rngl_add by easy.
+  progress f_equal.
+  rewrite <- rngl_summation_add_distr.
+  apply rngl_summation_eq_compat.
+  intros k Hk.
+  symmetry.
+  destruct (_ <? _)%L.
+  apply rngl_add_0_r.
+  apply rngl_add_0_l.
+}
+...
 rewrite summation_mod_idemp.
 erewrite rngl_summation_eq_compat; cycle 1. {
   intros k Hk.
@@ -2514,8 +2515,6 @@ erewrite rngl_summation_eq_compat; cycle 1. {
 }
 rewrite Nat.add_comm.
 specialize (coprimes_all_different_multiples _ _ Hal) as H1.
-(**)
-...
 rewrite eq_nb_of_mult_gt_half_summation.
 remember (∑ (i = 1, (l - 1) / 2), i) as T.
 remember (nb_of_mult_gt_half a l) as μ.
@@ -2526,8 +2525,7 @@ assert
      (μ * l - ∑ (j = 1, (l - 1) / 2), m j)). {
   progress unfold r.
 rewrite HeqT.
-progress unfold m.
-progress unfold r.
+...
 Compute (
     let l := 17 in
     let a := 5 in
