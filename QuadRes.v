@@ -2484,6 +2484,24 @@ assert
   apply rngl_add_0_r.
   apply rngl_add_0_l.
 }
+assert
+  (H2 :
+     ∑ (k = 1, (l - 1) / 2), k =
+       ∑ (k = 1, (l - 1) / 2),
+         (if (k * a) mod l <? (l - 1) / 2 then (k * a)%L mod l else 0) +
+       nb_of_mult_gt_half a l * l -
+       ∑ (k = 1, (l - 1) / 2),
+         (if (k * a) mod l <? (l - 1) / 2 then 0 else (k * a)%L mod l)). {
+Check Gauss_lemma.
+Theorem glop :
+  ∀ a l,
+  ∑ (k = 1, (l - 1) / 2), k =
+  ∑ (k = 1, (l - 1) / 2), abs (k * a) l.
+Proof.
+Print abs.
+Search abs.
+Check abs_all_different_multiples.
+(* bin ça va pas, il me faut abs (i * a) p et non pas i * abs a p. Non ? *)
 ...
 rewrite summation_mod_idemp.
 erewrite rngl_summation_eq_compat; cycle 1. {
