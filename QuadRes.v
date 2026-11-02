@@ -1280,6 +1280,15 @@ destruct x, y. {
       apply Nat.le_sub_le_add_l in Hm.
       apply Nat.le_antisymm in Hm; [ | easy ].
       symmetry in Hm.
+      destruct (le_dec (j * a) p) as [Hjap| Hjap]. {
+        apply (f_equal (λ x, x + j * a)) in Hm.
+        rewrite Nat.sub_add in Hm; [ | easy ].
+        rewrite <- Nat.mul_add_distr_r in Hm.
+        symmetry in Hm.
+        specialize (prime_divide_mul _ Hp (i + j) a) as H1.
+        rewrite Hm in H1.
+        specialize (H1 (Nat.divide_refl _)).
+...
       apply Nat.add_sub_eq_nz in Hm; cycle 1. {
         apply Nat.neq_mul_0.
         split; [ | flia Hap ].
