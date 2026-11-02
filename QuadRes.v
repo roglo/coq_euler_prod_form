@@ -2519,7 +2519,8 @@ Theorem glop :
   ∑ (k = 1, (l - 1) / 2), k =
   ∑ (k = 1, (l - 1) / 2), abs (k * a) l.
 Proof.
-Check mul_all_different_multiples.
+intros.
+specialize mul_all_different_multiples as H1.
 ...
 rewrite summation_mod_idemp.
 erewrite rngl_summation_eq_compat; cycle 1. {
