@@ -1240,6 +1240,12 @@ Theorem abs_all_different_multiples' : ∀ p,
   → ∀ i j, i < j < p → abs (i * a) p mod p ≠ abs (j * a) p mod p.
 Proof.
 intros * Hp * Hap * Hijp.
+replace p with 7 in *.
+replace a with 1 in *.
+replace i with 1 in *.
+replace j with 6 in *.
+cbn in *.
+...
 intros Haa; symmetry in Haa.
 progress unfold abs in Haa.
 remember (_ <=? _) as x in Haa.
@@ -1288,6 +1294,17 @@ destruct x, y. {
         specialize (prime_divide_mul _ Hp (i + j) a) as H1.
         rewrite Hm in H1.
         specialize (H1 (Nat.divide_refl _)).
+        destruct H1 as [H1| H1]. {
+          destruct H1 as (n, Hn).
+          rewrite Hn in Hm.
+          rewrite Nat.mul_comm in Hm.
+          rewrite Nat.mul_assoc in Hm.
+          apply Nat.mul_id_l in Hm; [ | now intros H1; subst p ].
+          apply Nat.eq_mul_1 in Hm.
+          destruct Hm; subst a n.
+          rewrite Nat.mul_1_r in Heqx, Heqy, Hjap, Hiaj.
+          rewrite Nat.mul_1_r in Hiaj.
+          rewrite Nat.mul_1_l in Hn.
 ...
       apply Nat.add_sub_eq_nz in Hm; cycle 1. {
         apply Nat.neq_mul_0.
