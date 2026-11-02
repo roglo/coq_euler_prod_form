@@ -1266,30 +1266,18 @@ destruct x, y. {
 } {
   apply Nat.leb_gt in Heqx.
   apply Nat.leb_le in Heqy.
-  apply Nat_eq_mod_sub_0 in Haa.
-Check Nat_eq_mod_sub_0.
-Search ((_ - _) mod _ = 0).
-About Nat_eq_mod_sub_0.
-...
-  apply Nat_eq_mod_sub_0 in Haa.
-  rewrite <- Nat.sub_add_distr in Haa.
-  rewrite <- Nat.mul_add_distr_r in Haa.
-  apply Nat.Lcm0.mod_divide in Haa.
-  destruct Haa as (m, Hm).
-  destruct (Nat.eq_dec m 0) as [Hmz| Hmz]. {
-    subst m.
-    cbn in Hm.
-    apply Nat.sub_0_le in Hm.
-(**)
-replace p with 7 in *.
-replace a with 2 in *.
-replace i with 1 in *.
-replace j with 4 in *.
-cbn in *.
-...
-p=7 a=2 i=1 j=4
-...
-=7 a=2 i=1 j=4
+  destruct (le_dec (i * a) (p - j * a)) as [Hiaj| Hiaj]. {
+    apply Nat_eq_mod_sub_0 in Haa; [ | easy ].
+    rewrite <- Nat.sub_add_distr in Haa.
+    rewrite <- Nat.mul_add_distr_r in Haa.
+    apply Nat.Lcm0.mod_divide in Haa.
+    destruct Haa as (m, Hm).
+    destruct (Nat.eq_dec m 0) as [Hmz| Hmz]. {
+      subst m.
+      cbn in Hm.
+      apply Nat.sub_0_le in Hm.
+      apply (Nat.add_le_mono_r _ _ (j * a)) in Hiaj.
+Search (_ ≤  _ - _).
 ...
 Qed.
 *)
