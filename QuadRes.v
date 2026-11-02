@@ -1276,8 +1276,16 @@ destruct x, y. {
       subst m.
       cbn in Hm.
       apply Nat.sub_0_le in Hm.
-      apply (Nat.add_le_mono_r _ _ (j * a)) in Hiaj.
-Search (_ ≤  _ - _).
+      rewrite Nat.mul_add_distr_r in Hm.
+      apply Nat.le_sub_le_add_l in Hm.
+      apply Nat.le_antisymm in Hm; [ | easy ].
+      symmetry in Hm.
+      apply Nat.add_sub_eq_nz in Hm; cycle 1. {
+        apply Nat.neq_mul_0.
+        split; [ | flia Hap ].
+        intros H; subst i.
+        cbn in Hm.
+        apply Nat.sub_0_le in Hm.
 ...
 Qed.
 *)
