@@ -93,7 +93,10 @@ Lemma le_half_prime_square_diff : ∀ p a a',
 Proof.
 intros * Hp Hp2 Ha Ha' Haa.
 intros H1.
-apply Nat_eq_mod_sub_0 in H1.
+apply Nat_eq_mod_sub_0 in H1; cycle 1. {
+  apply Nat.pow_le_mono_l.
+  now apply Nat.lt_le_incl.
+}
 rewrite Nat_squ_sub_squ, Nat.mul_comm in H1.
 apply Nat.Lcm0.mod_divide in H1.
 specialize (Nat.gauss _ _ _ H1) as H2.
@@ -141,7 +144,11 @@ Lemma le_half_prime_succ_square_diff : ∀ p b b',
 Proof.
 intros * Hp Hp2 Hb Hb' Hbb' Hb1.
 assert (Hpz : p ≠ 0) by now intros H; subst p.
-apply Nat_eq_mod_sub_0 in Hb1.
+apply Nat_eq_mod_sub_0 in Hb1; cycle 1. {
+  apply Nat.add_le_mono_r.
+  apply Nat.pow_le_mono_l.
+  now apply Nat.lt_le_incl.
+}
 replace (b' ^ 2 + 1 - (b ^ 2 + 1)) with (b' ^ 2 - b ^ 2) in Hb1 by flia.
 rewrite Nat_squ_sub_squ, Nat.mul_comm in Hb1.
 apply Nat.Lcm0.mod_divide in Hb1.
@@ -187,7 +194,9 @@ Theorem Nat_eq_mod_divide_sum : ∀ n a b,
 Proof.
 intros * Hnz Hab.
 destruct (le_dec n (a + b mod n)) as [Hpx| Hpx]. {
-  apply Nat_eq_mod_sub_0 in Hab.
+  apply Nat_eq_mod_sub_0 in Hab; cycle 1. {
+    now apply Nat.le_sub_le_add_r.
+  }
   rewrite Nat_sub_sub_assoc in Hab. 2: {
     split; [ | easy ].
     now apply Nat.lt_le_incl, Nat.mod_upper_bound.
@@ -200,7 +209,10 @@ destruct (le_dec n (a + b mod n)) as [Hpx| Hpx]. {
 } {
   apply Nat.nle_gt in Hpx.
   symmetry in Hab.
-  apply Nat_eq_mod_sub_0 in Hab.
+  apply Nat_eq_mod_sub_0 in Hab; cycle 1. {
+    apply Nat.le_add_le_sub_r.
+    now apply Nat.lt_le_incl.
+  }
   rewrite Nat_sub_sub_swap, <- Nat.sub_add_distr in Hab.
   remember (a + b mod n) as v eqn:Hv.
   move Hab at bottom.
@@ -340,7 +352,10 @@ assert
   remember ((b ^ 2 + 1) mod p) as b1 eqn:Hb1.
   remember ((b' ^ 2 + 1) mod p) as b'1 eqn:Hb'1.
   destruct (lt_dec b1 b'1) as [Hbb'| Hbb']. {
-    apply Nat_eq_mod_sub_0 in H.
+    apply Nat_eq_mod_sub_0 in H; cycle 1. {
+      apply Nat.sub_le_mono_l.
+      now apply Nat.lt_le_incl.
+    }
     replace (p - b1 - (p - b'1)) with (b'1 - b1) in H. 2: {
       specialize (Nat.mod_upper_bound (b' ^ 2 + 1) p Hpz) as H1.
       rewrite <- Hb'1 in H1.
@@ -358,7 +373,10 @@ assert
   }
   destruct (lt_dec b'1 b1) as [Hbb'1| Hbb'1]. {
     symmetry in H.
-    apply Nat_eq_mod_sub_0 in H.
+    apply Nat_eq_mod_sub_0 in H; cycle 1. {
+      apply Nat.sub_le_mono_l.
+      now apply Nat.lt_le_incl.
+    }
     replace (p - b'1 - (p - b1)) with (b1 - b'1) in H. 2: {
       specialize (Nat.mod_upper_bound (b ^ 2 + 1) p Hpz) as H1.
       rewrite <- Hb1 in H1.

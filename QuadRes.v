@@ -1258,51 +1258,39 @@ destruct x, y. {
   now apply Nat.lt_irrefl in H.
 } {
   apply Nat.leb_le in Heqx.
-  apply Nat.leb_gt in Heqy.
-  destruct (lt_dec ((i + j) * a) p) as [Hija| Hija]. {
-    symmetry in Haa.
-    apply Nat_eq_mod_sub_0 in Haa.
-    rewrite <- Nat.sub_add_distr in Haa.
-    rewrite <- Nat.mul_add_distr_r in Haa.
-    apply Nat.Lcm0.mod_divide in Haa.
-    destruct Haa as (m, Hm).
-    destruct (Nat.eq_dec m 0) as [Hmz| Hmz]. {
-      subst m.
-      cbn in Hm.
-      flia Hm Hija.
-    }
-    apply Nat.add_sub_eq_nz in Hm; cycle 1. {
-      apply Nat.neq_mul_0.
-      split; [ easy | ].
-      flia Hap.
-    }
-    apply Nat.add_sub_eq_r in Hm.
-    rewrite <- (Nat.mul_1_l p) in Hm at 1.
-    rewrite <- Nat.mul_sub_distr_r in Hm.
-    replace (1 - m) with 0 in Hm by flia Hmz.
-    symmetry in Hm; cbn in Hm.
-    apply Nat.eq_mul_0 in Hm.
-    destruct Hm as [Hm| Hm]; [ | flia Hm Hap ].
-    flia Hijp Hm.
-  } {
-    apply Nat.nlt_ge in Hija.
-    symmetry in Haa.
-    apply Nat_eq_mod_sub_0 in Haa.
-    rewrite <- Nat.sub_add_distr in Haa.
-    rewrite <- Nat.mul_add_distr_r in Haa.
-    clear Haa.
-(* ouais, bon, ça marche pas *)
+  apply Nat.leb_nle in Heqy.
+  apply Heqy; clear Heqy.
+  eapply Nat.le_trans; [ | apply Heqx ].
+  apply Nat.mul_le_mono_r.
+  now apply Nat.lt_le_incl.
+} {
+  apply Nat.leb_gt in Heqx.
+  apply Nat.leb_le in Heqy.
+  apply Nat_eq_mod_sub_0 in Haa.
+Check Nat_eq_mod_sub_0.
+Search ((_ - _) mod _ = 0).
+About Nat_eq_mod_sub_0.
 ...
-apply Nat_mul_mod_cancel_r in Haa. 2: {
-  rewrite Nat.gcd_comm.
-  apply eq_gcd_prime_small_1; [ easy | ].
-  progress unfold abs.
-  destruct (_ <=? _); [ easy | ].
-  flia Hap.
-}
-rewrite Nat.mod_small in Haa; [ | easy ].
-rewrite Nat.mod_small in Haa; [ | flia Hijp ].
-flia Hijp Haa.
+  apply Nat_eq_mod_sub_0 in Haa.
+  rewrite <- Nat.sub_add_distr in Haa.
+  rewrite <- Nat.mul_add_distr_r in Haa.
+  apply Nat.Lcm0.mod_divide in Haa.
+  destruct Haa as (m, Hm).
+  destruct (Nat.eq_dec m 0) as [Hmz| Hmz]. {
+    subst m.
+    cbn in Hm.
+    apply Nat.sub_0_le in Hm.
+(**)
+replace p with 7 in *.
+replace a with 2 in *.
+replace i with 1 in *.
+replace j with 4 in *.
+cbn in *.
+...
+p=7 a=2 i=1 j=4
+...
+=7 a=2 i=1 j=4
+...
 Qed.
 *)
 
@@ -2216,7 +2204,9 @@ Proof.
 intros * Hba Hab.
   cbn in Hab.
 symmetry in Hab; symmetry.
-apply Nat_eq_mod_sub_0 in Hab.
+apply Nat_eq_mod_sub_0 in Hab; cycle 1. {
+  now apply -> Nat.succ_le_mono.
+}
 cbn in Hab.
 revert b Hab Hba.
 induction a; intros. {

@@ -2171,7 +2171,12 @@ split. {
   rewrite <- Nat.Div0.mul_mod_idemp_r in H1.
   rewrite Hj in H1.
   replace 1 with (1 mod p) in H1 at 2; [ | rewrite Nat.mod_small; flia Hip ].
-  apply Nat_eq_mod_sub_0 in H1.
+  apply Nat_eq_mod_sub_0 in H1; cycle 1. {
+    apply Nat.neq_0_lt_0.
+    intros H2.
+    apply Nat.eq_mul_0 in H2.
+    destruct H2 as [H2| H2]; flia H2 Hip.
+  }
   apply Nat.Lcm0.mod_divide in H1.
   destruct H1 as (c, Hc).
   rewrite Nat.mul_sub_distr_l, Nat.mul_1_r in Hc.
@@ -2203,7 +2208,10 @@ rewrite Nat_pow_mod_is_pow_mod in Hcon; [ | now intros H; subst p ].
 specialize (Fermat_little_1 p Hp i) as H1.
 rewrite (Nat.mod_small i) in H1; [ | flia Hip ].
 rewrite <- Hcon in H1 at 2.
-apply Nat_eq_mod_sub_0 in H1.
+apply Nat_eq_mod_sub_0 in H1; cycle 1. {
+  apply Nat.pow_le_mono_r; [ flia Hip | ].
+  apply Nat.le_sub_l.
+}
 replace p with (p - 2 + 2) in H1 at 1 by flia Hip.
 rewrite <- (Nat.mul_1_r (_ ^ (p - 2))) in H1.
 rewrite Nat.pow_add_r in H1.
@@ -2293,7 +2301,10 @@ assert
   }
   apply Nat.nle_gt in Hik.
   symmetry in Hk.
-  apply Nat_eq_mod_sub_0 in Hk.
+  apply Nat_eq_mod_sub_0 in Hk; cycle 1. {
+    apply Nat.mul_le_mono_r.
+    now apply Nat.lt_le_incl.
+  }
   rewrite <- Nat.mul_sub_distr_r in Hk.
   apply Nat.Lcm0.mod_divide in Hk.
   specialize (Nat.gauss _ _ _ Hk) as H4.

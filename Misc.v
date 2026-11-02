@@ -684,42 +684,40 @@ Notation "a ≡ b 'mod' c" :=
 Notation "a ≢ b 'mod' c" :=
   (a mod c ≠ b mod c) (at level 70, b at level 36, c at level 36).
 
-Theorem Nat_eq_mod_sub_0 : ∀ a b c, a ≡ b mod c → (a - b) mod c = 0.
+Theorem Nat_eq_mod_sub_0 : ∀ a b c, b ≤ a → a ≡ b mod c ↔ (a - b) mod c = 0.
 Proof.
 intros * Hab.
-destruct (Nat.eq_dec c 0) as [Hcz| Hcz]. {
-  now subst c; cbn in Hab; subst b; rewrite Nat.sub_diag.
+split; intros Habc. {
+  destruct (Nat.eq_dec c 0) as [Hcz| Hcz]. {
+    now subst c; cbn in Habc; subst b; rewrite Nat.sub_diag.
+  }
+  specialize (Nat.div_mod a c Hcz) as H1.
+  specialize (Nat.div_mod b c Hcz) as H2.
+  rewrite H1, H2, Habc.
+  rewrite (Nat.add_comm (c * (b / c))).
+  rewrite Nat.sub_add_distr, Nat.add_sub.
+  rewrite <- Nat.mul_sub_distr_l, Nat.mul_comm.
+  apply Nat.Div0.mod_mul.
+} {
+  destruct (Nat.eq_dec c 0) as [Hcz| Hcz]. {
+    subst c.
+    cbn in Hab |-*.
+    apply Nat.sub_0_le in Habc.
+    now apply Nat.le_antisymm.
+  }
+  destruct (Nat.eq_dec a b) as [Haeb| Haeb]; [ now subst a | ].
+  specialize (Nat.div_mod (a - b) c Hcz) as H1.
+  rewrite Habc, Nat.add_0_r in H1.
+  apply Nat.add_sub_eq_nz in H1; cycle 1. {
+    intros H2.
+    apply Nat.eq_mul_0_r in H2; [ | easy ].
+    rewrite H2, Nat.mul_0_r in H1.
+    apply Nat.sub_0_le in H1.
+    now apply Haeb, Nat.le_antisymm.
+  }
+  rewrite <- H1.
+  now rewrite Nat.mul_comm, Nat.Div0.mod_add.
 }
-specialize (Nat.div_mod a c Hcz) as H1.
-specialize (Nat.div_mod b c Hcz) as H2.
-rewrite H1, H2, Hab.
-rewrite (Nat.add_comm (c * (b / c))).
-rewrite Nat.sub_add_distr, Nat.add_sub.
-rewrite <- Nat.mul_sub_distr_l, Nat.mul_comm.
-apply Nat.Div0.mod_mul.
-Qed.
-
-Theorem Nat_eq_sub_mod_0 : ∀ a b c, b ≤ a → (a - b) mod c = 0 → a ≡ b mod c.
-Proof.
-intros * Hba Hab.
-destruct (Nat.eq_dec c 0) as [Hcz| Hcz]. {
-  subst c.
-  cbn in Hab |-*.
-  apply Nat.sub_0_le in Hab.
-  now apply Nat.le_antisymm.
-}
-destruct (Nat.eq_dec a b) as [Haeb| Haeb]; [ now subst a | ].
-specialize (Nat.div_mod (a - b) c Hcz) as H1.
-rewrite Hab, Nat.add_0_r in H1.
-apply Nat.add_sub_eq_nz in H1; cycle 1. {
-  intros H2.
-  apply Nat.eq_mul_0_r in H2; [ | easy ].
-  rewrite H2, Nat.mul_0_r in H1.
-  apply Nat.sub_0_le in H1.
-  now apply Haeb, Nat.le_antisymm.
-}
-rewrite <- H1.
-now rewrite Nat.mul_comm, Nat.Div0.mod_add.
 Qed.
 
 Theorem Nat_mod_add_r_mul_l : ∀ a b c,
@@ -1219,7 +1217,9 @@ destruct (Nat.eq_dec n 0) as [Hnz| Hnz]. {
   now do 2 rewrite Nat.mul_1_r in Hab.
 }
 destruct (le_dec b a) as [Hba| Hba]. {
-  apply Nat_eq_mod_sub_0 in Hab.
+  apply Nat_eq_mod_sub_0 in Hab; cycle 1. {
+    now apply Nat.mul_le_mono_r.
+  }
   rewrite <- Nat.mul_sub_distr_r in Hab.
   apply Nat.Lcm0.mod_divide in Hab.
   rewrite Nat.gcd_comm in Hg.
@@ -1231,7 +1231,10 @@ destruct (le_dec b a) as [Hba| Hba]. {
 } {
   apply Nat.nle_gt in Hba.
   symmetry in Hab.
-  apply Nat_eq_mod_sub_0 in Hab.
+  apply Nat_eq_mod_sub_0 in Hab; cycle 1. {
+    apply Nat.mul_le_mono_r.
+    now apply Nat.lt_le_incl.
+  }
   rewrite <- Nat.mul_sub_distr_r in Hab.
   apply Nat.Lcm0.mod_divide in Hab.
   rewrite Nat.gcd_comm in Hg.
