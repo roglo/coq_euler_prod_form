@@ -1233,88 +1233,24 @@ rewrite Nat.mod_small in Haa; [ | flia Hijp ].
 flia Hijp Haa.
 Qed.
 
-(* to be completed
-Theorem abs_all_different_multiples' : ∀ p,
+Theorem mul_all_different_multiples : ∀ p,
   prime p
-  → ∀ a, 1 ≤ a < p
-  → ∀ i j, i < j < p → abs (i * a) p mod p ≠ abs (j * a) p mod p.
+  → ∀ a, coprimes a p
+  → ∀ i j, i < j < p → i * a mod p ≠ j * a mod p.
 Proof.
 intros * Hp * Hap * Hijp.
-replace p with 7 in *.
-replace a with 1 in *.
-replace i with 1 in *.
-replace j with 6 in *.
-cbn in *.
-...
+rewrite <- Nat.Div0.mul_mod_idemp_r; symmetry.
+rewrite <- Nat.Div0.mul_mod_idemp_r; symmetry.
 intros Haa; symmetry in Haa.
-progress unfold abs in Haa.
-remember (_ <=? _) as x in Haa.
-remember (_ <=? _) as y in Haa.
-move y before x.
-symmetry in Heqx, Heqy.
-destruct x, y. {
-  apply Nat_mul_mod_cancel_r in Haa; cycle 1. {
-    rewrite Nat.gcd_comm.
-    now apply eq_gcd_prime_small_1.
-  }
-  rewrite Nat.mod_small in Haa; [ | easy ].
-  rewrite Nat.mod_small in Haa; [ | flia Hijp ].
-  subst j.
-  destruct Hijp as (H, _).
-  now apply Nat.lt_irrefl in H.
-} {
-  apply Nat.leb_le in Heqx.
-  apply Nat.leb_nle in Heqy.
-  apply Heqy; clear Heqy.
-  eapply Nat.le_trans; [ | apply Heqx ].
-  apply Nat.mul_le_mono_r.
-  now apply Nat.lt_le_incl.
-} {
-  apply Nat.leb_gt in Heqx.
-  apply Nat.leb_le in Heqy.
-  destruct (le_dec (i * a) (p - j * a)) as [Hiaj| Hiaj]. {
-    apply Nat_eq_mod_sub_0 in Haa; [ | easy ].
-    rewrite <- Nat.sub_add_distr in Haa.
-    rewrite <- Nat.mul_add_distr_r in Haa.
-    apply Nat.Lcm0.mod_divide in Haa.
-    destruct Haa as (m, Hm).
-    destruct (Nat.eq_dec m 0) as [Hmz| Hmz]. {
-      subst m.
-      cbn in Hm.
-      apply Nat.sub_0_le in Hm.
-      rewrite Nat.mul_add_distr_r in Hm.
-      apply Nat.le_sub_le_add_l in Hm.
-      apply Nat.le_antisymm in Hm; [ | easy ].
-      symmetry in Hm.
-      destruct (le_dec (j * a) p) as [Hjap| Hjap]. {
-        apply (f_equal (λ x, x + j * a)) in Hm.
-        rewrite Nat.sub_add in Hm; [ | easy ].
-        rewrite <- Nat.mul_add_distr_r in Hm.
-        symmetry in Hm.
-        specialize (prime_divide_mul _ Hp (i + j) a) as H1.
-        rewrite Hm in H1.
-        specialize (H1 (Nat.divide_refl _)).
-        destruct H1 as [H1| H1]. {
-          destruct H1 as (n, Hn).
-          rewrite Hn in Hm.
-          rewrite Nat.mul_comm in Hm.
-          rewrite Nat.mul_assoc in Hm.
-          apply Nat.mul_id_l in Hm; [ | now intros H1; subst p ].
-          apply Nat.eq_mul_1 in Hm.
-          destruct Hm; subst a n.
-          rewrite Nat.mul_1_r in Heqx, Heqy, Hjap, Hiaj.
-          rewrite Nat.mul_1_r in Hiaj.
-          rewrite Nat.mul_1_l in Hn.
-...
-      apply Nat.add_sub_eq_nz in Hm; cycle 1. {
-        apply Nat.neq_mul_0.
-        split; [ | flia Hap ].
-        intros H; subst i.
-        cbn in Hm.
-        apply Nat.sub_0_le in Hm.
-...
+apply Nat_mul_mod_cancel_r in Haa; cycle 1. {
+  now rewrite Nat.Lcm0.gcd_mod, Nat.gcd_comm.
+}
+rewrite Nat.mod_small in Haa; [ | easy ].
+rewrite Nat.mod_small in Haa; [ | flia Hijp ].
+subst j.
+destruct Hijp as (H, _).
+now apply Nat.lt_irrefl in H.
 Qed.
-*)
 
 Theorem nb_of_mult_gt_half_0_l : ∀ n, nb_of_mult_gt_half 0 n = 0.
 Proof.
@@ -2583,10 +2519,7 @@ Theorem glop :
   ∑ (k = 1, (l - 1) / 2), k =
   ∑ (k = 1, (l - 1) / 2), abs (k * a) l.
 Proof.
-Print abs.
-Search abs.
-Check abs_all_different_multiples.
-(* bin ça va pas, il me faut abs (i * a) p et non pas i * abs a p. Non ? *)
+Check mul_all_different_multiples.
 ...
 rewrite summation_mod_idemp.
 erewrite rngl_summation_eq_compat; cycle 1. {
