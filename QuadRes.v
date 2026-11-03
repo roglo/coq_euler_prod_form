@@ -1233,12 +1233,11 @@ rewrite Nat.mod_small in Haa; [ | flia Hijp ].
 flia Hijp Haa.
 Qed.
 
-Theorem mul_all_different_multiples : ∀ p,
-  prime p
-  → ∀ a, coprimes a p
+Theorem mul_all_different_multiples : ∀ a p,
+  coprimes a p
   → ∀ i j, i < j < p → i * a mod p ≠ j * a mod p.
 Proof.
-intros * Hp * Hap * Hijp.
+intros * Hap * Hijp.
 rewrite <- Nat.Div0.mul_mod_idemp_r; symmetry.
 rewrite <- Nat.Div0.mul_mod_idemp_r; symmetry.
 intros Haa; symmetry in Haa.
@@ -2369,6 +2368,19 @@ destruct x, y; [ easy | | | easy ]. {
 }
 Qed.
 
+Theorem summation_list_permut :
+  ∀ (la lb : list nat) f,
+  permutation Nat.eqb la lb
+  → ∑ (i ∈ la), f i = ∑ (i ∈ lb), f i.
+Proof.
+intros * Hp.
+specialize @rngl_summation_list_permut as H1.
+specialize (H1 nat _ _ nat Nat.eqb).
+apply H1; [ | easy ].
+progress unfold Misc.equality.
+apply Nat.eqb_eq.
+Qed.
+
 (* to be completed
 Theorem quadratic_reciprocity :
   ∀ p q, prime p → prime q → 2 < p < q →
@@ -2521,6 +2533,15 @@ Theorem glop :
 Proof.
 intros.
 specialize mul_all_different_multiples as H1.
+progress unfold Utils.iter_seq.
+Search (∑ (_ ∈ List.map _ _), _).
+symmetry.
+erewrite rngl_summation_list_change_var.
+(* merde, c'est pas ça *)
+...
+rewrite <- rngl_summation_list_map.
+
+Check summation_list_permut.
 ...
 rewrite summation_mod_idemp.
 erewrite rngl_summation_eq_compat; cycle 1. {
@@ -2614,48 +2635,6 @@ rewrite <- (H2 (λ i, i)).
 clear H2.
 rewrite Nat_sub_succ_1.
 apply (rngl_summation_list_permut Nat.eqb_eq).
-...
-Theorem summation_list_permut :
-  ∀(la lb : list nat) f,
-  Permutation la lb
-  → ∑ (i ∈ la), f i = ∑ (i ∈ lb), f i.
-Proof.
-intros * Hp.
-progress unfold iter_list.
-generalize Hp; intros Ha.
-apply Permutation_length in Ha.
-remember (List.length lb) as n eqn:Hb.
-symmetry in Hb.
-revert n lb Hp Ha Hb.
-induction la  as [| a]; intros. {
-  cbn in Ha; subst n.
-  now apply List.length_zero_iff_nil in Hb; subst lb.
-}
-destruct lb as [| b]; [ cbn in Ha, Hb; congruence | ].
-cbn in Ha, Hb.
-destruct n; [ easy | ].
-apply Nat.succ_inj in Ha, Hb.
-cbn.
-rewrite List_fold_left_add_fun_from_0; symmetry.
-rewrite List_fold_left_add_fun_from_0; symmetry.
-inversion Hp. {
-  subst.
-  apply Permutation_cons_inv in Hp.
-  f_equal.
-  now apply (IHla (length la)).
-} {
-  subst x y la lb.
-  cbn.
-  rewrite List_fold_left_add_fun_from_0; symmetry.
-  rewrite List_fold_left_add_fun_from_0; symmetry.
-  do 2 rewrite Nat.add_assoc.
-  f_equal.
-  apply Nat.add_comm.
-} {
-  subst  l l''.
-  destruct l' as [| c]. {
-    now apply Permutation_nil_cons in H0.
-  }
 ...
 rewrite iter_list_cons; [ | easy | easy | easy ].
 rewrite iter_list_cons; [ | easy | easy | easy ].
