@@ -2538,10 +2538,10 @@ assert
   (H2 :
      ∑ (k = 1, (l - 1) / 2), k =
        ∑ (k = 1, (l - 1) / 2),
-         (if (k * a) mod l <? (l - 1) / 2 then (k * a)%L mod l else 0) +
+         (if (k * a) mod l <=? (l - 1) / 2 then (k * a)%L mod l else 0) +
        nb_of_mult_gt_half a l * l -
        ∑ (k = 1, (l - 1) / 2),
-         (if (k * a) mod l <? (l - 1) / 2 then 0 else (k * a)%L mod l)). {
+         (if (k * a) mod l <=? (l - 1) / 2 then 0 else (k * a)%L mod l)). {
   rewrite <- Nat.add_sub_assoc; cycle 1. {
     rewrite eq_nb_of_mult_gt_half_summation.
     progress replace Nat.mul with rngl_mul by easy.
@@ -2553,7 +2553,7 @@ assert
     replace rngl_zero with 0 by easy.
     replace rngl_mul with Nat.mul by easy.
     apply Nat.leb_le.
-    remember (_ <? _)%L as x eqn:Hx.
+    remember (_ <=? _)%L as x eqn:Hx.
     remember (_ <? _)%L as y eqn:Hy in |-*.
     symmetry in Hx, Hy.
     destruct x; [ easy | ].
@@ -2562,18 +2562,10 @@ assert
       apply Nat.lt_le_incl.
       now apply Nat.mod_upper_bound.
     }
-    apply rngl_ltb_ge_iff in Hx; [ | easy ].
+    apply Nat.leb_nle in Hx.
     apply rngl_ltb_ge_iff in Hy; [ | easy ].
-    apply Nat.leb_le in Hx.
-    apply Nat.leb_le in Hy.
-(* chiasse de pute, ça marche pas *)
-...
-    apply rngl_nlt_ge_iff in Hx.
-    destruct x, y; [ easy | easy | | ].
-    remember ((k * a)%L mod l <? (l - 1) / 2)%L as x eqn:Hx.
-    replace rngl_mul with Nat.mul by easy.
-cbn.
-    remember ((k * a) mod l <? (l - 1) / 2) as x eqn:Hx.
+    now apply rngl_le_Nat_le in Hy.
+  }
 ...
 Check Gauss_lemma.
 Theorem glop :
