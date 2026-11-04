@@ -2392,6 +2392,12 @@ rewrite <- (summation_list_map g (λ i, i)); symmetry.
 now apply summation_list_permut.
 Qed.
 
+Theorem rngl_le_Nat_le : ∀ a b, (a ≤ b)%L ↔ (a ≤ b).
+Proof.
+intros.
+apply Nat.leb_le.
+Qed.
+
 (* to be completed
 Theorem quadratic_reciprocity :
   ∀ p q, prime p → prime q → 2 < p < q →
@@ -2536,6 +2542,39 @@ assert
        nb_of_mult_gt_half a l * l -
        ∑ (k = 1, (l - 1) / 2),
          (if (k * a) mod l <? (l - 1) / 2 then 0 else (k * a)%L mod l)). {
+  rewrite <- Nat.add_sub_assoc; cycle 1. {
+    rewrite eq_nb_of_mult_gt_half_summation.
+    progress replace Nat.mul with rngl_mul by easy.
+    rewrite rngl_mul_summation_distr_r; [ | easy ].
+    apply rngl_le_Nat_le.
+    apply rngl_summation_le_compat; [ easy | easy | ].
+    intros k Hk.
+    progress unfold Nat.b2n.
+    replace rngl_zero with 0 by easy.
+    replace rngl_mul with Nat.mul by easy.
+    apply Nat.leb_le.
+    remember (_ <? _)%L as x eqn:Hx.
+    remember (_ <? _)%L as y eqn:Hy in |-*.
+    symmetry in Hx, Hy.
+    destruct x; [ easy | ].
+    destruct y. {
+      rewrite Nat.mul_1_l.
+      apply Nat.lt_le_incl.
+      now apply Nat.mod_upper_bound.
+    }
+    apply rngl_ltb_ge_iff in Hx; [ | easy ].
+    apply rngl_ltb_ge_iff in Hy; [ | easy ].
+    apply Nat.leb_le in Hx.
+    apply Nat.leb_le in Hy.
+(* chiasse de pute, ça marche pas *)
+...
+    apply rngl_nlt_ge_iff in Hx.
+    destruct x, y; [ easy | easy | | ].
+    remember ((k * a)%L mod l <? (l - 1) / 2)%L as x eqn:Hx.
+    replace rngl_mul with Nat.mul by easy.
+cbn.
+    remember ((k * a) mod l <? (l - 1) / 2) as x eqn:Hx.
+...
 Check Gauss_lemma.
 Theorem glop :
   ∀ a l,
