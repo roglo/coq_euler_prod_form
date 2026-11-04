@@ -2381,6 +2381,17 @@ progress unfold Misc.equality.
 apply Nat.eqb_eq.
 Qed.
 
+Theorem permutation_same_list_summation :
+  ∀ {A} (la : list A) f g,
+  permutation eqb (List.map f la) (List.map g la)
+  → ∑ (i ∈ la), f i = ∑ (i ∈ la), g i.
+Proof.
+intros * Hp.
+rewrite <- (summation_list_map f (λ i, i)); symmetry.
+rewrite <- (summation_list_map g (λ i, i)); symmetry.
+now apply summation_list_permut.
+Qed.
+
 (* to be completed
 Theorem quadratic_reciprocity :
   ∀ p q, prime p → prime q → 2 < p < q →
@@ -2534,50 +2545,12 @@ Proof.
 intros.
 specialize mul_all_different_multiples as H1.
 progress unfold Utils.iter_seq.
-Search (∑ (_ ∈  _), _ = ∑ (_ ∈ _), _).
-Theorem permutation_same_list_summation :
-  ∀ {A} (la : list A) f g,
-  permutation eqb (List.map f la) (List.map g la)
-  → ∑ (i ∈ la), f i = ∑ (i ∈ la), g i.
-Proof.
-intros * Hp.
-induction la as [| a]; [ easy | ].
-do 2 rewrite rngl_summation_list_cons.
-cbn in Hp.
-destruct (Nat.eq_dec (f a) (g a)) as [Hfg| Hfg]. {
-  f_equal; [ easy | ].
-  rewrite Hfg in Hp.
-  apply permutation_cons_inv in Hp; cycle 1. {
-    progress unfold Misc.equality.
-    apply Nat.eqb_eq.
-  }
-  now apply IHla.
-}
-apply permutation_cons_l_iff in Hp.
-cbn in Hp.
-generalize Hfg; intros H.
-apply Nat.eqb_neq in H.
-rewrite H in Hp; clear H.
-remember (Utils.List_extract _ _) as x eqn:Hx.
-symmetry in Hx.
-destruct x as [((bef, x), aft)| ]; [ | easy ].
-apply Utils.List_extract_Some_iff in Hx.
-destruct Hx as (Hx & Hax & Hba).
-apply Nat.eqb_eq in Hax.
-subst x.
-cbn in Hp.
-... ...
+rewrite Nat_sub_succ_1.
 apply permutation_same_list_summation.
-...
-erewrite rngl_summation_list_change_var
-with (g := λ k, abs (k * a) l).
-Check summation_list_permut.
-Check rngl_summation_list_eq_compat.
-Search (∑ (_ ∈ List.map _ _), _).
-(* merde, c'est pas ça *)
+rewrite List.map_id.
+progress unfold abs.
 ...
 rewrite <- rngl_summation_list_map.
-
 Check summation_list_permut.
 ...
 rewrite summation_mod_idemp.
