@@ -2567,6 +2567,16 @@ assert
     now apply rngl_le_Nat_le in Hy.
   }
 ...
+  erewrite rngl_summation_eq_compat; cycle 1. {
+    intros  k Hk.
+    replace k with
+       ((if (k * a) mod l <=? (l - 1) / 2 then k else 0) +
+        (if (k * a) mod l <=? (l - 1) / 2 then 0 else k)) at 1  by
+      now destruct (_ <=? _).
+    easy.
+  }
+  cbn - [ "/" "mod" ].
+...
 Check Gauss_lemma.
 Theorem glop :
   ∀ a l,
