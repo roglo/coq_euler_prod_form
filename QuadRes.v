@@ -2566,6 +2566,15 @@ assert
     apply rngl_ltb_ge_iff in Hy; [ | easy ].
     now apply rngl_le_Nat_le in Hy.
   }
+Theorem glop :
+  ∀ a p, coprimes a p →
+  ∑ (i = 1, p - 1), i = ∑ (i = 1, p - 1), i * a mod p.
+Proof.
+intros * Hap.
+specialize (mul_all_different_multiples a p Hap) as H1.
+apply permutation_same_list_summation.
+rewrite Nat_sub_succ_1.
+rewrite List.map_id.
 ...
   erewrite rngl_summation_eq_compat; cycle 1. {
     intros  k Hk.
