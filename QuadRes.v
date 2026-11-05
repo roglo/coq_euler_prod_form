@@ -2575,6 +2575,37 @@ specialize (mul_all_different_multiples a p Hap) as H1.
 apply permutation_same_list_summation.
 rewrite Nat_sub_succ_1.
 rewrite List.map_id.
+(*
+Compute (
+  let l := 17 in
+List.map (λ a,
+is_permutation eqb
+ (List.seq 1 ((l - 1) / 2))
+ (List.map (λ i, abs ((i * a) mod l) l) (List.seq 1 ((l - 1) / 2))))
+(List.filter (are_coprimes l) (List.seq 1 (l - 1)))).
+*)
+Theorem glop :
+  ∀ a l, coprimes a l →
+  permutation eqb
+    (List.seq 1 ((l - 1) / 2))
+    (List.map (λ i, abs ((i * a) mod l) l) (List.seq 1 ((l - 1) / 2))).
+Proof.
+intros * Hal.
+...
+apply nat_bijection_Permutation. {
+  intros i Hi; cbn.
+  destruct (lt_dec i n) as [Hin| Hin]; [ | easy ].
+  now apply Hn.
+} {
+  intros i j Hfij; cbn in Hfij.
+  destruct (lt_dec i n) as [Hin| Hin]. {
+...
+Theorem permutation_map_if_lt :
+  ∀ n f,
+  (∀ i, i < n → f i < n)
+  → (∀ i j, i < j < n → f i ≠ f j)
+  → Permutation (List.seq 0 n)
+    (ListDef.map (λ i, if lt_dec i n then f i else i) (List.seq 0 n)).
 ...
   erewrite rngl_summation_eq_compat; cycle 1. {
     intros  k Hk.
