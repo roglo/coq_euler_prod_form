@@ -2414,6 +2414,77 @@ intros.
 apply Nat.leb_le.
 Qed.
 
+Theorem coprimes_mul_mod :
+  ∀ a l x y,
+  coprimes a l
+  → 1 ≤ x < 1 + (l - 1) / 2
+  → 1 ≤ y < 1 + (l - 1) / 2
+  → (x * a) mod l = l - (y * a) mod l
+  → x = y.
+Proof.
+intros * Hal Hx Hy Hxy.
+symmetry in Hxy.
+apply Nat.add_sub_eq_nz in Hxy; cycle 1. {
+  intros H1.
+  apply Nat.Lcm0.mod_divide in H1.
+  rewrite Nat.mul_comm in H1.
+  apply Nat.gauss in H1; [ | now rewrite Nat.gcd_comm ].
+  destruct H1 as (m, Hm).
+  subst x.
+  destruct (Nat.eq_dec m 0) as [Hmz| Hmz]; [ now subst m | ].
+  destruct Hx as (_, Hx).
+  apply -> Nat.lt_succ_r in Hx.
+  apply Nat.nlt_ge in Hx.
+  apply Hx; clear Hx.
+  apply Nat.Div0.div_lt_upper_bound.
+  destruct l; [ cbn in Hy; flia Hy | ].
+  rewrite Nat_sub_succ_1.
+  rewrite Nat_mul_2_l.
+  rewrite Nat.mul_comm; cbn.
+  destruct m; [ easy | flia ].
+}
+apply (f_equal (λ x, x mod l)) in Hxy.
+rewrite Nat.Div0.mod_same in Hxy.
+rewrite Nat.Div0.add_mod_idemp_l in Hxy.
+rewrite Nat.Div0.add_mod_idemp_r in Hxy.
+rewrite <- Nat.mul_add_distr_r in Hxy.
+apply Nat.Lcm0.mod_divide in Hxy.
+rewrite Nat.mul_comm in Hxy.
+apply Nat.gauss in Hxy; [ | now rewrite Nat.gcd_comm ].
+destruct Hxy as (m, Hm).
+destruct (Nat.eq_dec m 0) as [Hmz| Hmz]. {
+  subst m; cbn in Hm.
+  apply Nat.eq_add_0 in Hm.
+  now destruct Hm; subst x y.
+}
+destruct Hx as (_, Hx).
+destruct Hy as (_, Hy).
+apply -> Nat.lt_succ_r in Hx.
+apply Nat.nlt_ge in Hx.
+destruct (Nat.eq_dec x y) as [Hxey| Hxey]; [ easy | ].
+exfalso; apply Hx; clear Hx.
+apply Nat.add_sub_eq_l in Hm.
+subst x.
+apply Nat.lt_add_lt_sub_r.
+apply Nat.lt_add_lt_sub_l.
+eapply Nat.lt_le_trans; [ apply Hy | ].
+apply Nat.le_succ_l.
+apply Nat.lt_add_lt_sub_r.
+rewrite <- Nat_mul_2_l.
+eapply Nat.le_lt_trans.
+apply Nat.Div0.mul_div_le.
+destruct m; [ easy | cbn ].
+destruct l. {
+  cbn in Hy.
+  apply Nat.lt_1_r in Hy; subst y.
+  cbn in Hxey.
+  now rewrite Nat.mul_0_r in Hxey.
+}
+rewrite Nat_sub_succ_1; cbn.
+apply Nat.lt_succ_r.
+apply Nat.le_add_r.
+Qed.
+
 (* to be completed
 Theorem quadratic_reciprocity :
   ∀ p q, prime p → prime q → 2 < p < q →
@@ -2641,8 +2712,16 @@ apply incl_incl_permutation. {
       apply Nat.le_add_r.
     }
   } {
-...
-Search ((_ * _) ≡ (_ * _) mod _).
+    now apply (coprimes_mul_mod a l).
+  } {
+    apply (coprimes_mul_mod a l); [ easy | easy | easy | ].
+    rewrite <- Hxy.
+    rewrite Nat.sub_sub_distr; [ | | easy ].
+    now rewrite Nat.sub_diag.
+    apply Nat.lt_le_incl, Nat.mod_upper_bound.
+    intros H; subst l.
+    cbn in Hx; flia Hx.
+  } {
 ...
 apply nat_bijection_Permutation. {
   intros i Hi; cbn.
