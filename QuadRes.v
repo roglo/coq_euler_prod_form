@@ -1233,7 +1233,7 @@ rewrite Nat.mod_small in Haa; [ | flia Hijp ].
 flia Hijp Haa.
 Qed.
 
-Theorem mul_all_different_multiples : ∀ a p,
+Theorem lt_mul_all_different_multiples : ∀ a p,
   coprimes a p
   → ∀ i j, i < j < p → i * a mod p ≠ j * a mod p.
 Proof.
@@ -1249,6 +1249,22 @@ rewrite Nat.mod_small in Haa; [ | flia Hijp ].
 subst j.
 destruct Hijp as (H, _).
 now apply Nat.lt_irrefl in H.
+Qed.
+
+Theorem mul_all_different_multiples : ∀ a p,
+  coprimes a p
+  → ∀ i j, i ≠ j → i < p → j < p → i * a mod p ≠ j * a mod p.
+Proof.
+intros * Hap * Hij Hi Hj.
+destruct (lt_dec i j) as [H1| H1]. {
+  now apply lt_mul_all_different_multiples.
+} {
+  apply Nat.nlt_ge in H1.
+  symmetry.
+  apply lt_mul_all_different_multiples; [ easy | ].
+  split; [ | easy ].
+  now apply Nat_le_neq_lt.
+}
 Qed.
 
 Theorem nb_of_mult_gt_half_0_l : ∀ n, nb_of_mult_gt_half 0 n = 0.
@@ -2591,6 +2607,42 @@ Theorem glop :
     (List.map (λ i, abs ((i * a) mod l) l) (List.seq 1 ((l - 1) / 2))).
 Proof.
 intros * Hal.
+apply incl_incl_permutation. {
+  progress unfold Misc.equality.
+  apply Nat.eqb_eq.
+} {
+  apply List.seq_NoDup.
+} {
+  apply Finite.Injective_map_NoDup_in; [ | apply List.seq_NoDup ].
+  intros * Hx Hy Hxy.
+  apply List.in_seq in Hx.
+  apply List.in_seq in Hy.
+  progress unfold abs in Hxy.
+  remember (_ <=? _) as u eqn:Hu in Hxy.
+  remember (_ <=? _) as v eqn:Hv in Hxy.
+  symmetry in Hu, Hv.
+  destruct (Nat.eq_dec x y) as [Hxey| Hxey]; [ easy | ].
+  destruct u, v. {
+    apply mul_all_different_multiples in Hxy; [ easy | easy | easy | | ]. {
+      eapply Nat.lt_le_trans; [ apply Hx | ].
+      apply Nat.le_succ_l.
+      apply Nat.Div0.div_lt_upper_bound.
+      rewrite Nat_mul_2_l.
+      destruct l; [ cbn in Hx; flia Hx | ].
+      rewrite Nat_sub_succ_1.
+      apply Nat.le_add_r.
+    } {
+      eapply Nat.lt_le_trans; [ apply Hy | ].
+      apply Nat.le_succ_l.
+      apply Nat.Div0.div_lt_upper_bound.
+      rewrite Nat_mul_2_l.
+      destruct l; [ cbn in Hx; flia Hx | ].
+      rewrite Nat_sub_succ_1.
+      apply Nat.le_add_r.
+    }
+  } {
+...
+Search ((_ * _) ≡ (_ * _) mod _).
 ...
 apply nat_bijection_Permutation. {
   intros i Hi; cbn.
