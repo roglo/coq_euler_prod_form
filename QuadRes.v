@@ -2664,7 +2664,7 @@ rewrite Nat_sub_succ_1.
 rewrite List.map_id.
 (*
 Compute (
-  let l := 17 in
+  let l := 18 in
 List.map (λ a,
 is_permutation eqb
  (List.seq 1 ((l - 1) / 2))
@@ -2672,15 +2672,13 @@ is_permutation eqb
 (List.filter (are_coprimes l) (List.seq 1 (l - 1)))).
 *)
 Theorem glop :
-  ∀ a l, Nat.Odd l → coprimes a l →
+  ∀ a l, coprimes a l →
   permutation eqb
     (List.seq 1 ((l - 1) / 2))
     (List.map (λ i, abs ((i * a) mod l) l) (List.seq 1 ((l - 1) / 2))).
 Proof.
-intros * Hl Hal.
+intros * Hal.
 destruct (Nat.eq_dec l 0) as [Hlz| Hlz]; [ now subst l | ].
-Check @incl_incl_permutation.
-...
 apply incl_incl_permutation. {
   progress unfold Misc.equality.
   apply Nat.eqb_eq.
@@ -2761,6 +2759,7 @@ apply incl_incl_permutation. {
   intros x Hx.
   apply List.in_seq in Hx.
   apply List.in_map_iff.
+...
   specialize congruence_inverse_has_unique_solution as H1.
   specialize (H1 l x).
   assert (H : 0 < x < l). {
