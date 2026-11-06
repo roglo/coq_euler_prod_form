@@ -2759,7 +2759,6 @@ apply incl_incl_permutation. {
   intros x Hx.
   apply List.in_seq in Hx.
   apply List.in_map_iff.
-...
   specialize congruence_inverse_has_unique_solution as H1.
   specialize (H1 l x).
   assert (H : 0 < x < l). {
@@ -2797,23 +2796,14 @@ apply incl_incl_permutation. {
   }
   apply Nat.nle_gt in Hyl.
 progress unfold abs.
-exists y.
-rewrite Nat.mul_comm, H2.
-...
-exists (l - y).
-split. {
-  progress unfold abs.
-  remember (_ <=? _) as u eqn:Hu.
-  symmetry in Hu.
-  destruct u; cycle 1. {
-    apply Nat.leb_gt in Hu.
-    rewrite <- H2.
-    apply Nat.add_sub_eq_l.
-Search ((_ - _) mod _).
 ...
   specialize congruence_inverse_has_unique_solution as H4.
-  specialize (H4 l (l - x)).
-  assert (H : 0 < l - x < l) by admit.
+  specialize (H4 l (y - (l - 1) / 2)).
+  assert (H : 0 < y - (l - 1) / 2 < l). {
+    split; [ now apply Nat.lt_add_lt_sub_r | ].
+    eapply Nat.le_lt_trans; [ | apply H1 ].
+    apply Nat.le_sub_l.
+  }
   specialize (H4 H); clear H.
   specialize (H4 a Hal).
   destruct H4 as (z & (H4, H5) & H6).
