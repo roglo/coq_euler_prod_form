@@ -2672,12 +2672,12 @@ is_permutation eqb
 (List.filter (are_coprimes l) (List.seq 1 (l - 1)))).
 *)
 Theorem glop :
-  ∀ a l, coprimes a l →
+  ∀ a l, Nat.Odd l → coprimes a l →
   permutation eqb
     (List.seq 1 ((l - 1) / 2))
     (List.map (λ i, abs ((i * a) mod l) l) (List.seq 1 ((l - 1) / 2))).
 Proof.
-intros * Hal.
+intros * Hl Hal.
 destruct (Nat.eq_dec l 0) as [Hlz| Hlz]; [ now subst l | ].
 apply incl_incl_permutation. {
   progress unfold Misc.equality.
@@ -2795,10 +2795,72 @@ apply incl_incl_permutation. {
     now apply Nat.lt_succ_r.
   }
   apply Nat.nle_gt in Hyl.
+  specialize congruence_inverse_has_unique_solution as H4.
+  specialize (H4 l (l - x)).
+  assert (H : 0 < l - x < l) by admit.
+  specialize (H4 H); clear H.
+  specialize (H4 a Hal).
+  destruct H4 as (z & (H4, H5) & H6).
+  exists z.
+  rewrite Nat.mul_comm, H5.
+  progress unfold abs.
+  remember (_ <=? _) as u eqn:Hu.
+  symmetry in Hu.
+  destruct u. {
+    apply Nat.leb_le in Hu.
+    exfalso.
+    apply Nat.nlt_ge in Hu.
+    apply Hu; clear Hu.
+    apply Nat.lt_add_lt_sub_l.
+    destruct Hx as (H7, H8).
+    apply (Nat.add_lt_mono_r _ _ ((l - 1) / 2)) in H8.
+    eapply Nat.lt_le_trans; [ apply H8 | ].
+    rewrite <- Nat.add_assoc.
+    rewrite <- Nat_mul_2_l.
+    apply Nat.le_succ_l.
+    destruct Hl as (k, Hk).
+    rewrite Hk.
+    rewrite Nat.add_sub.
+    rewrite (Nat.mul_comm _ k), Nat.div_mul; [ | easy ].
+    rewrite Nat.mul_comm.
+    now apply Nat.lt_add_pos_r.
+  }
+  rewrite Nat.sub_sub_distr; [ | | easy ]; cycle 1. {
+    eapply Nat.le_trans. {
+      apply Nat.lt_le_incl, Hx.
+    }
+    apply Nat.le_succ_l.
+    apply Nat.Div0.div_lt_upper_bound.
+    rewrite Nat_mul_2_l.
+    apply (Nat.lt_le_trans _ l); [ | apply Nat.le_add_r ].
+    flia Hlz.
+  }
+  rewrite Nat.sub_diag.
+  split; [ easy | ].
+  apply List.in_seq.
+  split. {
+    apply Nat.neq_0_lt_0; intros H; subst z.
+    rewrite Nat.mul_0_r in H5.
+    rewrite Nat.Div0.mod_0_l in H5.
+    symmetry in H5.
+    apply Nat.sub_0_le in H5.
+    apply Nat.nlt_ge in H5.
+    apply H5; clear H5.
+    eapply Nat.lt_le_trans; [ apply Hx | ].
+    apply Nat.le_succ_l.
+    apply Nat.Div0.div_lt_upper_bound.
+    rewrite Nat_mul_2_l.
+    apply (Nat.lt_le_trans _ l); [ | apply Nat.le_add_r ].
+    flia Hlz.
+  }
+(* bon, c'est pas bon *)
+...
   exists (l - y).
   split. {
     progress unfold abs.
     rewrite Nat.mul_sub_distr_r.
+
+Search ((_ - _) mod _).
 (* chais pas *)
 ...
   eapply Nat.lt_le_trans; [ apply H1 | ].
