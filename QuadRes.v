@@ -2679,13 +2679,15 @@ Theorem glop :
 Proof.
 intros * Hl Hal.
 destruct (Nat.eq_dec l 0) as [Hlz| Hlz]; [ now subst l | ].
+Check @incl_incl_permutation.
+...
 apply incl_incl_permutation. {
   progress unfold Misc.equality.
   apply Nat.eqb_eq.
 } {
   apply List.seq_NoDup.
 } {
-  apply Finite.Injective_map_NoDup_in; [ | apply List.seq_NoDup ].
+  apply FinFun.Injective_map_NoDup_in; [ | apply List.seq_NoDup ].
   intros * Hx Hy Hxy.
   apply List.in_seq in Hx.
   apply List.in_seq in Hy.
@@ -2795,6 +2797,21 @@ apply incl_incl_permutation. {
     now apply Nat.lt_succ_r.
   }
   apply Nat.nle_gt in Hyl.
+progress unfold abs.
+exists y.
+rewrite Nat.mul_comm, H2.
+...
+exists (l - y).
+split. {
+  progress unfold abs.
+  remember (_ <=? _) as u eqn:Hu.
+  symmetry in Hu.
+  destruct u; cycle 1. {
+    apply Nat.leb_gt in Hu.
+    rewrite <- H2.
+    apply Nat.add_sub_eq_l.
+Search ((_ - _) mod _).
+...
   specialize congruence_inverse_has_unique_solution as H4.
   specialize (H4 l (l - x)).
   assert (H : 0 < l - x < l) by admit.
