@@ -2795,7 +2795,86 @@ apply incl_incl_permutation. {
     now apply Nat.lt_succ_r.
   }
   apply Nat.nle_gt in Hyl.
+  specialize congruence_inverse_has_unique_solution as H4.
+  specialize (H4 l (l - x)).
+  assert (H : 0 < l - x < l). {
+    split. {
+      apply (Nat.add_lt_mono_r _ _ x).
+      rewrite Nat.sub_add; cycle 1. {
+        eapply Nat.le_trans; [ apply Nat.lt_le_incl, Hx | ].
+        apply Nat.le_succ_l.
+        apply Nat.Div0.div_lt_upper_bound.
+        rewrite Nat_mul_2_l.
+        destruct l; [ easy | ].
+        rewrite Nat_sub_succ_1.
+        apply Nat.le_add_r.
+      }
+      eapply Nat.le_trans; [ apply Hx | ].
+      apply Nat.le_succ_l.
+      apply Nat.Div0.div_lt_upper_bound.
+      rewrite Nat_mul_2_l.
+      destruct l; [ easy | ].
+      rewrite Nat_sub_succ_1.
+      apply Nat.le_add_r.
+    }
+    apply Nat.sub_lt; [ | easy ].
+    eapply Nat.le_trans; [ apply Nat.lt_le_incl, Hx | ].
+    apply Nat.le_succ_l.
+    apply Nat.Div0.div_lt_upper_bound.
+    rewrite Nat_mul_2_l.
+    destruct l; [ easy | ].
+    rewrite Nat_sub_succ_1.
+    apply Nat.le_add_r.
+  }
+  specialize (H4 H a Hal).
+  destruct H4 as (z & (H4, H5) & H6).
+  exists z.
+  rewrite Nat.mul_comm, H5.
+  split. {
+    progress unfold abs.
+    remember (_ <=? _) as u eqn:Hu.
+    symmetry in Hu.
+    destruct u; cycle 1. {
+      rewrite Nat.sub_sub_distr; [ | | easy ]; cycle 1. {
+        eapply Nat.le_trans; [ apply Nat.lt_le_incl, Hx | ].
+        apply Nat.le_succ_l.
+        apply Nat.Div0.div_lt_upper_bound.
+        rewrite Nat_mul_2_l.
+        destruct l; [ easy | ].
+        rewrite Nat_sub_succ_1.
+        apply Nat.le_add_r.
+      }
+      now rewrite Nat.sub_diag.
+    }
+    apply Nat.leb_le in Hu.
+    apply Nat.le_sub_le_add_r in Hu.
+    apply Nat.le_sub_le_add_l in Hu.
+...
+    apply Nat.nlt_ge in Hu.
+    exfalso; apply Hu; clear Hu.
+    apply Nat.lt_add_lt_sub_l.
+    apply Nat.lt_add_lt_sub_r.
+    eapply Nat.lt_le_trans; [ apply Hx | ].
+    apply Nat.le_succ_l.
+    apply Nat.lt_add_lt_sub_l.
+...
 progress unfold abs.
+remember 42 as z.
+exists z.
+split. {
+  remember (_ <=? _) as u eqn:Hu.
+  symmetry in Hu.
+  destruct u. {
+    apply Nat.leb_le in Hu.
+...
+  }
+  apply Nat.leb_gt in Hu.
+  rewrite <- H2.
+  apply (Nat.add_cancel_r _ _ ((z * a) mod l)).
+  rewrite Nat.sub_add; cycle 1. {
+    now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+  }
+  symmetry.
 ...
   specialize congruence_inverse_has_unique_solution as H4.
   specialize (H4 l (y - (l - 1) / 2)).
