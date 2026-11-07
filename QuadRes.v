@@ -2864,7 +2864,7 @@ rewrite Nat_sub_succ_1.
 rewrite List.map_id.
 (*
 Compute (
-  let l := 18 in
+  let l := 100 in
 List.map (λ a,
 is_permutation eqb
  (List.seq 1 ((l - 1) / 2))
@@ -2996,6 +2996,74 @@ apply incl_incl_permutation. {
     split. {
       apply Nat.le_add_le_sub_r.
       now apply Nat.mod_upper_bound.
+    }
+    apply Nat.lt_succ_r.
+    apply Nat.le_sub_le_add_l.
+    destruct (Nat.Even_Odd_dec l) as [Hl| Hl]; cycle 1. {
+      destruct Hl as (m, Hm).
+      rewrite Hm at 3.
+      rewrite Nat.add_sub, (Nat.mul_comm 2), Nat.div_mul; [ | easy ].
+      rewrite Hm in Hu at 1.
+      rewrite Nat.add_sub in Hu.
+      rewrite (Nat.mul_comm 2), Nat.div_mul in Hu; [ | easy ].
+      eapply Nat.le_trans; cycle 1. {
+        apply Nat.add_le_mono_r.
+        apply Nat.le_succ_l.
+        apply Hu.
+      }
+      rewrite Hm, Nat.add_comm.
+      now rewrite Nat_mul_2_l.
+    }
+    destruct Hl as (m, Hm).
+    destruct m; [ easy | ].
+    rewrite Hm at 3.
+    rewrite Nat.mul_succ_r.
+    rewrite <- Nat.add_sub_assoc; [ | now apply -> Nat.succ_le_mono ].
+    rewrite Nat_sub_succ_1.
+    rewrite (Nat.mul_comm _ m), Nat.div_add_l; [ | easy ].
+    rewrite Nat.div_small; [ | easy ].
+    rewrite Nat.add_0_r.
+    rewrite Hm in Hu at 1.
+    rewrite Nat.mul_succ_r in Hu.
+    rewrite <- Nat.add_sub_assoc in Hu; [ | now apply -> Nat.succ_le_mono ].
+    rewrite Nat_sub_succ_1 in Hu.
+    rewrite (Nat.mul_comm _ m), Nat.div_add_l in Hu; [ | easy ].
+    rewrite Nat.div_small in Hu; [ | easy ].
+    rewrite Nat.add_0_r in Hu.
+    rewrite Hm in Hi.
+    rewrite Nat.mul_succ_r in Hi.
+    rewrite <- Nat.add_sub_assoc in Hi; [ | now apply -> Nat.succ_le_mono ].
+    rewrite Nat_sub_succ_1 in Hi.
+    rewrite (Nat.mul_comm _ m), Nat.div_add_l in Hi; [ | easy ].
+    rewrite Nat.div_small in Hi; [ | easy ].
+    rewrite Nat.add_0_r in Hi.
+    destruct m; [ flia Hi | ].
+    destruct m. {
+      cbn in Hi.
+      replace i with 1 in Hu by flia Hi.
+      cbn in Hu.
+      rewrite Nat.add_0_r in Hu.
+      cbn in Hm.
+      replace i with 1 by flia Hi.
+      rewrite Nat.mul_1_l.
+      subst l.
+      clear i Hi.
+      clear Hlz.
+      remember (a mod 4) as a4 eqn:Ha4.
+      symmetry in Ha4.
+      destruct a4; [ easy | ].
+      destruct a4; [ now apply Nat.lt_irrefl in Hu | ].
+      clear Hu.
+      destruct a4. {
+        exfalso.
+        progress unfold coprimes in Hal.
+        rewrite Nat.gcd_comm in Hal.
+        rewrite <- Nat.Lcm0.gcd_mod in Hal.
+        rewrite Ha4 in Hal.
+        easy.
+      }
+      rewrite Nat.add_1_r.
+      now do 4 apply -> Nat.succ_le_mono.
     }
 ...
 progress unfold abs.
