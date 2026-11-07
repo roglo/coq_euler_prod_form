@@ -2759,10 +2759,7 @@ apply incl_incl_permutation. {
   intros x Hx.
   apply List.in_seq in Hx.
   apply List.in_map_iff.
-  specialize congruence_inverse_has_unique_solution as H1.
-  specialize (H1 l x).
-  assert (H : 0 < x < l). {
-    split; [ easy | ].
+  assert (Hxl : x < l). {
     eapply Nat.lt_le_trans; [ apply Hx | ].
     apply Nat.le_succ_l.
     apply Nat.Div0.div_lt_upper_bound.
@@ -2771,6 +2768,9 @@ apply incl_incl_permutation. {
     rewrite Nat_sub_succ_1.
     apply Nat.le_add_r.
   }
+  specialize congruence_inverse_has_unique_solution as H1.
+  specialize (H1 l x).
+  assert (H : 0 < x < l) by easy.
   specialize (H1 H); clear H.
   specialize (H1 a Hal).
   destruct H1 as (y & (H1, H2) & H3).
@@ -2800,31 +2800,10 @@ apply incl_incl_permutation. {
   assert (H : 0 < l - x < l). {
     split. {
       apply (Nat.add_lt_mono_r _ _ x).
-      rewrite Nat.sub_add; cycle 1. {
-        eapply Nat.le_trans; [ apply Nat.lt_le_incl, Hx | ].
-        apply Nat.le_succ_l.
-        apply Nat.Div0.div_lt_upper_bound.
-        rewrite Nat_mul_2_l.
-        destruct l; [ easy | ].
-        rewrite Nat_sub_succ_1.
-        apply Nat.le_add_r.
-      }
-      eapply Nat.le_trans; [ apply Hx | ].
-      apply Nat.le_succ_l.
-      apply Nat.Div0.div_lt_upper_bound.
-      rewrite Nat_mul_2_l.
-      destruct l; [ easy | ].
-      rewrite Nat_sub_succ_1.
-      apply Nat.le_add_r.
+      rewrite Nat.sub_add; [ easy | now apply Nat.lt_le_incl ].
     }
     apply Nat.sub_lt; [ | easy ].
-    eapply Nat.le_trans; [ apply Nat.lt_le_incl, Hx | ].
-    apply Nat.le_succ_l.
-    apply Nat.Div0.div_lt_upper_bound.
-    rewrite Nat_mul_2_l.
-    destruct l; [ easy | ].
-    rewrite Nat_sub_succ_1.
-    apply Nat.le_add_r.
+    now apply Nat.lt_le_incl.
   }
   specialize (H4 H a Hal); clear H.
   destruct H4 as (z & (H4, H5) & H6).
@@ -2836,15 +2815,7 @@ apply incl_incl_permutation. {
       remember (_ <=? _) as u eqn:Hu.
       symmetry in Hu.
       destruct u; cycle 1. {
-        rewrite Nat.sub_sub_distr; [ | | easy ]; cycle 1. {
-          eapply Nat.le_trans; [ apply Nat.lt_le_incl, Hx | ].
-          apply Nat.le_succ_l.
-          apply Nat.Div0.div_lt_upper_bound.
-          rewrite Nat_mul_2_l.
-          destruct l; [ easy | ].
-          rewrite Nat_sub_succ_1.
-          apply Nat.le_add_r.
-        }
+        rewrite Nat.sub_sub_distr; [ | now apply Nat.lt_le_incl | easy ].
         now rewrite Nat.sub_diag.
       }
       apply Nat.leb_le in Hu.
@@ -2889,10 +2860,7 @@ apply incl_incl_permutation. {
       rewrite Nat.Div0.mod_0_l in H5.
       symmetry in H5.
       apply Nat.sub_0_le in H5.
-      apply Nat.nlt_ge in H5.
-      apply H5; clear H5.
-      rewrite <- H2.
-      now apply Nat.mod_upper_bound.
+      now apply Nat.nlt_ge in H5.
     }
     now apply Nat.lt_succ_r.
   }
