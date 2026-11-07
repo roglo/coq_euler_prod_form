@@ -2914,13 +2914,23 @@ apply incl_incl_permutation. {
   } {
     destruct Hl as (m, Hl).
     subst l.
-    exfalso; clear - Hyl Hzl Hm.
-    move z before y.
-    move Hzl before Hyl.
-    apply Nat.nle_gt in Hzl.
-    apply Hzl; clear Hzl.
-    apply (Nat.add_le_mono_l _ _ (y mod (2 * m))).
-    rewrite Hm.
+    assert ((2 * m - 1) / 2 = m - 1). {
+      destruct m; [ easy | ].
+      cbn - [ "/" ].
+      rewrite Nat.add_0_r, Nat.sub_0_r.
+      rewrite Nat.add_succ_r.
+      rewrite <- Nat.add_1_r.
+      rewrite <- Nat_mul_2_l.
+      rewrite Nat.mul_comm.
+      rewrite Nat.div_add_l; [ | easy ].
+      now rewrite Nat.add_0_r, Nat.sub_0_r.
+    }
+    rewrite H in Hx, Hyl, Hzl.
+    clear H.
+    rewrite Nat.add_comm, Nat.sub_add in Hx; cycle 1. {
+      apply Nat.neq_0_lt_0.
+      now intros H; subst m.
+    }
 ...
   }
 }
