@@ -2896,27 +2896,34 @@ apply incl_incl_permutation. {
     destruct Hm as (Hm, _).
     now rewrite Hm in Hyl.
   }
-  destruct m. {
-    rewrite Nat.mul_1_l in Hm.
-    destruct (Nat.Even_Odd_dec l) as [Hl| Hl]; cycle 1. {
-      destruct Hl as (m, Hl).
-      subst l.
-      exfalso; clear - Hyl Hzl Hm.
-      rewrite Nat.add_sub in Hyl, Hzl.
-      rewrite Nat.mul_comm, Nat.div_mul in Hyl; [ | easy ].
-      rewrite Nat.mul_comm, Nat.div_mul in Hzl; [ | easy ].
-      rewrite Nat.mul_comm in Hm.
-      flia Hyl Hzl Hm.
-    } {
-      destruct Hl as (m, Hl).
-      subst l.
-      exfalso; clear - Hyl Hzl Hm.
-      move z before y.
-      move Hzl before Hyl.
-      apply Nat.nle_gt in Hzl.
-      apply Hzl; clear Hzl.
-      apply (Nat.add_le_mono_l _ _ (y mod (2 * m))).
-      rewrite Hm.
+  destruct m; cycle 1. {
+    specialize (Nat.mod_upper_bound y l Hlz) as H7.
+    specialize (Nat.mod_upper_bound z l Hlz) as H8.
+    flia Hm H7 H8.
+  }
+  rewrite Nat.mul_1_l in Hm.
+  destruct (Nat.Even_Odd_dec l) as [Hl| Hl]; cycle 1. {
+    destruct Hl as (m, Hl).
+    subst l.
+    exfalso; clear - Hyl Hzl Hm.
+    rewrite Nat.add_sub in Hyl, Hzl.
+    rewrite Nat.mul_comm, Nat.div_mul in Hyl; [ | easy ].
+    rewrite Nat.mul_comm, Nat.div_mul in Hzl; [ | easy ].
+    rewrite Nat.mul_comm in Hm.
+    flia Hyl Hzl Hm.
+  } {
+    destruct Hl as (m, Hl).
+    subst l.
+    exfalso; clear - Hyl Hzl Hm.
+    move z before y.
+    move Hzl before Hyl.
+    apply Nat.nle_gt in Hzl.
+    apply Hzl; clear Hzl.
+    apply (Nat.add_le_mono_l _ _ (y mod (2 * m))).
+    rewrite Hm.
+...
+  }
+}
 ...
 progress unfold abs.
 remember 42 as z.
