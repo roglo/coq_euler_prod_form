@@ -2884,6 +2884,39 @@ apply incl_incl_permutation. {
   apply Nat.Lcm0.mod_divide in H7.
   apply Nat.gauss in H7; [ | now rewrite Nat.gcd_comm ].
   destruct H7 as (m, Hm).
+  apply (f_equal (λ u, u mod l)) in Hm.
+  rewrite Nat.Div0.mod_mul in Hm.
+  rewrite <- Nat.Div0.add_mod_idemp_l in Hm.
+  rewrite <- Nat.Div0.add_mod_idemp_r in Hm.
+  apply Nat.Lcm0.mod_divide in Hm.
+  clear m.
+  destruct Hm as (m, Hm).
+  destruct m. {
+    apply Nat.eq_add_0 in Hm.
+    destruct Hm as (Hm, _).
+    now rewrite Hm in Hyl.
+  }
+  destruct m. {
+    rewrite Nat.mul_1_l in Hm.
+    destruct (Nat.Even_Odd_dec l) as [Hl| Hl]; cycle 1. {
+      destruct Hl as (m, Hl).
+      subst l.
+      exfalso; clear - Hyl Hzl Hm.
+      rewrite Nat.add_sub in Hyl, Hzl.
+      rewrite Nat.mul_comm, Nat.div_mul in Hyl; [ | easy ].
+      rewrite Nat.mul_comm, Nat.div_mul in Hzl; [ | easy ].
+      rewrite Nat.mul_comm in Hm.
+      flia Hyl Hzl Hm.
+    } {
+      destruct Hl as (m, Hl).
+      subst l.
+      exfalso; clear - Hyl Hzl Hm.
+      move z before y.
+      move Hzl before Hyl.
+      apply Nat.nle_gt in Hzl.
+      apply Hzl; clear Hzl.
+      apply (Nat.add_le_mono_l _ _ (y mod (2 * m))).
+      rewrite Hm.
 ...
 progress unfold abs.
 remember 42 as z.
