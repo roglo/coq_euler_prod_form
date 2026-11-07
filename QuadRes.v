@@ -2925,15 +2925,29 @@ apply incl_incl_permutation. {
       rewrite Nat.div_add_l; [ | easy ].
       now rewrite Nat.add_0_r, Nat.sub_0_r.
     }
-    rewrite H in Hx, Hyl, Hzl.
+    rewrite H in Hx, Hyl, Hzl |-*.
     clear H.
     rewrite Nat.add_comm, Nat.sub_add in Hx; cycle 1. {
       apply Nat.neq_0_lt_0.
       now intros H; subst m.
     }
-...
+    move Hyl at bottom.
+    move Hzl at bottom.
+    move Hm at bottom.
+    apply Nat.lt_sub_lt_add_l in Hyl, Hzl.
+    apply -> Nat.lt_succ_r in Hyl.
+    apply -> Nat.lt_succ_r in Hzl.
+    rewrite Nat_mul_2_l in Hm at 3.
+    assert (Hy : y mod (2 * m) = m) by flia Hyl Hzl Hm.
+    assert (Hz : z mod (2 * m) = m) by flia Hyl Hzl Hm.
+    clear Hyl Hzl Hm.
+    rewrite Nat.mod_small in Hy; [ | easy ].
+    rewrite Nat.mod_small in Hz; [ | easy ].
+    subst y z.
+    rewrite H2 in H5.
+    flia Hx H5.
   }
-}
+} {
 ...
 progress unfold abs.
 remember 42 as z.
