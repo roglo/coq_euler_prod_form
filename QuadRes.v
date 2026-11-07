@@ -2866,6 +2866,15 @@ apply incl_incl_permutation. {
   }
   apply Nat.nle_gt in Hzl.
   progress unfold abs.
+  assert (H7 : (a * y) mod l + (a * z) mod l = l) by flia H2 H5 Hxl.
+  apply (f_equal (λ u, u mod l)) in H7.
+  rewrite Nat.Div0.mod_same in H7.
+  rewrite Nat.Div0.add_mod_idemp_l in H7.
+  rewrite Nat.Div0.add_mod_idemp_r in H7.
+  rewrite <- Nat.mul_add_distr_l in H7.
+  apply Nat.Lcm0.mod_divide in H7.
+  apply Nat.gauss in H7; [ | now rewrite Nat.gcd_comm ].
+  destruct H7 as (m, Hm).
 ...
 progress unfold abs.
 remember 42 as z.
