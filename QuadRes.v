@@ -2826,37 +2826,78 @@ apply incl_incl_permutation. {
     rewrite Nat_sub_succ_1.
     apply Nat.le_add_r.
   }
-  specialize (H4 H a Hal).
+  specialize (H4 H a Hal); clear H.
   destruct H4 as (z & (H4, H5) & H6).
-  exists z.
-  rewrite Nat.mul_comm, H5.
-  split. {
-    progress unfold abs.
-    remember (_ <=? _) as u eqn:Hu.
-    symmetry in Hu.
-    destruct u; cycle 1. {
-      rewrite Nat.sub_sub_distr; [ | | easy ]; cycle 1. {
-        eapply Nat.le_trans; [ apply Nat.lt_le_incl, Hx | ].
-        apply Nat.le_succ_l.
-        apply Nat.Div0.div_lt_upper_bound.
-        rewrite Nat_mul_2_l.
-        destruct l; [ easy | ].
-        rewrite Nat_sub_succ_1.
-        apply Nat.le_add_r.
+  destruct (le_dec z ((l - 1) / 2)) as [Hzl| Hzl]. {
+    exists z.
+    rewrite Nat.mul_comm, H5.
+    split. {
+      progress unfold abs.
+      remember (_ <=? _) as u eqn:Hu.
+      symmetry in Hu.
+      destruct u; cycle 1. {
+        rewrite Nat.sub_sub_distr; [ | | easy ]; cycle 1. {
+          eapply Nat.le_trans; [ apply Nat.lt_le_incl, Hx | ].
+          apply Nat.le_succ_l.
+          apply Nat.Div0.div_lt_upper_bound.
+          rewrite Nat_mul_2_l.
+          destruct l; [ easy | ].
+          rewrite Nat_sub_succ_1.
+          apply Nat.le_add_r.
+        }
+        now rewrite Nat.sub_diag.
       }
-      now rewrite Nat.sub_diag.
+      apply Nat.leb_le in Hu.
+      apply Nat.le_sub_le_add_r in Hu.
+      apply Nat.le_sub_le_add_l in Hu.
+      destruct (Nat.Even_Odd_dec l) as [Hl| Hl]. {
+        destruct Hl as (m, Hl).
+        subst l.
+        destruct m; [ easy | ].
+        rewrite Nat.mul_succ_r in Hu at 2.
+        rewrite <- Nat.add_sub_assoc in Hu; [ | now apply -> Nat.succ_le_mono ].
+        rewrite Nat_sub_succ_1 in Hu.
+        rewrite (Nat.mul_comm _ m), Nat.div_add_l in Hu; [ | easy ].
+        rewrite Nat.div_small in Hu; [ | easy ].
+        rewrite Nat.add_0_r in Hu.
+        rewrite Nat.mul_succ_r in Hu.
+        rewrite Nat.add_sub_swap in Hu; [ | flia ].
+        rewrite Nat_mul_2_l, Nat.add_sub in Hu.
+        rewrite Nat.mul_succ_r in Hx.
+        rewrite <- Nat.add_sub_assoc in Hx; [ | now apply -> Nat.succ_le_mono ].
+        rewrite Nat_sub_succ_1 in Hx.
+        rewrite (Nat.mul_comm _ m), Nat.div_add_l in Hx; [ | easy ].
+        rewrite Nat.div_small in Hx; [ | easy ].
+        rewrite Nat.add_0_r in Hx.
+        flia Hx Hu.
+      }
+      destruct Hl as (m, Hl).
+      subst l.
+      rewrite Nat.add_sub in Hx, Hu.
+      rewrite Nat.mul_comm, Nat.div_mul in Hx; [ | easy ].
+      rewrite Nat.mul_comm, Nat.div_mul in Hu; [ | easy ].
+      rewrite Nat.add_sub_swap in Hu; [ | flia ].
+      rewrite Nat.mul_comm in Hu.
+      rewrite Nat_mul_2_l, Nat.add_sub in Hu.
+      flia Hx Hu.
     }
-    apply Nat.leb_le in Hu.
-    apply Nat.le_sub_le_add_r in Hu.
-    apply Nat.le_sub_le_add_l in Hu.
-...
-    apply Nat.nlt_ge in Hu.
-    exfalso; apply Hu; clear Hu.
-    apply Nat.lt_add_lt_sub_l.
-    apply Nat.lt_add_lt_sub_r.
-    eapply Nat.lt_le_trans; [ apply Hx | ].
-    apply Nat.le_succ_l.
-    apply Nat.lt_add_lt_sub_l.
+    apply List.in_seq.
+    split. {
+      apply Nat.neq_0_lt_0.
+      intros H7; subst z.
+      rewrite Nat.mul_0_r in H5.
+      rewrite Nat.Div0.mod_0_l in H5.
+      symmetry in H5.
+      apply Nat.sub_0_le in H5.
+      apply Nat.nlt_ge in H5.
+      apply H5; clear H5.
+      rewrite <- H2.
+      now apply Nat.mod_upper_bound.
+    }
+    now apply Nat.lt_succ_r.
+  }
+  apply Nat.nle_gt in Hzl.
+  progress unfold abs.
 ...
 progress unfold abs.
 remember 42 as z.
