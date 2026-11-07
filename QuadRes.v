@@ -2796,10 +2796,7 @@ apply incl_incl_permutation. {
       rewrite Nat.Div0.mod_0_l in H2; subst x.
       flia Hx.
     }
-    apply Nat.lt_succ_r.
-    apply (Nat.le_trans _ y); [ now apply Nat.Div0.mod_le | ].
-    eapply Nat.le_trans. {
-...
+    now apply Nat.lt_succ_r.
   }
   apply Nat.nle_gt in Hyl.
   specialize congruence_inverse_has_unique_solution as H4.
