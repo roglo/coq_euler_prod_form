@@ -2774,8 +2774,9 @@ apply incl_incl_permutation. {
   specialize (H1 H); clear H.
   specialize (H1 a Hal).
   destruct H1 as (y & (H1, H2) & H3).
-  destruct (le_dec y ((l - 1) / 2)) as [Hyl| Hyl]. {
-    exists y.
+  destruct (le_dec (y mod l) ((l - 1) / 2)) as [Hyl| Hyl]. {
+    exists (y mod l).
+    rewrite Nat.Div0.mul_mod_idemp_l.
     rewrite Nat.mul_comm, H2.
     split. {
       progress unfold abs.
@@ -2787,12 +2788,18 @@ apply incl_incl_permutation. {
     apply List.in_seq.
     split. {
       apply Nat.neq_0_lt_0.
-      intros H; subst y.
+      intros H.
+      apply Nat.Lcm0.mod_divide in H.
+      destruct H as (m, Hm); subst y.
+      destruct m; [ | flia H1 ].
       rewrite Nat.mul_0_r in H2.
       rewrite Nat.Div0.mod_0_l in H2; subst x.
       flia Hx.
     }
-    now apply Nat.lt_succ_r.
+    apply Nat.lt_succ_r.
+    apply (Nat.le_trans _ y); [ now apply Nat.Div0.mod_le | ].
+    eapply Nat.le_trans. {
+...
   }
   apply Nat.nle_gt in Hyl.
   specialize congruence_inverse_has_unique_solution as H4.
@@ -2807,8 +2814,9 @@ apply incl_incl_permutation. {
   }
   specialize (H4 H a Hal); clear H.
   destruct H4 as (z & (H4, H5) & H6).
-  destruct (le_dec z ((l - 1) / 2)) as [Hzl| Hzl]. {
-    exists z.
+  destruct (le_dec (z mod l) ((l - 1) / 2)) as [Hzl| Hzl]. {
+    exists (z mod l).
+    rewrite Nat.Div0.mul_mod_idemp_l.
     rewrite Nat.mul_comm, H5.
     split. {
       progress unfold abs.
@@ -2855,7 +2863,11 @@ apply incl_incl_permutation. {
     apply List.in_seq.
     split. {
       apply Nat.neq_0_lt_0.
-      intros H7; subst z.
+      intros H7.
+      apply Nat.Lcm0.mod_divide in H7.
+      destruct H7 as (m, Hm).
+      subst z.
+      destruct m; [ | flia  H4 ].
       rewrite Nat.mul_0_r in H5.
       rewrite Nat.Div0.mod_0_l in H5.
       symmetry in H5.
