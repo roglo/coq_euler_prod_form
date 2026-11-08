@@ -3071,6 +3071,24 @@ apply incl_incl_permutation. {
     apply Nat.Div0.mod_divides in H1.
     destruct H1  as (c, Hc).
     rewrite Hc, Nat.mul_comm, Nat.div_mul in Hu; [ | easy ].
+    apply Nat_eq_mod_1 in Hu.
+    destruct Hu as (H1 & H2 & _).
+    apply Nat.Div0.mod_divides in H1.
+    destruct H1 as (n, H1).
+    destruct c; [ easy |  ].
+    rewrite Nat_sub_succ_1 in H1.
+    clear H2.
+    subst c.
+    rewrite <- Nat.add_1_r in Hc.
+...
+    apply Nat.add_sub_eq_nz in H1; cycle 1. {
+      intros H.
+      apply Nat.eq_mul_0 in H.
+      destruct H as [H| H]; [ easy | subst n ].
+      rewrite Nat.mul_0_r in H1.
+      replace c with 1 in Hc  by flia H1 H2.
+      clear c H1 H2.
+      rewrite Nat.mul_1_r in Hc.
 ...
     destruct m; [ easy | ].
 (*
