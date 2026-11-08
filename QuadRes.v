@@ -3030,15 +3030,10 @@ apply incl_incl_permutation. {
       apply Nat.add_0_r.
     }
     rewrite Nat.add_comm in Hi.
-    rewrite Nat.sub_add in Hi; cycle 1. {
-      apply Nat.neq_0_lt_0.
-      now intros H; subst m.
-    }
+    destruct (Nat.eq_dec m 0) as [Hmz| Hmz]; [ now subst m | ].
+    rewrite Nat.sub_add in Hi; [ | now apply Nat.neq_0_lt_0 ].
     rewrite Nat.add_comm.
-    rewrite <- Nat.add_sub_swap; cycle 1. {
-      apply Nat.neq_0_lt_0.
-      now intros H; subst m.
-    }
+    rewrite <- Nat.add_sub_swap; [ | now apply Nat.neq_0_lt_0 ].
     rewrite <- Nat.add_sub_assoc; cycle 1. {
       apply Nat.neq_0_lt_0.
       now intros H; rewrite H in Hu.
@@ -3052,6 +3047,30 @@ apply incl_incl_permutation. {
     apply -> Nat.lt_succ_r in Hu.
     apply Nat_le_neq_lt; [ easy | ].
     intros H; clear Hu.
+    symmetry in H.
+    rewrite Hm in H.
+    rewrite (Nat.mul_comm 2) in H.
+    rewrite Nat.Div0.mod_mul_r in H.
+    remember ((i * a) / m mod 2) as u eqn:Hu.
+    symmetry in Hu.
+    destruct u. {
+      rewrite Nat.mul_0_r, Nat.add_0_r in H.
+      specialize (Nat.mod_upper_bound (i * a) m Hmz) as H1.
+      rewrite H in H1.
+      now apply Nat.lt_irrefl in H1.
+    }
+    rewrite Nat.mul_succ_r in H.
+    rewrite Nat.add_assoc in H.
+    apply Nat.add_sub_eq_r in H.
+    rewrite Nat.sub_diag in H; symmetry in H.
+    apply Nat.eq_add_0 in H.
+    destruct H as (H1, H2).
+    apply Nat.eq_mul_0 in H2.
+    destruct H2 as [H2| H2]; [ easy | ].
+    subst u.
+    apply Nat.Div0.mod_divides in H1.
+    destruct H1  as (c, Hc).
+    rewrite Hc, Nat.mul_comm, Nat.div_mul in Hu; [ | easy ].
 ...
     destruct m; [ easy | ].
 (*
