@@ -3131,6 +3131,16 @@ a,
         apply Nat.mul_1_r.
       }
       rewrite <- Hm in H.
+      rewrite Nat.add_1_r in H.
+      apply Nat.Even_succ in H.
+      apply Nat.Odd_mul_inv_l in H.
+      apply Nat.Odd_succ in H.
+      apply Nat.Even_succ in H.
+      destruct H as (i, H).
+      now rewrite Nat.add_1_r in H.
+    }
+    destruct m. {
+      cbn in Hm; subst l.
 ...
       generalize Heqb; intros H1.
       apply Nat_eq_mod_sub_0 in Heqb; cycle 1. {
