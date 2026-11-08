@@ -3016,7 +3016,24 @@ apply incl_incl_permutation. {
     }
     destruct Hl as (m, Hm).
     destruct m; [ easy | ].
-...
+(*
+Compute (
+let m := 20 in
+let i := 1 in
+List.map (λ a,
+(
+a,
+  2 * S m ≤ (i * a) mod (2 * S m) + (2 * S m - 1) / 2
+)
+)
+(List.filter (λ a,
+  Nat.ltb ((2 * S m - 1) / 2) ((i * a) mod (2 * S m))
+
+)
+  (List.filter (are_coprimes (2 * S m)) (List.seq 1 (2 * S m)))
+)
+).
+*)
     rewrite Hm at 3.
     rewrite Nat.mul_succ_r.
     rewrite <- Nat.add_sub_assoc; [ | now apply -> Nat.succ_le_mono ].
@@ -3091,14 +3108,28 @@ apply incl_incl_permutation. {
       destruct b; [ flia Hu | ].
       destruct b; [ flia Hu | clear Hu ].
       destruct b; [ exfalso | flia ].
+      clear Hal.
       replace 3 with (3 mod 6) in Heqb at 2 by easy.
+      destruct a; [ easy | ].
+      destruct a; [ easy | ].
+      apply Nat_eq_mod_sub_0 in Heqb; [ | flia ].
+      cbn - [ "mod" ] in Heqb.
+      rewrite Nat.add_0_r in Heqb.
+      rewrite Nat.add_succ_r in Heqb.
+      rewrite Nat_sub_succ_1 in Heqb.
+      rewrite Nat.add_succ_r in Heqb.
+      rewrite <- Nat_mul_2_l in Heqb.
+      rewrite <- Nat.add_1_r in Heqb.
+      apply Nat.Lcm0.mod_divide in Heqb.
+      destruct Heqb as (m, Hm).
+...
+      generalize Heqb; intros H1.
       apply Nat_eq_mod_sub_0 in Heqb; cycle 1. {
         destruct a; [ easy | ].
         destruct a; [ easy | flia ].
       }
       destruct a; [ easy | ].
-      destruct a. {
-        cbn in Heqb.
+      destruct a; [ easy | ].
 ...
       destruct a; [ easy | ].
       destruct a; [ easy | ].
