@@ -3015,6 +3015,44 @@ apply incl_incl_permutation. {
       now rewrite Nat_mul_2_l.
     }
     destruct Hl as (m, Hm).
+    rewrite Hm at  3.
+    rewrite Hm in Hi.
+    rewrite Hm in Hu at 1.
+    replace ((2 * m - 1) / 2) with (m - 1) in Hi, Hu |-*; cycle 1. {
+      symmetry.
+      destruct m; [ easy | ].
+      rewrite Nat.mul_succ_r.
+      rewrite <- Nat.add_sub_assoc; [ | now apply -> Nat.succ_le_mono ].
+      do 2 rewrite Nat_sub_succ_1.
+      rewrite Nat.mul_comm.
+      rewrite Nat.div_add_l; [ | easy ].
+      rewrite Nat.div_small; [ | now apply -> Nat.succ_lt_mono ].
+      apply Nat.add_0_r.
+    }
+    rewrite Nat.add_comm in Hi.
+    rewrite Nat.sub_add in Hi; cycle 1. {
+      apply Nat.neq_0_lt_0.
+      now intros H; subst m.
+    }
+    rewrite Nat.add_comm.
+    rewrite <- Nat.add_sub_swap; cycle 1. {
+      apply Nat.neq_0_lt_0.
+      now intros H; subst m.
+    }
+    rewrite <- Nat.add_sub_assoc; cycle 1. {
+      apply Nat.neq_0_lt_0.
+      now intros H; rewrite H in Hu.
+    }
+    rewrite Hm at 1.
+    rewrite Nat_mul_2_l.
+    apply Nat.add_le_mono_l.
+    apply Nat.le_add_le_sub_l.
+    apply Nat.le_succ_l.
+    apply Nat.lt_sub_lt_add_l in Hu.
+    apply -> Nat.lt_succ_r in Hu.
+    apply Nat_le_neq_lt; [ easy | ].
+    intros H; clear Hu.
+...
     destruct m; [ easy | ].
 (*
 Compute (
@@ -3087,8 +3125,8 @@ a,
     destruct m. {
       cbn in Hm.
       subst l.
-      cbn in Hi.
       clear Hlz.
+      cbn in Hi.
       destruct i; [ easy | ].
       destruct i. {
         rewrite Nat.mul_1_l in Hu |-*.
