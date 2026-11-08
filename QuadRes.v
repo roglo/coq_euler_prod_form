@@ -3016,6 +3016,7 @@ apply incl_incl_permutation. {
     }
     destruct Hl as (m, Hm).
     destruct m; [ easy | ].
+...
     rewrite Hm at 3.
     rewrite Nat.mul_succ_r.
     rewrite <- Nat.add_sub_assoc; [ | now apply -> Nat.succ_le_mono ].
@@ -3065,6 +3066,56 @@ apply incl_incl_permutation. {
       rewrite Nat.add_1_r.
       now do 4 apply -> Nat.succ_le_mono.
     }
+    progress unfold coprimes in Hal.
+    destruct m. {
+      cbn in Hm.
+      subst l.
+      cbn in Hi.
+      clear Hlz.
+      destruct i; [ easy | ].
+      destruct i. {
+        rewrite Nat.mul_1_l in Hu |-*.
+        rewrite Nat.gcd_comm in Hal.
+        rewrite <- Nat.Lcm0.gcd_mod in Hal.
+        remember (a mod 6) as b.
+        clear a Heqb.
+        destruct b; [ easy | ].
+        destruct b; [ cbn in Hu; flia Hu | ].
+        destruct b; [ easy | ].
+        destruct b; [ easy | flia ].
+      }
+      destruct i; [ clear Hi | flia Hi ].
+      remember ((2 * a) mod 6) as b.
+      symmetry in Heqb.
+      destruct b; [ easy | ].
+      destruct b; [ flia Hu | ].
+      destruct b; [ flia Hu | clear Hu ].
+      destruct b; [ exfalso | flia ].
+      replace 3 with (3 mod 6) in Heqb at 2 by easy.
+      apply Nat_eq_mod_sub_0 in Heqb; cycle 1. {
+        destruct a; [ easy | ].
+        destruct a; [ easy | flia ].
+      }
+      destruct a; [ easy | ].
+      destruct a. {
+        cbn in Heqb.
+...
+      destruct a; [ easy | ].
+      destruct a; [ easy | ].
+      destruct a; [ easy | ].
+      destruct a; [ easy | ].
+      destruct a; [ easy | ].
+      destruct a; [ easy | ].
+      destruct a; [ easy | ].
+      destruct a; [ easy | ].
+...
+      rewrite Nat.gcd_comm in Hal.
+      rewrite <- Nat.Lcm0.gcd_mod in Hal.
+      rewrite <- Nat.Div0.mul_mod_idemp_r in Hu.
+      rewrite <- Nat.Div0.mul_mod_idemp_r.
+      remember (a mod 6) as b.
+      clear a Heqb.
+      rename b into a.
 ...
 progress unfold abs.
 remember 42 as z.
