@@ -3122,6 +3122,15 @@ a,
       rewrite <- Nat.add_1_r in Heqb.
       apply Nat.Lcm0.mod_divide in Heqb.
       destruct Heqb as (m, Hm).
+      assert (H : Nat.Even (m * 6)). {
+        rewrite Nat.mul_comm.
+        replace 6 with (2 * 3) by easy.
+        rewrite <- Nat.mul_assoc.
+        apply Nat.Even_mul_l.
+        exists 1; symmetry.
+        apply Nat.mul_1_r.
+      }
+      rewrite <- Hm in H.
 ...
       generalize Heqb; intros H1.
       apply Nat_eq_mod_sub_0 in Heqb; cycle 1. {
