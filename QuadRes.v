@@ -2999,6 +2999,8 @@ apply incl_incl_permutation. {
     }
     apply Nat.lt_succ_r.
     apply Nat.le_sub_le_add_l.
+progress unfold coprimes in Hal.
+...
     destruct (Nat.Even_Odd_dec l) as [Hl| Hl]; cycle 1. {
       destruct Hl as (m, Hm).
       rewrite Hm at 3.
@@ -3080,6 +3082,22 @@ apply incl_incl_permutation. {
     clear H2.
     subst c.
     rewrite <- Nat.add_1_r in Hc.
+    assert (H : Nat.divide m (i * a)). {
+      rewrite Hc.
+      apply Nat.divide_factor_l.
+    }
+(**)
+Compute (
+let m := 7 in
+let i := 2 in
+let n := 1 in
+List.map (λ a,
+((2*m, a),
+  i * a = m * (2 * n + 1)
+)
+) (List.filter (are_coprimes (2 * m)) (List.seq 1 (2 * m)))
+).
+(**)
 ...
     apply Nat.add_sub_eq_nz in H1; cycle 1. {
       intros H.
