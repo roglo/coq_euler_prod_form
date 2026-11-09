@@ -2485,6 +2485,87 @@ apply Nat.lt_succ_r.
 apply Nat.le_add_r.
 Qed.
 
+Theorem NoDup_map_mul_mod_seq :
+  ∀ a l,
+  coprimes a l
+  → List.NoDup
+      (ListDef.map (λ i : nat, abs ((i * a) mod l) l)
+         (ListDef.seq 1 ((l - 1) / 2))).
+Proof.
+intros * Hal.
+apply FinFun.Injective_map_NoDup_in; [ | apply List.seq_NoDup ].
+intros * Hx Hy Hxy.
+destruct (Nat.eq_dec l 0) as [Hlz| Hlz]; [ now subst l | ].
+apply List.in_seq in Hx.
+apply List.in_seq in Hy.
+progress unfold abs in Hxy.
+remember (_ <=? _) as u eqn:Hu in Hxy.
+remember (_ <=? _) as v eqn:Hv in Hxy.
+symmetry in Hu, Hv.
+destruct (Nat.eq_dec x y) as [Hxey| Hxey]; [ easy | ].
+destruct u, v. {
+  apply mul_all_different_multiples in Hxy; [ easy | easy | easy | | ]. {
+    eapply Nat.lt_le_trans; [ apply Hx | ].
+    apply Nat.le_succ_l.
+    apply Nat.Div0.div_lt_upper_bound.
+    rewrite Nat_mul_2_l.
+    destruct l; [ easy | ].
+    rewrite Nat_sub_succ_1.
+    apply Nat.le_add_r.
+  } {
+    eapply Nat.lt_le_trans; [ apply Hy | ].
+    apply Nat.le_succ_l.
+    apply Nat.Div0.div_lt_upper_bound.
+    rewrite Nat_mul_2_l.
+    destruct l; [ easy | ].
+    rewrite Nat_sub_succ_1.
+    apply Nat.le_add_r.
+  }
+} {
+  now apply (coprimes_mul_mod a l).
+} {
+  apply (coprimes_mul_mod a l); [ easy | easy | easy | ].
+  rewrite <- Hxy.
+  rewrite Nat.sub_sub_distr; [ | | easy ].
+  now rewrite Nat.sub_diag.
+  now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+} {
+  apply Nat.leb_gt in Hu.
+  apply Nat.leb_gt in Hv.
+  apply Nat.add_sub_eq_nz in Hxy; cycle 1. {
+    intros H.
+    apply Nat.sub_0_le in H.
+    apply Nat.nlt_ge in H.
+    now apply H, Nat.mod_upper_bound.
+  }
+  rewrite Nat.add_sub_assoc in Hxy; cycle 1. {
+    now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+  }
+  apply Nat.add_sub_eq_nz in Hxy; [ | easy ].
+  apply Nat.add_cancel_r in Hxy.
+  apply Nat_mul_mod_cancel_r in Hxy; [ | easy ].
+  rewrite Nat.mod_small in Hxy; cycle 1. {
+    eapply Nat.lt_le_trans; [ apply Hy | ].
+    apply Nat.le_succ_l.
+    apply Nat.Div0.div_lt_upper_bound.
+    rewrite Nat_mul_2_l.
+    destruct l; [ easy | ].
+    rewrite Nat_sub_succ_1.
+    apply Nat.le_add_r.
+  }
+  rewrite Nat.mod_small in Hxy; cycle 1. {
+    eapply Nat.lt_le_trans; [ apply Hx | ].
+    apply Nat.le_succ_l.
+    apply Nat.Div0.div_lt_upper_bound.
+    rewrite Nat_mul_2_l.
+    destruct l; [ easy | ].
+    rewrite Nat_sub_succ_1.
+    apply Nat.le_add_r.
+  }
+  easy.
+}
+Qed.
+
 Theorem incl_seq_map_mul :
   ∀ a l x,
   coprimes a l
@@ -2831,83 +2912,13 @@ Theorem permutation_seq_map_abs_seq :
     (List.map (λ i, abs ((i * a) mod l) l) (List.seq 1 ((l - 1) / 2))).
 Proof.
 intros * Hal.
-destruct (Nat.eq_dec l 0) as [Hlz| Hlz]; [ now subst l | ].
 apply incl_incl_permutation. {
   progress unfold Misc.equality.
   apply Nat.eqb_eq.
 } {
   apply List.seq_NoDup.
 } {
-  apply FinFun.Injective_map_NoDup_in; [ | apply List.seq_NoDup ].
-  intros * Hx Hy Hxy.
-  apply List.in_seq in Hx.
-  apply List.in_seq in Hy.
-  progress unfold abs in Hxy.
-  remember (_ <=? _) as u eqn:Hu in Hxy.
-  remember (_ <=? _) as v eqn:Hv in Hxy.
-  symmetry in Hu, Hv.
-  destruct (Nat.eq_dec x y) as [Hxey| Hxey]; [ easy | ].
-  destruct u, v. {
-    apply mul_all_different_multiples in Hxy; [ easy | easy | easy | | ]. {
-      eapply Nat.lt_le_trans; [ apply Hx | ].
-      apply Nat.le_succ_l.
-      apply Nat.Div0.div_lt_upper_bound.
-      rewrite Nat_mul_2_l.
-      destruct l; [ easy | ].
-      rewrite Nat_sub_succ_1.
-      apply Nat.le_add_r.
-    } {
-      eapply Nat.lt_le_trans; [ apply Hy | ].
-      apply Nat.le_succ_l.
-      apply Nat.Div0.div_lt_upper_bound.
-      rewrite Nat_mul_2_l.
-      destruct l; [ easy | ].
-      rewrite Nat_sub_succ_1.
-      apply Nat.le_add_r.
-    }
-  } {
-    now apply (coprimes_mul_mod a l).
-  } {
-    apply (coprimes_mul_mod a l); [ easy | easy | easy | ].
-    rewrite <- Hxy.
-    rewrite Nat.sub_sub_distr; [ | | easy ].
-    now rewrite Nat.sub_diag.
-    now apply Nat.lt_le_incl, Nat.mod_upper_bound.
-  } {
-    apply Nat.leb_gt in Hu.
-    apply Nat.leb_gt in Hv.
-    apply Nat.add_sub_eq_nz in Hxy; cycle 1. {
-      intros H.
-      apply Nat.sub_0_le in H.
-      apply Nat.nlt_ge in H.
-      now apply H, Nat.mod_upper_bound.
-    }
-    rewrite Nat.add_sub_assoc in Hxy; cycle 1. {
-      now apply Nat.lt_le_incl, Nat.mod_upper_bound.
-    }
-    apply Nat.add_sub_eq_nz in Hxy; [ | easy ].
-    apply Nat.add_cancel_r in Hxy.
-    apply Nat_mul_mod_cancel_r in Hxy; [ | easy ].
-    rewrite Nat.mod_small in Hxy; cycle 1. {
-      eapply Nat.lt_le_trans; [ apply Hy | ].
-      apply Nat.le_succ_l.
-      apply Nat.Div0.div_lt_upper_bound.
-      rewrite Nat_mul_2_l.
-      destruct l; [ easy | ].
-      rewrite Nat_sub_succ_1.
-      apply Nat.le_add_r.
-    }
-    rewrite Nat.mod_small in Hxy; cycle 1. {
-      eapply Nat.lt_le_trans; [ apply Hx | ].
-      apply Nat.le_succ_l.
-      apply Nat.Div0.div_lt_upper_bound.
-      rewrite Nat_mul_2_l.
-      destruct l; [ easy | ].
-      rewrite Nat_sub_succ_1.
-      apply Nat.le_add_r.
-    }
-    easy.
-  }
+  now apply NoDup_map_mul_mod_seq.
 } {
   intros x Hx.
   now apply incl_seq_map_mul.
