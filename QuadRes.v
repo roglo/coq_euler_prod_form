@@ -3151,12 +3151,21 @@ assert
     easy.
   }
   cbn - [ "/" "mod" nb_of_mult_gt_half ].
-...
-    remember (_ <=? _) as x eqn:Hx.
-    symmetry in Hx.
-    destruct x.
-    rewrite Nat_add_if_distr_l.
-
+  rewrite eq_nb_of_mult_gt_half_summation.
+  progress replace Nat.mul with rngl_mul by easy.
+  rewrite rngl_mul_summation_distr_r; [ | easy ].
+  apply rngl_summation_eq_compat.
+  intros k Hk.
+  progress unfold Nat.b2n.
+  rewrite Nat.leb_antisym.
+  rewrite Bool.negb_if.
+  rewrite nat_ltb_rngl_ltb.
+  replace rngl_mul with Nat.mul by easy.
+  replace rngl_div with Nat.div by easy.
+  replace rngl_sub with Nat.sub by easy.
+  symmetry.
+  now destruct (_ <? _)%L.
+}
 ...
 Search (List.map _ (List.seq _ _)).
 rewrite Misc.List_map_seq.
