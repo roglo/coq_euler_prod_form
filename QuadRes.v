@@ -2685,6 +2685,238 @@ destruct (Nat.Even_Odd_dec l) as [Hl| Hl]; cycle 1. {
 }
 Qed.
 
+Theorem incl_map_mul_seq :
+  ∀ a l x,
+  coprimes a l
+  → x ∈ ListDef.map (λ i : nat, abs ((i * a) mod l) l)
+        (ListDef.seq 1 ((l - 1) / 2))
+  → x ∈ ListDef.seq 1 ((l - 1) / 2).
+Proof.
+intros * Hal Hx.
+destruct (Nat.eq_dec l 0) as [Hlz| Hlz]; [ now subst l | ].
+apply List.in_map_iff in Hx.
+apply List.in_seq.
+destruct  Hx as (i & Hx & Hi).
+apply List.in_seq in Hi.
+subst x.
+progress unfold abs.
+remember (_ <=? _) as u eqn:Hu.
+symmetry in Hu.
+destruct u. {
+  apply Nat.leb_le in Hu.
+  split. {
+    apply Nat.neq_0_lt_0.
+    intros H.
+    clear  Hu.
+    apply Nat.Lcm0.mod_divide in H.
+    rewrite Nat.mul_comm in H.
+    apply Nat.gauss in H; [ | now rewrite Nat.gcd_comm ].
+    destruct H as (m, Hm).
+    subst i.
+    destruct (Nat.eq_dec m 0) as [Hmz| Hmz]; [ now subst m | ].
+    destruct Hi as (H1, Hi).
+    apply Nat.nle_gt in Hi.
+    apply Hi; clear Hi.
+    destruct m; [ easy | ].
+    cbn - [ "/" ].
+    apply (Nat.le_trans _ l); [ | apply Nat.le_add_r ].
+    apply Nat.le_succ_l.
+    apply Nat.Div0.div_lt_upper_bound.
+    flia Hlz.
+  }
+  now apply Nat.lt_succ_r.
+} {
+  apply Nat.leb_gt in Hu.
+  split. {
+    apply Nat.le_add_le_sub_r.
+    now apply Nat.mod_upper_bound.
+  }
+  apply Nat.lt_succ_r.
+  apply Nat.le_sub_le_add_l.
+  destruct (Nat.Even_Odd_dec l) as [Hl| Hl]; cycle 1. {
+    destruct Hl as (m, Hm).
+    rewrite Hm at 3.
+    rewrite Nat.add_sub, (Nat.mul_comm 2), Nat.div_mul; [ | easy ].
+    rewrite Hm in Hu at 1.
+    rewrite Nat.add_sub in Hu.
+    rewrite (Nat.mul_comm 2), Nat.div_mul in Hu; [ | easy ].
+    eapply Nat.le_trans; cycle 1. {
+      apply Nat.add_le_mono_r.
+      apply Nat.le_succ_l.
+      apply Hu.
+    }
+    rewrite Hm, Nat.add_comm.
+    now rewrite Nat_mul_2_l.
+  }
+  destruct Hl as (m, Hm).
+  destruct (Nat.eq_dec ((i * a) mod l) m) as [Hialm| Hialm]. {
+    exfalso.
+    specialize congruence_inverse_has_unique_solution as H1.
+    specialize (H1 l 1).
+    assert (H : 0 < 1 < l). {
+      split; [ easy | ].
+      subst l.
+      destruct m; [ easy | ].
+      rewrite Nat.mul_succ_r, Nat.add_comm.
+      apply (Nat.lt_le_trans _ 2); [ easy | ].
+      apply Nat.le_add_r.
+    }
+    specialize (H1 H); clear H.
+    specialize (H1 a Hal).
+    destruct H1 as (a' & (H1, H2) & H3).
+    apply (f_equal (λ x, 2 * x * a')) in Hialm.
+    apply (f_equal (λ x, x mod l)) in Hialm.
+    rewrite <- Hm, (Nat.mul_comm l) in Hialm.
+    rewrite Nat.Div0.mod_mul in Hialm.
+    rewrite Nat.mul_shuffle0 in Hialm.
+    rewrite Nat.Div0.mul_mod_idemp_r in Hialm.
+    rewrite Nat.mul_shuffle0 in Hialm.
+    rewrite Nat.mul_assoc in Hialm.
+    rewrite <- Nat.mul_assoc in Hialm.
+    rewrite <- Nat.Div0.mul_mod_idemp_r in Hialm.
+    rewrite H2, Nat.mul_1_r in Hialm.
+    apply Nat.Lcm0.mod_divide in Hialm.
+    rewrite Hm in Hialm.
+    apply Nat.mul_divide_cancel_l in Hialm; [ | easy ].
+    destruct Hialm as (c, Hc).
+    subst i.
+    destruct c; [ easy | ].
+    destruct Hi as (H4, H5).
+    apply Nat.nle_gt in H5.
+    apply H5; clear H5.
+    apply Nat.le_succ_l.
+    apply Nat.Div0.div_lt_upper_bound.
+    rewrite (Nat.mul_comm _ m), Nat.mul_assoc.
+    rewrite <- Hm.
+    rewrite Nat.mul_succ_r.
+    apply (Nat.lt_le_trans _ l); [ | apply Nat.le_add_l ].
+    apply Nat.sub_lt; [ | easy ].
+    now apply Nat.neq_0_lt_0.
+  }
+  rewrite Hm in Hu, Hialm |-*.
+  replace ((2 * m - 1) / 2) with (m - 1) in Hu |-*; cycle 1. {
+    symmetry.
+    destruct m; [ easy | ].
+    rewrite Nat.mul_succ_r.
+    rewrite <- Nat.add_sub_assoc; [ | now apply -> Nat.succ_le_mono ].
+    do 2 rewrite Nat_sub_succ_1.
+    rewrite Nat.mul_comm.
+    rewrite Nat.div_add_l; [ | easy ].
+    rewrite Nat.div_small; [ | now apply -> Nat.succ_lt_mono ].
+    apply Nat.add_0_r.
+  }
+  apply Nat.le_sub_le_add_r.
+  rewrite Nat.sub_sub_distr; cycle 1. {
+    apply Nat.neq_0_lt_0.
+    intros H; subst m.
+    now rewrite Nat.mul_0_r in Hm.
+  } {
+    rewrite Nat_mul_2_l.
+    apply Nat.le_add_l.
+  }
+  rewrite Nat_mul_2_l at 1.
+  rewrite Nat.add_sub.
+  rewrite Nat.add_1_r.
+  apply Nat.le_succ_l.
+  apply Nat_le_neq_lt; [ | easy ].
+  apply Nat.lt_sub_lt_add_l in Hu.
+  now apply -> Nat.lt_succ_r in Hu.
+}
+Qed.
+
+Theorem permutation_seq_map_abs_seq :
+  ∀ a l, coprimes a l →
+  permutation eqb
+    (List.seq 1 ((l - 1) / 2))
+    (List.map (λ i, abs ((i * a) mod l) l) (List.seq 1 ((l - 1) / 2))).
+Proof.
+intros * Hal.
+destruct (Nat.eq_dec l 0) as [Hlz| Hlz]; [ now subst l | ].
+apply incl_incl_permutation. {
+  progress unfold Misc.equality.
+  apply Nat.eqb_eq.
+} {
+  apply List.seq_NoDup.
+} {
+  apply FinFun.Injective_map_NoDup_in; [ | apply List.seq_NoDup ].
+  intros * Hx Hy Hxy.
+  apply List.in_seq in Hx.
+  apply List.in_seq in Hy.
+  progress unfold abs in Hxy.
+  remember (_ <=? _) as u eqn:Hu in Hxy.
+  remember (_ <=? _) as v eqn:Hv in Hxy.
+  symmetry in Hu, Hv.
+  destruct (Nat.eq_dec x y) as [Hxey| Hxey]; [ easy | ].
+  destruct u, v. {
+    apply mul_all_different_multiples in Hxy; [ easy | easy | easy | | ]. {
+      eapply Nat.lt_le_trans; [ apply Hx | ].
+      apply Nat.le_succ_l.
+      apply Nat.Div0.div_lt_upper_bound.
+      rewrite Nat_mul_2_l.
+      destruct l; [ easy | ].
+      rewrite Nat_sub_succ_1.
+      apply Nat.le_add_r.
+    } {
+      eapply Nat.lt_le_trans; [ apply Hy | ].
+      apply Nat.le_succ_l.
+      apply Nat.Div0.div_lt_upper_bound.
+      rewrite Nat_mul_2_l.
+      destruct l; [ easy | ].
+      rewrite Nat_sub_succ_1.
+      apply Nat.le_add_r.
+    }
+  } {
+    now apply (coprimes_mul_mod a l).
+  } {
+    apply (coprimes_mul_mod a l); [ easy | easy | easy | ].
+    rewrite <- Hxy.
+    rewrite Nat.sub_sub_distr; [ | | easy ].
+    now rewrite Nat.sub_diag.
+    now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+  } {
+    apply Nat.leb_gt in Hu.
+    apply Nat.leb_gt in Hv.
+    apply Nat.add_sub_eq_nz in Hxy; cycle 1. {
+      intros H.
+      apply Nat.sub_0_le in H.
+      apply Nat.nlt_ge in H.
+      now apply H, Nat.mod_upper_bound.
+    }
+    rewrite Nat.add_sub_assoc in Hxy; cycle 1. {
+      now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+    }
+    apply Nat.add_sub_eq_nz in Hxy; [ | easy ].
+    apply Nat.add_cancel_r in Hxy.
+    apply Nat_mul_mod_cancel_r in Hxy; [ | easy ].
+    rewrite Nat.mod_small in Hxy; cycle 1. {
+      eapply Nat.lt_le_trans; [ apply Hy | ].
+      apply Nat.le_succ_l.
+      apply Nat.Div0.div_lt_upper_bound.
+      rewrite Nat_mul_2_l.
+      destruct l; [ easy | ].
+      rewrite Nat_sub_succ_1.
+      apply Nat.le_add_r.
+    }
+    rewrite Nat.mod_small in Hxy; cycle 1. {
+      eapply Nat.lt_le_trans; [ apply Hx | ].
+      apply Nat.le_succ_l.
+      apply Nat.Div0.div_lt_upper_bound.
+      rewrite Nat_mul_2_l.
+      destruct l; [ easy | ].
+      rewrite Nat_sub_succ_1.
+      apply Nat.le_add_r.
+    }
+    easy.
+  }
+} {
+  intros x Hx.
+  now apply incl_seq_map_mul.
+} {
+  intros x Hx.
+  now apply incl_map_mul_seq in Hx.
+}
+Qed.
+
 (* to be completed
 Theorem quadratic_reciprocity :
   ∀ p q, prime p → prime q → 2 < p < q →
@@ -2871,194 +3103,10 @@ is_permutation eqb
  (List.map (λ i, abs ((i * a) mod l) l) (List.seq 1 ((l - 1) / 2))))
 (List.filter (are_coprimes l) (List.seq 1 (l - 1)))).
 *)
-Theorem glop :
-  ∀ a l, coprimes a l →
-  permutation eqb
-    (List.seq 1 ((l - 1) / 2))
-    (List.map (λ i, abs ((i * a) mod l) l) (List.seq 1 ((l - 1) / 2))).
-Proof.
-intros * Hal.
-destruct (Nat.eq_dec l 0) as [Hlz| Hlz]; [ now subst l | ].
-apply incl_incl_permutation. {
-  progress unfold Misc.equality.
-  apply Nat.eqb_eq.
-} {
-  apply List.seq_NoDup.
-} {
-  apply FinFun.Injective_map_NoDup_in; [ | apply List.seq_NoDup ].
-  intros * Hx Hy Hxy.
-  apply List.in_seq in Hx.
-  apply List.in_seq in Hy.
-  progress unfold abs in Hxy.
-  remember (_ <=? _) as u eqn:Hu in Hxy.
-  remember (_ <=? _) as v eqn:Hv in Hxy.
-  symmetry in Hu, Hv.
-  destruct (Nat.eq_dec x y) as [Hxey| Hxey]; [ easy | ].
-  destruct u, v. {
-    apply mul_all_different_multiples in Hxy; [ easy | easy | easy | | ]. {
-      eapply Nat.lt_le_trans; [ apply Hx | ].
-      apply Nat.le_succ_l.
-      apply Nat.Div0.div_lt_upper_bound.
-      rewrite Nat_mul_2_l.
-      destruct l; [ easy | ].
-      rewrite Nat_sub_succ_1.
-      apply Nat.le_add_r.
-    } {
-      eapply Nat.lt_le_trans; [ apply Hy | ].
-      apply Nat.le_succ_l.
-      apply Nat.Div0.div_lt_upper_bound.
-      rewrite Nat_mul_2_l.
-      destruct l; [ easy | ].
-      rewrite Nat_sub_succ_1.
-      apply Nat.le_add_r.
-    }
-  } {
-    now apply (coprimes_mul_mod a l).
-  } {
-    apply (coprimes_mul_mod a l); [ easy | easy | easy | ].
-    rewrite <- Hxy.
-    rewrite Nat.sub_sub_distr; [ | | easy ].
-    now rewrite Nat.sub_diag.
-    now apply Nat.lt_le_incl, Nat.mod_upper_bound.
-  } {
-    apply Nat.leb_gt in Hu.
-    apply Nat.leb_gt in Hv.
-    apply Nat.add_sub_eq_nz in Hxy; cycle 1. {
-      intros H.
-      apply Nat.sub_0_le in H.
-      apply Nat.nlt_ge in H.
-      now apply H, Nat.mod_upper_bound.
-    }
-    rewrite Nat.add_sub_assoc in Hxy; cycle 1. {
-      now apply Nat.lt_le_incl, Nat.mod_upper_bound.
-    }
-    apply Nat.add_sub_eq_nz in Hxy; [ | easy ].
-    apply Nat.add_cancel_r in Hxy.
-    apply Nat_mul_mod_cancel_r in Hxy; [ | easy ].
-    rewrite Nat.mod_small in Hxy; cycle 1. {
-      eapply Nat.lt_le_trans; [ apply Hy | ].
-      apply Nat.le_succ_l.
-      apply Nat.Div0.div_lt_upper_bound.
-      rewrite Nat_mul_2_l.
-      destruct l; [ easy | ].
-      rewrite Nat_sub_succ_1.
-      apply Nat.le_add_r.
-    }
-    rewrite Nat.mod_small in Hxy; cycle 1. {
-      eapply Nat.lt_le_trans; [ apply Hx | ].
-      apply Nat.le_succ_l.
-      apply Nat.Div0.div_lt_upper_bound.
-      rewrite Nat_mul_2_l.
-      destruct l; [ easy | ].
-      rewrite Nat_sub_succ_1.
-      apply Nat.le_add_r.
-    }
-    easy.
-  }
-} {
-  intros x Hx.
-  now apply incl_seq_map_mul.
-} {
-  intros x Hx.
-  apply List.in_map_iff in Hx.
-  apply List.in_seq.
-  destruct  Hx as (i & Hx & Hi).
-  apply List.in_seq in Hi.
-  subst x.
-  progress unfold abs.
-  remember (_ <=? _) as u eqn:Hu.
-  symmetry in Hu.
-  destruct u. {
-    apply Nat.leb_le in Hu.
-    split. {
-      apply Nat.neq_0_lt_0.
-      intros H.
-      clear  Hu.
-      apply Nat.Lcm0.mod_divide in H.
-      rewrite Nat.mul_comm in H.
-      apply Nat.gauss in H; [ | now rewrite Nat.gcd_comm ].
-      destruct H as (m, Hm).
-      subst i.
-      destruct (Nat.eq_dec m 0) as [Hmz| Hmz]; [ now subst m | ].
-      destruct Hi as (H1, Hi).
-      apply Nat.nle_gt in Hi.
-      apply Hi; clear Hi.
-      destruct m; [ easy | ].
-      cbn - [ "/" ].
-      apply (Nat.le_trans _ l); [ | apply Nat.le_add_r ].
-      apply Nat.le_succ_l.
-      apply Nat.Div0.div_lt_upper_bound.
-      flia Hlz.
-    }
-    now apply Nat.lt_succ_r.
-  } {
-    apply Nat.leb_gt in Hu.
-    split. {
-      apply Nat.le_add_le_sub_r.
-      now apply Nat.mod_upper_bound.
-    }
-    apply Nat.lt_succ_r.
-    apply Nat.le_sub_le_add_l.
-    destruct (Nat.Even_Odd_dec l) as [Hl| Hl]; cycle 1. {
-      destruct Hl as (m, Hm).
-      rewrite Hm at 3.
-      rewrite Nat.add_sub, (Nat.mul_comm 2), Nat.div_mul; [ | easy ].
-      rewrite Hm in Hu at 1.
-      rewrite Nat.add_sub in Hu.
-      rewrite (Nat.mul_comm 2), Nat.div_mul in Hu; [ | easy ].
-      eapply Nat.le_trans; cycle 1. {
-        apply Nat.add_le_mono_r.
-        apply Nat.le_succ_l.
-        apply Hu.
-      }
-      rewrite Hm, Nat.add_comm.
-      now rewrite Nat_mul_2_l.
-    }
-    destruct Hl as (m, Hm).
-    destruct (Nat.eq_dec ((i * a) mod l) m) as [Hialm| Hialm]. {
-      exfalso.
-      specialize congruence_inverse_has_unique_solution as H1.
-      specialize (H1 l 1).
-      assert (H : 0 < 1 < l). {
-        split; [ easy | ].
-        subst l.
-        destruct m; [ easy | ].
-        rewrite Nat.mul_succ_r, Nat.add_comm.
-        apply (Nat.lt_le_trans _ 2); [ easy | ].
-        apply Nat.le_add_r.
-      }
-      specialize (H1 H); clear H.
-      specialize (H1 a Hal).
-      destruct H1 as (a' & (H1, H2) & H3).
-      apply (f_equal (λ x, 2 * x * a')) in Hialm.
-      apply (f_equal (λ x, x mod l)) in Hialm.
-      rewrite <- Hm, (Nat.mul_comm l) in Hialm.
-      rewrite Nat.Div0.mod_mul in Hialm.
-      rewrite Nat.mul_shuffle0 in Hialm.
-      rewrite Nat.Div0.mul_mod_idemp_r in Hialm.
-      rewrite Nat.mul_shuffle0 in Hialm.
-      rewrite Nat.mul_assoc in Hialm.
-      rewrite <- Nat.mul_assoc in Hialm.
-      rewrite <- Nat.Div0.mul_mod_idemp_r in Hialm.
-      rewrite H2, Nat.mul_1_r in Hialm.
-      apply Nat.Lcm0.mod_divide in Hialm.
-      rewrite Hm in Hialm.
-      apply Nat.mul_divide_cancel_l in Hialm; [ | easy ].
-      destruct Hialm as (c, Hc).
-      subst i.
-      destruct c; [ easy | ].
-      destruct Hi as (H4, H5).
-      apply Nat.nle_gt in H5.
-      apply H5; clear H5.
-      apply Nat.le_succ_l.
-      apply Nat.Div0.div_lt_upper_bound.
-      rewrite (Nat.mul_comm _ m), Nat.mul_assoc.
-      rewrite <- Hm.
-      rewrite Nat.mul_succ_r.
-      apply (Nat.lt_le_trans _ l); [ | apply Nat.le_add_l ].
-      apply Nat.sub_lt; [ | easy ].
-      now apply Nat.neq_0_lt_0.
-    }
+Check permutation_seq_map_abs_seq.
+...
+    apply Nat.le_sub_le_add_r.
+    eapply Nat.le_trans; [ | apply Nat.lt_le_incl, Hu ].
 ...
       specialize congruence_inverse_has_unique_solution as H1.
       specialize (H1 l (a mod l)).
