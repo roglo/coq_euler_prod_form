@@ -2928,6 +2928,40 @@ apply incl_incl_permutation. {
 }
 Qed.
 
+Theorem summation_up_to_half :
+  ∀ a l, coprimes a l →
+  ∑ (i = 1, (l - 1) / 2), i = ∑ (i = 1, (l - 1) / 2), (abs ((i * a) mod l) l).
+Proof.
+intros * Hap.
+apply permutation_same_list_summation.
+rewrite Nat_sub_succ_1.
+rewrite List.map_id.
+now apply permutation_seq_map_abs_seq.
+Qed.
+
+Theorem rngl_summation_if_then_else :
+  ∀ {T} {ro : ring_like_op T} {rp : ring_like_prop T},
+  ∀ b e (f : nat → bool) (g h : nat → T),
+  (∑ (i = b, e), (if f i then g i else h i) =
+     (∑ (i = b, e), (if f i then g i else 0) +
+      ∑ (i = b, e), (if f i then 0 else h i)))%L.
+Proof.
+intros.
+rewrite <- rngl_summation_add_distr.
+apply rngl_summation_eq_compat.
+intros i Hi.
+symmetry.
+destruct (f i).
+apply rngl_add_0_r.
+apply rngl_add_0_l.
+Qed.
+
+Theorem Nat_add_if_if :
+  ∀ (a : bool) b c d e,
+  (if a then b else c) + (if a then d else e) =
+  if a then b + d else c + e.
+Proof. now intros; now destruct a. Qed.
+
 (* to be completed
 Theorem quadratic_reciprocity :
   ∀ p q, prime p → prime q → 2 < p < q →
@@ -3096,13 +3130,36 @@ assert
     apply rngl_ltb_ge_iff in Hy; [ | easy ].
     now apply rngl_le_Nat_le in Hy.
   }
-Theorem glop :
-  ∀ a p, coprimes a p →
-  ∑ (i = 1, p - 1), i = ∑ (i = 1, p - 1), i * a mod p.
-Proof.
-intros * Hap.
+  rewrite (summation_up_to_half a); [ | easy ].
+  progress unfold abs.
+  rewrite rngl_summation_if_then_else.
+  replace Nat.add with rngl_add by easy.
+  progress f_equal.
+  symmetry.
+  apply Nat.add_sub_eq_l.
+  replace Nat.add with rngl_add by easy.
+  rewrite <- rngl_summation_add_distr.
+  erewrite rngl_summation_eq_compat; cycle 1. {
+    intros i Hi.
+    rewrite Nat_add_if_if.
+    replace rngl_zero with 0 by easy.
+    rewrite Nat.add_0_l.
+    easy.
+  }
+  cbn - [ "/" "mod" nb_of_mult_gt_half ].
+...
+    remember (_ <=? _) as x eqn:Hx.
+    symmetry in Hx.
+    destruct x.
+    rewrite Nat_add_if_distr_l.
+
+...
+Search (List.map _ (List.seq _ _)).
+rewrite Misc.List_map_seq.
+rewrite List.seq_map.
+Check permutation_seq_map_abs_seq.
+...
 specialize (mul_all_different_multiples a p Hap) as H1.
-apply permutation_same_list_summation.
 rewrite Nat_sub_succ_1.
 rewrite List.map_id.
 (*
