@@ -3144,6 +3144,10 @@ assert
     rewrite Nat_add_if_if.
     replace rngl_zero with 0 by easy.
     rewrite Nat.add_0_l.
+    rewrite Nat.add_sub_assoc; cycle 1. {
+      now apply Nat.lt_le_incl, Nat.mod_upper_bound.
+    }
+    rewrite Nat.add_comm, Nat.add_sub.
     easy.
   }
   cbn - [ "/" "mod" nb_of_mult_gt_half ].
