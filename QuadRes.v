@@ -2999,8 +2999,6 @@ apply incl_incl_permutation. {
     }
     apply Nat.lt_succ_r.
     apply Nat.le_sub_le_add_l.
-progress unfold coprimes in Hal.
-...
     destruct (Nat.Even_Odd_dec l) as [Hl| Hl]; cycle 1. {
       destruct Hl as (m, Hm).
       rewrite Hm at 3.
@@ -3017,6 +3015,67 @@ progress unfold coprimes in Hal.
       now rewrite Nat_mul_2_l.
     }
     destruct Hl as (m, Hm).
+    destruct (Nat.eq_dec ((i * a) mod l) m) as [Hialm| Hialm]. {
+      exfalso.
+      specialize congruence_inverse_has_unique_solution as H1.
+      specialize (H1 l 1).
+      assert (H : 0 < 1 < l). {
+        split; [ easy | ].
+        subst l.
+        destruct m; [ easy | ].
+        rewrite Nat.mul_succ_r, Nat.add_comm.
+        apply (Nat.lt_le_trans _ 2); [ easy | ].
+        apply Nat.le_add_r.
+      }
+      specialize (H1 H); clear H.
+      specialize (H1 a Hal).
+      destruct H1 as (a' & (H1, H2) & H3).
+      apply (f_equal (λ x, 2 * x * a')) in Hialm.
+      apply (f_equal (λ x, x mod l)) in Hialm.
+      rewrite <- Hm, (Nat.mul_comm l) in Hialm.
+      rewrite Nat.Div0.mod_mul in Hialm.
+      rewrite Nat.mul_shuffle0 in Hialm.
+      rewrite Nat.Div0.mul_mod_idemp_r in Hialm.
+      rewrite Nat.mul_shuffle0 in Hialm.
+      rewrite Nat.mul_assoc in Hialm.
+      rewrite <- Nat.mul_assoc in Hialm.
+      rewrite <- Nat.Div0.mul_mod_idemp_r in Hialm.
+      rewrite H2, Nat.mul_1_r in Hialm.
+      apply Nat.Lcm0.mod_divide in Hialm.
+      rewrite Hm in Hialm.
+      apply Nat.mul_divide_cancel_l in Hialm; [ | easy ].
+      destruct Hialm as (c, Hc).
+      subst i.
+      destruct c; [ easy | ].
+      destruct Hi as (H4, H5).
+      apply Nat.nle_gt in H5.
+      apply H5; clear H5.
+      apply Nat.le_succ_l.
+      apply Nat.Div0.div_lt_upper_bound.
+      rewrite (Nat.mul_comm _ m), Nat.mul_assoc.
+      rewrite <- Hm.
+      rewrite Nat.mul_succ_r.
+      apply (Nat.lt_le_trans _ l); [ | apply Nat.le_add_l ].
+      apply Nat.sub_lt; [ | easy ].
+      now apply Nat.neq_0_lt_0.
+    }
+...
+      specialize congruence_inverse_has_unique_solution as H1.
+      specialize (H1 l (a mod l)).
+      assert (H : 0 < a mod l < l). {
+        split; [ | now apply Nat.mod_upper_bound ].
+        apply Nat.neq_0_lt_0.
+        intros H.
+        rewrite <- Nat.Div0.mul_mod_idemp_r in Hialm.
+        rewrite H, Nat.mul_0_r in Hialm.
+        symmetry in Hialm.
+        rewrite Nat.Div0.mod_0_l in Hialm.
+        now  subst m; rewrite Nat.mul_0_r in Hm.
+      }
+      specialize (H1 H); clear H.
+      specialize (H1 a Hal).
+      destruct H1 as (z & (H1, H2) & H3).
+...
     rewrite Hm at  3.
     rewrite Hm in Hi.
     rewrite Hm in Hu at 1.
