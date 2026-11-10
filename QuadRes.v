@@ -3191,6 +3191,63 @@ progress replace rngl_mul with Nat.mul in H3 by easy.
 rewrite <- Hu.
 progress replace rngl_one with 1 in H3 by easy.
 rewrite Nat.add_shuffle0 in H3.
+symmetry in H3.
+apply (f_equal (λ x, x mod 2)) in H3.
+rewrite (proj2 (Nat.Lcm0.mod_divide (_ * _) 2)) in H3; cycle 1. {
+  destruct Ha as (k, H); rewrite H, Nat.add_sub.
+  rewrite Nat.mul_comm, <- Nat.mul_assoc.
+  apply Nat.divide_factor_l.
+}
+rewrite <- (Nat.Div0.mod_0_l 2) in H3 at 2.
+apply Nat_eq_mod_sub_0 in H3; cycle 1. {
+  destruct (le_dec w (nb_of_mult_gt_half a l * l)) as [H4| H4]. {
+    rewrite <- Nat.add_sub_assoc; [ | easy ].
+    rewrite Nat.add_comm.
+    apply Nat.add_le_mono_r.
+    apply Nat.le_sub_le_add_r.
+    rewrite <- Nat.add_assoc.
+    rewrite eq_nb_of_mult_gt_half_summation.
+    progress unfold Nat.b2n.
+    erewrite rngl_summation_eq_compat; cycle 1. {
+      intros k Hk.
+      rewrite <- nat_ltb_rngl_ltb.
+      rewrite Nat.ltb_antisym.
+      rewrite Bool.if_negb.
+      easy.
+    }
+    cbn - [ "/" ].
+    rewrite <- (Nat_mul_2_l w), Hw.
+    replace Nat.mul with rngl_mul by easy.
+    rewrite rngl_mul_summation_distr_l; [ | easy ].
+    rewrite Hu.
+    rewrite rngl_mul_summation_distr_l; [ | easy ].
+    replace rngl_sub with Nat.sub by easy.
+    replace Nat.add with rngl_add by easy.
+    rewrite <- rngl_summation_add_distr.
+    rewrite rngl_mul_summation_distr_r; [ | easy ].
+    apply rngl_le_Nat_le.
+    apply rngl_summation_le_compat; [ easy | easy | ].
+    intros k Hk.
+    remember (_ <=? _) as x eqn:Hx.
+    symmetry in Hx.
+    destruct x; [ easy | ].
+    rewrite Nat.mul_1_l.
+    apply Nat.leb_gt in Hx.
+    progress replace rngl_mul with Nat.mul by easy.
+    progress replace rngl_div with Nat.div by easy.
+    progress replace rngl_add with Nat.add by easy.
+    apply rngl_le_Nat_le.
+    progress replace rngl_mul with Nat.mul in Hx by easy.
+    progress replace rngl_one with 1 in Hx by easy.
+    rewrite Nat.add_1_r in Hx.
+    eapply Nat.le_trans; [ | apply Nat.le_add_l ].
+    apply Nat_div_lt_mul in Hx; [ | easy ].
+    apply Nat.lt_sub_lt_add_r in Hx.
+    rewrite Nat.add_1_r in Hx.
+    now apply -> Nat.lt_succ_r in Hx.
+  }
+  apply Nat.nle_gt in H4.
+...
 rewrite Nat.sub_sub_distr in H3.
 rewrite Nat.sub_add_distr in H3.
 rewrite Nat.add_sub in H3.
