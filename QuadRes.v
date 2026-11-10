@@ -3247,6 +3247,16 @@ apply Nat_eq_mod_sub_0 in H3; cycle 1. {
     now apply -> Nat.lt_succ_r in Hx.
   }
   apply Nat.nle_gt in H4.
+  eapply Nat.le_trans; [ apply Nat.le_sub_l | ].
+  rewrite Nat.add_comm.
+  apply Nat.add_le_mono_r.
+  eapply Nat.le_trans; [ | apply Nat.le_add_l ].
+  now apply Nat.lt_le_incl.
+}
+...
+  H3 : l * u + w + v - (v + nb_of_mult_gt_half a l * l - w) ≡ 0 mod 2
+  H3 : l * u + w + v ≡ (v + nb_of_mult_gt_half a l * l - w) mod 2
+...
 ...
 rewrite Nat.sub_sub_distr in H3.
 rewrite Nat.sub_add_distr in H3.
