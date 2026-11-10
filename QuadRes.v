@@ -3166,6 +3166,21 @@ assert
   symmetry.
   now destruct (_ <? _)%L.
 }
+rewrite <- rngl_mul_summation_distr_r in H1; [ | easy ].
+remember (∑ (i = 1, (l - 1) / 2), i) as m eqn:Hm.
+remember (_ + _) as x eqn:Hx in H1.
+remember (_ - _) as y eqn:Hy in H2.
+assert (H3 : (m * a - m = x - y)%L) by now rewrite H1, H2.
+replace (m * a - m)%L with (m * (a - 1))%L in H3; cycle 1. {
+  cbn.
+  replace rngl_mul with Nat.mul by easy.
+  replace rngl_one with 1 by easy.
+  now rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
+}
+subst x y; move H3 at bottom.
+...
+rewrite <- rngl_mul_sub_distr_l in H1; [ | ].
+...
 remember (∑ (k = 1, _), (if _ <=? _ then (k * a)%L mod l else 0)) as m eqn:Hm.
 remember (∑ (k = 1, _), (if _ <=? _ then 0 else (k * a)%L mod l)) as n eqn:Hn.
 move n before m.
