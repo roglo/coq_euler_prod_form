@@ -3178,6 +3178,22 @@ replace (m * a - m)%L with (m * (a - 1))%L in H3; cycle 1. {
   now rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
 }
 subst x y; move H3 at bottom.
+progress replace Nat.add with rngl_add in H3 by easy.
+progress replace Nat.sub with rngl_sub in H3 by easy.
+remember (∑ (k = 1, _), _)%L as u eqn:Hu in H3.
+remember (∑ (k = 1, _), _)%L as v eqn:Hv in H3.
+remember (∑ (k = 1, _), _)%L as w eqn:Hw in H3.
+move u before m; move v before u; move w before v.
+progress replace rngl_sub with Nat.sub in Hu by easy.
+progress replace rngl_add with Nat.add in H3 by easy.
+progress replace rngl_sub with Nat.sub in H3 by easy.
+progress replace rngl_mul with Nat.mul in H3 by easy.
+rewrite <- Hu.
+progress replace rngl_one with 1 in H3 by easy.
+rewrite Nat.add_shuffle0 in H3.
+rewrite Nat.sub_sub_distr in H3.
+rewrite Nat.sub_add_distr in H3.
+rewrite Nat.add_sub in H3.
 ...
 rewrite <- rngl_mul_sub_distr_l in H1; [ | ].
 ...
