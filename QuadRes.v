@@ -3072,9 +3072,9 @@ assert
     ∑ (k = 1, (l - 1) / 2), k * a =
       l * (∑ (k = 1, (l - 1) / 2), k * a / l) +
       (∑ (k = 1, (l - 1) / 2),
-         if (k * a) mod l <? (l - 1) / 2 then (k * a)%L mod l else 0) +
+         if (k * a) mod l <=? (l - 1) / 2 then (k * a)%L mod l else 0) +
       (∑ (k = 1, (l - 1) / 2),
-         if (k * a) mod l <? (l - 1) / 2 then 0 else (k * a)%L mod l)). {
+         if (k * a) mod l <=? (l - 1) / 2 then 0 else (k * a)%L mod l)). {
   erewrite rngl_summation_eq_compat; cycle 1. {
     intros k Hk.
     unfold rngl_mul.
@@ -3094,7 +3094,7 @@ assert
   apply rngl_summation_eq_compat.
   intros k Hk.
   symmetry.
-  destruct (_ <? _)%L.
+  destruct (_ <=? _)%L.
   apply rngl_add_0_r.
   apply rngl_add_0_l.
 }
@@ -3166,6 +3166,11 @@ assert
   symmetry.
   now destruct (_ <? _)%L.
 }
+remember (∑ (k = 1, _), (if _ <=? _ then (k * a)%L mod l else 0)) as m eqn:Hm.
+remember (∑ (k = 1, _), (if _ <=? _ then 0 else (k * a)%L mod l)) as n eqn:Hn.
+move n before m.
+rewrite eq_nb_of_mult_gt_half_summation.
+progress unfold Nat.b2n.
 ...
 Search (List.map _ (List.seq _ _)).
 rewrite Misc.List_map_seq.
