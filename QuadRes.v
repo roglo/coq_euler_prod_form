@@ -2024,45 +2024,27 @@ remember (f a) as fa eqn:Hfa; symmetry in Hfa.
 now destruct fa; cbn; rewrite Hfa, IHl.
 Qed.
 
+Theorem nat_leb_rngl_leb : ∀ a b, (a <=? b) = (a ≤? b)%L.
+Proof. easy. Qed.
+
 Theorem nat_ltb_rngl_ltb : ∀ a b, (a <? b) = (a <? b)%L.
 Proof.
 intros.
-progress unfold Nat.ltb.
-progress unfold rngl_ltb.
-cbn.
-destruct b. {
-  symmetry.
-  destruct (Nat.eq_dec a 0) as [Haz| Haz]. {
-    apply Bool.andb_false_r.
-  }
-  cbn.
-  rewrite Bool.andb_true_r.
-  apply Nat.leb_gt.
-  now apply Nat.neq_0_lt_0.
-} {
-  symmetry.
-  destruct (Nat.eq_dec a 0) as [Haz| Haz]; [ now subst a | ].
-  destruct (Nat.eq_dec a (S b)) as [Hasb| Hasb]. {
-    cbn.
-    rewrite Bool.andb_false_r; symmetry.
-    subst a.
-    now apply Nat.leb_gt.
-  }
-  rewrite Bool.andb_true_r.
-  remember (a <=? b) as x eqn:Hx.
-  symmetry in Hx.
-  destruct x. {
-    apply Nat.leb_le in Hx.
-    apply Nat.leb_le.
-    flia Hasb Hx.
-  }
-  apply Bool.not_true_iff_false in Hx.
-  apply Bool.not_true_iff_false.
-  intros H; apply Hx; clear Hx; rename H into Hx.
-  apply Nat.leb_le in Hx.
-  apply Nat.leb_le.
-  flia Hasb Hx.
+remember (a <? b)%L as x eqn:Hx.
+symmetry in Hx.
+destruct x. {
+  apply rngl_ltb_lt in Hx; [ | easy ].
+  apply Nat.ltb_lt.
+  progress unfold rngl_lt in Hx.
+  cbn in Hx.
+  destruct Hx as (H1, H2).
+  apply Nat.leb_le in H1.
+  now apply Nat_le_neq_lt.
 }
+apply rngl_ltb_ge_iff in Hx; [ | easy ].
+apply Nat.ltb_ge.
+cbn in Hx.
+now apply Nat.leb_le.
 Qed.
 
 Theorem eq_nb_of_mult_gt_half_summation :
@@ -3253,10 +3235,32 @@ apply Nat_eq_mod_sub_0 in H3; cycle 1. {
   eapply Nat.le_trans; [ | apply Nat.le_add_l ].
   now apply Nat.lt_le_incl.
 }
+apply (Nat_add_cancel_r_mod _ _ w) in H3.
+rewrite Nat.sub_add in H3; cycle 1. {
+  eapply Nat.le_trans; [ | apply Nat.le_add_l ].
+  rewrite eq_nb_of_mult_gt_half_summation.
+  replace Nat.mul with rngl_mul by easy.
+  rewrite rngl_mul_summation_distr_r; [ | easy ].
+  rewrite Hw.
+  progress unfold Nat.b2n.
+  apply rngl_le_Nat_le.
+  replace rngl_sub with Nat.sub by easy.
+  apply rngl_summation_le_compat; [ easy | easy | ].
+  intros k Hk.
+  rewrite rngl_ltb_neg_leb; [ | easy ].
+  rewrite Bool.negb_if.
+  replace Nat.div with rngl_div by easy.
+  rewrite nat_leb_rngl_leb.
+  destruct (_ ≤? _)%L; [ easy | ].
+  apply rngl_le_Nat_le.
+  rewrite Nat.mul_1_l.
+  apply Nat.lt_le_incl.
+  now apply Nat.mod_upper_bound.
+}
 ...
   H3 : l * u + w + v - (v + nb_of_mult_gt_half a l * l - w) ≡ 0 mod 2
   H3 : l * u + w + v ≡ (v + nb_of_mult_gt_half a l * l - w) mod 2
-...
+  H3 : l * u + w + v + w ≡ (v + nb_of_mult_gt_half a l * l) mod 2
 ...
 rewrite Nat.sub_sub_distr in H3.
 rewrite Nat.sub_add_distr in H3.
