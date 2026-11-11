@@ -3212,6 +3212,50 @@ Theorem quadratic_reciprocity :
     p mod 4 = 1 ∨ q mod 4 = 1.
 Proof.
 intros * Hp Hq Hpq.
+(**)
+assert (Hop : Nat.Odd p). {
+  assert (H : p ≠ 2). {
+    destruct Hpq as (H, _).
+    intros H1; subst p.
+    now apply Nat.lt_irrefl in H.
+  }
+  specialize (odd_prime _ Hp H) as H1.
+  apply Nat_eq_mod_1 in H1.
+  destruct H1 as (H1, _).
+  apply Nat.Div0.mod_divides in H1.
+  destruct H1 as (c, Hc).
+  exists c.
+  rewrite <- Hc; symmetry.
+  apply Nat.sub_add.
+  apply Nat.neq_0_lt_0.
+  now intros H1; subst p.
+}
+assert (Hoq : Nat.Odd q). {
+  assert (H : q ≠ 2). {
+    intros H1; subst q.
+    destruct Hpq as (H1, H2).
+    apply Nat.lt_le_incl in H1.
+    now apply Nat.nlt_ge in H1.
+  }
+  specialize (odd_prime _ Hq H) as H1.
+  apply Nat_eq_mod_1 in H1.
+  destruct H1 as (H1, _).
+  apply Nat.Div0.mod_divides in H1.
+  destruct H1 as (c, Hc).
+  exists c.
+  rewrite <- Hc; symmetry.
+  apply Nat.sub_add.
+  apply Nat.neq_0_lt_0.
+  now intros H1; subst q.
+}
+assert (Hcpq : coprimes p q). {
+  progress unfold coprimes.
+  rewrite Nat.gcd_comm.
+  apply (eq_gcd_prime_small_1 q p Hq); flia Hpq.
+}
+specialize (Gauss_lemma p q Hq Hcpq _ eq_refl) as H1.
+specialize (Eisenstein_lemma p q Hcpq Hop Hoq) as H2.
+...
 progress unfold is_quadratic_residue.
 specialize (Euler_criterion p Hp q) as H1.
 progress unfold Legendre_symbol in H1.
