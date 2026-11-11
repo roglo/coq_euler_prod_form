@@ -3229,9 +3229,6 @@ assert (H : coprimes q p). {
   apply (eq_gcd_prime_small_1 q p Hq); flia Hpq.
 }
 specialize (Gauss_lemma q p Hp H _ eq_refl) as H4; clear H.
-Check Eisenstein_lemma.
-...
-
 symmetry in H3, H4.
 progress unfold Legendre_symbol in H3.
 progress unfold Legendre_symbol in H4.
@@ -4316,6 +4313,7 @@ intros * Ha2  Hb2 Hp4 Hq4.
     }
     subst d; rewrite Nat.mul_comm in Hd.
 ...
+intros * Hp Hq Hpq.
 split; intros H1. {
   assert (H : p ≠ 2) by flia Hpq.
   specialize (odd_prime_mod_4 p Hp H) as Hp4; clear H.
