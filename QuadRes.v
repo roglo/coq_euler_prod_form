@@ -2071,7 +2071,7 @@ progress f_equal.
 now rewrite nat_ltb_rngl_ltb.
 Qed.
 
-Theorem Eisenstein_lemma :
+Theorem Eisenstein_lemma' :
   ∀ a p, prime p → coprimes a p →
   nb_of_mult_gt_half a p ≡ (∑ (k = 1, (p - 1) / 2), 2 * k * a / p) mod 2.
 Proof.
@@ -2189,6 +2189,23 @@ destruct (le_dec b a) as [Hba| Hba]. {
   apply Nat.nle_gt in Hba.
   apply Nat.lt_le_incl in Hba.
   now apply Nat_inj_succ_mod_le.
+}
+Qed.
+
+Theorem Nat_add_cancel_l_mod :
+  ∀ a b c d, c + a ≡ (c + b) mod d ↔ a ≡ b mod d.
+Proof.
+intros.
+split; intros Hab; cycle 1. {
+  rewrite <- Nat.Div0.add_mod_idemp_r.
+  rewrite Hab.
+  apply Nat.Div0.add_mod_idemp_r.
+} {
+  revert a b Hab.
+  induction c; intros; [ now do 2 rewrite Nat.add_0_l in Hab | ].
+  do 2 rewrite Nat.add_succ_l, <- Nat.add_succ_r in Hab.
+  apply IHc in Hab.
+  now apply Nat_inj_succ_mod in Hab.
 }
 Qed.
 
@@ -2944,91 +2961,7 @@ Theorem Nat_add_if_if :
   if a then b + d else c + e.
 Proof. now intros; now destruct a. Qed.
 
-(* to be completed
-Theorem quadratic_reciprocity :
-  ∀ p q, prime p → prime q → 2 < p < q →
-  is_quadratic_residue p q = is_quadratic_residue q p ↔
-    p mod 4 = 1 ∨ q mod 4 = 1.
-Proof.
-intros * Hp Hq Hpq.
-progress unfold is_quadratic_residue.
-specialize (Euler_criterion p Hp q) as H1.
-progress unfold Legendre_symbol in H1.
-symmetry in H1.
-specialize (Euler_criterion q Hq p) as H2.
-progress unfold Legendre_symbol in H2.
-symmetry in H2.
-assert (H : coprimes p q). {
-  progress unfold coprimes.
-  rewrite Nat.gcd_comm.
-  apply (eq_gcd_prime_small_1 q p Hq); flia Hpq.
-}
-specialize (Gauss_lemma p q Hq H _ eq_refl) as H3; clear H.
-assert (H : coprimes q p). {
-  apply (eq_gcd_prime_small_1 q p Hq); flia Hpq.
-}
-specialize (Gauss_lemma q p Hp H _ eq_refl) as H4; clear H.
-symmetry in H3, H4.
-progress unfold Legendre_symbol in H3.
-progress unfold Legendre_symbol in H4.
-progress unfold Legendre_symbol.
-remember (p =? 2) as p2 eqn:Hp2; symmetry in Hp2.
-destruct p2; [ apply Nat.eqb_eq in Hp2; flia Hpq Hp2 | ].
-clear Hp2.
-remember (q =? 2) as q2 eqn:Hq2; symmetry in Hq2.
-destruct q2; [ apply Nat.eqb_eq in Hq2; flia Hpq Hq2 | ].
-clear Hq2.
-remember (q mod p =? 0) as qpz eqn:Hqpz; symmetry in Hqpz.
-destruct qpz. {
-  apply Nat.eqb_eq in Hqpz.
-  apply Nat.Div0.mod_divides in Hqpz.
-  destruct Hqpz as (c, Hc).
-  subst q.
-  destruct c; [ flia Hpq | cbn in Hpq ].
-  destruct c; [ flia Hpq | cbn in Hpq ].
-  apply prime_not_mul in Hq.
-  now destruct Hq; [ subst p  | ].
-}
-clear Hqpz.
-remember (p mod q =? 0) as pqz eqn:Hpqz; symmetry in Hpqz.
-destruct pqz. {
-  apply Nat.eqb_eq in Hpqz.
-  apply Nat.Div0.mod_divides in Hpqz.
-  destruct Hpqz as (c, Hc).
-  subst p.
-  destruct c; flia Hpq.
-}
-clear Hpqz.
-remember (sqrt_mod q p) as mqp eqn:Hmqp; symmetry in Hmqp.
-destruct mqp as [a| ]. {
-  move a before q.
-  rewrite Nat.eqb_refl.
-  apply eq_sqrt_mod_Some in Hmqp.
-  destruct Hmqp as (Hap, Ha2).
-  remember (sqrt_mod p q) as mpq eqn:Hmpq; symmetry in Hmpq.
-(*
-  destruct mpq as [b| ]; cycle 1. {
-    assert (H : q ≠ 0) by flia Hap Hpq.
-    specialize (eq_sqrt_mod_None p q H Hmpq) as Hb2; clear H Hmpq.
-...
-*)
-  destruct mpq as [b| ]. {
-    move b before a.
-    move H2 before H1.
-    rewrite Nat.eqb_refl.
-    split; [ intros _ | easy ].
-    apply eq_sqrt_mod_Some in Hmpq.
-    destruct Hmpq as (Hbp, Hb2).
-    move Hbp before Hap.
-    move Hb2 before Ha2.
-    assert (H : p ≠ 2) by flia Hpq.
-    specialize (odd_prime_mod_4 p Hp H) as Hp4; clear H.
-    assert (H : q ≠ 2) by flia Hpq.
-    specialize (odd_prime_mod_4 q Hq H) as Hq4; clear H.
-    destruct Hp4 as [Hp4| Hp4]; [ now left | right ].
-    destruct Hq4 as [Hq4| Hq4]; [ easy | exfalso ].
-Check Eisenstein_lemma.
-Theorem Eisenstein_lemma' : ∀ a l,
+Theorem Eisenstein_lemma : ∀ a l,
   coprimes a l
   → Nat.Odd a
   → Nat.Odd l
@@ -3257,10 +3190,106 @@ rewrite Nat.sub_add in H3; cycle 1. {
   apply Nat.lt_le_incl.
   now apply Nat.mod_upper_bound.
 }
+rewrite (Nat.add_shuffle0 _ w) in H3.
+rewrite <- Nat.add_assoc in H3.
+rewrite <- Nat_mul_2_l in H3.
+rewrite Nat_mod_add_r_mul_l in H3.
+rewrite Nat.add_comm in H3.
+apply Nat_add_cancel_l_mod in H3.
+symmetry in H3.
+rewrite Nat.mul_comm in H3.
+apply Nat_mul_mod_cancel_l in H3; [ easy | ].
+destruct Hl as (n, Hn).
+rewrite Hn.
+rewrite Nat.gcd_comm.
+rewrite Nat.add_comm, Nat.mul_comm.
+now rewrite Nat.gcd_add_mult_diag_r.
+Qed.
+
+(* to be completed
+Theorem quadratic_reciprocity :
+  ∀ p q, prime p → prime q → 2 < p < q →
+  is_quadratic_residue p q = is_quadratic_residue q p ↔
+    p mod 4 = 1 ∨ q mod 4 = 1.
+Proof.
+intros * Hp Hq Hpq.
+progress unfold is_quadratic_residue.
+specialize (Euler_criterion p Hp q) as H1.
+progress unfold Legendre_symbol in H1.
+symmetry in H1.
+specialize (Euler_criterion q Hq p) as H2.
+progress unfold Legendre_symbol in H2.
+symmetry in H2.
+assert (H : coprimes p q). {
+  progress unfold coprimes.
+  rewrite Nat.gcd_comm.
+  apply (eq_gcd_prime_small_1 q p Hq); flia Hpq.
+}
+specialize (Gauss_lemma p q Hq H _ eq_refl) as H3; clear H.
+assert (H : coprimes q p). {
+  apply (eq_gcd_prime_small_1 q p Hq); flia Hpq.
+}
+specialize (Gauss_lemma q p Hp H _ eq_refl) as H4; clear H.
+symmetry in H3, H4.
+progress unfold Legendre_symbol in H3.
+progress unfold Legendre_symbol in H4.
+progress unfold Legendre_symbol.
+remember (p =? 2) as p2 eqn:Hp2; symmetry in Hp2.
+destruct p2; [ apply Nat.eqb_eq in Hp2; flia Hpq Hp2 | ].
+clear Hp2.
+remember (q =? 2) as q2 eqn:Hq2; symmetry in Hq2.
+destruct q2; [ apply Nat.eqb_eq in Hq2; flia Hpq Hq2 | ].
+clear Hq2.
+remember (q mod p =? 0) as qpz eqn:Hqpz; symmetry in Hqpz.
+destruct qpz. {
+  apply Nat.eqb_eq in Hqpz.
+  apply Nat.Div0.mod_divides in Hqpz.
+  destruct Hqpz as (c, Hc).
+  subst q.
+  destruct c; [ flia Hpq | cbn in Hpq ].
+  destruct c; [ flia Hpq | cbn in Hpq ].
+  apply prime_not_mul in Hq.
+  now destruct Hq; [ subst p  | ].
+}
+clear Hqpz.
+remember (p mod q =? 0) as pqz eqn:Hpqz; symmetry in Hpqz.
+destruct pqz. {
+  apply Nat.eqb_eq in Hpqz.
+  apply Nat.Div0.mod_divides in Hpqz.
+  destruct Hpqz as (c, Hc).
+  subst p.
+  destruct c; flia Hpq.
+}
+clear Hpqz.
+remember (sqrt_mod q p) as mqp eqn:Hmqp; symmetry in Hmqp.
+destruct mqp as [a| ]. {
+  move a before q.
+  rewrite Nat.eqb_refl.
+  apply eq_sqrt_mod_Some in Hmqp.
+  destruct Hmqp as (Hap, Ha2).
+  remember (sqrt_mod p q) as mpq eqn:Hmpq; symmetry in Hmpq.
+(*
+  destruct mpq as [b| ]; cycle 1. {
+    assert (H : q ≠ 0) by flia Hap Hpq.
+    specialize (eq_sqrt_mod_None p q H Hmpq) as Hb2; clear H Hmpq.
 ...
-  H3 : l * u + w + v - (v + nb_of_mult_gt_half a l * l - w) ≡ 0 mod 2
-  H3 : l * u + w + v ≡ (v + nb_of_mult_gt_half a l * l - w) mod 2
-  H3 : l * u + w + v + w ≡ (v + nb_of_mult_gt_half a l * l) mod 2
+*)
+  destruct mpq as [b| ]. {
+    move b before a.
+    move H2 before H1.
+    rewrite Nat.eqb_refl.
+    split; [ intros _ | easy ].
+    apply eq_sqrt_mod_Some in Hmpq.
+    destruct Hmpq as (Hbp, Hb2).
+    move Hbp before Hap.
+    move Hb2 before Ha2.
+    assert (H : p ≠ 2) by flia Hpq.
+    specialize (odd_prime_mod_4 p Hp H) as Hp4; clear H.
+    assert (H : q ≠ 2) by flia Hpq.
+    specialize (odd_prime_mod_4 q Hq H) as Hq4; clear H.
+    destruct Hp4 as [Hp4| Hp4]; [ now left | right ].
+    destruct Hq4 as [Hq4| Hq4]; [ easy | exfalso ].
+Check Eisenstein_lemma.
 ...
 rewrite Nat.sub_sub_distr in H3.
 rewrite Nat.sub_add_distr in H3.
