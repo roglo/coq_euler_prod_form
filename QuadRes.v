@@ -3253,10 +3253,16 @@ assert (Hcpq : coprimes p q). {
   rewrite Nat.gcd_comm.
   apply (eq_gcd_prime_small_1 q p Hq); flia Hpq.
 }
+assert (Hcqp : coprimes q p). {
+  progress unfold coprimes.
+  now rewrite Nat.gcd_comm.
+}
 specialize (Gauss_lemma p q Hq Hcpq _ eq_refl) as H1.
-specialize (Eisenstein_lemma p q Hcpq Hop Hoq) as H2.
-...
+specialize (Gauss_lemma q p Hp Hcqp _ eq_refl) as H2.
+specialize (Eisenstein_lemma p q Hcpq Hop Hoq) as H3.
+specialize (Eisenstein_lemma q p Hcqp Hoq Hop) as H4.
 progress unfold is_quadratic_residue.
+...
 specialize (Euler_criterion p Hp q) as H1.
 progress unfold Legendre_symbol in H1.
 symmetry in H1.
