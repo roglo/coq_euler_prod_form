@@ -2981,7 +2981,6 @@ assert (Hka : ∀ k, k * a / l ≡ (k * a + k * a mod l) mod 2). {
   rewrite <- Nat.mul_assoc.
   now rewrite Nat_mod_add_l_mul_l.
 }
-(**)
 assert
   (H1 :
     ∑ (k = 1, (l - 1) / 2), k * a =
@@ -3230,6 +3229,9 @@ assert (H : coprimes q p). {
   apply (eq_gcd_prime_small_1 q p Hq); flia Hpq.
 }
 specialize (Gauss_lemma q p Hp H _ eq_refl) as H4; clear H.
+Check Eisenstein_lemma.
+...
+
 symmetry in H3, H4.
 progress unfold Legendre_symbol in H3.
 progress unfold Legendre_symbol in H4.
