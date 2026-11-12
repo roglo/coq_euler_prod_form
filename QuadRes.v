@@ -3263,16 +3263,119 @@ specialize (Eisenstein_lemma p q Hcpq Hop Hoq) as H3.
 specialize (Eisenstein_lemma q p Hcqp Hoq Hop) as H4.
 progress unfold is_quadratic_residue.
 rewrite H1, H2.
-Theorem glop : ∀ a n, (n - 1) ^ a mod n = 1 ↔ Nat.Odd a.
+Theorem glop : ∀ a n, 2 < n → (n - 1) ^ a mod n = 1 ↔ Nat.Even a.
 Proof.
-intros.
+intros * H2n.
 split; intros Ha. {
   apply Nat_eq_mod_1 in Ha.
   destruct Ha as (H1 & H2 & H3).
   apply Nat.Div0.mod_divides in H1.
   destruct H1 as (c, H1).
-  progress unfold Nat.Odd.
-(* oh, fait chier, c'est pas ça *)
+  destruct (Nat.Even_Odd_dec a) as [H4| H4]; [ easy | exfalso ].
+  destruct H4 as (m, Hm).
+  generalize H1; intros H4.
+  apply (f_equal (λ x, x mod n)) in H4.
+  rewrite Nat.mul_comm, Nat.Div0.mod_mul in H4.
+  subst a.
+  rewrite Nat.pow_add_r in H4.
+  rewrite Nat.pow_1_r in H4.
+  rewrite Nat.pow_mul_r in H4.
+  apply Nat_eq_mod_sub_0 in H4; cycle 1. {
+    apply Nat.neq_0_lt_0.
+    intros H5.
+    apply Nat.eq_mul_0 in H5.
+    destruct H5 as [H5| H5]. {
+      apply Nat.pow_nonzero in H5; [ easy | ].
+      intros H6.
+      progress unfold "²" in H6.
+      rewrite Nat.mul_1_r in H6.
+      apply -> Nat.eq_square_0 in H6.
+      apply Nat.sub_0_le in H6.
+      flia H2n H6.
+    }
+    apply Nat.sub_0_le in H5.
+    flia H2n H5.
+  }
+  rewrite <- Nat.Div0.mul_mod_idemp_l in H4.
+  rewrite <- Nat_mod_pow_mod in H4.
+  rewrite Nat_sub_1_squ in H4; [ | now intros H; subst n ].
+  rewrite Nat.mod_1_l in H4; [ | flia H2n ].
+  rewrite Nat.pow_1_l in H4.
+  rewrite Nat.mod_1_l in H4; [ | flia H2n ].
+  rewrite Nat.mul_1_l in H4.
+  apply Nat_eq_mod_1 in H4.
+  destruct H4 as (H4, _).
+  rewrite <- Nat.sub_add_distr in H4.
+  rewrite Nat.add_1_r in H4.
+  apply Nat.Div0.mod_divides in H4.
+  destruct H4 as (d, H4).
+  clear H2 H3.
+  assert (n - 2 < n * d). {
+    destruct d. {
+      rewrite Nat.mul_0_r in H4.
+      flia H2n H4.
+    }
+    apply (Nat.lt_le_trans _ n). {
+      apply Nat.sub_lt; [ | easy ].
+      now apply Nat.lt_le_incl.
+    }
+    rewrite Nat.mul_succ_r.
+    apply Nat.le_add_l.
+  }
+  rewrite H4 in H.
+  now apply Nat.lt_irrefl in H.
+}
+destruct Ha as (c, H); subst a.
+rewrite Nat.pow_mul_r.
+...
+Search ((_ ^ _) mod _).
+rewrite Nat_sub_1_pow_mod.
+...
+rewrite <- 
+Check Nat_sub_1_squ
+...
+  apply Nat.add_sub_eq_nz in H4; cycle 1. {
+    intros H5.
+    apply Nat.eq_mul_0 in H5.
+    destruct H5 as [H5| H5]; [ now subst n | ].
+    subst d.
+    rewrite Nat.mul_0_r in H4.
+    flia H2n H4.
+  }
+...
+  enough (n ≠ 2).
+  rewrite Nat.mul_comm in H4.
+  destruct d; [ flia H4 H1n H | ].
+  cbn in H4.
+  apply Nat.add_sub_eq_nz in H4.
+  rewrite Nat.add_comm in H4.
+  apply Nat.add_sub_eq_l in H4.
+...
+  apply Nat.sub_le in H4.
+...
+  destruct n; [ easy | ].
+  rewrite Nat_sub_succ_1 in H4, H2, H1.
+  destruct n; [ easy | ].
+  clear H1n H3.
+  apply Nat_eq_succ_mod_1 in H4.
+  apply Nat.Div0.mod_divides in H4.
+  destruct H4 as (d, H4).
+...
+Search ((_ - _) mod _).
+  apply Nat_eq_mod_1 in H4.
+...
+  rewrite Nat.mod_pow_l in H4.
+  rewrite Nat_sub_1_squ in H4.
+...
+  rewrite Nat.mod_1_l in H4; [ | easy ].
+
+Search (_ mod _ = 1).
+  apply Nat_eq_mod_1 in H4.
+  destruct H4 as (H4 & H5 & H6).
+  apply Nat.Div0.mod_divides in H4.
+...
+Search ((_ - _)²).
+rewrite Nat_sub_1_squ in H4.
 ...
 remember (_ ^ _ mod _) as x eqn:Hx; symmetry in Hx.
 remember (_ ^ _ mod _) as y eqn:Hy in |-*; symmetry in Hy.
