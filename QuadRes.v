@@ -3341,11 +3341,76 @@ specialize (Eisenstein_lemma q p Hcqp Hoq Hop) as H4.
 progress unfold is_quadratic_residue.
 rewrite H1, H2.
 (**)
-remember (∑ (k = 1, _), _) as x eqn:Hx in H3.
-remember (∑ (k = 1, _), _) as y eqn:Hy in H4.
-move y before x; move Hy before Hx.
-assert (Hxy : x + y = (p - 1) / 2 * (q - 1) / 2). {
-  rewrite Hx, Hy.
+remember (∑ (k = 1, _), _) as sx eqn:Hsx in H3.
+remember (∑ (k = 1, _), _) as sy eqn:Hsy in H4.
+move sy before sx; move Hsy before Hsx.
+remember (∑ (x = 1, (p - 1) / 2), ∑ (y = 1, (q - 1) / 2), 1) as r eqn:Hr.
+erewrite rngl_summation_eq_compat in Hr; cycle 1. {
+  intros x Hx.
+  erewrite rngl_summation_eq_compat; cycle 1. {
+    intros y Hy.
+    replace 1%L with 1 by easy.
+    replace 1 with (Nat.b2n (p * y <? q * x) + Nat.b2n (q * x <? p * y));
+    cycle 1. {
+      progress unfold Nat.b2n.
+      remember (p * y <? q * x) as b eqn:Hb.
+      symmetry in Hb.
+      remember (q * x <? p * y) as c eqn:Hc.
+      symmetry in Hc.
+      destruct b, c; [ | easy | easy | ]; exfalso. {
+        apply Nat.ltb_lt in Hb.
+        apply Nat.ltb_lt in Hc.
+        flia Hb Hc.
+      }
+      apply Nat.ltb_ge in Hb.
+      apply Nat.ltb_ge in Hc.
+      apply Nat.le_antisymm in Hb; [ clear Hc | easy ].
+      assert (H5 : Nat.divide p (q * x)). {
+        rewrite <- Hb.
+        apply Nat.divide_factor_l.
+      }
+      apply Nat.gauss in H5; [ | easy ].
+      destruct H5 as (u, H5).
+      rewrite H5 in Hx.
+      destruct Hx as (H6, H7).
+      apply Nat.nlt_ge in H7.
+      apply H7; clear H7.
+      destruct u; [ easy | ].
+      cbn - [ "/" ].
+      apply (Nat.lt_le_trans _ p); [ | apply Nat.le_add_r ].
+      apply Nat.Div0.div_lt_upper_bound.
+      rewrite Nat_mul_2_l.
+      apply (Nat.lt_le_trans _ p); [ | apply Nat.le_add_r ].
+      apply Nat.sub_lt; [ | easy ].
+      apply Nat.neq_0_lt_0.
+      now intros H; subst p.
+    }
+    progress unfold Nat.b2n.
+    do 2 rewrite nat_ltb_rngl_ltb.
+    replace Nat.mul with rngl_mul by easy.
+    easy.
+  }
+  cbn - [ "<?" "/" ].
+  replace Nat.add with rngl_add by easy.
+  rewrite rngl_summation_add_distr.
+  remember (∑ (y = _, _), _) as xx in |-*.
+  remember (∑ (y = _, _), _) as yy in |-*.
+  subst xx yy.
+  easy.
+}
+cbn - [ "<?" "/" ] in Hr.
+rewrite rngl_summation_add_distr in Hr.
+remember (∑ (x = _, _), _) as xx in Hr.
+remember (∑ (x = _, _), _) as yy in Hr.
+subst xx yy.
+...
+assert (Hxy : sx + sy = (p - 1) / 2 * (q - 1) / 2). {
+  rewrite Hsx, Hsy.
+...
+  erewrite rngl_summation_eq_compat; cycle 1. {
+    intros x Hx.
+  erewrite rngl_summation_eq_compat; cycle 1. {
+    intros x Hx.
 ...
 remember (_ =? 1) as x eqn:Hx.
 remember (_ =? 1) as y eqn:Hy in |-*.
