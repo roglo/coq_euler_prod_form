@@ -3205,65 +3205,8 @@ rewrite Nat.add_comm, Nat.mul_comm.
 now rewrite Nat.gcd_add_mult_diag_r.
 Qed.
 
-(* to be completed
-Theorem quadratic_reciprocity :
-  ∀ p q, prime p → prime q → 2 < p < q →
-  is_quadratic_residue p q = is_quadratic_residue q p ↔
-    p mod 4 = 1 ∨ q mod 4 = 1.
-Proof.
-intros * Hp Hq Hpq.
-(**)
-assert (Hop : Nat.Odd p). {
-  assert (H : p ≠ 2). {
-    destruct Hpq as (H, _).
-    intros H1; subst p.
-    now apply Nat.lt_irrefl in H.
-  }
-  specialize (odd_prime _ Hp H) as H1.
-  apply Nat_eq_mod_1 in H1.
-  destruct H1 as (H1, _).
-  apply Nat.Div0.mod_divides in H1.
-  destruct H1 as (c, Hc).
-  exists c.
-  rewrite <- Hc; symmetry.
-  apply Nat.sub_add.
-  apply Nat.neq_0_lt_0.
-  now intros H1; subst p.
-}
-assert (Hoq : Nat.Odd q). {
-  assert (H : q ≠ 2). {
-    intros H1; subst q.
-    destruct Hpq as (H1, H2).
-    apply Nat.lt_le_incl in H1.
-    now apply Nat.nlt_ge in H1.
-  }
-  specialize (odd_prime _ Hq H) as H1.
-  apply Nat_eq_mod_1 in H1.
-  destruct H1 as (H1, _).
-  apply Nat.Div0.mod_divides in H1.
-  destruct H1 as (c, Hc).
-  exists c.
-  rewrite <- Hc; symmetry.
-  apply Nat.sub_add.
-  apply Nat.neq_0_lt_0.
-  now intros H1; subst q.
-}
-assert (Hcpq : coprimes p q). {
-  progress unfold coprimes.
-  rewrite Nat.gcd_comm.
-  apply (eq_gcd_prime_small_1 q p Hq); flia Hpq.
-}
-assert (Hcqp : coprimes q p). {
-  progress unfold coprimes.
-  now rewrite Nat.gcd_comm.
-}
-specialize (Gauss_lemma p q Hq Hcpq _ eq_refl) as H1.
-specialize (Gauss_lemma q p Hp Hcqp _ eq_refl) as H2.
-specialize (Eisenstein_lemma p q Hcpq Hop Hoq) as H3.
-specialize (Eisenstein_lemma q p Hcqp Hoq Hop) as H4.
-progress unfold is_quadratic_residue.
-rewrite H1, H2.
-Theorem glop : ∀ a n, 2 < n → (n - 1) ^ a mod n = 1 ↔ Nat.Even a.
+Theorem Nat_sub_1_pow_mod_is_even :
+  ∀ a n, 2 < n → (n - 1) ^ a mod n = 1 ↔ Nat.Even a.
 Proof.
 intros * H2n.
 split; intros Ha. {
@@ -3327,9 +3270,93 @@ split; intros Ha. {
 }
 destruct Ha as (c, H); subst a.
 rewrite Nat.pow_mul_r.
+induction c. {
+  cbn.
+  apply Nat.mod_1_l.
+  flia H2n.
+}
+rewrite Nat.pow_succ_r; [ | easy ].
+rewrite <- Nat.Div0.mul_mod_idemp_r.
+rewrite IHc, Nat.mul_1_r.
+apply Nat_sub_1_pow_mod.
+flia H2n.
+Qed.
+
+(* to be completed
+Theorem quadratic_reciprocity :
+  ∀ p q, prime p → prime q → 2 < p < q →
+  is_quadratic_residue p q = is_quadratic_residue q p ↔
+    p mod 4 = 1 ∨ q mod 4 = 1.
+Proof.
+intros * Hp Hq Hpq.
+(**)
+assert (Hop : Nat.Odd p). {
+  assert (H : p ≠ 2). {
+    destruct Hpq as (H, _).
+    intros H1; subst p.
+    now apply Nat.lt_irrefl in H.
+  }
+  specialize (odd_prime _ Hp H) as H1.
+  apply Nat_eq_mod_1 in H1.
+  destruct H1 as (H1, _).
+  apply Nat.Div0.mod_divides in H1.
+  destruct H1 as (c, Hc).
+  exists c.
+  rewrite <- Hc; symmetry.
+  apply Nat.sub_add.
+  apply Nat.neq_0_lt_0.
+  now intros H1; subst p.
+}
+assert (Hoq : Nat.Odd q). {
+  assert (H : q ≠ 2). {
+    intros H1; subst q.
+    destruct Hpq as (H1, H2).
+    apply Nat.lt_le_incl in H1.
+    now apply Nat.nlt_ge in H1.
+  }
+  specialize (odd_prime _ Hq H) as H1.
+  apply Nat_eq_mod_1 in H1.
+  destruct H1 as (H1, _).
+  apply Nat.Div0.mod_divides in H1.
+  destruct H1 as (c, Hc).
+  exists c.
+  rewrite <- Hc; symmetry.
+  apply Nat.sub_add.
+  apply Nat.neq_0_lt_0.
+  now intros H1; subst q.
+}
+assert (Hcpq : coprimes p q). {
+  progress unfold coprimes.
+  rewrite Nat.gcd_comm.
+  apply (eq_gcd_prime_small_1 q p Hq); flia Hpq.
+}
+assert (Hcqp : coprimes q p). {
+  progress unfold coprimes.
+  now rewrite Nat.gcd_comm.
+}
+specialize (Gauss_lemma p q Hq Hcpq _ eq_refl) as H1.
+specialize (Gauss_lemma q p Hp Hcqp _ eq_refl) as H2.
+specialize (Eisenstein_lemma p q Hcpq Hop Hoq) as H3.
+specialize (Eisenstein_lemma q p Hcqp Hoq Hop) as H4.
+progress unfold is_quadratic_residue.
+rewrite H1, H2.
+remember (_ =? 1) as x eqn:Hx.
+remember (_ =? 1) as y eqn:Hy in |-*.
+move y before x.
+symmetry in Hx, Hy.
+destruct x. {
+  apply Nat.eqb_eq in Hx.
+  generalize Hx; intros Hx1.
+  apply Nat_sub_1_pow_mod_is_even in Hx1; [ | flia Hpq ].
+  destruct Hx1 as (x1, Hx1).
+  apply (f_equal (λ x, x mod 2)) in Hx1.
+  rewrite H3 in Hx1.
+  rewrite Nat.mul_comm, Nat.Div0.mod_mul in Hx1.
 ...
-Search ((_ ^ _) mod _).
-rewrite Nat_sub_1_pow_mod.
+  destruct y. {
+    apply Nat.eqb_eq in Hy.
+    generalize Hy; intros Hy1.
+    apply Nat_sub_1_pow_mod_is_even in Hy1; [ | easy ].
 ...
 rewrite <- 
 Check Nat_sub_1_squ
