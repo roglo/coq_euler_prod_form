@@ -3346,17 +3346,21 @@ move y before x.
 symmetry in Hx, Hy.
 destruct x. {
   apply Nat.eqb_eq in Hx.
+  apply Nat_sub_1_pow_mod_is_even in Hx; [ | flia Hpq ].
+  destruct Hx as (x, Hx).
   generalize Hx; intros Hx1.
-  apply Nat_sub_1_pow_mod_is_even in Hx1; [ | flia Hpq ].
-  destruct Hx1 as (x1, Hx1).
   apply (f_equal (λ x, x mod 2)) in Hx1.
   rewrite H3 in Hx1.
   rewrite Nat.mul_comm, Nat.Div0.mod_mul in Hx1.
-...
   destruct y. {
+    split; [ intros _ | easy ].
     apply Nat.eqb_eq in Hy.
+    apply Nat_sub_1_pow_mod_is_even in Hy; [ | flia Hpq ].
+    destruct Hy as (y, Hy).
     generalize Hy; intros Hy1.
-    apply Nat_sub_1_pow_mod_is_even in Hy1; [ | easy ].
+    apply (f_equal (λ x, x mod 2)) in Hy1.
+    rewrite H4 in Hy1.
+    rewrite Nat.mul_comm, Nat.Div0.mod_mul in Hy1.
 ...
 rewrite <- 
 Check Nat_sub_1_squ
