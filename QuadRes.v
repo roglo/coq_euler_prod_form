@@ -3340,6 +3340,13 @@ specialize (Eisenstein_lemma p q Hcpq Hop Hoq) as H3.
 specialize (Eisenstein_lemma q p Hcqp Hoq Hop) as H4.
 progress unfold is_quadratic_residue.
 rewrite H1, H2.
+(**)
+remember (∑ (k = 1, _), _) as x eqn:Hx in H3.
+remember (∑ (k = 1, _), _) as y eqn:Hy in H4.
+move y before x; move Hy before Hx.
+assert (Hxy : x + y = (p - 1) / 2 * (q - 1) / 2). {
+  rewrite Hx, Hy.
+...
 remember (_ =? 1) as x eqn:Hx.
 remember (_ =? 1) as y eqn:Hy in |-*.
 move y before x.
