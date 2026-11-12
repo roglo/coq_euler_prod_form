@@ -3262,6 +3262,27 @@ specialize (Gauss_lemma q p Hp Hcqp _ eq_refl) as H2.
 specialize (Eisenstein_lemma p q Hcpq Hop Hoq) as H3.
 specialize (Eisenstein_lemma q p Hcqp Hoq Hop) as H4.
 progress unfold is_quadratic_residue.
+rewrite H1, H2.
+Theorem glop : ∀ a n, (n - 1) ^ a mod n = 1 ↔ Nat.Odd a.
+Proof.
+intros.
+split; intros Ha. {
+  apply Nat_eq_mod_1 in Ha.
+  destruct Ha as (H1 & H2 & H3).
+  apply Nat.Div0.mod_divides in H1.
+  destruct H1 as (c, H1).
+  progress unfold Nat.Odd.
+(* oh, fait chier, c'est pas ça *)
+...
+remember (_ ^ _ mod _) as x eqn:Hx; symmetry in Hx.
+remember (_ ^ _ mod _) as y eqn:Hy in |-*; symmetry in Hy.
+move y before x; move Hy before Hx.
+destruct (Nat.eq_dec x 1) as [Hx1| Hx1]. {
+  move Hx1 at top; subst x.
+  apply glop in Hx.
+  destruct (Nat.eq_dec y 1) as [Hy1| Hy1]. {
+    move Hy1 at top; subst y.
+    apply glop in Hy.
 ...
 specialize (Euler_criterion p Hp q) as H1.
 progress unfold Legendre_symbol in H1.
