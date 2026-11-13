@@ -3344,7 +3344,24 @@ rewrite H1, H2.
 remember (∑ (k = 1, _), _) as sx eqn:Hsx in H3.
 remember (∑ (k = 1, _), _) as sy eqn:Hsy in H4.
 move sy before sx; move Hsy before Hsx.
-remember (∑ (x = 1, (p - 1) / 2), ∑ (y = 1, (q - 1) / 2), 1) as r eqn:Hr.
+remember (∑ (x = 1, (p - 1) / 2), ∑ (y = 1, (q - 1) / 2), 1) as r eqn:Hrv.
+assert (Hrl : r = (p - 1) / 2 * ((q - 1) / 2)). {
+  rewrite rngl_summation_const in Hrv; [ | easy ].
+  rewrite Nat_sub_succ_1 in Hrv.
+  rewrite rngl_summation_const in Hrv; [ | easy ].
+  rewrite Nat_sub_succ_1 in Hrv.
+  rewrite rngl_mul_1_r in Hrv.
+  rewrite <- rngl_of_nat_mul in Hrv; [ | easy ].
+  replace r with (rngl_of_nat r) in Hrv; cycle 1. {
+    clear Hrv.
+    induction r; [ easy | ].
+    rewrite rngl_of_nat_succ.
+    now rewrite IHr.
+  }
+  now apply rngl_of_nat_inj in Hrv.
+}
+generalize Hrv; intros Hr.
+clear Hrv.
 erewrite rngl_summation_eq_compat in Hr; cycle 1. {
   intros x Hx.
   erewrite rngl_summation_eq_compat; cycle 1. {
