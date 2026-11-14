@@ -3424,14 +3424,17 @@ remember (∑ (x = _, _), _) as yy in Hr.
 subst xx yy.
 subst r; symmetry in Hr.
 Theorem glop :
-  ∀ N m p y,
+  ∀ N m p,
   0 < p
   → N / p ≤ m
-  → ∑ (i = 1, m), Nat.b2n (p * y <? N) = (N - 1) / p.
-Admitted.
+  → ∑ (y = 1, m), Nat.b2n (p * y <? N)%nat = (N - 1) / p.
+Proof.
+intros * Hzp Hpm.
+...
 erewrite rngl_summation_eq_compat in Hr; cycle 1. {
   intros x Hx.
   specialize (glop (q * x)) as H5.
+rewrite glop.
 ...
 assert (Hxy : sx + sy = (p - 1) / 2 * (q - 1) / 2). {
   rewrite Hsx, Hsy.
