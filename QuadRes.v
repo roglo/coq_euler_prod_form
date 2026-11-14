@@ -3420,6 +3420,7 @@ rewrite rngl_summation_add_distr in Hr.
 remember (∑ (x = _, _), _) as xx in Hr.
 remember (∑ (x = _, _), _) as yy in Hr.
 subst xx yy.
+subst r; symmetry in Hr.
 ...
 assert (Hxy : sx + sy = (p - 1) / 2 * (q - 1) / 2). {
   rewrite Hsx, Hsy.
