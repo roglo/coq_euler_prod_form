@@ -3402,8 +3402,10 @@ erewrite rngl_summation_eq_compat in Hr; cycle 1. {
       apply Nat.neq_0_lt_0.
       now intros H; subst p.
     }
+(*
     progress unfold Nat.b2n.
     do 2 rewrite nat_ltb_rngl_ltb.
+*)
     replace Nat.mul with rngl_mul by easy.
     easy.
   }
@@ -3421,6 +3423,15 @@ remember (∑ (x = _, _), _) as xx in Hr.
 remember (∑ (x = _, _), _) as yy in Hr.
 subst xx yy.
 subst r; symmetry in Hr.
+Theorem glop :
+  ∀ N m p y,
+  0 < p
+  → N / p ≤ m
+  → ∑ (i = 1, m), Nat.b2n (p * y <? N) = (N - 1) / p.
+Admitted.
+erewrite rngl_summation_eq_compat in Hr; cycle 1. {
+  intros x Hx.
+  specialize (glop (q * x)) as H5.
 ...
 assert (Hxy : sx + sy = (p - 1) / 2 * (q - 1) / 2). {
   rewrite Hsx, Hsy.
