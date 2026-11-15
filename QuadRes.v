@@ -3472,6 +3472,39 @@ rewrite rngl_summation_const; [ | easy ].
 rewrite Nat.mul_1_r.
 rewrite rngl_of_nat_nat.
 rewrite Nat_sub_succ_1.
+rewrite all_0_rngl_summation_0; [ apply Nat.add_0_r | ].
+intros y Hy.
+progress unfold Nat.b2n.
+remember (p * y <? N) as b eqn:Hb.
+symmetry in Hb.
+destruct b; [ exfalso | easy ].
+apply Nat.ltb_lt in Hb.
+destruct Hy as (Hy, Hym).
+apply Nat.nle_gt in Hb.
+apply Hb; clear Hb.
+...
+apply (Nat.mul_le_mono_l _ _ p) in Hy.
+eapply Nat.le_trans; [ | apply Hy ].
+rewrite Nat.add_1_r.
+rewrite Nat.mul_succ_r.
+Search (_ ≤ (_ / _) * _).
+...
+rewrite <- Nat.div_add; [ | now apply Nat.neq_0_lt_0 ].
+rewrite Nat.mul_1_l.
+destruct N; [ easy | ].
+rewrite Nat_sub_succ_1.
+destruct p; [ easy | ].
+...
+Search (_ ≤ (_ / _) * _).
+Search (_ * (_ / _) ).
+...
+eapply Nat.le_trans.
+Check Nat.Div0.mul_div_le.
+eapply Nat.le_trans; [ | apply Nat.Div0.mul_div_le ].
+...
+Search (_ / _ ≤ _).
+Search (_ ≤ _ / _ * _).
+Search (_ ≤ _ * (_ / _)).
 ...
 cbn - [ "<?" ].
 rewrite Nat.sub_0_r.
