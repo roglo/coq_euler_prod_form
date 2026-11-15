@@ -3282,6 +3282,14 @@ apply Nat_sub_1_pow_mod.
 flia H2n.
 Qed.
 
+Theorem rngl_of_nat_nat : ∀ n, rngl_of_nat n = n.
+Proof.
+intros.
+induction n; [ easy | ].
+rewrite rngl_of_nat_succ.
+now rewrite IHn.
+Qed.
+
 (* to be completed
 Theorem quadratic_reciprocity :
   ∀ p q, prime p → prime q → 2 < p < q →
@@ -3352,12 +3360,7 @@ assert (Hrl : r = (p - 1) / 2 * ((q - 1) / 2)). {
   rewrite Nat_sub_succ_1 in Hrv.
   rewrite rngl_mul_1_r in Hrv.
   rewrite <- rngl_of_nat_mul in Hrv; [ | easy ].
-  replace r with (rngl_of_nat r) in Hrv; cycle 1. {
-    clear Hrv.
-    induction r; [ easy | ].
-    rewrite rngl_of_nat_succ.
-    now rewrite IHr.
-  }
+  rewrite <- (rngl_of_nat_nat r) in Hrv.
   now apply rngl_of_nat_inj in Hrv.
 }
 generalize Hrv; intros Hr.
@@ -3430,6 +3433,52 @@ Theorem glop :
   → ∑ (y = 1, m), Nat.b2n (p * y <? N)%nat = (N - 1) / p.
 Proof.
 intros * Hzp Hpm.
+destruct (Nat.eq_dec N 0) as [Hnz| Hnz]. {
+  subst N; cbn.
+  rewrite Nat.Div0.div_0_l.
+  replace 0 with rngl_zero by easy.
+  now apply all_0_rngl_summation_0.
+}
+rewrite (rngl_summation_split ((N - 1) / p)); cycle 1. {
+  split; apply -> Nat.succ_le_mono; [ easy | ].
+  apply (Nat.le_trans _ (N / p)); [ | easy ].
+  apply Nat.Div0.div_le_mono.
+  apply Nat.le_sub_l.
+}
+erewrite rngl_summation_eq_compat; cycle 1. {
+  intros y Hy.
+  progress unfold Nat.b2n.
+  remember (p * y <? N) as b eqn:Hb.
+  symmetry in Hb.
+  destruct b; [ easy | exfalso ].
+  apply Bool.not_true_iff_false in Hb.
+  apply Hb; clear Hb.
+  apply Nat.leb_le.
+  destruct Hy as (H1y, Hy).
+  apply (Nat.mul_le_mono_r _ _ p) in Hy.
+  rewrite Nat.mul_comm in Hy.
+  apply Nat.succ_le_mono in Hy.
+  eapply Nat.le_trans; [ apply Hy | ].
+  apply Nat.le_succ_l.
+  apply (Nat.le_lt_trans _ (N - 1)); cycle 1. {
+    apply Nat.sub_lt; [ | easy ].
+    now apply Nat.neq_0_lt_0.
+  }
+  rewrite Nat.mul_comm.
+  apply Nat.Div0.mul_div_le.
+}
+cbn - [ "<?" ].
+rewrite rngl_summation_const; [ | easy ].
+rewrite Nat.mul_1_r.
+rewrite rngl_of_nat_nat.
+rewrite Nat_sub_succ_1.
+...
+cbn - [ "<?" ].
+rewrite Nat.sub_0_r.
+
+...
+Search (_ ≤ _ - _).
+  apply Nat.le_add_le_sub_r.
 ...
 erewrite rngl_summation_eq_compat in Hr; cycle 1. {
   intros x Hx.
