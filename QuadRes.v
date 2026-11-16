@@ -274,6 +274,25 @@ split; intros Habc. {
 }
 Qed.
 
+Theorem Nat_le_mul_div_add :
+  ∀ a b,
+  b ≠ 0 → a ≤ b * ((a - 1) / b) + b.
+Proof.
+intros * Hbz.
+destruct (Nat.eq_dec a 0) as [Haz| Haz]; [ now subst a | ].
+specialize (Nat.div_mod (a - 1) b Hbz) as H1.
+symmetry in H1.
+apply Nat.add_sub_eq_r in H1.
+rewrite <- H1.
+rewrite <- Nat.add_sub_swap; [ | apply Nat.Div0.mod_le ].
+rewrite <- Nat.add_sub_swap; [ | now apply Nat.neq_0_lt_0 ].
+rewrite <- Nat.add_sub_assoc; [ | now apply Nat.neq_0_lt_0 ].
+rewrite <- Nat.add_sub_assoc; [ apply Nat.le_add_r | ].
+apply Nat.le_add_le_sub_l.
+apply Nat.le_succ_l.
+now apply Nat.mod_upper_bound.
+Qed.
+
 Theorem odd_prime_mod_4 : ∀ p, prime p → p ≠ 2 → p mod 4 = 1 ∨ p mod 4 = 3.
 Proof.
 intros * Hp Hp2.
@@ -3290,6 +3309,70 @@ rewrite rngl_of_nat_succ.
 now rewrite IHn.
 Qed.
 
+Theorem summation_b2n_mul_lt :
+  ∀ N m p,
+  0 < p
+  → N / p ≤ m
+  → ∑ (y = 1, m), Nat.b2n (p * y <? N)%nat = (N - 1) / p.
+Proof.
+intros * Hzp Hpm.
+destruct (Nat.eq_dec N 0) as [Hnz| Hnz]. {
+  subst N; cbn.
+  rewrite Nat.Div0.div_0_l.
+  replace 0 with rngl_zero by easy.
+  now apply all_0_rngl_summation_0.
+}
+rewrite (rngl_summation_split ((N - 1) / p)); cycle 1. {
+  split; apply -> Nat.succ_le_mono; [ easy | ].
+  apply (Nat.le_trans _ (N / p)); [ | easy ].
+  apply Nat.Div0.div_le_mono.
+  apply Nat.le_sub_l.
+}
+erewrite rngl_summation_eq_compat; cycle 1. {
+  intros y Hy.
+  progress unfold Nat.b2n.
+  remember (p * y <? N) as b eqn:Hb.
+  symmetry in Hb.
+  destruct b; [ easy | exfalso ].
+  apply Bool.not_true_iff_false in Hb.
+  apply Hb; clear Hb.
+  apply Nat.leb_le.
+  destruct Hy as (H1y, Hy).
+  apply (Nat.mul_le_mono_r _ _ p) in Hy.
+  rewrite Nat.mul_comm in Hy.
+  apply Nat.succ_le_mono in Hy.
+  eapply Nat.le_trans; [ apply Hy | ].
+  apply Nat.le_succ_l.
+  apply (Nat.le_lt_trans _ (N - 1)); cycle 1. {
+    apply Nat.sub_lt; [ | easy ].
+    now apply Nat.neq_0_lt_0.
+  }
+  rewrite Nat.mul_comm.
+  apply Nat.Div0.mul_div_le.
+}
+cbn - [ "<?" ].
+rewrite rngl_summation_const; [ | easy ].
+rewrite Nat.mul_1_r.
+rewrite rngl_of_nat_nat.
+rewrite Nat_sub_succ_1.
+rewrite all_0_rngl_summation_0; [ apply Nat.add_0_r | ].
+intros y Hy.
+progress unfold Nat.b2n.
+remember (p * y <? N) as b eqn:Hb.
+symmetry in Hb.
+destruct b; [ exfalso | easy ].
+apply Nat.ltb_lt in Hb.
+destruct Hy as (Hy, Hym).
+apply Nat.nle_gt in Hb.
+apply Hb; clear Hb.
+apply (Nat.mul_le_mono_l _ _ p) in Hy.
+eapply Nat.le_trans; [ | apply Hy ].
+rewrite Nat.add_1_r.
+rewrite Nat.mul_succ_r.
+apply Nat_le_mul_div_add.
+now apply Nat.neq_0_lt_0.
+Qed.
+
 (* to be completed
 Theorem quadratic_reciprocity :
   ∀ p q, prime p → prime q → 2 < p < q →
@@ -3426,97 +3509,14 @@ remember (∑ (x = _, _), _) as xx in Hr.
 remember (∑ (x = _, _), _) as yy in Hr.
 subst xx yy.
 subst r; symmetry in Hr.
-Theorem glop :
-  ∀ N m p,
-  0 < p
-  → N / p ≤ m
-  → ∑ (y = 1, m), Nat.b2n (p * y <? N)%nat = (N - 1) / p.
-Proof.
-intros * Hzp Hpm.
-destruct (Nat.eq_dec N 0) as [Hnz| Hnz]. {
-  subst N; cbn.
-  rewrite Nat.Div0.div_0_l.
-  replace 0 with rngl_zero by easy.
-  now apply all_0_rngl_summation_0.
-}
-rewrite (rngl_summation_split ((N - 1) / p)); cycle 1. {
-  split; apply -> Nat.succ_le_mono; [ easy | ].
-  apply (Nat.le_trans _ (N / p)); [ | easy ].
-  apply Nat.Div0.div_le_mono.
-  apply Nat.le_sub_l.
-}
-erewrite rngl_summation_eq_compat; cycle 1. {
-  intros y Hy.
-  progress unfold Nat.b2n.
-  remember (p * y <? N) as b eqn:Hb.
-  symmetry in Hb.
-  destruct b; [ easy | exfalso ].
-  apply Bool.not_true_iff_false in Hb.
-  apply Hb; clear Hb.
-  apply Nat.leb_le.
-  destruct Hy as (H1y, Hy).
-  apply (Nat.mul_le_mono_r _ _ p) in Hy.
-  rewrite Nat.mul_comm in Hy.
-  apply Nat.succ_le_mono in Hy.
-  eapply Nat.le_trans; [ apply Hy | ].
-  apply Nat.le_succ_l.
-  apply (Nat.le_lt_trans _ (N - 1)); cycle 1. {
-    apply Nat.sub_lt; [ | easy ].
-    now apply Nat.neq_0_lt_0.
-  }
-  rewrite Nat.mul_comm.
-  apply Nat.Div0.mul_div_le.
-}
-cbn - [ "<?" ].
-rewrite rngl_summation_const; [ | easy ].
-rewrite Nat.mul_1_r.
-rewrite rngl_of_nat_nat.
-rewrite Nat_sub_succ_1.
-rewrite all_0_rngl_summation_0; [ apply Nat.add_0_r | ].
-intros y Hy.
-progress unfold Nat.b2n.
-remember (p * y <? N) as b eqn:Hb.
-symmetry in Hb.
-destruct b; [ exfalso | easy ].
-apply Nat.ltb_lt in Hb.
-destruct Hy as (Hy, Hym).
-apply Nat.nle_gt in Hb.
-apply Hb; clear Hb.
-...
-apply (Nat.mul_le_mono_l _ _ p) in Hy.
-eapply Nat.le_trans; [ | apply Hy ].
-rewrite Nat.add_1_r.
-rewrite Nat.mul_succ_r.
-Search (_ ≤ (_ / _) * _).
-...
-rewrite <- Nat.div_add; [ | now apply Nat.neq_0_lt_0 ].
-rewrite Nat.mul_1_l.
-destruct N; [ easy | ].
-rewrite Nat_sub_succ_1.
-destruct p; [ easy | ].
-...
-Search (_ ≤ (_ / _) * _).
-Search (_ * (_ / _) ).
-...
-eapply Nat.le_trans.
-Check Nat.Div0.mul_div_le.
-eapply Nat.le_trans; [ | apply Nat.Div0.mul_div_le ].
-...
-Search (_ / _ ≤ _).
-Search (_ ≤ _ / _ * _).
-Search (_ ≤ _ * (_ / _)).
-...
-cbn - [ "<?" ].
-rewrite Nat.sub_0_r.
-
-...
-Search (_ ≤ _ - _).
-  apply Nat.le_add_le_sub_r.
-...
 erewrite rngl_summation_eq_compat in Hr; cycle 1. {
   intros x Hx.
-  specialize (glop (q * x)) as H5.
-rewrite glop.
+  rewrite summation_b2n_mul_lt; cycle 1. {
+    now apply Nat.neq_0_lt_0; intros H; subst p.
+  } {
+...
+  specialize (summation_b2n_mul_lt (q * x) ((q - 1) / 2)) as H5.
+  rewrite H5.
 ...
 assert (Hxy : sx + sy = (p - 1) / 2 * (q - 1) / 2). {
   rewrite Hsx, Hsy.
