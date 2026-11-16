@@ -3381,6 +3381,20 @@ Theorem summation_b2n_mul_gt :
   → ∑ (y = 1, m), Nat.b2n (N <? p * y)%nat = m - (N - 1) / p.
 Proof.
 intros * Hzp Hpm.
+Compute (
+  let N := 2 in
+List.map (λ p,
+List.map (λ m,
+(
+N, p, m,
+  ∑ (y = 1, m), Nat.b2n (N <? p * y)%nat
+, m - (N - 1) / p
+)
+) (List.seq (N / p) 10)
+) (List.seq 1 10)
+).
+Inspect 1.
+...
 (**)
 rewrite (rngl_summation_split (N / p)).
 erewrite rngl_summation_eq_compat; cycle 1. {
@@ -3453,7 +3467,9 @@ rewrite Nat.mul_succ_r.
 apply Nat_le_mul_div_add.
 now apply Nat.neq_0_lt_0.
 ...
+*)
 
+(* to be completed
 Theorem quadratic_reciprocity :
   ∀ p q, prime p → prime q → 2 < p < q →
   is_quadratic_residue p q = is_quadratic_residue q p ↔
