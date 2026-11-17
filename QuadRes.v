@@ -3381,14 +3381,18 @@ Theorem summation_b2n_mul_gt :
   → ∑ (y = 1, m), Nat.b2n (N <? p * y)%nat = m - (N - 1) / p.
 Proof.
 intros * Hzp Hpm.
+Check summation_b2n_mul_lt.
+(* ouais mais il y a ceux qui sont égaux *)
+...
 Compute (
   let N := 2 in
 List.map (λ p,
 List.map (λ m,
 (
 N, p, m,
-  ∑ (y = 1, m), Nat.b2n (N <? p * y)%nat
-, m - (N - 1) / p
+Nat.eqb
+  (∑ (y = 1, m), Nat.b2n (N <? p * y)%nat)
+  (m - 1 - (N - 1) / p)
 )
 ) (List.seq (N / p) 10)
 ) (List.seq 1 10)
