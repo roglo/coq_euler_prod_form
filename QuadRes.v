@@ -3585,6 +3585,48 @@ Check summation_b2n_mul_lt.
     now apply Nat.neq_0_lt_0.
   } {
 (**)
+    assert (H5 : 2 * p * x  ≤ p * (q - 1) < p * q). {
+      split. {
+        rewrite (Nat.mul_comm 2), <- Nat.mul_assoc.
+        apply Nat.mul_le_mono_l.
+        destruct Hx as (H1x, Hx).
+        apply (Nat.mul_le_mono_pos_l _ _ 2) in Hx; [ | easy ].
+        eapply Nat.le_trans; [ apply Hx | ].
+        apply Nat.Div0.mul_div_le.
+      }
+      apply Nat.mul_lt_mono_pos_l; [ now apply Nat.neq_0_lt_0 | ].
+      apply Nat.sub_lt; [ now  apply Nat.neq_0_lt_0 | easy ].
+    }
+    assert (H6 : p * x / q < p / 2). {
+...
+      apply Nat.Div0.div_lt_upper_bound.
+      apply (Nat.mul_lt_mono_pos_l 2); [ easy | ].
+      rewrite Nat.mul_assoc.
+      eapply Nat.le_lt_trans; [ apply H5 | ].
+(*
+...
+rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
+apply (Nat.add_lt_mono_r _ _ p).
+rewrite Nat.sub_add; cycle 1. {
+destruct q; [ easy | ].
+rewrite Nat.mul_succ_r.
+apply Nat.le_add_l.
+}
+      rewrite (Nat.mul_comm p), (Nat.mul_comm 2).
+      rewrite <- Nat.mul_assoc.
+apply Nat.lt_sub_lt_add_l.
+rewrite <- Nat.mul_sub_distr_l.
+...
+*)
+      eapply Nat.lt_le_trans; [ apply H5 | ].
+      rewrite (Nat.mul_comm p), (Nat.mul_comm 2).
+      rewrite <- Nat.mul_assoc.
+      apply Nat.mul_le_mono_l.
+      destruct Hop as (p', Hop); rewrite Hop.
+      rewrite Nat.mul_comm.
+      rewrite Nat.div_add_l; [ | easy ].
+      cbn; rewrite Nat.add_0_r.
+...
     apply Nat.Div0.div_le_upper_bound.
     destruct Hx as (H1x, Hx).
     apply (Nat.mul_le_mono_l _ _ p) in Hx.
