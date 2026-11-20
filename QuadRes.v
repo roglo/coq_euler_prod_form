@@ -3599,8 +3599,8 @@ clear Hpq.
       apply Nat.sub_lt; [ now  apply Nat.neq_0_lt_0 | easy ].
     }
     assert (H6 : p * x / q < p / 2). {
-destruct Hop as (a, Hop).
-destruct Hoq as (b, Hoq).
+      destruct Hop as (a, Hop).
+      destruct Hoq as (b, Hoq).
       assert (H6 : p * x ≤ (2 * a + 1) * b). {
         rewrite Hop.
         apply Nat.mul_le_mono_l.
@@ -3633,14 +3633,19 @@ destruct Hoq as (b, Hoq).
       }
       assert (H9 : p * x < q * (a + 1)) by flia H8.
       assert (H10 : p * x / q ≤ a). {
+        apply Nat.lt_succ_r.
+        rewrite <- Nat.add_1_r.
+        now apply Nat.Div0.div_lt_upper_bound.
+      }
+      apply Nat_le_neq_lt. {
+        apply (Nat.le_trans _ a); [ easy | ].
+        rewrite Hop.
+        rewrite Nat.mul_comm.
+        rewrite Nat.div_add_l; [ | easy ].
+        now rewrite Nat.add_0_r.
+      }
+      intros H11.
 ...
-specialize (Nat.div_mod (p * x) q Hqz) as H10.
-...
-rewrite Hop, Hoq.
-rewrite (Nat.mul_comm 2 p').
-rewrite Nat.div_add_l; [ | easy ].
-...
-      apply Nat.Div0.div_lt_upper_bound.
 (*
 destruct Hx as (H1x, Hx).
 apply (Nat.mul_le_mono_l _ _ p) in Hx.
