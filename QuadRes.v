@@ -3693,6 +3693,33 @@ erewrite rngl_summation_eq_compat in Hr; cycle 1. {
 }
 cbn - [ "<?" rngl_mul rngl_div "/" ] in Hr.
 rewrite <- Hsx in Hr.
+rewrite Nat_sub_1_pow_mod; cycle 1. {
+  apply Nat_le_neq_lt.
+  now apply Nat.neq_0_lt_0.
+  now intros H; subst q.
+}
+rewrite Nat_sub_1_pow_mod; cycle 1. {
+  apply Nat_le_neq_lt.
+  now apply Nat.neq_0_lt_0.
+  now intros H; subst p.
+}
+rewrite H3, H4.
+rewrite <- Nat_sub_1_pow_mod; cycle 1. {
+  apply Nat_le_neq_lt.
+  now apply Nat.neq_0_lt_0.
+  now intros H; subst q.
+}
+rewrite <- Nat_sub_1_pow_mod; cycle 1. {
+  apply Nat_le_neq_lt.
+  now apply Nat.neq_0_lt_0.
+  now intros H; subst p.
+}
+Theorem Nat_sub_1_pow_mod_eq_even :
+  ∀ a n, 2 < n → (n - 1) ^ a mod n =? 1 = Nat.even a.
+Proof.
+Admitted.
+rewrite Nat_sub_1_pow_mod_eq_even.
+rewrite Nat_sub_1_pow_mod_eq_even.
 ...
 (*
 destruct Hx as (H1x, Hx).
