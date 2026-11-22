@@ -3393,6 +3393,29 @@ apply Nat_le_mul_div_add.
 now apply Nat.neq_0_lt_0.
 Qed.
 
+Theorem Nat_even_mod_2 : ∀ x, Nat.even (x mod 2) = Nat.even x.
+Proof.
+intros.
+remember (x mod 2) as x2 eqn:Hx2.
+symmetry in Hx2.
+symmetry.
+destruct x2. {
+  apply Nat.Div0.mod_divides in Hx2.
+  destruct Hx2 as (c, Hx2); subst x.
+  apply Nat.even_even.
+}
+destruct x2. {
+  apply Nat_eq_mod_exists in Hx2.
+  destruct Hx2 as (Hx2 & _).
+  destruct Hx2 as (c, Hx2); subst x.
+  rewrite Nat.mul_comm.
+  apply Nat.even_odd.
+}
+specialize (Nat.mod_upper_bound x 2 (Nat.neq_succ_0 _))  as H1.
+rewrite Hx2 in H1.
+now do 2 apply Nat.succ_lt_mono in H1.
+Qed.
+
 (* to be completed
 Theorem quadratic_reciprocity :
   ∀ p q, prime p → prime q → 2 < p < q →
@@ -3713,6 +3736,7 @@ erewrite rngl_summation_eq_compat in Hr; cycle 1. {
 }
 cbn - [ "<?" rngl_mul rngl_div "/" ] in Hr.
 rewrite <- Hsx in Hr.
+replace rngl_add with Nat.add in Hr by easy.
 rewrite Nat_sub_1_pow_mod; cycle 1. {
   apply Nat_le_neq_lt.
   now apply Nat.neq_0_lt_0.
@@ -3761,7 +3785,13 @@ rewrite Nat_sub_1_pow_mod in H2; cycle 1. {
 rewrite H3 in H1.
 rewrite H4 in H2.
 move sy before sx.
-remember (Nat.even sy) as esy eqn:Hesy.
+rewrite <- Nat_even_mod_2.
+rewrite <- (Nat_even_mod_2 sy).
+remember (sx mod 2) as sx2 eqn:Hsx2.
+remember (sy mod 2) as sy2 eqn:Hsy2.
+move sy2 before sx2.
+move Hsy2 before Hsx2.
+remember (Nat.even sy2) as esy eqn:Hesy.
 symmetry in Hesy.
 destruct esy. {
   split; intros Hesx. {
