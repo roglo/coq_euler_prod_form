@@ -3475,9 +3475,9 @@ specialize (Eisenstein_lemma p q Hcpq Hop Hoq) as H3.
 specialize (Eisenstein_lemma q p Hcqp Hoq Hop) as H4.
 progress unfold is_quadratic_residue.
 rewrite H1, H2.
-remember (∑ (k = 1, _), _) as sx eqn:Hsx in H3.
-remember (∑ (k = 1, _), _) as sy eqn:Hsy in H4.
-move sy before sx; move Hsy before Hsx.
+remember (∑ (k = 1, _), _) as spq eqn:Hspq in H3.
+remember (∑ (k = 1, _), _) as sqp eqn:Hsqp in H4.
+move sqp before spq; move Hsqp before Hspq.
 remember (∑ (x = 1, (p - 1) / 2), ∑ (y = 1, (q - 1) / 2), 1) as r eqn:Hrv.
 assert (Hrl : r = (p - 1) / 2 * ((q - 1) / 2)). {
   rewrite rngl_summation_const in Hrv; [ | easy ].
@@ -3622,7 +3622,7 @@ Check Hpq.
   easy.
 }
 cbn - [ "<?" rngl_mul rngl_div "/" ] in Hr.
-rewrite <- Hsy in Hr.
+rewrite <- Hsqp in Hr.
 rewrite rngl_summation_summation_exch in Hr.
 clear Hpq.
 erewrite rngl_summation_eq_compat in Hr; cycle 1. {
@@ -3735,7 +3735,7 @@ erewrite rngl_summation_eq_compat in Hr; cycle 1. {
   easy.
 }
 cbn - [ "<?" rngl_mul rngl_div "/" ] in Hr.
-rewrite <- Hsx in Hr.
+rewrite <- Hspq in Hr.
 replace rngl_add with Nat.add in Hr by easy.
 rewrite Nat_sub_1_pow_mod; cycle 1. {
   apply Nat_le_neq_lt.
@@ -3772,6 +3772,7 @@ rewrite Nat_sub_1_pow_mod_eq_even; cycle 1. {
   apply Nat.odd_spec in Hop.
   now rewrite Nat.odd_2 in Hop.
 }
+...
 rewrite Nat_sub_1_pow_mod in H1; cycle 1. {
   apply Nat_le_neq_lt.
   now apply Nat.neq_0_lt_0.
@@ -3784,17 +3785,17 @@ rewrite Nat_sub_1_pow_mod in H2; cycle 1. {
 }
 rewrite H3 in H1.
 rewrite H4 in H2.
-move sy before sx.
+move sqp before spq.
 rewrite <- Nat_even_mod_2.
-rewrite <- (Nat_even_mod_2 sy).
-remember (sx mod 2) as sx2 eqn:Hsx2.
-remember (sy mod 2) as sy2 eqn:Hsy2.
-move sy2 before sx2.
-move Hsy2 before Hsx2.
-remember (Nat.even sy2) as esy eqn:Hesy.
-symmetry in Hesy.
-destruct esy. {
-  split; intros Hesx. {
+rewrite <- (Nat_even_mod_2 sqp).
+remember (spq mod 2) as spq2 eqn:Hspq2.
+remember (sqp mod 2) as sqp2 eqn:Hsqp2.
+move sqp2 before spq2.
+move Hsqp2 before Hspq2.
+remember (Nat.even sqp2) as esqp eqn:Hesqp.
+symmetry in Hesqp.
+destruct esqp. {
+  split; intros Hespq. {
 ...
 (*
 destruct Hx as (H1x, Hx).
@@ -3977,8 +3978,8 @@ cbn - [ "<?" "/" ] in Hr.
   specialize (summation_b2n_mul_lt (q * x) ((q - 1) / 2)) as H5.
   rewrite H5.
 ...
-assert (Hxy : sx + sy = (p - 1) / 2 * (q - 1) / 2). {
-  rewrite Hsx, Hsy.
+assert (Hxy : spq + sqp = (p - 1) / 2 * (q - 1) / 2). {
+  rewrite Hspq, Hsqp.
 ...
   erewrite rngl_summation_eq_compat; cycle 1. {
     intros x Hx.
