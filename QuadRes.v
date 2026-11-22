@@ -3301,6 +3301,26 @@ apply Nat_sub_1_pow_mod.
 flia H2n.
 Qed.
 
+Theorem Nat_sub_1_pow_mod_eq_even :
+  ∀ a n, 2 < n → (n - 1) ^ a mod n =? 1 = Nat.even a.
+Proof.
+intros * H2n.
+remember (Nat.even a) as ea eqn:Hea.
+symmetry in Hea.
+destruct ea. {
+  apply Nat.even_spec in Hea.
+  apply Nat.eqb_eq.
+  now apply Nat_sub_1_pow_mod_is_even.
+} {
+  apply Bool.not_true_iff_false in Hea.
+  apply Bool.not_true_iff_false.
+  intros H1; apply Hea; clear Hea.
+  apply Nat.even_spec.
+  apply Nat.eqb_eq in H1.
+  now apply Nat_sub_1_pow_mod_is_even in H1.
+}
+Qed.
+
 Theorem rngl_of_nat_nat : ∀ n, rngl_of_nat n = n.
 Proof.
 intros.
@@ -3714,12 +3734,37 @@ rewrite <- Nat_sub_1_pow_mod; cycle 1. {
   now apply Nat.neq_0_lt_0.
   now intros H; subst p.
 }
-Theorem Nat_sub_1_pow_mod_eq_even :
-  ∀ a n, 2 < n → (n - 1) ^ a mod n =? 1 = Nat.even a.
-Proof.
-Admitted.
-rewrite Nat_sub_1_pow_mod_eq_even.
-rewrite Nat_sub_1_pow_mod_eq_even.
+rewrite Nat_sub_1_pow_mod_eq_even; cycle 1. {
+  destruct q; [ easy | ].
+  destruct q; [ easy | ].
+  destruct q; [ | now do 2 apply -> Nat.succ_lt_mono ].
+  apply Nat.odd_spec in Hoq.
+  now rewrite Nat.odd_2 in Hoq.
+}
+rewrite Nat_sub_1_pow_mod_eq_even; cycle 1. {
+  destruct p; [ easy | ].
+  destruct p; [ easy | ].
+  destruct p; [ | now do 2 apply -> Nat.succ_lt_mono ].
+  apply Nat.odd_spec in Hop.
+  now rewrite Nat.odd_2 in Hop.
+}
+rewrite Nat_sub_1_pow_mod in H1; cycle 1. {
+  apply Nat_le_neq_lt.
+  now apply Nat.neq_0_lt_0.
+  now intros H; subst q.
+}
+rewrite Nat_sub_1_pow_mod in H2; cycle 1. {
+  apply Nat_le_neq_lt.
+  now apply Nat.neq_0_lt_0.
+  now intros H; subst p.
+}
+rewrite H3 in H1.
+rewrite H4 in H2.
+move sy before sx.
+remember (Nat.even sy) as esy eqn:Hesy.
+symmetry in Hesy.
+destruct esy. {
+  split; intros Hesx. {
 ...
 (*
 destruct Hx as (H1x, Hx).
