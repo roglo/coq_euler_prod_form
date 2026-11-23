@@ -362,6 +362,101 @@ rewrite Nat_sub_1_pow_mod_eq_even; cycle 1. {
   apply Nat.odd_spec in Hop.
   now rewrite Nat.odd_2 in Hop.
 }
+assert (H : p ≠ 2). {
+  intros H; subst p.
+  now apply Nat.odd_spec in Hop.
+}
+specialize (odd_prime_mod_4 p Hp H) as H4p; clear H.
+assert (H : q ≠ 2). {
+  intros H; subst q.
+  now apply Nat.odd_spec in Hoq.
+}
+specialize (odd_prime_mod_4 q Hq H) as H4q; clear H.
+destruct H4p as [H4p| H4p]. {
+  split; intros Hpq; [ now left | clear Hpq ].
+  apply Nat_eq_mod_1 in H4p.
+  destruct H4p as (H4p & _ & _).
+  apply Nat.Div0.mod_divides in H4p.
+  destruct H4p as (p', H4p).
+  rewrite H4p in Hr.
+  rewrite (Nat.mul_comm 4) in Hr.
+  progress replace 4 with (2 * 2) in Hr by easy.
+  rewrite Nat.mul_assoc in Hr.
+  rewrite Nat.div_mul in Hr; [ | easy ].
+  rewrite (Nat.mul_comm _ 2) in Hr.
+  rewrite <- Nat.mul_assoc in Hr.
+...
+  destruct H4q as [H4q| H4q]. {
+    apply Nat_eq_mod_1 in H4q.
+    destruct H4q as (H4q & _ & _).
+    apply Nat.Div0.mod_divides in H4p, H4q.
+    destruct H4p as (p', H4p).
+    destruct H4q as (q', H4q).
+    rewrite H4p, H4q in Hr.
+    do 2 rewrite (Nat.mul_comm 4) in Hr.
+    progress replace 4 with (2 * 2) in Hr by easy.
+    do 2 rewrite Nat.mul_assoc in Hr.
+    rewrite Nat.div_mul in Hr; [ | easy ].
+    rewrite Nat.div_mul in Hr; [ | easy ].
+    rewrite (Nat.mul_comm _ 2), Nat.mul_assoc in Hr.
+    rewrite Nat.mul_comm, Nat.mul_assoc in Hr.
+    rewrite <- Nat.mul_assoc in Hr.
+    remember (Nat.even sqp) as esqp eqn:Hesqp.
+    symmetry in Hesqp.
+    destruct esqp. {
+      apply Nat.even_spec in Hesqp.
+      destruct Hesqp as (c, H); move H at top; subst sqp.
+      apply Nat.add_sub_eq_l in Hr.
+      rewrite <- Nat.mul_sub_distr_l in Hr.
+      rewrite <- Hr.
+      apply Nat.even_even.
+    } {
+      apply Bool.not_true_iff_false in Hesqp.
+      apply Bool.not_true_iff_false.
+      intros H; apply Hesqp; clear Hesqp.
+      apply Nat.even_spec in H.
+      destruct H as (c, H); move H at top; subst spq.
+      apply Nat.add_sub_eq_r in Hr.
+      rewrite <- Nat.mul_sub_distr_l in Hr.
+      rewrite <- Hr.
+      apply Nat.even_even.
+    }
+  } {
+...
+    apply Nat_eq_mod_exists in H4q.
+    destruct H4q as ((q', H4q) & _).
+    apply Nat.Div0.mod_divides in H4p, H4q.
+    destruct H4p as (p', H4p).
+    destruct H4q as (q', H4q).
+    rewrite H4p, H4q in Hr.
+    do 2 rewrite (Nat.mul_comm 4) in Hr.
+    progress replace 4 with (2 * 2) in Hr by easy.
+    do 2 rewrite Nat.mul_assoc in Hr.
+    rewrite Nat.div_mul in Hr; [ | easy ].
+    rewrite Nat.div_mul in Hr; [ | easy ].
+    rewrite (Nat.mul_comm _ 2), Nat.mul_assoc in Hr.
+    rewrite Nat.mul_comm, Nat.mul_assoc in Hr.
+    rewrite <- Nat.mul_assoc in Hr.
+    remember (Nat.even sqp) as esqp eqn:Hesqp.
+    symmetry in Hesqp.
+    destruct esqp. {
+      apply Nat.even_spec in Hesqp.
+      destruct Hesqp as (c, H); move H at top; subst sqp.
+      apply Nat.add_sub_eq_l in Hr.
+      rewrite <- Nat.mul_sub_distr_l in Hr.
+      rewrite <- Hr.
+      apply Nat.even_even.
+    } {
+      apply Bool.not_true_iff_false in Hesqp.
+      apply Bool.not_true_iff_false.
+      intros H; apply Hesqp; clear Hesqp.
+      apply Nat.even_spec in H.
+      destruct H as (c, H); move H at top; subst spq.
+      apply Nat.add_sub_eq_r in Hr.
+      rewrite <- Nat.mul_sub_distr_l in Hr.
+      rewrite <- Hr.
+      apply Nat.even_even.
+    }
 ...
 rewrite Nat_sub_1_pow_mod in H1; cycle 1. {
   apply Nat_le_neq_lt.
