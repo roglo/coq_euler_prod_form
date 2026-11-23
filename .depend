@@ -1,14 +1,14 @@
-Formula.vo Formula.glob Formula.v.beautified Formula.required_vo: Formula.v Misc.vo Primes.vo /home/pps/deraugla/.opam/rocq-9.0/lib/rocq-runtime/rocqworker
-FourSquareEuler.vo FourSquareEuler.glob FourSquareEuler.v.beautified FourSquareEuler.required_vo: FourSquareEuler.v /home/pps/deraugla/.opam/rocq-9.0/lib/rocq-runtime/rocqworker
-FourSquareLag.vo FourSquareLag.glob FourSquareLag.v.beautified FourSquareLag.required_vo: FourSquareLag.v FourSquareEuler.vo Misc.vo Pigeonhole.vo Primes.vo /home/pps/deraugla/.opam/rocq-9.0/lib/rocq-runtime/rocqworker
-Misc.vo Misc.glob Misc.v.beautified Misc.required_vo: Misc.v /home/pps/deraugla/.opam/rocq-9.0/lib/rocq-runtime/rocqworker
-Pigeonhole.vo Pigeonhole.glob Pigeonhole.v.beautified Pigeonhole.required_vo: Pigeonhole.v Misc.vo /home/pps/deraugla/.opam/rocq-9.0/lib/rocq-runtime/rocqworker
-Primes.vo Primes.glob Primes.v.beautified Primes.required_vo: Primes.v Misc.vo /home/pps/deraugla/.opam/rocq-9.0/lib/rocq-runtime/rocqworker
-Primisc.vo Primisc.glob Primisc.v.beautified Primisc.required_vo: Primisc.v Misc.vo Primes.vo QuadRes.vo Ring2.vo Rpolynomial2.vo Rsummation.vo Totient.vo /home/pps/deraugla/.opam/rocq-9.0/lib/rocq-runtime/rocqworker
-QuadRes.vo QuadRes.glob QuadRes.v.beautified QuadRes.required_vo: QuadRes.v Misc.vo Primes.vo QuadRes_1.vo /home/pps/deraugla/.opam/rocq-9.0/lib/rocq-runtime/rocqworker
-QuadRes_1.vo QuadRes_1.glob QuadRes_1.v.beautified QuadRes_1.required_vo: QuadRes_1.v Misc.vo Primes.vo /home/pps/deraugla/.opam/rocq-9.0/lib/rocq-runtime/rocqworker
-Ring2.vo Ring2.glob Ring2.v.beautified Ring2.required_vo: Ring2.v /home/pps/deraugla/.opam/rocq-9.0/lib/rocq-runtime/rocqworker
-Rpolynomial2.vo Rpolynomial2.glob Rpolynomial2.v.beautified Rpolynomial2.required_vo: Rpolynomial2.v Misc.vo Ring2.vo Rsummation.vo /home/pps/deraugla/.opam/rocq-9.0/lib/rocq-runtime/rocqworker
-Rsummation.vo Rsummation.glob Rsummation.v.beautified Rsummation.required_vo: Rsummation.v Misc.vo Ring2.vo /home/pps/deraugla/.opam/rocq-9.0/lib/rocq-runtime/rocqworker
-Sensitivity.vo Sensitivity.glob Sensitivity.v.beautified Sensitivity.required_vo: Sensitivity.v /home/pps/deraugla/.opam/rocq-9.0/lib/rocq-runtime/rocqworker
-Totient.vo Totient.glob Totient.v.beautified Totient.required_vo: Totient.v Misc.vo Primes.vo /home/pps/deraugla/.opam/rocq-9.0/lib/rocq-runtime/rocqworker
+Formula.vo Formula.glob Formula.v.beautified Formula.required_vo: Formula.v Misc.vo Primes.vo .
+FourSquareEuler.vo FourSquareEuler.glob FourSquareEuler.v.beautified FourSquareEuler.required_vo: FourSquareEuler.v .
+FourSquareLag.vo FourSquareLag.glob FourSquareLag.v.beautified FourSquareLag.required_vo: FourSquareLag.v FourSquareEuler.vo Misc.vo Pigeonhole.vo Primes.vo .
+Misc.vo Misc.glob Misc.v.beautified Misc.required_vo: Misc.v .
+Pigeonhole.vo Pigeonhole.glob Pigeonhole.v.beautified Pigeonhole.required_vo: Pigeonhole.v Misc.vo .
+Primes.vo Primes.glob Primes.v.beautified Primes.required_vo: Primes.v Misc.vo .
+Primisc.vo Primisc.glob Primisc.v.beautified Primisc.required_vo: Primisc.v Misc.vo Primes.vo QuadRes.vo Ring2.vo Rpolynomial2.vo Rsummation.vo Totient.vo .
+QuadRes.vo QuadRes.glob QuadRes.v.beautified QuadRes.required_vo: QuadRes.v Misc.vo Primes.vo QuadRes_1.vo .
+QuadRes_1.vo QuadRes_1.glob QuadRes_1.v.beautified QuadRes_1.required_vo: QuadRes_1.v Misc.vo Primes.vo .
+Ring2.vo Ring2.glob Ring2.v.beautified Ring2.required_vo: Ring2.v .
+Rpolynomial2.vo Rpolynomial2.glob Rpolynomial2.v.beautified Rpolynomial2.required_vo: Rpolynomial2.v Misc.vo Ring2.vo Rsummation.vo .
+Rsummation.vo Rsummation.glob Rsummation.v.beautified Rsummation.required_vo: Rsummation.v Misc.vo Ring2.vo .
+Sensitivity.vo Sensitivity.glob Sensitivity.v.beautified Sensitivity.required_vo: Sensitivity.v .
+Totient.vo Totient.glob Totient.v.beautified Totient.required_vo: Totient.v Misc.vo Primes.vo .

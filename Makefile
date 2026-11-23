@@ -9,7 +9,7 @@ clean:
 
 depend:
 	mv .depend .depend.bak
-	coqdep $(FILESFORDEP) | LC_ALL=C sort > .depend
+	coqdep -worker . $(FILESFORDEP) | LC_ALL=C sort > .depend
 
 .SUFFIXES: .v .vo
 
