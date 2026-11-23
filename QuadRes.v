@@ -6,6 +6,10 @@ Require Import RingLike.Core.
 Require Import RingLike.IterAdd.
 Require Import RingLike.Nat_algebra.
 
+Check Euler_criterion.
+Check Gauss_lemma.
+Check quadratic_reciprocity_2.
+
 (* to be completed
 Theorem quadratic_reciprocity :
   ∀ p q, prime p → prime q → 2 < p < q →

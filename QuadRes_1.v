@@ -1038,8 +1038,6 @@ destruct sm as [b| ]. {
 }
 Qed.
 
-Inspect 1.
-
 (* Gauss Lemma *)
 
 Definition nb_of_mult_gt_half a p :=
@@ -1630,8 +1628,6 @@ apply Nat.sub_lt; [ | easy ].
 now apply Nat.neq_0_lt_0.
 Qed.
 
-Inspect 1.
-
 Theorem Nat_same_parity_same_opp_1_pow :
   ∀ n, n ≠ 0 → ∀ a b,
   a ≡ b mod 2
@@ -1881,8 +1877,6 @@ destruct n; [ easy | ].
 do 4 apply Nat.succ_lt_mono in H1.
 easy.
 Qed.
-
-Inspect 1.
 
 Theorem Nat_div_less_small : ∀ n a b,
   n * b ≤ a < (n + 1) * b

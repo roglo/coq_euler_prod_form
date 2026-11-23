@@ -9,7 +9,7 @@ clean:
 
 depend:
 	mv .depend .depend.bak
-	coqdep -worker . $(FILESFORDEP) | LC_ALL=C sort > .depend
+	coqdep -worker aaaa $(FILESFORDEP) | sed 's/ aaaa//' | LC_ALL=C sort > .depend
 
 .SUFFIXES: .v .vo
 
