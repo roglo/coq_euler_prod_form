@@ -135,11 +135,14 @@ Theorem quadratic_reciprocity :
     p mod 4 = 1 ∨ q mod 4 = 1.
 Proof.
 intros * Hp Hq Hpq.
+assert (H2p : 2 < p) by easy.
+assert (H2q : 2 < q) by flia Hpq.
+assert (Hpneq : p ≠ q) by flia Hpq.
+clear Hpq.
 assert (Hop : Nat.Odd p). {
   assert (H : p ≠ 2). {
-    destruct Hpq as (H, _).
     intros H1; subst p.
-    now apply Nat.lt_irrefl in H.
+    now apply Nat.lt_irrefl in H2p.
   }
   specialize (odd_prime _ Hp H) as H1.
   apply Nat_eq_mod_1 in H1.
@@ -155,9 +158,7 @@ assert (Hop : Nat.Odd p). {
 assert (Hoq : Nat.Odd q). {
   assert (H : q ≠ 2). {
     intros H1; subst q.
-    destruct Hpq as (H1, H2).
-    apply Nat.lt_le_incl in H1.
-    now apply Nat.nlt_ge in H1.
+    now apply Nat.lt_irrefl in H2q.
   }
   specialize (odd_prime _ Hq H) as H1.
   apply Nat_eq_mod_1 in H1.
@@ -172,8 +173,7 @@ assert (Hoq : Nat.Odd q). {
 }
 assert (Hcpq : coprimes p q). {
   progress unfold coprimes.
-  rewrite Nat.gcd_comm.
-  apply (eq_gcd_prime_small_1 q p Hq); flia Hpq.
+  now apply eq_primes_gcd_1.
 }
 assert (Hcqp : coprimes q p). {
   progress unfold coprimes.
@@ -261,7 +261,6 @@ subst xx yy.
 subst r; symmetry in Hr.
 erewrite rngl_summation_eq_compat in Hr; cycle 1. {
   intros x Hx.
-clear Hpq.
   rewrite summation_b2n_mul_lt; cycle 1. {
     now apply Nat.neq_0_lt_0.
   } {
@@ -278,7 +277,6 @@ clear Hpq.
 cbn - [ "<?" rngl_mul rngl_div "/" ] in Hr.
 rewrite <- Hsqp in Hr.
 rewrite rngl_summation_summation_exch in Hr.
-clear Hpq.
 erewrite rngl_summation_eq_compat in Hr; cycle 1. {
   intros x Hx.
   rewrite summation_b2n_mul_lt; cycle 1. {
