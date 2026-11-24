@@ -38,6 +38,7 @@ f_equal; f_equal; f_equal.
 flia.
 Qed.
 
+(*
 Theorem fold_iter_seq_succ_l : ∀ A b len f (d : A),
   Utils.iter_list (List.seq (S b) (S len - 1)) f d =
     Utils.iter_seq (S b) (b + len) f d.
@@ -54,6 +55,7 @@ intros.
 progress unfold Utils.iter_seq.
 now rewrite Nat_sub_succ_1.
 Qed.
+*)
 
 Theorem fold_iter_seq_1_succ_sub : ∀ A len f (d : A),
   Utils.iter_list (List.seq 1 (S len - 1)) f d = Utils.iter_seq 1 len f d.
@@ -151,6 +153,7 @@ rewrite Nat.Div0.mod_add.
 now apply Nat.mod_small.
 Qed.
 
+(*
 Theorem Nat_eq_pow_1 : ∀ a b, a ^ b = 1 → a = 1 ∨ b = 0.
 Proof.
 intros * Hab.
@@ -158,6 +161,7 @@ destruct b; [ now right | left ].
 cbn in Hab.
 now apply Nat.eq_mul_1 in Hab.
 Qed.
+*)
 
 Theorem Nat_eq_mod_1 : ∀ a b, a mod b = 1 ↔ (a - 1) mod b = 0 ∧ a ≠ 0 ∧ b ≠ 1.
 Proof.
@@ -238,6 +242,7 @@ rewrite Hb2 in H1.
 flia H1.
 Qed.
 
+(*
 Theorem Nat_add_if_distr_l :
   ∀ a (b : bool) c d, (a + if b then c else d) = if b then a + c else a + d.
 Proof. now intros; destruct b. Qed.
@@ -245,6 +250,7 @@ Proof. now intros; destruct b. Qed.
 Theorem Nat_mul_if_distr_l :
   ∀ a (b : bool) c d, (a * if b then c else d) = if b then a * c else a * d.
 Proof. now intros; destruct b. Qed.
+*)
 
 Theorem Nat_eq_mod_exists : ∀ a b c,
   a mod b = c ↔ (∃ k, a = k * b + c) ∧ (b = 0 ∨ c < b).
@@ -1878,6 +1884,7 @@ do 4 apply Nat.succ_lt_mono in H1.
 easy.
 Qed.
 
+(*
 Theorem Nat_div_less_small : ∀ n a b,
   n * b ≤ a < (n + 1) * b
   → a / b = n.
@@ -2017,6 +2024,7 @@ cbn.
 progress f_equal.
 apply IHc.
 Qed.
+*)
 
 Theorem List_eq_length_filter_summation :
   ∀ l f,
@@ -2084,6 +2092,7 @@ progress f_equal.
 now rewrite nat_ltb_rngl_ltb.
 Qed.
 
+(*
 Theorem Eisenstein_lemma' :
   ∀ a p, prime p → coprimes a p →
   nb_of_mult_gt_half a p ≡ (∑ (k = 1, (p - 1) / 2), 2 * k * a / p) mod 2.
@@ -2166,6 +2175,7 @@ intros i Hi.
 rewrite Nat.sub_0_r.
 now rewrite Nat_sub_succ_1.
 Qed.
+*)
 
 Theorem Nat_inj_succ_mod_le : ∀ a b c, a ≤ b → S a ≡ S b mod c → a ≡ b mod c.
 Proof.
@@ -2239,6 +2249,7 @@ split; intros Hab; cycle 1. {
 }
 Qed.
 
+(*
 Theorem Nat_add_sub_eq_l_mod :
   ∀ a b c d, b ≤ a → b + c ≡ a mod d → a - b ≡ c mod d.
 Proof.
@@ -2395,6 +2406,7 @@ destruct x, y; [ easy | | | easy ]. {
   now apply Nat.le_0_r in Hy; subst a.
 }
 Qed.
+*)
 
 Theorem summation_list_permut :
   ∀ (la lb : list nat) f,
@@ -3387,6 +3399,7 @@ apply Nat_le_mul_div_add.
 now apply Nat.neq_0_lt_0.
 Qed.
 
+(*
 Theorem Nat_even_mod_2 : ∀ x, Nat.even (x mod 2) = Nat.even x.
 Proof.
 intros.
@@ -3409,3 +3422,4 @@ specialize (Nat.mod_upper_bound x 2 (Nat.neq_succ_0 _))  as H1.
 rewrite Hx2 in H1.
 now do 2 apply Nat.succ_lt_mono in H1.
 Qed.
+*)
