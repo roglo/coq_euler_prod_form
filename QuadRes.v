@@ -261,125 +261,12 @@ subst xx yy.
 subst r; symmetry in Hr.
 erewrite rngl_summation_eq_compat in Hr; cycle 1. {
   intros x Hx.
+clear Hpq.
   rewrite summation_b2n_mul_lt; cycle 1. {
     now apply Nat.neq_0_lt_0.
   } {
-(*
     now apply mul_div_le_pred_div_2.
   }
-  rewrite Nat.mul_comm.
-(*****)
-  replace ((x * q - 1) / p) with (x * q / p); cycle 1. {
-    specialize (Nat.div_mod (x * p) q) as H5.
-    rewrite H5; [ | now intros H; subst q ].
-    rewrite <- Nat.add_sub_assoc; cycle 1. {
-      apply Nat.neq_0_lt_0.
-      intros H.
-      apply Nat.Lcm0.mod_divide in H.
-      apply Nat.gauss in H; cycle 1. {
-        apply eq_gcd_prime_small_1; [ easy | ].
-        split; [ easy | ].
-        eapply Nat.le_lt_trans; [ apply Hx | ].
-        apply Nat.Div0.div_lt_upper_bound.
-        apply (Nat.lt_le_trans _ q).
-        apply Nat.sub_lt; [ now apply Nat.neq_0_lt_0 | easy ].
-        rewrite Nat_mul_2_l.
-        apply Nat.le_add_l.
-      }
-      progress unfold coprimes in Hcpq.
-      destruct H as (c, Hc).
-      rewrite Hc in Hcpq.
-      rewrite Nat.gcd_comm in Hcpq.
-      rewrite Nat.mul_comm in Hcpq.
-      rewrite Nat.gcd_mul_diag_l in Hcpq.
-      now rewrite Hcpq in Hq.
-    }
-    rewrite (Nat.mul_comm q).
-    rewrite Nat.div_add_l; [ | easy ].
-    rewrite Nat.div_add_l; [ | easy ].
-    progress f_equal.
-    rewrite Nat.div_small; [ | now apply Nat.mod_upper_bound ].
-    symmetry.
-    apply Nat.div_small.
-    apply (Nat.le_lt_trans _ ((x * p) mod q)); cycle 1. {
-      now apply Nat.mod_upper_bound.
-    }
-    apply Nat.le_sub_l.
-  }
-  replace Nat.div with rngl_div by easy.
-  replace Nat.mul with rngl_mul by easy.
-  easy.
-}
-..........
-  replace ((x * p - 1) / q) with (x * p / q); cycle 1. {
-    specialize (Nat.div_mod (x * p) q) as H5.
-    rewrite H5; [ | now intros H; subst q ].
-    rewrite <- Nat.add_sub_assoc; cycle 1. {
-      apply Nat.neq_0_lt_0.
-      intros H.
-      apply Nat.Lcm0.mod_divide in H.
-      apply Nat.gauss in H; cycle 1. {
-        apply eq_gcd_prime_small_1; [ easy | ].
-        split; [ easy | ].
-        eapply Nat.le_lt_trans; [ apply Hx | ].
-        apply Nat.Div0.div_lt_upper_bound.
-        apply (Nat.lt_le_trans _ p).
-        apply Nat.sub_lt; [ now apply Nat.neq_0_lt_0 | easy ].
-        rewrite Nat_mul_2_l.
-        apply Nat.le_add_r.
-      }
-      progress unfold coprimes in Hcpq.
-      destruct H as (c, Hc).
-      rewrite Hc in Hcpq.
-      rewrite Nat.gcd_comm in Hcpq.
-      rewrite Nat.mul_comm in Hcpq.
-      rewrite Nat.gcd_mul_diag_l in Hcpq.
-      now rewrite Hcpq in Hq.
-    }
-    rewrite (Nat.mul_comm q).
-    rewrite Nat.div_add_l; [ | easy ].
-    rewrite Nat.div_add_l; [ | easy ].
-    progress f_equal.
-    rewrite Nat.div_small; [ | now apply Nat.mod_upper_bound ].
-    symmetry.
-    apply Nat.div_small.
-    apply (Nat.le_lt_trans _ ((x * p) mod q)); cycle 1. {
-      now apply Nat.mod_upper_bound.
-    }
-    apply Nat.le_sub_l.
-  }
-  replace Nat.div with rngl_div by easy.
-  replace Nat.mul with rngl_mul by easy.
-  easy.
-}
-cbn - [ "<?" rngl_mul rngl_div "/" ] in Hr.
-rewrite <- Hspq in Hr.
-...
-*)
-    apply Nat.Div0.div_le_upper_bound.
-    rewrite <- Nat.Lcm0.divide_div_mul_exact; cycle 1. {
-      destruct Hoq as (c, H).
-      rewrite H, Nat.add_sub.
-      apply Nat.divide_factor_l.
-    }
-    destruct Hx as (H1x, Hx).
-    apply (Nat.mul_le_mono_l _ _ q) in Hx.
-    eapply Nat.le_trans; [ apply Hx | ].
-    rewrite <- Nat.Lcm0.divide_div_mul_exact; cycle 1. {
-      destruct Hop as (c, H).
-      rewrite H, Nat.add_sub.
-      apply Nat.divide_factor_l.
-    }
-    apply Nat.Div0.div_le_mono.
-    rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
-    rewrite Nat.mul_sub_distr_l, Nat.mul_1_r.
-    rewrite Nat.mul_comm.
-    apply Nat.sub_le_mono_l.
-Check Hpq.
-(* should be proven without Hpq; see further *)
-    now apply Nat.lt_le_incl.
-  }
-  clear Hpq.
   rewrite Nat.mul_comm.
   replace ((x * q - 1) / p) with (x * q / p); cycle 1. {
     now apply mul_div_eq_mul_sub_1_div.
