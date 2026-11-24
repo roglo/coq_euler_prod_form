@@ -167,26 +167,24 @@ assert (Hcqp : coprimes q p). {
 }
 specialize (Gauss_lemma p q Hq Hcpq _ eq_refl) as H1.
 specialize (Gauss_lemma q p Hp Hcqp _ eq_refl) as H2.
+progress unfold is_quadratic_residue.
+rewrite H1, H2; clear H1 H2.
 specialize (Eisenstein_lemma p q Hcpq Hop Hoq) as H3.
 specialize (Eisenstein_lemma q p Hcqp Hoq Hop) as H4.
-progress unfold is_quadratic_residue.
-rewrite H1, H2.
 remember (∑ (k = 1, _), _) as spq eqn:Hspq in H3.
 remember (∑ (k = 1, _), _) as sqp eqn:Hsqp in H4.
 move sqp before spq; move Hsqp before Hspq.
-remember (∑ (x = 1, (p - 1) / 2), ∑ (y = 1, (q - 1) / 2), 1) as r eqn:Hrv.
+remember (∑ (x = 1, (p - 1) / 2), ∑ (y = 1, (q - 1) / 2), 1) as r eqn:Hr.
 assert (Hrl : r = (p - 1) / 2 * ((q - 1) / 2)). {
-  rewrite rngl_summation_const in Hrv; [ | easy ].
-  rewrite Nat_sub_succ_1 in Hrv.
-  rewrite rngl_summation_const in Hrv; [ | easy ].
-  rewrite Nat_sub_succ_1 in Hrv.
-  rewrite rngl_mul_1_r in Hrv.
-  rewrite <- rngl_of_nat_mul in Hrv; [ | easy ].
-  rewrite <- (rngl_of_nat_nat r) in Hrv.
-  now apply rngl_of_nat_inj in Hrv.
+  rewrite rngl_summation_const in Hr; [ | easy ].
+  rewrite Nat_sub_succ_1 in Hr.
+  rewrite rngl_summation_const in Hr; [ | easy ].
+  rewrite Nat_sub_succ_1 in Hr.
+  rewrite rngl_mul_1_r in Hr.
+  rewrite <- rngl_of_nat_mul in Hr; [ | easy ].
+  rewrite <- (rngl_of_nat_nat r) in Hr.
+  now apply rngl_of_nat_inj in Hr.
 }
-generalize Hrv; intros Hr.
-clear Hrv.
 erewrite rngl_summation_eq_compat in Hr; cycle 1. {
   intros x Hx.
   erewrite rngl_summation_eq_compat; cycle 1. {
