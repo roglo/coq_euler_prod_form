@@ -128,17 +128,13 @@ apply Nat.le_sub_l.
 Qed.
 
 Theorem quadratic_reciprocity :
-  ∀ p q, prime p → prime q → 2 < p → 2 < q → p ≠ q →
+  ∀ p q, prime p → prime q → p ≠ 2 → q ≠ 2 → p ≠ q →
   is_quadratic_residue p q = is_quadratic_residue q p ↔
     p mod 4 = 1 ∨ q mod 4 = 1.
 Proof.
-intros * Hp Hq H2p H2q Hpneq.
+intros * Hp Hq Hp2 Hq2 Hpneq.
 assert (Hop : Nat.Odd p). {
-  assert (H : p ≠ 2). {
-    intros H1; subst p.
-    now apply Nat.lt_irrefl in H2p.
-  }
-  specialize (odd_prime _ Hp H) as H1.
+  specialize (odd_prime _ Hp Hp2) as H1.
   apply Nat_eq_mod_1 in H1.
   destruct H1 as (H1, _).
   apply Nat.Div0.mod_divides in H1.
@@ -150,11 +146,7 @@ assert (Hop : Nat.Odd p). {
   now intros H1; subst p.
 }
 assert (Hoq : Nat.Odd q). {
-  assert (H : q ≠ 2). {
-    intros H1; subst q.
-    now apply Nat.lt_irrefl in H2q.
-  }
-  specialize (odd_prime _ Hq H) as H1.
+  specialize (odd_prime _ Hq Hq2) as H1.
   apply Nat_eq_mod_1 in H1.
   destruct H1 as (H1, _).
   apply Nat.Div0.mod_divides in H1.
