@@ -1,0 +1,612 @@
+Set Nested Proofs Allowed.
+From Stdlib Require Import Utf8 Arith.
+From Stdlib Require Import Sorting.Permutation.
+Require Import Misc Primes.
+
+Fixpoint nth_sqrt_mod_loop cnt n a p i :=
+  match cnt with
+  | 0 => None
+  | S cnt' =>
+      if i ^ n mod p =? a mod p then Some i
+      else nth_sqrt_mod_loop cnt' n a p (S i)
+  end.
+
+Definition sqrt_mod a p := nth_sqrt_mod_loop p 2 a p 0.
+Definition nth_sqrt_mod n a p := nth_sqrt_mod_loop p n a p 0.
+
+Definition Legendre_symbol a p :=
+  if p =? 2 then 1
+  else if a mod p =? 0 then 0
+  else
+    match sqrt_mod a p with
+    | Some _ => 1
+    | None => p - 1
+    end.
+
+Theorem sqrt_mod_loop_mod :
+  ∀ cnt n a p i,
+  nth_sqrt_mod_loop cnt n a p i = nth_sqrt_mod_loop cnt n (a mod p) p i.
+Proof.
+intros.
+revert i.
+induction cnt; intros; [ easy | cbn ].
+rewrite Nat.Div0.mod_mod.
+now rewrite IHcnt.
+Qed.
+
+Theorem sqrt_mod_mod : ∀ p a, sqrt_mod a p = sqrt_mod (a mod p) p.
+Proof.
+intros.
+apply sqrt_mod_loop_mod.
+Qed.
+
+Theorem eq_sqrt_mod_loop_Some :
+  ∀ cnt n a b p i,
+  nth_sqrt_mod_loop cnt n a p i = Some b
+  → i ≤ b < i + cnt ∧ b ^ n ≡ a mod p.
+Proof.
+intros * Hsm.
+revert i Hsm.
+induction cnt; intros; [ easy | ].
+cbn - [ "*" ] in Hsm.
+remember ((i ^ n) mod p =? a mod p) as e eqn:He.
+symmetry in He.
+destruct e; cycle 1. {
+  apply IHcnt in Hsm.
+  split; [ | easy ].
+  rewrite Nat.add_succ_r, <- Nat.add_succ_l.
+  split; [ flia Hsm | easy ].
+}
+injection Hsm; clear Hsm; intros; subst b.
+apply Nat.eqb_eq in He.
+split; [ flia | easy ].
+Qed.
+
+Theorem eq_sqrt_mod_loop_None :
+  ∀ cnt n a i p,
+  a ≢ 0 mod p
+  → nth_sqrt_mod_loop cnt n a p i = None
+  → ∀ b, i ≤ b < i + cnt → b ^ n ≢ a mod p.
+Proof.
+intros * Hap Hsm * Hib Hbb.
+symmetry in Hbb.
+revert i Hib Hsm.
+induction cnt; intros; [ flia Hib | ].
+cbn in Hsm.
+remember ((i ^ n) mod p =? a mod p) as sip eqn:Hsip.
+symmetry in Hsip.
+destruct sip; [ easy | ].
+destruct (Nat.eq_dec i b) as [Hib1| Hib1]; cycle 1. {
+  apply IHcnt in Hsm; [ easy | ].
+  split; [ | flia Hib ].
+  flia Hib Hib1.
+}
+subst i.
+clear Hib.
+rewrite Hbb in Hsip.
+now rewrite Nat.eqb_refl in Hsip.
+Qed.
+
+Theorem eq_sqrt_mod_Some :
+  ∀ a b p,
+  sqrt_mod a p = Some b
+  → b < p ∧ b² ≡ a mod p.
+Proof.
+intros * Hsm.
+now apply eq_sqrt_mod_loop_Some in Hsm.
+Qed.
+
+Theorem eq_sqrt_mod_None :
+  ∀ a p,
+  p ≠ 0
+  → sqrt_mod a p = None
+  → ∀ b, b² ≢ a mod p.
+Proof.
+intros * Hpz Hsm * Hbb.
+rewrite Nat.pow_2_r in Hbb.
+apply eq_sqrt_mod_loop_None with (b := b mod p) in Hsm. {
+  rewrite Nat.pow_2_r in Hsm.
+  rewrite Nat.Div0.mul_mod_idemp_l in Hsm.
+  rewrite Nat.Div0.mul_mod_idemp_r in Hsm.
+  easy.
+} {
+  intros H.
+  rewrite Nat.Div0.mod_0_l in H.
+  rewrite H in Hbb.
+  progress unfold sqrt_mod in Hsm.
+  destruct p; [ easy | ].
+  cbn - [ "mod" ] in Hsm.
+  remember (_ =? _) as x eqn:Hx.
+  symmetry in Hx.
+  destruct x; [ easy | ].
+  rewrite H in Hx.
+  apply Nat.eqb_neq in Hx.
+  now rewrite Nat.Div0.mod_0_l in Hx.
+}
+split; [ easy | ].
+now apply Nat.mod_upper_bound.
+Qed.
+
+Theorem permutation_map_if_lt :
+  ∀ n f,
+  (∀ i, i < n → f i < n)
+  → (∀ i j, i < j < n → f i ≠ f j)
+  → Permutation (List.seq 0 n)
+    (ListDef.map (λ i, if lt_dec i n then f i else i) (List.seq 0 n)).
+Proof.
+intros * Hn Hf.
+apply Permutation_sym.
+apply nat_bijection_Permutation. {
+  intros i Hi; cbn.
+  destruct (lt_dec i n) as [Hin| Hin]; [ | easy ].
+  now apply Hn.
+} {
+  intros i j Hfij; cbn in Hfij.
+  destruct (lt_dec i n) as [Hin| Hin]. {
+    destruct (lt_dec j n) as [Hjn| Hjn]. {
+      destruct (lt_dec i j) as [Hij| Hij]. {
+        now specialize (Hf i j (conj Hij Hjn)).
+      } {
+        apply Nat.nlt_ge in Hij.
+        destruct (Nat.eq_dec i j) as [Heij| Heij]; [ easy | ].
+        assert (H : j < i) by flia Hij Heij.
+        specialize (Hf j i (conj H Hin)).
+        now symmetry in Hfij.
+      }
+    } {
+      subst j.
+      now specialize (Hn _ Hin).
+    }
+  } {
+    destruct (lt_dec j n) as [Hjn| Hjn]; [ | easy ].
+    subst i.
+    now specialize (Hn _ Hjn).
+  }
+}
+Qed.
+
+Theorem all_different_exist : ∀ f n,
+  (∀ i, i < n → f i < n)
+  → (∀ i j, i < j < n → f i ≠ f j)
+  → ∀ a, a < n → ∃ x, f x = a.
+Proof.
+intros * Hn Hf * Han.
+remember (List.seq 0 n) as l eqn:Hl.
+set (g := λ i, if lt_dec i n then f i else i).
+assert (Hperm : Permutation l (List.map g l)). {
+  subst l g.
+  now apply permutation_map_if_lt.
+}
+specialize (Permutation_in a Hperm) as H1.
+assert (H : a ∈ l). {
+  subst l.
+  apply List.in_seq; flia Han.
+}
+specialize (H1 H); clear H.
+subst g; cbn in H1.
+apply List.in_map_iff in H1.
+destruct H1 as (x & Hax & Hx).
+destruct (lt_dec x n) as [Hxn| Hxn]; [ now exists x | now subst x ].
+Qed.
+
+(* https://proofwiki.org/wiki/Euler%27s_Criterion *)
+(* The congruence 𝑏𝑥≡𝑎(mod𝑝) has (modulo 𝑝) a unique solution 𝑏′ by Solution
+   of Linear Congruence. *)
+
+Theorem congruence_inverse_has_unique_solution :
+  ∀ p a,
+  0 < a < p
+  → ∀ b, coprimes b p
+  → ∃! b', (b' < p ∧ (b * b') mod p = a).
+Proof.
+intros * (Ha, Hap) * Hcp.
+assert (Hpz : p ≠ 0) by now intros H; subst p.
+apply Nat.neq_0_lt_0 in Ha.
+specialize (coprimes_all_different_multiples b p Hcp) as H1.
+specialize (not_forall_in_interv_imp_exist 1 (p - 1)) as H2.
+specialize (H2 (λ b', (b * b') mod p = a)).
+cbn in H2.
+assert (H : ∀ n, Decidable.decidable ((b * n) mod p = a)). {
+  intros n.
+  apply Nat.eq_decidable.
+}
+specialize (H2 H); clear H.
+assert (H : 1 ≤ p - 1). {
+  destruct p; [ easy | ].
+  destruct p; [ flia Ha Hap | flia ].
+}
+specialize (H2 H); clear H.
+assert (Hb' : ¬ (∀ b', (b * b') mod p ≠ a)). {
+  move H1 at bottom.
+  intros H3.
+  specialize (all_different_exist (λ b', (b' * b) mod p)) as H4.
+  cbn in H4.
+  specialize (H4 p).
+  assert (H : ∀ i, i < p → (i * b) mod p < p). {
+    intros.
+    now apply Nat.mod_upper_bound.
+  }
+  specialize (H4 H H1 a Hap); clear H.
+  destruct H4 as (b', Hb').
+  specialize (H3 b').
+  now rewrite Nat.mul_comm in H3.
+}
+assert (H : ¬ (∀ n : nat, 1 ≤ n ≤ p - 1 → (b * n) mod p ≠ a)). {
+  intros H; apply Hb'; intros b'.
+  destruct (Nat.eq_dec (b' mod p) 0) as [Hb'z| Hb'z]. {
+    rewrite <- Nat.Div0.mul_mod_idemp_r.
+    rewrite Hb'z, Nat.mul_0_r; cbn.
+    rewrite Nat.Div0.mod_0_l.
+    now apply Nat.neq_sym.
+  }
+  rewrite <- Nat.Div0.mul_mod_idemp_r.
+  apply H.
+  split; [ flia Hb'z | ].
+  rewrite Nat.sub_1_r.
+  apply Nat.lt_le_pred.
+  now apply Nat.mod_upper_bound.
+}
+specialize (H2 H); clear H.
+destruct H2 as (b', H2).
+exists (b' mod p).
+split. {
+  split; [ now apply Nat.mod_upper_bound | ].
+  now rewrite Nat.Div0.mul_mod_idemp_r.
+} {
+  intros x (Hxp & Hxa).
+  rewrite <- Nat.Div0.mul_mod_idemp_r in H2.
+  rewrite <- H2 in Hxa.
+  destruct (le_dec (b' mod p) x) as [Hbx| Hbx]. {
+    apply Nat_mul_mod_cancel_l in Hxa; [ | easy ].
+    rewrite Nat.Div0.mod_mod in Hxa.
+    rewrite <- Hxa.
+    now apply Nat.mod_small.
+  } {
+    apply Nat.nle_gt in Hbx.
+    symmetry in Hxa.
+    apply Nat_mul_mod_cancel_l in Hxa; [ | easy ].
+    rewrite Nat.Div0.mod_mod in Hxa.
+    symmetry in Hxa.
+    now rewrite Nat.mod_small in Hxa.
+  }
+}
+Qed.
+
+Theorem congruence_inverse_has_unique_different_solution :
+  ∀ p a,
+  prime p
+  → 0 < a < p
+  → (∀ n, 1 ≤ n ≤ p - 1 → n² mod p ≠ a)
+  → ∀ b, 1 ≤ b < p
+  → ∃! b' : nat, (b' < p ∧ (b * b') mod p = a ∧ b ≠ b').
+Proof.
+intros * Hp (Haz, Hap) Hnres.
+apply Nat.neq_0_lt_0 in Haz.
+intros b Hbp.
+assert (Hbb : ∀ b, 1 ≤ b < p → ∃! b', (b' < p ∧ (b * b') mod p = a)). {
+  clear b Hbp.
+  intros b Hb.
+  apply congruence_inverse_has_unique_solution; cycle 1. {
+    progress unfold coprimes.
+    rewrite Nat.gcd_comm.
+    now apply eq_gcd_prime_small_1.
+  }
+  split; [ | easy ].
+  now apply Nat.neq_0_lt_0.
+}
+specialize (Hbb b Hbp).
+destruct Hbb as (b' & (H1 & H2) & H3).
+exists b'.
+split. {
+  split; [ easy | ].
+  split; [ easy | ].
+  intros H; subst b'.
+  revert H2.
+  rewrite <- Nat.pow_2_r.
+  apply Hnres; flia Hbp.
+} {
+  intros x' (Hx1 & Hx2 & Hx3).
+  now apply H3.
+}
+Qed.
+
+(* https://proofwiki.org/wiki/Euler%27s_Criterion *)
+(* It follows that the residue classes {1,2,…,𝑝−1} modulo 𝑝 fall into
+   (𝑝−1)/2 pairs 𝑏,𝑏′ such that 𝑏𝑏′≡𝑎(mod𝑝). *)
+
+Theorem fact_pred_p_equiv :
+  ∀ p a,
+  prime p
+  → 0 < a < p
+  → (∀ n, 1 ≤ n ≤ p - 1 → n² mod p ≠ a)
+  → fact (p - 1) ≡ a ^ ((p - 1) / 2) mod p.
+Proof.
+intros * Hp (Haz, Hap) Hnres.
+assert
+  (Hbb : ∀ b, 1 ≤ b < p → ∃! b', (b' < p ∧ (b * b') mod p = a ∧ b ≠ b')). {
+  now apply congruence_inverse_has_unique_different_solution.
+}
+rewrite fact_eq_fold_left.
+(* very similar with eq_fold_left_mul_seq_2_prime_sub_3_1;
+   perhaps a common lemma could be useful *)
+specialize (List.seq_NoDup (p - 1) 1) as Hnd.
+remember (List.seq 1 (p - 1)) as l eqn:Hl.
+assert
+  (Hij : ∀ i, i ∈ l →
+   ∃j, j ∈ l ∧ i ≠ j ∧ (i * j) mod p = a ∧
+    ∀ k, k ∈ l → k ≠ i → (k * j) mod p ≠ a). {
+  intros i Hi.
+  specialize (Hbb i) as H1.
+  assert (H : 1 ≤ i < p). {
+    subst l.
+    apply List.in_seq in Hi; flia Hi.
+  }
+  specialize (H1 H); clear H.
+  destruct H1 as (j & (Hj1 & Hj2 & Hj3) & Hj4).
+  exists j.
+  split. {
+    subst l; apply List.in_seq.
+    split; [ | flia Hj1 ].
+    destruct j; [ | flia ].
+    symmetry in Hj2.
+    apply Nat.neq_0_lt_0 in Haz.
+    now rewrite Nat.mul_0_r, Nat.Div0.mod_0_l in Hj2.
+  }
+  split; [ easy | ].
+  split; [ easy | ].
+  intros k Hk Hki.
+  specialize (Hj4 k) as H1.
+  destruct (Nat.eq_dec ((i * k) mod p) a) as [Hka| Hka]. {
+    assert (H : k < p ∧ (i * k) mod p = a ∧ i ≠ k). {
+      apply Nat.neq_sym in Hki.
+      split; [ | easy ].
+      rewrite Hl in Hk.
+      apply List.in_seq in Hk.
+      flia Hk.
+    }
+    specialize (H1 H); clear H.
+    subst k.
+    rewrite <- Nat.pow_2_r.
+    apply Hnres.
+    split; [ | flia Hj1 ].
+    destruct j; [ | flia ].
+    symmetry in Hj2.
+    apply Nat.neq_0_lt_0 in Haz.
+    now rewrite Nat.mul_0_r, Nat.Div0.mod_0_l in Hj2.
+  } {
+    intros Hkj.
+    move Hj2 at bottom.
+    rewrite <- Hkj in Hj2.
+    destruct (le_dec k i) as [Hik| Hik]. {
+      apply Nat_mul_mod_cancel_r in Hj2. 2: {
+        rewrite Nat.gcd_comm.
+        apply eq_gcd_prime_small_1; [ easy | ].
+        split; [ | easy ].
+        destruct j; [ | flia ].
+        rewrite Nat.mul_0_r, Nat.Div0.mod_0_l in Hkj.
+        apply Nat.neq_0_lt_0 in Haz.
+        now symmetry in Hkj.
+      }
+      rewrite Nat.mod_small in Hj2. 2: {
+        rewrite Hl in Hi; apply List.in_seq in Hi; flia Hi.
+      }
+      rewrite Nat.mod_small in Hj2. 2: {
+        rewrite Hl in Hk; apply List.in_seq in Hk; flia Hk.
+      }
+      now symmetry in Hj2.
+    } {
+      apply Nat.nle_gt in Hik.
+      symmetry in Hj2.
+      apply Nat_mul_mod_cancel_r in Hj2. 2: {
+        rewrite Nat.gcd_comm.
+        apply eq_gcd_prime_small_1; [ easy | ].
+        split; [ | easy ].
+        destruct j; [ | flia ].
+        rewrite Nat.mul_0_r, Nat.Div0.mod_0_l in Hkj.
+        apply Nat.neq_0_lt_0 in Haz.
+        now symmetry in Hkj.
+      }
+      rewrite Hl in Hk; apply List.in_seq in Hk.
+      rewrite Nat.mod_small in Hj2; [ | flia Hk ].
+      rewrite Nat.mod_small in Hj2; [ flia Hj2 Hik | ].
+      rewrite Hl in Hi; apply List.in_seq in Hi; flia Hi.
+    }
+  }
+}
+clear Hbb Hnres.
+replace (p - 1) with (length l). 2: {
+  now subst l; rewrite List.length_seq.
+}
+clear Hl.
+remember (length l) as len eqn:Hlen; symmetry in Hlen.
+revert l Hnd Hij Hlen.
+induction len as (len, IHlen) using lt_wf_rec; intros.
+destruct len. {
+  apply List.length_zero_iff_nil in Hlen.
+  now rewrite Hlen.
+}
+destruct l as [| b l]; [ easy | ].
+specialize (Hij b (or_introl (eq_refl _))) as H1.
+destruct H1 as (i2 & Hi2l & Hai2 & Hai2p & Hk).
+destruct Hi2l as [Hi2l| Hi2l]; [ easy | ].
+specialize (List.in_split i2 l Hi2l) as (l1 & l2 & Hll).
+rewrite Hll.
+cbn - [ "/" ]; rewrite Nat.add_0_r.
+rewrite List.fold_left_app; cbn - [ "/" ].
+rewrite List_fold_left_mul_from_1.
+rewrite Nat.mul_shuffle0, Nat.mul_comm.
+rewrite List_fold_left_mul_from_1.
+do 2 rewrite Nat.mul_assoc.
+remember (i2 * 2) as x.
+rewrite <- Nat.mul_assoc; subst x.
+rewrite <- Nat.Div0.mul_mod_idemp_l.
+rewrite (Nat.mul_comm i2).
+rewrite Hai2p.
+replace (S len) with (len - 1 + 1 * 2). 2: {
+  destruct len; [ | flia ].
+  cbn in Hlen.
+  apply Nat.succ_inj in Hlen.
+  rewrite Hll in Hlen.
+  rewrite List.length_app in Hlen; cbn in Hlen.
+  now rewrite Nat.add_comm in Hlen.
+}
+rewrite Nat.div_add; [ | easy ].
+rewrite Nat.add_comm, Nat.pow_add_r, Nat.pow_1_r.
+rewrite <- Nat.Div0.mul_mod_idemp_r.
+rewrite <- (Nat.Div0.mul_mod_idemp_r _ (a ^ _)).
+f_equal; f_equal.
+rewrite Nat.mul_comm.
+rewrite List_fold_left_mul_assoc, Nat.mul_1_l.
+rewrite <- List.fold_left_app.
+apply (IHlen (len - 1)); [ flia | | | ]. 3: {
+  cbn in Hlen.
+  apply Nat.succ_inj in Hlen.
+  rewrite <- Hlen, Hll.
+  do 2 rewrite List.length_app.
+  cbn; flia.
+} {
+  apply List.NoDup_cons_iff in Hnd.
+  destruct Hnd as (_, Hnd).
+  rewrite Hll in Hnd.
+  now apply List.NoDup_remove_1 in Hnd.
+}
+intros i Hi.
+specialize (Hij i) as H1.
+assert (H : i ∈ b :: l). {
+  right; rewrite Hll.
+  apply List.in_app_or in Hi.
+  apply List.in_or_app.
+  destruct Hi as [Hi| Hi]; [ now left | now right; right ].
+}
+specialize (H1 H); clear H.
+destruct H1 as (j & Hjall & Hinj & Hijp & Hk').
+exists j.
+split. {
+  destruct Hjall as [Hjall| Hjall]. {
+    subst j; exfalso.
+    specialize (Hk' i2) as H1.
+    assert (H : i2 ∈ b :: l). {
+      now rewrite Hll; right; apply List.in_or_app; right; left.
+    }
+    specialize (H1 H); clear H.
+    assert (H : i2 ≠ i). {
+      intros H; subst i2.
+      move Hnd at bottom; move Hi at bottom.
+      apply List.NoDup_cons_iff in Hnd.
+      destruct Hnd as (_, Hnd).
+      rewrite Hll in Hnd.
+      now apply List.NoDup_remove_2 in Hnd.
+    }
+    specialize (H1 H).
+    now rewrite Nat.mul_comm in H1.
+  }
+  rewrite Hll in Hjall.
+  apply List.in_app_or in Hjall.
+  apply List.in_or_app.
+  destruct Hjall as [Hjall| Hjall]; [ now left | ].
+  destruct Hjall as [Hjall| Hjall]; [ | now right ].
+  subst j.
+  destruct (Nat.eq_dec b i) as [Hbi| Hbi]. {
+    subst i.
+    move Hnd at bottom.
+    apply List.NoDup_cons_iff in Hnd.
+    destruct Hnd as (Hnd, _).
+    exfalso; apply Hnd; clear Hnd.
+    rewrite Hll.
+    apply List.in_app_or in Hi.
+    apply List.in_or_app.
+    destruct Hi as [Hi| Hi]; [ now left | now right; right ].
+  }
+  now specialize (Hk' b (or_introl eq_refl) Hbi) as H2.
+}
+split; [ easy | ].
+split; [ easy | ].
+intros k Hkll Hki.
+apply Hk'; [ | easy ].
+right.
+rewrite Hll.
+apply List.in_app_or in Hkll.
+apply List.in_or_app.
+destruct Hkll as [Hkll| Hkll]; [ now left | now right; right ].
+Qed.
+
+Theorem Euler_criterion : ∀ p,
+  prime p
+  → ∀ a, Legendre_symbol a p ≡ a ^ ((p - 1) / 2) mod p.
+Proof.
+intros * Hp *.
+symmetry.
+destruct (Nat.eq_dec p 2) as [Hp2| Hp2]; [ now subst p | ].
+progress unfold Legendre_symbol.
+generalize Hp2; intros H.
+apply Nat.eqb_neq in H; rewrite H; clear H.
+destruct (Nat.eq_dec (a mod p) 0) as [Haz| Haz]. {
+  rewrite <- Nat_mod_pow_mod, Haz; cbn - [ "/" ].
+  destruct p; [ easy | ].
+  destruct p; [ easy | ].
+  destruct p; [ easy | ].
+  cbn - [ "/" "mod" ].
+  rewrite Nat.pow_0_l; cycle 1. {
+    intros H.
+    apply Nat.div_small_iff in H; [ | easy ].
+    flia H.
+  }
+  now rewrite Nat.Div0.mod_0_l.
+}
+rewrite <- Nat_mod_pow_mod.
+generalize Haz; intros H.
+apply Nat.eqb_neq in H; rewrite H; clear H.
+rewrite sqrt_mod_mod.
+remember (a mod p) as b eqn:Hb.
+symmetry in Hb.
+assert (Hap : b < p). {
+  subst b; apply Nat.mod_upper_bound.
+  now intros H; subst p.
+}
+clear a Hb; rename b into a.
+remember (sqrt_mod a p) as sm eqn:Hsm.
+symmetry in Hsm.
+destruct sm as [b| ]. {
+  apply eq_sqrt_mod_Some in Hsm.
+  cbn in Hsm.
+  rewrite Nat.mul_1_r in Hsm.
+  destruct Hsm as (Hb, Hsm).
+  rewrite <- Nat_mod_pow_mod.
+  rewrite <- Hsm.
+  rewrite Nat_mod_pow_mod.
+  rewrite <- Nat.pow_2_r.
+  rewrite <- Nat.pow_mul_r.
+  rewrite <- (proj2 (Nat.Div0.div_exact _ _)). {
+    rewrite Fermat_little; [ | easy | ]. {
+      symmetry.
+      apply Nat.mod_1_l.
+      now apply prime_ge_2.
+    }
+    split; [ | easy ].
+    destruct b; [ | now apply -> Nat.succ_le_mono ].
+    rewrite Nat.mod_small in Hsm; [ | easy ].
+    symmetry in Hsm.
+    now rewrite Nat.mod_small in Hsm.
+  }
+  specialize (odd_prime _ Hp Hp2) as H1.
+  specialize (Nat.div_mod p 2 (Nat.neq_succ_0 _)) as H2.
+  rewrite H1 in H2.
+  rewrite H2, Nat.add_sub, Nat.mul_comm.
+  apply Nat.Div0.mod_mul.
+} {
+  assert (Hpz : p ≠ 0) by flia Hap.
+  specialize (eq_sqrt_mod_None a p Hpz Hsm) as H3.
+  assert (Hzap : 0 < a < p) by flia Haz Hap.
+  specialize (fact_pred_p_equiv p a Hp Hzap) as H1.
+  assert (H : ∀ n, 1 ≤ n ≤ p - 1 → n² mod p ≠ a). {
+    intros n Hn.
+    rewrite <- (Nat.mod_small a p); [ | easy ].
+    apply H3.
+  }
+  specialize (H1 H); clear H.
+  rewrite <- H1.
+  rewrite (Nat.mod_small (p - 1)); [ | flia Hap ].
+  apply Wilson; [ | easy ].
+  now apply prime_ge_2.
+}
+Qed.
