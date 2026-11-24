@@ -38,25 +38,6 @@ f_equal; f_equal; f_equal.
 flia.
 Qed.
 
-(*
-Theorem fold_iter_seq_succ_l : ∀ A b len f (d : A),
-  Utils.iter_list (List.seq (S b) (S len - 1)) f d =
-    Utils.iter_seq (S b) (b + len) f d.
-Proof.
-intros.
-rewrite fold_iter_seq; cbn.
-now do 2 rewrite Nat.sub_0_r.
-Qed.
-
-Theorem fold_iter_seq_1 : ∀ A len f (d : A),
-  Utils.iter_list (List.seq 1 len) f d = Utils.iter_seq 1 len f d.
-Proof.
-intros.
-progress unfold Utils.iter_seq.
-now rewrite Nat_sub_succ_1.
-Qed.
-*)
-
 Theorem fold_iter_seq_1_succ_sub : ∀ A len f (d : A),
   Utils.iter_list (List.seq 1 (S len - 1)) f d = Utils.iter_seq 1 len f d.
 Proof. easy. Qed.
@@ -153,16 +134,6 @@ rewrite Nat.Div0.mod_add.
 now apply Nat.mod_small.
 Qed.
 
-(*
-Theorem Nat_eq_pow_1 : ∀ a b, a ^ b = 1 → a = 1 ∨ b = 0.
-Proof.
-intros * Hab.
-destruct b; [ now right | left ].
-cbn in Hab.
-now apply Nat.eq_mul_1 in Hab.
-Qed.
-*)
-
 Theorem Nat_eq_mod_1 : ∀ a b, a mod b = 1 ↔ (a - 1) mod b = 0 ∧ a ≠ 0 ∧ b ≠ 1.
 Proof.
 intros.
@@ -241,16 +212,6 @@ specialize (Nat.mod_upper_bound b 2 (Nat.neq_succ_0 _)) as H1.
 rewrite Hb2 in H1.
 flia H1.
 Qed.
-
-(*
-Theorem Nat_add_if_distr_l :
-  ∀ a (b : bool) c d, (a + if b then c else d) = if b then a + c else a + d.
-Proof. now intros; destruct b. Qed.
-
-Theorem Nat_mul_if_distr_l :
-  ∀ a (b : bool) c d, (a * if b then c else d) = if b then a * c else a * d.
-Proof. now intros; destruct b. Qed.
-*)
 
 Theorem Nat_eq_mod_exists : ∀ a b c,
   a mod b = c ↔ (∃ k, a = k * b + c) ∧ (b = 0 ∨ c < b).
@@ -1225,18 +1186,6 @@ Qed.
 
 Definition is_quadratic_residue a p := Legendre_symbol a p =? 1.
 
-(*
-Compute (let p := 29 in List.map (λ a, (sqrt_mod a p, a)) (List.seq 0 p)).
-
-Compute (let n := 3 in map (λ p, (p, List.filter (λ a, match nth_sqrt_mod n a p with Some _ => true | None => false end) (List.seq 1 (p - 1)))) (List.seq 1 20)).
-
-1,2,3,5,6,10,11,15,17
-
-Compute (let p := 29 in List.filter (λ a, match sqrt_mod a p with Some _ => true | None => false end) (List.seq 1 (p - 1))).
-Compute (let p := 29 in List.filter (λ a, (nb_of_mult_gt_half a p mod 2 =? 0)) (seq 1 (p - 1))).
-Compute (let p := 29 in List.filter (λ a, is_quadratic_residue a p) (seq 1 p)).
-*)
-
 Theorem abs_all_different_multiples : ∀ p,
   prime p
   → ∀ a, 1 ≤ a < p
@@ -1884,148 +1833,6 @@ do 4 apply Nat.succ_lt_mono in H1.
 easy.
 Qed.
 
-(*
-Theorem Nat_div_less_small : ∀ n a b,
-  n * b ≤ a < (n + 1) * b
-  → a / b = n.
-Proof.
-intros * Hab.
-assert (Hb : b ≠ 0). {
-  now intros Hb; rewrite Hb, (Nat.mul_comm (n + 1)) in Hab.
-}
-replace a with (a - n * b + n * b) at 1 by now apply Nat.sub_add.
-rewrite Nat.div_add; [ | easy ].
-replace n with (0 + n) at 3 by easy; f_equal.
-apply Nat.div_small.
-apply Nat.add_lt_mono_r with (p := n * b).
-rewrite Nat.add_comm in Hab; cbn in Hab.
-now rewrite Nat.sub_add.
-Qed.
-
-Theorem Nat_eq_mul_2_div_mod_to_bool :
-  ∀ a n,
-  n ≠ 0
-  → (2 * a / n) mod 2 = Nat.b2n ((n - 1) / 2 <? a mod n).
-Proof.
-intros * Hnz.
-remember ((n - 1) / 2 <? a mod n) as b eqn:Hb; symmetry in Hb.
-destruct b; cbn - [ "*" "mod" ]. {
-  apply Nat.ltb_lt in Hb.
-  specialize (Nat.div_mod a n Hnz) as H1.
-  rewrite H1.
-  rewrite Nat.mul_add_distr_l.
-  rewrite (Nat.mul_comm n), Nat.mul_assoc.
-  rewrite Nat.div_add_l; [ | easy ].
-  rewrite Nat_mod_add_l_mul_l.
-  apply Nat_eq_mod_1.
-  split. {
-    apply Nat.Lcm0.mod_divide.
-    rewrite (Nat_div_less_small 1); [ now exists 0 | ].
-    rewrite Nat.mul_1_l.
-    cbn - [ "*" ].
-    split. {
-      apply Nat_div_lt_mul in Hb; [ | easy ].
-      apply Nat.lt_sub_lt_add_l in Hb.
-      now apply -> Nat.lt_succ_r in Hb.
-    }
-    apply Nat.mul_lt_mono_pos_l; [ easy | ].
-    now apply Nat.mod_upper_bound.
-  }
-  split; [ | easy ].
-  intros H2.
-  apply Nat.div_small_iff in H2; [ | easy ].
-  apply Nat.nle_gt in H2.
-  apply H2; clear H2.
-  apply Nat_div_lt_mul in Hb; [ | easy ].
-  apply Nat.lt_sub_lt_add_l in Hb.
-  now apply -> Nat.lt_succ_r in Hb.
-} {
-  apply Nat.ltb_ge in Hb.
-  apply Nat.Lcm0.mod_divide.
-  specialize (Nat.div_mod a n Hnz) as H1.
-  rewrite H1.
-  rewrite Nat.mul_add_distr_l.
-  rewrite (Nat.mul_comm n), Nat.mul_assoc.
-  rewrite Nat.div_add_l; [ | easy ].
-  apply Nat.divide_add_r; [ now apply Nat.divide_mul_l | ].
-  rewrite Nat.div_small; [ now exists 0 | ].
-  apply (Nat.mul_le_mono_l _ _ 2) in Hb.
-  eapply Nat.le_lt_trans; [ apply Hb | ].
-  eapply Nat.le_lt_trans; [ apply Nat.Div0.mul_div_le | ].
-  flia Hnz.
-}
-Qed.
-
-Theorem fold_left_op_fun_from_d : ∀ {T A} d op a l (f : A → _)
-  (op_d_l : ∀ x, op d x = x)
-  (op_d_r : ∀ x, op x d = x)
-  (op_assoc : ∀ a b c, op a (op b c) = op (op a b) c),
-  List.fold_left (λ (c : T) i, op c (f i)) l a =
-  op a (List.fold_left (λ (c : T) i, op c (f i)) l d).
-Proof.
-intros.
-revert a.
-induction l as [| x l]; intros; [ symmetry; apply op_d_r | cbn ].
-rewrite IHl; symmetry; rewrite IHl.
-rewrite op_d_l.
-apply op_assoc.
-Qed.
-
-Theorem iter_list_cons : ∀ A B d op (a : B) la f
-  (op_d_l : ∀ x, op d x = x)
-  (op_d_r : ∀ x, op x d = x)
-  (op_assoc : ∀ a b c, op a (op b c) = op (op a b) c),
-  Utils.iter_list (a :: la) (λ (c : A) i, op c (f i)) d =
-  op (f a) (Utils.iter_list la (λ (c : A) i, op c (f i)) d).
-Proof.
-intros.
-progress unfold Utils.iter_list; cbn.
-rewrite op_d_l.
-now apply (fold_left_op_fun_from_d d).
-Qed.
-
-(*
-Theorem summation_list_cons : ∀ A (a : A) la f,
-  ∑ (i ∈ a :: la), f i = f a + ∑ (i ∈ la), f i.
-Proof.
-intros.
-apply iter_list_cons.
-apply Nat.add_0_l.
-apply Nat.add_0_r.
-apply Nat.add_assoc.
-Qed.
-
-Theorem product_list_cons : ∀ A (a : A) la f,
-  ∏ (i ∈ a :: la), f i = f a * ∏ (i ∈ la), f i.
-Proof.
-intros.
-apply iter_list_cons.
-apply Nat.mul_1_l.
-apply Nat.mul_1_r.
-apply Nat.mul_assoc.
-Qed.
-*)
-
-Theorem Nat_pow_summation_r :
-  ∀ a b e f, a ^ (∑ (i = b, e), f i) = ∏ (i = b, e), a ^ f i.
-Proof.
-intros.
-progress unfold Utils.iter_seq.
-remember (S e - b) as l eqn:Hl; clear Hl.
-revert b.
-induction l as [| c]; intros; [ easy | ].
-cbn.
-rewrite rngl_summation_list_cons.
-rewrite rngl_product_list_cons.
-rewrite Nat.pow_add_r.
-rewrite nat_pow_of_rngl_power.
-progress unfold rngl_mul.
-cbn.
-progress f_equal.
-apply IHc.
-Qed.
-*)
-
 Theorem List_eq_length_filter_summation :
   ∀ l f,
   List.length (List.filter f l) =
@@ -2091,91 +1898,6 @@ replace Nat.mul with rngl_mul by easy.
 progress f_equal.
 now rewrite nat_ltb_rngl_ltb.
 Qed.
-
-(*
-Theorem Eisenstein_lemma' :
-  ∀ a p, prime p → coprimes a p →
-  nb_of_mult_gt_half a p ≡ (∑ (k = 1, (p - 1) / 2), 2 * k * a / p) mod 2.
-Proof.
-intros * Hp Hap.
-assert (Hpz : p ≠ 0) by now intros H; subst p.
-progress unfold coprimes in Hap.
-remember ((p - 1) / 2) as h eqn:Hh.
-move h before p.
-rewrite summation_mod_idemp.
-erewrite rngl_summation_eq_compat; cycle 1. {
-  intros i Hi.
-  rewrite <- Nat.mul_assoc.
-  now rewrite (Nat_eq_mul_2_div_mod_to_bool _ _ Hpz).
-}
-cbn - [ nb_of_mult_gt_half "<?" "/" "mod" ].
-rewrite Hh.
-rewrite eq_nb_of_mult_gt_half_summation.
-erewrite rngl_summation_eq_compat; [ easy | ].
-intros i Hi.
-now rewrite <- nat_ltb_rngl_ltb.
-Qed.
-
-Theorem summation_to_twice_plus_1 :
-  ∀ e f,
-  ∑ (i = 1, e), f (2 * i) =
-  ∑ (i = 1, 2 * e + 1), if i mod 2 =? 0 then f i else 0.
-Proof.
-intros.
-induction e; cbn - [ "*" "mod" rngl_zero rngl_add ]. {
-  rewrite rngl_summation_empty; [ | easy ].
-  now rewrite rngl_summation_only_one.
-}
-rewrite rngl_summation_split_last; [ | now apply -> Nat.succ_le_mono ].
-rewrite rngl_summation_succ_succ.
-erewrite rngl_summation_eq_compat; cycle 1. {
-  intros i Hi.
-  now rewrite Nat_sub_succ_1.
-}
-cbn - [ "*" "mod" ].
-rewrite IHe.
-symmetry.
-rewrite rngl_summation_split_last; cycle 1. {
-  rewrite Nat.add_1_r.
-  now apply -> Nat.succ_le_mono.
-}
-rewrite (rngl_summation_shift 1); cycle 1. {
-  split; [ now apply -> Nat.succ_le_mono | ].
-  rewrite Nat.add_1_r.
-  now do 2 apply -> Nat.succ_le_mono.
-}
-rewrite Nat_sub_succ_1.
-rewrite Nat.add_sub.
-rewrite Nat_mod_add_l_mul_l.
-rewrite Nat.mod_small; [ | now apply -> Nat.succ_lt_mono ].
-cbn - [ "*" "mod" ].
-rewrite Nat.add_0_r.
-rewrite Nat.mul_succ_r.
-rewrite rngl_summation_split_last; cycle 1. {
-  rewrite Nat.add_comm; cbn.
-  now apply -> Nat.succ_le_mono.
-}
-rewrite Nat.sub_0_r.
-rewrite (rngl_summation_shift 1); cycle 1. {
-  split; [ now apply -> Nat.succ_le_mono | ].
-  rewrite Nat.add_comm; cbn.
-  now do 2 apply -> Nat.succ_le_mono.
-}
-rewrite Nat_sub_succ_1.
-rewrite <- Nat.add_sub_assoc; cycle 1. {
-  now apply -> Nat.succ_le_mono.
-}
-rewrite Nat_sub_succ_1.
-rewrite Nat_mod_add_l_mul_l.
-rewrite Nat.Div0.mod_same.
-cbn - [ "*" "mod" "/" "-" ].
-f_equal; [ | now rewrite Nat.mul_succ_r ].
-apply rngl_summation_eq_compat.
-intros i Hi.
-rewrite Nat.sub_0_r.
-now rewrite Nat_sub_succ_1.
-Qed.
-*)
 
 Theorem Nat_inj_succ_mod_le : ∀ a b c, a ≤ b → S a ≡ S b mod c → a ≡ b mod c.
 Proof.
@@ -2248,165 +1970,6 @@ split; intros Hab; cycle 1. {
   now apply Nat_inj_succ_mod in Hab.
 }
 Qed.
-
-(*
-Theorem Nat_add_sub_eq_l_mod :
-  ∀ a b c d, b ≤ a → b + c ≡ a mod d → a - b ≡ c mod d.
-Proof.
-intros * Hba Hbca.
-apply (Nat_add_cancel_r_mod _ _ b).
-rewrite Nat.sub_add; [ | easy ].
-now symmetry; rewrite Nat.add_comm.
-Qed.
-
-Theorem Nat_min_if_then_else :
-  ∀ a b, min a b = if a <=? b then a else b.
-Proof.
-intros.
-remember (a <=? b) as ab eqn:Hab; symmetry in Hab.
-destruct ab. {
-  apply Nat.leb_le in Hab.
-  now apply Nat.min_l.
-} {
-  apply Nat.leb_gt, Nat.lt_le_incl in Hab.
-  now apply Nat.min_r.
-}
-Qed.
-
-Theorem Nat_leb_sub_r : ∀ a b c, (c ≤ b) → (a <=? b - c) = (a + c <=? b).
-Proof.
-intros * Hcb.
-remember (_ <=? _) as x eqn:Hx; symmetry in Hx.
-symmetry.
-destruct x. {
-  apply Nat.leb_le in Hx.
-  apply Nat.leb_le.
-  apply (Nat.add_le_mono_r _ _ c) in Hx.
-  now rewrite Nat.sub_add in Hx.
-} {
-  apply Bool.not_true_iff_false in Hx.
-  apply Bool.not_true_iff_false.
-  intros H; apply Hx; clear Hx; rename H into Hx.
-  apply Nat.leb_le in Hx.
-  apply Nat.leb_le.
-  now apply Nat.le_add_le_sub_r.
-}
-Qed.
-
-Theorem Nat_leb_mul_l : ∀ a b c,
-  a ≠ 0 → Nat.divide a c → (a * b <=? c) = (b <=? c / a).
-Proof.
-intros * Haz Hac.
-remember (_ <=? _) as x eqn:Hx; symmetry in Hx.
-symmetry.
-destruct x. {
-  apply Nat.leb_le in Hx.
-  apply Nat.leb_le.
-  apply (Nat.mul_le_mono_pos_l _ _ a). {
-    now apply Nat.neq_0_lt_0.
-  }
-  rewrite <- Nat.Lcm0.divide_div_mul_exact; [ | easy ].
-  now rewrite (Nat.mul_comm _ c), Nat.div_mul.
-} {
-  apply Bool.not_true_iff_false in Hx.
-  apply Bool.not_true_iff_false.
-  intros H; apply Hx; clear Hx; rename H into Hx.
-  apply Nat.leb_le in Hx.
-  apply Nat.leb_le.
-  apply (Nat.mul_le_mono_pos_l _ _ a) in Hx; cycle 1. {
-    now apply Nat.neq_0_lt_0.
-  }
-  rewrite <- Nat.Lcm0.divide_div_mul_exact in Hx; [ | easy ].
-  now rewrite (Nat.mul_comm _ c), Nat.div_mul in Hx.
-}
-Qed.
-
-Theorem Nat_leb_neq_ltb : ∀ a b, a ≠ b → (a <=? b) = (a <? b).
-Proof.
-intros * Hab.
-remember (_ <? _) as x eqn:Hx; symmetry in Hx.
-destruct x. {
-  apply Nat.ltb_lt in Hx.
-  apply Nat.leb_le.
-  now apply Nat.lt_le_incl.
-} {
-  apply Bool.not_true_iff_false in Hx.
-  apply Bool.not_true_iff_false.
-  intros H; apply Hx; clear Hx; rename H into Hx.
-  apply Nat.leb_le in Hx.
-  apply Nat.ltb_lt.
-  now apply Nat_le_neq_lt.
-}
-Qed.
-
-Theorem Nat_ltb_leb_pred: ∀ a b, b ≠ 0 → (a <? b) = (a <=? Nat.pred b).
-Proof.
-intros * Hbz.
-remember (_ <=? _) as x eqn:Hx; symmetry in Hx.
-destruct x. {
-  apply Nat.leb_le in Hx.
-  apply Nat.ltb_lt.
-  apply (Nat.le_lt_trans _ (Nat.pred b)); [ easy | ].
-  now apply Nat.lt_pred_l.
-} {
-  apply Bool.not_true_iff_false in Hx.
-  apply Bool.not_true_iff_false.
-  intros H; apply Hx; clear Hx; rename H into Hx.
-  apply Nat.ltb_lt in Hx.
-  apply Nat.leb_le.
-  now apply Nat.lt_le_pred.
-}
-Qed.
-
-Theorem abs_eq_min : ∀ a b, Nat.Odd b → abs a b = min a (b - a).
-Proof.
-intros * Hb.
-progress unfold abs.
-rewrite Nat_min_if_then_else.
-remember (a <=? _) as x eqn:Hx; symmetry in Hx.
-remember (a <=? _) as y eqn:Hy in |-*; symmetry in Hy.
-destruct x, y; [ easy | | | easy ]. {
-  apply Nat.leb_le in Hx.
-  apply Nat.leb_nle in Hy.
-  exfalso; apply Hy; clear Hy.
-  apply Nat.le_add_le_sub_l.
-  apply (Nat.mul_le_mono_pos_r _ _ 2) in Hx; [ | easy ].
-  rewrite <- Nat_mul_2_l, Nat.mul_comm.
-  eapply Nat.le_trans; [ apply Hx | ].
-  rewrite Nat.mul_comm.
-  eapply Nat.le_trans.
-  apply Nat.Div0.mul_div_le.
-  apply Nat.le_sub_l.
-} {
-  apply Nat.leb_le in Hy.
-  apply Nat.leb_gt in Hx.
-  apply (Nat.add_le_mono_r _ _ a) in Hy.
-  destruct (le_dec a b) as [Hab| Hab]. {
-    rewrite Nat.sub_add in Hy; [ | easy ].
-    rewrite <- Nat_mul_2_l, Nat.mul_comm in Hy.
-    apply (Nat.mul_lt_mono_pos_l 2) in Hx; [ | easy ].
-    rewrite <- Nat.Lcm0.divide_div_mul_exact in Hx; cycle 1. {
-      destruct Hb as (m, Hm).
-      rewrite Hm, Nat.add_sub.
-      apply Nat.divide_factor_l.
-    }
-    rewrite Nat.mul_comm, Nat.div_mul in Hx; [ | easy ].
-    apply Nat.lt_sub_lt_add_l in Hx.
-    apply -> Nat.lt_succ_r in Hx.
-    apply Nat.le_antisymm in Hx; [ | now rewrite Nat.mul_comm ].
-    rewrite <- Hx.
-    rewrite Nat_mul_2_l.
-    apply Nat.add_sub.
-  }
-  apply Nat.nle_gt in Hab.
-  rewrite (proj2 (Nat.sub_0_le b a)) in Hy; [ | now apply Nat.lt_le_incl ].
-  cbn in Hy.
-  apply Nat.le_add_le_sub_l in Hy.
-  rewrite Nat.sub_diag in Hy.
-  now apply Nat.le_0_r in Hy; subst a.
-}
-Qed.
-*)
 
 Theorem summation_list_permut :
   ∀ (la lb : list nat) f,
@@ -3398,28 +2961,3 @@ rewrite Nat.mul_succ_r.
 apply Nat_le_mul_div_add.
 now apply Nat.neq_0_lt_0.
 Qed.
-
-(*
-Theorem Nat_even_mod_2 : ∀ x, Nat.even (x mod 2) = Nat.even x.
-Proof.
-intros.
-remember (x mod 2) as x2 eqn:Hx2.
-symmetry in Hx2.
-symmetry.
-destruct x2. {
-  apply Nat.Div0.mod_divides in Hx2.
-  destruct Hx2 as (c, Hx2); subst x.
-  apply Nat.even_even.
-}
-destruct x2. {
-  apply Nat_eq_mod_exists in Hx2.
-  destruct Hx2 as (Hx2 & _).
-  destruct Hx2 as (c, Hx2); subst x.
-  rewrite Nat.mul_comm.
-  apply Nat.even_odd.
-}
-specialize (Nat.mod_upper_bound x 2 (Nat.neq_succ_0 _))  as H1.
-rewrite Hx2 in H1.
-now do 2 apply Nat.succ_lt_mono in H1.
-Qed.
-*)
