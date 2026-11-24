@@ -6,10 +6,6 @@ Require Import RingLike.Core.
 Require Import RingLike.IterAdd.
 Require Import RingLike.Nat_algebra.
 
-(*
-Check Euler_criterion.
-Check Gauss_lemma.
-*)
 Check quadratic_reciprocity_2.
 
 Theorem mul_div_le_pred_div_2 :
@@ -90,11 +86,11 @@ Theorem mul_div_eq_mul_sub_1_div :
   ∀ p q x,
   prime p
   → coprimes p q
-  → p ≠ 0
   → 1 ≤ x ≤ (p - 1) / 2
   → x * q / p = (x * q - 1) / p.
 Proof.
-intros * Hp  Hcpq Hpz Hx.
+intros * Hp Hcpq Hx.
+assert (Hpz : p ≠ 0) by now intros H; subst p.
 specialize (Nat.div_mod (x * q) p) as H5.
 rewrite H5; [ | now intros H; subst p ].
 rewrite <- Nat.add_sub_assoc; cycle 1. {
