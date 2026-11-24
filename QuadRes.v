@@ -163,10 +163,8 @@ assert (Hcpq : coprimes p q). {
 }
 assert (Hcqp : coprimes q p). {
   progress unfold coprimes.
-  now rewrite Nat.gcd_comm.
+  now apply eq_primes_gcd_1.
 }
-assert (Hpz : p ≠ 0) by now intros H; rewrite H in Hp.
-assert (Hqz : q ≠ 0) by now intros H; rewrite H in Hq.
 specialize (Gauss_lemma p q Hq Hcpq _ eq_refl) as H1.
 specialize (Gauss_lemma q p Hp Hcqp _ eq_refl) as H2.
 specialize (Eisenstein_lemma p q Hcpq Hop Hoq) as H3.
@@ -226,7 +224,8 @@ erewrite rngl_summation_eq_compat in Hr; cycle 1. {
       rewrite Nat_mul_2_l.
       apply (Nat.lt_le_trans _ p); [ | apply Nat.le_add_r ].
       apply Nat.sub_lt; [ | easy ].
-      now apply Nat.neq_0_lt_0.
+      apply Nat.neq_0_lt_0.
+      now intros H; subst p.
     }
     replace Nat.mul with rngl_mul by easy.
     easy.
@@ -248,7 +247,8 @@ subst r; symmetry in Hr.
 erewrite rngl_summation_eq_compat in Hr; cycle 1. {
   intros x Hx.
   rewrite summation_b2n_mul_lt; cycle 1. {
-    now apply Nat.neq_0_lt_0.
+    apply Nat.neq_0_lt_0.
+    now intros H; subst p.
   } {
     now apply mul_div_le_pred_div_2.
   }
@@ -266,7 +266,8 @@ rewrite rngl_summation_summation_exch in Hr.
 erewrite rngl_summation_eq_compat in Hr; cycle 1. {
   intros x Hx.
   rewrite summation_b2n_mul_lt; cycle 1. {
-    now apply Nat.neq_0_lt_0.
+    apply Nat.neq_0_lt_0.
+    now intros H; subst q.
   } {
     now apply mul_div_le_pred_div_2.
   }
@@ -283,23 +284,27 @@ rewrite <- Hspq in Hr.
 replace rngl_add with Nat.add in Hr by easy.
 rewrite Nat_sub_1_pow_mod; cycle 1. {
   apply Nat_le_neq_lt.
-  now apply Nat.neq_0_lt_0.
+  apply Nat.neq_0_lt_0.
+  now intros H; subst q.
   now intros H; subst q.
 }
 rewrite Nat_sub_1_pow_mod; cycle 1. {
   apply Nat_le_neq_lt.
-  now apply Nat.neq_0_lt_0.
+  apply Nat.neq_0_lt_0.
+  now intros H; subst p.
   now intros H; subst p.
 }
 rewrite H3, H4.
 rewrite <- Nat_sub_1_pow_mod; cycle 1. {
   apply Nat_le_neq_lt.
-  now apply Nat.neq_0_lt_0.
+  apply Nat.neq_0_lt_0.
+  now intros H; subst q.
   now intros H; subst q.
 }
 rewrite <- Nat_sub_1_pow_mod; cycle 1. {
   apply Nat_le_neq_lt.
-  now apply Nat.neq_0_lt_0.
+  apply Nat.neq_0_lt_0.
+  now intros H; subst p.
   now intros H; subst p.
 }
 rewrite Nat_sub_1_pow_mod_eq_even; cycle 1. {
