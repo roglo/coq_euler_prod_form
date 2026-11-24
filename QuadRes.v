@@ -6,8 +6,10 @@ Require Import RingLike.Core.
 Require Import RingLike.IterAdd.
 Require Import RingLike.Nat_algebra.
 
+(*
 Check Euler_criterion.
 Check Gauss_lemma.
+*)
 Check quadratic_reciprocity_2.
 
 Theorem mul_div_le_pred_div_2 :
@@ -130,15 +132,11 @@ apply Nat.le_sub_l.
 Qed.
 
 Theorem quadratic_reciprocity :
-  ∀ p q, prime p → prime q → 2 < p < q →
+  ∀ p q, prime p → prime q → 2 < p → 2 < q → p ≠ q →
   is_quadratic_residue p q = is_quadratic_residue q p ↔
     p mod 4 = 1 ∨ q mod 4 = 1.
 Proof.
-intros * Hp Hq Hpq.
-assert (H2p : 2 < p) by easy.
-assert (H2q : 2 < q) by flia Hpq.
-assert (Hpneq : p ≠ q) by flia Hpq.
-clear Hpq.
+intros * Hp Hq H2p H2q Hpneq.
 assert (Hop : Nat.Odd p). {
   assert (H : p ≠ 2). {
     intros H1; subst p.
