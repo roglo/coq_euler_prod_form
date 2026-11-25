@@ -5,7 +5,7 @@ Require Import RingLike.Core.
 Require Import RingLike.IterAdd.
 Require Import RingLike.Nat_algebra.
 
-Require Import Misc Primes GaussLemma EisensteinLemma QuadRes_1.
+Require Import Misc Primes GaussLemma EisensteinLemma QuadRes_2.
 
 Theorem mul_div_le_pred_div_2 :
   ∀ p q x, Nat.Odd p → Nat.Odd q → x ≤ (q - 1) / 2 → p * x / q ≤ (p - 1) / 2.
