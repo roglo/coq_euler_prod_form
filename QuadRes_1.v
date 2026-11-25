@@ -1,12 +1,9 @@
 Set Nested Proofs Allowed.
-From Stdlib Require Import Utf8 Arith(* Init.Nat*).
+From Stdlib Require Import Utf8 Arith.
 
 Require Import RingLike.Core.
 Require Import RingLike.IterAdd.
 Require Import RingLike.Nat_algebra.
-(*
-Require Import RingLike.PermutationFun.
-*)
 
 Require Import Misc Primes EulerCriterion GaussLemma.
 
