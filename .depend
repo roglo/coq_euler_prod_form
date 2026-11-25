@@ -1,5 +1,6 @@
 EisensteinLemma.vo EisensteinLemma.glob EisensteinLemma.v.beautified EisensteinLemma.required_vo: EisensteinLemma.v EulerCriterion.vo GaussLemma.vo Misc.vo Primes.vo
 EulerCriterion.vo EulerCriterion.glob EulerCriterion.v.beautified EulerCriterion.required_vo: EulerCriterion.v Misc.vo Primes.vo
+FermatTwoSquares.vo FermatTwoSquares.glob FermatTwoSquares.v.beautified FermatTwoSquares.required_vo: FermatTwoSquares.v Misc.vo Primes.vo
 Formula.vo Formula.glob Formula.v.beautified Formula.required_vo: Formula.v Misc.vo Primes.vo
 FourSquareEuler.vo FourSquareEuler.glob FourSquareEuler.v.beautified FourSquareEuler.required_vo: FourSquareEuler.v
 FourSquareLag.vo FourSquareLag.glob FourSquareLag.v.beautified FourSquareLag.required_vo: FourSquareLag.v FourSquareEuler.vo Misc.vo Pigeonhole.vo Primes.vo

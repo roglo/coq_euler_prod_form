@@ -1,4 +1,4 @@
-TARGET=Formula.vo Totient.vo QuadRes.vo Ring2.vo Rsummation.vo Rpolynomial2.vo FourSquareEuler.vo FourSquareLag.vo
+TARGET=Formula.vo Totient.vo QuadRes.vo Ring2.vo Rsummation.vo Rpolynomial2.vo FourSquareEuler.vo FourSquareLag.vo FermatTwoSquares.vo
 FILESFORDEP=`LC_ALL=C ls *.v`
 
 all: $(TARGET)
