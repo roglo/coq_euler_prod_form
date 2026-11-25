@@ -36,35 +36,14 @@ destruct lb as [| (b, n)]; [ easy | ].
 now destruct (eq a b).
 Qed.
 
-Theorem prime_decomp_prod : ∀ n, n ≠ 0 → ∏ (p ∈ prime_decomp n), p = n.
+Theorem prime_decomp_prod_all : ∀ n, n ≠ 0 → ∏ (p ∈ prime_decomp n), p = n.
 Proof.
 intros * Hnz.
-remember (prime_decomp n) as pd eqn:Hpd.
-symmetry in Hpd.
-revert n Hnz Hpd.
-induction pd as [| p]; intros. {
-  rewrite rngl_product_list_empty; [ | easy ].
-  apply prime_decomp_nil_iff in Hpd.
-  now destruct Hpd.
-}
-rewrite rngl_product_list_cons.
-specialize (proj1 (prime_decomp_in_iff n p)) as H1.
-rewrite Hpd in H1.
-specialize (H1 (or_introl eq_refl)).
-destruct H1 as (_ & H1 & H2).
-rewrite (IHpd (n / p)). {
-  replace rngl_mul with Nat.mul by easy.
-  rewrite <- Nat.Lcm0.divide_div_mul_exact; [ | easy ].
-  rewrite Nat.mul_comm.
-  apply Nat.div_mul.
-  now intros H; subst p.
-} {
-  intros H3.
-  apply Nat.div_small_iff in H3; [ | now intros H4; subst p ].
-  apply Nat.divide_pos_le in H2; [ | now apply Nat.neq_0_lt_0 ].
-  now apply Nat.nle_gt in H3.
-}
-now apply prime_decomp_cons.
+specialize (prime_decomp_prod n Hnz) as H1.
+progress unfold Utils.iter_list.
+replace rngl_mul with Nat.mul by easy.
+replace rngl_one with 1 by easy.
+easy.
 Qed.
 
 (* to be completed
