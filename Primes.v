@@ -132,7 +132,7 @@ Theorem exist_prime_divisor : ∀ n, 2 ≤ n →
   ∃ d, prime d ∧ Nat.divide d n.
 Proof.
 intros * Hn.
-induction n as (n, IHn) using (well_founded_ind lt_wf).
+induction n as (n, IHn) using lt_wf_rec.
 remember (is_prime n) as b eqn:Hb; symmetry in Hb.
 destruct b; [ now exists n | ].
 apply Bool.not_true_iff_false in Hb.
