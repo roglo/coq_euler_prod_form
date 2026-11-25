@@ -5,7 +5,7 @@ Require Import RingLike.Core.
 Require Import RingLike.IterAdd.
 Require Import RingLike.Nat_algebra.
 
-Require Import Misc Primes GaussLemma QuadRes_1.
+Require Import Misc Primes GaussLemma EisensteinLemma QuadRes_1.
 
 Check quadratic_reciprocity_2.
 
