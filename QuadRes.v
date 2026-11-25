@@ -7,8 +7,6 @@ Require Import RingLike.Nat_algebra.
 
 Require Import Misc Primes GaussLemma EisensteinLemma QuadRes_1.
 
-Check quadratic_reciprocity_2.
-
 Theorem mul_div_le_pred_div_2 :
   ∀ p q x, Nat.Odd p → Nat.Odd q → x ≤ (q - 1) / 2 → p * x / q ≤ (p - 1) / 2.
 Proof.
@@ -126,6 +124,175 @@ apply (Nat.le_lt_trans _ ((x * q) mod p)); cycle 1. {
   now apply Nat.mod_upper_bound.
 }
 apply Nat.le_sub_l.
+Qed.
+
+Theorem rngl_of_nat_nat : ∀ n, rngl_of_nat n = n.
+Proof.
+intros.
+induction n; [ easy | ].
+rewrite rngl_of_nat_succ.
+now rewrite IHn.
+Qed.
+
+Theorem summation_b2n_mul_lt :
+  ∀ N m p,
+  0 < p
+  → N / p ≤ m
+  → ∑ (y = 1, m), Nat.b2n (p * y <? N)%nat = (N - 1) / p.
+Proof.
+intros * Hzp Hpm.
+destruct (Nat.eq_dec N 0) as [Hnz| Hnz]. {
+  subst N; cbn.
+  rewrite Nat.Div0.div_0_l.
+  replace 0 with rngl_zero by easy.
+  now apply all_0_rngl_summation_0.
+}
+rewrite (rngl_summation_split ((N - 1) / p)); cycle 1. {
+  split; apply -> Nat.succ_le_mono; [ easy | ].
+  apply (Nat.le_trans _ (N / p)); [ | easy ].
+  apply Nat.Div0.div_le_mono.
+  apply Nat.le_sub_l.
+}
+erewrite rngl_summation_eq_compat; cycle 1. {
+  intros y Hy.
+  progress unfold Nat.b2n.
+  remember (p * y <? N) as b eqn:Hb.
+  symmetry in Hb.
+  destruct b; [ easy | exfalso ].
+  apply Bool.not_true_iff_false in Hb.
+  apply Hb; clear Hb.
+  apply Nat.leb_le.
+  destruct Hy as (H1y, Hy).
+  apply (Nat.mul_le_mono_r _ _ p) in Hy.
+  rewrite Nat.mul_comm in Hy.
+  apply Nat.succ_le_mono in Hy.
+  eapply Nat.le_trans; [ apply Hy | ].
+  apply Nat.le_succ_l.
+  apply (Nat.le_lt_trans _ (N - 1)); cycle 1. {
+    apply Nat.sub_lt; [ | easy ].
+    now apply Nat.neq_0_lt_0.
+  }
+  rewrite Nat.mul_comm.
+  apply Nat.Div0.mul_div_le.
+}
+cbn - [ "<?" ].
+rewrite rngl_summation_const; [ | easy ].
+rewrite Nat.mul_1_r.
+rewrite rngl_of_nat_nat.
+rewrite Nat_sub_succ_1.
+rewrite all_0_rngl_summation_0; [ apply Nat.add_0_r | ].
+intros y Hy.
+progress unfold Nat.b2n.
+remember (p * y <? N) as b eqn:Hb.
+symmetry in Hb.
+destruct b; [ exfalso | easy ].
+apply Nat.ltb_lt in Hb.
+destruct Hy as (Hy, Hym).
+apply Nat.nle_gt in Hb.
+apply Hb; clear Hb.
+apply (Nat.mul_le_mono_l _ _ p) in Hy.
+eapply Nat.le_trans; [ | apply Hy ].
+rewrite Nat.add_1_r.
+rewrite Nat.mul_succ_r.
+apply Nat_le_mul_div_add.
+now apply Nat.neq_0_lt_0.
+Qed.
+
+Theorem Nat_sub_1_pow_mod_is_even :
+  ∀ a n, 2 < n → (n - 1) ^ a mod n = 1 ↔ Nat.Even a.
+Proof.
+intros * H2n.
+split; intros Ha. {
+  apply Nat_eq_mod_1 in Ha.
+  destruct Ha as (H1 & H2 & H3).
+  apply Nat.Div0.mod_divides in H1.
+  destruct H1 as (c, H1).
+  destruct (Nat.Even_Odd_dec a) as [H4| H4]; [ easy | exfalso ].
+  destruct H4 as (m, Hm).
+  generalize H1; intros H4.
+  apply (f_equal (λ x, x mod n)) in H4.
+  rewrite Nat.mul_comm, Nat.Div0.mod_mul in H4.
+  subst a.
+  rewrite Nat.pow_add_r in H4.
+  rewrite Nat.pow_1_r in H4.
+  rewrite Nat.pow_mul_r in H4.
+  apply Nat_eq_mod_sub_0 in H4; cycle 1. {
+    apply Nat.neq_0_lt_0.
+    intros H5.
+    apply Nat.eq_mul_0 in H5.
+    destruct H5 as [H5| H5]. {
+      apply Nat.pow_nonzero in H5; [ easy | ].
+      intros H6.
+      progress unfold "²" in H6.
+      rewrite Nat.mul_1_r in H6.
+      apply -> Nat.eq_square_0 in H6.
+      apply Nat.sub_0_le in H6.
+      flia H2n H6.
+    }
+    apply Nat.sub_0_le in H5.
+    flia H2n H5.
+  }
+  rewrite <- Nat.Div0.mul_mod_idemp_l in H4.
+  rewrite <- Nat_mod_pow_mod in H4.
+  rewrite Nat_sub_1_squ in H4; [ | now intros H; subst n ].
+  rewrite Nat.mod_1_l in H4; [ | flia H2n ].
+  rewrite Nat.pow_1_l in H4.
+  rewrite Nat.mod_1_l in H4; [ | flia H2n ].
+  rewrite Nat.mul_1_l in H4.
+  apply Nat_eq_mod_1 in H4.
+  destruct H4 as (H4, _).
+  rewrite <- Nat.sub_add_distr in H4.
+  rewrite Nat.add_1_r in H4.
+  apply Nat.Div0.mod_divides in H4.
+  destruct H4 as (d, H4).
+  clear H2 H3.
+  assert (n - 2 < n * d). {
+    destruct d. {
+      rewrite Nat.mul_0_r in H4.
+      flia H2n H4.
+    }
+    apply (Nat.lt_le_trans _ n). {
+      apply Nat.sub_lt; [ | easy ].
+      now apply Nat.lt_le_incl.
+    }
+    rewrite Nat.mul_succ_r.
+    apply Nat.le_add_l.
+  }
+  rewrite H4 in H.
+  now apply Nat.lt_irrefl in H.
+}
+destruct Ha as (c, H); subst a.
+rewrite Nat.pow_mul_r.
+induction c. {
+  cbn.
+  apply Nat.mod_1_l.
+  flia H2n.
+}
+rewrite Nat.pow_succ_r; [ | easy ].
+rewrite <- Nat.Div0.mul_mod_idemp_r.
+rewrite IHc, Nat.mul_1_r.
+apply Nat_sub_1_pow_mod.
+flia H2n.
+Qed.
+
+Theorem Nat_sub_1_pow_mod_eq_even :
+  ∀ a n, 2 < n → (n - 1) ^ a mod n =? 1 = Nat.even a.
+Proof.
+intros * H2n.
+remember (Nat.even a) as ea eqn:Hea.
+symmetry in Hea.
+destruct ea. {
+  apply Nat.even_spec in Hea.
+  apply Nat.eqb_eq.
+  now apply Nat_sub_1_pow_mod_is_even.
+} {
+  apply Bool.not_true_iff_false in Hea.
+  apply Bool.not_true_iff_false.
+  intros H1; apply Hea; clear Hea.
+  apply Nat.even_spec.
+  apply Nat.eqb_eq in H1.
+  now apply Nat_sub_1_pow_mod_is_even in H1.
+}
 Qed.
 
 Theorem quadratic_reciprocity :
