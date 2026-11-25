@@ -631,13 +631,3 @@ destruct esqp. {
 Qed.
 
 Inspect 1.
-
-(* to be completed
-(* attempt to define it with Legendre symbols but the problem is that
-   my Legendre symbol is not "1 or -1" but "1 or p-1".
-Theorem quadratic_reciprocity :
-  ∀ p q, prime p → prime p →
-  Legendre_symbol p q * Legendre_symbol q p =
-  opp_1_pow (((p -1) / 2) * ((q - 1) / 2)).
-*)
-*)
