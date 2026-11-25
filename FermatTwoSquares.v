@@ -36,6 +36,37 @@ destruct lb as [| (b, n)]; [ easy | ].
 now destruct (eq a b).
 Qed.
 
+Theorem prime_decomp_prod : ∀ n, n ≠ 0 → ∏ (p ∈ prime_decomp n), p = n.
+Proof.
+intros * Hnz.
+remember (prime_decomp n) as pd eqn:Hpd.
+symmetry in Hpd.
+revert n Hnz Hpd.
+induction pd as [| p]; intros. {
+  rewrite rngl_product_list_empty; [ | easy ].
+  apply prime_decomp_nil_iff in Hpd.
+  now destruct Hpd.
+}
+rewrite rngl_product_list_cons.
+specialize (proj1 (prime_decomp_in_iff n p)) as H1.
+rewrite Hpd in H1.
+specialize (H1 (or_introl eq_refl)).
+destruct H1 as (_ & H1 & H2).
+rewrite (IHpd (n / p)). {
+  replace rngl_mul with Nat.mul by easy.
+  rewrite <- Nat.Lcm0.divide_div_mul_exact; [ | easy ].
+  rewrite Nat.mul_comm.
+  apply Nat.div_mul.
+  now intros H; subst p.
+} {
+  intros H3.
+  apply Nat.div_small_iff in H3; [ | now intros H4; subst p ].
+  apply Nat.divide_pos_le in H2; [ | now apply Nat.neq_0_lt_0 ].
+  now apply Nat.nle_gt in H3.
+}
+now apply prime_decomp_cons.
+Qed.
+
 (* to be completed
 Theorem Fermat_two_squares_any :
   ∀ n,
@@ -67,29 +98,7 @@ Print list_regroup.
     now intros; apply Hp; right.
   }
   specialize (IHpdp H); clear H.
-Theorem prime_decomp_prod : ∀ n, n ≠ 0 → ∏ (p ∈ prime_decomp n), p = n.
-Proof.
-intros * Hnz.
-remember (prime_decomp n) as pd eqn:Hpd.
-symmetry in Hpd.
-revert n Hnz Hpd.
-induction pd as [| p]; intros. {
-  rewrite rngl_product_list_empty; [ | easy ].
-  apply prime_decomp_nil_iff in Hpd.
-  now destruct Hpd.
-}
-rewrite rngl_product_list_cons.
-rewrite (IHpd (n / p)). {
-  replace rngl_mul with Nat.mul by easy.
-  specialize (proj1 (prime_decomp_in_iff n p)) as H1.
-  rewrite Hpd in H1.
-  specialize (H1 (or_introl eq_refl)).
-  rewrite <- Nat.Lcm0.divide_div_mul_exact; [ | easy ].
-  destruct H1 as (_ & H1 & _).
-  rewrite Nat.mul_comm.
-  apply Nat.div_mul.
-  now intros H; subst p.
-}
+Check prime_decomp_prod.
 ...
 in_prime_decomp_ge_2: ∀ n d : nat, d ∈ prime_decomp n → 2 ≤ d
 in_prime_decomp_divide: ∀ n d : nat, d ∈ prime_decomp n → Nat.divide d n
