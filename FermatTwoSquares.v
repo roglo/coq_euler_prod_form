@@ -77,21 +77,21 @@ Print list_regroup.
     now intros; apply Hp; right.
   }
   specialize (IHpdp H); clear H.
-Check prime_decomp_prod.
-...
-in_prime_decomp_ge_2: ∀ n d : nat, d ∈ prime_decomp n → 2 ≤ d
-in_prime_decomp_divide: ∀ n d : nat, d ∈ prime_decomp n → Nat.divide d n
-prime_decomp_cons:
-  ∀ (n a : nat) (l : list nat),
-    prime_decomp n = a :: l → prime_decomp (n / a) = l
-...
-  apply Nat.Div0.div_mul_exact.
-... ...
+Check prime_decomp_prod_all.
+Theorem prime_decomp_with_power_prod_all :
+  ∀ n, n ≠ 0 → ∏ (pk ∈ prime_decomp_with_power n), fst pk ^ snd pk = n.
+Proof.
+intros * Hnz.
+Admitted.
   set (m := ∏ (pk ∈ pdp), fst pk ^ snd pk).
-  specialize (IHpdp  m).
+  specialize (IHpdp m).
   assert (H : prime_decomp_with_power m = pdp). {
     progress unfold m.
-    progress unfold prime_decomp_with_power.
+progress unfold prime_decomp_with_power.
+Search prime_decomp.
+...
+prime_decomp_prod_all: ∀ n : nat, n ≠ 0 → ∏ (p ∈ prime_decomp n), p = n
+    rewrite prime_decomp_prod_all.
 ...
 
 Theorem Fermat_two_squares :
