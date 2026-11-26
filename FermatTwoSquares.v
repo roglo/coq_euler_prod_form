@@ -49,6 +49,11 @@ replace rngl_one with 1 by easy.
 easy.
 Qed.
 
+Theorem fold_list_expand {A} :
+  ∀ (la : list (A * _)),
+  flat_map (λ pk, repeat (fst pk) (snd pk)) la = list_expand la.
+Proof. easy. Qed.
+
 (* to be completed
 Theorem Fermat_two_squares_any :
   ∀ n,
@@ -85,11 +90,13 @@ Print list_regroup.
     progress unfold m.
     progress unfold prime_decomp_with_power.
 Print list_expand.
-Theorem glop {A} eq : ∀ (la : list (A * nat)),
-  list_regroup eq (list_expand la) = la.
+Theorem glop  : ∀ la n pk,
+  prime_decomp_with_power n = pk :: la
+  → list_regroup Nat.eqb (list_expand la) = la.
 Proof.
-intros.
-induction la as [| (p, k)]; [ easy | ].
+intros * Hpd.
+revert n pk Hpd.
+induction la as [| (p, k)]; intros; [ easy | ].
 cbn.
 progress unfold list_expand in IHla.
 Theorem list_regroup_app {A} (eq : A → _) :
@@ -107,12 +114,22 @@ induction la as [| a]; intros; cbn. {
   symmetry in Hlc.
   destruct lc as [| (p, k)]; [ easy | ].
   cbn.
-Search (_ ++ flat_map _ _).
+  rewrite fold_list_expand.
+  revert p k lc Hlc.
+  induction lb as [| p]; intros; [ easy | cbn ].
+  cbn in Hlc.
+  remember (list_regroup eq lb) as gb eqn:Hgb.
+  symmetry in Hgb.
+  destruct gb as [| (p', k')]. {
+    now injection Hlc; clear Hlc; intros; subst p k lc.
+  }
+  remember (eq p p') as pp eqn:Hpp; symmetry in Hpp.
+  destruct pp. {
+    injection Hlc; clear Hlc; intros; subst lc p0 k.
 ...
-  induction lb as [| b]; [ easy | cbn ].
-  destruct lc 
-
-  rewrite IHlb.
+  specialize (IHlb 
+  rewrite IHlb; [ easy | ].
+...
 ... ...
 rewrite <- (glop Nat.eqb).
 f_equal.
