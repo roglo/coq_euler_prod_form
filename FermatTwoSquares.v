@@ -20,6 +20,9 @@ Fixpoint list_regroup {A} (eq : A → A → bool) (la : list A) :=
   | [] => []
   end.
 
+Definition list_expand {A} (la : list (A * nat)) :=
+  List.flat_map (λ pk, List.repeat (fst pk) (snd pk)) la.
+
 Definition prime_decomp_with_power n := list_regroup Nat.eqb (prime_decomp n).
 
 Theorem list_regroup_nil_iff {A} eq : ∀ (la : list A),
@@ -76,19 +79,57 @@ Print list_regroup.
   assert (H : ∀ p k, (p, k) ∈ pdp → p mod 4 ≠ 3 ∨ Nat.Even k). {
     now intros; apply Hp; right.
   }
-  specialize (IHpdp H); clear H.
+  set (m := ∏ (pk ∈ pdp), fst pk ^ snd pk).
+  specialize (IHpdp H m); clear H.
+  assert (H : prime_decomp_with_power m = pdp). {
+    progress unfold m.
+    progress unfold prime_decomp_with_power.
+Print list_expand.
+Theorem glop {A} eq : ∀ (la : list (A * nat)),
+  list_regroup eq (list_expand la) = la.
+Proof.
+intros.
+induction la as [| (p, k)]; [ easy | ].
+cbn.
+progress unfold list_expand in IHla.
+Theorem list_regroup_app {A} (eq : A → _) :
+  ∀ la lb,
+  list_regroup eq (la ++ lb) =
+    list_regroup eq (list_expand (list_regroup eq la ++ list_regroup eq lb)).
+Proof.
+intros.
+progress unfold list_expand.
+rewrite flat_map_app.
+revert lb.
+induction la as [| a]; intros; cbn. {
+  symmetry.
+  remember (list_regroup eq lb) as lc eqn:Hlc.
+  symmetry in Hlc.
+  destruct lc as [| (p, k)]; [ easy | ].
+  cbn.
+Search (_ ++ flat_map _ _).
+...
+  induction lb as [| b]; [ easy | cbn ].
+  destruct lc 
+
+  rewrite IHlb.
+... ...
+rewrite <- (glop Nat.eqb).
+f_equal.
+...
+Theorem glop {A} eq : ∀ (la : list A), list_expand (list_regroup eq la) = la.
+...
 Check prime_decomp_prod_all.
 Theorem prime_decomp_with_power_prod_all :
   ∀ n, n ≠ 0 → ∏ (pk ∈ prime_decomp_with_power n), fst pk ^ snd pk = n.
 Proof.
 intros * Hnz.
-Admitted.
-  set (m := ∏ (pk ∈ pdp), fst pk ^ snd pk).
-  specialize (IHpdp m).
-  assert (H : prime_decomp_with_power m = pdp). {
-    progress unfold m.
-progress unfold prime_decomp_with_power.
+...
+    specialize (prime_decomp_with_power_prod_all m) as H1.
+...
 Search prime_decomp.
+Inspect 2.
+Search list_regroup.
 ...
 prime_decomp_prod_all: ∀ n : nat, n ≠ 0 → ∏ (p ∈ prime_decomp n), p = n
     rewrite prime_decomp_prod_all.
