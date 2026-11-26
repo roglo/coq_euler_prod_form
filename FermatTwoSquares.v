@@ -1,6 +1,6 @@
 Set Nested Proofs Allowed.
 From Stdlib Require Import Utf8 Arith(* Init.Nat*).
-Import List ListNotations.
+Import List.ListNotations.
 
 Require Import RingLike.Core.
 Require Import RingLike.IterMul.
@@ -8,6 +8,20 @@ Require Import RingLike.Nat_algebra.
 
 Require Import Misc Primes.
 
+Check List.fold_left.
+
+Definition list_regroup {A} (eq : A → A → bool) (la : list A) :=
+  List.fold_right
+    (λ a lb,
+       match lb with
+       | (b, k) :: lb' =>
+           if eq a b then (b, S k) :: lb' else (a, 1) :: (b, k) :: lb'
+       | [] =>
+           [(a, 1)]
+       end)
+    [] la.
+
+(*
 Fixpoint list_regroup {A} (eq : A → A → bool) (la : list A) :=
   match la with
   | a :: la =>
@@ -19,11 +33,24 @@ Fixpoint list_regroup {A} (eq : A → A → bool) (la : list A) :=
       end
   | [] => []
   end.
+*)
 
 Definition list_expand {A} (la : list (A * nat)) :=
   List.flat_map (λ pk, List.repeat (fst pk) (snd pk)) la.
 
 Definition prime_decomp_with_power n := list_regroup Nat.eqb (prime_decomp n).
+
+Theorem fold_list_regroup {A} (eq : A → A → bool) :
+  ∀ (la : list A),
+  List.fold_right
+    (λ (a : A) (lb : list (A * nat)),
+       match lb with
+       | [] => [(a, 1)]
+       | (b, k) :: lb' => if eq a b then (b, S k) :: lb' else (a, 1) :: (b, k) :: lb'
+       end)
+    [] la =
+  list_regroup eq la.
+Proof. easy. Qed.
 
 Theorem list_regroup_nil_iff {A} eq : ∀ (la : list A),
   list_regroup eq la = [] ↔ la = [].
@@ -32,6 +59,7 @@ intros.
 induction la as [| a]; [ easy | ].
 cbn.
 split; [ | easy ].
+rewrite fold_list_regroup.
 intros H1; exfalso.
 remember (list_regroup eq la) as lb eqn:Hlb.
 symmetry in Hlb.
@@ -51,7 +79,7 @@ Qed.
 
 Theorem fold_list_expand {A} :
   ∀ (la : list (A * _)),
-  flat_map (λ pk, repeat (fst pk) (snd pk)) la = list_expand la.
+  List.flat_map (λ pk, List.repeat (fst pk) (snd pk)) la = list_expand la.
 Proof. easy. Qed.
 
 (* to be completed
@@ -106,15 +134,31 @@ Theorem list_regroup_app {A} (eq : A → _) :
 Proof.
 intros.
 progress unfold list_expand.
-rewrite flat_map_app.
+rewrite List.flat_map_app.
 revert lb.
 induction la as [| a]; intros; cbn. {
+  do 2 rewrite fold_list_regroup.
   symmetry.
   remember (list_regroup eq lb) as lc eqn:Hlc.
   symmetry in Hlc.
   destruct lc as [| (p, k)]; [ easy | ].
   cbn.
+  rewrite fold_list_regroup.
   rewrite fold_list_expand.
+  rewrite <- Hlc.
+  revert p k lc Hlc.
+  induction lb as [| q]; intros; [ easy | cbn ].
+  rewrite fold_list_regroup.
+  cbn in Hlc.
+  rewrite fold_list_regroup in Hlc.
+  rewrite Hlc.
+  rewrite IHlb. {
+    remember (list_regroup eq lb) as lgb eqn:Hlgb.
+    symmetry in Hlgb.
+    destruct lgb as [| (b, k')]. {
+      injection Hlc; clear Hlc; intros; subst q k lc.
+(* ouah, fait chier *)
+...
   revert p k lc Hlc.
   induction lb as [| p]; intros; [ easy | cbn ].
   cbn in Hlc.
@@ -126,6 +170,8 @@ induction la as [| a]; intros; cbn. {
   remember (eq p p') as pp eqn:Hpp; symmetry in Hpp.
   destruct pp. {
     injection Hlc; clear Hlc; intros; subst lc p0 k.
+...
+    apply IHlb.
 ...
   specialize (IHlb 
   rewrite IHlb; [ easy | ].
