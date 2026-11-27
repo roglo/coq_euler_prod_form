@@ -83,6 +83,61 @@ Theorem fold_list_expand {A} :
 Proof. easy. Qed.
 
 (* to be completed
+Theorem prime_decomp_with_power_prod_all :
+  ∀ n, n ≠ 0 → ∏ (pk ∈ prime_decomp_with_power n), fst pk ^ snd pk = n.
+Proof.
+intros * Hnz.
+specialize (prime_decomp_prod_all n Hnz) as H1.
+progress unfold prime_decomp_with_power.
+remember (prime_decomp n) as pd eqn:Hp; symmetry in Hp.
+revert n Hnz Hp H1.
+induction pd as [| p]; intros; [ easy | ].
+cbn.
+rewrite fold_list_regroup.
+remember (list_regroup Nat.eqb pd) as g eqn:Hg.
+symmetry in Hg.
+destruct g as [| (a, k)]. {
+  apply list_regroup_nil_iff in Hg; subst pd.
+  rewrite rngl_product_list_only_one in H1.
+  rewrite rngl_product_list_only_one; cbn.
+  now rewrite Nat.mul_1_r.
+}
+rewrite rngl_product_list_cons in H1.
+specialize (IHpd (∏ (i ∈ pd), i)).
+assert (H : ∏ (i ∈ pd), i ≠ 0). {
+  clear - Hp.
+  revert n Hp.
+  induction pd as [| q]; intros. {
+    now rewrite rngl_product_list_empty.
+  }
+  rewrite rngl_product_list_cons.
+  apply Nat.neq_mul_0.
+  split. {
+    intros H; subst q.
+    specialize (in_prime_decomp_is_prime n 0) as H1.
+    rewrite Hp in H1.
+    cbn in H1.
+    progress unfold prime in H1.
+    cbn in H1.
+    apply Bool.diff_false_true.
+    apply H1.
+    now right; left.
+  }
+  apply (IHpd (p * ∏ (i ∈ pd), i)).
+Search (prime_decomp (_ * _)).
+About prime_decomp_mul.
+...
+  rewrite primt_decomp_mul
+... ...
+specialize (IHpd H); clear H.
+...
+remember (p =? a) as pa eqn:Hpa; symmetry in Hpa.
+destruct pa. {
+  apply Nat.eqb_eq in Hpa; subst a.
+  rewrite rngl_product_list_cons.
+  cbn - [ rngl_power ].
+...
+
 Theorem Fermat_two_squares_any :
   ∀ n,
   (∀ p k, (p, k) ∈ prime_decomp_with_power n → p mod 4 ≠ 3 ∨ Nat.Even k)
@@ -118,11 +173,26 @@ Print list_regroup.
     progress unfold m.
     progress unfold prime_decomp_with_power.
 Print list_expand.
-Theorem glop  : ∀ la n pk,
+Theorem glop : ∀ la n,
+  prime_decomp_with_power n = la
+  → list_regroup Nat.eqb (list_expand la) = la.
+Proof.
+intros * Hn.
+revert n Hn.
+induction la as [| (p, k)]; intros; [ easy | cbn ].
+rewrite fold_list_expand.
+rewrite fold_list_regroup.
+Inspect 6.
+Search prime_decomp_with_power.
+...
+specialize (IHla (prime_decomp_with_power n)).
+...
+Theorem glop : ∀ la n pk,
   prime_decomp_with_power n = pk :: la
   → list_regroup Nat.eqb (list_expand la) = la.
 Proof.
 intros * Hpd.
+...
 revert n pk Hpd.
 induction la as [| (p, k)]; intros; [ easy | ].
 cbn.
@@ -183,10 +253,6 @@ f_equal.
 Theorem glop {A} eq : ∀ (la : list A), list_expand (list_regroup eq la) = la.
 ...
 Check prime_decomp_prod_all.
-Theorem prime_decomp_with_power_prod_all :
-  ∀ n, n ≠ 0 → ∏ (pk ∈ prime_decomp_with_power n), fst pk ^ snd pk = n.
-Proof.
-intros * Hnz.
 ...
     specialize (prime_decomp_with_power_prod_all m) as H1.
 ...
