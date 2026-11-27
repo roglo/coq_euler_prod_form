@@ -4,6 +4,7 @@ Import List.ListNotations.
 
 Require Import RingLike.Core.
 Require Import RingLike.IterMul.
+Require Import RingLike.IterAnd.
 Require Import RingLike.Nat_algebra.
 
 Require Import Misc Primes.
@@ -80,7 +81,45 @@ Theorem fold_list_expand {A} :
   List.flat_map (λ pk, List.repeat (fst pk) (snd pk)) la = list_expand la.
 Proof. easy. Qed.
 
+Definition List_Forall_bool {A} (f : A → bool) l := ⋀ (x ∈ l), f x.
+
+Definition two_squ_resolvable pd :=
+  ⋀ (pk ∈ pd),
+    let '(p, k) := pk in
+    negb (Nat.eqb (p mod 4) 3) || Nat.even k.
+
+Fixpoint resolve_2sq_loop it (n : nat) :=
+  match it with
+  | 0 => None
+  | S it' =>
+      let pd := prime_decomp_with_power n in
+      List.fold_left
+        (λ kkk pk,
+           let r := resolve_2sq_loop_for_prime it' pk in
+           Some 1)
+        pd None
+  end
+with resolve_2sq_loop_for_prime it (pk : nat * nat) :=
+  match it with
+  | 0 => None
+  | S it' =>
+      let '(p, k) := pk in
+      if (negb (Nat.eqb (p mod 4) 3) || Nat.even k)%bool then
+        let i := 2 in (* to be completed *)
+        (* i²+1 ≡ 0 (mod p) *)
+        (* i²+1 = k * p *)
+        let k := (i² + 1) / p in
+        match resolve_2sq_loop it' k with
+        | Some pd => Some i (* to be completed *)
+        | None => None
+        end
+      else
+        None
+  end.
+
 (* to be completed
+Compute (List.map (λ n, (n, resolve_2sq_loop n n)) (List.seq 1 100)).
+
 Theorem prime_decomp_spec :
   ∀ n pd, n ≠ 0 →
   prime_decomp n = pd ↔ Sorted le pd ∧ Forall prime pd ∧ ∏ (p ∈ pd), p = n.
@@ -131,6 +170,31 @@ clear n Hnz Hp.
 remember (∏ (i ∈ _), _) as x in IHpd; subst x. (* renaming *)
 rewrite <- IHpd at 2.
 clear IHpd.
+(**)
+apply Sorted_inv in Hs.
+destruct Hs as (Hs, Hr).
+apply Forall_cons_iff in Hpd.
+destruct Hpd as (Hp, Hpd).
+Theorem glop :
+  ∀ p pd,
+  HdRel le p pd
+  → prime p
+  → Sorted le pd
+  → Forall prime pd
+  → prime_decomp (p * ∏ (i ∈ pd), i)%L = p :: prime_decomp (∏ (i ∈ pd), i).
+Proof.
+intros * Hr Hp Hs Hpd.
+revert p Hr Hp.
+induction pd as [| q]; intros. {
+  rewrite rngl_product_list_empty; [ | easy ].
+  rewrite Nat.mul_1_r.
+  replace 1%L with 1 by easy; cbn.
+  now apply prime_decomp_of_prime.
+}
+rewrite rngl_product_list_cons.
+rewrite Nat.mul_assoc.
+(* faudrait un théorème avec un "n" général, au lieu de "p". Ce "n"
+   serait le produit de nombres premiers inférieurs à ceux de "pd" *)
 ...
 
 Theorem prime_decomp_with_power_prod_all :
