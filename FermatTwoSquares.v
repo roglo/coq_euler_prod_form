@@ -1,5 +1,5 @@
 Set Nested Proofs Allowed.
-From Stdlib Require Import Utf8 Arith(* Init.Nat*).
+From Stdlib Require Import Utf8 Arith(* Init.Nat*) SetoidList.
 Import List.ListNotations.
 
 Require Import RingLike.Core.
@@ -7,8 +7,6 @@ Require Import RingLike.IterMul.
 Require Import RingLike.Nat_algebra.
 
 Require Import Misc Primes.
-
-Check List.fold_left.
 
 Definition list_regroup {A} (eq : A → A → bool) (la : list A) :=
   List.fold_right
@@ -83,6 +81,46 @@ Theorem fold_list_expand {A} :
 Proof. easy. Qed.
 
 (* to be completed
+Theorem prime_decomp_spec :
+  ∀ n pd, n ≠ 0 →
+  prime_decomp n = pd ↔ Sorted le pd ∧ Forall prime pd ∧ ∏ (p ∈ pd), p = n.
+Proof.
+intros * Hnz.
+split. {
+  intros Hpd.
+  rewrite <- Hpd.
+  split; [ apply Sorted_prime_decomp | ].
+  split. {
+    apply Forall_forall.
+    apply in_prime_decomp_is_prime.
+  }
+  now apply prime_decomp_prod_all.
+}
+intros (Hs & Hpd & Hp).
+revert n Hnz Hp.
+induction pd as [| p]; intros. {
+  rewrite rngl_product_list_empty in Hp; [ | easy ].
+  now subst n.
+}
+rewrite rngl_product_list_cons in Hp.
+apply Sorted_inv in Hs.
+destruct Hs as (Hs & Hr).
+specialize (IHpd Hs).
+apply Forall_cons_iff in Hpd.
+destruct Hpd as (Hpp & Hpd).
+specialize (IHpd Hpd).
+specialize (IHpd (∏ (p ∈  pd), p)).
+assert (H : ∏ (p ∈ pd), p ≠ 0). {
+  intros H.
+  replace 0 with 0%L in H by easy.
+  apply rngl_product_list_integral in H; [ | easy | easy | easy ].
+  destruct H as (q & Hq & H); subst q.
+  specialize (proj1 (Forall_forall prime pd) Hpd) as H1.
+  now specialize (H1 0%L Hq).
+}
+specialize (IHpd H eq_refl); clear H.
+...
+
 Theorem prime_decomp_with_power_prod_all :
   ∀ n, n ≠ 0 → ∏ (pk ∈ prime_decomp_with_power n), fst pk ^ snd pk = n.
 Proof.
