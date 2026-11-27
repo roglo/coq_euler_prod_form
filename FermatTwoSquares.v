@@ -86,6 +86,11 @@ Theorem prime_decomp_spec :
   prime_decomp n = pd ↔ Sorted le pd ∧ Forall prime pd ∧ ∏ (p ∈ pd), p = n.
 Proof.
 intros * Hnz.
+(*
+assert (hhhhhhh : ∀ (p q : nat) pd, p ∈ pd → p ∈ q :: pd).
+now intros; right.
+Show Proof.
+*)
 split. {
   intros Hpd.
   rewrite <- Hpd.
@@ -103,22 +108,29 @@ induction pd as [| p]; intros. {
   now subst n.
 }
 rewrite rngl_product_list_cons in Hp.
-apply Sorted_inv in Hs.
-destruct Hs as (Hs & Hr).
-specialize (IHpd Hs).
-apply Forall_cons_iff in Hpd.
-destruct Hpd as (Hpp & Hpd).
-specialize (IHpd Hpd).
+generalize Hs; intros H.
+apply Sorted_inv in H.
+destruct H as (H & _).
+specialize (IHpd H); clear H.
+generalize Hpd; intros H.
+apply Forall_cons_iff in H.
+destruct H as (_ & H).
+specialize (IHpd H); clear H.
 specialize (IHpd (∏ (p ∈  pd), p)).
 assert (H : ∏ (p ∈ pd), p ≠ 0). {
   intros H.
   replace 0 with 0%L in H by easy.
   apply rngl_product_list_integral in H; [ | easy | easy | easy ].
   destruct H as (q & Hq & H); subst q.
-  specialize (proj1 (Forall_forall prime pd) Hpd) as H1.
-  now specialize (H1 0%L Hq).
+  specialize (proj1 (Forall_forall prime (p :: pd)) Hpd) as H1.
+  now specialize (H1 0%L (or_intror Hq)).
 }
 specialize (IHpd H eq_refl); clear H.
+rewrite <- Hp.
+clear n Hnz Hp.
+remember (∏ (i ∈ _), _) as x in IHpd; subst x. (* renaming *)
+rewrite <- IHpd at 2.
+clear IHpd.
 ...
 
 Theorem prime_decomp_with_power_prod_all :
