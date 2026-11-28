@@ -87,6 +87,32 @@ Definition two_squ_resolvable pd :=
     let '(p, k) := pk in
     negb (Nat.eqb (p mod 4) 3) || Nat.even k.
 
+Fixpoint primitive_root_mod_loop it p g :=
+  match it with
+  | 0 => 0
+  | S it' =>
+      if is_primitive_root_mod p g then g
+      else primitive_root_mod_loop it' p (S g)
+  end.
+
+Definition primitive_root_mod p := primitive_root_mod_loop p p 2.
+
+(*
+Compute (
+  List.map (λ n, (n, primitive_root_mod n))
+    (List.filter is_prime (List.seq 1 100))).
+*)
+
+Definition sqrt_opp_1_mod p :=
+  let g := primitive_root_mod p in
+  Nat_pow_mod g ((p - 1) / 4) p.
+
+(*
+Compute (
+  List.map (λ n, let i := sqrt_opp_1_mod n in (n, i, Nat_pow_mod i 2 n))
+    (List.filter (λ n, (is_prime n && (n mod 4 =? 1))%bool) (List.seq 1 100))).
+*)
+
 Fixpoint resolve_2sq_loop it (n : nat) :=
   match it with
   | 0 => None
@@ -95,29 +121,29 @@ Fixpoint resolve_2sq_loop it (n : nat) :=
       List.fold_left
         (λ kkk pk,
            let r := resolve_2sq_loop_for_prime it' pk in
-           Some 1)
+           r)
         pd None
   end
 with resolve_2sq_loop_for_prime it (pk : nat * nat) :=
   match it with
-  | 0 => None
+  | 0 => Some 44
   | S it' =>
       let '(p, k) := pk in
       if (negb (Nat.eqb (p mod 4) 3) || Nat.even k)%bool then
-        let i := 2 in (* to be completed *)
+        let i := sqrt_opp_1_mod p in
         (* i²+1 ≡ 0 (mod p) *)
         (* i²+1 = k * p *)
         let k := (i² + 1) / p in
         match resolve_2sq_loop it' k with
-        | Some pd => Some i (* to be completed *)
-        | None => None
+        | Some v => Some (100 + v) (* to be completed *)
+        | None => Some 45
         end
       else
         None
   end.
 
 (* to be completed
-Compute (List.map (λ n, (n, resolve_2sq_loop n n)) (List.seq 1 100)).
+Compute (List.map (λ n, (n, resolve_2sq_loop (2 * n) n)) (List.seq 1 100)).
 
 Compute (is_primitive_root_mod 7 2).
 Compute (is_primitive_root_mod 7 3).
