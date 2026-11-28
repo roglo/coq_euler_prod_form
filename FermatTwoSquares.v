@@ -9,7 +9,16 @@ Require Import RingLike.Nat_algebra.
 
 Require Import Misc Primes.
 
-Definition list_regroup {A} (eq : A → A → bool) (la : list A) :=
+Definition List_uniq {A} (eq : A → A → bool) (la : list A) :=
+  List.fold_right
+    (λ a lb,
+       match lb with
+       | b :: lb' => if eq a b then b :: lb' else a :: b :: lb'
+       | [] => [a]
+       end)
+    [] la.
+
+Definition List_regroup {A} (eq : A → A → bool) (la : list A) :=
   List.fold_right
     (λ a lb,
        match lb with
@@ -20,24 +29,10 @@ Definition list_regroup {A} (eq : A → A → bool) (la : list A) :=
        end)
     [] la.
 
-(*
-Fixpoint list_regroup {A} (eq : A → A → bool) (la : list A) :=
-  match la with
-  | a :: la =>
-      match list_regroup eq la with
-      | (b, n) :: lb =>
-          if eq a b then (b, S n) :: lb else (a, 1) :: (b, n) :: lb
-      | [] =>
-          [(a, 1)]
-      end
-  | [] => []
-  end.
-*)
-
-Definition list_expand {A} (la : list (A * nat)) :=
+Definition List_expand {A} (la : list (A * nat)) :=
   List.flat_map (λ pk, List.repeat (fst pk) (snd pk)) la.
 
-Definition prime_decomp_with_power n := list_regroup Nat.eqb (prime_decomp n).
+Definition prime_decomp_with_power n := List_regroup Nat.eqb (prime_decomp n).
 
 Theorem fold_list_regroup {A} (eq : A → A → bool) :
   ∀ (la : list A),
@@ -48,11 +43,11 @@ Theorem fold_list_regroup {A} (eq : A → A → bool) :
        | (b, k) :: lb' => if eq a b then (b, S k) :: lb' else (a, 1) :: (b, k) :: lb'
        end)
     [] la =
-  list_regroup eq la.
+  List_regroup eq la.
 Proof. easy. Qed.
 
 Theorem list_regroup_nil_iff {A} eq : ∀ (la : list A),
-  list_regroup eq la = [] ↔ la = [].
+  List_regroup eq la = [] ↔ la = [].
 Proof.
 intros.
 induction la as [| a]; [ easy | ].
@@ -60,7 +55,7 @@ cbn.
 split; [ | easy ].
 rewrite fold_list_regroup.
 intros H1; exfalso.
-remember (list_regroup eq la) as lb eqn:Hlb.
+remember (List_regroup eq la) as lb eqn:Hlb.
 symmetry in Hlb.
 destruct lb as [| (b, n)]; [ easy | ].
 now destruct (eq a b).
@@ -78,10 +73,14 @@ Qed.
 
 Theorem fold_list_expand {A} :
   ∀ (la : list (A * _)),
-  List.flat_map (λ pk, List.repeat (fst pk) (snd pk)) la = list_expand la.
+  List.flat_map (λ pk, List.repeat (fst pk) (snd pk)) la = List_expand la.
 Proof. easy. Qed.
 
 Definition List_Forall_bool {A} (f : A → bool) l := ⋀ (x ∈ l), f x.
+
+Definition is_primitive_root_mod p g :=
+  ⋀ (q ∈ List_uniq Nat.eqb (prime_decomp (p - 1))),
+    negb (Nat_pow_mod g ((p - 1) / q) p =? 1).
 
 Definition two_squ_resolvable pd :=
   ⋀ (pk ∈ pd),
@@ -119,6 +118,15 @@ with resolve_2sq_loop_for_prime it (pk : nat * nat) :=
 
 (* to be completed
 Compute (List.map (λ n, (n, resolve_2sq_loop n n)) (List.seq 1 100)).
+
+Compute (is_primitive_root_mod 7 2).
+Compute (is_primitive_root_mod 7 3).
+
+Compute (
+  List.map (λ n,
+    (n, List.length (List.filter (is_primitive_root_mod n) (List.seq 1 n)))
+  ) (List.filter is_prime (List.seq 1 60))
+).
 
 Theorem prime_decomp_spec :
   ∀ n pd, n ≠ 0 →
